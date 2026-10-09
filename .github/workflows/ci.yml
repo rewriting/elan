@@ -20,7 +20,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-            build-essential clang cmake bison flex libfl-dev default-jdk-headless libgc-dev automake tcsh python3
+            build-essential clang libclang-rt-18-dev cmake bison flex libfl-dev default-jdk-headless libgc-dev automake tcsh python3
           echo "ELAN_WS=$RUNNER_TEMP/elan" >> "$GITHUB_ENV"
 
       - name: Dependencies and case-sensitive volume (macOS)
