@@ -92,6 +92,7 @@ strategy *gen_normalisation1(int norm_index,int modu, int sort,
 
   NNEW(rlab1,term);
   nolexem.crendofstreamlex();
+  whtypelex.crendofstreamlex(); // S2: always set before use; silences -Wmaybe-uninitialized
 
   // compute transitive closure
   for(k=0; k< NNONTERMINALS; k++) { closure[k]=0; constant[k]=-1; }

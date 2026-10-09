@@ -180,7 +180,10 @@ static char *attach_type_modu(char *s,int t,char *modu)
 {
 char full_name[STRLEN];
   if (s == NULL || strlen(s) == 0) return NULL; /////// exception for nonamed rules
-  sprintf(full_name,"%s%s%s%s%s",s,TYPE_SEPARATOR,typet.ide(t), MODULE_SEPARATOR, modu);
+  // S2: sprintf could overflow full_name with long names
+  if (snprintf(full_name,sizeof(full_name),"%s%s%s%s%s",s,TYPE_SEPARATOR,typet.ide(t), MODULE_SEPARATOR, modu)
+      >= (int) sizeof(full_name)) {
+    sterr << "\n[semact] name too long\n"; failexit(); }
   return strdup(full_name);
 }
 
@@ -653,7 +656,8 @@ term noterm; noterm.stinit();
            attach_type_mod(strIdentLex.alfsy(),actwheretype.typeval(),impmoduli)); }
        else if (strategywasapplied) {
          int strx, stry;
-         inverse_apply_code(rside2,&strx,&stry);
+         // S2: strx/stry were used uninitialised when rside2 is not an applied code
+         if (!inverse_apply_code(rside2,&strx,&stry)) interr();
          actwhstrategy = trrules.strategyindex_refs(
            attach_type_mod(EVALSTR,actwheretype.typeval(),
               evalmoduli(strx,stry))); 
@@ -772,7 +776,8 @@ int handlewherepattern(lstream *f, int pattyp, struct wherelist *wl)
 	attach_type_mod(strIdentLex.alfsy(),pattyp,impmoduli)); 
   else if (strategywasapplied) {
     int strx, stry;
-    inverse_apply_code(rside2,&strx,&stry);
+    // S2: strx/stry were used uninitialised when rside2 is not an applied code
+    if (!inverse_apply_code(rside2,&strx,&stry)) interr();
    actwhstrategy = trrules.strategyindex_refs(
 	attach_type_mod(EVALSTR,pattyp,
 			evalmoduli(strx,stry)));

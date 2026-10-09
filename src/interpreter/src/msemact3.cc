@@ -486,7 +486,8 @@ int semact3(int n,lexem l,lstream *f)
    resan = grstack[stacki].earleycall(f,actwheretype,endofin);
    if (! resan) return(HANDERRORIM);
    ter1.popt();
-   inverse_apply_code(ter1,&strx,&stry);
+   // S2: strx/stry were used uninitialised when ter1 is not an applied code
+   if (!inverse_apply_code(ter1,&strx,&stry)) interr();
    trrules.strategyremove_refs(actstratindex);	
    actwhstrategy = trrules.strategyindex_refs(
                attach_type_mod(EVALSTR,actwheretype.typeval(),

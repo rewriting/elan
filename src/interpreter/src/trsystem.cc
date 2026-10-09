@@ -904,6 +904,8 @@ int strategy::infertype(int warn,int &sort)
   /*transrule *rule;*/
   /* r initialised to avoid warning */
   int    r =0, aa,  typ, refs; /* res, */
+  aa = sort; // S2: match() leaves aa unset on incompatible sorts; sort is then
+             // kept, as in the later iterations of the rule loop below
    // stout << "INFER >> " << sort << "\n";
    //this->dump();
    //stout << "-----------------------\n";
