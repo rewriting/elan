@@ -40,3 +40,4 @@ term/term.cc -> load/module.h  # global tables fsymtab/trrules/typet/import are 
 term/term.cc -> load/strategy.h  # parser-state globals of the loader read by this file (S3b: pass state explicitly)
 term/termdefs.h -> match/acmatchdefs.h  # term embeds the libmatch state type (match_state) (move match_state to match)
 term/tmisc.cc -> load/module.h  # global tables fsymtab/trrules/typet/import are declared in load/module.h (S3b: own them in term/rewrite)
+lex/mlstream.cc -> base/commondefs.h  # the preprocessor (FOR EACH) runs the strategy interpreter and the Earley parser (S3b: callbacks)

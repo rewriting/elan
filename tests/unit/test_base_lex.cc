@@ -2,6 +2,10 @@
 // They pin down the 2004 behaviour: identifier codes are hash positions.
 #include "check.h"
 #include "commondefs.h"
+#include <cstdio>
+#include <cstring>
+#include <string>
+#include <vector>
 
 TEST(stringtab_add_then_member_and_index) {
   stringtab t(100);
@@ -57,6 +61,45 @@ TEST(lexem_end_of_stream) {
   l.crendofstreamlex();
   CHECK(l.isendofstream());
   CHECK_STREQ(l.alfsy(), "ENDOFLSTREAM");
+}
+
+TEST(mitab_add_counts_occurrences_and_finds) {
+  mitab t(100);
+  int i = t.addn(7);
+  CHECK(t.member(7));
+  CHECK_EQ(t.posid, i);
+  CHECK_EQ(i, 7);                                // position is n modulo size
+  CHECK_EQ(t.addn(107), (7 + 211) % 100);        // collision: probe by 211
+  CHECK(!t.member(8));
+}
+
+TEST(lexem_identifier_is_coded_by_its_tabofident_position) {
+  lexem l;
+  l.cridlex("someident");
+  CHECK(l.isident());
+  CHECK_EQ(l.idval(), tabofident.index("someident"));
+  CHECK_STREQ(l.alfsy(), "someident");
+}
+
+// Lex a string through the real lexer (lstream over an in-memory FILE*).
+static std::vector<std::string> lex_all(const char *text) {
+  FILE *f = fmemopen((void *)text, strlen(text), "r");
+  ichstream in(f, "test");
+  lstream ls(&in);
+  std::vector<std::string> out;
+  lexem l;
+  for (int n = 0; n < 50; n++) {
+    ls.ilex(l);
+    if (l.isendofstream()) break;
+    if (l.isblankk()) continue;
+    out.push_back(l.isnum() ? "#" + std::to_string(l.numval()) : std::string(l.alfsy()));
+  }
+  return out;
+}
+
+TEST(lstream_lexes_identifiers_numbers_and_characters) {
+  std::vector<std::string> expected = {"f", "(", "x", ",", "#42", ")"};
+  CHECK(lex_all("f(x, 42)") == expected);
 }
 
 int main() { return run_tests(); }

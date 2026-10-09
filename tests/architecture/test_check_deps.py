@@ -37,6 +37,20 @@ class CheckDepsTest(unittest.TestCase):
         root = tree({"term/t.h": "", "lex/l.cc": '#include "../term/t.h"\n'})
         self.assertEqual(cd.violations(root, RULES, set()), [("lex/l.cc", "term/t.h")])
 
+    def test_angle_bracket_include_of_a_module_header_is_checked(self):
+        root = tree({"term/t.h": "", "lex/l.cc": '#include <t.h>\n'})
+        self.assertEqual(cd.violations(root, RULES, set()), [("lex/l.cc", "term/t.h")])
+
+    def test_headers_in_module_subdirectories_are_not_on_the_include_path(self):
+        root = tree({"term/sub/t.h": "", "lex/l.cc": '#include "t.h"\n'})
+        self.assertEqual(cd.violations(root, RULES, set()), [])
+
+    def test_umbrella_header_is_forbidden_below_its_level(self):
+        root = tree({"base/commondefs.h": "", "base/b.cc": '#include "commondefs.h"\n',
+                     "term/t.cc": '#include "commondefs.h"\n'})
+        self.assertEqual(cd.violations(root, RULES, set(), umbrella={"base/commondefs.h": {"base", "lex"}}),
+                         [("base/b.cc", "base/commondefs.h")])
+
     def test_listed_exception_passes(self):
         root = tree({"term/t.h": "", "lex/l.cc": '#include "t.h"\n'})
         self.assertEqual(cd.violations(root, RULES, {("lex/l.cc", "term/t.h")}), [])

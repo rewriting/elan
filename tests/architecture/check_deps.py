@@ -33,7 +33,11 @@ for _m in ("meta", "ref", "peval", "command", "compile"):
 RULES["driver"] = sorted(set(RULES) - {"driver"})
 
 SOURCE = re.compile(r"\.(c|cc|h|t|parser)$")
-INCLUDE = re.compile(r'^\s*#\s*include\s*"([^"]+)"', re.M)
+INCLUDE = re.compile(r'^\s*#\s*include\s*([<"])([^">]+)[">]', re.M)
+
+# Umbrella headers (including everything) are forbidden in the low modules,
+# even their own: there they would hide dependencies on higher modules.
+UMBRELLA = {"base/commondefs.h": {"base", "lex"}}
 COMMENT = re.compile(r"/\*.*?\*/|//[^\n]*", re.S)
 
 
@@ -50,23 +54,26 @@ def module_of(root, path):
     return path.relative_to(root).parts[0]
 
 
-def resolve(root, rules, src, name):
-    """Header as the compiler finds it: next to the includer, else in a module dir."""
-    local = (src.parent / name).resolve()
-    if local.is_file() and root.resolve() in local.parents:
-        return root / local.relative_to(root.resolve())
+def resolve(root, rules, src, name, quoted=True):
+    """Header as the compiler finds it: "x.h" next to the includer first, then
+    (both forms) in the module directories, which are on the include path.
+    Subdirectories of a module are not on the include path."""
+    if quoted:
+        local = (src.parent / name).resolve()
+        if local.is_file() and root.resolve() in local.parents:
+            return root / local.relative_to(root.resolve())
     for mod in rules:
-        for cand in (root / mod / name, *(root / mod).rglob(name)):
-            if cand.is_file():
-                return cand
+        cand = root / mod / name
+        if cand.is_file():
+            return cand
     return None
 
 
 def edges(root, rules):
     for src in sources(root, rules):
         text = COMMENT.sub("", src.read_text(errors="replace"))
-        for name in INCLUDE.findall(text):
-            hdr = resolve(root, rules, src, name)
+        for kind, name in INCLUDE.findall(text):
+            hdr = resolve(root, rules, src, name, quoted=(kind == '"'))
             if hdr is not None:
                 yield src, hdr
 
@@ -75,11 +82,13 @@ def rel(root, p):
     return p.relative_to(root).as_posix()
 
 
-def violations(root, rules, exceptions):
+def violations(root, rules, exceptions, umbrella=None):
+    umbrella = UMBRELLA if umbrella is None else umbrella
     out = []
     for src, hdr in edges(root, rules):
         a, b = module_of(root, src), module_of(root, hdr)
-        if a == b or b in rules.get(a, []):
+        forbidden_umbrella = a in umbrella.get(rel(root, hdr), ())
+        if not forbidden_umbrella and (a == b or b in rules.get(a, [])):
             continue
         e = (rel(root, src), rel(root, hdr))
         if e not in exceptions and e not in out:
@@ -114,8 +123,10 @@ def main():
     bad = violations(a.root, RULES, exc)
     stale = [] if a.list_violations else stale_exceptions(a.root, RULES, exc)
     for s, h in bad:
-        print(f"FORBIDDEN {s} -> {h}  ({module_of(a.root, a.root / s)} may not depend on "
-              f"{module_of(a.root, a.root / h)})")
+        ms, mh = module_of(a.root, a.root / s), module_of(a.root, a.root / h)
+        why = (f"umbrella header forbidden in {ms}" if ms in UMBRELLA.get(h, ())
+               else f"{ms} may not depend on {mh}")
+        print(f"FORBIDDEN {s} -> {h}  ({why})")
     for s, h in stale:
         print(f"STALE exception (no longer needed, remove it): {s} -> {h}")
     print(f"architecture: {len(bad)} forbidden includes, {len(stale)} stale exceptions, "

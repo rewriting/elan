@@ -70,7 +70,7 @@ check-arch:
 
 # C++ unit tests of the interpreter modules (tests/unit, CTest)
 check-unit: all
-	cd $(BUILD) && ctest --output-on-failure
+	cd $(BUILD) && ctest --output-on-failure --no-tests=error
 
 check: smoke test-runner check-arch check-unit
 	$(BENCH) --prefix $(PREFIX) --kinds I,A
