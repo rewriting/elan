@@ -57,8 +57,8 @@ class mitab
     int n,nofoc;           // number and number of occurences
   } *id;               // hashed table of pairs
 
-  void mitab::init();
-  void mitab::stinit(int);
+  void init();
+  void stinit(int);
  public:
 
   int posid;                // position of last founded member 
@@ -69,15 +69,15 @@ class mitab
   ~mitab();
 
 //  char *ide(int n);                   // give string of number n
-  void mitab::dump(char *); //dump of tab with name
-//  void mitab::write(char *,char *); //write table values
-  int mitab::addn(int n);   // add n into the table and return 
+  void dump(char *); //dump of tab with name
+//  void write(char *,char *); //write table values
+  int addn(int n);   // add n into the table and return 
                                     // his number
-  void mitab::removen(int n);
-  void mitab::removenonp(int ind);   // remove string of index n from table !!
+  void removen(int n);
+  void removenonp(int ind);   // remove string of index n from table !!
                                       // remove must be done in reversed 
                                       // order than add !!!!!!!!!!!!!!!!!!!!!!
-  int mitab::member(int n);   // is n a member of the table ?
+  int member(int n);   // is n a member of the table ?
                                   // if yes the posid is its index
 
 		// following functions for list the strings in for-cycle
