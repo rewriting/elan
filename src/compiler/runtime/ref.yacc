@@ -192,7 +192,7 @@ TERM    :   c_INT c_lbrace INTEGER c_rbrace
           {
             int code = lookup($1);
             /*printf("code = %d\n",code);*/
-            ($$,code);
+            (void)code;
             $$=(Gterm*)GspecialApply($$);
           }
           | ASFIDF c_lbrace LIST_TERM c_rbrace

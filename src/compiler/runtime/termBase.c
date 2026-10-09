@@ -744,7 +744,6 @@ int isEqMolecule(Gterm *m1, Gterm *m2) {
   fclose (tmp_file);
 
   /*
-  /*
    * Recuperer un terme a partir d'une chaine
    *
   sort = fsymtab[GgetSymb(m1)].sort ;

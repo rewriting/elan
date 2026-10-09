@@ -275,8 +275,9 @@ static void delete_dead_vars(PURE_PROBLEM *prob)
         var_tab[j] = var_tab[i];
       j++;
     }
-    else
+    else {
       EFREE(var_tab[i].vmult);
+    }
   }
   prob->n_var = j;
 }
@@ -454,8 +455,9 @@ void destroy_pure(PURE_PROBLEM *prob)
   }
   for(i = 0; i < n_var; i++){
     EFREE(var_tab[i].vmult);
-    if(var_tab[i].owner != SHARED)
+    if(var_tab[i].owner != SHARED) {
       EFREE(var_tab[i].ass.o.assign);
+    }
   }
   EFREE(term_tab);
   EFREE(var_tab);

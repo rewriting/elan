@@ -438,8 +438,9 @@ void MS_pattern_list_free(int **pattern_list,int nb_pattern)
   Verif_void(pattern_list,"MS_pattern_list_free(pattern_list)");
   for(i=0 ; i<nb_pattern ; i++)
     {
-      if(pattern_list[i])
+      if(pattern_list[i]) {
 	IFREE(pattern_list[i]);
+      }
     }
   IFREE(pattern_list);
 }

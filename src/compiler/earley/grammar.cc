@@ -106,7 +106,7 @@ struct sgrammrule * grammar::addrul(lexem &leftside,lexem *body,int priority, in
   ggl =  & (nontt[leftside.typeval()]);
   while (*ggl != NULL) ggl = &((*ggl)->next);
   *ggl = gl;
-/* */
+*/
   return(gr);
 }
 

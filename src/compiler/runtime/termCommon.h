@@ -167,7 +167,7 @@ extern void termac_alloc(struct termac **ptr_dest,
   setSubterm(tac,arity,subterm);\
   setArity(tac,arity+1);}
 
-//  setHcode(tac,INTERN_HFUNCTION(tac,subterm));\
+//  setHcode(tac,INTERN_HFUNCTION(tac,subterm));
 
 
 #define termac_add_last(t,st,m) termac_add_lastColor(t,st,m,0)

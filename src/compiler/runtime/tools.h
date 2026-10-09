@@ -74,7 +74,7 @@ extern int allocatedBug;
 #define Verif_void(objet,chaine)
 #endif
 
-// if(allocatedBug==1) if((*(int*)156372512)!=1) { assert(1); }\
+// if(allocatedBug==1) if((*(int*)156372512)!=1) { assert(1); }
 
 #ifndef NULL
 #define NULL 0

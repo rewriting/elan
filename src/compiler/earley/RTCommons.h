@@ -45,7 +45,7 @@ struct term {
   int counter; /* reference counter */
   struct term **myfreelist;
   int fs;
-  struct term *(sub[2]);
+  struct term *sub[2];
 };
 
 

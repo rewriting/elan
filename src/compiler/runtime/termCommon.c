@@ -591,7 +591,7 @@ static struct termac *merge_sorted_term(struct termac *tac1,
 //  (res->subterm)=(Gterm**) MALLOC(2*getSize(res)*sizeof(Gterm*));
   
   for(i1=0, i2=0, indice=0 ; i1<getArity(tac1) && i2<getArity(tac2) ; ) {
-    if(comp=Gterm_cmp(getSubterm(tac1,i1), getSubterm(tac2,i2))) {
+    if((comp=Gterm_cmp(getSubterm(tac1,i1), getSubterm(tac2,i2)))) {
       if(comp<0) {
           // on copie t1
         setSubterm(res,indice,getSubterm(tac1,i1));
