@@ -44,7 +44,7 @@ extern void CPL_init_realloc_protect(void* (*f)(void *, size_t));
 extern void CPL_init_realloc(void* (*f)(void *, size_t));
 
 extern int setChoicePoint();
-extern void globalFail();
+extern void globalFail() __attribute__((noreturn));
 
 extern void cCutMark(char *ra);
 extern char *cCut();

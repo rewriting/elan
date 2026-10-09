@@ -238,7 +238,7 @@ static __attribute__((noinline)) void makeLongJump() {
   printf("[fail] Error\n");
 }
 
-void globalFail() {
+__attribute__((noreturn)) void globalFail() {
   register volatile char *sp;
     /* suppression du point de choix */
   s = (char*)backTrail + tab_pile[stack_ptr].data_index;

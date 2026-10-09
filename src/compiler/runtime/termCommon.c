@@ -217,7 +217,7 @@ void term_printREF(FILE *fich,Gterm *t)
  // ehm modification a faire
 static struct termac *merge_sorted_term(struct termac *tac1,
                                         struct termac *tac2);
-static struct termac *termac_insert_bubble(struct termac *tac, int pos);
+static void termac_insert_bubble(struct termac *tac, int pos);
 
 static int termac_lookup(Gterm *subterm,
                          struct termac *tac,
@@ -536,7 +536,7 @@ static int termac_lookup(Gterm *subterm,
  * t[pos..n]   decale d'un cran a droite
  * t[pos]      <- subterm
  */
-static struct termac *termac_insert_bubble(struct termac *tac, int pos) {
+static void termac_insert_bubble(struct termac *tac, int pos) {
   int i;
   if(getArity(tac) == getSize(tac)) {
     termac_resize(tac,2*getSize(tac));

@@ -637,6 +637,9 @@ Gterm * norm_4(Gterm *t) {
 	}
     }
     }
+    /* 2026: no subterm was rewritten (or t is AC): t is in normal form; the
+       2004 code fell off the end and returned an undefined value */
+    return t;
 }
 
 Gterm * norm_in(Gterm *t) {
