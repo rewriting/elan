@@ -653,7 +653,7 @@ class grammar
   int buffi,ntbuffi;
 
   void addsymbol_(lexem *ebuff,int *ebuffi,lexem &);
-  struct sgrammrule *grammar::addrule_(lexem *ebuff,int *ebuffi,lexem &leftside, int priority, int infos, int num);
+  struct sgrammrule *addrule_(lexem *ebuff,int *ebuffi,lexem &leftside, int priority, int infos, int num);
   struct sgrammrule * addrul(lexem &leftside,lexem *body,int priority, int infos ,int num);
   void addnont_(lexem *ebuff,int *ebuffi,lexem &);
 

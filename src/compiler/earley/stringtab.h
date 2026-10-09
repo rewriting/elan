@@ -77,8 +77,8 @@ class stringtab
   int forpos;		   // actual position for for-cycle
   char **id;               // hashed table of strings
 
-  void stringtab::init();
-  void stringtab::stinit(int);
+  void init();
+  void stinit(int);
  public:
 
   int posid;                // position of last founded member 
@@ -89,18 +89,18 @@ class stringtab
   ~stringtab();
 
   char *ide(int n);                   // give string of number n
-  void stringtab::dump(char *name); //dump of tab with name
+  void dump(char *name); //dump of tab with name
 #ifdef EARLEY
-  void stringtab::earleyDump(ochstream&,char *name); //dump of tab with name
+  void earleyDump(ochstream&,char *name); //dump of tab with name
 #endif
-  void stringtab::write(char *,char *); //write table values
-  int stringtab::addstr(char *s);   // add string s into the table and return 
+  void write(char *,char *); //write table values
+  int addstr(char *s);   // add string s into the table and return 
                                     // his number
-  void stringtab::removestr(int n);   // remove string of #n from table !!!!!!!
+  void removestr(int n);   // remove string of #n from table !!!!!!!
                                       // remove must be done in reversed 
                                       // order than add !!!!!!!!!!!!!!!!!!!!!!
-  int stringtab::member(char *s);   // is s a member of the table ?
-  int stringtab::index(char *s);   // is s a member of the table ?
+  int member(char *s);   // is s a member of the table ?
+  int index(char *s);   // is s a member of the table ?
 
 		// following functions for list the strings in for-cycle
   void forinit();

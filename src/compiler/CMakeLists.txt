@@ -1,0 +1,146 @@
+# The ELAN compiler (spec S5a): REM (Java) generates C from the program
+# exported by `elan --cexport`; the generated Makefile compiles it and links
+# it with the C runtime (libruntime-base), the Earley parser (libearley), the
+# choice-point library (libchoice) and the Boehm GC.
+#
+# The sources are the 2004 ones (+ reference patches): they are compiled with
+# the pre-standard flags of the reference build (reference/build.sh), not
+# with the strict flags of the interpreter (modernisation is S5b).
+
+# --- tools and dependencies ---------------------------------------------------
+if(APPLE AND NOT DEFINED ENV{JAVA_HOME} AND EXISTS /opt/homebrew/opt/openjdk)
+  set(ENV{JAVA_HOME} /opt/homebrew/opt/openjdk)   # Homebrew's openjdk is keg-only
+endif()
+find_package(Java COMPONENTS Runtime Development)
+if(NOT Java_JAVAC_EXECUTABLE OR NOT Java_JAVA_EXECUTABLE)
+  message(FATAL_ERROR "ELAN compiler: no JDK found (brew install openjdk / apt install default-jdk-headless, "
+                      "or set JAVA_HOME); -DELAN_COMPILER=OFF builds the interpreter only")
+endif()
+find_program(ELAN_BISON NAMES bison REQUIRED)
+find_program(ELAN_FLEX NAMES flex REQUIRED)
+
+if(APPLE)
+  set(ELAN_GC_DEFAULT /opt/homebrew/opt/bdw-gc)
+else()
+  set(ELAN_GC_DEFAULT /usr)
+endif()
+set(ELAN_GC_PREFIX ${ELAN_GC_DEFAULT} CACHE PATH "Boehm GC (bdw-gc) installation prefix")
+if(NOT EXISTS ${ELAN_GC_PREFIX}/include/gc.h AND NOT EXISTS ${ELAN_GC_PREFIX}/include/gc/gc.h)
+  message(FATAL_ERROR "ELAN compiler: Boehm GC not found in ${ELAN_GC_PREFIX} "
+                      "(brew install bdw-gc / apt install libgc-dev, or set ELAN_GC_PREFIX)")
+endif()
+
+# Pre-standard C and C++ (reference/build.sh: CC_FLAGS, CXX_FLAGS)
+set(ELAN_RT_C_OPTIONS   -std=gnu89 -w -fcommon -fsigned-char)
+set(ELAN_RT_CXX_OPTIONS -std=gnu++98 -fpermissive -w -fsigned-char)
+
+# --- REM: javac -> classes/ -------------------------------------------------------
+file(GLOB_RECURSE REM_SOURCES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/rem/*.java)
+set(REM_CLASSES ${CMAKE_CURRENT_BINARY_DIR}/classes)
+add_custom_command(
+  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/rem.stamp
+  COMMAND ${CMAKE_COMMAND} -E rm -rf ${REM_CLASSES}
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${REM_CLASSES}
+  COMMAND ${Java_JAVAC_EXECUTABLE} -nowarn -encoding ISO-8859-1 -d ${REM_CLASSES} ${REM_SOURCES}
+  COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_CURRENT_BINARY_DIR}/rem.stamp
+  DEPENDS ${REM_SOURCES}
+  COMMENT "Compiling REM (javac)")
+add_custom_target(rem ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/rem.stamp)
+install(DIRECTORY ${REM_CLASSES}/ DESTINATION classes)
+
+# --- libruntime-base: the C runtime, base term variant ---------------------------
+# Generated parser of terms read at run time: y.tab.c #includes lex.yy.c.
+set(RT ${CMAKE_CURRENT_SOURCE_DIR}/runtime)
+set(RT_GEN ${CMAKE_CURRENT_BINARY_DIR}/runtime)
+file(MAKE_DIRECTORY ${RT_GEN})
+add_custom_command(
+  OUTPUT ${RT_GEN}/y.tab.c ${RT_GEN}/y.tab.h
+  COMMAND ${ELAN_BISON} -y -d ${RT}/ref.yacc
+  WORKING_DIRECTORY ${RT_GEN}
+  DEPENDS ${RT}/ref.yacc
+  COMMENT "Generating the runtime term parser (bison)")
+add_custom_command(
+  OUTPUT ${RT_GEN}/lex.yy.c
+  COMMAND ${ELAN_FLEX} ${RT}/ref.lex
+  WORKING_DIRECTORY ${RT_GEN}
+  DEPENDS ${RT}/ref.lex
+  COMMENT "Generating the runtime term lexer (flex)")
+set_source_files_properties(${RT_GEN}/y.tab.c PROPERTIES OBJECT_DEPENDS ${RT_GEN}/lex.yy.c)
+# one target owns the generated files (both runtime variants use them)
+add_custom_target(runtime_parser DEPENDS ${RT_GEN}/y.tab.c ${RT_GEN}/y.tab.h ${RT_GEN}/lex.yy.c)
+
+# runtime/Makefile.am: ALLSRCS = COMMONSRCS ACMATCHERSRC termBase.c (same order)
+set(RUNTIME_SOURCES
+  bgraph.c bitset.c bitset_32.c link.c match_state.c builtinMatching.c
+  tools.c streval.c ac_tools.c thunklib.c builtin.c ${RT_GEN}/y.tab.c
+  termCommon.c trace.c termIn.c termOut.c bitset_tab_mask.c bitset_tab_int.c
+  build_free.c build_pure.c flatten.c solve_free.c build_match.c eker_tools.c
+  gccmatch.c solve_pure.c termBase.c)
+list(TRANSFORM RUNTIME_SOURCES PREPEND ${RT}/ REGEX "^[^/]")
+# runtime/Makefile.am: CC_OPT, the -base rules (-DBASETERM)
+set(RUNTIME_DEFINITIONS PACKAGE="elan-compiler" VERSION="4.3f"
+    COMPUTE_HCODE CSETCHP BITSET32 HASHCODE BORO BGSHARE NONUNDERSCORED
+    BITSETMASK GCMEM COLOR BASETERM)
+set(RUNTIME_INCLUDES ${RT} ${RT_GEN} ${CMAKE_CURRENT_SOURCE_DIR}/cpl ${ELAN_GC_PREFIX}/include)
+
+# libruntime-base (no optimisation, as in the reference) and
+# libruntime-base-dbg (-g -DDEBUG, linked by `elanc -debug`)
+foreach(v base base-dbg)
+  add_library(runtime-${v} STATIC ${RUNTIME_SOURCES})
+  target_compile_options(runtime-${v} PRIVATE ${ELAN_RT_C_OPTIONS})
+  target_compile_definitions(runtime-${v} PRIVATE ${RUNTIME_DEFINITIONS})
+  target_include_directories(runtime-${v} PRIVATE ${RUNTIME_INCLUDES})
+  add_dependencies(runtime-${v} runtime_parser)
+endforeach()
+target_compile_options(runtime-base-dbg PRIVATE -g)
+target_compile_definitions(runtime-base-dbg PRIVATE DEBUG)
+
+# --- libearley: Earley parser used by the generated programs (C++) -------------
+add_library(earley STATIC
+  earley/commondefs.cc earley/lbuffer.cc earley/misc.cc earley/stringtab.cc
+  earley/earley.cc earley/grammar.cc earley/lstream.cc earley/ochstream.cc
+  earley/esemact.cc earley/ichstream.cc earley/mallo.cc earley/runtimeInit.cc)
+# earley/Makefile.am: AM_CXXFLAGS = -O2 -w $(CFLAGSPERSO), CXXFLAGS = -g -O2
+target_compile_options(earley PRIVATE ${ELAN_RT_CXX_OPTIONS} -O2 -g)
+target_compile_definitions(earley PRIVATE PACKAGE="elan-compiler" VERSION="4.3f"
+  COMMAND BINS PEM BORO ANYS SYMBS SELECT CAPAT LIN EARLEY STRINGS META SEMANTIC
+  IOS NORM EXTEND ATERM CSTRAT PARTE COMPRIM RUNTIME)
+target_include_directories(earley PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/earley
+  ${CMAKE_CURRENT_SOURCE_DIR}/compat ${ELAN_GC_PREFIX}/include)
+
+# --- libchoice: choice points by stack copying (cpl) -----------------------------
+# cpl/src/Makefile.am: CFLAGS = -Wall -O2; the -dbg variant: -Wall -g -DDEBUG
+foreach(v choice choice-dbg)
+  add_library(${v} STATIC cpl/choice.c)
+  target_compile_options(${v} PRIVATE ${ELAN_RT_C_OPTIONS})
+  target_compile_definitions(${v} PRIVATE PACKAGE_NAME="" PACKAGE_TARNAME=""
+    PACKAGE_VERSION="" PACKAGE_STRING="" PACKAGE_BUGREPORT="" PACKAGE="cpl" VERSION="0.6")
+endforeach()
+target_compile_options(choice PRIVATE -Wall -O2)
+target_compile_options(choice-dbg PRIVATE -Wall -g)
+target_compile_definitions(choice-dbg PRIVATE DEBUG)
+
+# --- installation (layout of the reference install) ------------------------------
+install(TARGETS runtime-base runtime-base-dbg earley choice choice-dbg
+        ARCHIVE DESTINATION lib)
+# runtime/Makefile.am: pkginclude_HEADERS (the C skeletons are #included by
+# the generated main file)
+file(GLOB RUNTIME_HEADERS ${RT}/*.h)
+install(FILES ${RUNTIME_HEADERS} ${RT_GEN}/y.tab.h
+              ${RT}/main_skeleton.c ${RT}/main_coq_skeleton.c ${RT}/main_skeleton_lib.c
+        DESTINATION include/elan-compiler)
+install(FILES cpl/choice.h DESTINATION include)
+
+# elanc: __PREFIX__ and the tools of this build (the generated Makefiles
+# compile with the compilers of the libraries: a C++ program cannot link a
+# libearley built by another C++ standard library).
+file(READ ${CMAKE_CURRENT_SOURCE_DIR}/scripts/elanc.src ELANC)
+string(REPLACE "__PREFIX__"    "${CMAKE_INSTALL_PREFIX}"   ELANC "${ELANC}")
+string(REPLACE "__JAVA__"      "${Java_JAVA_EXECUTABLE}"   ELANC "${ELANC}")
+string(REPLACE "__ELAN_CC__"   "${CMAKE_C_COMPILER}"       ELANC "${ELANC}")
+string(REPLACE "__ELAN_CXX__"  "${CMAKE_CXX_COMPILER}"     ELANC "${ELANC}")
+string(REPLACE "__GC_PREFIX__" "${ELAN_GC_PREFIX}"         ELANC "${ELANC}")
+file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/elanc "${ELANC}")
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
+             ${CMAKE_CURRENT_SOURCE_DIR}/scripts/elanc.src)
+install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/elanc DESTINATION bin)

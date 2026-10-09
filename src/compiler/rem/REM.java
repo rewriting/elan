@@ -317,6 +317,16 @@ public class REM {
        * Sous Makefile
        */
       subMakefile.write("ARCH := $(shell uname -s)\n");
+      // The compilers and the GC of the ELAN installation (passed by elanc):
+      // the program must be linked by the C++ compiler that built libearley.
+      // Defaults only: the environment can override them.
+      String[] makefileTools = { "ELAN_CC", "ELAN_CXX", "GC_PREFIX" };
+      for(int t = 0; t < makefileTools.length; t++) {
+        String value = System.getProperty(makefileTools[t]);
+        if(value != null && value.length() > 0) {
+          subMakefile.write(makefileTools[t] + " ?= " + value + "\n");
+        }
+      }
       subMakefile.write("ifneq (,$(findstring CYGWIN,$(ARCH)))\n");
       subMakefile.write("CC = gcc -static -pipe\n");
       subMakefile.write("CXX = g++ -Wl,--stack,0x2000000\n");
@@ -347,8 +357,12 @@ public class REM {
       subMakefile.write("DLLIB = \n");
       subMakefile.write("else\n");
       // Linux (2026): pre-standard C mode, no static link, no libtool
-      subMakefile.write("CC = gcc -pipe -std=gnu89 -w -fcommon -fsigned-char\n");
-      subMakefile.write("CXX = g++\n");
+      subMakefile.write("ifneq ($(ARCH),Darwin)\n");
+      subMakefile.write("ELAN_CC ?= gcc\n");
+      subMakefile.write("ELAN_CXX ?= g++\n");
+      subMakefile.write("endif\n");
+      subMakefile.write("CC = $(ELAN_CC) -pipe -std=gnu89 -w -fcommon -fsigned-char\n");
+      subMakefile.write("CXX = $(ELAN_CXX)\n");
       //subMakefile.write("CXX = g++ \n");
       if(Flags.choicePointDebug) {
         if(Flags.onlyC) {

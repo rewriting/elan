@@ -34,7 +34,7 @@ echo
 ########################################################
 set ARCH = `uname -m`
 set ELAN = "__PREFIX__/bin/elan"
-set JAVA = "java"
+set JAVA = "__JAVA__"
 
 ########################################################
 #                                                      #
@@ -152,9 +152,9 @@ endif
 #  ${JAVA} -jar ${CLASSES}/rem.jar ${LGIFILE}.ref ${REMOPTION}
 
 if($?verb) then
-  echo ${JAVA} -DPREFIX=__PREFIX__ -cp ${CLASSES} rem.REM ${LGIFILE}.ref ${REMOPTION}
+  echo ${JAVA} -DPREFIX=__PREFIX__ -DELAN_CC=__ELAN_CC__ -DELAN_CXX=__ELAN_CXX__ -DGC_PREFIX=__GC_PREFIX__ -cp ${CLASSES} rem.REM ${LGIFILE}.ref ${REMOPTION}
 endif
-  ${JAVA} -DPREFIX=__PREFIX__ -cp ${CLASSES} rem.REM ${LGIFILE}.ref ${REMOPTION}
+  ${JAVA} -DPREFIX=__PREFIX__ -DELAN_CC=__ELAN_CC__ -DELAN_CXX=__ELAN_CXX__ -DGC_PREFIX=__GC_PREFIX__ -cp ${CLASSES} rem.REM ${LGIFILE}.ref ${REMOPTION}
 
 
 else
