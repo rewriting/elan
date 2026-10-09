@@ -56,7 +56,7 @@ add_custom_target(elan_parsers DEPENDS ${ELAN_GENERATED})
 # --- elan: the interpreter ---------------------------------------------------
 add_executable(elan
   src/ldmain.cc src/msemact.cc src/msemact3.cc src/termcompile.cc src/matchcompile.cc
-  src/compilemisc.cc src/strategy.cc src/grammar.cc src/earley.cc src/esemact.cc src/term.cc
+  src/compilemisc.cc src/trsystem_compile.cc src/strategy.cc src/grammar.cc src/earley.cc src/esemact.cc src/term.cc
   src/module.cc src/tmisc.cc src/rtmisc.cc src/match.cc src/trsystem.cc src/normalise.cc
   src/aterm.cc src/partial.cc src/stateofexecution.cc src/meta.cc src/lbuffer.cc
   src/mlstream.cc src/command.cc

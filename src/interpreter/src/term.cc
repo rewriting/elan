@@ -2148,3 +2148,46 @@ void term::writerectostring(char *strin)
 }
 
 
+
+// Built-in type and sort of a term (moved from termcompile.cc: used by the
+// interpreter, not only by the C code generator).
+int term::isofbuiltintype()
+{ lexem ll;
+  switch (t->infos) {
+  case TIDENT:  case TNUMBER:
+    return(t->infos);
+  case TSTRING:
+     return(t->infos);
+  case TVAR:
+    // stout << "VAR compif.varsor " <<t->compif.varsort.typeval() << "\n";
+    return(ISBUILTIN((t->compif.varsort)));
+  case TNORMFS:
+    ll = fsymtab[t->fsymi].textform()->leftside;
+    return(ISBUILTIN(ll));
+  default :     
+    interr();
+  }
+  return 0; /* to avoid warning */
+}
+
+lexem term::termtype()
+{
+  switch(t->infos) {
+    case TIDENT: 
+      sterr << "[termtype] INT.ERR.\n";
+      interr();	
+    case TNUMBER:
+         return numtype;
+  case TSTRING:
+    sterr << "termtype for TSTRING is not implemented yet"; failexit();
+    case TVAR:
+         return((t->compif.varsort));
+    case TNORMFS:
+      return fsymtab[t->fsymi].textform()->leftside; 
+    default:
+      interr();
+  }
+  lexem ll;
+  return ll; /* NULL; *//* to avoid warning */
+}
+
