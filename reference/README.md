@@ -15,8 +15,11 @@ elan -b queens.lgi < queens.inp            # interpreter
 elanc -nosplit queens && make -f queens.make && ./a.out -noInput   # compiler
 ```
 
-Requirements: `brew install gcc openjdk bdw-gc bison flex libtool`, and a
-**case-sensitive** file system (see the top-level README).
+Requirements: `brew install gcc openjdk bdw-gc bison flex libtool` (macOS), or
+`apt install build-essential cmake bison flex libfl-dev default-jdk-headless libgc-dev automake python3`
+(Linux, Ubuntu 24.04), and a **case-sensitive** file system (see the top-level
+README). `build.sh` picks its defaults from `uname -s`; `ELAN_CC`, `ELAN_CXX`,
+`GC_PREFIX`, `JAVA_HOME` and `AUX` override them.
 
 ## What the build does
 
@@ -45,6 +48,7 @@ compilers and 32-bit machines of 2003 and is now rejected or miscompiled.
 | `03-rem-enum-identifier` | `enum` used as a variable name in the JavaCC-generated REF parser (keyword since Java 5) | REM does not compile |
 | `04-rem-darwin-makefile` | the Makefile generated for compiled programs only knows Linux/Cygwin | compiled programs do not link on macOS (`-lfl`, `-static`, libtool, GC paths) |
 | `05-cpl-arm64` | (a) `get_sp()` returns the address of a local: GCC folds it to `NULL`; (b) the result of `alloca()` is unused and may be removed; (c) `allocStablePointer()` moved the back-trail by 4 bytes, so the saved stack copies became misaligned and the conservative GC no longer saw the pointers they contain | (a) segfault at the first choice point; (c) non-deterministic results under `-optimiseChoicePoint` (e.g. 21–39 solutions instead of 92 for 8 queens) |
+| `06-rem-linux-makefile` | the Linux branch of the Makefile generated for compiled programs links statically and through `libtool`, and compiles the 1990s C in the default (C17) mode | compiled programs do not build on current Linux distributions |
 
 ## Known limitations of the reference
 

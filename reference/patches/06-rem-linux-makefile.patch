@@ -1,0 +1,14 @@
+--- a/elan3/src/elan-compiler/src/rem/REM.java
++++ b/elan3/src/elan-compiler/src/rem/REM.java
+@@ -346,8 +346,9 @@
+       subMakefile.write("YLIB = -lfl\n");
+       subMakefile.write("DLLIB = \n");
+       subMakefile.write("else\n");
+-      subMakefile.write("CC = gcc -static -pipe\n");
+-      subMakefile.write("CXX = libtool --mode=link g++\n");
++      // Linux (2026): pre-standard C mode, no static link, no libtool
++      subMakefile.write("CC = gcc -pipe -std=gnu89 -w -fcommon\n");
++      subMakefile.write("CXX = g++\n");
+       //subMakefile.write("CXX = g++ \n");
+       if(Flags.choicePointDebug) {
+         if(Flags.onlyC) {

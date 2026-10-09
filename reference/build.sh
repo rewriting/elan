@@ -24,18 +24,27 @@ SRC="$BUILD/elan3/src"
 PREFIX="${PREFIX:-$HERE/install}"
 LOGDIR="$BUILD/logs"
 
-GCC="${ELAN_CC:-gcc-16}"
-GXX="${ELAN_CXX:-g++-16}"
-GC_PREFIX="${GC_PREFIX:-/opt/homebrew/opt/bdw-gc}"
-JAVA_HOME="${JAVA_HOME:-/opt/homebrew/opt/openjdk}"
-AUX="${AUX:-$(dirname "$(find /opt/homebrew/Cellar/libtool -name config.guess -path '*build-aux*' | head -1)")}"
+case "$(uname -s)" in
+  Darwin)
+    GCC="${ELAN_CC:-gcc-16}"; GXX="${ELAN_CXX:-g++-16}"
+    GC_PREFIX="${GC_PREFIX:-/opt/homebrew/opt/bdw-gc}"
+    JAVA_HOME="${JAVA_HOME:-/opt/homebrew/opt/openjdk}"
+    AUX="${AUX:-$(dirname "$(find /opt/homebrew/Cellar/libtool -name config.guess -path '*build-aux*' | head -1)")}"
+    AR=/usr/bin/ar ;;
+  Linux)
+    GCC="${ELAN_CC:-gcc}"; GXX="${ELAN_CXX:-g++}"
+    GC_PREFIX="${GC_PREFIX:-/usr}"
+    JAVA_HOME="${JAVA_HOME:-$(dirname "$(dirname "$(readlink -f "$(command -v javac)")")")}"
+    AUX="${AUX:-$(dirname "$(ls /usr/share/automake-*/config.guess | sort -V | tail -1)")}"
+    AR=ar ;;
+  *) echo "unsupported platform $(uname -s)"; exit 1 ;;
+esac
 export PATH="$JAVA_HOME/bin:$PATH"
 
 # Pre-standard C: K&R prototypes, tentative definitions shared between objects
 CC_FLAGS="$GCC -std=gnu89 -w -fcommon"
 # Pre-standard C++: <iostream.h>, extra qualifications, ...
 CXX_FLAGS="$GXX -std=gnu++98 -fpermissive -w -I$HERE/compat"
-AR=/usr/bin/ar
 
 log() { printf '\n=== %s\n' "$*"; }
 run() { # run <logname> <cmd...>: quiet, show the log tail on failure
@@ -66,6 +75,8 @@ freeze_autotools() {
 build_prepare() {
   log "Preparing sources from legacy/ + patches/"
   case_sensitive_or_die
+  # (the library build extracts a read-only distribution tree: make it removable)
+  [ -d "$BUILD" ] && chmod -R u+w "$BUILD"
   rm -rf "$BUILD"; mkdir -p "$SRC" "$LOGDIR"
   cp -R "$LEGACY/elan3/src/." "$SRC/"
   cp -R "$LEGACY/elan/src/aterm-1.6.5" "$SRC/"

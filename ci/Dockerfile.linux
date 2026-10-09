@@ -1,0 +1,6 @@
+# Local reproduction of the Linux CI job (same packages as .github/workflows/ci.yml).
+FROM ubuntu:24.04
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+      build-essential cmake bison flex libfl-dev default-jdk-headless libgc-dev \
+      automake python3 git ca-certificates && rm -rf /var/lib/apt/lists/*
+WORKDIR /work
