@@ -15,24 +15,30 @@ add_library(match STATIC
 target_compile_options(match PRIVATE ${ELAN_C_COMPAT_OPTIONS} -g)
 target_compile_definitions(match PRIVATE ${ELAN_DEFINITIONS})
 
-# --- options shared by every C++ target of src/ ------------------------------
+# --- options shared by every C++ target --------------------------------------
+# Sources are grouped by module (spec S3a, D1); during the transition every
+# module directory is an include directory, so `#include "x.h"` keeps working.
 set(ELAN_INTERP_DEFINITIONS ${ELAN_DEFINITIONS}
     PREFIX="${CMAKE_INSTALL_PREFIX}")
+set(ELAN_MODULES base lex parse term match rewrite load meta ref peval command compile driver)
+set(ELAN_INCLUDE_DIRS)
+foreach(m ${ELAN_MODULES})
+  list(APPEND ELAN_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/${m})
+endforeach()
 set(ELAN_COMMON_SOURCES
-  src/commondefs.cc src/ochstream.cc src/ichstream.cc src/lstream.cc
-  src/stringtab.cc src/mitab.cc src/mallo.cc src/misc.cc)
+  base/commondefs.cc base/ochstream.cc base/ichstream.cc lex/lstream.cc
+  base/stringtab.cc base/mitab.cc base/mallo.cc base/misc.cc)
 
 function(elan_cxx_target target)
   target_compile_options(${target} PRIVATE ${ELAN_CXX_COMPAT_OPTIONS} -pipe -O2)
   target_compile_definitions(${target} PRIVATE ${ELAN_INTERP_DEFINITIONS})
-  target_include_directories(${target} PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/src)
+  target_include_directories(${target} PRIVATE ${ELAN_INCLUDE_DIRS})
 endfunction()
 
 # --- mtokdef / mabident: keyword-table generators (host tools) ------------
-add_executable(mtokdef src/mtokdefmain.cc src/specials.cc ${ELAN_COMMON_SOURCES})
+add_executable(mtokdef parse/tools/mtokdefmain.cc parse/tools/specials.cc ${ELAN_COMMON_SOURCES})
 elan_cxx_target(mtokdef)
-add_executable(mabident src/mtokmain.cc src/specials.cc ${ELAN_COMMON_SOURCES})
+add_executable(mabident parse/tools/mtokmain.cc parse/tools/specials.cc ${ELAN_COMMON_SOURCES})
 elan_cxx_target(mabident)
 
 # --- generated parser sources ----------------------------------------------
@@ -41,33 +47,41 @@ set(ELAN_GENERATED
   ${ELAN_GEN_DIR}/ppexparser.cc ${ELAN_GEN_DIR}/mparser.cc ${ELAN_GEN_DIR}/atermparser.cc
   ${ELAN_GEN_DIR}/reduceparser.cc ${ELAN_GEN_DIR}/ldparser.cc ${ELAN_GEN_DIR}/tabofident.cc
   ${ELAN_GEN_DIR}/atabofident.cc ${ELAN_GEN_DIR}/commtokens.h)
-set(S ${CMAKE_CURRENT_SOURCE_DIR}/src)
+set(G ${CMAKE_CURRENT_SOURCE_DIR}/parse/grammars)
 add_custom_command(
   OUTPUT ${ELAN_GENERATED}
   COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/gen-parsers.sh
-          $<TARGET_FILE:macc> $<TARGET_FILE:mtokdef> $<TARGET_FILE:mabident> ${S} ${ELAN_GEN_DIR}
+          $<TARGET_FILE:macc> $<TARGET_FILE:mtokdef> $<TARGET_FILE:mabident> ${G} ${ELAN_GEN_DIR}
   DEPENDS macc mtokdef mabident ${CMAKE_CURRENT_SOURCE_DIR}/gen-parsers.sh
-          ${S}/ppexgram.t ${S}/modgram.t ${S}/ldmodgram.t ${S}/aterm.orig ${S}/aterm.ref
-          ${S}/aterm.reduce ${S}/include.parser ${S}/toaterm ${S}/ppexparser.h ${S}/mparser.h
-          ${S}/atermparser.h ${S}/reduceparser.h ${S}/ldparser.h
+          ${G}/ppexgram.t ${G}/modgram.t ${G}/ldmodgram.t ${G}/aterm.orig ${G}/aterm.ref
+          ${G}/aterm.reduce ${G}/include.parser ${G}/toaterm ${G}/ppexparser.h ${G}/mparser.h
+          ${G}/atermparser.h ${G}/reduceparser.h ${G}/ldparser.h
   COMMENT "Generating ELAN parser sources with macc")
 add_custom_target(elan_parsers DEPENDS ${ELAN_GENERATED})
 
-# --- elan: the interpreter ---------------------------------------------------
-add_executable(elan
-  src/ldmain.cc src/msemact.cc src/msemact3.cc src/termcompile.cc src/matchcompile.cc
-  src/compilemisc.cc src/trsystem_compile.cc src/strategy.cc src/grammar.cc src/earley.cc src/esemact.cc src/term.cc
-  src/module.cc src/tmisc.cc src/rtmisc.cc src/match.cc src/trsystem.cc src/normalise.cc
-  src/aterm.cc src/partial.cc src/stateofexecution.cc src/meta.cc src/lbuffer.cc
-  src/mlstream.cc src/command.cc
+# --- elan_core: the interpreter as a library (spec S3a, D4) ------------------
+# The order of the sources is the link order of the former elan executable:
+# it fixes the order of the static initialisers.
+add_library(elan_core STATIC
+  driver/ldmain.cc load/msemact.cc load/msemact3.cc compile/termcompile.cc
+  compile/matchcompile.cc compile/compilemisc.cc compile/trsystem_compile.cc
+  load/strategy.cc parse/grammar.cc parse/earley.cc parse/esemact.cc term/term.cc
+  load/module.cc term/tmisc.cc rewrite/rtmisc.cc match/match.cc rewrite/trsystem.cc
+  rewrite/normalise.cc ref/ref.cc peval/partial.cc rewrite/stateofexecution.cc
+  meta/meta.cc lex/lbuffer.cc lex/mlstream.cc command/command.cc
   ${ELAN_COMMON_SOURCES}
   ${ELAN_GEN_DIR}/tabofident.cc ${ELAN_GEN_DIR}/ppexparser.cc ${ELAN_GEN_DIR}/mparser.cc
   ${ELAN_GEN_DIR}/atermparser.cc ${ELAN_GEN_DIR}/reduceparser.cc ${ELAN_GEN_DIR}/ldparser.cc
   ${ELAN_GEN_DIR}/atabofident.cc)
+elan_cxx_target(elan_core)
+target_include_directories(elan_core PRIVATE ${ELAN_GEN_DIR})
+add_dependencies(elan_core elan_parsers)
+target_link_libraries(elan_core PUBLIC match m)
+
+# --- elan: the interpreter ---------------------------------------------------
+add_executable(elan driver/main.cc)
 elan_cxx_target(elan)
-target_include_directories(elan PRIVATE ${ELAN_GEN_DIR})
-add_dependencies(elan elan_parsers)
-target_link_libraries(elan PRIVATE match m)
+target_link_libraries(elan PRIVATE elan_core)
 
 install(TARGETS elan RUNTIME DESTINATION bin)
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/src/lib/elanlib/

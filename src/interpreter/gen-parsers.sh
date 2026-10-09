@@ -1,7 +1,8 @@
 #!/bin/sh
 # Generate the parser sources of the ELAN interpreter, exactly as the
 # $(generated_c) rule of elan-interpreter/src/Makefile.am (2003) did.
-# Usage: gen-parsers.sh MACC MTOKDEF MABIDENT SRCDIR OUTDIR
+# Usage: gen-parsers.sh MACC MTOKDEF MABIDENT GRAMMARDIR OUTDIR
+# (GRAMMARDIR = src/interpreter/parse/grammars)
 set -e
 MACC=$1; MTOKDEF=$2; MABIDENT=$3; S=$4; O=$5
 mkdir -p "$O"; cd "$O"

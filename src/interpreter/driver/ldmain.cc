@@ -38,6 +38,7 @@
 #include "strategy.h"
 #include "rtdatas.h"
 #include "strategy.h"
+#include "elan_main.h"
 int lis_norm = 0;
 int alg_normalisation = 1;
 
@@ -852,9 +853,10 @@ void conform_strategies(int warn)
 
 
 ///////////////////////////////main////////////////////////////////
-//
+// The command-line interpreter; main() (driver/main.cc) only calls it, so
+// that the core library elan_core has no main.
 
-int main(int argc, char **argv)
+int elan_main(int argc, char **argv)
 {
   char *modsource,*moddest_c,*callcompilstr,*calllinkstr=NULL; /* ,*includef*/
   const char *nsoptstr;
