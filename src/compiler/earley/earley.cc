@@ -157,7 +157,7 @@ void grammar::inisitset()       // initialize set of situations sitset[sitseti]
 
 int grammar::addtosit(struct sgrammrule *rule, int position, int i)
 //                 append situation [(rule, position),i] into sitset[sitseti]
-{ register struct sitlist *s,**ss;
+{ struct sitlist *s,**ss;
   struct psymlist **pp,*p;
   lexem sy;
 //stout << "\n[addtosi] try to add rule :";  dumpgrrule(rule);

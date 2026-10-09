@@ -72,7 +72,7 @@ struct term {
 }
 
 #define FREE0(packet) {\
-  register struct term **tmp;\
+  struct term **tmp;\
   tmp = packet->myfreelist;\
   packet->sub[0] = *tmp; *tmp = packet;\
 }

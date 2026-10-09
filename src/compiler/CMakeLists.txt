@@ -32,7 +32,7 @@ endif()
 
 # Pre-standard C and C++ (reference/build.sh: CC_FLAGS, CXX_FLAGS)
 set(ELAN_RT_C_OPTIONS   -std=gnu89 -w -fcommon -fsigned-char)
-set(ELAN_RT_CXX_OPTIONS -std=gnu++98 -fpermissive -w -fsigned-char)
+set(ELAN_RT_CXX_OPTIONS -std=c++17 -w -fsigned-char)
 
 # --- REM: javac -> classes/ -------------------------------------------------------
 file(GLOB_RECURSE REM_SOURCES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/rem/*.java)
