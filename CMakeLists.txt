@@ -5,8 +5,8 @@ project(elan VERSION 3.6 LANGUAGES C CXX)
 # Removing these options is sub-project S2.
 # -fsigned-char: the code stores -1 in `char` (e.g. module visibilities); char
 # is unsigned on Linux/aarch64, where local rules then become visible.
-set(ELAN_C_COMPAT_OPTIONS   -std=c17 -w -fsigned-char)
-set(ELAN_CXX_COMPAT_OPTIONS -std=c++17 -w -fsigned-char)
+set(ELAN_C_COMPAT_OPTIONS   -std=c17 -fsigned-char -Wall -Wextra)
+set(ELAN_CXX_COMPAT_OPTIONS -std=c++17 -fsigned-char -Wall -Wextra)
 set(ELAN_DEFINITIONS
     PACKAGE="elan-interpreter" VERSION="3.6g" YYTEXT_POINTER=1)
 

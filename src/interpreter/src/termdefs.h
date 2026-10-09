@@ -321,6 +321,7 @@ class term
                                 // vp says if it is valide position (because 
                                // of extensionality of AC symbols 
   void operator = (term);	// only assignement of pointers !!!!!!!!
+  term(const term &) = default;	// copies the pointer, as the implicit one did
   int contains_AC();               // true, if it contains at least one AC symbol
 
   int match(term gt,term *substarray,int varn,struct vilist *&iv);  
