@@ -30,21 +30,25 @@ case "$(uname -s)" in
     GC_PREFIX="${GC_PREFIX:-/opt/homebrew/opt/bdw-gc}"
     JAVA_HOME="${JAVA_HOME:-/opt/homebrew/opt/openjdk}"
     AUX="${AUX:-$(dirname "$(find /opt/homebrew/Cellar/libtool -name config.guess -path '*build-aux*' | head -1)")}"
-    AR=/usr/bin/ar ;;
+    AR=/usr/bin/ar
+    ATERM_EXTRA="" ;;
   Linux)
     GCC="${ELAN_CC:-gcc}"; GXX="${ELAN_CXX:-g++}"
     GC_PREFIX="${GC_PREFIX:-/usr}"
     JAVA_HOME="${JAVA_HOME:-$(dirname "$(dirname "$(readlink -f "$(command -v javac)")")")}"
     AUX="${AUX:-$(dirname "$(ls /usr/share/automake-*/config.guess | sort -V | tail -1)")}"
-    AR=ar ;;
+    AR=ar
+    # ATerm 1.6.5 uses CLK_TCK, which glibc no longer defines
+    ATERM_EXTRA="'-DCLK_TCK=sysconf(_SC_CLK_TCK)'" ;;
   *) echo "unsupported platform $(uname -s)"; exit 1 ;;
 esac
 export PATH="$JAVA_HOME/bin:$PATH"
 
 # Pre-standard C: K&R prototypes, tentative definitions shared between objects
-CC_FLAGS="$GCC -std=gnu89 -w -fcommon"
+# -fsigned-char: the 1990s code assumes a signed `char` (unsigned on Linux/aarch64)
+CC_FLAGS="$GCC -std=gnu89 -w -fcommon -fsigned-char"
 # Pre-standard C++: <iostream.h>, extra qualifications, ...
-CXX_FLAGS="$GXX -std=gnu++98 -fpermissive -w -I$HERE/compat"
+CXX_FLAGS="$GXX -std=gnu++98 -fpermissive -w -fsigned-char -I$HERE/compat"
 
 log() { printf '\n=== %s\n' "$*"; }
 run() { # run <logname> <cmd...>: quiet, show the log tail on failure
@@ -122,7 +126,7 @@ build_aterm() {
   run aterm env CC="$CC_FLAGS" AR=$AR ./configure --prefix="$PREFIX"
   # -DPROTOTYPES=1: md5.h otherwise declares K&R prototypes rejected by GCC 16.
   # The 'test' directory needs generated files that are not shipped: ignore it.
-  make -k install CC="$CC_FLAGS -DPROTOTYPES=1" AR=$AR >>"$LOGDIR/aterm.log" 2>&1 || true
+  make -k install CC="$CC_FLAGS -DPROTOTYPES=1 $ATERM_EXTRA" AR=$AR >>"$LOGDIR/aterm.log" 2>&1 || true
   [ -f "$PREFIX/lib/libATerm.a" ] || { echo "libATerm.a missing (see $LOGDIR/aterm.log)"; exit 1; }
 }
 
