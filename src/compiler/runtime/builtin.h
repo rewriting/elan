@@ -64,7 +64,8 @@ extern Gterm *con_0,*con_1;
 #define GisTagged(n) (((long)(n))&TAG_MASK)
 
 #define GgetInt(n) (((long)(n))>>1)
-#define GsetIntegerTag(n) ((Gterm*)((((long)(n))<<1)|INTEGER_MASK))
+/* the shift is unsigned: a negative long shifted left is undefined (same bits) */
+#define GsetIntegerTag(n) ((Gterm*)((((unsigned long)(long)(n))<<1)|INTEGER_MASK))
 #define GisIntegerTagged(n) (((long)(n))&INTEGER_MASK)
 
 #define IDENTIFIER_MASK 0x0000000000000002
