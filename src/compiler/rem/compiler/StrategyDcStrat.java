@@ -1,0 +1,112 @@
+/*
+  
+    REM - Reduce ELAN Machine
+
+    Copyright (C) 2000-2001  LORIA (CNRS, INPL, INRIA, UHP, U-Nancy 2)
+			     Nancy, France.
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
+
+    Pierre-Etienne Moreau	e-mail: Pierre-Etienne.Moreau@loria.fr
+
+*/
+package rem.compiler;
+
+import java.util.*;
+
+public class StrategyDcStrat extends StrategyTerm {
+
+  public StrategyDcStrat(Vector sub) {
+    super(sub);
+  }
+
+  protected void setDetType() {
+    detTypeState=start;
+    detType = DetType.detType;
+    for(int i=0 ; i<subterms.size() ; i++) {
+      StrategyTerm term = (StrategyTerm) subterms.elementAt(i);
+      detType = detType.and(term.getDetType());
+    }
+    detTypeState=done;
+  }
+
+  protected DetType getDefaultDetType() {
+    return DetType.nonDetType;
+  }
+  
+  public void compile(OutputCode s,int deep, OutputCode matchSubtermCode) {
+    Tools.indent(s,deep); s.write("{\n");
+    super.compile(s,deep+1,matchSubtermCode);
+
+    Tools.indent(s,deep+1); s.write("long wasr_index = allocStable(sizeof(int));\n");
+    Tools.indent(s,deep+1); s.write("*((int*)getStablePointer(wasr_index))=0;\n");
+
+    for(int i=0 ; i<subterms.size() ; i++) {
+      StrategyTerm sterm = (StrategyTerm) subterms.elementAt(i);
+      boolean isLast = (i+1 == subterms.size());
+      boolean isFirst = (i==0);
+
+      if(!isFirst) {
+	/*
+	 * Le test est place en debut de boucle pour propager le fail 
+	 * de la derniere sous-strategie en cas d'echec
+	 */
+	Tools.indent(s,deep+1); s.write("/* On vient d'un fail */\n");
+	Tools.indent(s,deep+1); s.write("if(*((int*)getStablePointer(wasr_index))!=0) {\n");
+	Tools.indent(s,deep+2); s.write("/* Si on a un resultat on propage le fail */\n");
+	Tools.genFail(s,deep+2);
+	Tools.indent(s,deep+1); s.write("}\n");
+	Tools.indent(s,deep+1); s.write("/* Sinon on essai la strategie suivante */\n");
+      }
+      if(!isLast) {
+	Tools.indent(s,deep+1); s.write("if(!setChoicePoint()) {\n");
+	Tools.indent(s,deep+2); s.write("/* Si la strategie suivante echoue, on passe a la suivante */\n");
+	deep++;
+      }
+
+      sterm.compile(s,deep+1, matchSubtermCode);
+
+      if(!isLast) {
+	Tools.indent(s,deep+1); s.write("/* La strategie a donne un resultat */\n");
+	Tools.indent(s,deep+1); s.write("if(*((int*)getStablePointer(wasr_index))==0) {\n");
+	Tools.indent(s,deep+2); s.write("*((int*)getStablePointer(wasr_index))=1;\n");
+	Tools.indent(s,deep+1); s.write("}\n");
+      }
+
+      Tools.indent(s,deep+1); s.write("goto stratLab" + getExitLabel() + ";\n");
+      
+      if(!isLast) {
+	deep--;
+	Tools.indent(s,deep+1); s.write("}\n");
+      }
+    }
+
+    Tools.indent(s,deep); s.write("stratLab" + getExitLabel() + ":;\n");
+    Tools.indent(s,deep); s.write("}\n");
+  }
+  
+  public String toString() {
+    StringBuffer s = new StringBuffer();
+    s.append( "DC" );
+    s.append( super.toString() );
+    return s.toString();
+  }
+
+  public String getName() {
+    return super.getName() + "_DC";
+  }
+ 
+
+}
