@@ -2,6 +2,8 @@
 #   make                 build the interpreter (build/)
 #   make install         install into $(PREFIX)
 #   make check           unit tests of the runner + interpreter tests (I, A) of the bench
+#                        + compiled tests (J, JO)
+#   make check-compiler  compiled tests (J, JO) only: elanc, REM, runtime libraries
 #   make reference       build the 2004 reference system (reference/install)
 #   make check-reference full bench (778 tests) against the reference
 BUILD   ?= build
@@ -21,7 +23,7 @@ else
   ELAN_CXX ?= g++
 endif
 
-.PHONY: manual manual-update all configure install check check-sanitize check-arch check-unit test-runner smoke reference check-reference clean toolchain
+.PHONY: manual manual-update all configure install check check-compiler check-sanitize check-arch check-unit test-runner smoke reference check-reference clean toolchain
 
 all: configure
 	cmake --build $(BUILD) -j
@@ -70,10 +72,20 @@ check-arch:
 check-unit: all
 	cd $(BUILD) && ctest --output-on-failure --no-tests=error
 
+# Compiled tests of the bench (spec S5a, D4): elanc -> make -> a.out, against
+# the installed compiler (the generated programs are built with the
+# compilers of this build, see src/compiler/CMakeLists.txt).
+CHECK_COMPILER = $(BENCH) --prefix $(PREFIX) --kinds J,JO
+check-compiler: install
+	$(CHECK_COMPILER)
+
 check: smoke test-runner check-arch check-unit
 	$(BENCH) --prefix $(PREFIX) --kinds I,A
+	$(CHECK_COMPILER)
 
 # Interpreter tests under sanitizers (build-san/): AddressSanitizer + UBSan.
+# The compiled tests (J, JO) run too: `elan --cexport` runs under the
+# sanitizers; the compiler libraries and the generated programs do not.
 # On macOS 27 with Apple Clang 17, ASan hangs at startup even for an empty
 # program, so the default there is UBSan only (ASan runs in CI on Linux and in
 # ci/Dockerfile.linux). Leak detection is off: terms are never freed, by design.

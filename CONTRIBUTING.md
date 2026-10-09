@@ -21,7 +21,8 @@ build of 2004.
    there is none).
 7. The interpreter compiles as strict C++17/C17 with `-Wall -Wextra -Werror`
    under GCC and Clang, and the bench runs clean under ASan+UBSan
-   (`make check-sanitize`). A warning or a sanitizer report is fixed at its
+   (`make check-sanitize`). The compiler sources (`src/compiler/`) are still
+   built with the pre-standard flags of the reference. A warning or a sanitizer report is fixed at its
    root cause, never silenced, unless the tool is provably wrong (then say why
    in a comment and in the commit).
 
