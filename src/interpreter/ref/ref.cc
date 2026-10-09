@@ -697,7 +697,7 @@ lexem whtype;
     (stack)[(top)++] = (value); } while (0)
 
 
-int atermsemact(int n,lexem l,lstream *f)
+int atermsemact(int n,lexem l,lstream * /*f*/)
 {
   struct namelist *nl;
   struct sgrammrule *rule = NULL; /* initialised to avoid warning */
@@ -1034,9 +1034,7 @@ int atermsemact(int n,lexem l,lstream *f)
       appactstrat();
       break;
     case 163:
-      if (strstacki+2 >= MAXINCLSTRAT) {
-	f->owarn("\n[semact] strstacki overflowed over MAXINCLSTRAT\n",NULL);
-	return(ERRORIM); }
+      grow_strstack(strstacki+3);
       strstack[strstacki+1]=strstack[strstacki+2]=NULL;
       strstacki+=2;
       break;
@@ -1098,7 +1096,7 @@ int atermsemact(int n,lexem l,lstream *f)
       ss->str = strstack[strstacki-1];
       strstack[strstacki-1]=strstack[strstacki]=NULL;
       //	  NNEW(actstrategy ,strategy);
-      if (strlstacki+2 > MAXINCLSTRAT) ref_stack_overflow("strlstack");
+      grow_strlstack(strlstacki+2);
       strlstack[strlstacki++] = ss;
       strlstack[strlstacki++] = ss;
       }

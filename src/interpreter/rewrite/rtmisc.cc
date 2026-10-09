@@ -27,6 +27,7 @@
 
 #include <string.h>
 #include <errno.h>
+#include <vector>
 #include "commondefs.h"
 #include "termdefs.h"
 #include "module.h"
@@ -41,20 +42,24 @@ struct rstackel {
   int n;
 };
 
-#define INIT() {rstacki = rstack; rstacki--;}
-#define PUSH(tt,nn) {++rstacki; rstacki->t=(tt); rstacki->n=(nn);}
+// The stack of reduce() grows on demand (terms of any depth; MAXTERMDEEP =
+// 20000 until S3b): rstack[0..rstacki] are in use, rstacki is an index.
+#define INIT() {rstacki = -1;}
+#define PUSH(tt,nn) {++rstacki; \
+    if (rstacki >= (int)rstack.size()) rstack.resize(2 * rstack.size() + 1); \
+    rstack[rstacki].t=(tt); rstack[rstacki].n=(nn);}
 #define POP() {rstacki--;}
-#define TOP() (*rstacki)
-#define TOP1() (*(rstacki-1))
-#define EMPTY() (rstacki<rstack)
-#define EMPTY1() (rstacki<=rstack)
-#define INCRTOPI() {(rstacki->n)++;}
+#define TOP() (rstack[rstacki])
+#define TOP1() (rstack[rstacki-1])
+#define EMPTY() (rstacki<0)
+#define EMPTY1() (rstacki<=0)
+#define INCRTOPI() {(rstack[rstacki].n)++;}
 
 /*
 static void stackdump()
 { int i;
   sterr << "[rtmisc.stackdump] start\n";
-  for (i=0; i<=rstacki-rstack; i++) {
+  for (i=0; i<=rstacki; i++) {
     sterr << i << ": [" << rstack[i].n << ",";
     rstack[i].t.write(sterr);
     sterr << "]\n";
@@ -1000,8 +1005,8 @@ int handlecondition(term c, term *substarray)
 
 void reduce(term &mt,int trace)		// main reduce loop; 
 {
-  struct rstackel *rstack = new struct rstackel[MAXTERMDEEP];
-  struct rstackel *rstacki;	// *rstacki == top;
+  std::vector<struct rstackel> rstack(1024);
+  int rstacki;	// rstack[rstacki] == top
   term actt;
   int acti;
   int estrat_len = 0;
@@ -1018,11 +1023,6 @@ void reduce(term &mt,int trace)		// main reduce loop;
   INIT();
   PUSH(mt,0);
   while (! EMPTY()) {
-    if (rstacki >= rstack+MAXTERMDEEP) {
-       sterr << "[reduce] stack overflowed over MAXTERMDEEP = " << MAXTERMDEEP
-             << "\n\t fatal\n";
-       exit(EXIT_FAILURE);
-    }
     actt = TOP().t;
     acti = TOP().n;
 
@@ -1104,7 +1104,6 @@ void reduce(term &mt,int trace)		// main reduce loop;
     indent(); traceout << "[reduce] stop :\n"; 
     traceind-=3;
   }
-  delete [] rstack;
 }
 
 

@@ -35,6 +35,7 @@
 #include "stringtab.h"
 #include "mitab.h"
 #include "streams.h"
+#include <vector>
 
 class lexem
  {		// !!! bodies of functions are in 'lstream.c'
@@ -121,7 +122,7 @@ inline int lexem::isident() {return((lex<=BOFIDENT && lex>BOFIDENT-MAXNOFIDENT)|
 inline int lexem::isrealid() {return(lex<=BOFIDENT && lex > BOFIDENT-MAXNOFIDENT);}
 //inline lexem::isident() {return((lex<=BOFIDENT && lex>BOFTYPES)||lex==IDENT);}
 //inline lexem::isrealid() {return(lex<=BOFIDENT && lex > BOFTYPES);}
-extern char   *stringconstants[];
+extern std::vector<char *> stringconstants;  // MAXNOFSTRING at most (range of lexems)
 extern int    stringconstantsi;
 inline int lexem::isstring()  { return((lex<=BOFSTRING && lex>BOFSTRING-MAXNOFSTRING ) || lex == STRING); }
 inline int lexem::isrealstring()  { return(lex<=BOFSTRING && lex>BOFSTRING-MAXNOFSTRING); }

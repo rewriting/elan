@@ -37,7 +37,7 @@ extern int handlestrategydefinition(lstream *f);
 extern struct sgrammrule *dollar_vartab[MAXNOFVAR];
 // copie de vartab pour les regles de variable avec un dollar
 
- int profistck[MAXPROFISTCK];           // stack of profiles
+ std::vector<int> profistck;           // stack of profiles (grows on demand)
  int profistcki =       -1;             // top-pointer to the profistck
  lexem actlvtab[MAXNOFVAR];             // for variables in labels
  int actlvtabi = 0;                     // pointer to actlvtab
@@ -61,13 +61,13 @@ extern struct sgrammrule *dollar_vartab[MAXNOFVAR];
  struct RPair *fsymrules = NULL;        // list of rule indexes (r1,r2)
 
 int spairi = 0;
-struct Spair spair[MAXSPAIR];
+std::vector<struct Spair> spair;
 
 int Gtypestack[MAXGTYPESTACK];
 int Gtypestacki = 0;
 
 int    inlinecodesi = 0;
-struct INLINES inlinecodes[MAXSPAIR];
+std::vector<struct INLINES> inlinecodes;
 int    ninlines = 0;
 
 int is_def_str(int from, int to)
@@ -109,14 +109,11 @@ int add_strat_nont(int pos1,int pos2)
   for(i = 0; i < spairi; i++)
     if (spair[i].from == pos1 && spair[i].to == pos2) break;
   if (i >= spairi) {
-    if (spairi+1 >= MAXSPAIR) {
-      sterr << "\n[semact] SPAIR overflow\n"; failexit(); }
-    else {
-      spair[spairi].from = pos1;
-      spair[spairi].to = pos2;
-      spair[spairi].stratsort = r; 
-      spairi++;
-    }
+    if (spairi >= (int)spair.size()) spair.resize(spairi + 1);
+    spair[spairi].from = pos1;
+    spair[spairi].to = pos2;
+    spair[spairi].stratsort = r; 
+    spairi++;
   }
   return r;
 }
@@ -125,8 +122,7 @@ int add_strat_nont(int pos1,int pos2)
 void push_profistck(int p)
 {
    profistcki++;
-   if (profistcki >= MAXPROFISTCK) {
-     sterr << "[profiles] int.err.\n"; failexit(); }
+   if (profistcki >= (int)profistck.size()) profistck.resize(profistcki + 1);
    profistck[profistcki] = p;
  }
 
@@ -210,28 +206,28 @@ int handlestrategybody(lstream *f)
   reslex.crtypelex(actruletypeindex);
 
   // right1 => Y
-  grstack[stacki].addsymbol(reslex); le.crtypelex(RIGHTSTYPE);
-  rightsrule1=grstack[stacki].addrule(le,RNOPRIOR,RNOINFO,STRATCONSTRULE);
+  modframes[stacki].gr.addsymbol(reslex); le.crtypelex(RIGHTSTYPE);
+  rightsrule1=modframes[stacki].gr.addrule(le,RNOPRIOR,RNOINFO,STRATCONSTRULE);
   // rule1 => right1 =>right1
-  le.crtypelex(RIGHTSTYPE); grstack[stacki].addsymbol(le);
-  le.crcharlex('='); grstack[stacki].addsymbol(le);
-  le.crcharlex('>'); grstack[stacki].addsymbol(le);
-  le.crtypelex(RIGHTSTYPE); grstack[stacki].addsymbol(le);
+  le.crtypelex(RIGHTSTYPE); modframes[stacki].gr.addsymbol(le);
+  le.crcharlex('='); modframes[stacki].gr.addsymbol(le);
+  le.crcharlex('>'); modframes[stacki].gr.addsymbol(le);
+  le.crtypelex(RIGHTSTYPE); modframes[stacki].gr.addsymbol(le);
     le.crtypelex(STARTTYPE); 
-  mainrule1=grstack[stacki].addrule(le,RNOPRIOR,RNOINFO,RULECONSTRULE); 
+  mainrule1=modframes[stacki].gr.addrule(le,RNOPRIOR,RNOINFO,RULECONSTRULE); 
 
   // right2 => <X->Y>
-  grstack[stacki].addsymbol(applex); le.crtypelex(STRATTYPE);
-  rightsrule2=grstack[stacki].addrule(le,RNOPRIOR,RNOINFO,RIGHTSRULE);
+  modframes[stacki].gr.addsymbol(applex); le.crtypelex(STRATTYPE);
+  rightsrule2=modframes[stacki].gr.addrule(le,RNOPRIOR,RNOINFO,RIGHTSRULE);
   // rule2 => right2 =>right2
-  le.crtypelex(STRATTYPE); grstack[stacki].addsymbol(le);
-  le.crcharlex(']'); grstack[stacki].addsymbol(le);
-  le.crtypelex(STRATTYPE); grstack[stacki].addsymbol(le);
+  le.crtypelex(STRATTYPE); modframes[stacki].gr.addsymbol(le);
+  le.crcharlex(']'); modframes[stacki].gr.addsymbol(le);
+  le.crtypelex(STRATTYPE); modframes[stacki].gr.addsymbol(le);
     le.crtypelex(STARTTYPE); 
-  mainrule2=grstack[stacki].addrule(le,RNOPRIOR,RNOINFO,RULECONSTRULE);
+  mainrule2=modframes[stacki].gr.addrule(le,RNOPRIOR,RNOINFO,RULECONSTRULE);
 
   esemactinit();
-  resan = grstack[stacki].earleycall(f,le,endofin);
+  resan = modframes[stacki].gr.earleycall(f,le,endofin);
   if (! resan) return(resan);
 
 ///...ADDING
@@ -280,10 +276,10 @@ int handlestrategybody(lstream *f)
   //stout << "##4 ##"; acttrrulelab->dump(0); stout << "\n";
   dstr_rs = rs;
   }
-  grstack[stacki].deleterule(mainrule1);
-  grstack[stacki].deleterule(rightsrule1); 
-  grstack[stacki].deleterule(mainrule2);
-  grstack[stacki].deleterule(rightsrule2);
+  modframes[stacki].gr.deleterule(mainrule1);
+  modframes[stacki].gr.deleterule(rightsrule1); 
+  modframes[stacki].gr.deleterule(mainrule2);
+  modframes[stacki].gr.deleterule(rightsrule2);
   return(resan);
 }
 
@@ -312,7 +308,7 @@ int semact3(int n,lexem l,lstream *f)
        if (profi_lev == 1 /*arg type*/) {
          actprofis++;
          le.crtypelex(pos);
-         grstack[stacki].addnont(le);
+         modframes[stacki].gr.addnont(le);
        } else {
          actleftside.crtypelex(pos);
          if (actarity!=actprofis) {
@@ -336,7 +332,7 @@ int semact3(int n,lexem l,lstream *f)
      if (profi_level <= 1 /*only topmost level*/) {
        if (profi_lev == 1 /*arg type*/) {
          actprofis++;
-         grstack[stacki].addnont(le);
+         modframes[stacki].gr.addnont(le);
        } else {
          actleftside = le;
        }
@@ -372,14 +368,14 @@ int semact3(int n,lexem l,lstream *f)
     acttrrulelab = NULL; acttrrule = NULL;
 
     stratindex = strattype; 
-    pos = grstack[stacki].lookbuiltincode(actruletypeindex_l, actruletypeindex, le, &infos);
+    pos = modframes[stacki].gr.lookbuiltincode(actruletypeindex_l, actruletypeindex, le, &infos);
     rinfos = infos;
     if (pos > 0) { term ls, rs, resvar, *rlab;
       lexem applex, selflex, reslex;
       char *strnam;             
       apli = apply_code(actruletypeindex_l,actruletypeindex);
       if (apli != -1) { // the module strat[x,y] has been used
-	// grstack[stacki].add_apply_code(actruletypeindex_l,actruletypeindex);
+	// modframes[stacki].gr.add_apply_code(actruletypeindex_l,actruletypeindex);
         // add_stratmoduli(actruletypeindex_l,actruletypeindex);
 	// apli = apply_code(actruletypeindex_l,actruletypeindex); }
         applex.crtypelex(add_strat_nont(actruletypeindex_l,actruletypeindex));
@@ -466,9 +462,9 @@ int semact3(int n,lexem l,lstream *f)
        return(ERRORIM);
      }
      lle.cridlex("self"); actvtab[actvtabi] = lle;
-     vartab[actvtabi]=grstack[stacki].addvarrule(actruletype_l,// self : s
+     vartab[actvtabi]=modframes[stacki].gr.addvarrule(actruletype_l,// self : s
                       actvtab[actvtabi],VARSPRI,RVAR,-actvtabi-1);
-     dollar_vartab[vartabi]=grstack[stacki].adddollarvarrule(actruletype_l,
+     dollar_vartab[vartabi]=modframes[stacki].gr.adddollarvarrule(actruletype_l,
 			    actvtab[vartabi],VARSPRI,RVAR,-vartabi-1);
      actvtabi++;
     vartabi++;
@@ -484,7 +480,7 @@ int semact3(int n,lexem l,lstream *f)
  case 353:                                     // processing of new where
    { int resan,strx,stry;
    /*char *strnam;*/
-   resan = grstack[stacki].earleycall(f,actwheretype,endofin);
+   resan = modframes[stacki].gr.earleycall(f,actwheretype,endofin);
    if (! resan) return(HANDERRORIM);
    ter1.popt();
    // S2: strx/stry were used uninitialised when ter1 is not an applied code
@@ -510,7 +506,7 @@ int semact3(int n,lexem l,lstream *f)
  case 360:                                      // begin of strategy
                                                 //  strategy :: RWstrategy
 //  KKKK
-   rinfos=RLOCOOP;importrinfos[stacki] = RLOCOOP;
+   rinfos=RLOCOOP;modframes[stacki].importrinfos = RLOCOOP;
    in_strategies = 1;
    create_nested();
 //   listofrules = NULL;
@@ -569,9 +565,9 @@ int semact3(int n,lexem l,lstream *f)
        return(ERRORIM);
      }
      lle.cridlex("self"); actvtab[actvtabi] = lle;
-     vartab[actvtabi]=grstack[stacki].addvarrule(actruletype_l,// self : s
+     vartab[actvtabi]=modframes[stacki].gr.addvarrule(actruletype_l,// self : s
                       actvtab[actvtabi],VARSPRI,RVAR,-actvtabi-1);
-     dollar_vartab[vartabi]=grstack[stacki].adddollarvarrule(actruletype_l,
+     dollar_vartab[vartabi]=modframes[stacki].gr.adddollarvarrule(actruletype_l,
 			    actvtab[vartabi],VARSPRI,RVAR,-vartabi-1);
      actvtabi++;
     vartabi++;
@@ -707,16 +703,16 @@ struct sgrammrule *add_fsymrule(struct sgrammrule *gr1,struct sgrammrule *gr2,
         ari++;
 //      stout << "<" << rs1->typeval() << "," << rs2->typeval() << ">";
       lle.crtypelex(add_strat_nont(rs1->typeval(),rs2->typeval()));
-      grstack[stacki].addsymbol(lle); }
+      modframes[stacki].gr.addsymbol(lle); }
     else
-	grstack[stacki].addsymbol(*rs1); 
+	modframes[stacki].gr.addsymbol(*rs1); 
     rs1++; rs2++;
   }
 //  stout << " => " << 
 //       "<" << gr1->leftside.typeval()<<","<< gr2->leftside.typeval() << ">";
   lle.crtypelex(
       add_strat_nont(gr1->leftside.typeval(),gr2->leftside.typeval()));
-  gr=grstack[stacki].addrule(lle,
+  gr=modframes[stacki].gr.addrule(lle,
 			     gr1->priority+DELTA_PRIOR,rinfos,
 			     /////////rulepri+DELTA_PRIOR | finfos2,rinfos,
 			     actcode);
@@ -820,18 +816,18 @@ int handlestrategydefinition(lstream *f)
   reslex.crtypelex(actruletypeindex);
 
   // right2 => <X->Y>
-  grstack[stacki].addsymbol(applex); le.crtypelex(STRATTYPE);
-  rightsrule2=grstack[stacki].addrule(le,RNOPRIOR,RNOINFO,RIGHTSRULE);
+  modframes[stacki].gr.addsymbol(applex); le.crtypelex(STRATTYPE);
+  rightsrule2=modframes[stacki].gr.addrule(le,RNOPRIOR,RNOINFO,RIGHTSRULE);
   // rule2 => right2 =>right2
-  le.crtypelex(STRATTYPE); grstack[stacki].addsymbol(le);
-  le.crcharlex('='); grstack[stacki].addsymbol(le);
-  le.crcharlex('>'); grstack[stacki].addsymbol(le);
-  le.crtypelex(STRATTYPE); grstack[stacki].addsymbol(le);
+  le.crtypelex(STRATTYPE); modframes[stacki].gr.addsymbol(le);
+  le.crcharlex('='); modframes[stacki].gr.addsymbol(le);
+  le.crcharlex('>'); modframes[stacki].gr.addsymbol(le);
+  le.crtypelex(STRATTYPE); modframes[stacki].gr.addsymbol(le);
   le.crtypelex(STARTTYPE); 
-  mainrule2=grstack[stacki].addrule(le,RNOPRIOR,RNOINFO,RULECONSTRULE);
+  mainrule2=modframes[stacki].gr.addrule(le,RNOPRIOR,RNOINFO,RULECONSTRULE);
 
   esemactinit();
-  resan = grstack[stacki].earleycall(f,le,endofin);
+  resan = modframes[stacki].gr.earleycall(f,le,endofin);
   if (! resan) return(resan);
 
 ///...ADDING
@@ -876,8 +872,8 @@ int handlestrategydefinition(lstream *f)
   */
   dstr_rs = rs;
 
-  grstack[stacki].deleterule(mainrule2);
-  grstack[stacki].deleterule(rightsrule2);
+  modframes[stacki].gr.deleterule(mainrule2);
+  modframes[stacki].gr.deleterule(rightsrule2);
   return(resan);
 }
 

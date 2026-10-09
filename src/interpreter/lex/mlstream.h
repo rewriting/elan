@@ -34,6 +34,7 @@
 #include "constants.h"
 #include "mitab.h"
 #include "lstream.h"
+#include <deque>
 
 #define SIMITERACTION 0
 #define INCRITERACTION 1
@@ -75,7 +76,11 @@ private:
       } iditer;
     } actdata;
     lbuffer actionbuf;
-  } macactstack[MAXNESTMAC];		// stack of actions to prepend
+  };
+  // stack of actions to prepend: macactstack[0..macactstacki-1] are in use;
+  // it grows on demand (MAXNESTMAC = 10 until S3b), a std::deque keeps the
+  // existing elements in place when it grows
+  std::deque<macactelem> macactstack;
   int macactstacki;
 
 /*

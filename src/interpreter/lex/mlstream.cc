@@ -205,13 +205,7 @@ void mlstream::deletemac(int name)		// in reversed order
 
 void mlstream::addactionprelim()
 {
-  if (macactstacki>=MAXNESTMAC) {
-//actionstackdump();
-     oerr();
-     sterr << "too much nested macro construction, more than MAXNESTMAC="
-           << MAXNESTMAC << " sorry, FATAL\n";
-     failexit();
-  }
+  if (macactstacki >= (int)macactstack.size()) macactstack.emplace_back();
 }
 
 void mlstream::addsimplecopy(lbuffer &b)

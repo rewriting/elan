@@ -34,6 +34,9 @@
 #ifndef __strategy_h
 #define __strategy_h
 
+#include <deque>
+#include <vector>
+
 struct nvlist {
   int i;
   lexem ruletype;
@@ -69,7 +72,6 @@ extern struct ilist *symbappl[];
 //#define aux_fsym(code)        ((code-FSYMTABSIZE) / AUXRULES)
 
 #define NOPROFIL              -9999           // bottom of the stack
-#define MAXPROFISTCK          1000
 #define MAXCODE               10000           // >= MAXCODE - codes of strats
 #define START_RULE            "START_RULE"    // MAIN STRATEGY & RULE
 #define START_STRATEGY        "START_STRATEGY"// MAIN STRATEGY & RULE
@@ -127,16 +129,27 @@ extern struct selector selectors[];
 extern int actvtabi,vartabi;                    // numbers of variables (two values differ during parsing variable declarations
 extern int big;						//			 for the same type)
 extern term lside,rside,condition;              // left hand side, right hand side and the condition of the CP RW rule
-extern const char *actmodname[MAXINCLDEEP];           // stack of the names of CP modules 
-extern char *actfilemodname[MAXINCLDEEP];       // stack of the files where the CP modules are placed
-//extern int newmodule[MAXINCLDEEP];
-extern grammar grstack[MAXINCLDEEP];            // stack of the grammars of CP modules
-extern int stacki;                              // index to modules stacks
-extern int importrinfos[MAXINCLDEEP];           // kind (GLOBAL/LOCAL) of the CP import of a module
-extern strategy *strstack[MAXINCLSTRAT];        // stack used while parsing nested strategies (REPEAT,ITERATE)
+// One frame per module being read: an import reads the imported module one
+// level deeper (stacki+1). The frames of a level are reused by the next
+// module read at that level. The stack grows on demand (imports of any
+// depth; MAXINCLDEEP = 30 until S3b); a std::deque keeps the existing frames
+// in place when it grows, but code holds indices (stacki), not references.
+struct ModuleFrame {
+  const char *modname = nullptr;                // name of the CP module
+  char *filemodname = nullptr;                  // file where the CP module is placed
+  grammar gr;                                   // grammar of the CP module
+  int importrinfos = 0;                         // kind (GLOBAL/LOCAL) of the CP import of the module
+};
+extern std::deque<ModuleFrame> modframes;       // modframes[0..stacki]: the modules being read
+extern int stacki;                              // index to modframes
+extern void grow_modframes(int level);          // makes modframes[level] exist
+extern std::vector<strategy *> strstack;        // stack used while parsing nested strategies (REPEAT,ITERATE)
 extern int strstacki;                         // index to strstack
-extern struct strlist *strlstack[MAXINCLSTRAT]; // stack used while parsing nested list of strategies (DONT CARE/KNOW CHOOSE)
+extern std::vector<struct strlist *> strlstack; // stack used while parsing nested list of strategies (DONT CARE/KNOW CHOOSE)
 extern int strlstacki;                        // index to strlstack
+// the two stacks above grow on demand (MAXINCLSTRAT = 30 until S3b)
+extern void grow_strstack(int n);               // makes strstack[0..n-1] exist
+extern void grow_strlstack(int n);              // makes strlstack[0..n-1] exist
 extern term ter1, ter2;                         // a temporary term variable
 extern const char *acttrrulename;                     // the name of the CP RW rule
 extern transrule *acttrrule;                    // the CP RW rule
@@ -159,7 +172,7 @@ extern int pretydumpsitset(lstream *f,stringtab *types); // pretty dump of earle
 
 
 
-extern int profistck[MAXPROFISTCK];           // stack of profiles
+extern std::vector<int> profistck;           // stack of profiles (grows on demand)
 extern int profistcki;             // top-pointer to the profistck
 extern int in_strat_def;          // true iff parsing str body
 extern int in_strat_module;           // true if parse strat.eln
@@ -203,10 +216,9 @@ class profitab
 
 extern class profitab profit;                        // table of profiles
 
-#define MAXSPAIR    1000
 extern  int spairi;
 struct  Spair { int from; int to; int stratsort; };  // cannot be move to inlinecodesi
-extern struct Spair spair[];                     // pairs [x,y] if strat[x,y]
+extern std::vector<struct Spair> spair;          // pairs [x,y] if strat[x,y] (grows on demand)
 
 struct selector {
          int type;
@@ -239,7 +251,7 @@ struct INLINES {
   return -1; \
 }
 
-extern struct INLINES inlinecodes[];       
+extern std::vector<struct INLINES> inlinecodes; // grows on demand (MAXSPAIR = 1000 until S3b)
 extern int ninlines;
 extern int is_inlin(int cde);
 extern int is_inlineplus(int cde);

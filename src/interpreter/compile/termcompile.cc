@@ -30,6 +30,10 @@
 #include "module.h"
 #include "compiledefs.h"
 
+// Base of the sharing score of searchbestshare: the former term depth
+// limit MAXTERMDEEP (20000), kept so that the generated code is unchanged.
+#define SHAREDEEPBASE 20000
+
 #define ISSHARED(lt,rt) \
   (rt.t->compif.rs.sharetype != NOSHARE && \
    rt.t->compif.rs.sharedterm == lt.t\
@@ -298,7 +302,7 @@ void term::searchbestshare(term r)
 		if (r.t->compif.rs.sharetype == PERFSHARE) return; 
                 if (b && (a >= b) && ISCONSTRUCTOR(r.t->fsymi) &&
 		    r.t->compif.rs.sharetype==NOSHARE) { // possible share
-		  fl = MAXTERMDEEP - bestsharedeep;
+		  fl = SHAREDEEPBASE - bestsharedeep;
 		  if (t->fsymi == r.t->fsymi) fl++;
 		  for(i=0;i<b;i++) {
 		    rt = r.t->subt[i]; tt = t->subt[i];

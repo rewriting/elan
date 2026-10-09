@@ -67,16 +67,27 @@ extern lexem Sif,Swhere,Send,Sstart;            // some usefull reserved words
  int actvtabi,vartabi;                    // numbers of variables (two values differ during parsing variable declarations
 						//			 for the same type)
  term lside,rside,condition;              // left hand side, right hand side and the condition of the CP RW rule
- const char *actmodname[MAXINCLDEEP];           // stack of the names of CP modules 
- char *actfilemodname[MAXINCLDEEP];       // stack of the files where the CP modules are placed
-// int newmodule[MAXINCLDEEP];
- grammar grstack[MAXINCLDEEP];            // stack of the grammars of CP modules
- int stacki = 0;                              // index to modules stacks
- int importrinfos[MAXINCLDEEP];           // kind (GLOBAL/LOCAL) of the CP import of a module
- strategy *strstack[MAXINCLSTRAT];        // stack used while parsing nested strategies (REPEAT,ITERATE)
+ std::deque<ModuleFrame> modframes(1);   // stack of the CP modules being read (strategy.h)
+ int stacki = 0;                              // index to modframes
+ std::vector<strategy *> strstack(2);     // stack used while parsing nested strategies (REPEAT,ITERATE)
  int strstacki=0;                         // index to strstack
- struct strlist *strlstack[MAXINCLSTRAT]; // stack used while parsing nested list of strategies (DONT CARE/KNOW CHOOSE)
+ std::vector<struct strlist *> strlstack; // stack used while parsing nested list of strategies (DONT CARE/KNOW CHOOSE)
  int strlstacki=0;                        // index to strlstack
+
+void grow_modframes(int level)
+{
+  while ((int)modframes.size() <= level) modframes.emplace_back();
+}
+
+void grow_strstack(int n)
+{
+  if ((int)strstack.size() < n) strstack.resize(n, NULL);
+}
+
+void grow_strlstack(int n)
+{
+  if ((int)strlstack.size() < n) strlstack.resize(n, NULL);
+}
  term ter1;                               // a temporary term variable
  term ter2;                               // a temporary term variable
  const char *acttrrulename;                     // the name of the CP RW rule
@@ -383,12 +394,12 @@ void mkmodname5(struct chlist *&actimp) // <X->Y>
 }
 
 grammar *actgram()
-{ return(& grstack[stacki]);
+{ return(& modframes[stacki].gr);
 }
 
 void setmodname(const char *s, char *ss)
 {
-  actmodname[stacki]=s; actfilemodname[stacki] = ss;
+  modframes[stacki].modname=s; modframes[stacki].filemodname = ss;
 }
 
 void addstandards(grammar &gr)
@@ -474,8 +485,8 @@ void crStandModules()
 { grammar *g;
   NNEW(g ,grammar);
   addstandards(*g);
-  g->addgrammar(grstack[stacki],RLOCOOP,RGLOP);
-  g->addgrammar(grstack[stacki],RLOCOOP|RIMPORTBIT,RGLOP);
+  g->addgrammar(modframes[stacki].gr,RLOCOOP,RGLOP);
+  g->addgrammar(modframes[stacki].gr,RLOCOOP|RIMPORTBIT,RGLOP);
   actstrategy->setprocgr(g);
 }
 
@@ -509,7 +520,7 @@ int sem_action_137(lstream *f,lexem l)
 
 int sem_action_138(lstream *f)
 { int resan;
-  resan = grstack[stacki].earleycall(f,actwheretype,endofin);
+  resan = modframes[stacki].gr.earleycall(f,actwheretype,endofin);
   if (! resan) return(HANDERRORIM);
   ter1.popt();
   if (acttrrule) { // elan rule
@@ -529,7 +540,7 @@ int sem_action_139(lstream *f)
 { int resan;
   term cond;
   term cond1;
-  resan = grstack[stacki].earleycall(f,booltype,endofin);
+  resan = modframes[stacki].gr.earleycall(f,booltype,endofin);
   if (! resan) return(HANDERRORIM);
   cond.popt();
   if (acttrrule) {
@@ -552,43 +563,43 @@ int get_pattern_where(lstream *f,  int pattyp, int wtype, int (*fin)(lexem) )
 
   strIdentVal = 0; strategywasapplied = 0;
   //--- where (type)pattern:=()term
-  if (pattyp) { le.crtypelex(pattyp); grstack[stacki].addsymbol(le);}
-  le.crcharlex(':'); grstack[stacki].addsymbol(le);
-  le.crcharlex('='); grstack[stacki].addsymbol(le);
-  le.crcharlex('('); grstack[stacki].addsymbol(le);  // pour l'instant
-  le.crcharlex(')'); grstack[stacki].addsymbol(le);
-  le.crtypelex(wtype); grstack[stacki].addsymbol(le);
+  if (pattyp) { le.crtypelex(pattyp); modframes[stacki].gr.addsymbol(le);}
+  le.crcharlex(':'); modframes[stacki].gr.addsymbol(le);
+  le.crcharlex('='); modframes[stacki].gr.addsymbol(le);
+  le.crcharlex('('); modframes[stacki].gr.addsymbol(le);  // pour l'instant
+  le.crcharlex(')'); modframes[stacki].gr.addsymbol(le);
+  le.crtypelex(wtype); modframes[stacki].gr.addsymbol(le);
   le.crtypelex(STARTTYPE); 
-  mainrule1=grstack[stacki].addrule(le,RNOPRIOR,RNOINFO,RIGHTSRULE);
+  mainrule1=modframes[stacki].gr.addrule(le,RNOPRIOR,RNOINFO,RIGHTSRULE);
 
   //--- where (type)pattern:=(sss)term
-  if (pattyp) { le.crtypelex(pattyp); grstack[stacki].addsymbol(le);}
-  le.crcharlex(':'); grstack[stacki].addsymbol(le);
-  le.crcharlex('='); grstack[stacki].addsymbol(le);
-  le.crcharlex('('); grstack[stacki].addsymbol(le);  
-                     grstack[stacki].addsymbol(internIdentType);  
-  le.crcharlex(')'); grstack[stacki].addsymbol(le);
-  le.crtypelex(wtype); grstack[stacki].addsymbol(le);
+  if (pattyp) { le.crtypelex(pattyp); modframes[stacki].gr.addsymbol(le);}
+  le.crcharlex(':'); modframes[stacki].gr.addsymbol(le);
+  le.crcharlex('='); modframes[stacki].gr.addsymbol(le);
+  le.crcharlex('('); modframes[stacki].gr.addsymbol(le);  
+                     modframes[stacki].gr.addsymbol(internIdentType);  
+  le.crcharlex(')'); modframes[stacki].gr.addsymbol(le);
+  le.crtypelex(wtype); modframes[stacki].gr.addsymbol(le);
   le.crtypelex(STARTTYPE); 
-  mainrule2=grstack[stacki].addrule(le,RNOPRIOR,RNOINFO,RIGHTSRULE);
+  mainrule2=modframes[stacki].gr.addrule(le,RNOPRIOR,RNOINFO,RIGHTSRULE);
 
   //--- where (type)pattern:=[SSS]term
-  if (pattyp) { le.crtypelex(pattyp); grstack[stacki].addsymbol(le);}
-  le.crcharlex(':'); grstack[stacki].addsymbol(le);
-  le.crcharlex('='); grstack[stacki].addsymbol(le);
-  le.crcharlex('['); grstack[stacki].addsymbol(le);  
-  le.crtypelex(wtype); grstack[stacki].addsymbol(le);
+  if (pattyp) { le.crtypelex(pattyp); modframes[stacki].gr.addsymbol(le);}
+  le.crcharlex(':'); modframes[stacki].gr.addsymbol(le);
+  le.crcharlex('='); modframes[stacki].gr.addsymbol(le);
+  le.crcharlex('['); modframes[stacki].gr.addsymbol(le);  
+  le.crtypelex(wtype); modframes[stacki].gr.addsymbol(le);
   le.crtypelex(STARTTYPE); 
-  mainrule3=grstack[stacki].addrule(le,RNOPRIOR,RNOINFO,STRATCONSTRULE);
+  mainrule3=modframes[stacki].gr.addrule(le,RNOPRIOR,RNOINFO,STRATCONSTRULE);
 
   le.crtypelex(STARTTYPE); 
 // CSBug  esemactinit();
-  resan = grstack[stacki].earleycall(f,le,fin);
+  resan = modframes[stacki].gr.earleycall(f,le,fin);
   if (! resan) return(resan);
 
-  grstack[stacki].deleterule(mainrule1);
-  grstack[stacki].deleterule(mainrule2);
-  grstack[stacki].deleterule(mainrule3);
+  modframes[stacki].gr.deleterule(mainrule1);
+  modframes[stacki].gr.deleterule(mainrule2);
+  modframes[stacki].gr.deleterule(mainrule3);
 
   return resan;
 }
@@ -612,7 +623,7 @@ term noterm; noterm.stinit();
      if (le == Sif) {
        f->ilex(le);
 //CSBug       esemactinit(); 
-       resan = grstack[stacki].earleycall(f,booltype,endofinco);
+       resan = modframes[stacki].gr.earleycall(f,booltype,endofinco);
        if (! resan) { f->owarn("[fatal] error in parse_seq \n",NULL); 
                       failexit(); }
        p->leftvarn = IFVARN; p->strateg = NULL;
@@ -692,7 +703,7 @@ struct tseq *ts;
      ts->is_case = 0;
      NNEW(ts->u.one_branch.result, term);
 //CSBug     esemactinit();
-     resan=grstack[stacki].earleycall(f,actruletype,endofinco);
+     resan=modframes[stacki].gr.earleycall(f,actruletype,endofinco);
      if (! resan) { 
        f->owarn(" [fatal] error in parse_tseq\n",NULL); failexit(); }
      ts->u.one_branch.result->popt();
@@ -807,26 +818,26 @@ int handlerulebody(lstream *f)
   struct sgrammrule *mainrule,*mainrule1,*rightsrule;
   int resan;
 // RIGHTSTYPE ---------
-  grstack[stacki].addsymbol(actruletype);
+  modframes[stacki].gr.addsymbol(actruletype);
   le.crtypelex(RIGHTSTYPE);
-  rightsrule=grstack[stacki].addrule(le,RNOPRIOR,RNOINFO,RIGHTSRULE);
+  rightsrule=modframes[stacki].gr.addrule(le,RNOPRIOR,RNOINFO,RIGHTSRULE);
 // RULECONSTRULE I -------
-  grstack[stacki].addsymbol(actruletype_l);
-  le.crcharlex('='); grstack[stacki].addsymbol(le);
-  le.crcharlex('>'); grstack[stacki].addsymbol(le);
-  le.crtypelex(RIGHTSTYPE); grstack[stacki].addnont(le);
+  modframes[stacki].gr.addsymbol(actruletype_l);
+  le.crcharlex('='); modframes[stacki].gr.addsymbol(le);
+  le.crcharlex('>'); modframes[stacki].gr.addsymbol(le);
+  le.crtypelex(RIGHTSTYPE); modframes[stacki].gr.addnont(le);
   le.crtypelex(STARTTYPE); 
-  mainrule=grstack[stacki].addrule(le,RNOPRIOR,RNOINFO,RULECONSTRULE);
+  mainrule=modframes[stacki].gr.addrule(le,RNOPRIOR,RNOINFO,RULECONSTRULE);
 // RULECONSTRULE II -------
-  grstack[stacki].addsymbol(actruletype_l);
-  le.crcharlex('='); grstack[stacki].addsymbol(le);
-  le.crcharlex('>'); grstack[stacki].addsymbol(le);
+  modframes[stacki].gr.addsymbol(actruletype_l);
+  le.crcharlex('='); modframes[stacki].gr.addsymbol(le);
+  le.crcharlex('>'); modframes[stacki].gr.addsymbol(le);
   le.crtypelex(STARTTYPE); 
-  mainrule1=grstack[stacki].addrule(le,RNOPRIOR,RNOINFO,RULECONSTRULE1);
+  mainrule1=modframes[stacki].gr.addrule(le,RNOPRIOR,RNOINFO,RULECONSTRULE1);
 // PARSE --------
   le.crtypelex(STARTTYPE); 
   esemactinit();
-  resan = grstack[stacki].earleycall(f,le,
+  resan = modframes[stacki].gr.earleycall(f,le,
 				     endofinco
 				     );
   if (! resan) return(resan);
@@ -838,9 +849,9 @@ int handlerulebody(lstream *f)
       f->owarn(" [fatal] end expected after switch\n",NULL); failexit(); }
    }
 //--------------------------
-  grstack[stacki].deleterule(mainrule1);
-  grstack[stacki].deleterule(mainrule);
-  grstack[stacki].deleterule(rightsrule);
+  modframes[stacki].gr.deleterule(mainrule1);
+  modframes[stacki].gr.deleterule(mainrule);
+  modframes[stacki].gr.deleterule(rightsrule);
   return(resan);
 }
 
@@ -976,9 +987,6 @@ int impmod, in_stratmod;
    }
    modsou = addsuffix(actargmodname,".eln");
    mlstream ff(modsou); ///mlstream/lstream <=> with/without preprocessor !!!!!
-   if (stacki >= MAXINCLDEEP) {
-     f->owarn("includes are deepest then MAXINCLDEEP =",NULL);
-     failexit(); }
    setmodname(name,actargmodname);
    if (!msyntan(ff,0,lextomodlex)) failexit();
    CFRE(modsou);
@@ -992,10 +1000,10 @@ int impmod, in_stratmod;
    impmoduli = impmod; in_stratmoduli = in_stratmod;
    NNEW(importglobgr[import.posid] ,grammar);
 
-   importglobgr[import.posid]->addgrammar(grstack[stacki],RGLOP|RIMPORTBIT,RGLOP);
-   importglobgr[import.posid]->addgrammar(grstack[stacki],RGLOP,RGLOP);
+   importglobgr[import.posid]->addgrammar(modframes[stacki].gr,RGLOP|RIMPORTBIT,RGLOP);
+   importglobgr[import.posid]->addgrammar(modframes[stacki].gr,RGLOP,RGLOP);
 
-   grstack[stacki].freetopl();
+   modframes[stacki].gr.freetopl();
 
    conform_strategies(1); 
    trrules.assign_all_refs(1); // WWW = 0
@@ -1003,7 +1011,7 @@ int impmod, in_stratmod;
 
 void importmod(char *impmodule,lstream *f, int supermodule)
 {
-  importmod_inf( impmodule, f, supermodule,  importrinfos[stacki]);
+  importmod_inf( impmodule, f, supermodule,  modframes[stacki].importrinfos);
 }
 
 void importmod_inf(const char *impmodule,lstream *f, int supermodule, int rinf)
@@ -1011,9 +1019,10 @@ void importmod_inf(const char *impmodule,lstream *f, int supermodule, int rinf)
   int xx=0; /* initialised to avoid warning */
   if (supermodule != -1) { xx = impmoduli; impmoduli= supermodule; }
 	if (! import.member(impmodule)) {
+            grow_modframes(stacki+1);
             stacki++;
             readmodules(f,impmodule);
-            grstack[stacki].freetopl();
+            modframes[stacki].gr.freetopl();
             stacki--;
   	  } 
           import.member(impmodule);         // to set import.posid
@@ -1035,10 +1044,10 @@ void importmod_inf(const char *impmodule,lstream *f, int supermodule, int rinf)
            f->owarn("there is probably a cycle in imports of module ",
 		    impmodule,"\n",NULL);
           } else {
-            grstack[stacki].addgrammar(
+            modframes[stacki].gr.addgrammar(
 		  *importglobgr[import.posid],RGLOP,
 		  rinf|RIMPORTBIT); 
-	  // grstack[stacki].dump();
+	  // modframes[stacki].gr.dump();
 	    if (is_explimpl) {
 	      char mname[STRLEN];
 	      is_explimpl = 0;
@@ -1325,16 +1334,16 @@ int semact1(int n,lexem l,lstream *f)
   int rrr;
   switch (n) {
   case 0:                                    // begin of semactions
-	import.member(actmodname[stacki]);
+	import.member(modframes[stacki].modname);
         init_visi(import.posid);
   	if (! batch) {
 	  //---------
 	  odsek(graphout,stacki<<1);
-	  graphout << "handling module "<< actmodname[stacki];
+	  graphout << "handling module "<< modframes[stacki].modname;
 	  graphout << "\n"; 
 	  graphout.flush();
 	}
-      addstandards(grstack[stacki]);
+      addstandards(modframes[stacki].gr);
       rulepri=0; finfos=FSNOINFO; finfos2 = RNOPRIOR; actarity=0; actprofis=0;
       actsemantic=0;
       actcode=fsymtabi; actvtabi=vartabi=0; nestedvartabi = NULL;
@@ -1349,7 +1358,7 @@ int semact1(int n,lexem l,lstream *f)
  case 93:  case 94:  case 95:  case 96:  case 123:
   case 124:  case 125:  case 126:  case 127: // characters in 'op' 
      le.crcharlex(n);
-     grstack[stacki].addsymbol(le);
+     modframes[stacki].gr.addsymbol(le);
      break;
 
 /* from now, the actions are ordered    */
@@ -1390,7 +1399,7 @@ int semact1(int n,lexem l,lstream *f)
       int lhs_type = actleftside.typeval();
       int ii = stratsort2index(lhs_type);
 
-      gr=grstack[stacki].addrule(actleftside,rulepri | finfos2,rinfos,actcode);
+      gr=modframes[stacki].gr.addrule(actleftside,rulepri | finfos2,rinfos,actcode);
 
       //dumpgrrule(gr);
 
@@ -1425,16 +1434,16 @@ int semact1(int n,lexem l,lstream *f)
       for(j=0;j<numb_selectors;j++) {
         lexem ktype;
          // @.name 
-         grstack[stacki].addsymbol(actleftside);
-         le.crcharlex('.'); grstack[stacki].addsymbol(le);
+         modframes[stacki].gr.addsymbol(actleftside);
+         le.crcharlex('.'); modframes[stacki].gr.addsymbol(le);
          le.cridlex(typet.ide(selectors[j].name)); 
-           grstack[stacki].addsymbol(le);
+           modframes[stacki].gr.addsymbol(le);
 //       xi.crtypelex(selectors[j].type);
 
          xi.crtypelex(ith_subsort(oldfsymtabi,
                                   selectors[j].possition+1));
 
-         gr=grstack[stacki].addrule(xi,rulepri | finfos2,rinfos,actcode);
+         gr=modframes[stacki].gr.addrule(xi,rulepri | finfos2,rinfos,actcode);
 
          add_to_fsymtab(1,gr,0);
          // r.rule f(x1,...xn).pos = pos
@@ -1452,16 +1461,16 @@ int semact1(int n,lexem l,lstream *f)
                          (acsymbolinleftside?ACMATCH:NORMMATCH),rlabel,NULL);  
          //----------------------
          // @[.name<-@]
-         grstack[stacki].addsymbol(actleftside);
-         le.crcharlex('['); grstack[stacki].addsymbol(le);
-         le.crcharlex('.'); grstack[stacki].addsymbol(le);
+         modframes[stacki].gr.addsymbol(actleftside);
+         le.crcharlex('['); modframes[stacki].gr.addsymbol(le);
+         le.crcharlex('.'); modframes[stacki].gr.addsymbol(le);
          le.cridlex(typet.ide(selectors[j].name)); 
-           grstack[stacki].addsymbol(le);
-         le.crcharlex('<'); grstack[stacki].addsymbol(le);
-         le.crcharlex('-'); grstack[stacki].addsymbol(le);
-         grstack[stacki].addsymbol(xi);
-         le.crcharlex(']'); grstack[stacki].addsymbol(le);
-         gr=grstack[stacki].
+           modframes[stacki].gr.addsymbol(le);
+         le.crcharlex('<'); modframes[stacki].gr.addsymbol(le);
+         le.crcharlex('-'); modframes[stacki].gr.addsymbol(le);
+         modframes[stacki].gr.addsymbol(xi);
+         le.crcharlex(']'); modframes[stacki].gr.addsymbol(le);
+         gr=modframes[stacki].gr.
            addrule(actleftside,rulepri|finfos2,RGLOP,actcode);
          add_to_fsymtab(2,gr,0);
          // r.rule f(x1,...xn)[.pos<-val] => f...
@@ -1497,7 +1506,7 @@ int semact1(int n,lexem l,lstream *f)
         f->owarn("\n[semact] arity of alias is not compatible with the profil\n",NULL);
         return(ERRORIM);
      }
-     if ( ! grstack[stacki].addalias(actalr,actleftside)) {
+     if ( ! modframes[stacki].gr.addalias(actalr,actleftside)) {
         f->owarn("\n[semact] alias not found, non existant symbol:\n",NULL);
         writegrrule(sterr,actalr,&typet);
         return(ERRORIM);
@@ -1511,11 +1520,11 @@ int semact1(int n,lexem l,lstream *f)
      finfos2 = RNOPRIOR; wasdefinedas = 0;
      break;
   case 26:                                    // identifier in 'op'
-     grstack[stacki].addsymbol(l);
-//     grstack[stacki].addrw(l);
+     modframes[stacki].gr.addsymbol(l);
+//     modframes[stacki].gr.addrw(l);
      break;
   case 27:                                   // number in 'op'
-     grstack[stacki].addsymbol(l);
+     modframes[stacki].gr.addsymbol(l);
      break;
   case 28:case 29:                           // identifier in sort declaration
       typet.addstr(actimp->s);
@@ -1525,14 +1534,14 @@ int semact1(int n,lexem l,lstream *f)
   case 30:case 31:                           // identifier in profil
      typecheck(f,actimp->s);
      le.crtypelex(typet.addstr(actimp->s));
-     grstack[stacki].addnont(le);
+     modframes[stacki].gr.addnont(le);
      actprofis++;
      CFRE(actimp->s); CFRE(actimp); 
      actimp=NULL;
      sel_poss++;
      break;
   case 130:                                  // add one 'op' for alias
-     actalr=grstack[stacki].addrule(actleftside,rulepri|finfos2,rinfos,0);  
+     actalr=modframes[stacki].gr.addrule(actleftside,rulepri|finfos2,rinfos,0);  
      actarity=0; profistcki = -1;
      break;
   case 133:                                 // add one local variable
@@ -1561,10 +1570,10 @@ int semact1(int n,lexem l,lstream *f)
 #endif
   case 135:                                 // add variables from one declare
        for(; vartabi<actvtabi; vartabi++) {
-//          grstack[stacki].addrw(actvtab[vartabi]);
-          vartab[vartabi]= grstack[stacki].addvarrule(actvartype,
+//          modframes[stacki].gr.addrw(actvtab[vartabi]);
+          vartab[vartabi]= modframes[stacki].gr.addvarrule(actvartype,
                                  actvtab[vartabi],VARSPRI,RVAR,-vartabi-1);
-	  dollar_vartab[vartabi] = grstack[stacki].adddollarvarrule(actvartype,
+	  dollar_vartab[vartabi] = modframes[stacki].gr.adddollarvarrule(actvartype,
                                  actvtab[vartabi],VARSPRI,RVAR,-vartabi-1);
        }
        break;
@@ -1586,8 +1595,8 @@ int semact1(int n,lexem l,lstream *f)
        // remove all variable rules
        while( actvtabi > nestedvartabi->i) {
           actvtabi--;
-          grstack[stacki].deleterule(vartab[actvtabi]);
-          grstack[stacki].deleterule(dollar_vartab[actvtabi]);
+          modframes[stacki].gr.deleterule(vartab[actvtabi]);
+          modframes[stacki].gr.deleterule(dollar_vartab[actvtabi]);
          }
        actvtabi = vartabi = nestedvartabi->i;
        actruletype = nestedvartabi->ruletype;
@@ -1651,15 +1660,15 @@ int semact1(int n,lexem l,lstream *f)
   case 139:                               // if term in trrule
          return sem_action_139(f);					      
   case 140:				  // global operation def.
-        rinfos=RGLOP; importrinfos[stacki] = RGLOP;
+        rinfos=RGLOP; modframes[stacki].importrinfos = RGLOP;
 	break;
   case 141:				  // local operation def.
-        rinfos=RLOCOOP;importrinfos[stacki] = RLOCOOP;
+        rinfos=RLOCOOP;modframes[stacki].importrinfos = RLOCOOP;
 	break;
   case 150:  // RWrules
-        rinfos=RLOCOOP;importrinfos[stacki] = RLOCOOP;
+        rinfos=RLOCOOP;modframes[stacki].importrinfos = RLOCOOP;
 	in_strategies = 0;
-        //rinfos=RGLOP; importrinfos[stacki] = RGLOP;  // rules are global by default
+        //rinfos=RGLOP; modframes[stacki].importrinfos = RGLOP;  // rules are global by default
 	goto l_143;
   case 143:				  // initial declare in rbody
 	l_143:					       
@@ -1668,42 +1677,42 @@ int semact1(int n,lexem l,lstream *f)
 	break;
   case 144:				  // module was parsed,
 					  // make glob grammar
-        globtermgr.addgrammar(grstack[stacki],RGLOP,RGLOP);
-        globtermgr.addgrammar(grstack[stacki],RLOCOOP,RGLOP);
+        globtermgr.addgrammar(modframes[stacki].gr,RGLOP,RGLOP);
+        globtermgr.addgrammar(modframes[stacki].gr,RLOCOOP,RGLOP);
 	{
 	  /* char *visi; */
           /* int i;*/
-	  import.member(actmodname[stacki]);
+	  import.member(modframes[stacki].modname);
 	  /* visi = visibilities[import.posid]; */
 	  if (! batch) {
 	    odsek(graphout,stacki<<1);
-	    graphout << "end of " << actmodname[stacki];
+	    graphout << "end of " << modframes[stacki].modname;
 //	    for(i=0; i < MAXNOFIMPORTS; i++) 
 //	      if (visi[i] > 0) graphout << " G" << i;
 //	      else if (visi[i] < 0) graphout << " L" << i; 
 	    graphout << "\n";
 	  graphout.flush(); }
 	}
-	if (ignore == 0 && grstack[stacki].anysymbol_exists()) {
+	if (ignore == 0 && modframes[stacki].gr.anysymbol_exists()) {
 	  char mname[STRLEN], fname[STRLEN];
 	  is_explimpl = 1;
 	  snprintf(mname,sizeof(mname),"explimpl%d",explimpl_index);
 	  snprintf(fname,sizeof(fname),"explimpl%d.eln",explimpl_index);
 	  ignore++;
-	  grstack[stacki].any_code(mname,fname, actmodname[stacki]); 
+	  modframes[stacki].gr.any_code(mname,fname, modframes[stacki].modname); 
 	  ignore--;
 	}
-	if (grstack[stacki].symbappl_exists()) {
+	if (modframes[stacki].gr.symbappl_exists()) {
 	  char mname[STRLEN], fname[STRLEN];
 	  is_symbappl = 1;
 	  snprintf(mname,sizeof(mname),"symbappl%d",symbappl_index);
 	  snprintf(fname,sizeof(fname),"symbappl%d.eln",symbappl_index);
-	  grstack[stacki].symbappl_code(mname,fname, actmodname[stacki]); 
+	  modframes[stacki].gr.symbappl_code(mname,fname, modframes[stacki].modname); 
 	}
 	break;
   case 145:				// code handl
         actcode=l.numval();
-	  if (! builtinmodules.member(actfilemodname[stacki]))
+	  if (! builtinmodules.member(modframes[stacki].filemodname))
 	    f->owarn("[warning] using the 'code' option in user's module\n",NULL);
         break;
   case 146:                               // pattern
@@ -1718,7 +1727,7 @@ int semact1(int n,lexem l,lstream *f)
   case 148:      // code nnn
   case 149:      // code -nnn
         actsemantic=l.numval();
-	if (! builtinmodules.member(actfilemodname[stacki]))
+	if (! builtinmodules.member(modframes[stacki].filemodname))
 	  f->owarn("[warning] using the 'semantic' option in user's module\n",NULL);
 	if (n == 148) actcode = actsemantic;                       // like plus
 	else actsemantic=-actsemantic;						
@@ -1728,7 +1737,7 @@ int semact1(int n,lexem l,lstream *f)
      break;
   case 153:                                   // place for argument in 'op' 
      le.crendofstreamlex();
-     grstack[stacki].addsymbol(le);
+     modframes[stacki].gr.addsymbol(le);
      actarity++;
      break;
   case 154:                                  // name of transision rule
@@ -1753,10 +1762,10 @@ int semact1(int n,lexem l,lstream *f)
 	stratindex = strattype; 
 	goto fin1; }
       if (is_def_str(actruletypeindex_l,actruletypeindex) == -1) goto fin1;
-       le.cridlex(acttrrulename); grstack[stacki].addsymbol(le);
+       le.cridlex(acttrrulename); modframes[stacki].gr.addsymbol(le);
        lside.copy(lside1); rside.copy(rside1);
        if (actlvtabi > 0) {
-	 le.crcharlex('('); grstack[stacki].addsymbol(le);
+	 le.crcharlex('('); modframes[stacki].gr.addsymbol(le);
 	 for (i=0; i<actlvtabi; i++) {
            for(j = 0; j<actvtabi; j++)
 	     if (actvtab[j] == actlvtab[i]) break;
@@ -1768,14 +1777,14 @@ int semact1(int n,lexem l,lstream *f)
              le.crtypelex(add_strat_nont(pom,pom));     // strategy argument
 	   else 
 	     le.crtypelex(pom);                         // else ordinal
-	   grstack[stacki].addsymbol(le);
+	   modframes[stacki].gr.addsymbol(le);
 	   if (i+1 < actlvtabi) {
-	     le.crcharlex(','); grstack[stacki].addsymbol(le); }
+	     le.crcharlex(','); modframes[stacki].gr.addsymbol(le); }
 	 }
-	 le.crcharlex(')'); grstack[stacki].addsymbol(le);
+	 le.crcharlex(')'); modframes[stacki].gr.addsymbol(le);
        }
      strlex.crtypelex(add_strat_nont(actruletypeindex_l,actruletypeindex));
-     gr = grstack[stacki].addrule(strlex,RNOPRIOR,rinfos,fsymtabi);
+     gr = modframes[stacki].gr.addrule(strlex,RNOPRIOR,rinfos,fsymtabi);
 
      rname = attach_type("LAB",actruletypeindex);
      trrules.trruleindex(rname);
@@ -1891,10 +1900,7 @@ int semact1(int n,lexem l,lstream *f)
 	appactstrat();
 	break;
   case 163:				// repeat / iterate (begin)
-	if (strstacki+2 >= MAXINCLSTRAT) {
-	   f->owarn("\n[semact] strstacki overflowed over MAXINCLSTRAT\n",NULL);
-	   return(ERRORIM);
-	}
+	grow_strstack(strstacki+3);
 	strstack[strstacki+1]=strstack[strstacki+2]=NULL;
 	strstacki+=2;
 	break;
@@ -2050,9 +2056,7 @@ int semact1(int n,lexem l,lstream *f)
             ss->str->settypeof(sntype.typeval());
 	  strstack[strstacki-1]=strstack[strstacki]=NULL;
 //	  NNEW(actstrategy ,strategy);
-	  if (strlstacki+2 > MAXINCLSTRAT) {
-	    sterr << "\n[semact] strlstacki overflowed over MAXINCLSTRAT\n\t fatal\n";
-	    failexit(); }
+	  grow_strlstack(strlstacki+2);
 	  strlstack[strlstacki++] = ss;
 	  strlstack[strlstacki++] = ss;
 	}
@@ -2078,7 +2082,7 @@ int semact1(int n,lexem l,lstream *f)
         break; 
   case 182:
         le.crcharlex(symbolcode);
-        grstack[stacki].addsymbol(le);
+        modframes[stacki].gr.addsymbol(le);
         break;
   case 183:
         symbolcode = l.numval();
@@ -2112,7 +2116,7 @@ int semact1(int n,lexem l,lstream *f)
 	  lexem le;
 	  if (actarglist==NULL) {
 	     f->oerr("number of formal and actual parameters for module ",
-	     actmodname[stacki]," doesn't correspond\n",NULL);
+	     modframes[stacki].modname," doesn't correspond\n",NULL);
 	     return(HANDERRORIM);
           }
           if (int_arg(actarglist)) {
@@ -2148,7 +2152,7 @@ int semact1(int n,lexem l,lstream *f)
   case 189:
 	if (actarglist!=NULL) {
 	     f->oerr("number of actual and formal parameters for module ",NULL);
-	     f->oerr(actmodname[stacki]," doesn't correspond\n",NULL);
+	     f->oerr(modframes[stacki].modname," doesn't correspond\n",NULL);
 	     return(HANDERRORIM);
 	}
 	break;
@@ -2187,10 +2191,10 @@ int semact1(int n,lexem l,lstream *f)
 	finfos2 = RRIGHTASSOC;
 	break;
   case 201:                                 // end of imports
-	fsymtab_remakealias(&(grstack[stacki]));
+	fsymtab_remakealias(&(modframes[stacki].gr));
         break;
   case 202:                                 // default local import
-        rinfos=RLOCOOP; importrinfos[stacki] = RLOCOOP;
+        rinfos=RLOCOOP; modframes[stacki].importrinfos = RLOCOOP;
 	break;
   case 203:                                 // inline in strategy
 	actstrategy->setname(STRINLINE,impmoduli);
@@ -2219,7 +2223,7 @@ int semact1(int n,lexem l,lstream *f)
       f->owarn("\n[semact] arity of hardAlias definition is not compatible with the profil\n",NULL);
       return(ERRORIM);
     }
-    if ( ! (grstack[stacki].addhardalias(actalr,actleftside))) {
+    if ( ! (modframes[stacki].gr.addhardalias(actalr,actleftside))) {
       f->owarn("\n[semact] hardAlias was not found\n",NULL);
       return(ERRORIM);
     }
@@ -2239,21 +2243,20 @@ int semact1(int n,lexem l,lstream *f)
     actprofis=0;
     break;
   case 208:
-    grstack[stacki].combine(); // (NEW)
+    modframes[stacki].gr.combine(); // (NEW)
     if (in_stratmoduli) {
       /*int i,j;*/
-     if (inlinecodesi+1 >= MAXSPAIR) {
-       f->owarn("\n[semact] SPAIR overflow\n",NULL); exit(ERRORIM); }
+     if (inlinecodesi >= (int)inlinecodes.size()) inlinecodes.resize(inlinecodesi + 1);
      inlinecodes[inlinecodesi].from = stratmoduli_fromi; 
      inlinecodes[inlinecodesi].to   = stratmoduli_toi;
 //     inlinecodes[inlinecodesi].stratsort = add_strat_nont(stratmoduli_fromi,stratmoduli_toi);
-     grstack[stacki].lookinlinecode(stratmoduli_fromi,stratmoduli_toi);
+     modframes[stacki].gr.lookinlinecode(stratmoduli_fromi,stratmoduli_toi);
      inlinecodesi++; 
     }
     break;
   case 210:                                    // epsilon lexem
      le.crblanklex();
-     grstack[stacki].addsymbol(le);
+     modframes[stacki].gr.addsymbol(le);
     break;
   case 213:
     typecheck(f,actimp->s);

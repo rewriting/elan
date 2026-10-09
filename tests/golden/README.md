@@ -14,8 +14,10 @@ only. These tests pin, byte for byte, what it does not see:
 * the standard output, standard error and exit status of deliberate errors
   (`programs/`: syntax error, missing file or module, undefined sort or
   operator, bad query, too many variables, overflow of the tables of
-  identifiers, symbols and string constants, too many `any[X]` imports,
-  deep imports, nested strategies) and of a term deeper than the 2004 term stack.
+  identifiers, symbols and string constants, too many `any[X]` imports);
+* programs beyond the 2004 sizes of internal stacks, which grow on demand
+  since S3b: a term deeper than `MAXTERMDEEP`, imports deeper than
+  `MAXINCLDEEP`, strategies nested deeper than `MAXINCLSTRAT`.
 
 Files:
 
@@ -40,3 +42,4 @@ table below.
 |---|---|
 | all (initial set) | commit `96974dc` (S3b design), Apple Clang 17, macOS |
 | `err-too-many-any-imports` | S3b step 3 (the overflow of `anys` now fails with a message) |
+| `deep-term`, `deep-import`, `nested-strategies` | S3b step 4 (dynamic stacks: these programs now run; before, `err-deep-import` and `err-nested-strategies` failed) |

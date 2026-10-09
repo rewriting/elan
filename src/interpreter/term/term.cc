@@ -26,6 +26,7 @@
 */
 
 #include "termdefs.h"
+#include <vector>
 #include "module.h"
 #include "codes.h"
 #include "compiledefs.h"
@@ -37,7 +38,9 @@
 
 /* ------------ building term from R-derivation output -------------------*/
 
-static term tstack[MAXTERMDEEP];
+// Stack of the terms being built (grows on demand: terms of any depth;
+// MAXTERMDEEP = 20000 until S3b). tstack[0..tstacki-1] are in use.
+static std::vector<term> tstack;
 static int tstacki = 0; 
 int writewasident = 1;
 int equal_non_ground = 0;     // local hack
@@ -90,11 +93,7 @@ void term::addterm(int fsi,int inf,int count, term *st)
 
 void term::pushht(struct hterm *ht)
 {
-  if (tstacki>=MAXTERMDEEP) {
-     sterr << "[term::addterm] tstacki overflow over MAXTERMDEEP\n\t"
-	  << "internal error, sorry!!\n";
-     failexit();
-  }
+  if (tstacki >= (int)tstack.size()) tstack.resize(tstacki + 1);
   tstack[tstacki++].t= ht;
 }
 
@@ -1164,21 +1163,21 @@ char *strnam;
 
   this->stinit(); 
   snprintf(sss,sizeof(sss),"INLINE%d",++ninlines);
-  inle.cridlex(sss); grstack[stacki].addsymbol(inle);
-  le.crcharlex('('); grstack[stacki].addsymbol(le);
+  inle.cridlex(sss); modframes[stacki].gr.addsymbol(inle);
+  le.crcharlex('('); modframes[stacki].gr.addsymbol(le);
   for(i=0, arty=0; i<actvtabi; i++) {
     uu = is_affected_let(i,asses);
     if (uu > 1) {
       sterr<<"[error] variable Var(" <<i<< ") is several times assigned\n"; 
       failexit(); }
     if ((exp.cont_var(i) || is_referenced_let(i,asses)) && uu == 0) {
-      grstack[stacki].addnont(vartab[i]->leftside);
+      modframes[stacki].gr.addnont(vartab[i]->leftside);
       arty++; this->crvar(i,vartab[i]->leftside); 
     }
   }
-  le.crcharlex(')'); grstack[stacki].addsymbol(le);
+  le.crcharlex(')'); modframes[stacki].gr.addsymbol(le);
   le.crtypelex(add_strat_nont(inlinecodes[j].from,inlinecodes[j].to));
-  gr = grstack[stacki].addrule(le,RNOPRIOR,RGLOP,actcode);
+  gr = modframes[stacki].gr.addrule(le,RNOPRIOR,RGLOP,actcode);
   cde = actcode;
   add_to_fsymtab(arty,gr,0 ); // later DS_LET
   this->crterm(cde,arty);
@@ -1276,8 +1275,8 @@ char *strnam;
   naffected = 0;
   this->stinit(); 
   snprintf(sss,sizeof(sss),"INLINE%d",++ninlines);
-  inle.cridlex(sss); grstack[stacki].addsymbol(inle);
-  le.crcharlex('('); grstack[stacki].addsymbol(le);
+  inle.cridlex(sss); modframes[stacki].gr.addsymbol(inle);
+  le.crcharlex('('); modframes[stacki].gr.addsymbol(le);
   for(i=0, arty=0; i<actvtabi; i++) {
     affected[i] = 0;
     if (extended && (uu = is_affected(i,anies))) {
@@ -1291,13 +1290,13 @@ char *strnam;
 	(t2.cont_var(i) 
 	|| (extended && anies.cont_var(i))
 	 )) { // not exact !!!
-      grstack[stacki].addnont(vartab[i]->leftside);
+      modframes[stacki].gr.addnont(vartab[i]->leftside);
       arty++; this->crvar(i,vartab[i]->leftside); 
     }
   }
-  le.crcharlex(')'); grstack[stacki].addsymbol(le);
+  le.crcharlex(')'); modframes[stacki].gr.addsymbol(le);
   le.crtypelex(add_strat_nont(inlinecodes[j].from,inlinecodes[j].to));
-  gr = grstack[stacki].addrule(le,RNOPRIOR,RGLOP,actcode);
+  gr = modframes[stacki].gr.addrule(le,RNOPRIOR,RGLOP,actcode);
   cde = actcode;
   add_to_fsymtab(arty,gr,0);  // later DS_INLINE
   this->crterm(cde,arty);
@@ -1334,7 +1333,7 @@ char *strnam;
 
   // ------------------------------------------
   // stout << sss << "into grstack([" << stacki << "])\n"; 
-  // grstack[stacki].dump();
+  // modframes[stacki].gr.dump();
 }
 
 int term::ren_vars_lin(int check, term &r, struct wherelist **whs)

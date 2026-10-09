@@ -95,7 +95,9 @@ void lstream::fulex(lexem &l)
 }
 
 char strconst[STRLEN];
-char *stringconstants[MAXNOFSTRING];
+// The string constants, numbered by their lexems (BOFSTRING-i): the
+// storage grows on demand, their number is limited by the lexem range.
+std::vector<char *> stringconstants;
 int  stringconstantsi = 0;
 
 char *lexem::stringval() 
@@ -107,7 +109,7 @@ char *lexem::stringval()
 void lexem::crstringlex(char *s) {
   int i = stringconstantsi;
   if (stringconstantsi < MAXNOFSTRING) {
-    stringconstants[stringconstantsi]=strdup(s); 
+    stringconstants.push_back(strdup(s));
     stringconstantsi++;
     lex=BOFSTRING-i; 
   }

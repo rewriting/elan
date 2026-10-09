@@ -55,19 +55,14 @@
 #define OUTPUTS "stderr"  // outputs of executable
 #define MAXNOFIMPORTS 200 // max. number of imported modules
 #define MRWTSIZE 300      // number of res.word of ELAN (to accurate when def.)
-#define MAXINCLDEEP 30    // max. deep of import graph
 #define MAXNOFMAC 50	  // max. number of macro vars.
-#define MAXNESTMAC 10	  // max. nested macro
 #define MAXUNIFFSYM MAXNFSYM  // max. number of symbols in comm. with UNIF
 #define MAXDEEPCONSTEXP 10 // max. deep of constant expression in prepro.
 #define MAXNOFTRN 2000	  // max. number of trans. rule names
 #define MAXNOFAXIOMS 10	  // max. number of parts in specification
 #define MAXNOFSTRAT 500	  // max. number of strategies
-#define MAXINCLSTRAT 30	  // max. number of rep./iterate nesting
 #define MAXNOFSUBPROCESS 30 // max. number of subprocessus
 #define MAXNNONT 500    // maximal number of nonterminals
-//#define MAXTERMDEEP 10000     // max deep  of terms
-#define MAXTERMDEEP 20000     // max deep  of terms
 #define MAXNOFARITIES 100    // maximal number of different arities
 
 //Marian's version 
