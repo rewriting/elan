@@ -60,8 +60,8 @@ void lbuffer::clear()
 //sterr << "[lbuffer::clear]\n";
   bb=firstch.next;
   while (bb!=NULL) {
-    DELETE1((bb->l));
-    b=bb; bb=bb->next; CFRE((b));
+    delete [] bb->l;
+    b=bb; bb=bb->next; DELETE1((b));
   }
   firstch.next=NULL; 
   lastch = &firstch;
@@ -88,13 +88,13 @@ void lbuffer::get(lexem &le)
    else {	
     lb = firstch.next;
 				//    firstch = *lb;
-    DELETE1(firstch.l);
+    delete [] firstch.l;
     firstch.l = lb->l;
     firstch.b = lb->b;
     firstch.e = lb->e;
     firstch.next = lb->next;
     if (firstch.next == NULL) lastch = &firstch;
-    CFRE((lb));
+    DELETE1((lb));
   }
   }
 }
