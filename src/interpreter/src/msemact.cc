@@ -1586,7 +1586,7 @@ int semact1(int n,lexem l,lstream *f)
        actvtabi = vartabi = nestedvartabi->i;
        actruletype = nestedvartabi->ruletype;
        { struct nvlist *ll; 
-         ll= nestedvartabi ->next; CFRE(nestedvartabi); 
+         ll= nestedvartabi ->next; DELETE1(nestedvartabi); 
          nestedvartabi = ll;
        }
        break;
