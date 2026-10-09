@@ -198,6 +198,7 @@ extern struct Gfsym  fsymtab[];
 #define GsetReduced(t)          ((t)->symb |= REDUCEMASK)
 #define GisReduced(t)           ((t)->symb &  REDUCEMASK)
 
+extern void Gterm_init(int argc,char **argv,long *ptr_bottomOfStack);
 extern void term_alloc(Gterm **ptr_dest,
 		       int size_sname,
 		       unsigned int funsym);

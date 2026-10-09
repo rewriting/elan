@@ -47,7 +47,7 @@ int initElanLib(long *bp) {
   int i,j;
 
     //Gterm_init(argc,argv,&bp);
-  Gterm_init(NULL,NULL,&bp);
+  Gterm_init(0,NULL,bp);
   CPL_init_malloc_protect(GC_malloc);
   CPL_init_malloc(GC_malloc_atomic);
   CPL_init_realloc_protect(GC_realloc);
@@ -68,6 +68,7 @@ int initElanLib(long *bp) {
       tab_rewrite_step[i][j] = 0;
     }
   }
+  return 0;  /* 2026: no value was returned (undefined) */
 }
 
 int getStrategyIndex(char *strategyName) {

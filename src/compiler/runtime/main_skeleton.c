@@ -45,7 +45,7 @@ int printMode=0;
 
 
 /* Help */
-printHelp() {
+void printHelp(void) {
   printf("  Options:\n");
   printf("    -noInput\n");
   printf("    -REFInput\n");
@@ -227,7 +227,6 @@ int main(int argc,char **argv) {
     }
     fail();
   }
-end:
   getrusage(RUSAGE_SELF, &after_self);
 #ifdef DEBUG
     //backStatistics();
@@ -241,14 +240,14 @@ end:
           printedHeader=1;
         }
 
-        printf("tab_rewrite_step[%d] :\t%u\t%u\n",
+        printf("tab_rewrite_step[%d] :\t%lu\t%lu\n",
                j,tab_rewrite_step[0][j],tab_rewrite_step[1][j]);
       }
     }
     if(coqMode) {
-      printf("\nrewrite_step = %u where traced steps: %u\n",rewrite_step, rewrite_label_step);
+      printf("\nrewrite_step = %lu where traced steps: %lu\n",rewrite_step, rewrite_label_step);
     } else {
-      printf("\nrewrite_step = %u\n",rewrite_step);
+      printf("\nrewrite_step = %lu\n",rewrite_step);
     }
     diff_sec  = after_self.ru_utime.tv_sec  - before_self.ru_utime.tv_sec;
     diff_usec = after_self.ru_utime.tv_usec - before_self.ru_utime.tv_usec;
@@ -256,9 +255,9 @@ end:
     if(!quietMode) {
       printf("total time    = %.3f sec\n",total_time);
       if(diff_sec > 0) {
-        printf("average speed = %d rwr/sec\n",(long)(((double)rewrite_step)/total_time));
+        printf("average speed = %ld rwr/sec\n",(long)(((double)rewrite_step)/total_time));
       } else if(diff_usec > 0) {
-        printf("average speed = %d rwr/sec\n",(long)(((double)1000000*rewrite_step)/((double)diff_usec)));
+        printf("average speed = %ld rwr/sec\n",(long)(((double)1000000*rewrite_step)/((double)diff_usec)));
       }
     }
   }

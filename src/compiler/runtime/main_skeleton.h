@@ -108,6 +108,7 @@ typedef Gterm* (*funTabType)();
 //modification a faire ac
 extern void EkerTermInit();
 extern void symbol_init();
+extern int lazy_annotation_read(char *file_lazy);  /* thunklib.c */
 extern int strCall;
 extern funTabType strTab[]; // [Huy: Oct 18 00] 
 

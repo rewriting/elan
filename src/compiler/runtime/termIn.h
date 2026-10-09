@@ -61,6 +61,7 @@ extern char *tabSort[TABOFSORT_SIZE] ;
 extern Gterm *termParser(int queryMode, int evaluationMode);
 extern Gterm *EarleyParser(char *querySortName);
 extern void EarleyParserInit();
+extern void initTabRef(void);
 extern int findTab(char *s[],int n,char *str);
 extern void addstandards(void);
 

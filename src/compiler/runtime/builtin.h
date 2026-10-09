@@ -34,6 +34,7 @@ struct TabFile {
 };
 extern int tabfile_free_case[MAXFILE];
 extern struct TabFile *tabfile;
+extern void Ginit_builtin(void);
 
 // 1ere version
 //#define getInt(n) (((long)(n))/2)
