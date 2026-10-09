@@ -156,8 +156,8 @@ void term::crExtVar(int nv, lexem sort)
 
 void term::crdoublecon(double vv)
 {
-  int * doublebuf;
-  doublebuf = (int*) &vv;
+  int doublebuf[2];   // S2: was an int* aliasing vv (strict-aliasing UB)
+  memcpy(doublebuf,&vv,sizeof(vv));
   crstterm(doublebuf[1],TNUMBER);
   crstterm(doublebuf[0],TNUMBER);
   crterm(DOUBLECONSTRUCT);
@@ -170,7 +170,9 @@ double term::doubleval()
   }
   dv[0] = t->subt[0].head();
   dv[1] = t->subt[1].head();
-  return( * ( (double*) dv) );
+  double d;           // S2: was *(double*)dv (strict-aliasing UB)
+  memcpy(&d,dv,sizeof(d));
+  return(d);
 }
 
 void term::crdoubleunmin()
@@ -182,7 +184,10 @@ void term::crdoubleunmin()
   }
   dv[0] = tt.t->subt[0].head();
   dv[1] = tt.t->subt[1].head();
-  * ( (double*) dv) = - (* ( (double*) dv));
+  double d;           // S2: was *(double*)dv (strict-aliasing UB)
+  memcpy(&d,dv,sizeof(d));
+  d = - d;
+  memcpy(dv,&d,sizeof(d));
   tt.t->subt[0].t->fsymi = dv[0];
   tt.t->subt[1].t->fsymi = dv[1];
 }

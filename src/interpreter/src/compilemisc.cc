@@ -550,7 +550,7 @@ int getnum(lstream *ff)
 int writereturnedterm(lstream *ff,ochstream &of)
 { lexem lex,*p;
  int lv1; /*,lv2,sign;*/
-  char *doublep[2];
+  int doublep[2];
   ff->ilex(lex);
   while (! lex.isnum() && lex.isnotendofstream()) {
     if (lex == '\177') ff->ilex(lex);
@@ -574,10 +574,15 @@ int writereturnedterm(lstream *ff,ochstream &of)
   if (lv1 < FSYMCODESBEG) {
     if (lv1 == DOUBLECONSTRUCT) {
       ff->ilex(lex);
-      doublep[0] = (char*) getnum(ff);
+      // S2: doublep was char*[2]; on LP64 the double was read from the
+      // first (sign-extended) pointer only.  The two ints now form the
+      // double as they did on the 32-bit hosts of 2004.
+      doublep[0] = getnum(ff);
       ff->ilex(lex);
-      doublep[1] = (char*) getnum(ff);
-      of << *((double*) doublep);
+      doublep[1] = getnum(ff);
+      double d;
+      memcpy(&d,doublep,sizeof(d));
+      of << d;
     } else if (lv1 == TIDENT) {
       of << OPTWRITEBLANK() << tabofident.ide(getnum(ff));   wasident=1;
     } else if (lv1 == TNORMFS) {         // a builtin normfs==boolean
