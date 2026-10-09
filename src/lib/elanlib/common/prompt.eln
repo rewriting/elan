@@ -1,0 +1,23 @@
+// This file is generated automatically: do not edit it directly. 
+module prompt[X]
+        import local IO[string] IO[X];
+        end
+            operators global 
+              read          : X;
+              print(@)      : (X) X;
+              printnl(@)    : (X) X;
+              prompt(@)     : (string) X;
+            end   
+        rules for X
+        pr, pr1 : string;
+        t, t1   : X;
+        global
+          [] read => read(stdin)                                        end
+          [] print(t) => write(stdout,t)                                end
+          [] printnl(t) => t1   where t1:=()write(stdout,t) 
+                                where pr:=()write(stdout,"\n")          end
+          [] prompt(pr) => read(stdin) where pr1:=()write(stdout,pr)    end
+        end
+
+end  
+ 

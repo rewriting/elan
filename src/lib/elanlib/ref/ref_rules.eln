@@ -1,0 +1,171 @@
+// This file is generated automatically: do not edit it directly. 
+  module ref_rules
+          import global
+                  int
+                  REF
+                  ref_tables ref_terms ref_strategies
+                  list[RuleStatement]     list[WhereStatement]
+                  io[Term] io[string]
+                  ;
+          end
+              operators global
+                nof_rules(@)          : (Program) int;
+                nof_named_rules(@)    : (Program) int;
+                get_rule(@,@)         : (int Program) RuleStatement;
+
+                get_rule_name(@,@)    : (int Program) string;
+                get_rule_name(@,@)    : (int Tab) string;
+
+              /*
+                gen_new_rule_name(@)  : (Program) int;
+              */
+                add_rule_name(@,@,@)  : (int string Tab) Tab;
+
+                add_rule_name(@,@)    : (string Program) Program;
+                add_rule_name(@,@)    : (string Tab) Tab;
+                member_rule_name(@,@) : (string Program) int;
+                member_rule_name(@,@) : (string Tab) int;
+
+                print_rule(@,@,@)     : (Pid RuleStatement Program) int;
+                print_wheres(@,@,@)   : (Pid list[WhereStatement] Program) int;   
+              local
+                nof_named_rules(@)    : (list[RuleStatement]) int;
+                get_rule(@,@)         : (int list[RuleStatement]) RuleStatement;
+              end    
+          rules for string
+          ind     : int;
+          P       : Program;
+          tab     : list[TabItem];
+          global
+            []  get_rule_name(-1,P) => ""                         end
+            []  get_rule_name(ind,P) =>
+                  get_rule_name(ind,P.RuleNames)                  end
+            []  get_rule_name(ind,RuleNames tab) =>
+                  get_string(ind,tab)                             end
+          end
+
+          rules for int
+          pid             : Pid;
+          Rule            : RuleStatement;
+          P               : Program;
+          lhs_void, rhs_void, where_void  : int;
+          void1, void2, void3, void4, void        : string;
+          wh              : WhereStatement;
+          whs             : list[WhereStatement];
+          var, var_void   : Term;
+          loop,sindex,str_void    : int;
+          t               : Term;
+          global
+            []  print_rule(pid,Rule,P) => 999
+                  where lhs_void:=()print(pid,Rule.rwrule.lhs:Rule.rule_sort,P)
+                  where void:=()write(pid," => ")
+                  where rhs_void:=()print(pid,Rule.rwrule.rhs:Rule.rule_sort,P)
+                  where void1:=()write(pid,"\n")
+                  where where_void:=()print_wheres(pid,Rule.rwrule.wheres,P)
+            end
+            []  print_wheres(pid,nil,P) => 999                                    end
+            []  print_wheres(pid,IFF(t).whs,P) => 999
+                  where void:=()write(pid,"\tif ")
+                  where lhs_void:=()print(pid,t,P)
+                  where void3:=()write(pid,"\n")
+                  where loop:=()print_wheres(pid,whs,P)
+            end
+            []  print_wheres(pid,WHERE(var,-1,t).whs,P) => 999
+                  where void:=()write(pid,"\twhere ")
+                  where var_void:=()write(pid,var)
+                  where void1:=()write(pid,":=()")
+                  where lhs_void:=()print(pid,t,P)
+                  where void3:=()write(pid,"\n")
+                  where loop:=()print_wheres(pid,whs,P)
+            end
+            []  print_wheres(pid,WHERE(var,sindex,t).whs,P) => 999
+                  where void:=()write(pid,"\twhere ")
+                  where var_void:=()write(pid,var)
+                  where void1:=()write(pid,":=(")
+                  where void4:=()write(pid,get_strategy_name(sindex,P))
+                  where void2:=()write(pid,")")
+                  where lhs_void:=()print(pid,t,P)
+                  where void3:=()write(pid,"\n")
+                  where loop:=()print_wheres(pid,whs,P)
+            end   
+          end
+
+          rules for Program
+          s       : string;
+          P, P1   : Program;
+          ind     : int;
+          global
+            []  add_rule_name(s,P) => 
+                  P[.RuleNames<-add_rule_name(s,P.RuleNames)]
+            end
+          end
+
+          rules for Tab
+          ind             : int;
+          name            : string;
+          tab             : list[TabItem];
+          global
+            []  add_rule_name(ind,name, RuleNames tab) =>
+                          RuleNames add_string(ind,name,tab)      end
+          end
+
+          rules for Tab
+          tis1,tis        : list[TabItem];
+          s               : string;
+          global
+            []  add_rule_name(s,RuleNames tis) => RuleNames tis1 
+                                          // cf.constants in rtdatas.h
+                          where tis1:=()add_hash_string(s,tis,2000)
+            end
+          end
+
+
+          rules for int
+          P       : Program;
+          Rule    : RuleStatement;
+          Rules   : list[RuleStatement];
+          global
+            []    nof_rules(P)    => size(P.AllRules)                     end
+            []    nof_named_rules(P)      => nof_named_rules(P.AllRules)  end
+            []    nof_named_rules(nil)    => 0                            end
+            []    nof_named_rules(Rule.Rules) => nof_named_rules(Rules)
+                          if Rule.rule_name_index == -1                   end
+            []    nof_named_rules(Rule.Rules) => 1+nof_named_rules(Rules) end
+          /*
+            []    gen_new_rule_name(P) => 
+                          new_string_index(P.RuleNames.RuleNames)         end
+          */
+          end
+
+          rules for int
+          ind             : int;
+          ti              : TabItem;
+          tis             : list[TabItem];
+          s               : string;
+          tsize, n, m     : int;
+          P               : Program;
+          global
+            []  member_rule_name(s,P) =>
+                          member_rule_name(s,P.RuleNames)
+            end
+            []  member_rule_name(s,RuleNames tis) =>
+                  member_string(s,tis)                                    end
+          end
+
+          rules for RuleStatement
+          P       : Program;
+          rindex  : int;
+          Rule    : RuleStatement;
+          Rules   : list[RuleStatement];
+          global
+            []    get_rule(rindex,P)      => get_rule(rindex,P.AllRules)  
+            end
+            []    get_rule(rindex,Rule.Rules) => Rule
+                                  if Rule.rule_name_index == rindex       
+            end
+            []    get_rule(rindex,Rule.Rules) => get_rule(rindex,Rules)
+            end
+          end
+  end  
+   
+

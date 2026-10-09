@@ -1,0 +1,210 @@
+extension aterm;
+typeuse 
+     Aterm,listAterm, 
+     Awhere,listAwhere,listAwhere1, Whtype, listlistAwhere, listlistAwhere1,
+     Arul, Arule, listArule, trybegin,
+     Astrat,listAstrat,
+     Astrategy, listAstrategy, Aruletype,
+     Alex,listAlex, ssyntactic,
+     Aoperator, listAoperator,Varindex,Varsort,
+     Aoperators, listAoperators,
+     Atabitem, Alex1, Alex2, listCodes, Code,
+     Atab, finend, spriority, srulenumber , ssemantic, topglopflag,
+     string, Anumber, Alabel, Alabel1, Amodule, Wherevar, Wherestrat,
+     querysort, resultsort, reducesort, mainstrat, startwtt, checkwtt, Aquery,
+     Ffsym, Finfos,Farity, Lhs, Rhs, SWRhs,Astrattype, strstore, Ainfos,sassoccomm,
+     Astrats, Aconstr, Arules, Astrindex,Astrindex1,Astratslist, Aprogram,
+     AChead, one2beg, onebeg, Avarnum,
+     {{ Strategies a la Pierrot }}
+     dontcare2beg, dontknow2beg, stralts, strategy, stratbody,
+     dontcarebeg, dontknowbeg, whilebegin, iterbegin,
+     SwitchKind, Aswitch, listAbranch, BranchCond, Abranch,
+     Areduce, RedStrategy, RedTerm;
+
+op
+  Type(__)		:: (Anumber) Alex			code 1;
+  Char(__)		:: (Anumber) Alex			code 2;
+  Num(__)		:: (Anumber) Alex			code 3;
+  String(__)		:: (Anumber) Alex			code 4;
+  Ident(__)		:: (Anumber) Alex			code 5;
+  Blank			::           Alex			code 6;
+
+  __			:: (number) Anumber			code 7;
+  - __			:: (number) Anumber			code 8;
+
+  nil			:: listAoperator;
+  __ . __		:: (Aoperator, listAoperator) listAoperator;
+
+  nil			:: listAlex;
+  __			:: (Alex) Alex2				code 40;
+  __ . __		:: (Alex2, listAlex) listAlex;
+
+  __:__:__:__:__:__:__:__:nil    {{ !!! LOCAL STRATEGIES ARE NOT IMPORTED YET}} 
+			:: (topglopflag,
+				srulenumber, 
+				spriority, 
+				ssyntactic,
+	 			ssemantic, 
+				sassoccomm,
+				Anumber,
+				listAlex) Aoperator	code 11;
+  __			:: (finend) listAoperators;
+  GrammarForSort   __ : __ : __ end __ :: (Alex1, Anumber, listAoperator, listAoperators) listAoperators;
+
+  __			:: (Anumber) sassoccomm 		code 10;
+  __			:: (Anumber) spriority			code 13;
+  __			:: (Anumber) srulenumber		code 14;
+  __			:: (Anumber) ssemantic			code 15;
+  __			:: (Anumber) ssyntactic			code 9;
+  __			:: (Anumber) Alex1			code 16;
+  __			:: (Anumber) topglopflag		code 17;
+  
+  __			:: (Anumber) Varindex			code 18;
+  __			:: (Anumber) Varsort			code 19;
+
+  VAR(__,__)		:: (Varindex,Varsort) Aterm		code 20;
+  EVAR(__,__)		:: (Varindex,Varsort) Aterm		code 20;
+  INT(__)		:: (Anumber) Aterm			code 21;
+  IDENT(__)		:: (Anumber) Aterm			code 22;
+
+  STRING(__)		:: (listCodes) Aterm			code 23;
+  nil			:: listCodes;
+  __			:: (Anumber) Code			code 32;
+  __ . __		:: (Code,listCodes) listCodes;
+
+  __			:: (Anumber) Ffsym			code 25;
+  __			:: (Anumber) Finfos			code 26;
+  __			:: (Anumber) Farity			code 27;
+  FSYM(__,__) 		:: (listAterm, Ffsym) Aterm		code 24;
+
+ {{ ========================== RULE ================================== }}
+
+  IFF(__)		:: (Aterm) Awhere			code 30;
+
+  TRY			:: trybegin				code 126;
+  nil			:: listlistAwhere			code 127;
+  __ . __		:: (listAwhere1, listlistAwhere) 
+						listlistAwhere  code 128;
+  __(__) 		:: (trybegin, listlistAwhere) Awhere	code 129;
+
+  __			:: (Aterm) Wherevar			code 28;
+  __			:: (Anumber) Wherestrat			code 29;
+  WHERE(__,__,__)	:: (Wherevar, Wherestrat, Aterm) Awhere	code 31;
+  PWHERE(__,__,__,__)	:: (Wherevar, Whtype, Wherestrat, Aterm) Awhere	code 45;
+
+  __			:: (Anumber) Whtype			code 46;
+  __			:: (Anumber) Alabel			code 37;
+  __			:: (Anumber) Amodule			code 38;
+  __			:: (Aterm) Lhs				code 34;
+  __			:: (Aterm) SWRhs			code 35;
+  __			:: (Aterm) Rhs				code 41;
+  __			:: (Anumber) Aruletype;	{{ code ??? }}
+  __			:: (Anumber) Ainfos			code 39;
+  __			:: (Anumber) AChead			code 36;
+  __			:: (Anumber) Avarnum			code 33;
+
+  nil			:: listAterm;
+  __ . __ 		:: (Aterm, listAterm) listAterm;
+
+  nil			:: listAwhere;
+  __ . __		:: (Awhere, listAwhere) listAwhere;
+
+  __		  :: (Aterm) BranchCond				code 134;
+
+
+  __		        :: (listAwhere) listAwhere1		code 137;
+
+  NOSWITCH(__,__)       :: (listAwhere1, SWRhs) Aswitch	        code 130;
+  SWITCH(__,__)         :: (listAwhere1, listAbranch) Aswitch   code 131;
+
+  __ , __         :: (BranchCond, Aswitch) Abranch		code 135;
+
+  nil		  :: listAbranch				code 138;
+  __ . __         :: (Abranch, listAbranch) listAbranch		code 139;
+
+  SWRULE(__,__,__,__,__,__,__,__) end 
+		  :: (Alabel, Aruletype, Amodule, Ainfos, 
+			AChead, Avarnum, Lhs, Aswitch) Arul	code 136;
+
+  RULE(__,__,__,__,__,__,__,__,__) end 
+		  :: (Alabel, Aruletype, Amodule, Ainfos, 
+			AChead, Avarnum, Lhs, Rhs, listAwhere) Arul code 133;
+
+  __ __ 		:: (listArule, Arul) listArule;
+  __  			:: (Arul) listArule;
+
+  EndDef end		:: finend; 
+
+ DC 		:: dontcare2beg					code 163;
+ ONE 		:: one2beg					code 163;
+ DK 		:: dontknow2beg					code 163;
+ __ ( __ )	:: (one2beg, stralts) strategy			code 171;
+ __ ( __ )	:: (dontcare2beg, stralts) strategy		code 175;
+ __ ( __ )	:: (dontknow2beg, stralts) strategy		code 176;
+ __		:: (stratbody) stralts				code 177;
+ __ , __	:: (stralts, stratbody) stralts			code 178;
+
+ one 		:: onebeg				; {{	code 163;}}
+ dc 		:: dontcarebeg				; {{	code 163;}}
+ dk 		:: dontknowbeg				; {{	code 163;}}
+ __ ( __ )	:: (onebeg, Arules) strategy			code 172;
+ __ ( __ )	:: (dontcarebeg, Arules) strategy		code 173;
+ __ ( __ )	:: (dontknowbeg, Arules) strategy		code 174;
+
+ dccall(__, __, __) :: (listCodes, Ainfos, Astrattype) strategy	code 183;
+ dkcall(__, __, __) :: (listCodes, Ainfos, Astrattype) strategy	code 184;
+
+ nil		:: Arules					code 190;
+ __ . __ 	:: (Alabel1, Arules) Arules 			code 191;
+ __		:: (Alabel) Alabel1				code 192;
+
+ repeat*	:: whilebegin					code 163;
+ iterate* 	:: iterbegin					code 163;
+ __ ( __ )	:: (whilebegin, stratbody) strategy		code 164;
+ __ ( __ )	:: (iterbegin,stratbody) strategy		code 165;
+
+
+ call(__)	:: (Astrindex1) strategy			code 159;
+
+ __		:: (Anumber) Astrindex				code 179;
+ __		:: (Anumber) Astrattype				code 180;
+ end           	:: strstore					code 181;
+ __		:: (Anumber) Astrindex1				code 182;
+
+ id		:: strategy					code 196;
+ fail		:: strategy					code 195;
+ META		:: strategy					code 197;
+
+ __		::(strategy) stratbody				code 160;
+ __ ; __	::(stratbody, strategy) stratbody		code 160;
+
+ STRATEGY(__,__,__,__) __  __ :: (Astrindex, Astrattype, Amodule, stratbody,
+				  strstore, listAstrategy) listAstrategy;
+  __		:: (finend) listAstrategy;
+
+ {{ ========================== QUERY ================================== }}
+
+  __			:: (Anumber) querysort		code 140;
+  __			:: (Anumber) resultsort		code 141;
+  __			:: (Anumber) reducesort		code 113;
+  __			:: (Anumber) mainstrat		code 142;
+  __			:: (Aterm) startwtt		code 143;
+  __			:: (Aterm) checkwtt		code 144;
+
+  QUERY(__,__,__,__,__)	end ::
+		(querysort, resultsort, mainstrat, startwtt, checkwtt) Aquery;
+
+  __ __ __ __ __ __ __	:: (listAoperators, listAoperators, listAoperators,
+		    		listArule, finend, listAstrategy, Aquery) Aprogram;
+  
+  __ end	:: (Aterm) RedTerm			code 111;
+  __ end	:: (stratbody) RedStrategy		code 112;
+
+ __ __ __ __      :: (Aprogram, reducesort, RedStrategy, RedTerm) Areduce;
+{{ __ __ __ __ __      :: (Aprogram, Amodule, reducesort, RedStrategy, RedTerm) Areduce;}}
+{{ __ __ __ 	:: (Aquery, RedStrategy, RedTerm) Areduce;}}
+        
+::
+{{ -- pour .ref axiom for Amodule: end}}
+{{ -- pour .reduce axiom for Areduce: end}}
+ 

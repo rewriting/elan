@@ -1,0 +1,157 @@
+// This file is generated automatically: do not edit it directly. 
+ module ref_unify
+         import global
+                 int bool
+                 REF
+                 occur[Term,Term] 
+                 replace[Term,eqSystem] replace[Term,Term] 
+                 eq[Term]
+                 ;
+         end
+         sort substitution equation eqSystem; end
+             operators global
+               isvar(@)      : (Term) bool;
+
+               nosubstitution: substitution;
+               identity      : substitution;
+               @ -> @        : ( Term Term ) substitution;
+               @ o @         : ( substitution substitution ) substitution    assocLeft;
+                 
+               apply(@,@)    : ( substitution eqSystem ) eqSystem;
+               apply(@,@)    : ( substitution Term ) Term;
+
+               @             : ( bool ) eqSystem;
+               @             : ( equation ) eqSystem;
+               @ & @         : ( eqSystem eqSystem ) eqSystem        assocLeft;
+               (@ & @)       : ( eqSystem eqSystem ) eqSystem        alias @ & @:;
+
+               system_to_subst(@)    : ( eqSystem ) substitution;
+
+               @ = @         : (Term Term) equation;
+               @             : ( equation ) eqSystem         alias @:;
+             end   
+         stratop global 
+             unify       : <eqSystem->eqSystem>          bs;
+             unifys      : <eqSystem->eqSystem>          bs;
+         end
+         rules for eqSystem
+                 tt      : eqSystem;
+                 s1,s2   : substitution;
+                 v       : Term;
+                 t       : Term; 
+         global
+           [] apply(identity,tt) => tt                           end
+           [] apply(s1 o s2 ,tt)         => apply(s2,apply(s1,tt))       end
+           [] apply(v->t,tt)             => replace(v,t,tt)              end
+         end
+
+         rules for Term
+                 tt      : Term;
+                 s1,s2   : substitution;
+                 v       : Term;
+                 t       : Term; 
+         global
+           [] apply(identity,tt) => tt                           end
+           [] apply(s1 o s2 ,tt)         => apply(s2,apply(s1,tt))       end
+           [] apply(v->t,tt)             => replace(v,t,tt)              end
+         end
+
+         rules  for substitution
+          P,Q,R  : eqSystem;
+                 x,t     : Term;
+         global
+           [] system_to_subst(true)      => identity                     end
+           [] system_to_subst(x=t)       => x->t         if isvar(x)     end
+           [] system_to_subst(x=t)       => t->x                         end
+           [] system_to_subst(P & Q)     => system_to_subst(P) o 
+                                            system_to_subst(Q)
+           end
+         end
+
+         rules for bool
+         xi,xt,yi,yt     : int;
+         global
+           []    isvar(VAR(xi,xt)) => true               end
+           []    isvar(VAR(xi,xt)) => false              end
+         end
+
+         rules for eqSystem
+         P,Q,R           : eqSystem;
+         s,t,x,y         : Term;
+         xi,xt,yi,yt     : int;
+         //n             : int;
+         e               : equation;
+         global
+         //  [new_var_elim] P & var(n) = $t      => apply(var(n)->$t,P)  end
+           [unfold]       P & (Q & R)            => (P & Q) & R          end
+           [eqPass]       P & e                  => e & P                end
+
+           [delete]      P & s=s => P
+           end
+           [coalesce]    P & VAR(xi,xt)=VAR(yi,yt)       => 
+                                  VAR(xi,xt)=VAR(yi,yt) & 
+                                         apply(VAR(xi,xt)->VAR(yi,yt),P)
+                                 if xi != yi or xt != yt
+           end
+           [conflict]    P & s=t => false
+                                 if s != t
+                                    and not(isvar(s)) and not(isvar(t))
+           end
+           [occCheck1]   P & x=s => false
+                                 if occurs x in s and not isvar(s)
+           end
+           [occCheck2]   P & s=x => false
+                                 if occurs x in s and not isvar(s)
+           end
+           [eliminate1]  P & x=s => x=s & apply(x->s,P)
+                                 if not(occurs x in s) 
+           end
+           [eliminate2]  P & s=x => x=s & apply(x->s,P)
+                                 if not(occurs x in s) 
+           end
+           [matchClash]  P & s=x => false
+                                 if not isvar(s) 
+           end
+         //--- initial and final transitions rules
+           [trueelim]    P & true        => P                            end
+           [truepass]    P & true        => true & P                     end
+           [trueadd]     P               => true & P                     end
+           [falsepropag] false           => false                        end
+           [truepropag]  true            => true                         end
+
+         end
+
+         rules for eqSystem
+         P               : eqSystem;
+         code_f, code_g  : int;
+         s, t            : Term; 
+         ss, tt          : list[Term];
+         global
+           [decompose] P & FSYM(ss,code_f) = FSYM(tt,code_g)
+                         => 
+                         false
+                         if code_f != code_g
+           end
+           [decompose] P & FSYM(s.ss,code_f)=FSYM(t.tt,code_f)
+                         => 
+                         P & s = t & FSYM(ss,-1) = FSYM(tt,-1)
+           end
+         end
+         strategies for eqSystem
+         implicit
+
+           [.] unify => dc one(trueadd);
+                         repeat*(dc one(unfold, delete, decompose, 
+                                     conflict, coalesce, occCheck1, 
+                                     occCheck2, eliminate1, eliminate2 ) );
+                         dc one(trueelim, truepropag, falsepropag)
+           end
+           [.] unifys => repeat*(dc one(unfold, delete, decompose, conflict,
+                                     coalesce, occCheck1, occCheck2, 
+                                     eliminate1, eliminate2) ) ;
+                         dc one(truepass, truepropag)
+           end
+         end
+ end  
+   
+

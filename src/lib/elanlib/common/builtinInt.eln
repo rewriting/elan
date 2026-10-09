@@ -1,0 +1,56 @@
+// This file is generated automatically: do not edit it directly. 
+module builtinInt
+        import 
+                global anyInteger;
+                local  bool;
+        end
+        sort    builtinInt;
+        end
+        operators
+         global
+          @ + @   : (builtinInt builtinInt) builtinInt pri 500 assocLeft code 3;
+          @ - @   : (builtinInt builtinInt) builtinInt pri 600 assocLeft code 4;
+          @ * @   : (builtinInt builtinInt) builtinInt pri 700 assocLeft code 5;
+          @ / @   : (builtinInt builtinInt) builtinInt pri 800 assocLeft code 6;
+          @ % @   : (builtinInt builtinInt) builtinInt pri 800 assocLeft code 27;
+          @ & @   : (builtinInt builtinInt) builtinInt pri 800 assocLeft code 28;
+          @ | @   : (builtinInt builtinInt) builtinInt pri 800 assocLeft code 29;
+          - @     : (builtinInt) builtinInt            pri 900           code 20;
+          (@ + @)  : (builtinInt builtinInt) builtinInt pri 500 assocLeft alias @ + @:;
+          (@ - @)  : (builtinInt builtinInt) builtinInt pri 600 assocLeft alias @ - @:;
+          (@ * @)  : (builtinInt builtinInt) builtinInt pri 700 assocLeft alias @ * @:;
+          (@ / @)  : (builtinInt builtinInt) builtinInt pri 800 assocLeft alias @ / @:;
+          (@ % @)  : (builtinInt builtinInt) builtinInt pri 800 assocLeft alias @ % @:;
+          (@ & @)  : (builtinInt builtinInt) builtinInt pri 800 assocLeft alias @ & @:;
+          (@ | @)  : (builtinInt builtinInt) builtinInt pri 800 assocLeft alias @ | @:;
+          (- @)    : (builtinInt) builtinInt            pri 900           alias - @:;
+
+          plus(@,@) : (builtinInt builtinInt) builtinInt  alias @ + @:;
+          minus(@,@): (builtinInt builtinInt) builtinInt  alias @ - @:;
+          time(@,@) : (builtinInt builtinInt) builtinInt  alias @ * @:;
+          div(@,@)  : (builtinInt builtinInt) builtinInt  alias @ / @:;
+          mod(@,@)  : (builtinInt builtinInt) builtinInt  alias @ % @:;
+          and(@,@)  : (builtinInt builtinInt) builtinInt  alias @ & @:;
+          or(@,@)   : (builtinInt builtinInt) builtinInt  alias @ | @:;
+          umin(@)   : (builtinInt) builtinInt             alias - @:;
+          umin_builtinInt(@): (builtinInt) builtinInt     alias umin(@):;
+          @ == @        : (builtinInt builtinInt) bool        pri 300 code 8;
+          @ != @        : (builtinInt builtinInt) bool        pri 300 code 9;
+          @ <  @        : (builtinInt builtinInt) bool        pri 300 code 10;
+          @ <= @        : (builtinInt builtinInt) bool        pri 300 code 11;
+          @ >  @        : (builtinInt builtinInt) bool        pri 300 code 12;
+          @ >= @        : (builtinInt builtinInt) bool        pri 300 code 13;
+
+          eq_builtinInt(@,@)        : (builtinInt builtinInt) bool    pri 300 alias @ == @:;
+          neq_builtinInt(@,@)       : (builtinInt builtinInt) bool    pri 300 alias @ != @:;
+          less_builtinInt(@,@)      : (builtinInt builtinInt) bool    pri 300 alias @ < @:;
+          lesseq_builtinInt(@,@)    : (builtinInt builtinInt) bool    pri 300 alias @ <=@:;
+          greater_builtinInt(@,@)   : (builtinInt builtinInt) bool    pri 300 alias @ > @:;
+          greatereq_builtinInt(@,@) : (builtinInt builtinInt) bool    pri 300 alias @ >=@:;
+          btoi(@)               : (bool) builtinInt           pri 900 code 25;
+          btoi_builtinInt(@)    : (bool) builtinInt     pri 900 alias btoi(@):;
+
+          itob(@)               : (builtinInt) bool           pri 900 code 26;
+          itob_builtinInt(@)    : (builtinInt) bool     pri 900 alias itob(@):;
+        end
+end

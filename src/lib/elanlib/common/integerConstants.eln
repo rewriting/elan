@@ -1,0 +1,18 @@
+// This file is generated automatically: do not edit it directly. 
+module integerConstants
+        sort int;
+        end
+        operators
+         global
+
+          0     : int;
+          1     : int;
+          -1    : int;
+          2     : int;
+          -2    : int;
+          3     : int;
+        .
+        .
+        .
+        end
+end

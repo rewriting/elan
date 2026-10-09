@@ -1,0 +1,66 @@
+Description des fichiers qui composent ELAN :
+---------------------------------------------
+
+acmatchdefs.h		: interface match eker
+axmodgram.t		: a effacer
+banner.c		: banner (Peter)
+chbuffer.c		: ???
+command.c		: interpreteur de commandes (Peter)
+command.h		: idem
+commondefs.c		: variables globales 
+commondefs.h		: definitions globales
+compiledefs.h		: def. pour compilateur
+compilemisc.c		: fonctions diverses pour le compilateur
+earley.c		: algo d'earley
+esemact.c		: action semantiques pour earley
+esemact3.c		: to be deleted
+grammar.c		: structure de donnees pour les grammaires
+ichstream.c		: interface stdio (objet)
+lbuffer.c		: buffer de lexem
+ldmain.c		: fichier principale
+ldmodgram.t		: grammaire pour la description de la logique (.lgi)
+linkdate.c		: date de la derniere compilation
+lstream.c		: analyseur lexical
+mallo.c			: gestion memoire 
+mallotest.c		: a effacer
+match.c			: match AC + gestion de dccall et dkcall
+matchcompile.c		: compilation du matching (difficile a recuperer)
+misc.c			: divers, gestion de chaines
+mitab.c			: multiensemble des entiers (add,ismember) variables ?
+mitab.h			: ...
+mlstream.c		: preprocessor
+modgram.t		: grammaire ``fixe'' des modules (.eln)
+module.c		: quelques variables et fonctions globales
+module.h		: ...
+mtokdefmain.c		: prg pour traiter les mots cles
+mtokdefs.c		: et generer un morceau de code
+mtokmain.c		: ...
+ochstream.c		: comme ichstream pour output		
+parser.			: parser LALR(1) template
+paxmmain.c		: a effacer
+ppexgram.t		: grammaire du preprocessor (cste d'expression)
+rtdatas.h		: donnees pour les regles, strategies etc ...
+rtmisc.c		: run-time misc : builtin, strat de normalisation
+			  (reduce). Tout pour interpreter...
+semact.c		: actions semantiques de modgram.t
+semact3.c		: (Peter)
+shit.t			: (Peter)
+specials.c		: pas important. fonctions bidon pour le linkage
+			  de mtokdef
+stateofexecution.c	: interpretateur de strategies (backtrack ...)
+strategy.c		: (Peter)
+strategy.h		: (Peter)
+stringtab.c		: htable des chaines de caracteres 
+			  (lexem, nom de modules, mots cles, type)
+stringtab.h		: ...
+sym_types.h		: ???
+term.c			: gestion des terms
+eker_term.h		: structure de termes d'Eker
+termcompile.c		: gestion des termes pour le compilateur	
+termdefs.h		: structure de terme
+testmatch.c		: ???
+tmisc.c			: divers alias fsymtab
+trsystem.c		: transrule strategy et trsystem implementation
+			  compilation des strategies
+visigraph.c		: interface pour DaVinci
+visigraph.h		: interface pour DaVinci

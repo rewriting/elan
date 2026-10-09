@@ -1,0 +1,21 @@
+// This file is generated automatically: do not edit it directly. 
+module anyIdentifier
+/*
+        This module is          ***built-in***
+        What follows are only   ***comments*** 
+        for explaining its semantics
+
+sort ident;
+op
+ global
+ a      : ident ;
+ b      : ident ;
+ aa     : ident ;
+ ab     : ident ;
+ aab    : ident ;
+ ... ... ...
+end
+*/
+end  
+
+

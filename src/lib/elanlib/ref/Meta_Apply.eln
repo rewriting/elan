@@ -1,0 +1,121 @@
+// This file is generated automatically: do not edit it directly. 
+  module Meta_Apply
+          import 
+            global 
+                  builtinInt list[string] list[Term] REF;
+            local
+                  refstring2string ref2string[Strategy] ref2string[Term] ref2string[Program] string2refterm;
+          end
+              operators global
+                meta_apply(@,@':'@,@,@)  :  (Strategy Term Sort Program builtinInt) Term;
+                                         
+                meta_apply(@,@,@,@)      : (string string Program builtinInt) string;
+                meta_apply(@,@':'@,@,@,@): (Strategy Term Sort Program builtinInt builtinInt) list[Term];                       
+                meta_apply(@,@,@,@,@)   : (string list[string] Program builtinInt builtinInt) list[string];
+               
+                strings2refterms(@':'@,@): (list[string] string Program) list[Term];
+                refterms2strings(@,@): (list[Term] Program) list[string];
+   
+              local
+                meta_apply(@,@,@,@,@) : (string string string string builtinInt) string       code 170;
+                meta_apply(@,@,@,@)   : (string string string builtinInt) string      code 172;
+                meta_apply(@,@,@,@,@,@) : (string list[string] string string builtinInt builtinInt) list[string] code 171;
+
+                meta_apply(@,@,@,@,@) : (string list[string] string builtinInt builtinInt) list[string] code 173;
+
+              /**** TO BE DELETED
+                meta_apply(@,@,@,@)   : (string string string builtinInt) string      code 163;
+                                       // strat  term   prog    n-th
+                meta_apply(@,@,@,@,@) : (string list[string] string builtinInt builtinInt) list[string] code 164;
+                                       // strat  term   prog    n-th      number
+              ****/
+              end    
+          stratop global
+            meta_apply_strategy   : <Term -> Term>        bs;
+          end
+
+          rules for string
+          str, term, lgi, spc, aux_file_name
+                                  : string;
+          P, P1                   : Program;
+          n                       : builtinInt;
+          global
+            []    meta_apply(str,term,SPEC(lgi,spc),n) => 
+                          meta_apply(str,term,lgi,spc,n)  end
+            []    meta_apply(str,term,P,n) => 
+                          meta_apply(str,term,aux_file_name,n)
+                          where aux_file_name:=()get_aux_file_name+".ref"
+                          where P1:=()write_file(aux_file_name,P)
+            end
+          end
+
+          rules for list[string]
+          str, lgi, spc, aux_file_name    
+                          : string;
+          terms           : list[string];
+          P, P1           : Program;
+          frm, n          : builtinInt;
+          global
+            []    meta_apply(str,terms,SPEC(lgi,spc),frm,n) => 
+                          meta_apply(str,terms,lgi,spc,frm,n)     end
+            []    meta_apply(str,terms,P,frm,n) => 
+                          meta_apply(str,terms,aux_file_name,frm,n)
+                          where aux_file_name:=()get_aux_file_name+".ref"
+                          where P1:=()write_file(aux_file_name,P)
+            end
+          end
+
+          rules for Term
+          S       : Strategy;
+          T       : Term;
+          P       : Program;
+          sorte   : Sort;
+          n       : builtinInt;
+          str     : string;
+          term8, term9: Term;
+          global
+            [meta_apply_rule]     
+                meta_apply(S,T:sorte,P,n) => 
+                    string2refterm(str:Sort2string(sorte),P)
+                          where str:=(META)meta_apply(
+                            term2string(S),term2string(T),P,n)
+            end
+          end
+          rules for list[Term]
+          S       : Strategy;
+          T       : Term;
+          P       : Program;
+          sorte   : Sort;
+          frm     : builtinInt;
+          n       : builtinInt;
+          x       : string;
+          xs      : list[string];
+          sortstr : string;
+          global
+            []    meta_apply(S,T:sorte,P,frm,n) => 
+                          strings2refterms(xs:Sort2string(sorte),P)
+                          where xs:=(META)meta_apply(
+                            term2string(S),term2string(T).nil, P, frm,n)
+            end
+            []    strings2refterms(nil:sortstr,P) => nil                          end
+            []    strings2refterms(x.xs:sortstr,P) => string2refterm(x:sortstr,P).
+                                                  strings2refterms(xs:sortstr,P)  end
+          end
+
+          rules for list[string]
+          P       : Program;
+          x       : Term;
+          xs      : list[Term];
+          global
+            []    refterms2strings(nil,P) => nil                                  end
+            []    refterms2strings(x.xs,P) => refterm2string(x,P).refterms2strings(xs,P)  
+            end
+          end
+
+          strategies for Term
+          implicit
+            [.]  meta_apply_strategy => dk(meta_apply_rule) end
+          end
+  end  
+   
+

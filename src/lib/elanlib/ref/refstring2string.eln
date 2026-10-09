@@ -1,0 +1,64 @@
+// This file is generated automatically: do not edit it directly. 
+  module refstring2string
+          import global builtinInt list[string] list[Term] 
+                  REF 
+                  ref_write[0]  ref_read[0]; // 0 for verbose
+          local   divers2string//[Term]
+                  io[Program] io[string]
+                  ;
+          end
+              operators global
+                spec2ref(@,@)         : // exports a spec, returns a Program
+                              (string string) Program;
+                spec2ref(@,@)         : // exports a spec, returns its ref-file name
+                              (string string) string  code 162;       // ".spc"+".lgi"->".ref"
+                //--------------------                       
+                ThisProgram           : // returns SPEC(curr_lgi,curr_spc)
+                              Program         code 165;       // ref of the running program
+                //--------------------                       
+                refstring2string(@,@) : // ("FSYM(...)",P)
+                              (string Program) string;
+                refstring2string(@,@) : // ("FSYM(...)","file.ref")
+                              (string string) string          code 160;       // ChR's prettyprint box
+                //--------------------                       
+                string2refstring(@':'@,@) :   // ("FSYM(...)":"list",P)
+                              (string Sort Program) string;
+                string2refstring(@':'@,@) :   // ("FSYM(...)":"list","file.ref")
+                              (string string string) string   code 161;       // ChR's parser box
+              end   
+          rules for Program
+          lgi, spc, tmp_file_name : string;
+          global
+            []    spec2ref(lgi,spc) => read_file(tmp_file_name)
+                          where tmp_file_name:=()spec2ref(lgi,spc)        end
+          end
+
+          rules for string
+          P, P1           : Program;
+          aux_file_name   : string;
+          termstring      : string;
+          sorte           : Sort;
+          lgi, spc        : string;
+          global
+            []    refstring2string(termstring,SPEC(lgi,spc)) =>
+                      refstring2string(termstring,spec2ref(lgi,spc))
+            end
+            []    refstring2string(termstring,P) =>
+                      refstring2string(termstring,aux_file_name)
+                          where aux_file_name:=()get_aux_file_name+".ref"
+                          where P1:=()write_file(aux_file_name,P)
+            end
+            //--------------------                       
+            []    string2refstring(termstring:sorte,SPEC(lgi,spc)) => 
+                      string2refstring(termstring:Sort2string(sorte),
+                                       spec2ref(lgi,spc))
+            end
+            []    string2refstring(termstring:sorte,P) => 
+                      string2refstring(termstring:Sort2string(sorte),aux_file_name)
+                          where aux_file_name:=()get_aux_file_name+".ref"
+                          where P1:=()write_file(aux_file_name,P)
+            end
+          end
+  end  
+   
+

@@ -1,0 +1,25 @@
+// This file is generated automatically: do not edit it directly. 
+  module ref_modules
+          import global
+                  int
+                  REF
+                  ref_tables
+                  list[TabItem]
+                  ;
+          end
+              operators global
+                get_module(@,@)               : (int Program) string;   
+              local
+                get_module(@,@)               : (int Tab) string;
+              end    
+          rules for string
+          tis     : list[TabItem];
+          P       : Program;
+          n       : int;
+          global
+            []  get_module(n,P) => get_module(n,P.Modules)                end
+            []  get_module(n,Modules tis) => get_string(n,tis)            end
+          end
+  end  
+   
+

@@ -1,0 +1,65 @@
+// This file is generated automatically: do not edit it directly. 
+  module ref_unify_builtin
+          import global
+                  REF
+                  ref_unify
+                  list[Term] eq[list[Term]]
+                  builtinSyntacticMatching[Term,list[Term]]
+                  ;
+          end
+              operators global
+                mgu(@,@)      : (Term Term) substitution;
+                unifyFail     : list[Term];   
+              local
+                listTerm_variable(@,@) : ( Term list[Term] ) list[Term];
+                listTerm_variable(@,@) : ( list[Term] list[Term] ) list[Term];
+                system_to_subst(@,@)  : (list[Term] list[Term]) substitution;
+              end    
+          rules for substitution
+          mgu, listVar, ts: list[Term];
+          t1, t2          : Term;
+          m, n            : int;
+          global
+            []  mgu(t1,t2) => system_to_subst(listVar,mgu)
+                  where listVar:=()
+                          listTerm_variable(t1,listTerm_variable(t2,nil))
+                  where mgu:=()
+                          builtinSyntacticUnification(t1,t2,listVar,unifyFail)
+                  if mgu != unifyFail
+            end
+            []  mgu(t1, t2)       => nosubstitution
+            end
+          end
+
+          rules for list[Term]
+          mgu, listVar, ts: list[Term];
+          t1, t2          : Term;
+          m, n            : int;
+          global
+            []    listTerm_variable(VAR(n,m),listVar) => VAR(n,m).listVar 
+            end
+            []    listTerm_variable(FSYM(ts,m),listVar) => 
+                  listTerm_variable(ts,listVar) 
+            end
+            []    listTerm_variable(t1,listVar) => listVar
+            end
+            //----------------------------------------
+            []    listTerm_variable(nil,listVar) => listVar
+            end
+            []    listTerm_variable(t1.ts,listVar) => 
+                  listTerm_variable(ts,listTerm_variable(t1,listVar))
+            end
+          end
+
+          rules for substitution
+           lv     : list[Term];
+           lt     : list[Term];
+           t      : Term;
+           v      : Term;
+          global
+            [] system_to_subst(lv,nil)    => identity                     end
+            [] system_to_subst(v.lv,t.lt) => v->t o system_to_subst(lv,lt) end
+          end
+  end  
+   
+

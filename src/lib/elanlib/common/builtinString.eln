@@ -1,0 +1,19 @@
+module builtinString
+        import global anyString builtinInt ident;
+        end
+        sort builtinString;
+        end
+        operators global 
+           string_strlen(@)       : (builtinString) builtinInt   pri 2000 code 150;
+           string_strcat(@,@)     : (builtinString builtinString) builtinString pri 2000 assocRight code 151;
+           string @[@]            : (builtinString builtinInt) builtinInt pri 2000 code 152;
+           string @[@<-@]         : (builtinString builtinInt builtinInt) builtinString pri 2000 code 153;
+           string_substr(@,@,@)   : (builtinString builtinInt builtinInt) builtinString pri 2000 code 154;
+           string_strspn(@,@)     : (builtinString builtinString) builtinInt    pri 2000 code 156;
+           string_strcmp(@,@)     : (builtinString builtinString) builtinInt    pri 2000 code 157;
+           string_string(@)       : (builtinInt) builtinString           pri 2000 code 158;
+           string_ident2string(@) : (ident) builtinString                code 177;
+        end
+
+end  
+ 

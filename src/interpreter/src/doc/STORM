@@ -1,0 +1,32 @@
+Pour integrer Strom dans ELAN :
+
+../storm_src/proto.h :
+----------------------
+net_init	: creation du net
+net_insert	: insertion d'un pattern
+net_match	: premiere solution
+net_next_answer	: solution suivante
+
+../storm_src/net.c :
+--------------------
+commentaires sur ces fonctions
+
+../storm_src/interface.h :
+--------------------------
+interface pour relier les differentes representations
+
+
+eker_term.h :
+-------------
+struture de term d'Eker : TERM
+
+term.c :
+---------
+toacform : fonction de conversion
+tomyform : fonction de conversion
+
+termdefs.h :
+------------
+struture de term de Marian
+
+

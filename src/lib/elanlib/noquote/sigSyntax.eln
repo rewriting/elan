@@ -1,0 +1,23 @@
+// This file is generated automatically: do not edit it directly. 
+module sigSyntax
+        import 
+                global  identifier int;
+                local   identifier list[identifier] pair[identifier,int] 
+                        list[pair[identifier,int]];
+        end  
+        operators
+         global
+
+          @ ':' @ : ( identifier int ) pair[identifier,int]     alias [@,@]:;
+
+          Epsilon : list[identifier]                            alias nil:;
+          @  @    : ( identifier list[identifier] ) list[identifier]   
+                                                                alias cons(@,@):;
+
+          Epsilon : list[pair[identifier,int]]                  alias nil:;
+          @  @    : ( pair[identifier,int] list[pair[identifier,int]] ) 
+                                  list[pair[identifier,int]]    alias cons(@,@):;
+
+        end
+end  
+ 

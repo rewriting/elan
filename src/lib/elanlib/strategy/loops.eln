@@ -1,0 +1,32 @@
+// This file is generated automatically: do not edit it directly. 
+   module loops[v,X]
+           import global int strat[X] replace[int,<X->X>]; end
+               operators global
+                 v                             : int;
+               end   
+           stratop global
+             for  v=@ to @ do @ od         : (int int <X>) <X>;
+             for  v=@ downto @ do @ od     : (int int <X>) <X>;
+             some v=@ to @ do @ od         : (int int <X>) <X>;
+           end
+           strategies for X
+                   n, m, mm        : int;
+                   s, ss           : <X>;
+                   t               : X;
+           implicit
+             [.] some v=n to m do s od =>
+                           dk(replace(v,n,s), some v= n+1 to m do s od)
+                           if n <= m                                               end
+             [.] for v=n to m do s od =>
+                           replace(v,n,s); for v= n+1 to m do s od
+                           if n <= m                                               end
+
+             [.] for v=n to m do s od =>   id if n > m                             end
+             [.] for v=n downto m do s od =>
+                           replace(v,n,s); for v= n-1 downto m do s od
+                           if n >= m                                               end
+             [.] for v=n downto m do s od =>  id if n < m                          end
+           end
+   end  
+    
+

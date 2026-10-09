@@ -1,0 +1,29 @@
+// This file is generated automatically: do not edit it directly. 
+ module Meta_strat[X]
+ // ONLY FOR INTERPRETER 
+         import global builtinString; end
+
+         sort Labels[X] 
+              Strategies[X] Strateg[X] 
+              Strategy[X];
+         end
+             operators global
+               @                : (Strategy[X]) Strategies[X]                   code 131;
+               @ , @            : (Strategy[X] Strategies[X]) Strategies[X]     code 132;
+               @                : (builtinString) Labels[X]                     code 133;
+               @ @              : (builtinString Labels[X]) Labels[X]           code 134;
+               dc(@)            : (Labels[X]) Strateg[X]                        code 135;
+               dk(@)            : (Labels[X]) Strateg[X]                        code 136;
+               dc(@)            : (Strategies[X]) Strateg[X]                    code 137;
+               dk(@)            : (Strategies[X]) Strateg[X]                    code 138;
+               repeat @ endrepeat   : (Strategy[X]) Strateg[X]                  code 139;
+               while @ endwhile     : (Strategy[X]) Strateg[X]   alias repeat @ endrepeat:;
+               iterate @ enditerate : (Strategy[X]) Strateg[X]                  code 140;
+               @                    : (Strateg[X]) Strategy[X]                  code 141;
+               @ @                  : (Strateg[X] Strategy[X]) Strategy[X]      code 142;
+               id                   : Strateg[X]                                code 143;
+               call @':'X           : (builtinString) Strateg[X]                code 144;
+             end   
+ end  
+  
+

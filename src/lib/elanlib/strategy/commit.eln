@@ -1,0 +1,19 @@
+// This file is generated automatically: do not edit it directly. 
+  module commit[X]
+          import global int strat[X] list[X] strapply[X]; end
+          stratop global
+            commit @ do @ od                      : (builtinInt <X>) <X>;
+          end
+          strategies for X
+                  n       : builtinInt;
+                  s       : <X>;
+                  a,t     : X;
+                  ts      : list[X];
+          explicit
+            [.] [commit n do s od]t => a  where ts:=()setof(s,t,0,n)
+                                          where a:=(listExtract)elem(ts)
+            end
+          end
+  end  
+   
+

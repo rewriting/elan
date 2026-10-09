@@ -1,0 +1,39 @@
+build_match.o: build_match.c defs.h /usr/include/stdio.h \
+  /usr/include/sys/types.h /usr/include/sys/appleapiopts.h \
+  /usr/include/sys/cdefs.h /usr/include/machine/types.h \
+  /usr/include/ppc/types.h /usr/include/machine/ansi.h \
+  /usr/include/ppc/ansi.h /usr/include/machine/endian.h \
+  /usr/include/ppc/endian.h term_types.h functions.h pure_types.h \
+  free_types.h state_types.h
+
+defs.h:
+
+/usr/include/stdio.h:
+
+/usr/include/sys/types.h:
+
+/usr/include/sys/appleapiopts.h:
+
+/usr/include/sys/cdefs.h:
+
+/usr/include/machine/types.h:
+
+/usr/include/ppc/types.h:
+
+/usr/include/machine/ansi.h:
+
+/usr/include/ppc/ansi.h:
+
+/usr/include/machine/endian.h:
+
+/usr/include/ppc/endian.h:
+
+term_types.h:
+
+functions.h:
+
+pure_types.h:
+
+free_types.h:
+
+state_types.h:

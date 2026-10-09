@@ -1,0 +1,19 @@
+// This file is generated automatically: do not edit it directly. 
+module ident
+        import global anyIdentifier;
+               local  bool;
+        end 
+        sort ident;
+        end  
+        operators
+         global
+
+           @ == @       : ( ident ident ) bool                  code 14;
+           @ != @       : ( ident ident ) bool                  code 15;
+
+           eq_ident(@,@)    : ( ident ident ) bool      alias @ == @:;
+           neq_ident(@,@)   : ( ident ident ) bool      alias @ != @:;
+
+        end  
+end  
+

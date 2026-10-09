@@ -1,0 +1,25 @@
+// This file is generated automatically: do not edit it directly. 
+  module ref_sorts
+          import global
+                  int
+                  REF
+                  ref_tables
+                  list[TabItem]
+                  ;
+          end
+              operators global
+                get_sort(@,@)         : (int Program) string;   
+              local
+                get_sort(@,@)         : (int Tab) string;
+              end    
+          rules for string
+          tis     : list[TabItem];
+          P       : Program;
+          n       : int;
+          global
+            []  get_sort(n,P) => get_sort(n,P.Sorts)                      end
+            []  get_sort(n,Sorts tis) => get_string(n,tis)                end
+          end
+  end  
+   
+
