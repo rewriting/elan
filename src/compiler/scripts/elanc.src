@@ -35,6 +35,9 @@ JAVA="__JAVA__"
 CLASSES="__PREFIX__/classes"
 # The installation and its tools (defaults of the generated Makefile)
 PROPERTIES="-DPREFIX=__PREFIX__ -DELAN_CC=__ELAN_CC__ -DELAN_CXX=__ELAN_CXX__ -DGC_PREFIX=__GC_PREFIX__"
+# Sanitizer options of the runtime libraries (sanitizer build), for the
+# generated programs: one property, its value contains blanks
+SANITIZE="__ELAN_SANITIZE__"
 
 REMOPTION=""
 ELANOPTION="-b "
@@ -109,9 +112,9 @@ if [ $# -gt 0 ]; then
   "$ELAN" --cexport "$LGIFILE.ref" $ELANOPTION "$LGIDIR/$LGIFILE.lgi" ${SPCNAME:+"$SPCNAME"} || exit $?
 
   if [ -n "$verb" ]; then
-    show $JAVA $PROPERTIES -cp $CLASSES rem.REM $LGIFILE.ref $REMOPTION
+    show $JAVA $PROPERTIES ${SANITIZE:+"-DELAN_SANITIZE=$SANITIZE"} -cp $CLASSES rem.REM $LGIFILE.ref $REMOPTION
   fi
-  "$JAVA" $PROPERTIES -cp "$CLASSES" rem.REM "$LGIFILE.ref" $REMOPTION
+  "$JAVA" $PROPERTIES ${SANITIZE:+"-DELAN_SANITIZE=$SANITIZE"} -cp "$CLASSES" rem.REM "$LGIFILE.ref" $REMOPTION
 
 else
   echo "elanc [[elan options][compiler options]] file[.lgi] [file.[spc]]"

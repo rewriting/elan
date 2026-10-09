@@ -93,7 +93,9 @@ check: smoke test-runner check-arch check-unit
 
 # Interpreter tests under sanitizers (build-san/): AddressSanitizer + UBSan.
 # The compiled tests (J, JO) run too: `elan --cexport` runs under the
-# sanitizers; the compiler libraries and the generated programs do not.
+# sanitizers, the compiler libraries and the generated programs are built with
+# UBSan only (libchoice copies the C stack, which ASan cannot check; elanc
+# passes the options to the generated Makefiles).
 # On macOS 27 with Apple Clang 17, ASan hangs at startup even for an empty
 # program, so the default there is UBSan only (ASan runs in CI on Linux and in
 # ci/Dockerfile.linux). Leak detection is off: terms are never freed, by design.

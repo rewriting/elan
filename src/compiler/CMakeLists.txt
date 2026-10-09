@@ -37,6 +37,13 @@ endif()
 set(ELAN_RT_C_OPTIONS   -std=c17 -fno-common -fsigned-char -Wall -Wextra -Werror)
 set(ELAN_RT_CXX_OPTIONS -std=c++17 -fsigned-char -Wall -Wextra -Werror)
 
+# Sanitizer build (top-level CMakeLists.txt): the libraries are compiled with
+# UBSan, and elanc passes the same options to the generated Makefiles.
+if(ELAN_COMPILER_SANITIZE_OPTIONS)
+  add_compile_options(${ELAN_COMPILER_SANITIZE_OPTIONS})
+endif()
+string(JOIN " " ELAN_COMPILER_SANITIZE_FLAGS ${ELAN_COMPILER_SANITIZE_OPTIONS})
+
 # --- REM: javac -> classes/ -------------------------------------------------------
 file(GLOB_RECURSE REM_SOURCES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/rem/*.java)
 set(REM_CLASSES ${CMAKE_CURRENT_BINARY_DIR}/classes)
@@ -140,13 +147,15 @@ install(FILES cpl/choice.h DESTINATION include)
 
 # elanc: __PREFIX__ and the tools of this build (the generated Makefiles
 # compile with the compilers of the libraries: a C++ program cannot link a
-# libearley built by another C++ standard library).
+# libearley built by another C++ standard library), and the sanitizer options
+# of the libraries (empty outside a sanitizer build).
 file(READ ${CMAKE_CURRENT_SOURCE_DIR}/scripts/elanc.src ELANC)
 string(REPLACE "__PREFIX__"    "${CMAKE_INSTALL_PREFIX}"   ELANC "${ELANC}")
 string(REPLACE "__JAVA__"      "${Java_JAVA_EXECUTABLE}"   ELANC "${ELANC}")
 string(REPLACE "__ELAN_CC__"   "${CMAKE_C_COMPILER}"       ELANC "${ELANC}")
 string(REPLACE "__ELAN_CXX__"  "${CMAKE_CXX_COMPILER}"     ELANC "${ELANC}")
 string(REPLACE "__GC_PREFIX__" "${ELAN_GC_PREFIX}"         ELANC "${ELANC}")
+string(REPLACE "__ELAN_SANITIZE__" "${ELAN_COMPILER_SANITIZE_FLAGS}" ELANC "${ELANC}")
 file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/elanc "${ELANC}")
 set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
              ${CMAKE_CURRENT_SOURCE_DIR}/scripts/elanc.src)

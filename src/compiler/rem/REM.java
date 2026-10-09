@@ -317,8 +317,9 @@ public class REM {
       subMakefile.write("ARCH := $(shell uname -s)\n");
       // The compilers and the GC of the ELAN installation (passed by elanc):
       // the program must be linked by the C++ compiler that built libearley.
-      // Defaults only: the environment can override them.
-      String[] makefileTools = { "ELAN_CC", "ELAN_CXX", "GC_PREFIX" };
+      // ELAN_SANITIZE: the sanitizer options of the libraries (sanitizer
+      // build only). Defaults only: the environment can override them.
+      String[] makefileTools = { "ELAN_CC", "ELAN_CXX", "GC_PREFIX", "ELAN_SANITIZE" };
       for(int t = 0; t < makefileTools.length; t++) {
         String value = System.getProperty(makefileTools[t]);
         if(value != null && value.length() > 0) {
@@ -360,8 +361,8 @@ public class REM {
       subMakefile.write("ELAN_CXX ?= g++\n");
       subMakefile.write("GC_PREFIX ?= /usr\n");
       subMakefile.write("endif\n");
-      subMakefile.write("CC = $(ELAN_CC) -pipe -std=gnu89 -w -fcommon -fsigned-char -I$(GC_PREFIX)/include\n");
-      subMakefile.write("CXX = $(ELAN_CXX) -L$(GC_PREFIX)/lib\n");
+      subMakefile.write("CC = $(ELAN_CC) -pipe -std=gnu89 -w -fcommon -fsigned-char -I$(GC_PREFIX)/include $(ELAN_SANITIZE)\n");
+      subMakefile.write("CXX = $(ELAN_CXX) -L$(GC_PREFIX)/lib $(ELAN_SANITIZE)\n");
       //subMakefile.write("CXX = g++ \n");
       if(Flags.choicePointDebug) {
         if(Flags.onlyC) {
@@ -391,8 +392,8 @@ public class REM {
       subMakefile.write("ELAN_CC ?= gcc-16\n");
       subMakefile.write("ELAN_CXX ?= g++-16\n");
       subMakefile.write("GC_PREFIX ?= /opt/homebrew/opt/bdw-gc\n");
-      subMakefile.write("CC = $(ELAN_CC) -pipe -std=gnu89 -w -fcommon -I$(GC_PREFIX)/include\n");
-      subMakefile.write("CXX = $(ELAN_CXX) -L$(GC_PREFIX)/lib\n");
+      subMakefile.write("CC = $(ELAN_CC) -pipe -std=gnu89 -w -fcommon -I$(GC_PREFIX)/include $(ELAN_SANITIZE)\n");
+      subMakefile.write("CXX = $(ELAN_CXX) -L$(GC_PREFIX)/lib $(ELAN_SANITIZE)\n");
       subMakefile.write("YLIB = -ll\n");
       subMakefile.write("DLLIB = \n");
       subMakefile.write("endif\n");
