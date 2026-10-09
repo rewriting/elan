@@ -53,3 +53,23 @@ add_custom_command(
           ${S}/atermparser.h ${S}/reduceparser.h ${S}/ldparser.h
   COMMENT "Generating ELAN parser sources with macc")
 add_custom_target(elan_parsers DEPENDS ${ELAN_GENERATED})
+
+# --- elan: the interpreter ---------------------------------------------------
+add_executable(elan
+  src/ldmain.cc src/msemact.cc src/msemact3.cc src/termcompile.cc src/matchcompile.cc
+  src/compilemisc.cc src/strategy.cc src/grammar.cc src/earley.cc src/esemact.cc src/term.cc
+  src/module.cc src/tmisc.cc src/rtmisc.cc src/match.cc src/trsystem.cc src/normalise.cc
+  src/aterm.cc src/partial.cc src/stateofexecution.cc src/meta.cc src/lbuffer.cc
+  src/mlstream.cc src/command.cc
+  ${ELAN_COMMON_SOURCES}
+  ${ELAN_GEN_DIR}/tabofident.cc ${ELAN_GEN_DIR}/ppexparser.cc ${ELAN_GEN_DIR}/mparser.cc
+  ${ELAN_GEN_DIR}/atermparser.cc ${ELAN_GEN_DIR}/reduceparser.cc ${ELAN_GEN_DIR}/ldparser.cc
+  ${ELAN_GEN_DIR}/atabofident.cc)
+elan_cxx_target(elan)
+target_include_directories(elan PRIVATE ${ELAN_GEN_DIR})
+add_dependencies(elan elan_parsers)
+target_link_libraries(elan PRIVATE match m)
+
+install(TARGETS elan RUNTIME DESTINATION bin)
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/src/lib/elanlib/
+        DESTINATION share/elanlib)
