@@ -35,17 +35,13 @@
 #define nl() lexan(rwt,uit,&inf)
 
 
-void expect_sym(s)
-int s;
+void expect_sym(int s)
 { 
   /* added NULL arg to satisfy prototype */
   if (nl()!=s) oferr(&inf,"[exp] \t%s expected",alfsy(-s, NULL));
 }
 
-void hcomline(name,fnam,aar,mmodn)
-char *name;                        /* vstupny argument hcomline */
-char *fnam;
-int *aar,*mmodn;
+void hcomline(char *name /* vstupny argument hcomline */, char *fnam, int *aar, int *mmodn)
 {
   INFILE fff;
   char *p,*q;
@@ -119,8 +115,7 @@ static void hop(void)
 }
 
 
-void trapsa(name)
-char *name;
+void trapsa(char *name)
 { int sy,ar,modn,axtyp;
 /* struct flist *pppp; */
 /* FILE *off,*oflinf,*ofc,*offtid; */

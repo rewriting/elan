@@ -161,9 +161,7 @@ void envirread()
 */
 }
 
-int enviradd(t,gt)
-int t;
-char *gt;
+int enviradd(int t, char *gt)
 { int n;
   n=idadd(gt,strlen(gt),envtypt);
   if (envnumt[n]==NULL) {
@@ -179,8 +177,7 @@ char *gt;
   return(envnumt[n]->num);
 }
 
-int envirnumallo(tn,ln)
-int tn,ln;
+int envirnumallo(int tn, int ln)
 { struct nlist *p;
   p=envnumt[envindt[tn]];
   if (ln==-1) return(p->num);
@@ -218,14 +215,11 @@ void envirwrite()
   FREEIDT(envtypt); TIDFRE(envtypt);
 }
 
-int isinenvir(gt)
-char *gt;
+int isinenvir(char *gt)
 { return(idmember(gt,envtypt));
 }
 
-int envirget(t,gt)
-int t;
-char *gt;
+int envirget(int t, char *gt)
 {
   if (idmember(gt,envtypt)) {
     if (t=='t' && envtyp[posid]!='t') oferr(NULL,"[envirget] %s is not type",gt);
@@ -235,21 +229,17 @@ char *gt;
   return(-1);
 }
 
-int enviraliget(n)
-int n;
+int enviraliget(int n)
 { return(alityp[envindt[n]]);
 }
 
-char *envirgetname(s)
-int s;
+char *envirgetname(int s)
 {
   if (s<1023) return(envtypt->id[envindt[s]]);
   return("STAND");  /* parse kept as in 2004 */
 }
 
-void envirsetal(i,gt)
-int i;
-char *gt;
+void envirsetal(int i, char *gt)
 {
   if (!idmember(gt,envtypt)) oferr(NULL,"[envirsetal] unknown type %s",gt);
   if (envtyp[posid]!='t') oferr(NULL,"%s is not type",gt);

@@ -79,9 +79,7 @@ static void rules(void)
   inimport=0;
 }
 
-void readgram(n,t)
-char *n;
-int t;
+void readgram(char *n, int t)
 { /* int tm; */
   INFILE rff;
   if (! opeinfile(n,&rff))
@@ -157,9 +155,7 @@ static void oasocpri(int a,FILE *f)
 }
 
 
-void outruleb(b,e,f)
-int b,e;
-FILE *f;
+void outruleb(int b, int e, FILE *f)
 { int i,begr,j;
   oasocpri(LEFTASOC,f);
   oasocpri(RIGHTASOC,f);
@@ -197,8 +193,7 @@ int terminalv(int typ)
 
 
 
-int hruleb(t,reallyimp)
-int t,reallyimp;
+int hruleb(int t, int reallyimp)
 { int etypl,i,j,head;
   struct rslist *bodyl;
   inruleb=1; canimport=reallyimp;

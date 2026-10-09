@@ -66,9 +66,7 @@ static int sarg;        /* flag pre semaction, ci kopirujem aktualny arg.*/
 
 
 
-int opeinfile(s,ff)
-char *s;
-INFILE *ff;
+int opeinfile(char *s, INFILE *ff)
 { char c,*ss;
   ff->f=fopen(s,"r");
   if (ff->f==NULL) {
@@ -91,8 +89,7 @@ opefail:
   return(1);
 }
 
-void cloinfile(ff)
-INFILE *ff;
+void cloinfile(INFILE *ff)
 { CFRE(ff->name);
   if (ff->f!=NULL) fclose(ff->f);
 }
@@ -153,9 +150,7 @@ char *p;
   return(p);
   }*/
 
-int sast(rw,ui,f)
-TABID *rw,*ui;
-INFILE *f;
+int sast(TABID *rw, TABID *ui, INFILE *f)
 { int sy;
   char *p;
   sarg=2; amacbi=0; sy=lexan(rw,ui,f);
@@ -173,9 +168,7 @@ static int handldef(INFILE *f,int sy)
   return(sy);
 }
 
-int hasocpri(f,sy)
-INFILE *f;
-int sy;
+int hasocpri(INFILE *f, int sy)
 {
   // initialised to NOASOC to avoid uninitialisation warning
   unsigned as=NOASOC;
@@ -199,9 +192,7 @@ int sy;
 }
 
 
-int prodef(f,sy)
-int sy;
-INFILE *f;
+int prodef(INFILE *f, int sy)
 { INFILE f2;
   while (sy==STinclude) {
     blankskip();
@@ -222,9 +213,7 @@ INFILE *f;
   return(sy);
 }
 
-void pushmac(t,i)
-char *t;
-int i;
+void pushmac(char *t, int i)
 { char *p;
   if (inmaci>=MAXINMAC) oferr(NULL,"\t too many nested macros \n");
   p=ALLOSS(i,char);
@@ -245,9 +234,7 @@ static void handlarg(int ar,TABID *rw,TABID *ui,INFILE *f)
     if (ar!=handlar(rw,ui,f)) oferr(f,"bad number of argument");
 }
 
-int handlar(rw,ui,f)
-TABID *rw,*ui;
-INFILE *f;
+int handlar(TABID *rw, TABID *ui, INFILE *f)
 {
   int i,ls,ena;
   char *p;
@@ -266,8 +253,7 @@ INFILE *f;
   return(i);
 }
 
-void handlfarg(ar)
-int ar;
+void handlfarg(int ar)
 { int i,am;
  if (ar) {
   expect_sym('['); i=0;
@@ -294,9 +280,7 @@ void resetmactab()
     }
 }
 
-int lexan(rw,ui,ff)
-TABID *rw,*ui;
-INFILE *ff;
+int lexan(TABID *rw, TABID *ui, INFILE *ff)
 { int i,c;
   snval=nval; suival=uival; schval=chval; srnval=rnval;
   aff=ff;
@@ -415,9 +399,7 @@ static handlestring()
 static char alfsych[]=" ";
 static char alfsyci[]="\'\\ \'";
 
-char *alfsy(s,t)
-int s;
-TABID *t;
+char *alfsy(int s, TABID *t)
 { 
   s= -s;
   if (s<LASTCHAR) { 
@@ -435,8 +417,7 @@ TABID *t;
   return(alfstter(s));
 }
 
-char *alfstter(s)
-int s;
+char *alfstter(int s)
 {
   switch(s) {
   case APOSCHAR :return("CHAR");

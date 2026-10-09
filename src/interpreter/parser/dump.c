@@ -72,8 +72,7 @@ static void polout(int p)
   printf("%c\n",i==p?'_':' ');
 }
 
-void stbdump(i)
-int i;
+void stbdump(int i)
 {   int j,n,*pp;
     struct actlist *aa;
     printf("\n\n stav cislo %d :\n polozky:\n",i);

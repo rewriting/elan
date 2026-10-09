@@ -34,9 +34,7 @@
 
 /*...........................................................................*/
 
-int idmember(id,t)
-char *id;
-TABID *t;
+int idmember(char *id, TABID *t)
 { char *p;
   posid=0; p=id;
   while (*p) posid=posid+*(p++);
@@ -48,10 +46,7 @@ TABID *t;
   return(0);
 }
 
-int idadd(id,l,t)
-char *id;
-int l;
-TABID *t;
+int idadd(char *id, int l, TABID *t)
 { if (!idmember(id,t)) {
     if (((t->nidin+1)*10)/9 >= t->maxid) {
       oerr(NULL,'e',"[idadd] id tab overflowed over %d\n ",t->maxid);
@@ -77,8 +72,7 @@ static void idinit(TABID *t)
   t->nidin=0;
 }
 
-TABID * idtaballoc(n)
-int n;
+TABID * idtaballoc(int n)
 { TABID *t;
   t=ALLOS(TABID);
   t->id = ALLOSS(n,char *);
@@ -87,10 +81,7 @@ int n;
   return(t);
 }
 
-void tiddump(f,t,name)
-FILE *f;
-TABID *t;
-char *name;
+void tiddump(FILE *f, TABID *t, char *name)
 { int i;
   fprintf(f,"static char * %s0[]={",name);
   for(i=0; i<(t->maxid-1);i++) {

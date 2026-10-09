@@ -1,8 +1,7 @@
 #include <stdlib.h>
 #include "tools.h"
 
-void MsgErreur(message)
- char *message;
+void MsgErreur(char *message)
 {
   printf("%s",message);
 }

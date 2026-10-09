@@ -49,8 +49,7 @@ static void free_index_list(INDEX_LIST *list)
  *	(2) Delete any bound variables together with their bindings.
  *	(3) Build structures for assignments and shared variables.
  */
-BOOL build_pure(obj)
-MATCH_OBJECT *obj;
+BOOL build_pure(MATCH_OBJECT *obj)
 {
   PURE_LIST *pure_stack = obj->pure_stack;
   int i, j, term_tab_size, *vmult;
@@ -402,8 +401,7 @@ got_subterm:
 /*
  *	Free all storage allocted to pure problem structure
  */
-void destroy_pure(prob)
-PURE_PROBLEM *prob;
+void destroy_pure(PURE_PROBLEM *prob)
 {
   VAR_HEADER *var_tab;
   TERM_HEADER *term_tab;

@@ -23,10 +23,7 @@ static BOOL advance_graph(MATCH_OBJECT *obj, GRAPH_LIST *g, BOOL reset);
  *	Find all solutions to free AC problem by iteratively backtracking
  *	over all solutions to AC subproblems.
  */
-BOOL solve_free(obj, fp, reset)
-MATCH_OBJECT *obj;
-FREE_PROBLEM *fp;
-BOOL reset;
+BOOL solve_free(MATCH_OBJECT *obj, FREE_PROBLEM *fp, BOOL reset)
 {
   AC_PROB_LIST *p;
 

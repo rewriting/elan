@@ -17,8 +17,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void *salloc(n)
-unsigned n;
+void *salloc(unsigned n)
 {
   char *t = (char*) malloc(n);
 
@@ -27,9 +26,7 @@ unsigned n;
   return((void *) t);
 }
 
-void *srealloc(old, size)
-void *old;
-unsigned size;
+void *srealloc(void *old, unsigned size)
 {
   char *t = realloc((char *) old, size);
 
@@ -38,15 +35,13 @@ unsigned size;
   return((void *) t);
 }
 
-void sfree(p)
-void *p;
+void sfree(void *p)
 {
   free((char *) p);
 }
 
 
-void fatal(s,a)
-char *s, *a;
+void fatal(char *s, char *a)
 {
   fprintf(stderr,"[error] ACmatch error ");
   if(*a)

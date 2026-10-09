@@ -18,9 +18,7 @@ static TERM *ac_uncompress(TERM *t);
 /*
  *	Build a match object
  */
-void *build_match(p, s, tot_var)
-TERM *p, *s;
-int tot_var;
+void *build_match(TERM *p, TERM *s, int tot_var)
 {
   MATCH_OBJECT *m = MALLOC(MATCH_OBJECT);
   int i;
@@ -89,9 +87,7 @@ static BOOL find_match(MATCH_OBJECT *m)
   return(FALSE);
 }
 
-BOOL extract_match(vm, assignment)
-void *vm;
-TERM *assignment[];
+BOOL extract_match(void *vm, TERM *assignment[])
 {
   MATCH_OBJECT *m = (MATCH_OBJECT *) vm;
   int i, j, t, n_var, n_term, a;
@@ -213,8 +209,7 @@ static TERM *ac_uncompress(TERM *t)
 /*
  *	destroy object and free storage
  */
-void destroy_match(vm)
-void *vm;
+void destroy_match(void *vm)
 {
   MATCH_OBJECT *m = (MATCH_OBJECT *) vm;
 

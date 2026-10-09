@@ -30,9 +30,7 @@
 */
 #include "globdef.h"
 
-char *allo(n,s)
-unsigned long n;
-int s;
+char *allo(unsigned long n, int s)
 { char *p;
   if (n!=0) {
   p=malloc((n*(long)s));
@@ -45,8 +43,7 @@ int s;
   return(NULL);
 }
 
-void fre(p)
-void *p;
+void fre(void *p)
 {
   if (p!=NULL) free(p);
 }

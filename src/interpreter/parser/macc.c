@@ -134,9 +134,7 @@ static char *alfsymbol(int s)
 
 /*static  char rwtn[5]=" rwt";*/
 
-void gensa(saf,name)
-FILE *saf;
-int name;
+void gensa(FILE *saf, int name)
 { int i,p,a,p0,a0,c;
   struct gotolist *gg;
   struct actlist *aa;
@@ -228,8 +226,7 @@ int name;
 static char alfch[]=" ";
 static char alftyp[100];		/* dufam, ze 100 bude stacit */
 
-char * alfa(sy)
-int sy;
+char * alfa(int sy)
 {
   if (sy==DEFAULTSYM) return("DEFAULT");
   if (sy>0) {

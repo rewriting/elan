@@ -17,8 +17,7 @@ static TERM_LIST *merge_sort(TERM_LIST *p, int len);
 /*
  *	flatten a term
  */
-void flatten(t)
-TERM *t;
+void flatten(TERM *t)
 {
   TERM_LIST *p, *active;
   int count;
@@ -54,8 +53,7 @@ TERM *t;
   t->rest.f.list_len = count;
 }
 
-void ac_compress(t)
-TERM *t;
+void ac_compress(TERM *t)
 {
   /* initialised to avoid warning */
   BOOL ac = FALSE;
@@ -166,8 +164,7 @@ static TERM_LIST *merge_sort(TERM_LIST *p, int len)
  *	argument list of free function symbols and multiset order for
  *	argument lists of AC function symbols.
  */
-int term_cmp(t, t2)
-TERM *t, *t2;
+int term_cmp(TERM *t, TERM *t2)
 {
   TERM_TYPE type = t->type, type2 = t2->type;
   TERM_LIST *p, *p2;
@@ -214,8 +211,7 @@ TERM *t, *t2;
   }
 }
 
-void destroy_term(t)
-TERM *t;
+void destroy_term(TERM *t)
 {
   TERM_LIST *p, *p2;
   AC_LIST *q, *q2;
