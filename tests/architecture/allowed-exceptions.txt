@@ -1,0 +1,42 @@
+# Forbidden includes that exist today (S3a). Each needs a reason; the list may
+# only shrink: check_deps.py reports entries that are no longer needed.
+# Format: from-file -> header  # reason
+
+base/commondefs.h -> lex/lexem.h  # transitional umbrella header (S3a): untouched files still include commondefs.h
+base/commondefs.h -> lex/lstream.h  # transitional umbrella header (S3a): untouched files still include commondefs.h
+base/commondefs.h -> lex/mlstream.h  # transitional umbrella header (S3a): untouched files still include commondefs.h
+base/commondefs.h -> parse/grammar.h  # transitional umbrella header (S3a): untouched files still include commondefs.h
+compile/trsystem_compile.cc -> command/command.h  # the runtime tests the command-language flag `commands` and its print stack (S3b: callback/hook)
+lex/mlstream.cc -> load/module.h  # global tables fsymtab/trrules/typet/import are declared in load/module.h (S3b: own them in term/rewrite)
+lex/mlstream.cc -> term/termdefs.h  # parser/preprocessor build terms directly (esemact, FOR EACH) (S3b: term-building callback)
+match/match.cc -> load/module.h  # global tables fsymtab/trrules/typet/import are declared in load/module.h (S3b: own them in term/rewrite)
+parse/earley.cc -> load/module.h  # global tables fsymtab/trrules/typet/import are declared in load/module.h (S3b: own them in term/rewrite)
+parse/earley.cc -> term/termdefs.h  # parser/preprocessor build terms directly (esemact, FOR EACH) (S3b: term-building callback)
+parse/esemact.cc -> load/module.h  # global tables fsymtab/trrules/typet/import are declared in load/module.h (S3b: own them in term/rewrite)
+parse/esemact.cc -> term/termdefs.h  # parser/preprocessor build terms directly (esemact, FOR EACH) (S3b: term-building callback)
+parse/grammar.cc -> command/command.h  # the runtime tests the command-language flag `commands` and its print stack (S3b: callback/hook)
+parse/grammar.cc -> compile/compiledefs.h  # ISCONSTRUCTOR macros / `compile` flag defined in compiledefs.h (move to term)
+parse/grammar.cc -> load/module.h  # global tables fsymtab/trrules/typet/import are declared in load/module.h (S3b: own them in term/rewrite)
+parse/grammar.cc -> load/strategy.h  # parser-state globals of the loader read by this file (S3b: pass state explicitly)
+parse/grammar.cc -> term/codes.h  # grammar generation uses builtin symbol codes
+peval/partial.cc -> command/command.h  # the runtime tests the command-language flag `commands` and its print stack (S3b: callback/hook)
+peval/partial.cc -> compile/compiledefs.h  # ISCONSTRUCTOR macros / `compile` flag defined in compiledefs.h (move to term)
+ref/ref.cc -> command/command.h  # the runtime tests the command-language flag `commands` and its print stack (S3b: callback/hook)
+rewrite/normalise.cc -> command/command.h  # the runtime tests the command-language flag `commands` and its print stack (S3b: callback/hook)
+rewrite/normalise.cc -> load/module.h  # global tables fsymtab/trrules/typet/import are declared in load/module.h (S3b: own them in term/rewrite)
+rewrite/normalise.cc -> load/strategy.h  # parser-state globals of the loader read by this file (S3b: pass state explicitly)
+rewrite/rtmisc.cc -> command/command.h  # the runtime tests the command-language flag `commands` and its print stack (S3b: callback/hook)
+rewrite/rtmisc.cc -> load/module.h  # global tables fsymtab/trrules/typet/import are declared in load/module.h (S3b: own them in term/rewrite)
+rewrite/rtmisc.cc -> meta/meta.h  # meta-level builtins (META_*) are dispatched from the reduction/strategy interpreter
+rewrite/stateofexecution.cc -> command/command.h  # the runtime tests the command-language flag `commands` and its print stack (S3b: callback/hook)
+rewrite/stateofexecution.cc -> load/module.h  # global tables fsymtab/trrules/typet/import are declared in load/module.h (S3b: own them in term/rewrite)
+rewrite/stateofexecution.cc -> meta/meta.h  # meta-level builtins (META_*) are dispatched from the reduction/strategy interpreter
+rewrite/trsystem.cc -> command/command.h  # the runtime tests the command-language flag `commands` and its print stack (S3b: callback/hook)
+rewrite/trsystem.cc -> load/module.h  # global tables fsymtab/trrules/typet/import are declared in load/module.h (S3b: own them in term/rewrite)
+rewrite/trsystem.cc -> load/strategy.h  # parser-state globals of the loader read by this file (S3b: pass state explicitly)
+term/term.cc -> command/command.h  # the runtime tests the command-language flag `commands` and its print stack (S3b: callback/hook)
+term/term.cc -> compile/compiledefs.h  # ISCONSTRUCTOR macros / `compile` flag defined in compiledefs.h (move to term)
+term/term.cc -> load/module.h  # global tables fsymtab/trrules/typet/import are declared in load/module.h (S3b: own them in term/rewrite)
+term/term.cc -> load/strategy.h  # parser-state globals of the loader read by this file (S3b: pass state explicitly)
+term/termdefs.h -> match/acmatchdefs.h  # term embeds the libmatch state type (match_state) (move match_state to match)
+term/tmisc.cc -> load/module.h  # global tables fsymtab/trrules/typet/import are declared in load/module.h (S3b: own them in term/rewrite)

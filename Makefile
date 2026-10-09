@@ -21,7 +21,7 @@ else
   ELAN_CXX ?= g++
 endif
 
-.PHONY: all configure install check check-sanitize test-runner smoke reference check-reference clean toolchain
+.PHONY: all configure install check check-sanitize check-arch test-runner smoke reference check-reference clean toolchain
 
 all: configure
 	cmake --build $(BUILD) -j
@@ -63,7 +63,12 @@ smoke: install
 	if grep -q 's(o)' $$d/out; then echo "smoke: elan finds its library without ELANLIB"; rm -rf $$d; \
 	else cat $$d/out; rm -rf $$d; exit 1; fi
 
-check: smoke test-runner
+# Module dependency rules (tests/architecture, S3a spec D2)
+check-arch:
+	cd tests/architecture && python3 test_check_deps.py
+	python3 tests/architecture/check_deps.py
+
+check: smoke test-runner check-arch
 	$(BENCH) --prefix $(PREFIX) --kinds I,A
 
 # Interpreter tests under sanitizers (build-san/): AddressSanitizer + UBSan.
