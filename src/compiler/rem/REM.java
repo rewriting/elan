@@ -205,7 +205,7 @@ public class REM {
         }
       }
 
-      query = parser.Start(file_gram);
+      query = REFParser.Start(file_gram);
       parser=null; /* liberation de la memoire du parser */
 
       /*

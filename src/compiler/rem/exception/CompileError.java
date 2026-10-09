@@ -25,6 +25,7 @@
 package rem.exception;
 
 public class CompileError extends Exception {
+  private static final long serialVersionUID = 1L;
   protected String msg="no message";
   
   public CompileError() {

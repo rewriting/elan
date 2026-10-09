@@ -30,7 +30,7 @@ public class SymbolInteger extends SymbolValue {
   private static Hashtable table = new Hashtable(40);
 
   public SymbolInteger(int intValue, Lexem sort) {
-    super(new Integer(intValue),sort);
+    super(Integer.valueOf(intValue),sort);
   }
 
   public String setTag() {

@@ -324,7 +324,7 @@ int SymbolDeclaration(Lexem lexSort, OutputCode s,int numberOfGrammarRule) :
 
     numberOfGrammarRule += 5;
     for(i=0 ; i<arrayLex.length ; i++) {
-      lexem = (Lexem)arrayLex[i];
+      lexem = arrayLex[i];
       if(lexem != LexemIdentifier.blank) {
           // Type
         if(lexem instanceof LexemIdentifier) type = 0;
@@ -644,7 +644,7 @@ String ElanString() :
   (
     code=readInt() <DOT>
     {
-      stringValue+= (new Character((char)code)).toString();
+      stringValue+= String.valueOf((char)code);
     }
     )* <NIL>
     {

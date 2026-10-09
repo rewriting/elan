@@ -486,7 +486,7 @@ TOKEN : {
 
     numberOfGrammarRule += 5;
     for(i=0 ; i<arrayLex.length ; i++) {
-      lexem = (Lexem)arrayLex[i];
+      lexem = arrayLex[i];
       if(lexem != LexemIdentifier.blank) {
           // Type
         if(lexem instanceof LexemIdentifier) type = 0;
@@ -848,7 +848,7 @@ TOKEN : {
       }
       code = readInt();
       jj_consume_token(DOT);
-      stringValue+= (new Character((char)code)).toString();
+      stringValue+= String.valueOf((char)code);
     }
     jj_consume_token(NIL);
       {if (true) return "\"" + stringValue + "\"";}

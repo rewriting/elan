@@ -85,6 +85,7 @@ public class StrategyEval {
     }
   }
 
+  @SuppressWarnings("fallthrough")  // DS_DK continues into DS_DC on purpose
   public static void genEvalSem(OutputCode s,int deep,
 				int exitLab, String dest, Term str, 
 				int sem, String src) {

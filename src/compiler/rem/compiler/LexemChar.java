@@ -30,7 +30,7 @@ public class LexemChar extends Lexem {
   private static Hashtable table = new Hashtable(40);
 
   public LexemChar(int code) {
-    super(code, (new Character((char)code)).toString() );
+    super(code, String.valueOf((char)code) );
   }
 
   public void put() {

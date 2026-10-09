@@ -76,7 +76,7 @@ public class DDNode {
   }
 
   private int starNumber() {
-    return tree.starNumber;
+    return DDTree.starNumber;
   }
   public int maskSize() {
     return tree.getBitSetSize();
@@ -395,7 +395,7 @@ public class DDNode {
 
 	if(arity > 0) {
 	  stackNode.push(this);
-	  stackLevel.push(new Integer(arity));
+	  stackLevel.push(Integer.valueOf(arity));
 	  //System.out.println("on empile:      [" + this + "," + arity + "]");
 	  next[i].backChaining(stackNode, stackLevel);
 	} else {
@@ -417,7 +417,7 @@ public class DDNode {
 	    }
 	    
 	    stackNode.push(node);
-	    stackLevel.push(new Integer(level-1));
+	    stackLevel.push(Integer.valueOf(level-1));
 	    //System.out.println("modif sommet de pile et recursion");
 	      
 	    //node  = (DDNode)stackNode.peek();

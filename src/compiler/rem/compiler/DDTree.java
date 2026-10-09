@@ -114,12 +114,12 @@ public class DDTree {
   private void initTable(Term current) {
     if( current.getSymbol().isVariable()  ) {
       if( table.get(current.getSymbol()) == null ) {
-	table.put(current.getSymbol(), new Integer(starNumber));
+	table.put(current.getSymbol(), Integer.valueOf(starNumber));
       }	
     } else {
       if( table.get(current.getSymbol()) == null ) {
 	vector.addElement(current.getSymbol());
-	table.put(current.getSymbol(), new Integer(vector.size()));
+	table.put(current.getSymbol(), Integer.valueOf(vector.size()));
       }
     }
     /*    
@@ -556,7 +556,7 @@ public class DDTree {
 	RewriteRule rule = (RewriteRule)rules.elementAt(i);
 	if(rule.hasACPattern()) {
 	  Term firstACPattern = rule.getLeftside().getFirstACPattern();
-	  Integer varNumber = new Integer(firstACPattern.getVarNumber());
+	  Integer varNumber = Integer.valueOf(firstACPattern.getVarNumber());
 	  if(!tableOfBitsets.containsKey(varNumber)) {
 	    tableOfBitsets.put(varNumber,new BitSet());
 	  }

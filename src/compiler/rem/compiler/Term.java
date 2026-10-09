@@ -1983,7 +1983,7 @@ public class Term {
     }
     if(Flags.strat >= 3 && isStrategy()) {
     	if(arity<=5) {
-    		s.write(deep,"GmakeAppl" + (int)(arity+1) + "(sv[" + getVarNumber()  + "],code_" + getSymbolCode());
+    		s.write(deep,"GmakeAppl" + (arity+1) + "(sv[" + getVarNumber()  + "],code_" + getSymbolCode());
     		Tools.indent(s,deep);
     	} else {
     		s.write(deep,"GmakeAppl(&sv[" + getVarNumber()  + "]" + ",code_" + getSymbolCode() + ",code_arity(code_" + getSymbolCode() + ")");

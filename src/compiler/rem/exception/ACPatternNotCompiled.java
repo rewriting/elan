@@ -24,5 +24,7 @@
 */
 package rem.exception;
 
-public class ACPatternNotCompiled extends CompileError { }
+public class ACPatternNotCompiled extends CompileError {
+  private static final long serialVersionUID = 1L;
+}
 

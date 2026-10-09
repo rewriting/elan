@@ -24,5 +24,7 @@
 */
 package rem.exception;
 
-public class RuleNotCompiled extends CompileError { }
+public class RuleNotCompiled extends CompileError {
+  private static final long serialVersionUID = 1L;
+}
 

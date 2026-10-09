@@ -25,6 +25,7 @@
 package rem.exception;
 
 public class ACPatternWithSeveralACSubterms extends CompileError {
+  private static final long serialVersionUID = 1L;
 
   public ACPatternWithSeveralACSubterms(String msg) {
     super(msg);
