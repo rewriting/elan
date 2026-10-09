@@ -59,6 +59,14 @@ jobs:
         if: runner.os == 'Linux'
         run: make -C "$ELAN_WS" BUILD=build-clang ELAN_CC=clang ELAN_CXX=clang++ PREFIX="$ELAN_WS/build-clang/install" check
 
+      - name: Modern interpreter under AddressSanitizer + UBSan (Linux)
+        if: runner.os == 'Linux'
+        run: make -C "$ELAN_WS" check-sanitize
+
+      - name: Modern interpreter under UBSan (macOS; ASan is broken there)
+        if: runner.os == 'macOS'
+        run: make -C "$ELAN_WS" ELAN_CC=cc ELAN_CXX=c++ check-sanitize
+
       - name: Modern interpreter, make check (macOS system Clang)
         if: runner.os == 'macOS'
         run: make -C "$ELAN_WS" ELAN_CC=cc ELAN_CXX=c++ check
