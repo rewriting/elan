@@ -28,7 +28,6 @@
 
 #include "rtdatas.h"
 #include "module.h"
-#include "compiledefs.h"
 #include "strategy.h"
 #include <string.h>
 #include "command.h"

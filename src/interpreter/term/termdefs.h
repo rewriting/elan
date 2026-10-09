@@ -438,5 +438,10 @@ extern void conform_strategies(int warn);
 
 
   extern int withrhs;	
+// Built-in kind (TNORMFS, TIDENT, TNUMBER, TSTRING, or 0) of the sort l
+// (booltype... are in module.h); moved from compiledefs.h, used by term.cc.
+#define ISBUILTIN(l) ((l==booltype)?TNORMFS:((l==identype)?TIDENT:((l==numtype)?TNUMBER:((l==stringtype)?TSTRING:0))))
+//#define ISBUILTIN(l) ((l==booltype)?TNORMFS:((l==identype)?TIDENT:((l==numtype)?TNUMBER:0)))
+
 #endif // end RUNTIME
 

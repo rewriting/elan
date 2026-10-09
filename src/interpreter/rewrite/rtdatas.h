@@ -33,7 +33,6 @@
 //  sets of rewriting rules, transition rules and strategies
 
 #include "termdefs.h"
-#include "compiledefs.h"
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <sys/types.h>

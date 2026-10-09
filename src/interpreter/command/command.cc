@@ -32,7 +32,6 @@
 #include "command.h"
 #include "module.h"
 #include "string.h"
-#include "compiledefs.h"
 
 
 stck::stck(const char *pref,const char *s)

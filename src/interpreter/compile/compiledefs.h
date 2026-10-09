@@ -172,8 +172,6 @@ extern FILE *inloutfile;
    (s>=FSYMCODESBEG && trrules.getnnrules(s) == NULL && fsymtab[s].isnotdefinedas()))
 */
 
-#define ISBUILTIN(l) ((l==booltype)?TNORMFS:((l==identype)?TIDENT:((l==numtype)?TNUMBER:((l==stringtype)?TSTRING:0))))
-//#define ISBUILTIN(l) ((l==booltype)?TNORMFS:((l==identype)?TIDENT:((l==numtype)?TNUMBER:0)))
 
 #endif
 
