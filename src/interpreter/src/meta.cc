@@ -495,7 +495,7 @@ void term2strateg(int typ,term *t, strategy *s)
 // should allocate s
 void term2strategies(int typ,term *t, struct strlist **s)
 {
-  NNEW(*s,struct strlist);
+  AALLOS(*s,struct strlist);
   switch (t->semantic()) {
     case One_Strategy:
       term2strategy(typ,t->subterm(0),&((*s)->str));

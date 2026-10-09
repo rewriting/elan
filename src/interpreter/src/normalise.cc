@@ -207,7 +207,7 @@ strategy *gen_normalisation1(int norm_index,int modu, int sort,
 	 // lstrat->setname(STRNAMEDONTCARE,modu);
 	 lstrat->setname(STRNAMEONE,modu);
          NNEW(nm, struct namelist); nm->next = NULL; nm->strname = nrulei;
-         NNEW(sl,struct strlist);sl->next = slist;sl->str = lstrat;slist = sl;
+         AALLOS(sl,struct strlist);sl->next = slist;sl->str = lstrat;slist = sl;
          lstrat->setnamelist(nm); lstrat->settypeof(typ);
        }
        }                        // -------- LEFT_MOST_INNER_MOST
@@ -275,7 +275,7 @@ strategy *gen_normalisation1(int norm_index,int modu, int sort,
 	     NNEW(lstrat, strategy); 
 	     // lstrat->setname(STRNAMEDONTCARE,modu);
 	     lstrat->setname(STRNAMEONE,modu);
-	     NNEW(sl,struct strlist);sl->next = slist;sl->str = lstrat;
+	     AALLOS(sl,struct strlist);sl->next = slist;sl->str = lstrat;
 	     slist = sl;
 	     lstrat->setnamelist(nplist); lstrat->settypeof(typ); }
 	 }
@@ -297,7 +297,7 @@ strategy *gen_normalisation1(int norm_index,int modu, int sort,
 //	 lstrat->setname(STRNAMEDONTCARE,modu);
 	 lstrat->setname(STRNAMEONE,modu);
          NNEW(nm, struct namelist); nm->next = NULL; nm->strname = nrulei;
-         NNEW(sl,struct strlist);sl->next = slist;sl->str = lstrat;slist = sl;
+         AALLOS(sl,struct strlist);sl->next = slist;sl->str = lstrat;slist = sl;
          lstrat->setnamelist(nm); lstrat->settypeof(typ);
        }
       }                            //---------#ifdef LEFT_MOST_OUTER_MOST     

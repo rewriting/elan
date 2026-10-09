@@ -2037,7 +2037,7 @@ int semact1(int n,lexem l,lstream *f)
   case 177:				// first elem in strlist
   case 211:                             //               strtypedlist
 	{ struct strlist *ss;
-	  NNEW(ss , struct strlist);
+	  AALLOS(ss , struct strlist);
 	  ss->next = NULL;
 	  ss->str = strstack[strstacki-1];
           if (n == 211)
@@ -2051,7 +2051,7 @@ int semact1(int n,lexem l,lstream *f)
   case 178:				// another elem in strlist
   case 212:                             //                 strtypedlist
 	{ struct strlist *ss;
-	  NNEW(ss , struct strlist);
+	  AALLOS(ss , struct strlist);
 	  ss->next = NULL;
 	  ss->str = strstack[strstacki-1];
           if (n == 212)

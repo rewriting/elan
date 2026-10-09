@@ -1081,7 +1081,7 @@ int atermsemact(int n,lexem l,lstream *f)
       break;
     case 177:
       { struct strlist *ss;
-      NNEW(ss , struct strlist);
+      AALLOS(ss , struct strlist);
       ss->next = NULL;
       ss->str = strstack[strstacki-1];
       strstack[strstacki-1]=strstack[strstacki]=NULL;
@@ -1092,7 +1092,7 @@ int atermsemact(int n,lexem l,lstream *f)
       break;
     case 178:
       { struct strlist *ss;
-      NNEW(ss , struct strlist);
+      AALLOS(ss , struct strlist);
       ss->next = NULL;
       ss->str = strstack[strstacki-1];
       strstack[strstacki-1]=strstack[strstacki]=NULL;

@@ -767,7 +767,7 @@ void DeletE(struct strlist *sl)
   if (sl) {
       sl->str->Delete();
       p = sl; sl=sl->next;
-      DELETE1(p);
+      CFRE(p);
   } else
     return ;
 }
@@ -798,7 +798,7 @@ void strategy::Delete()
 struct strlist *copies(struct strlist *sl)
 { strlist *p;
   if (sl) {
-    NNEW(p, struct strlist);
+    AALLOS(p, struct strlist);
     p->str = sl->str->copy();
     p->next = copies(sl->next);   // fucking recursion, but who cares ...
     return p;
@@ -924,7 +924,7 @@ int strategy::infertype(int warn,int &sort)
         if (r != -1) {
           if (alg_normalisation == 1) {
             setname(STRNAMEREPEAT,getmodule());
-            NNEW(aux_sl,struct strlist); aux_sl->next = NULL;
+            AALLOS(aux_sl,struct strlist); aux_sl->next = NULL;
             aux_sl->str = u.substrategy;
             aux_sl->str->settypeof(sort);
             setsubst(gen_normalisation1(
