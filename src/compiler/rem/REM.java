@@ -160,6 +160,7 @@ public class REM {
         parser = new REFParser(new java.io.FileInputStream(fullFileName));
       } catch (java.io.FileNotFoundException e) {
         System.out.println("Reduce ELAN Code Machine. File " + fullFileName + " not found.");
+        System.exit(1);  // 2026: errors give a non-zero exit status
         return;
       }
     } else {
@@ -536,9 +537,11 @@ public class REM {
     } catch (ParseException e) {
       System.out.println("Reduce ELAN Code Machine. Encountered errors during parse.");
       e.printStackTrace();
+      System.exit(1);
     } catch (Exception e1) {
       System.out.println("Reduce ELAN Code Machine. Encountered errors during interpretation/tree building.");
       e1.printStackTrace();
+      System.exit(1);
     }
   }
 }

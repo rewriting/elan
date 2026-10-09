@@ -51,6 +51,44 @@ else
   ok "rem_rejects_aterm"
 fi
 
+# 5. REM exits with a non-zero status on errors: missing .ref, parse error
+fresh remstatus
+( cd "$WORK/remstatus" && elanc -nosplit -quiet enum >/dev/null 2>&1 )
+if ( cd "$WORK/remstatus" && "$JAVA" -cp "$PREFIX/classes" rem.REM missing.ref -quiet >/dev/null 2>&1 ); then
+  fail "rem_fails_on_a_missing_ref"
+else
+  ok "rem_fails_on_a_missing_ref"
+fi
+echo "1" > "$WORK/remstatus/bad.ref"   # lexically valid: a ParseException
+if ( cd "$WORK/remstatus" && "$JAVA" -cp "$PREFIX/classes" rem.REM bad.ref -quiet >/dev/null 2>&1 ); then
+  fail "rem_fails_on_a_parse_error"
+else
+  ok "rem_fails_on_a_parse_error"
+fi
+if ( cd "$WORK/remstatus" && "$JAVA" -cp "$PREFIX/classes" rem.REM enum.ref -nosplit -nocode -quiet >/dev/null 2>&1 ); then
+  ok "rem_succeeds_on_a_valid_ref"
+else
+  fail "rem_succeeds_on_a_valid_ref"
+fi
+
+# 6. elanc fails when REM fails (an option without its argument makes REM fail)
+fresh elancrem
+if ( cd "$WORK/elancrem" && elanc -nosplit -quiet enum -strategy >/dev/null 2>&1 ); then
+  fail "elanc_fails_when_rem_fails"
+else
+  ok "elanc_fails_when_rem_fails"
+fi
+
+# 7. the generated Makefile compiles and links with $(ELAN_SANITIZE) (the
+#    sanitizer options of a sanitizer build, empty otherwise)
+mk="$WORK/gcprefix/.elan.enum/Makefile"
+if [ "$(grep -c '^CC = $(ELAN_CC) .*$(ELAN_SANITIZE)$' "$mk")" -eq 2 ] \
+   && [ "$(grep -c '^CXX = $(ELAN_CXX) .*$(ELAN_SANITIZE)$' "$mk")" -eq 2 ]; then
+  ok "generated_makefile_uses_elan_sanitize"
+else
+  fail "generated_makefile_uses_elan_sanitize"
+fi
+
 rm -rf "$WORK"
 echo "$fails failed"
 [ "$fails" -eq 0 ]
