@@ -28,35 +28,55 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <dirent.h>
+#include <string>
 #include "constants.h"
 #include "streams.h"
 #include "alloc.h"
 #include "misc.h"
 #include "options.h"
 
+FILE *fopen_exact(const char *path)
+{
+  FILE *f = fopen(path, "r");
+  if (f == NULL) return NULL;
+  std::string p(path);
+  std::string::size_type slash = p.rfind('/');
+  std::string dir  = (slash == std::string::npos) ? "." : (slash == 0 ? "/" : p.substr(0, slash));
+  std::string base = (slash == std::string::npos) ? p : p.substr(slash + 1);
+  DIR *d = opendir(dir.c_str());
+  if (d == NULL) return f;                 // cannot list the directory: keep fopen's answer
+  bool exact = false;
+  for (struct dirent *e; (e = readdir(d)) != NULL; )
+    if (base == e->d_name) { exact = true; break; }
+  closedir(d);
+  if (!exact) { fclose(f); return NULL; }  // same file name up to case only
+  return f;
+}
+
 ichstream::ichstream(const char *name)              // to open elan file in lib or .
 { char *fn;
 
-  if ((file=fopen(name,"r"))) { fn = mstrdup(name); commonopen(fn,NFILE); return; }
+  if ((file=fopen_exact(name))) { fn = mstrdup(name); commonopen(fn,NFILE); return; }
 
   fn = addsuffix(perslib,name);
-  if ((file=fopen(fn,"r"))) { commonopen(fn,NFILE); return; }
+  if ((file=fopen_exact(fn))) { commonopen(fn,NFILE); return; }
   CFRE(fn);
 
   fn = addsuffix(elanlibcommon,name);
-  if ((file=fopen(fn,"r"))) { commonopen(fn,NFILE); return; }
+  if ((file=fopen_exact(fn))) { commonopen(fn,NFILE); return; }
   CFRE(fn);
 
   fn = addsuffix(elanlibqnq,name);
-  if ((file=fopen(fn,"r"))) { commonopen(fn,NFILE); return; }
+  if ((file=fopen_exact(fn))) { commonopen(fn,NFILE); return; }
   CFRE(fn);
 
   fn = addsuffix(elanlibstrat,name);
-  if ((file=fopen(fn,"r"))) { commonopen(fn,NFILE); return; }
+  if ((file=fopen_exact(fn))) { commonopen(fn,NFILE); return; }
   CFRE(fn);
 
   fn = addsuffix(elanlibref,name);
-  if ((file=fopen(fn,"r"))) { commonopen(fn,NFILE); return; }
+  if ((file=fopen_exact(fn))) { commonopen(fn,NFILE); return; }
   CFRE(fn);
 
   sterr << "[error] can't open input file '"<< name << "'\n\tfatal\n"; failexit(); 

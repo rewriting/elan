@@ -37,6 +37,10 @@
 #define NFILE 0		// type of ichstream. internal ichstream constants.
 #define PIPE 1
 
+// fopen(path, "r") that only accepts a file whose name matches `path` exactly,
+// also on case-insensitive file systems (module any vs Any). NULL otherwise.
+FILE *fopen_exact(const char *path);
+
 class ichstream
  {
  private:
