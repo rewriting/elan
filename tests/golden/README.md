@@ -8,8 +8,9 @@ only. These tests pin, byte for byte, what it does not see:
   `Compiler.4.0/Test` programs whose compiled J tests pass): their numbers are
   stringtab hash positions and symbol codes, read by `elan --import`, by REM
   and by the compiled runtime (see `docs/ref-format.md`);
-* the `-d` dump of 5 programs and the `-s`/`-S` statistics of 6 (times and
-  speeds normalised);
+* the `-d` dump of 5 programs and the `-s`/`-S` statistics of 6 (times
+  normalised; the average speed, printed only when the measured time is not
+  zero, removed);
 * the standard output, standard error and exit status of deliberate errors
   (`programs/`: syntax error, missing file or module, undefined sort or
   operator, bad query, too many variables, overflow of the tables of

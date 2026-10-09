@@ -10,8 +10,6 @@ end
 
  Statistics:
  total time	(<T>+<T>)=<T> sec	(main+subprocesses)
-
- average speed = <N> inf/sec
             109505 nonamed rules applied, 254944 tried
             19523   named rules applied, 72257 tried
 

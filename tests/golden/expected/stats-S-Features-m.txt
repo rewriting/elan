@@ -60,8 +60,6 @@ end
 
  Statistics:
  total time	(<T>+<T>)=<T> sec	(main+subprocesses)
-
- average speed = <N> inf/sec
                15 nonamed rules applied,    34 tried
                13   named rules applied,    80 tried
 
@@ -90,8 +88,6 @@ end
 
  Statistics:
  total time	(<T>+<T>)=<T> sec	(main+subprocesses)
-
- average speed = <N> inf/sec
                 4 nonamed rules applied,     8 tried
                11   named rules applied,    76 tried
 
@@ -173,8 +169,6 @@ end
 
  Statistics:
  total time	(<T>+<T>)=<T> sec	(main+subprocesses)
-
- average speed = <N> inf/sec
                19 nonamed rules applied,    43 tried
                13   named rules applied,    92 tried
 
@@ -203,8 +197,6 @@ end
 
  Statistics:
  total time	(<T>+<T>)=<T> sec	(main+subprocesses)
-
- average speed = <N> inf/sec
                 8 nonamed rules applied,    17 tried
                11   named rules applied,    88 tried
 
@@ -259,8 +251,6 @@ end
 
  Statistics:
  total time	(<T>+<T>)=<T> sec	(main+subprocesses)
-
- average speed = <N> inf/sec
                23 nonamed rules applied,    52 tried
                13   named rules applied,   104 tried
 
@@ -289,8 +279,6 @@ end
 
  Statistics:
  total time	(<T>+<T>)=<T> sec	(main+subprocesses)
-
- average speed = <N> inf/sec
                12 nonamed rules applied,    26 tried
                11   named rules applied,   100 tried
 
@@ -345,8 +333,6 @@ end
 
  Statistics:
  total time	(<T>+<T>)=<T> sec	(main+subprocesses)
-
- average speed = <N> inf/sec
              1625 nonamed rules applied,  4004 tried
               348   named rules applied,  1845 tried
 

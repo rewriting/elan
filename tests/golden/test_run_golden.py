@@ -48,10 +48,12 @@ class NormaliseTest(unittest.TestCase):
         self.assertEqual(s, "<WORK>/m.eln <PREFIX>/share/elanlib <REPO>/a")
 
     def test_times_and_speeds_are_hidden(self):
-        s = rg.normalise(" total time\t(0.711+0.000)=0.711 sec\t(main+subprocesses)\n"
-                         " average speed = 92364 inf/sec\n", Path("/w"), Path("/p"))
-        self.assertEqual(s, " total time\t(<T>+<T>)=<T> sec\t(main+subprocesses)\n"
-                            " average speed = <N> inf/sec\n")
+        fast = " total time\t(0.000+0.000)=0.000 sec\t(main+subprocesses)\n   15 nonamed\n"
+        slow = (" total time\t(0.711+0.000)=0.711 sec\t(main+subprocesses)\n"
+                "\n average speed = 92364 inf/sec\n   15 nonamed\n")
+        want = " total time\t(<T>+<T>)=<T> sec\t(main+subprocesses)\n   15 nonamed\n"
+        self.assertEqual(rg.normalise(fast, Path("/w"), Path("/p")), want)
+        self.assertEqual(rg.normalise(slow, Path("/w"), Path("/p")), want)
 
 
 class RenderTest(unittest.TestCase):

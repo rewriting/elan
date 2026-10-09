@@ -23,7 +23,8 @@ The cases are listed in cases.tsv (tab-separated, `#` comments):
 contains gen.py, `python3 -I gen.py` runs first in it (generated programs:
 table overflows, deep includes...). Text outputs are normalised: the work
 directory, the install prefix and the repository become <WORK>, <PREFIX> and
-<REPO>; the times and speeds of the statistics become <T> and <N>.
+<REPO>; the times of the statistics become <T>, and their average speed (printed
+only when the time is not zero) is removed.
 
 Usage:
   run_golden.py [--prefix PREFIX] [--filter REGEX] [-j N] [--update]
@@ -72,7 +73,8 @@ def parse_manifest(text):
 
 # ---------------------------------------------------------------- normalisation
 TIME = re.compile(r"\(\d+\.\d+\+\d+\.\d+\)=\d+\.\d+ sec")
-SPEED = re.compile(r"average speed = \S+ inf/sec")
+# printed only when the measured time is not zero: removed
+SPEED = re.compile(r"\n average speed = -?\d+ inf/sec\n")
 
 
 def normalise(text, work, prefix):
@@ -84,7 +86,7 @@ def normalise(text, work, prefix):
     for p in sorted(subst, key=len, reverse=True):   # longest first: /private/var/x before /var/x
         text = text.replace(p, subst[p])
     text = TIME.sub("(<T>+<T>)=<T> sec", text)
-    return SPEED.sub("average speed = <N> inf/sec", text)
+    return SPEED.sub("", text)
 
 
 def render_run(args, out, err, rc):
