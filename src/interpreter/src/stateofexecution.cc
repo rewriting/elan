@@ -428,7 +428,7 @@ void stateofexecution::rep_iter_add_state(term t,int afterdeterm)
 //    s->s->free();                    // state is over =>not neccessary,just trt
     DELETE1(s->s);
   } else {
-    NNEW(s ,struct statelist);
+    AALLOS(s ,struct statelist);
     s->next = actsl->u->rep_iter;
     actsl->u->rep_iter = s;
   }
@@ -596,7 +596,7 @@ stout << "strategy = "; actsl->actst->dump(); stout << "\n";
   res = actsl->trt;			// only because of pretty tracing
   if (actsl->actst->strnam() == STRCALL) goto strcall;
   if (actsl->u == NULL) {			// just initialize
-    NNEW(actsl->u,union simple_str_state);
+    AALLOS(actsl->u,union simple_str_state);
     switch (actsl->actst->strnam()) {
     case STRNAMEDONTCARE: case STRNAMEDONTKNOW: case STRNAMEONE: case STRNAMEDONTKNOWCON:
 		actsl->u->choose.r = NULL;
@@ -1354,7 +1354,7 @@ forward0:
 //	  << "\n";
 
 
-  NNEW(ws ,struct wheress);
+  AALLOS(ws ,struct wheress);
   ws->actwh = actwh; ws->prev = lastws; lastws = ws;
   ws->TRYCHOICE = 0;
   if (actwh->leftvarn == TRYCHOICEEND) {
