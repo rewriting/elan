@@ -101,6 +101,22 @@ def stale_exceptions(root, rules, exceptions):
     return sorted(e for e in exceptions if e not in used)
 
 
+def case_collisions(top):
+    """Groups of entries of a same directory whose names differ only by case
+    (they cannot coexist on a case-insensitive file system)."""
+    out = []
+    for d in sorted([top, *[p for p in top.rglob("*") if p.is_dir()]]):
+        groups = {}
+        for p in d.iterdir():
+            groups.setdefault(p.name.lower(), []).append(p.name)
+        out += [sorted(g) for g in groups.values() if len(g) > 1]
+    return out
+
+
+# Trees that users install or copy: they must work on case-insensitive systems.
+PORTABLE_TREES = ["src/lib/elanlib", "examples"]
+
+
 def load_exceptions(path):
     exc = set()
     if path.exists():
@@ -129,9 +145,14 @@ def main():
         print(f"FORBIDDEN {s} -> {h}  ({why})")
     for s, h in stale:
         print(f"STALE exception (no longer needed, remove it): {s} -> {h}")
+    repo = HERE.parent.parent
+    collisions = [(t, g) for t in PORTABLE_TREES if (repo / t).is_dir()
+                  for g in case_collisions(repo / t)]
+    for t, g in collisions:
+        print(f"CASE COLLISION in {t}: {' / '.join(g)}")
     print(f"architecture: {len(bad)} forbidden includes, {len(stale)} stale exceptions, "
-          f"{len(exc)} listed exceptions")
-    return 1 if (bad or stale) else 0
+          f"{len(exc)} listed exceptions, {len(collisions)} case collisions")
+    return 1 if (bad or stale or collisions) else 0
 
 
 if __name__ == "__main__":

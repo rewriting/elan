@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 """Unit tests of check_deps.py (stdlib unittest)."""
+import atexit
+import shutil
 import sys
 import tempfile
 import unittest
@@ -11,8 +13,15 @@ import check_deps as cd  # noqa: E402
 RULES = {"lex": ["base"], "base": [], "term": ["lex", "base"]}
 
 
+# Test trees live next to this file (the repository's case-sensitive volume;
+# the system temp dir may be case-insensitive) and are removed at exit.
+TMP = Path(__file__).resolve().parent / ".tmp"
+atexit.register(shutil.rmtree, TMP, True)
+
+
 def tree(files):
-    root = Path(tempfile.mkdtemp())
+    TMP.mkdir(exist_ok=True)
+    root = Path(tempfile.mkdtemp(dir=TMP))
     for rel, text in files.items():
         p = root / rel
         p.parent.mkdir(parents=True, exist_ok=True)
@@ -71,6 +80,16 @@ class CheckDepsTest(unittest.TestCase):
         root = tree({"lex/l.cc": ""})
         self.assertEqual(cd.stale_exceptions(root, RULES, {("lex/l.cc", "term/t.h")}),
                          [("lex/l.cc", "term/t.h")])
+
+
+class CaseCollisionTest(unittest.TestCase):
+    def test_names_differing_only_by_case_are_reported(self):
+        root = tree({"lib/any.eln": "", "lib/x/y.eln": "", "lib/AnY.eln": ""})
+        self.assertEqual(cd.case_collisions(root / "lib"), [["AnY.eln", "any.eln"]])
+
+    def test_same_name_in_different_directories_is_fine(self):
+        root = tree({"lib/a/any.eln": "", "lib/b/Any.eln": ""})
+        self.assertEqual(cd.case_collisions(root / "lib"), [])
 
 
 if __name__ == "__main__":

@@ -45,11 +45,7 @@ configure: toolchain
 	  echo "$(ELAN_CONFIG)" > $(BUILD)/.elan-configure; \
 	fi
 
-# The library contains files differing only by case (strategy/any.eln, Any.eln).
 install: all
-	@mkdir -p $(PREFIX); p=$$(mktemp -d $(PREFIX)/.case.XXXX); touch $$p/a $$p/A; \
-	n=$$(ls $$p | wc -l); rm -rf $$p; \
-	if [ $$n -ne 2 ]; then echo "ERROR: $(PREFIX) is on a case-insensitive file system; the ELAN library has files differing only by case (see README)"; exit 1; fi
 	rm -rf $(PREFIX)/share/elanlib   # library files removed from the sources must not linger
 	cmake --install $(BUILD)
 

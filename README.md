@@ -45,7 +45,9 @@ hdiutil attach ~/github/elan.sparseimage -mountpoint ~/github/elan -nobrowse
 cd ~/github/elan && git clone https://github.com/rewriting/elan .
 ```
 
-After a reboot, only the `hdiutil attach` line is needed.
+After a reboot, only the `hdiutil attach` line is needed. This is only needed
+for the repository (because of `legacy/`): the installed interpreter and its
+library work on any file system.
 
 ## Quick start
 
@@ -53,7 +55,7 @@ After a reboot, only the `hdiutil attach` line is needed.
 make                 # build the interpreter (CMake, into build/)
 make check           # runner unit tests + 368 interpreter tests of the bench
 make check-sanitize  # same under ASan+UBSan (UBSan only on macOS, see Makefile)
-make install PREFIX=/Volumes/elan-tools   # PREFIX must be case-sensitive (see above)
+make install PREFIX=$HOME/.local   # any file system
 make reference       # build the 2004 reference system (interpreter + compiler)
 make check-reference # full bench (778 tests) against the reference
 ```
