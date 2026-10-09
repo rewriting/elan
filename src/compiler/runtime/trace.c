@@ -145,7 +145,7 @@ int GcoqprefixParser(char *s1, char *s2) {
 	    /* ( id ) */;
 	} else {
 	    if(c!=':') {
-		printf("':' expected\n",c);
+		printf("':' expected\n");
 		return 1; 
 	    }
 	    if(fscanf(fp_query_sort," %[^ )] %c",s2,&c) != 2) {
@@ -218,13 +218,15 @@ int Gtrace_pretty_print(TR_COQ * head,int deep, FILE * fp_trace)
 		    i = i+1;
 		    if (node->father == racine)
 			{ 
-			    sprintf(tmp,"%d",node->ps);
+			    snprintf(tmp,sizeof(tmp),"%d",node->ps);
 			}
 		    else
 			{
-			    sprintf(tmp,";%d",node->ps);
+			    snprintf(tmp,sizeof(tmp),";%d",node->ps);
 			}
-		    sprintf(output1,"%s%s",tmp,output);
+		    if (snprintf(output1,sizeof(output1),"%s%s",tmp,output) >= (int)sizeof(output1)) {
+			/* too long a position: truncated (it overflowed output1) */
+		    }
 		    strcpy(output,output1);
 		    node = node->father;
 		}
@@ -588,7 +590,6 @@ Gterm * norm_4(Gterm *t) {
 	    r1 = rewrite_real_step;
 	    t = ((strTabFunType)strTab[(strTabSize-1)/2+strCall])(t);//str_xxx
 	    r2 = rewrite_real_step;
-	    printf("");
 	    if (r1 == r2) break;                /*no more rule can be applied*/
 	}
 	T = t; // save the current top     

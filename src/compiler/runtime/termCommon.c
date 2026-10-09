@@ -69,11 +69,11 @@ void term_print(FILE *fich,Gterm *t)
 static void print_f_prefix(FILE *fich,Gterm *t) {
   if(GisIntegerTagged(t)) {
       // fprintf(fich,"integer\n");
-    fprintf(fich,"%d",GgetInt(t));
+    fprintf(fich,"%ld",GgetInt(t));
     return;
   } else if(GisIdentifierTagged(t)) {
       //fprintf(fich,"identifier\n");
-    fprintf(fich,"ident(%d)",GgetIdentifier(t));
+    fprintf(fich,"ident(%lu)",GgetIdentifier(t));
       //fprintf(fich,"%d",GgetIdentifier(t));
     return;
   } else if(GisStringTagged(t)) {
@@ -155,10 +155,10 @@ void term_printREF(FILE *fich,Gterm *t)
   int i;
   Verif_void(t,"term_printREF(fich,t)");
   if(GisIntegerTagged(t)) {
-    fprintf(fich,"INT(%d)",GgetInt(t));
+    fprintf(fich,"INT(%ld)",GgetInt(t));
     return;
   } else if(GisIdentifierTagged(t)) {
-    fprintf(fich,"IDENT(%d)",GgetIdentifier(t));
+    fprintf(fich,"IDENT(%lu)",GgetIdentifier(t));
     return;
   }
     // PROBLEME SUR SUN

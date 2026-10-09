@@ -193,28 +193,28 @@ void eker_print_term(TERM *t) {
   }
   switch(t->type) {
   case VARIABLE:
-    printf("VAR(%d)", t->sym);
+    printf("VAR(%lu)", t->sym);
     break;
   case CONSTANT:
-    printf("CST(%d)", t->sym);
+    printf("CST(%lu)", t->sym);
     break;
   case BUILTIN:
-    printf("BI(%d)", t->sym);
+    printf("BI(%lu)", t->sym);
     break;
 
   case FUNCTION:
-    printf("SYM(%d)(", t->sym);
+    printf("SYM(%lu)(", t->sym);
     eker_print_tlist(t->rest.f.arg_list);
     printf(")");
     break;
   case AC_NORMAL:
-    printf("ACSYM(%d)(", t->sym);
+    printf("ACSYM(%lu)(", t->sym);
     eker_print_tlist(t->rest.f.arg_list);
     printf(")");
     break;
   case AC_COMPRESSED:
     //printf("ACC(%d)(", t->sym);
-    printf("ACC(%d)[count=%d](", t->sym,t->rest.a.arg_count );
+    printf("ACC(%lu)[count=%d](", t->sym,t->rest.a.arg_count );
     eker_print_aclist(t->rest.a.ac_list);
     printf(")");
     break;

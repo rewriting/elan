@@ -137,11 +137,11 @@ void termOut(FILE *fich,Gterm *t) {
   int i;
 
   if(GisIntegerTagged(t)) {
-    fprintf(fich,"%d",GgetInt(t));
+    fprintf(fich,"%ld",GgetInt(t));
     //printf("termOut GisIntegerTagged\n");
     return;
   } else if(GisIdentifierTagged(t)) {
-    fprintf(fich,"IDENT(%d)",GgetIdentifier(t));
+    fprintf(fich,"IDENT(%lu)",GgetIdentifier(t));
     // A REVOIR !!!
     //printf("termOut GisIdentifierTagged\n");
     return;

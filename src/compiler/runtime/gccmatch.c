@@ -90,7 +90,7 @@ void fatal(char *s, char *a)
   if(*a)
     (void) fprintf(stderr, s, a);
   else
-    (void) fprintf(stderr, s);
+    (void) fprintf(stderr, "%s", s);
   (void) fprintf(stderr,"\n");
   exit(1);
 }

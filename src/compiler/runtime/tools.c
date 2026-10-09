@@ -195,7 +195,7 @@ fin:
   if(SIZE(res)!=size)
     {
       fprintf(stderr,"\n\n[intern alloc] error \n\n");
-      fprintf(stderr,"size=%d\tmysize=%d\n",size,SIZE(res));
+      fprintf(stderr,"size=%d\tmysize=%ld\n",size,SIZE(res));
       exit(1);
     }
   //printf("[intern_alloc] (%d)\tsize=%d\n",res,SIZE(res));
@@ -234,7 +234,7 @@ void print_space_usage()
     {
       if(freelist[i])
 	{
-	  printf("freelist[%4d]",i*scale);
+	  printf("freelist[%4lu]",i*scale);
 	  printf("%7d ",   nb_alloc[i]);
 	  printf("%7d ",   nb_free[i]);
 	  printf("%7d ",   nb_alloc[i] - nb_free[i]);
@@ -296,7 +296,7 @@ fin:
   if(SIZE(res)!=size)
     {
       fprintf(stderr,"\n\n[intern alloc] error \n\n");
-      fprintf(stderr,"size=%d\tmysize=%d\n",size,SIZE(res));
+      fprintf(stderr,"size=%d\tmysize=%ld\n",size,SIZE(res));
       exit(1);
     }
   //printf("[intern_alloc] (%d)\tsize=%d\n",res,SIZE(res));
@@ -315,14 +315,14 @@ unsigned long cptCmpTotal=0;
 void globalStatistics() {
 #ifdef DEBUG
   printf("\nStatistics:\n");
-  printf("\tcptMalloc      = %u bytes (%f Mb)\n",cptMalloc,
+  printf("\tcptMalloc      = %lu bytes (%f Mb)\n",cptMalloc,
          ((double)cptMalloc)/(1024*1024));
-  printf("\tcptAMalloc     = %u bytes (%f Mb)\n",cptAMalloc,
+  printf("\tcptAMalloc     = %lu bytes (%f Mb)\n",cptAMalloc,
          ((double)cptAMalloc)/(1024*1024));
-  printf("\tcptTermAlloc   = %u\n",cptTermAlloc);
-  printf("\tcptTermacAlloc = %u\n",cptTermacAlloc);
-  printf("\tcptCmpEqual    = %u\n",cptCmpEqual);
-  printf("\tcptCmpTotal    = %u\n",cptCmpTotal);
+  printf("\tcptTermAlloc   = %lu\n",cptTermAlloc);
+  printf("\tcptTermacAlloc = %lu\n",cptTermacAlloc);
+  printf("\tcptCmpEqual    = %lu\n",cptCmpEqual);
+  printf("\tcptCmpTotal    = %lu\n",cptCmpTotal);
   printf("\n");
 #endif
 }

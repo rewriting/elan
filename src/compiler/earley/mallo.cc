@@ -155,7 +155,7 @@ char *allocator(long n)
     {
       if ((n+scale)>MEMCHUNKSIZE)
 	{
-	  fprintf(stderr,"\n\n[allocator] memory block too big: %d\n\n",n+scale);
+	  fprintf(stderr,"\n\n[allocator] memory block too big: %lu\n\n",n+scale);
 	  failexit();
 	}
       actchunk = (char *) malloc(MEMCHUNKSIZE);
@@ -236,7 +236,7 @@ void print_space_usage()
     {
       if(freelist[i])
 	{
-	  printf("freelist[%4d]",i*scale);
+	  printf("freelist[%4lu]",i*scale);
 	  printf("%7d ",   nb_alloc[i]);
 	  printf("%7d ",   nb_free[i]);
 	  printf("%7d ",   nb_alloc[i] - nb_free[i]);
@@ -277,7 +277,7 @@ int alloc_member(long *t)
 void testalloc(long *t)
 { 
   if (alloc_member(t)) {
-    fprintf(stderr,"two times allocated place t==%d\n\n",t); 
+    fprintf(stderr,"two times allocated place t==%p\n\n",(void *)t); 
     failexit();
   }
   if (alloc_table_index >= MAXALLOCPLACE) {
@@ -292,7 +292,7 @@ void testfree(long *t)
   int i;
   if (!alloc_member(t))
     {
-      fprintf(stderr,"two times freed the same place !!!\nt==%d\n",t); 
+      fprintf(stderr,"two times freed the same place !!!\nt==%p\n",(void *)t); 
       fprintf(stderr,"position=%d\n",position);
       failexit();
     }
