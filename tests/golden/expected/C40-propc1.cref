@@ -1,0 +1,400 @@
+Identifiers
+102:"f".
+116:"t".
+120:"x".
+121:"y".
+122:"z".
+132:"AC".
+143:"IF".
+146:"a1".
+147:"a2".
+148:"a3".
+149:"a4".
+150:"a5".
+151:"a6".
+152:"a7".
+153:"a8".
+154:"a9".
+162:"q1".
+163:"q2".
+164:"q3".
+194:"a10".
+195:"a11".
+196:"a12".
+197:"a13".
+198:"a14".
+199:"dc".
+200:"a16".
+201:"a17".
+202:"a18".
+205:"id".
+207:"dk".
+211:"AND".
+213:"of".
+214:"eq".
+215:"END".
+225:"or".
+231:"FOR".
+232:"LPL".
+236:"tx".
+273:"EACH".
+295:"META".
+305:"THAT".
+307:"SUCH".
+309:"iff".
+311:"end".
+322:"one".
+324:"neq".
+327:"for".
+331:"pri".
+337:"not".
+345:"xor".
+351:"try".
+354:"ANDIF".
+410:"a15".
+411:"code".
+412:"fail".
+417:"Prop".
+418:"if".
+424:"bs".
+428:"bool".
+429:"tall".
+431:"then".
+437:"dont".
+438:"tone".
+439:"part".
+444:"with".
+447:"know".
+448:"true".
+456:"sort".
+489:"dcOne".
+510:"check".
+518:"and".
+522:"alias".
+523:"local".
+539:"where".
+548:"propc".
+552:"tsome".
+554:"spart".
+555:"rules".
+558:"start".
+566:"query".
+597:"propc1".
+611:"dccall".
+619:"dkcall".
+622:"care".
+623:"call".
+625:"global".
+639:"public".
+641:"repeat".
+646:"module".
+650:"less".
+653:"lesseq".
+657:"source".
+658:"switch".
+659:"normin".
+667:"import".
+671:"result".
+674:"export".
+719:"defined".
+720:"declare".
+730:"Epsilon".
+734:"false".
+737:"eq_bool".
+746:"greater".
+750:"iterate".
+755:"implies".
+759:"builtin".
+763:"first".
+770:"rewrite".
+781:"stratop".
+788:"normout".
+834:"case".
+835:"handline".
+842:"firstOne".
+847:"neq_bool".
+849:"dcconcur".
+850:"inline".
+852:"choose".
+857:"dkconcur".
+859:"implicit".
+866:"explicit".
+877:"queryend".
+883:"strategy".
+899:"definedAs".
+905:"hardAlias".
+932:"assocLeft".
+960:"greatereq".
+962:"less_bool".
+970:"normalise".
+972:"oneconcur".
+974:"private".
+977:"normalize".
+986:"otherwise".
+991:"operators".
+1047:"assocRight".
+1083:"strategies".
+1176:"lesseq_bool".
+1188:"description".
+1269:"greater_bool".
+1377:"specification".
+1483:"greatereq_bool".
+nil
+end
+
+Sorts
+19:"intern int".
+32:"ident".
+58:"builtinInt".
+220:"intern ident".
+351:"intern string".
+390:"builtinString".
+417:"Prop".
+428:"bool".
+nil
+end
+
+Modules
+28:"bool".
+46:"anyInteger".
+148:"propc".
+155:"anyIdentifier".
+159:"propc1.lgi".
+170:"anyString".
+181:"anyQuotedIdentifier".
+nil
+end
+
+RuleNames
+nil
+end
+
+StrategyNames
+nil
+end
+
+GrammarForSort 417:0:
+3:300:0:8:0:0:0:Ident(116).nil:nil.
+3:301:0:8:0:0:0:Ident(102).nil:nil.
+3:302:0:10:0:2:0:Ident(518).Char(40).Type(417).Char(44).Type(417).Char(41).nil:nil.
+3:303:0:10:0:2:0:Ident(345).Char(40).Type(417).Char(44).Type(417).Char(41).nil:nil.
+3:304:0:8:0:0:0:Ident(225).Char(40).Type(417).Char(44).Type(417).Char(41).nil:nil.
+3:305:0:8:0:0:0:Ident(309).Char(40).Type(417).Char(44).Type(417).Char(41).nil:nil.
+3:306:0:8:0:0:0:Ident(337).Char(40).Type(417).Char(41).nil:nil.
+3:307:0:8:0:0:0:Ident(755).Char(40).Type(417).Char(44).Type(417).Char(41).nil:nil.
+3:308:0:8:0:0:0:Ident(146).nil:nil.
+3:309:0:8:0:0:0:Ident(147).nil:nil.
+3:310:0:8:0:0:0:Ident(148).nil:nil.
+3:311:0:8:0:0:0:Ident(149).nil:nil.
+3:312:0:8:0:0:0:Ident(150).nil:nil.
+3:313:0:8:0:0:0:Ident(151).nil:nil.
+3:314:0:8:0:0:0:Ident(152).nil:nil.
+3:315:0:8:0:0:0:Ident(153).nil:nil.
+3:316:0:8:0:0:0:Ident(154).nil:nil.
+3:317:0:8:0:0:0:Ident(194).nil:nil.
+3:318:0:8:0:0:0:Ident(195).nil:nil.
+3:319:0:8:0:0:0:Ident(196).nil:nil.
+3:320:0:8:0:0:0:Ident(197).nil:nil.
+3:321:0:8:0:0:0:Ident(198).nil:nil.
+3:322:0:8:0:0:0:Ident(410).nil:nil.
+3:323:0:8:0:0:0:Ident(200).nil:nil.
+3:324:0:8:0:0:0:Ident(201).nil:nil.
+3:325:0:8:0:0:0:Ident(202).nil:nil.
+3:326:0:8:0:0:0:Ident(162).nil:nil.
+3:327:0:8:0:0:0:Ident(163).nil:nil.
+3:328:0:8:0:0:0:Ident(164).nil:nil.
+nil end
+GrammarForSort 428:1:
+nil end
+EndDef end
+GrammarForSort 417:0:
+nil end
+GrammarForSort 428:1:
+2:1:0:8:0:0:0:Ident(448).nil:nil.
+2:0:0:8:0:0:0:Ident(734).nil:nil.
+2:21:100:9:21:0:0:Type(428).Ident(518).Type(428).nil:nil.
+2:22:100:9:22:0:0:Type(428).Ident(225).Type(428).nil:nil.
+2:21:100:1:21:0:0:Char(40).Type(428).Ident(518).Type(428).Char(41).nil:nil.
+2:22:100:1:22:0:0:Char(40).Type(428).Ident(225).Type(428).Char(41).nil:nil.
+2:24:200:8:24:0:0:Ident(337).Char(40).Type(428).Char(41).nil:nil.
+2:24:200:0:24:0:0:Ident(337).Type(428).nil:nil.
+2:24:200:0:24:0:0:Char(40).Ident(337).Type(428).Char(41).nil:nil.
+2:24:200:0:24:0:0:Char(40).Ident(337).Char(40).Type(428).Char(41).Char(41).nil:nil.
+2:8:200:9:8:0:0:Type(428).Char(61).Char(61).Type(428).nil:nil.
+2:9:200:9:9:0:0:Type(428).Char(33).Char(61).Type(428).nil:nil.
+2:10:200:9:10:0:0:Type(428).Char(60).Type(428).nil:nil.
+2:11:200:9:11:0:0:Type(428).Char(60).Char(61).Type(428).nil:nil.
+2:12:200:9:12:0:0:Type(428).Char(62).Type(428).nil:nil.
+2:13:200:9:13:0:0:Type(428).Char(62).Char(61).Type(428).nil:nil.
+2:8:200:0:8:0:0:Ident(737).Char(40).Type(428).Char(44).Type(428).Char(41).nil:nil.
+2:9:200:0:9:0:0:Ident(847).Char(40).Type(428).Char(44).Type(428).Char(41).nil:nil.
+2:10:200:0:10:0:0:Ident(962).Char(40).Type(428).Char(44).Type(428).Char(41).nil:nil.
+2:11:200:0:11:0:0:Ident(1176).Char(40).Type(428).Char(44).Type(428).Char(41).nil:nil.
+2:12:200:0:12:0:0:Ident(1269).Char(40).Type(428).Char(44).Type(428).Char(41).nil:nil.
+2:13:200:0:13:0:0:Ident(1483).Char(40).Type(428).Char(44).Type(428).Char(41).nil:nil.
+nil end
+EndDef end
+GrammarForSort 19:0:
+nil end
+GrammarForSort 220:0:
+nil end
+GrammarForSort 351:0:
+nil end
+GrammarForSort 417:0:
+nil end
+EndDef end
+
+RULE(
+-1,
+417,148,1,0,1,FSYM(  VAR(0,417). VAR(0,417).nil, 302),
+ VAR(0,417),
+nil)
+
+ end
+
+RULE(
+-1,
+417,148,1,0,5,FSYM(  EVAR(4,417).FSYM(  VAR(0,417). VAR(0,417).nil, 302).nil, 302),
+FSYM(  EVAR(4,417). VAR(0,417).nil, 302),
+nil)
+
+ end
+
+RULE(
+-1,
+417,148,1,0,1,FSYM(  VAR(0,417).FSYM( nil, 300).nil, 302),
+ VAR(0,417),
+nil)
+
+ end
+
+RULE(
+-1,
+417,148,1,0,5,FSYM(  EVAR(4,417).FSYM(  VAR(0,417).FSYM( nil, 300).nil, 302).nil, 302),
+FSYM(  EVAR(4,417). VAR(0,417).nil, 302),
+nil)
+
+ end
+
+RULE(
+-1,
+417,148,1,0,1,FSYM(  VAR(0,417).FSYM( nil, 301).nil, 302),
+FSYM( nil, 301),
+nil)
+
+ end
+
+RULE(
+-1,
+417,148,1,0,5,FSYM(  EVAR(4,417).FSYM(  VAR(0,417).FSYM( nil, 301).nil, 302).nil, 302),
+FSYM(  EVAR(4,417).FSYM( nil, 301).nil, 302),
+nil)
+
+ end
+
+RULE(
+-1,
+417,148,1,0,3,FSYM(  VAR(0,417).FSYM(  VAR(1,417). VAR(2,417).nil, 303).nil, 302),
+FSYM( FSYM(  VAR(0,417). VAR(1,417).nil, 302).FSYM(  VAR(0,417). VAR(2,417).nil, 302).nil, 303),
+nil)
+
+ end
+
+RULE(
+-1,
+417,148,1,0,5,FSYM(  EVAR(4,417).FSYM(  VAR(0,417).FSYM(  VAR(1,417). VAR(2,417).nil, 303).nil, 302).nil, 302),
+FSYM(  EVAR(4,417).FSYM( FSYM(  VAR(0,417). VAR(1,417).nil, 302).FSYM(  VAR(0,417). VAR(2,417).nil, 302).nil, 303).nil, 302),
+nil)
+
+ end
+
+RULE(
+-1,
+417,148,1,0,1,FSYM(  VAR(0,417). VAR(0,417).nil, 303),
+FSYM( nil, 301),
+nil)
+
+ end
+
+RULE(
+-1,
+417,148,1,0,5,FSYM(  EVAR(4,417).FSYM(  VAR(0,417). VAR(0,417).nil, 303).nil, 303),
+FSYM(  EVAR(4,417).FSYM( nil, 301).nil, 303),
+nil)
+
+ end
+
+RULE(
+-1,
+417,148,1,0,1,FSYM(  VAR(0,417).FSYM( nil, 301).nil, 303),
+ VAR(0,417),
+nil)
+
+ end
+
+RULE(
+-1,
+417,148,1,0,5,FSYM(  EVAR(4,417).FSYM(  VAR(0,417).FSYM( nil, 301).nil, 303).nil, 303),
+FSYM(  EVAR(4,417). VAR(0,417).nil, 303),
+nil)
+
+ end
+
+RULE(
+-1,
+417,148,1,1,2,FSYM(  VAR(0,417). VAR(1,417).nil, 304),
+FSYM( FSYM(  VAR(0,417). VAR(1,417).nil, 302).FSYM(  VAR(0,417). VAR(1,417).nil, 303).nil, 303),
+nil)
+
+ end
+
+RULE(
+-1,
+417,148,1,1,2,FSYM(  VAR(0,417). VAR(1,417).nil, 305),
+FSYM( FSYM(  VAR(0,417). VAR(1,417).nil, 303).nil, 306),
+nil)
+
+ end
+
+RULE(
+-1,
+417,148,1,1,1,FSYM(  VAR(0,417).nil, 306),
+FSYM(  VAR(0,417).FSYM( nil, 300).nil, 303),
+nil)
+
+ end
+
+RULE(
+-1,
+417,148,1,1,2,FSYM(  VAR(0,417). VAR(1,417).nil, 307),
+FSYM( FSYM(  VAR(0,417).FSYM(  VAR(0,417). VAR(1,417).nil, 302).nil, 303).nil, 306),
+nil)
+
+ end
+
+RULE(
+-1,
+417,148,1,1,1,FSYM( nil, 326),
+FSYM( FSYM( FSYM( FSYM( FSYM( FSYM( nil, 308).FSYM( nil, 309).nil, 304).FSYM( FSYM( FSYM( nil, 310).nil, 306).FSYM( FSYM( FSYM( nil, 311).FSYM( nil, 312).nil, 303).FSYM( FSYM( FSYM( FSYM( nil, 313).nil, 306).nil, 306).nil, 306).nil, 305).nil, 304).nil, 305).FSYM( FSYM( FSYM( FSYM( nil, 314).FSYM( nil, 315).nil, 302).FSYM( FSYM( FSYM( FSYM( FSYM( nil, 316).FSYM( FSYM( nil, 317).FSYM( nil, 318).nil, 302).nil, 304).FSYM( nil, 309).nil, 303).FSYM( FSYM( FSYM( nil, 318).FSYM( FSYM( nil, 309).FSYM( FSYM( nil, 312).FSYM( nil, 312).nil, 305).nil, 303).nil, 302).FSYM( FSYM( FSYM( nil, 314).FSYM( nil, 314).nil, 303).FSYM( FSYM( nil, 316).FSYM( nil, 311).nil, 305).nil, 303).nil, 302).nil, 303).nil, 306).nil, 302).nil, 306).nil, 305).FSYM( FSYM( FSYM( FSYM( FSYM( nil, 308).FSYM( nil, 309).nil, 304).FSYM( FSYM( FSYM( nil, 310).nil, 306).FSYM( FSYM( FSYM( nil, 311).FSYM( nil, 312).nil, 303).FSYM( FSYM( FSYM( FSYM( nil, 313).nil, 306).nil, 306).nil, 306).nil, 305).nil, 304).nil, 305).FSYM( FSYM( FSYM( FSYM( nil, 314).FSYM( nil, 315).nil, 302).FSYM( FSYM( FSYM( FSYM( FSYM( nil, 316).FSYM( FSYM( nil, 317).FSYM( nil, 318).nil, 302).nil, 304).FSYM( nil, 309).nil, 303).FSYM( FSYM( FSYM( nil, 318).FSYM( FSYM( nil, 309).FSYM( FSYM( nil, 312).FSYM( nil, 312).nil, 305).nil, 303).nil, 302).FSYM( FSYM( FSYM( nil, 314).FSYM( nil, 314).nil, 303).FSYM( FSYM( nil, 316).FSYM( nil, 311).nil, 305).nil, 303).nil, 302).nil, 303).nil, 306).nil, 302).nil, 306).nil, 305).FSYM( FSYM( FSYM( FSYM( FSYM( nil, 308).FSYM( nil, 309).nil, 302).FSYM( FSYM( FSYM( FSYM( FSYM( FSYM( FSYM( FSYM( nil, 310).FSYM( nil, 311).nil, 302).FSYM( FSYM( nil, 312).FSYM( nil, 313).nil, 307).nil, 307).FSYM( FSYM( nil, 314).FSYM( nil, 315).nil, 304).nil, 303).FSYM( FSYM( FSYM( nil, 316).FSYM( nil, 317).nil, 305).FSYM( nil, 318).nil, 303).nil, 304).FSYM( FSYM( FSYM( nil, 309).FSYM( nil, 309).nil, 303).FSYM( nil, 314).nil, 303).nil, 304).FSYM( FSYM( FSYM( nil, 311).FSYM( nil, 316).nil, 304).FSYM( FSYM( FSYM( nil, 313).nil, 306).FSYM( nil, 313).nil, 303).nil, 305).nil, 303).nil, 306).nil, 307).FSYM( FSYM( FSYM( FSYM( nil, 318).nil, 306).FSYM( FSYM( nil, 316).nil, 306).nil, 305).nil, 306).nil, 302).nil, 306).nil, 307).nil, 302).FSYM( FSYM( FSYM( FSYM( FSYM( nil, 308).FSYM( nil, 309).nil, 302).FSYM( FSYM( FSYM( FSYM( FSYM( FSYM( FSYM( FSYM( nil, 310).FSYM( nil, 311).nil, 302).FSYM( FSYM( nil, 312).FSYM( nil, 313).nil, 307).nil, 307).FSYM( FSYM( nil, 314).FSYM( nil, 315).nil, 304).nil, 303).FSYM( FSYM( FSYM( nil, 316).FSYM( nil, 317).nil, 305).FSYM( nil, 318).nil, 303).nil, 304).FSYM( FSYM( FSYM( nil, 309).FSYM( nil, 309).nil, 303).FSYM( nil, 314).nil, 303).nil, 304).FSYM( FSYM( FSYM( nil, 311).FSYM( nil, 316).nil, 304).FSYM( FSYM( FSYM( nil, 313).nil, 306).FSYM( nil, 313).nil, 303).nil, 305).nil, 303).nil, 306).nil, 307).FSYM( FSYM( FSYM( FSYM( nil, 318).nil, 306).FSYM( FSYM( nil, 316).nil, 306).nil, 305).nil, 306).nil, 302).nil, 306).nil, 307),
+nil)
+
+ end
+
+RULE(
+-1,
+417,148,1,1,1,FSYM( nil, 327),
+FSYM( FSYM( FSYM( FSYM( FSYM( FSYM( nil, 308).FSYM( FSYM( FSYM( nil, 309).FSYM( nil, 310).nil, 304).FSYM( nil, 311).nil, 303).nil, 303).FSYM( FSYM( FSYM( FSYM( FSYM( nil, 312).nil, 306).FSYM( FSYM( FSYM( FSYM( nil, 313).FSYM( nil, 314).nil, 305).FSYM( FSYM( nil, 315).FSYM( nil, 316).nil, 305).nil, 303).FSYM( FSYM( nil, 317).FSYM( nil, 316).nil, 302).nil, 304).nil, 303).FSYM( FSYM( FSYM( FSYM( nil, 309).nil, 306).nil, 306).FSYM( FSYM( FSYM( nil, 316).FSYM( nil, 313).nil, 304).FSYM( FSYM( nil, 317).FSYM( nil, 312).nil, 304).nil, 307).nil, 305).nil, 305).FSYM( FSYM( FSYM( nil, 316).FSYM( FSYM( FSYM( nil, 315).nil, 306).FSYM( FSYM( nil, 311).FSYM( nil, 316).nil, 304).nil, 307).nil, 304).nil, 306).nil, 303).nil, 302).nil, 306).FSYM( FSYM( FSYM( FSYM( FSYM( nil, 308).FSYM( FSYM( FSYM( nil, 309).FSYM( nil, 310).nil, 304).FSYM( nil, 311).nil, 303).nil, 303).FSYM( FSYM( FSYM( FSYM( FSYM( nil, 312).nil, 306).FSYM( FSYM( FSYM( FSYM( nil, 313).FSYM( nil, 314).nil, 305).FSYM( FSYM( nil, 315).FSYM( nil, 316).nil, 305).nil, 303).FSYM( FSYM( nil, 317).FSYM( nil, 316).nil, 302).nil, 304).nil, 303).FSYM( FSYM( FSYM( FSYM( nil, 309).nil, 306).nil, 306).FSYM( FSYM( FSYM( nil, 316).FSYM( nil, 313).nil, 304).FSYM( FSYM( nil, 317).FSYM( nil, 312).nil, 304).nil, 307).nil, 305).nil, 305).FSYM( FSYM( FSYM( nil, 316).FSYM( FSYM( FSYM( nil, 315).nil, 306).FSYM( FSYM( nil, 311).FSYM( nil, 316).nil, 304).nil, 307).nil, 304).nil, 306).nil, 303).nil, 302).nil, 306).FSYM( FSYM( FSYM( FSYM( FSYM( FSYM( nil, 308).FSYM( FSYM( FSYM( nil, 309).FSYM( nil, 310).nil, 303).FSYM( FSYM( nil, 311).nil, 306).nil, 303).nil, 304).FSYM( FSYM( FSYM( nil, 312).FSYM( FSYM( nil, 313).FSYM( nil, 314).nil, 302).nil, 303).nil, 306).nil, 302).FSYM( FSYM( FSYM( FSYM( nil, 315).FSYM( nil, 316).nil, 307).FSYM( nil, 317).nil, 303).FSYM( FSYM( FSYM( nil, 311).FSYM( FSYM( nil, 311).FSYM( nil, 308).nil, 304).nil, 302).FSYM( nil, 309).nil, 303).nil, 307).nil, 307).FSYM( FSYM( FSYM( FSYM( FSYM( nil, 311).FSYM( nil, 314).nil, 304).FSYM( nil, 309).nil, 303).FSYM( FSYM( nil, 315).FSYM( nil, 308).nil, 302).nil, 304).FSYM( FSYM( FSYM( FSYM( nil, 313).nil, 306).nil, 306).nil, 306).nil, 304).nil, 307).nil, 306).nil, 307).nil, 302).FSYM( FSYM( FSYM( FSYM( FSYM( FSYM( nil, 308).FSYM( FSYM( FSYM( nil, 309).FSYM( nil, 310).nil, 303).FSYM( FSYM( nil, 311).nil, 306).nil, 303).nil, 304).FSYM( FSYM( FSYM( nil, 312).FSYM( FSYM( nil, 313).FSYM( nil, 314).nil, 302).nil, 303).nil, 306).nil, 302).FSYM( FSYM( FSYM( FSYM( nil, 315).FSYM( nil, 316).nil, 307).FSYM( nil, 317).nil, 303).FSYM( FSYM( FSYM( nil, 311).FSYM( FSYM( nil, 311).FSYM( nil, 308).nil, 304).nil, 302).FSYM( nil, 309).nil, 303).nil, 307).nil, 307).FSYM( FSYM( FSYM( FSYM( FSYM( nil, 311).FSYM( nil, 314).nil, 304).FSYM( nil, 309).nil, 303).FSYM( FSYM( nil, 315).FSYM( nil, 308).nil, 302).nil, 304).FSYM( FSYM( FSYM( FSYM( nil, 313).nil, 306).nil, 306).nil, 306).nil, 304).nil, 307).nil, 306).nil, 307),
+nil)
+
+ end
+
+RULE(
+-1,
+417,148,1,1,1,FSYM( nil, 328),
+FSYM( FSYM( FSYM( FSYM( FSYM( FSYM( nil, 308).FSYM( FSYM( FSYM( nil, 309).FSYM( nil, 310).nil, 304).FSYM( nil, 311).nil, 303).nil, 303).FSYM( FSYM( FSYM( FSYM( FSYM( nil, 312).nil, 306).FSYM( FSYM( FSYM( FSYM( nil, 313).FSYM( nil, 314).nil, 305).FSYM( FSYM( nil, 315).FSYM( nil, 316).nil, 305).nil, 303).FSYM( FSYM( nil, 317).FSYM( nil, 318).nil, 302).nil, 304).nil, 303).FSYM( FSYM( FSYM( nil, 311).FSYM( FSYM( nil, 310).FSYM( FSYM( nil, 308).FSYM( nil, 309).nil, 305).nil, 302).nil, 304).FSYM( FSYM( FSYM( nil, 311).nil, 306).nil, 306).nil, 307).nil, 305).FSYM( FSYM( FSYM( FSYM( nil, 313).FSYM( nil, 308).nil, 307).FSYM( FSYM( nil, 308).nil, 306).nil, 307).FSYM( FSYM( nil, 316).nil, 306).nil, 303).nil, 303).nil, 302).nil, 306).FSYM( FSYM( FSYM( FSYM( FSYM( nil, 308).FSYM( FSYM( FSYM( nil, 309).FSYM( nil, 310).nil, 304).FSYM( nil, 311).nil, 303).nil, 303).FSYM( FSYM( FSYM( FSYM( FSYM( nil, 312).nil, 306).FSYM( FSYM( FSYM( FSYM( nil, 313).FSYM( nil, 314).nil, 305).FSYM( FSYM( nil, 315).FSYM( nil, 316).nil, 305).nil, 303).FSYM( FSYM( nil, 317).FSYM( nil, 318).nil, 302).nil, 304).nil, 303).FSYM( FSYM( FSYM( nil, 311).FSYM( FSYM( nil, 310).FSYM( FSYM( nil, 308).FSYM( nil, 309).nil, 305).nil, 302).nil, 304).FSYM( FSYM( FSYM( nil, 311).nil, 306).nil, 306).nil, 307).nil, 305).FSYM( FSYM( FSYM( FSYM( nil, 313).FSYM( nil, 308).nil, 307).FSYM( FSYM( nil, 308).nil, 306).nil, 307).FSYM( FSYM( nil, 316).nil, 306).nil, 303).nil, 303).nil, 302).nil, 306).FSYM( FSYM( FSYM( FSYM( FSYM( FSYM( nil, 308).FSYM( FSYM( FSYM( nil, 309).FSYM( nil, 310).nil, 303).FSYM( FSYM( nil, 311).nil, 306).nil, 303).nil, 304).FSYM( FSYM( FSYM( nil, 312).FSYM( FSYM( nil, 313).FSYM( nil, 314).nil, 302).nil, 303).nil, 306).nil, 302).FSYM( FSYM( FSYM( FSYM( nil, 315).FSYM( nil, 316).nil, 307).FSYM( nil, 317).nil, 303).FSYM( FSYM( FSYM( nil, 318).FSYM( FSYM( nil, 309).FSYM( nil, 315).nil, 307).nil, 302).FSYM( nil, 315).nil, 303).nil, 307).nil, 307).FSYM( FSYM( FSYM( FSYM( FSYM( nil, 312).FSYM( FSYM( nil, 315).FSYM( FSYM( nil, 315).FSYM( nil, 316).nil, 302).nil, 304).nil, 304).FSYM( FSYM( nil, 309).nil, 306).nil, 307).FSYM( FSYM( nil, 314).nil, 306).nil, 304).nil, 306).nil, 307).nil, 306).nil, 307).nil, 302).FSYM( FSYM( FSYM( FSYM( FSYM( FSYM( nil, 308).FSYM( FSYM( FSYM( nil, 309).FSYM( nil, 310).nil, 303).FSYM( FSYM( nil, 311).nil, 306).nil, 303).nil, 304).FSYM( FSYM( FSYM( nil, 312).FSYM( FSYM( nil, 313).FSYM( nil, 314).nil, 302).nil, 303).nil, 306).nil, 302).FSYM( FSYM( FSYM( FSYM( nil, 315).FSYM( nil, 316).nil, 307).FSYM( nil, 317).nil, 303).FSYM( FSYM( FSYM( nil, 318).FSYM( FSYM( nil, 309).FSYM( nil, 315).nil, 307).nil, 302).FSYM( nil, 315).nil, 303).nil, 307).nil, 307).FSYM( FSYM( FSYM( FSYM( FSYM( nil, 312).FSYM( FSYM( nil, 315).FSYM( FSYM( nil, 315).FSYM( nil, 316).nil, 302).nil, 304).nil, 304).FSYM( FSYM( nil, 309).nil, 306).nil, 307).FSYM( FSYM( nil, 314).nil, 306).nil, 304).nil, 306).nil, 307).nil, 306).nil, 307),
+nil)
+
+ end
+EndDef end
+EndDef end
+QUERY(417,417,-1,FSYM( nil, 326),FSYM( nil, 1)) end 

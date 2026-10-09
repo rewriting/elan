@@ -19,6 +19,7 @@ backtracking. This repository preserves the original system and revives it.
 | `docs/manual/` | the ELAN 3.6 user manual (LaTeX sources, PDF) |
 | `tests/unit/`, `tests/architecture/` | C++ unit tests of the modules; module dependency rules |
 | `tests/regression/` | targeted regression tests (one directory per case) |
+| `tests/golden/` | golden tests: exported `.ref` files, `-d` dump, statistics, error messages and exit status |
 | `ci/`, `.github/workflows/` | Linux image for local checks, CI on Ubuntu and macOS |
 
 ## Requirements
@@ -110,7 +111,7 @@ REM exit with a non-zero status on errors. The ATerm runtime of 2003
 
 ```sh
 make                 # build the interpreter and the compiler (CMake, into build/)
-make check           # unit tests, architecture, 368 bench tests + 13 examples, 410 compiled tests
+make check           # unit tests, architecture, golden tests, 368 bench tests + 13 examples, 410 compiled tests
 make check-compiler  # only the compiled tests (elanc, J/JO kinds of the bench)
 make check-sanitize  # same under ASan+UBSan (UBSan only on macOS; compiled programs: UBSan)
 make install PREFIX=$HOME/.local   # any file system

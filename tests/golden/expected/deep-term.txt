@@ -1,0 +1,6 @@
+$ elan -b prog.lgi
+--- stdout
+--- stderr
+[reduce] stack overflowed over MAXTERMDEEP = 20000
+	 fatal
+--- exit status 1

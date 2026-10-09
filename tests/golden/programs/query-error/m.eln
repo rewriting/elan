@@ -1,0 +1,11 @@
+module m
+import global int; end
+operators global
+ f(@) : (int) int;
+end
+rules for int
+  n : int;
+global
+ [] f(n) => n + 1 end
+end
+end

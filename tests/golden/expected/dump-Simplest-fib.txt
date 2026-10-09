@@ -1,0 +1,124 @@
+$ elan -b -d fib.lgi
+--- stdout
+
+Sorts
+intern int, ident, builtinInt, intern ident, int, 
+intern string, builtinString, bool, 
+
+Function symbols
+ @ '+'  @ 	 : (builtinInt builtinInt)builtinInt	 assocLeft 	 pri 500 code 3 sem 3;
+ @ '-'  @ 	 : (builtinInt builtinInt)builtinInt	 assocLeft 	 pri 600 code 4 sem 4;
+ @ '*'  @ 	 : (builtinInt builtinInt)builtinInt	 assocLeft 	 pri 700 code 5 sem 5;
+ @ '/'  @ 	 : (builtinInt builtinInt)builtinInt	 assocLeft 	 pri 800 code 6 sem 6;
+ @ '%'  @ 	 : (builtinInt builtinInt)builtinInt	 assocLeft 	 pri 800 code 27 sem 27;
+ @ '&'  @ 	 : (builtinInt builtinInt)builtinInt	 assocLeft 	 pri 800 code 28 sem 28;
+ @ '|'  @ 	 : (builtinInt builtinInt)builtinInt	 assocLeft 	 pri 800 code 29 sem 29;
+'-'  @ 	 : (builtinInt)builtinInt	 pri 900 code 20 sem 20;
+'('  @ '+'  @ ')' 	 : (builtinInt builtinInt)builtinInt	 assocLeft 	 pri 500 code 3 sem 3;
+'('  @ '-'  @ ')' 	 : (builtinInt builtinInt)builtinInt	 assocLeft 	 pri 600 code 4 sem 4;
+'('  @ '*'  @ ')' 	 : (builtinInt builtinInt)builtinInt	 assocLeft 	 pri 700 code 5 sem 5;
+'('  @ '/'  @ ')' 	 : (builtinInt builtinInt)builtinInt	 assocLeft 	 pri 800 code 6 sem 6;
+'('  @ '%'  @ ')' 	 : (builtinInt builtinInt)builtinInt	 assocLeft 	 pri 800 code 27 sem 27;
+'('  @ '&'  @ ')' 	 : (builtinInt builtinInt)builtinInt	 assocLeft 	 pri 800 code 28 sem 28;
+'('  @ '|'  @ ')' 	 : (builtinInt builtinInt)builtinInt	 assocLeft 	 pri 800 code 29 sem 29;
+'(' '-'  @ ')' 	 : (builtinInt)builtinInt	 pri 900 code 20 sem 20;
+'plus' '('  @ ','  @ ')' 	 : (builtinInt builtinInt)builtinInt	 pri 0 code 3 sem 3;
+'minus' '('  @ ','  @ ')' 	 : (builtinInt builtinInt)builtinInt	 pri 0 code 4 sem 4;
+'time' '('  @ ','  @ ')' 	 : (builtinInt builtinInt)builtinInt	 pri 0 code 5 sem 5;
+'div' '('  @ ','  @ ')' 	 : (builtinInt builtinInt)builtinInt	 pri 0 code 6 sem 6;
+'mod' '('  @ ','  @ ')' 	 : (builtinInt builtinInt)builtinInt	 pri 0 code 27 sem 27;
+'and' '('  @ ','  @ ')' 	 : (builtinInt builtinInt)builtinInt	 pri 0 code 28 sem 28;
+'or' '('  @ ','  @ ')' 	 : (builtinInt builtinInt)builtinInt	 pri 0 code 29 sem 29;
+'umin' '('  @ ')' 	 : (builtinInt)builtinInt	 pri 0 code 20 sem 20;
+'umin_builtinInt' '('  @ ')' 	 : (builtinInt)builtinInt	 pri 0 code 20 sem 20;
+'btoi' '('  @ ')' 	 : (bool)builtinInt	 pri 900 code 25 sem 25;
+'btoi_builtinInt' '('  @ ')' 	 : (bool)builtinInt	 pri 900 code 25 sem 25;
+'valueOf' '('  @ ')' 	 : (int)builtinInt	 pri 900 code 317;
+ @ 	 : (builtinInt)int	 pri 1000 code 300;
+'['  @ ']' 	 : (builtinInt)int	 pri 1000 code 300;
+ @ '+'  @ 	 : (int int)int	 assocLeft 	 pri 500 code 301;
+ @ '-'  @ 	 : (int int)int	 assocLeft 	 pri 600 code 302;
+ @ '*'  @ 	 : (int int)int	 assocLeft 	 pri 700 code 303;
+ @ '%'  @ 	 : (int int)int	 assocLeft 	 pri 800 code 304;
+ @ '&'  @ 	 : (int int)int	 assocLeft 	 pri 800 code 305;
+ @ '/'  @ 	 : (int int)int	 assocLeft 	 pri 800 code 306;
+ @ '|'  @ 	 : (int int)int	 assocLeft 	 pri 800 code 307;
+'-'  @ 	 : (int)int	 pri 900 code 308;
+'('  @ '+'  @ ')' 	 : (int int)int	 pri 500 code 301;
+'('  @ '-'  @ ')' 	 : (int int)int	 pri 600 code 302;
+'('  @ '*'  @ ')' 	 : (int int)int	 pri 700 code 303;
+'('  @ '/'  @ ')' 	 : (int int)int	 pri 800 code 306;
+'('  @ '%'  @ ')' 	 : (int int)int	 pri 800 code 304;
+'('  @ '&'  @ ')' 	 : (int int)int	 pri 800 code 305;
+'('  @ '|'  @ ')' 	 : (int int)int	 pri 800 code 307;
+'(' '-'  @ ')' 	 : (int)int	 pri 900 code 308;
+'plus' '('  @ ','  @ ')' 	 : (int int)int	 pri 500 code 301;
+'minus' '('  @ ','  @ ')' 	 : (int int)int	 pri 600 code 302;
+'time' '('  @ ','  @ ')' 	 : (int int)int	 pri 700 code 303;
+'div' '('  @ ','  @ ')' 	 : (int int)int	 pri 800 code 306;
+'mod' '('  @ ','  @ ')' 	 : (int int)int	 pri 800 code 304;
+'and' '('  @ ','  @ ')' 	 : (int int)int	 pri 800 code 305;
+'or' '('  @ ','  @ ')' 	 : (int int)int	 pri 800 code 307;
+'umin' '('  @ ')' 	 : (int)int	 pri 900 code 308;
+'btoi' '('  @ ')' 	 : (bool)int	 pri 900 code 315;
+'btoi_int' '('  @ ')' 	 : (bool)int	 pri 900 code 315;
+ @ 	 : (builtinInt)int	 pri 1000 code 300;
+'fib' '('  @ ')' 	 : (int)int	 pri 0 code 318;
+'true' 	 : bool	 pri 0 code 1;
+'false' 	 : bool	 pri 0 code 0;
+ @ 'and'  @ 	 : (bool bool)bool	 assocLeft 	 pri 100 code 21 sem 21;
+ @ 'or'  @ 	 : (bool bool)bool	 assocLeft 	 pri 100 code 22 sem 22;
+'('  @ 'and'  @ ')' 	 : (bool bool)bool	 assocLeft 	 pri 100 code 21 sem 21;
+'('  @ 'or'  @ ')' 	 : (bool bool)bool	 assocLeft 	 pri 100 code 22 sem 22;
+'not' '('  @ ')' 	 : (bool)bool	 pri 200 code 24 sem 24;
+'not'  @ 	 : (bool)bool	 pri 200 code 24 sem 24;
+'(' 'not'  @ ')' 	 : (bool)bool	 pri 200 code 24 sem 24;
+'(' 'not' '('  @ ')' ')' 	 : (bool)bool	 pri 200 code 24 sem 24;
+ @ '=' '='  @ 	 : (bool bool)bool	 assocLeft 	 pri 200 code 8 sem 8;
+ @ '!' '='  @ 	 : (bool bool)bool	 assocLeft 	 pri 200 code 9 sem 9;
+ @ '<'  @ 	 : (bool bool)bool	 assocLeft 	 pri 200 code 10 sem 10;
+ @ '<' '='  @ 	 : (bool bool)bool	 assocLeft 	 pri 200 code 11 sem 11;
+ @ '>'  @ 	 : (bool bool)bool	 assocLeft 	 pri 200 code 12 sem 12;
+ @ '>' '='  @ 	 : (bool bool)bool	 assocLeft 	 pri 200 code 13 sem 13;
+'eq_bool' '('  @ ','  @ ')' 	 : (bool bool)bool	 pri 200 code 8 sem 8;
+'neq_bool' '('  @ ','  @ ')' 	 : (bool bool)bool	 pri 200 code 9 sem 9;
+'less_bool' '('  @ ','  @ ')' 	 : (bool bool)bool	 pri 200 code 10 sem 10;
+'lesseq_bool' '('  @ ','  @ ')' 	 : (bool bool)bool	 pri 200 code 11 sem 11;
+'greater_bool' '('  @ ','  @ ')' 	 : (bool bool)bool	 pri 200 code 12 sem 12;
+'greatereq_bool' '('  @ ','  @ ')' 	 : (bool bool)bool	 pri 200 code 13 sem 13;
+ @ '=' '='  @ 	 : (builtinInt builtinInt)bool	 pri 300 code 8 sem 8;
+ @ '!' '='  @ 	 : (builtinInt builtinInt)bool	 pri 300 code 9 sem 9;
+ @ '<'  @ 	 : (builtinInt builtinInt)bool	 pri 300 code 10 sem 10;
+ @ '<' '='  @ 	 : (builtinInt builtinInt)bool	 pri 300 code 11 sem 11;
+ @ '>'  @ 	 : (builtinInt builtinInt)bool	 pri 300 code 12 sem 12;
+ @ '>' '='  @ 	 : (builtinInt builtinInt)bool	 pri 300 code 13 sem 13;
+'eq_builtinInt' '('  @ ','  @ ')' 	 : (builtinInt builtinInt)bool	 pri 300 code 8 sem 8;
+'neq_builtinInt' '('  @ ','  @ ')' 	 : (builtinInt builtinInt)bool	 pri 300 code 9 sem 9;
+'less_builtinInt' '('  @ ','  @ ')' 	 : (builtinInt builtinInt)bool	 pri 300 code 10 sem 10;
+'lesseq_builtinInt' '('  @ ','  @ ')' 	 : (builtinInt builtinInt)bool	 pri 300 code 11 sem 11;
+'greater_builtinInt' '('  @ ','  @ ')' 	 : (builtinInt builtinInt)bool	 pri 300 code 12 sem 12;
+'greatereq_builtinInt' '('  @ ','  @ ')' 	 : (builtinInt builtinInt)bool	 pri 300 code 13 sem 13;
+'itob' '('  @ ')' 	 : (builtinInt)bool	 pri 900 code 26 sem 26;
+'itob_builtinInt' '('  @ ')' 	 : (builtinInt)bool	 pri 900 code 26 sem 26;
+ @ '=' '='  @ 	 : (int int)bool	 pri 300 code 309;
+ @ '!' '='  @ 	 : (int int)bool	 pri 300 code 310;
+ @ '>'  @ 	 : (int int)bool	 pri 300 code 311;
+ @ '>' '='  @ 	 : (int int)bool	 pri 300 code 312;
+ @ '<' '='  @ 	 : (int int)bool	 pri 300 code 313;
+ @ '<'  @ 	 : (int int)bool	 pri 300 code 314;
+'eq_int' '('  @ ','  @ ')' 	 : (int int)bool	 pri 300 code 309;
+'neq_int' '('  @ ','  @ ')' 	 : (int int)bool	 pri 300 code 310;
+'less_int' '('  @ ','  @ ')' 	 : (int int)bool	 pri 300 code 314;
+'lesseq_int' '('  @ ','  @ ')' 	 : (int int)bool	 pri 300 code 313;
+'greater_int' '('  @ ','  @ ')' 	 : (int int)bool	 pri 300 code 311;
+'greatereq_int' '('  @ ','  @ ')' 	 : (int int)bool	 pri 300 code 312;
+'itob' '('  @ ')' 	 : (int)bool	 pri 900 code 316;
+'itob_int' '('  @ ')' 	 : (int)bool	 pri 900 code 316;
+
+ 10946 end
+
+ end end
+end
+
+--- stderr
+--- exit status 0

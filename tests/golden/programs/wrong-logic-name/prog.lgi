@@ -1,0 +1,6 @@
+LPL other description
+  query    of sort int
+  result   of sort int
+  import   m
+  start with () query
+end

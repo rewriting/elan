@@ -1,0 +1,24 @@
+$ elan -b -s fib.lgi
+--- stdout
+ 10946 end
+
+ end end
+end
+
+
+ Statistics:
+ total time	(<T>+<T>)=<T> sec	(main+subprocesses)
+
+ average speed = <N> inf/sec
+            65671 nonamed rules applied, 94326 tried
+                0   named rules applied,     0 tried
+
+ named rules
+           applied   tried    rule for symbol
+
+
+	numberOfAllocTerm = 317408
+
+end of statistics
+--- stderr
+--- exit status 0

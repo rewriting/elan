@@ -1,0 +1,371 @@
+$ elan -b -S m.lgi
+--- stdout
+ la la 1 end
+
+ end end
+end
+
+
+ Statistics:
+ total time	(<T>+<T>)=<T> sec	(main+subprocesses)
+                0 nonamed rules applied,     0 tried
+                0   named rules applied,    18 tried
+
+ named rules
+           applied   tried    rule for symbol
+                 0       3    eta:lterm
+                 0       3    beta:lterm
+                 0       3    NORMALISE_RULE0:lterm
+                 0       3    NORMALISE_RULE0_320:lterm
+                 0       6    NORMALISE_RULE0_319:lterm
+
+ nonamed rules
+           applied   tried    rule for symbol
+
+
+	numberOfAllocTerm = 25
+
+end of statistics
+ la la la(2((32)1)) end
+
+ end end
+end
+
+
+ Statistics:
+ total time	(<T>+<T>)=<T> sec	(main+subprocesses)
+                0 nonamed rules applied,     0 tried
+                0   named rules applied,    60 tried
+
+ named rules
+           applied   tried    rule for symbol
+                 0      10    eta:lterm
+                 0      10    beta:lterm
+                 0      10    NORMALISE_RULE0:lterm
+                 0      10    NORMALISE_RULE0_320:lterm
+                 0      20    NORMALISE_RULE0_319:lterm
+
+ nonamed rules
+           applied   tried    rule for symbol
+
+
+	numberOfAllocTerm = 81
+
+end of statistics
+ la la(21) end
+
+ end end
+end
+
+
+ Statistics:
+ total time	(<T>+<T>)=<T> sec	(main+subprocesses)
+
+ average speed = <N> inf/sec
+               15 nonamed rules applied,    34 tried
+               13   named rules applied,    80 tried
+
+ named rules
+           applied   tried    rule for symbol
+                 0      16    eta:lterm
+                 3      19    beta:lterm
+                 3      16    NORMALISE_RULE0:lterm
+                 4      13    NORMALISE_RULE0_320:lterm
+                 3      16    NORMALISE_RULE0_319:lterm
+
+ nonamed rules
+           applied   tried    rule for symbol
+                 3       3    plus( int , int )
+                12      31    repl( int , lterm , lterm )
+
+
+	numberOfAllocTerm = 186
+
+end of statistics
+ la la(21) end
+
+ end end
+end
+
+
+ Statistics:
+ total time	(<T>+<T>)=<T> sec	(main+subprocesses)
+
+ average speed = <N> inf/sec
+                4 nonamed rules applied,     8 tried
+               11   named rules applied,    76 tried
+
+ named rules
+           applied   tried    rule for symbol
+                 0      15    eta:lterm
+                 2      17    beta:lterm
+                 2      15    NORMALISE_RULE0:lterm
+                 4      13    NORMALISE_RULE0_320:lterm
+                 3      16    NORMALISE_RULE0_319:lterm
+
+ nonamed rules
+           applied   tried    rule for symbol
+                 1       1    plus( int , int )
+                 3       7    repl( int , lterm , lterm )
+
+
+	numberOfAllocTerm = 143
+
+end of statistics
+ la la(21) end
+
+ end end
+end
+
+
+ Statistics:
+ total time	(<T>+<T>)=<T> sec	(main+subprocesses)
+                1 nonamed rules applied,     1 tried
+                5   named rules applied,    47 tried
+
+ named rules
+           applied   tried    rule for symbol
+                 0       9    eta:lterm
+                 1      10    beta:lterm
+                 1       9    NORMALISE_RULE0:lterm
+                 2       8    NORMALISE_RULE0_320:lterm
+                 1      11    NORMALISE_RULE0_319:lterm
+
+ nonamed rules
+           applied   tried    rule for symbol
+                 1       1    repl( int , lterm , lterm )
+
+
+	numberOfAllocTerm = 79
+
+end of statistics
+ la la(21) end
+
+ end end
+end
+
+
+ Statistics:
+ total time	(<T>+<T>)=<T> sec	(main+subprocesses)
+                0 nonamed rules applied,     0 tried
+                0   named rules applied,    30 tried
+
+ named rules
+           applied   tried    rule for symbol
+                 0       5    eta:lterm
+                 0       5    beta:lterm
+                 0       5    NORMALISE_RULE0:lterm
+                 0       5    NORMALISE_RULE0_320:lterm
+                 0      10    NORMALISE_RULE0_319:lterm
+
+ nonamed rules
+           applied   tried    rule for symbol
+
+
+	numberOfAllocTerm = 41
+
+end of statistics
+ la la(2(21)) end
+
+ end end
+end
+
+
+ Statistics:
+ total time	(<T>+<T>)=<T> sec	(main+subprocesses)
+
+ average speed = <N> inf/sec
+               19 nonamed rules applied,    43 tried
+               13   named rules applied,    92 tried
+
+ named rules
+           applied   tried    rule for symbol
+                 0      18    eta:lterm
+                 3      21    beta:lterm
+                 3      18    NORMALISE_RULE0:lterm
+                 4      15    NORMALISE_RULE0_320:lterm
+                 3      20    NORMALISE_RULE0_319:lterm
+
+ nonamed rules
+           applied   tried    rule for symbol
+                 3       3    plus( int , int )
+                16      40    repl( int , lterm , lterm )
+
+
+	numberOfAllocTerm = 210
+
+end of statistics
+ la la(2(21)) end
+
+ end end
+end
+
+
+ Statistics:
+ total time	(<T>+<T>)=<T> sec	(main+subprocesses)
+
+ average speed = <N> inf/sec
+                8 nonamed rules applied,    17 tried
+               11   named rules applied,    88 tried
+
+ named rules
+           applied   tried    rule for symbol
+                 0      17    eta:lterm
+                 2      19    beta:lterm
+                 2      17    NORMALISE_RULE0:lterm
+                 4      15    NORMALISE_RULE0_320:lterm
+                 3      20    NORMALISE_RULE0_319:lterm
+
+ nonamed rules
+           applied   tried    rule for symbol
+                 1       1    plus( int , int )
+                 7      16    repl( int , lterm , lterm )
+
+
+	numberOfAllocTerm = 167
+
+end of statistics
+ la la(2(21)) end
+
+ end end
+end
+
+
+ Statistics:
+ total time	(<T>+<T>)=<T> sec	(main+subprocesses)
+                0 nonamed rules applied,     0 tried
+                0   named rules applied,    42 tried
+
+ named rules
+           applied   tried    rule for symbol
+                 0       7    eta:lterm
+                 0       7    beta:lterm
+                 0       7    NORMALISE_RULE0:lterm
+                 0       7    NORMALISE_RULE0_320:lterm
+                 0      14    NORMALISE_RULE0_319:lterm
+
+ nonamed rules
+           applied   tried    rule for symbol
+
+
+	numberOfAllocTerm = 57
+
+end of statistics
+ la la(2(2(21))) end
+
+ end end
+end
+
+
+ Statistics:
+ total time	(<T>+<T>)=<T> sec	(main+subprocesses)
+
+ average speed = <N> inf/sec
+               23 nonamed rules applied,    52 tried
+               13   named rules applied,   104 tried
+
+ named rules
+           applied   tried    rule for symbol
+                 0      20    eta:lterm
+                 3      23    beta:lterm
+                 3      20    NORMALISE_RULE0:lterm
+                 4      17    NORMALISE_RULE0_320:lterm
+                 3      24    NORMALISE_RULE0_319:lterm
+
+ nonamed rules
+           applied   tried    rule for symbol
+                 3       3    plus( int , int )
+                20      49    repl( int , lterm , lterm )
+
+
+	numberOfAllocTerm = 234
+
+end of statistics
+ la la(2(2(21))) end
+
+ end end
+end
+
+
+ Statistics:
+ total time	(<T>+<T>)=<T> sec	(main+subprocesses)
+
+ average speed = <N> inf/sec
+               12 nonamed rules applied,    26 tried
+               11   named rules applied,   100 tried
+
+ named rules
+           applied   tried    rule for symbol
+                 0      19    eta:lterm
+                 2      21    beta:lterm
+                 2      19    NORMALISE_RULE0:lterm
+                 4      17    NORMALISE_RULE0_320:lterm
+                 3      24    NORMALISE_RULE0_319:lterm
+
+ nonamed rules
+           applied   tried    rule for symbol
+                 1       1    plus( int , int )
+                11      25    repl( int , lterm , lterm )
+
+
+	numberOfAllocTerm = 191
+
+end of statistics
+ la la(2(2(21))) end
+
+ end end
+end
+
+
+ Statistics:
+ total time	(<T>+<T>)=<T> sec	(main+subprocesses)
+                0 nonamed rules applied,     0 tried
+                0   named rules applied,    54 tried
+
+ named rules
+           applied   tried    rule for symbol
+                 0       9    eta:lterm
+                 0       9    beta:lterm
+                 0       9    NORMALISE_RULE0:lterm
+                 0       9    NORMALISE_RULE0_320:lterm
+                 0      18    NORMALISE_RULE0_319:lterm
+
+ nonamed rules
+           applied   tried    rule for symbol
+
+
+	numberOfAllocTerm = 73
+
+end of statistics
+ la la(2(2(2(2(2(2(2(2(2(2(21))))))))))) end
+
+ end end
+end
+
+
+ Statistics:
+ total time	(<T>+<T>)=<T> sec	(main+subprocesses)
+
+ average speed = <N> inf/sec
+             1625 nonamed rules applied,  4004 tried
+              348   named rules applied,  1845 tried
+
+ named rules
+           applied   tried    rule for symbol
+                 0     371    eta:lterm
+                33     404    beta:lterm
+                33     371    NORMALISE_RULE0:lterm
+                64     338    NORMALISE_RULE0_320:lterm
+               218     361    NORMALISE_RULE0_319:lterm
+
+ nonamed rules
+           applied   tried    rule for symbol
+               343     343    plus( int , int )
+              1282    3661    repl( int , lterm , lterm )
+
+
+	numberOfAllocTerm = 8251
+
+end of statistics
+--- stderr
+--- exit status 0

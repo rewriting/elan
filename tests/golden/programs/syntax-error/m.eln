@@ -1,0 +1,7 @@
+module m
+import global int; end
+operators global
+ f(@) : (int) int;
+end
+end
+this is not ELAN

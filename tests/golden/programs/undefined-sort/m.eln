@@ -1,0 +1,6 @@
+module m
+import global int; end
+operators global
+ f(@) : (nosort) int;
+end
+end

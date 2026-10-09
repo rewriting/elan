@@ -1,0 +1,26 @@
+$ elan -b -S poly1.lgi someVariables.spc
+--- stdout
+ 0*X*X+3*1*X+X*1+0*X+2*1+0 end
+
+ end end
+end
+
+
+ Statistics:
+ total time	(<T>+<T>)=<T> sec	(main+subprocesses)
+               11 nonamed rules applied,    27 tried
+                0   named rules applied,     0 tried
+
+ named rules
+           applied   tried    rule for symbol
+
+ nonamed rules
+           applied   tried    rule for symbol
+                11      27    deriv( poly )
+
+
+	numberOfAllocTerm = 40
+
+end of statistics
+--- stderr
+--- exit status 0

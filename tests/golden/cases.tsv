@@ -1,0 +1,66 @@
+# Golden cases (see run_golden.py). Fields are separated by ONE tab.
+# ref <id> <dir> <lgi> <spc|->          : --export and --cexport of the program
+# run <id> <dir> <stdin|-> <elan args>   : stdout, stderr and exit status
+#
+# .ref files of bench programs whose I/A (applications) or J (Compiler.4.0) tests pass
+ref	Simplest-fib	legacy/elan3/applications/Simplest	fib	-
+ref	Simplest-hanoi	legacy/elan3/applications/Simplest	hanoi	-
+ref	Simplest-nhorse	legacy/elan3/applications/Simplest	nhorse	-
+ref	Simplest-primes	legacy/elan3/applications/Simplest	primes	-
+ref	Simplest-main	legacy/elan3/applications/Simplest	main	-
+ref	Features-Fail	legacy/elan3/applications/Features	Fail	qqq
+ref	Features-ac2	legacy/elan3/applications/Features	ac2	qqq
+ref	Features-m	legacy/elan3/applications/Features	m	-
+ref	Features-norm	legacy/elan3/applications/Features	norm	-
+ref	Features-sel	legacy/elan3/applications/Features	sel	-
+ref	Features-trq	legacy/elan3/applications/Features	trq	-
+ref	HOU-hou-exa	legacy/elan3/applications/HOU_1_18	hou	exa
+ref	HOU-phou-specPat1	legacy/elan3/applications/HOU_1_18	phou	specPat1
+ref	Poly-poly1	legacy/elan3/applications/Poly	poly1	someVariables
+ref	Prolog-lovers	legacy/elan3/applications/Prolog	prolog	lovers
+ref	Prolog-queens	legacy/elan3/applications/Prolog	prolog	queens
+ref	Unification-boolean	legacy/elan3/applications/Unification	unification	boolean
+ref	Gpo-append	legacy/elan3/contributions/Proving/Termination/Gpo	gpo	append
+ref	MatchingAC-ctesig	legacy/elan3/contributions/Solving/Equational/MatchingAC	matchingAC	ctesig
+ref	C40-enum	legacy/elan/sources/Compiler.4.0/Test	enum	-
+ref	C40-choice1	legacy/elan/sources/Compiler.4.0/Test	choice1	-
+ref	C40-match11	legacy/elan/sources/Compiler.4.0/Test	match11	-
+ref	C40-testACNumbering	legacy/elan/sources/Compiler.4.0/Test	testACNumbering	-
+ref	C40-manySortedSet1	legacy/elan/sources/Compiler.4.0/Test	manySortedSet1	-
+ref	C40-wpatternAC1	legacy/elan/sources/Compiler.4.0/Test	wpatternAC1	-
+ref	C40-propc1	legacy/elan/sources/Compiler.4.0/Test	propc1	-
+ref	C40-rep	legacy/elan/sources/Compiler.4.0/Test	rep	-
+#
+# -d dump (signature, strategies, rules)
+run	dump-Simplest-fib	legacy/elan3/applications/Simplest	SAMPLES/ifib.inp	-b -d fib.lgi
+run	dump-Simplest-nhorse	legacy/elan3/applications/Simplest	Sample/nhorse.inp	-b -d nhorse.lgi
+run	dump-Prolog-queens	legacy/elan3/applications/Prolog	SAMPLES/iqueens.inp	-b -d prolog.lgi queens.spc
+run	dump-Unification-bool1	legacy/elan3/applications/Unification	SAMPLES/bool1.inp	-b -d unification.lgi boolean.spc
+run	dump-Features-ac2	legacy/elan3/applications/Features	SAMPLES/ac2.inp	-b -d ac2.lgi qqq.spc
+#
+# statistics: -s short, -S long (times and speeds are normalised)
+run	stats-s-Simplest-fib	legacy/elan3/applications/Simplest	SAMPLES/ifib.inp	-b -s fib.lgi
+run	stats-S-Simplest-fib	legacy/elan3/applications/Simplest	SAMPLES/ifib.inp	-b -S fib.lgi
+run	stats-S-Simplest-nhorse	legacy/elan3/applications/Simplest	Sample/nhorse.inp	-b -S nhorse.lgi
+run	stats-s-Prolog-queens	legacy/elan3/applications/Prolog	SAMPLES/iqueens.inp	-b -s prolog.lgi queens.spc
+run	stats-S-Features-m	legacy/elan3/applications/Features	SAMPLES/m.inp	-b -S m.lgi
+run	stats-S-Poly-poly1	legacy/elan3/applications/Poly	SAMPLES/poly1.inp	-b -S poly1.lgi someVariables.spc
+#
+# deliberate errors (without -b: the messages and warnings are shown)
+run	err-missing-lgi	tests/golden/programs/syntax-error	-	nofile.lgi
+run	err-unknown-option	tests/golden/programs/syntax-error	-	--nosuch prog.lgi
+run	err-syntax-error	tests/golden/programs/syntax-error	input	prog.lgi
+run	err-missing-module	tests/golden/programs/missing-module	-	prog.lgi
+run	err-undefined-sort	tests/golden/programs/undefined-sort	input	prog.lgi
+run	err-undefined-operator	tests/golden/programs/undefined-operator	-	prog.lgi
+run	err-query-error	tests/golden/programs/query-error	input	prog.lgi
+run	err-wrong-logic-name	tests/golden/programs/wrong-logic-name	-	prog.lgi
+run	err-too-many-variables	tests/golden/programs/too-many-variables	-	prog.lgi
+run	err-identifier-table-overflow	tests/golden/programs/identifier-table-overflow	-	prog.lgi
+run	err-symbol-table-overflow	tests/golden/programs/symbol-table-overflow	-	prog.lgi
+run	err-string-constants-overflow	tests/golden/programs/string-constants-overflow	-	prog.lgi
+run	err-deep-import	tests/golden/programs/deep-import	input	prog.lgi
+run	err-nested-strategies	tests/golden/programs/nested-strategies	input	prog.lgi
+#
+# a term deeper than the 2004 limit MAXTERMDEEP = 20000
+run	deep-term	tests/golden/programs/deep-term	input	-b prog.lgi

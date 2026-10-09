@@ -1,0 +1,24 @@
+module m
+import global int; end
+sort nat; end
+operators global
+ z : nat;
+ s(@) : (nat) nat;
+ build(@) : (int) nat;
+ len(@) : (nat) int;
+ lenacc(@,@) : (nat int) int;
+end
+rules for nat
+  n : int;
+global
+ [] build(0) => z end
+ [] build(n) => s(build(n-1)) if n > 0 end
+end
+rules for int
+  x : nat; a : int;
+global
+ [] len(x) => lenacc(x,0) end
+ [] lenacc(z,a) => a end
+ [] lenacc(s(x),a) => lenacc(x,a+1) end
+end
+end

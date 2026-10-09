@@ -1,0 +1,388 @@
+Identifiers
+82:"R".
+97:"a".
+98:"b".
+99:"c".
+120:"x".
+132:"AC".
+142:"GG".
+143:"IF".
+152:"LL".
+164:"RR".
+194:"a10".
+195:"a11".
+196:"a21".
+197:"a40".
+198:"a41".
+199:"dc".
+205:"id".
+207:"dk".
+211:"AND".
+213:"of".
+214:"eq".
+215:"END".
+225:"or".
+230:"ss".
+231:"FOR".
+232:"LPL".
+273:"EACH".
+292:"Foo".
+295:"META".
+305:"THAT".
+307:"SUCH".
+311:"end".
+322:"one".
+324:"neq".
+327:"for".
+331:"pri".
+334:"GG_a".
+335:"GG_b".
+336:"GG_c".
+337:"not".
+344:"LL_a".
+345:"LL_b".
+346:"LL_c".
+351:"try".
+354:"ANDIF".
+406:"a20".
+407:"a30".
+408:"a31".
+409:"a50".
+410:"a51".
+411:"code".
+412:"fail".
+415:"loca".
+416:"locb".
+418:"if".
+421:"main".
+424:"bs".
+426:"self".
+428:"bool".
+429:"tall".
+431:"then".
+437:"dont".
+438:"tone".
+439:"part".
+444:"with".
+447:"know".
+448:"true".
+456:"sort".
+489:"dcOne".
+510:"check".
+518:"and".
+522:"alias".
+523:"local".
+539:"where".
+552:"tsome".
+554:"spart".
+555:"rules".
+558:"start".
+566:"query".
+611:"dccall".
+619:"dkcall".
+622:"care".
+623:"call".
+625:"global".
+639:"public".
+641:"repeat".
+646:"module".
+650:"less".
+652:"GG_loca".
+653:"GG_locb".
+657:"source".
+658:"switch".
+659:"normin".
+662:"LL_loca".
+663:"LL_locb".
+667:"import".
+671:"result".
+674:"export".
+719:"defined".
+720:"declare".
+730:"Epsilon".
+734:"false".
+737:"eq_bool".
+746:"greater".
+750:"iterate".
+759:"builtin".
+763:"first".
+770:"rewrite".
+781:"stratop".
+788:"normout".
+834:"case".
+835:"handline".
+842:"firstOne".
+847:"neq_bool".
+849:"dcconcur".
+850:"inline".
+852:"choose".
+857:"dkconcur".
+859:"implicit".
+864:"lesseq".
+866:"explicit".
+877:"queryend".
+883:"strategy".
+899:"definedAs".
+905:"hardAlias".
+932:"assocLeft".
+960:"greatereq".
+962:"less_bool".
+970:"normalise".
+972:"oneconcur".
+974:"private".
+977:"normalize".
+986:"otherwise".
+991:"operators".
+1047:"assocRight".
+1083:"strategies".
+1176:"lesseq_bool".
+1188:"description".
+1269:"greater_bool".
+1377:"specification".
+1483:"greatereq_bool".
+nil
+end
+
+Sorts
+19:"intern int".
+32:"ident".
+58:"builtinInt".
+220:"intern ident".
+292:"Foo".
+313:"<Foo->Foo>".
+351:"intern string".
+390:"builtinString".
+428:"bool".
+nil
+end
+
+Modules
+15:"loca".
+16:"locb".
+21:"main".
+28:"bool".
+46:"anyInteger".
+97:"a".
+98:"b".
+99:"c".
+155:"anyIdentifier".
+159:"anyString".
+181:"anyQuotedIdentifier".
+183:"main.lgi".
+nil
+end
+
+RuleNames
+432:"R:Foo".
+756:"R:Foo/a!GL".
+757:"R:Foo/b!GL".
+758:"R:Foo/c!GL".
+764:"R:Foo/a!LO".
+765:"R:Foo/b!LO".
+766:"R:Foo/c!LO".
+1074:"R:Foo/loca!GL".
+1075:"R:Foo/locb!GL".
+1082:"R:Foo/loca!LO".
+1083:"R:Foo/locb!LO".
+nil
+end
+
+StrategyNames
+48:"ss:Foo/main".
+158:"RR:Foo/a".
+159:"RR:Foo/b".
+160:"RR:Foo/c".
+187:"LL_locb:Foo/locb".
+328:"GG_a:Foo/a".
+330:"GG_b:Foo/b".
+332:"GG_c:Foo/c".
+338:"LL_a:Foo/a".
+340:"LL_b:Foo/b".
+342:"LL_c:Foo/c".
+464:"GG_loca:Foo/loca".
+466:"GG_locb:Foo/locb".
+474:"LL_loca:Foo/loca".
+476:"RR:Foo/loca".
+477:"RR:Foo/locb".
+nil
+end
+
+GrammarForSort 292:0:
+3:300:0:8:0:0:0:Ident(194).nil:nil.
+3:301:0:8:0:0:0:Ident(195).nil:nil.
+3:305:0:8:0:0:0:Ident(406).nil:nil.
+3:306:0:8:0:0:0:Ident(196).nil:nil.
+3:320:0:8:0:0:0:Ident(407).nil:nil.
+3:321:0:8:0:0:0:Ident(408).nil:nil.
+3:325:0:8:0:0:0:Ident(97).nil:nil.
+nil end
+GrammarForSort 313:0:
+3:302:0:12:0:0:0:Ident(334).nil:nil.
+3:303:0:12:0:0:0:Ident(164).nil:nil.
+3:307:0:12:0:0:0:Ident(335).nil:nil.
+3:308:0:12:0:0:0:Ident(164).nil:nil.
+3:322:0:12:0:0:0:Ident(336).nil:nil.
+3:323:0:12:0:0:0:Ident(164).nil:nil.
+3:326:0:12:0:0:0:Ident(230).nil:nil.
+nil end
+GrammarForSort 428:1:
+nil end
+EndDef end
+GrammarForSort 292:0:
+2:310:0:8:0:0:0:Ident(197).nil:nil.
+2:311:0:8:0:0:0:Ident(198).nil:nil.
+2:315:0:8:0:0:0:Ident(409).nil:nil.
+2:316:0:8:0:0:0:Ident(410).nil:nil.
+nil end
+GrammarForSort 313:0:
+2:304:0:12:0:0:0:Ident(344).nil:nil.
+2:309:0:12:0:0:0:Ident(345).nil:nil.
+2:312:0:12:0:0:0:Ident(652).nil:nil.
+2:313:0:12:0:0:0:Ident(164).nil:nil.
+2:314:0:12:0:0:0:Ident(662).nil:nil.
+2:317:0:12:0:0:0:Ident(653).nil:nil.
+2:318:0:12:0:0:0:Ident(164).nil:nil.
+2:319:0:12:0:0:0:Ident(663).nil:nil.
+2:324:0:12:0:0:0:Ident(346).nil:nil.
+nil end
+GrammarForSort 428:1:
+2:1:0:8:0:0:0:Ident(448).nil:nil.
+2:0:0:8:0:0:0:Ident(734).nil:nil.
+2:21:100:9:21:0:0:Type(428).Ident(518).Type(428).nil:nil.
+2:22:100:9:22:0:0:Type(428).Ident(225).Type(428).nil:nil.
+2:21:100:1:21:0:0:Char(40).Type(428).Ident(518).Type(428).Char(41).nil:nil.
+2:22:100:1:22:0:0:Char(40).Type(428).Ident(225).Type(428).Char(41).nil:nil.
+2:24:200:8:24:0:0:Ident(337).Char(40).Type(428).Char(41).nil:nil.
+2:24:200:0:24:0:0:Ident(337).Type(428).nil:nil.
+2:24:200:0:24:0:0:Char(40).Ident(337).Type(428).Char(41).nil:nil.
+2:24:200:0:24:0:0:Char(40).Ident(337).Char(40).Type(428).Char(41).Char(41).nil:nil.
+2:8:200:9:8:0:0:Type(428).Char(61).Char(61).Type(428).nil:nil.
+2:9:200:9:9:0:0:Type(428).Char(33).Char(61).Type(428).nil:nil.
+2:10:200:9:10:0:0:Type(428).Char(60).Type(428).nil:nil.
+2:11:200:9:11:0:0:Type(428).Char(60).Char(61).Type(428).nil:nil.
+2:12:200:9:12:0:0:Type(428).Char(62).Type(428).nil:nil.
+2:13:200:9:13:0:0:Type(428).Char(62).Char(61).Type(428).nil:nil.
+2:8:200:0:8:0:0:Ident(737).Char(40).Type(428).Char(44).Type(428).Char(41).nil:nil.
+2:9:200:0:9:0:0:Ident(847).Char(40).Type(428).Char(44).Type(428).Char(41).nil:nil.
+2:10:200:0:10:0:0:Ident(962).Char(40).Type(428).Char(44).Type(428).Char(41).nil:nil.
+2:11:200:0:11:0:0:Ident(1176).Char(40).Type(428).Char(44).Type(428).Char(41).nil:nil.
+2:12:200:0:12:0:0:Ident(1269).Char(40).Type(428).Char(44).Type(428).Char(41).nil:nil.
+2:13:200:0:13:0:0:Ident(1483).Char(40).Type(428).Char(44).Type(428).Char(41).nil:nil.
+nil end
+EndDef end
+GrammarForSort 19:0:
+nil end
+GrammarForSort 220:0:
+nil end
+GrammarForSort 292:0:
+nil end
+GrammarForSort 313:0:
+nil end
+GrammarForSort 351:0:
+nil end
+EndDef end
+/*432 R:Foo*/
+RULE(
+756,292,97,1,1,1, VAR(0,292),
+FSYM( nil, 300),
+nil)
+
+ end
+/*432 R:Foo*/
+RULE(
+764,292,97,2,1,1, VAR(0,292),
+FSYM( nil, 301),
+nil)
+
+ end
+/*432 R:Foo*/
+RULE(
+757,292,98,1,1,1, VAR(0,292),
+FSYM( nil, 305),
+nil)
+
+ end
+/*432 R:Foo*/
+RULE(
+765,292,98,2,1,1, VAR(0,292),
+FSYM( nil, 306),
+nil)
+
+ end
+/*432 R:Foo*/
+RULE(
+1074,292,15,1,1,1, VAR(0,292),
+FSYM( nil, 310),
+nil)
+
+ end
+/*432 R:Foo*/
+RULE(
+1082,292,15,2,1,1, VAR(0,292),
+FSYM( nil, 311),
+nil)
+
+ end
+/*432 R:Foo*/
+RULE(
+1075,292,16,1,1,1, VAR(0,292),
+FSYM( nil, 315),
+nil)
+
+ end
+/*432 R:Foo*/
+RULE(
+1083,292,16,2,1,1, VAR(0,292),
+FSYM( nil, 316),
+nil)
+
+ end
+/*432 R:Foo*/
+RULE(
+758,292,99,1,1,1, VAR(0,292),
+FSYM( nil, 320),
+nil)
+
+ end
+/*432 R:Foo*/
+RULE(
+766,292,99,2,1,1, VAR(0,292),
+FSYM( nil, 321),
+nil)
+
+ end
+EndDef end
+STRATEGY(48,292,21,DK(dk(756.757.758.nil) , DK(call(332)) , DK(call(328)) , DK(call(330)) , DK(dk(756.757.758.nil) , call(332)) , DK(call(328) , call(332)))) 
+end
+STRATEGY(158,292,97,dk(756.764.nil)) 
+end
+STRATEGY(159,292,98,dk(757.765.nil)) 
+end
+STRATEGY(160,292,99,dk(756.757.1074.1075.758.766.nil)) 
+end
+STRATEGY(187,292,16,dk(1075.1083.nil)) 
+end
+STRATEGY(328,292,97,dk(756.764.nil)) 
+end
+STRATEGY(330,292,98,dk(757.765.nil)) 
+end
+STRATEGY(332,292,99,dk(756.757.1074.1075.758.766.nil)) 
+end
+STRATEGY(338,292,97,dk(756.764.nil)) 
+end
+STRATEGY(340,292,98,dk(757.765.nil)) 
+end
+STRATEGY(342,292,99,dk(756.757.1074.1075.758.766.nil)) 
+end
+STRATEGY(464,292,15,dk(1074.1082.nil)) 
+end
+STRATEGY(466,292,16,dk(1075.1083.nil)) 
+end
+STRATEGY(474,292,15,dk(1074.1082.nil)) 
+end
+STRATEGY(476,292,15,dk(1074.1082.nil)) 
+end
+STRATEGY(477,292,16,dk(1075.1083.nil)) 
+end
+EndDef end
+QUERY(292,292,48, VAR(0,292),FSYM( nil, 1)) end 

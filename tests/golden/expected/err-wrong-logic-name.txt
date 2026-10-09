@@ -1,0 +1,12 @@
+$ elan prog.lgi
+--- stdout
+
+ELAN version 3.6g
+
+Copyright (C) 1994-2003  LORIA (CNRS, INPL, INRIA, UHP, U-Nancy 2)
+                         Nancy, France.
+--- stderr
+
+[error] :file=prog.lgi	line=1	pos=0
+ name of logic doesn't correspond to name of file
+--- exit status 1

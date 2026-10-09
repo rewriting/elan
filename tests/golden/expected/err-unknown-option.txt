@@ -1,0 +1,19 @@
+$ elan --nosuch prog.lgi
+--- stdout
+--- stderr
+[warning] unknown option '--nosuch'
+Usage:
+	elan [options] lgi_file [spc_file]
+Options:
+	--dump, -d		: dump of signature, strategies and rules
+	--trace, -t [num]	: tracing of execution (default max)
+	--statistic, -s/-S	: statistics: short/long
+	--warningsoff, -w	: suppress warning messages of the parser
+	--quiet, -q		: quiet regime of execution
+	--batch, -b		: batch regime (no messages at all)
+	--elanlib		: elanlib
+	--secondlib, -l lib	: second elan library (by default ..)
+	--command, -C		: command language
+	--export, --cexport	: export to a .ref file
+	--import  		: import from a .ref file
+--- exit status 1

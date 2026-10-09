@@ -1,0 +1,21 @@
+$ elan prog.lgi
+--- stdout
+
+ELAN version 3.6g
+
+Copyright (C) 1994-2003  LORIA (CNRS, INPL, INRIA, UHP, U-Nancy 2)
+                         Nancy, France.
+   handling module m
+     handling module int
+       handling module builtinInt
+         handling module bool
+         end of bool
+       end of builtinInt
+     end of int
+--- stderr
+
+[error] :file=m.eln	line=8	pos=17
+[earley] syntax error on symbol 'g'
+	one of ('NUMBER' 'umin_builtinInt' 'btoi_builtinInt' 'btoi_int' 'valueOf' 'time' 'minus' 'and' 'plus' 'umin' 'btoi' 'div' 'mod' 'or' 'n' 'f' '[' '-' '(' '$') expected
+	in context f ( n ) = >  >>>g<<< ( n ) end 
+--- exit status 1

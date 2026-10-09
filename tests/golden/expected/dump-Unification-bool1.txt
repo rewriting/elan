@@ -1,0 +1,457 @@
+$ elan -b -d unification.lgi boolean.spc
+--- stdout
+
+local rule conflict:constraint/unification[Vars,Ops] [1/1/fsym=379/vars=3]
+ ( VAR(0)& VAR(1)= VAR(2))	 =>  false
+
+     if ((neq_variable(head( VAR(1)),head( VAR(2)))and(not(isvar( VAR(1)))))and(not(isvar( VAR(2)))))
+
+local rule trueelim:constraint/unification[Vars,Ops] [1/2/fsym=379/vars=1]
+ ( VAR(0)&true)	 =>  VAR(0)
+
+
+global rule identity:constraint/identity[constraint] [1/3/fsym=0/vars=1]
+  VAR(0)	 =>  VAR(0)
+
+
+local rule topOccRule:list[int]/termCommons[Ops,Vars] [1/4/fsym=365/vars=1]
+  nvocc( VAR(0))	 =>  nil
+
+     if (not(isvar( VAR(0))))
+
+local rule decompose:constraint/unification[Vars,Ops] [1/5/fsym=379/vars=1]
+ ( VAR(0)&true=true)	 =>  VAR(0)
+
+
+local rule decompose:constraint/unification[Vars,Ops] [2/6/fsym=379/vars=1]
+ ( VAR(0)&false=false)	 =>  VAR(0)
+
+
+local rule decompose:constraint/unification[Vars,Ops] [3/7/fsym=379/vars=5]
+ ( VAR(0)&or( VAR(1), VAR(2))=or( VAR(3), VAR(4)))	 => ( VAR(0)&( VAR(1)= VAR(3)& VAR(2)= VAR(4)))
+
+
+local rule occ_check1:constraint/unification[Vars,Ops] [1/8/fsym=379/vars=3]
+ ( VAR(0)& VAR(1)= VAR(2))	 =>  false
+
+     if (occurs( VAR(1), VAR(2))and(not(isvar( VAR(2)))))
+
+local rule occ_check2:constraint/unification[Vars,Ops] [1/9/fsym=379/vars=3]
+ ( VAR(0)& VAR(1)= VAR(2))	 =>  false
+
+     if (occurs( VAR(2), VAR(1))and(not(isvar( VAR(1)))))
+
+local rule extractrule1:variable/list[variable] [1/10/fsym=355/vars=2]
+  elem(cons_variable( VAR(0), VAR(1)))	 =>  VAR(0)
+
+
+local rule extractrule2:variable/list[variable] [1/11/fsym=355/vars=2]
+  elem(cons_variable( VAR(0), VAR(1)))	 =>  elem( VAR(1))
+
+
+local rule eliminate1:constraint/unification[Vars,Ops] [1/12/fsym=379/vars=3]
+ ( VAR(0)& VAR(1)= VAR(2))	 => ( VAR(1)= VAR(2)&apply( VAR(1)-> VAR(2), VAR(0)))
+
+     if (((not(occurs( VAR(1), VAR(2))))and occurs( VAR(1), VAR(0)))and(not(isvar( VAR(2)))))
+
+local rule eliminate2:constraint/unification[Vars,Ops] [1/13/fsym=379/vars=3]
+ ( VAR(0)& VAR(1)= VAR(2))	 => ( VAR(2)= VAR(1)&apply( VAR(2)-> VAR(1), VAR(0)))
+
+     if (((not(occurs( VAR(2), VAR(1))))and occurs( VAR(2), VAR(0)))and(not(isvar( VAR(1)))))
+
+local rule truepropag:constraint/unification[Vars,Ops] [1/14/fsym=377/vars=1]
+  true	 =>  true
+
+
+local rule extractrule1:identifier/list[identifier] [1/15/fsym=322/vars=2]
+  elem( VAR(0) VAR(1))	 =>  VAR(0)
+
+
+local rule extractrule2:identifier/list[identifier] [1/16/fsym=322/vars=2]
+  elem( VAR(0) VAR(1))	 =>  elem( VAR(1))
+
+
+local rule extractrule1:pair[identifier,int]/list[pair[identifier,int]] [1/17/fsym=334/vars=2]
+  elem( VAR(0) VAR(1))	 =>  VAR(0)
+
+
+local rule extractrule2:pair[identifier,int]/list[pair[identifier,int]] [1/18/fsym=334/vars=2]
+  elem( VAR(0) VAR(1))	 =>  elem( VAR(1))
+
+
+local rule extractrule1:int/list[int] [1/19/fsym=347/vars=2]
+  elem(cons_int( VAR(0), VAR(1)))	 =>  VAR(0)
+
+
+local rule extractrule2:int/list[int] [1/20/fsym=347/vars=2]
+  elem(cons_int( VAR(0), VAR(1)))	 =>  elem( VAR(1))
+
+
+local rule delete:constraint/unification[Vars,Ops] [1/21/fsym=379/vars=3]
+ ( VAR(0)& VAR(1)= VAR(2))	 =>  VAR(0)
+
+     if  eq_variable( VAR(1), VAR(2))
+
+local rule delete:constraint/unification[Vars,Ops] [2/22/fsym=379/vars=1]
+ ( VAR(0)&(true&true))	 => ( VAR(0)&true)
+
+
+local rule delete:constraint/unification[Vars,Ops] [3/23/fsym=379/vars=1]
+ ( VAR(0)&false)	 =>  false
+
+
+local rule trueadd:constraint/unification[Vars,Ops] [1/24/fsym=0/vars=1]
+  VAR(0)	 => (true& VAR(0))
+
+
+local rule inOccRule:list[int]/termCommons[Ops,Vars] [1/25/fsym=365/vars=3]
+  nvocc(or( VAR(0), VAR(1)))	 =>  cons_int(1, VAR(2))
+
+     where VAR(2) := (chooseOccurence:list[int]/termCommons[Ops,Vars])  nvocc( VAR(0))
+
+local rule inOccRule:list[int]/termCommons[Ops,Vars] [2/26/fsym=365/vars=3]
+  nvocc(or( VAR(0), VAR(1)))	 =>  cons_int(2, VAR(2))
+
+     where VAR(2) := (chooseOccurence:list[int]/termCommons[Ops,Vars])  nvocc( VAR(1))
+
+local rule coalesce:constraint/unification[Vars,Ops] [1/27/fsym=379/vars=3]
+ ( VAR(0)& VAR(1)= VAR(2))	 => ( VAR(1)= VAR(2)&apply( VAR(1)-> VAR(2), VAR(0)))
+
+     if ((occurs( VAR(1), VAR(0))and occurs( VAR(2), VAR(0)))and neq_variable( VAR(1), VAR(2)))
+
+strategy global listExtract:pair[identifier,int]/list[pair[identifier,int]]
+ iterate (
+   dc one(extractrule2:pair[identifier,int] )
+ );
+ dc one(extractrule1:pair[identifier,int] )
+
+strategy global listExtract:identifier/list[identifier]
+ iterate (
+   dc one(extractrule2:identifier )
+ );
+ dc one(extractrule1:identifier )
+
+strategy global listExtract:int/list[int]
+ iterate (
+   dc one(extractrule2:int )
+ );
+ dc one(extractrule1:int )
+
+strategy global listExtract:variable/list[variable]
+ iterate (
+   dc one(extractrule2:variable )
+ );
+ dc one(extractrule1:variable )
+
+strategy global chooseOccurence:list[int]/termCommons[Ops,Vars]
+ dk(topOccRule:list[int] inOccRule:list[int] )
+
+strategy global unify:constraint/unification[Vars,Ops]
+ dc(trueadd:constraint );
+ repeat* (
+   dc(delete:constraint decompose:constraint conflict:constraint coalesce:constraint occ_check1:constraint occ_check2:constraint eliminate1:constraint eliminate2:constraint )
+ );
+ dc(trueelim:constraint identity:constraint )
+
+strategy global unifys:constraint/unification[Vars,Ops]
+ dc(trueadd:constraint );
+ repeat* (
+   dc(delete:constraint decompose:constraint conflict:constraint coalesce:constraint occ_check1:constraint occ_check2:constraint eliminate1:constraint eliminate2:constraint )
+ );
+ dc(trueelim:constraint truepropag:constraint )
+
+Sorts
+intern int, ident, pair[identifier,int], builtinInt, identifier, 
+constraint, <list[int]->list[int]>, list[pair[identifier,int]], list[identifier], intern ident, 
+<pair[identifier,int]->pair[identifier,int]>, int, variable, substitution, <identifier->identifier>, 
+intern string, equation, builtinString, <int->int>, <variable->variable>, 
+<constraint->constraint>, bool, term, list[int], list[variable], 
+
+Function symbols
+'['  @ ','  @ ']' 	 : (identifier int)pair[identifier,int]	 pri 0 code 327;
+'elem' '('  @ ')' 	 : (list[pair[identifier,int]])pair[identifier,int]	 pri 0 code 334;
+ @ '-' 'th' 'elem' '('  @ ')' 	 : (int list[pair[identifier,int]])pair[identifier,int]	 pri 0 code 335;
+ @ ':'  @ 	 : (identifier int)pair[identifier,int]	 pri 0 code 327;
+ @ '+'  @ 	 : (builtinInt builtinInt)builtinInt	 assocLeft 	 pri 500 code 3 sem 3;
+ @ '-'  @ 	 : (builtinInt builtinInt)builtinInt	 assocLeft 	 pri 600 code 4 sem 4;
+ @ '*'  @ 	 : (builtinInt builtinInt)builtinInt	 assocLeft 	 pri 700 code 5 sem 5;
+ @ '/'  @ 	 : (builtinInt builtinInt)builtinInt	 assocLeft 	 pri 800 code 6 sem 6;
+ @ '%'  @ 	 : (builtinInt builtinInt)builtinInt	 assocLeft 	 pri 800 code 27 sem 27;
+ @ '&'  @ 	 : (builtinInt builtinInt)builtinInt	 assocLeft 	 pri 800 code 28 sem 28;
+ @ '|'  @ 	 : (builtinInt builtinInt)builtinInt	 assocLeft 	 pri 800 code 29 sem 29;
+'-'  @ 	 : (builtinInt)builtinInt	 pri 900 code 20 sem 20;
+'('  @ '+'  @ ')' 	 : (builtinInt builtinInt)builtinInt	 assocLeft 	 pri 500 code 3 sem 3;
+'('  @ '-'  @ ')' 	 : (builtinInt builtinInt)builtinInt	 assocLeft 	 pri 600 code 4 sem 4;
+'('  @ '*'  @ ')' 	 : (builtinInt builtinInt)builtinInt	 assocLeft 	 pri 700 code 5 sem 5;
+'('  @ '/'  @ ')' 	 : (builtinInt builtinInt)builtinInt	 assocLeft 	 pri 800 code 6 sem 6;
+'('  @ '%'  @ ')' 	 : (builtinInt builtinInt)builtinInt	 assocLeft 	 pri 800 code 27 sem 27;
+'('  @ '&'  @ ')' 	 : (builtinInt builtinInt)builtinInt	 assocLeft 	 pri 800 code 28 sem 28;
+'('  @ '|'  @ ')' 	 : (builtinInt builtinInt)builtinInt	 assocLeft 	 pri 800 code 29 sem 29;
+'(' '-'  @ ')' 	 : (builtinInt)builtinInt	 pri 900 code 20 sem 20;
+'plus' '('  @ ','  @ ')' 	 : (builtinInt builtinInt)builtinInt	 pri 0 code 3 sem 3;
+'minus' '('  @ ','  @ ')' 	 : (builtinInt builtinInt)builtinInt	 pri 0 code 4 sem 4;
+'time' '('  @ ','  @ ')' 	 : (builtinInt builtinInt)builtinInt	 pri 0 code 5 sem 5;
+'div' '('  @ ','  @ ')' 	 : (builtinInt builtinInt)builtinInt	 pri 0 code 6 sem 6;
+'mod' '('  @ ','  @ ')' 	 : (builtinInt builtinInt)builtinInt	 pri 0 code 27 sem 27;
+'and' '('  @ ','  @ ')' 	 : (builtinInt builtinInt)builtinInt	 pri 0 code 28 sem 28;
+'or' '('  @ ','  @ ')' 	 : (builtinInt builtinInt)builtinInt	 pri 0 code 29 sem 29;
+'umin' '('  @ ')' 	 : (builtinInt)builtinInt	 pri 0 code 20 sem 20;
+'umin_builtinInt' '('  @ ')' 	 : (builtinInt)builtinInt	 pri 0 code 20 sem 20;
+'btoi' '('  @ ')' 	 : (bool)builtinInt	 pri 900 code 25 sem 25;
+'btoi_builtinInt' '('  @ ')' 	 : (bool)builtinInt	 pri 900 code 25 sem 25;
+'valueOf' '('  @ ')' 	 : (int)builtinInt	 pri 900 code 318;
+ @ 	 : (ident)identifier	 pri 0 code 300;
+'elem' '('  @ ')' 	 : (list[identifier])identifier	 pri 0 code 322;
+ @ '-' 'th' 'elem' '('  @ ')' 	 : (int list[identifier])identifier	 pri 0 code 323;
+'first' '('  @ ')' 	 : (pair[identifier,int])identifier	 pri 0 code 328;
+'1' '-' 'th' '('  @ ')' 	 : (pair[identifier,int])identifier	 pri 0 code 328;
+'head' '('  @ ')' 	 : (term)identifier	 pri 0 code 362;
+'replace'  @ 'by'  @ 'in'  @ 	 : (term term constraint)constraint	 pri 0 code 16 sem 16;
+'replace' '('  @ ')' 'by' '('  @ ')' 'in' '('  @ ')' 	 : (term term constraint)constraint	 pri 0 code 16 sem 16;
+'replace' '('  @ ','  @ ','  @ ')' 	 : (term term constraint)constraint	 pri 0 code 16 sem 16;
+ @ 	 : (bool)constraint	 pri 0 code 377;
+ @ 	 : (equation)constraint	 pri 0 code 378;
+ @ '&'  @ 	 : (constraint constraint)constraint	 assocRight 	 pri 0 code 379;
+'('  @ '&'  @ ')' 	 : (constraint constraint)constraint	 pri 0 code 379;
+ @ '('  @ ')' 	 : (substitution constraint)constraint	 pri 0 code 381;
+'apply' '('  @ ','  @ ')' 	 : (substitution constraint)constraint	 pri 0 code 381;
+'identity' '('  @ ')' 	 : (constraint)constraint	 pri 0 code 382;
+ @ 	 : (equation)constraint	 pri 0 code 378;
+'chooseOccurence' 	 : <list[int]->list[int]>	 pri 0 code 375;
+'nil_pair' '[' 'identifier' ',' 'int' ']' 	 : list[pair[identifier,int]]	 pri 0 code 331;
+'nil' 	 : list[pair[identifier,int]]	 pri 0 code 331;
+ @ '.'  @ 	 : (pair[identifier,int] list[pair[identifier,int]])list[pair[identifier,int]]	 pri 0 code 332;
+ @  @ 	 : (pair[identifier,int] list[pair[identifier,int]])list[pair[identifier,int]]	 pri 0 code 332;
+ @ ','  @ 	 : (pair[identifier,int] list[pair[identifier,int]])list[pair[identifier,int]]	 pri 0 code 332;
+'cons' '('  @ ','  @ ')' 	 : (pair[identifier,int] list[pair[identifier,int]])list[pair[identifier,int]]	 pri 0 code 332;
+'cons_pair' '[' 'identifier' ',' 'int' ']' '('  @ ','  @ ')' 	 : (pair[identifier,int] list[pair[identifier,int]])list[pair[identifier,int]]	 pri 0 code 332;
+'append' '('  @ ','  @ ')' 	 : (list[pair[identifier,int]] list[pair[identifier,int]])list[pair[identifier,int]]	 pri 0 code 333;
+ @ '@'  @ 	 : (list[pair[identifier,int]] list[pair[identifier,int]])list[pair[identifier,int]]	 pri 0 code 333;
+'ccat' '('  @ '*'  @ ')' 	 : (int list[pair[identifier,int]])list[pair[identifier,int]]	 pri 0 code 337;
+'ccat' '('  @ ','  @ ')' 	 : (int list[pair[identifier,int]])list[pair[identifier,int]]	 pri 0 code 337;
+'BLANKLEXEM' 	 : list[pair[identifier,int]]	 pri 0 code 331;
+ @  @ 	 : (pair[identifier,int] list[pair[identifier,int]])list[pair[identifier,int]]	 pri 0 code 332;
+'nil_identifier' 	 : list[identifier]	 pri 0 code 319;
+'nil' 	 : list[identifier]	 pri 0 code 319;
+ @ '.'  @ 	 : (identifier list[identifier])list[identifier]	 pri 0 code 320;
+ @  @ 	 : (identifier list[identifier])list[identifier]	 pri 0 code 320;
+ @ ','  @ 	 : (identifier list[identifier])list[identifier]	 pri 0 code 320;
+'cons' '('  @ ','  @ ')' 	 : (identifier list[identifier])list[identifier]	 pri 0 code 320;
+'cons_identifier' '('  @ ','  @ ')' 	 : (identifier list[identifier])list[identifier]	 pri 0 code 320;
+'append' '('  @ ','  @ ')' 	 : (list[identifier] list[identifier])list[identifier]	 pri 0 code 321;
+ @ '@'  @ 	 : (list[identifier] list[identifier])list[identifier]	 pri 0 code 321;
+'ccat' '('  @ '*'  @ ')' 	 : (int list[identifier])list[identifier]	 pri 0 code 325;
+'ccat' '('  @ ','  @ ')' 	 : (int list[identifier])list[identifier]	 pri 0 code 325;
+'BLANKLEXEM' 	 : list[identifier]	 pri 0 code 319;
+ @  @ 	 : (identifier list[identifier])list[identifier]	 pri 0 code 320;
+'listExtract' 	 : <pair[identifier,int]->pair[identifier,int]>	 pri 0 code 338;
+ @ 	 : (builtinInt)int	 pri 1000 code 301;
+'['  @ ']' 	 : (builtinInt)int	 pri 1000 code 301;
+ @ '+'  @ 	 : (int int)int	 assocLeft 	 pri 500 code 302;
+ @ '-'  @ 	 : (int int)int	 assocLeft 	 pri 600 code 303;
+ @ '*'  @ 	 : (int int)int	 assocLeft 	 pri 700 code 304;
+ @ '%'  @ 	 : (int int)int	 assocLeft 	 pri 800 code 305;
+ @ '&'  @ 	 : (int int)int	 assocLeft 	 pri 800 code 306;
+ @ '/'  @ 	 : (int int)int	 assocLeft 	 pri 800 code 307;
+ @ '|'  @ 	 : (int int)int	 assocLeft 	 pri 800 code 308;
+'-'  @ 	 : (int)int	 pri 900 code 309;
+'('  @ '+'  @ ')' 	 : (int int)int	 pri 500 code 302;
+'('  @ '-'  @ ')' 	 : (int int)int	 pri 600 code 303;
+'('  @ '*'  @ ')' 	 : (int int)int	 pri 700 code 304;
+'('  @ '/'  @ ')' 	 : (int int)int	 pri 800 code 307;
+'('  @ '%'  @ ')' 	 : (int int)int	 pri 800 code 305;
+'('  @ '&'  @ ')' 	 : (int int)int	 pri 800 code 306;
+'('  @ '|'  @ ')' 	 : (int int)int	 pri 800 code 308;
+'(' '-'  @ ')' 	 : (int)int	 pri 900 code 309;
+'plus' '('  @ ','  @ ')' 	 : (int int)int	 pri 500 code 302;
+'minus' '('  @ ','  @ ')' 	 : (int int)int	 pri 600 code 303;
+'time' '('  @ ','  @ ')' 	 : (int int)int	 pri 700 code 304;
+'div' '('  @ ','  @ ')' 	 : (int int)int	 pri 800 code 307;
+'mod' '('  @ ','  @ ')' 	 : (int int)int	 pri 800 code 305;
+'and' '('  @ ','  @ ')' 	 : (int int)int	 pri 800 code 306;
+'or' '('  @ ','  @ ')' 	 : (int int)int	 pri 800 code 308;
+'umin' '('  @ ')' 	 : (int)int	 pri 900 code 309;
+'btoi' '('  @ ')' 	 : (bool)int	 pri 900 code 316;
+'btoi_int' '('  @ ')' 	 : (bool)int	 pri 900 code 316;
+ @ 	 : (builtinInt)int	 pri 1000 code 301;
+'size' '('  @ ')' 	 : (list[identifier])int	 pri 0 code 324;
+'size_of_identifier_list' '('  @ ')' 	 : (list[identifier])int	 pri 0 code 324;
+'second' '('  @ ')' 	 : (pair[identifier,int])int	 pri 0 code 329;
+'2' '-' 'th' '('  @ ')' 	 : (pair[identifier,int])int	 pri 0 code 329;
+'size' '('  @ ')' 	 : (list[pair[identifier,int]])int	 pri 0 code 336;
+'size_of_pair' '[' 'identifier' ',' 'int' ']' '_' 'list' '('  @ ')' 	 : (list[pair[identifier,int]])int	 pri 0 code 336;
+'elem' '('  @ ')' 	 : (list[int])int	 pri 0 code 347;
+ @ '-' 'th' 'elem' '('  @ ')' 	 : (int list[int])int	 pri 0 code 348;
+'size' '('  @ ')' 	 : (list[int])int	 pri 0 code 349;
+'size_of_int_list' '('  @ ')' 	 : (list[int])int	 pri 0 code 349;
+'size' '('  @ ')' 	 : (list[variable])int	 pri 0 code 357;
+'size_of_variable_list' '('  @ ')' 	 : (list[variable])int	 pri 0 code 357;
+'varnum_Vars' 	 : int	 pri 0 code 374;
+'elem' '('  @ ')' 	 : (list[variable])variable	 pri 0 code 355;
+ @ '-' 'th' 'elem' '('  @ ')' 	 : (int list[variable])variable	 pri 0 code 356;
+'var' '('  @ ')' 	 : (int)variable	 pri 0 code 360;
+'b' 	 : variable	 pri 0 code 372;
+'identity' 	 : substitution	 pri 0 code 341;
+ @ '-' '>'  @ 	 : (variable term)substitution	 pri 0 code 342;
+ @ 'o'  @ 	 : (substitution substitution)substitution	 assocLeft 	 pri 0 code 343;
+'rename_subst' '('  @ ','  @ ')' 	 : (list[variable] int)substitution	 pri 0 code 368;
+'system_to_subst' '('  @ ')' 	 : (constraint)substitution	 pri 0 code 380;
+'listExtract' 	 : <identifier->identifier>	 pri 0 code 326;
+ @ '='  @ 	 : (term term)equation	 pri 0 code 376;
+ @ '='  @ 	 : (term term)equation	 pri 0 code 376;
+'listExtract' 	 : <int->int>	 pri 0 code 351;
+'listExtract' 	 : <variable->variable>	 pri 0 code 359;
+'unify' 	 : <constraint->constraint>	 pri 0 code 383;
+'unifys' 	 : <constraint->constraint>	 pri 0 code 384;
+'true' 	 : bool	 pri 0 code 1;
+'false' 	 : bool	 pri 0 code 0;
+ @ 'and'  @ 	 : (bool bool)bool	 assocLeft 	 pri 100 code 21 sem 21;
+ @ 'or'  @ 	 : (bool bool)bool	 assocLeft 	 pri 100 code 22 sem 22;
+'('  @ 'and'  @ ')' 	 : (bool bool)bool	 assocLeft 	 pri 100 code 21 sem 21;
+'('  @ 'or'  @ ')' 	 : (bool bool)bool	 assocLeft 	 pri 100 code 22 sem 22;
+'not' '('  @ ')' 	 : (bool)bool	 pri 200 code 24 sem 24;
+'not'  @ 	 : (bool)bool	 pri 200 code 24 sem 24;
+'(' 'not'  @ ')' 	 : (bool)bool	 pri 200 code 24 sem 24;
+'(' 'not' '('  @ ')' ')' 	 : (bool)bool	 pri 200 code 24 sem 24;
+ @ '=' '='  @ 	 : (bool bool)bool	 assocLeft 	 pri 200 code 8 sem 8;
+ @ '!' '='  @ 	 : (bool bool)bool	 assocLeft 	 pri 200 code 9 sem 9;
+ @ '<'  @ 	 : (bool bool)bool	 assocLeft 	 pri 200 code 10 sem 10;
+ @ '<' '='  @ 	 : (bool bool)bool	 assocLeft 	 pri 200 code 11 sem 11;
+ @ '>'  @ 	 : (bool bool)bool	 assocLeft 	 pri 200 code 12 sem 12;
+ @ '>' '='  @ 	 : (bool bool)bool	 assocLeft 	 pri 200 code 13 sem 13;
+'eq_bool' '('  @ ','  @ ')' 	 : (bool bool)bool	 pri 200 code 8 sem 8;
+'neq_bool' '('  @ ','  @ ')' 	 : (bool bool)bool	 pri 200 code 9 sem 9;
+'less_bool' '('  @ ','  @ ')' 	 : (bool bool)bool	 pri 200 code 10 sem 10;
+'lesseq_bool' '('  @ ','  @ ')' 	 : (bool bool)bool	 pri 200 code 11 sem 11;
+'greater_bool' '('  @ ','  @ ')' 	 : (bool bool)bool	 pri 200 code 12 sem 12;
+'greatereq_bool' '('  @ ','  @ ')' 	 : (bool bool)bool	 pri 200 code 13 sem 13;
+ @ '=' '='  @ 	 : (ident ident)bool	 pri 0 code 14 sem 14;
+ @ '!' '='  @ 	 : (ident ident)bool	 pri 0 code 15 sem 15;
+'eq_ident' '('  @ ','  @ ')' 	 : (ident ident)bool	 pri 0 code 14 sem 14;
+'neq_ident' '('  @ ','  @ ')' 	 : (ident ident)bool	 pri 0 code 15 sem 15;
+ @ '=' '='  @ 	 : (identifier identifier)bool	 pri 0 code 18 sem 18;
+ @ '!' '='  @ 	 : (identifier identifier)bool	 pri 0 code 19 sem 19;
+ @ '<'  @ 	 : (identifier identifier)bool	 pri 0 code 30 sem 30;
+ @ '<' '='  @ 	 : (identifier identifier)bool	 pri 0 code 31 sem 31;
+ @ '>'  @ 	 : (identifier identifier)bool	 pri 0 code 32 sem 32;
+ @ '>' '='  @ 	 : (identifier identifier)bool	 pri 0 code 33 sem 33;
+'eq_identifier' '('  @ ','  @ ')' 	 : (identifier identifier)bool	 pri 0 code 18 sem 18;
+'neq_identifier' '('  @ ','  @ ')' 	 : (identifier identifier)bool	 pri 0 code 19 sem 19;
+'less_identifier' '('  @ ','  @ ')' 	 : (identifier identifier)bool	 pri 0 code 30 sem 30;
+'lesseq_identifier' '('  @ ','  @ ')' 	 : (identifier identifier)bool	 pri 0 code 31 sem 31;
+'greater_identifier' '('  @ ','  @ ')' 	 : (identifier identifier)bool	 pri 0 code 32 sem 32;
+'greatereq_identifier' '('  @ ','  @ ')' 	 : (identifier identifier)bool	 pri 0 code 33 sem 33;
+ @ '=' '='  @ 	 : (identifier identifier)bool	 pri 0 code 18 sem 18;
+ @ '!' '='  @ 	 : (identifier identifier)bool	 pri 0 code 19 sem 19;
+'eq_identifier' '('  @ ','  @ ')' 	 : (identifier identifier)bool	 pri 0 code 18 sem 18;
+'neq_identifier' '('  @ ','  @ ')' 	 : (identifier identifier)bool	 pri 0 code 19 sem 19;
+ @ '=' '='  @ 	 : (builtinInt builtinInt)bool	 pri 300 code 8 sem 8;
+ @ '!' '='  @ 	 : (builtinInt builtinInt)bool	 pri 300 code 9 sem 9;
+ @ '<'  @ 	 : (builtinInt builtinInt)bool	 pri 300 code 10 sem 10;
+ @ '<' '='  @ 	 : (builtinInt builtinInt)bool	 pri 300 code 11 sem 11;
+ @ '>'  @ 	 : (builtinInt builtinInt)bool	 pri 300 code 12 sem 12;
+ @ '>' '='  @ 	 : (builtinInt builtinInt)bool	 pri 300 code 13 sem 13;
+'eq_builtinInt' '('  @ ','  @ ')' 	 : (builtinInt builtinInt)bool	 pri 300 code 8 sem 8;
+'neq_builtinInt' '('  @ ','  @ ')' 	 : (builtinInt builtinInt)bool	 pri 300 code 9 sem 9;
+'less_builtinInt' '('  @ ','  @ ')' 	 : (builtinInt builtinInt)bool	 pri 300 code 10 sem 10;
+'lesseq_builtinInt' '('  @ ','  @ ')' 	 : (builtinInt builtinInt)bool	 pri 300 code 11 sem 11;
+'greater_builtinInt' '('  @ ','  @ ')' 	 : (builtinInt builtinInt)bool	 pri 300 code 12 sem 12;
+'greatereq_builtinInt' '('  @ ','  @ ')' 	 : (builtinInt builtinInt)bool	 pri 300 code 13 sem 13;
+'itob' '('  @ ')' 	 : (builtinInt)bool	 pri 900 code 26 sem 26;
+'itob_builtinInt' '('  @ ')' 	 : (builtinInt)bool	 pri 900 code 26 sem 26;
+ @ '=' '='  @ 	 : (int int)bool	 pri 300 code 310;
+ @ '!' '='  @ 	 : (int int)bool	 pri 300 code 311;
+ @ '>'  @ 	 : (int int)bool	 pri 300 code 312;
+ @ '>' '='  @ 	 : (int int)bool	 pri 300 code 313;
+ @ '<' '='  @ 	 : (int int)bool	 pri 300 code 314;
+ @ '<'  @ 	 : (int int)bool	 pri 300 code 315;
+'eq_int' '('  @ ','  @ ')' 	 : (int int)bool	 pri 300 code 310;
+'neq_int' '('  @ ','  @ ')' 	 : (int int)bool	 pri 300 code 311;
+'less_int' '('  @ ','  @ ')' 	 : (int int)bool	 pri 300 code 315;
+'lesseq_int' '('  @ ','  @ ')' 	 : (int int)bool	 pri 300 code 314;
+'greater_int' '('  @ ','  @ ')' 	 : (int int)bool	 pri 300 code 312;
+'greatereq_int' '('  @ ','  @ ')' 	 : (int int)bool	 pri 300 code 313;
+'itob' '('  @ ')' 	 : (int)bool	 pri 900 code 317;
+'itob_int' '('  @ ')' 	 : (int)bool	 pri 900 code 317;
+'ispair' '('  @ ')' 	 : (pair[identifier,int])bool	 pri 0 code 330;
+ @ '=' '='  @ 	 : (term term)bool	 pri 0 code 18 sem 18;
+ @ '!' '='  @ 	 : (term term)bool	 pri 0 code 19 sem 19;
+ @ '<'  @ 	 : (term term)bool	 pri 0 code 30 sem 30;
+ @ '<' '='  @ 	 : (term term)bool	 pri 0 code 31 sem 31;
+ @ '>'  @ 	 : (term term)bool	 pri 0 code 32 sem 32;
+ @ '>' '='  @ 	 : (term term)bool	 pri 0 code 33 sem 33;
+'eq_term' '('  @ ','  @ ')' 	 : (term term)bool	 pri 0 code 18 sem 18;
+'neq_term' '('  @ ','  @ ')' 	 : (term term)bool	 pri 0 code 19 sem 19;
+'less_term' '('  @ ','  @ ')' 	 : (term term)bool	 pri 0 code 30 sem 30;
+'lesseq_term' '('  @ ','  @ ')' 	 : (term term)bool	 pri 0 code 31 sem 31;
+'greater_term' '('  @ ','  @ ')' 	 : (term term)bool	 pri 0 code 32 sem 32;
+'greatereq_term' '('  @ ','  @ ')' 	 : (term term)bool	 pri 0 code 33 sem 33;
+ @ '=' '='  @ 	 : (term term)bool	 pri 0 code 18 sem 18;
+ @ '!' '='  @ 	 : (term term)bool	 pri 0 code 19 sem 19;
+'eq_term' '('  @ ','  @ ')' 	 : (term term)bool	 pri 0 code 18 sem 18;
+'neq_term' '('  @ ','  @ ')' 	 : (term term)bool	 pri 0 code 19 sem 19;
+ @ '=' '='  @ 	 : (variable variable)bool	 pri 0 code 18 sem 18;
+ @ '!' '='  @ 	 : (variable variable)bool	 pri 0 code 19 sem 19;
+ @ '<'  @ 	 : (variable variable)bool	 pri 0 code 30 sem 30;
+ @ '<' '='  @ 	 : (variable variable)bool	 pri 0 code 31 sem 31;
+ @ '>'  @ 	 : (variable variable)bool	 pri 0 code 32 sem 32;
+ @ '>' '='  @ 	 : (variable variable)bool	 pri 0 code 33 sem 33;
+'eq_variable' '('  @ ','  @ ')' 	 : (variable variable)bool	 pri 0 code 18 sem 18;
+'neq_variable' '('  @ ','  @ ')' 	 : (variable variable)bool	 pri 0 code 19 sem 19;
+'less_variable' '('  @ ','  @ ')' 	 : (variable variable)bool	 pri 0 code 30 sem 30;
+'lesseq_variable' '('  @ ','  @ ')' 	 : (variable variable)bool	 pri 0 code 31 sem 31;
+'greater_variable' '('  @ ','  @ ')' 	 : (variable variable)bool	 pri 0 code 32 sem 32;
+'greatereq_variable' '('  @ ','  @ ')' 	 : (variable variable)bool	 pri 0 code 33 sem 33;
+ @ '=' '='  @ 	 : (variable variable)bool	 pri 0 code 18 sem 18;
+ @ '!' '='  @ 	 : (variable variable)bool	 pri 0 code 19 sem 19;
+'eq_variable' '('  @ ','  @ ')' 	 : (variable variable)bool	 pri 0 code 18 sem 18;
+'neq_variable' '('  @ ','  @ ')' 	 : (variable variable)bool	 pri 0 code 19 sem 19;
+'isvar' '('  @ ')' 	 : (term)bool	 pri 0 code 364;
+'occurs'  @ 'in'  @ 	 : (variable term)bool	 pri 0 code 17 sem 17;
+'occurs' '('  @ ','  @ ')' 	 : (variable term)bool	 pri 0 code 17 sem 17;
+'occurs'  @ 'in'  @ 	 : (variable constraint)bool	 pri 0 code 17 sem 17;
+'occurs' '('  @ ','  @ ')' 	 : (variable constraint)bool	 pri 0 code 17 sem 17;
+ @ 	 : (variable)term	 pri 1000 code 361;
+ @ '-' 'th' 'subterm' '('  @ ')' 	 : (int term)term	 pri 0 code 363;
+ @ 'at'  @ 	 : (term list[int])term	 pri 0 code 366;
+ @ '['  @ ']' 'at'  @ 	 : (term term list[int])term	 pri 0 code 367;
+'true' '(' ')' 	 : term	 pri 0 code 369;
+'true' 	 : term	 pri 0 code 369;
+'false' '(' ')' 	 : term	 pri 0 code 370;
+'false' 	 : term	 pri 0 code 370;
+'or' '(' ','  @ ','  @ ')' 	 : (term term)term	 pri 0 code 371;
+'or' '('  @ ','  @ ',' ')' 	 : (term term)term	 pri 0 code 371;
+'or' '(' ','  @ ','  @ ',' ')' 	 : (term term)term	 pri 0 code 371;
+'or' '('  @ ','  @ ')' 	 : (term term)term	 pri 0 code 371;
+'nil_int' 	 : list[int]	 pri 0 code 344;
+'nil' 	 : list[int]	 pri 0 code 344;
+ @ '.'  @ 	 : (int list[int])list[int]	 pri 0 code 345;
+ @  @ 	 : (int list[int])list[int]	 pri 0 code 345;
+ @ ','  @ 	 : (int list[int])list[int]	 pri 0 code 345;
+'cons' '('  @ ','  @ ')' 	 : (int list[int])list[int]	 pri 0 code 345;
+'cons_int' '('  @ ','  @ ')' 	 : (int list[int])list[int]	 pri 0 code 345;
+'append' '('  @ ','  @ ')' 	 : (list[int] list[int])list[int]	 pri 0 code 346;
+ @ '@'  @ 	 : (list[int] list[int])list[int]	 pri 0 code 346;
+'ccat' '('  @ '*'  @ ')' 	 : (int list[int])list[int]	 pri 0 code 350;
+'ccat' '('  @ ','  @ ')' 	 : (int list[int])list[int]	 pri 0 code 350;
+'nvocc' '('  @ ')' 	 : (term)list[int]	 pri 0 code 365;
+'nil_variable' 	 : list[variable]	 pri 0 code 352;
+'nil' 	 : list[variable]	 pri 0 code 352;
+ @ '.'  @ 	 : (variable list[variable])list[variable]	 pri 0 code 353;
+ @  @ 	 : (variable list[variable])list[variable]	 pri 0 code 353;
+ @ ','  @ 	 : (variable list[variable])list[variable]	 pri 0 code 353;
+'cons' '('  @ ','  @ ')' 	 : (variable list[variable])list[variable]	 pri 0 code 353;
+'cons_variable' '('  @ ','  @ ')' 	 : (variable list[variable])list[variable]	 pri 0 code 353;
+'append' '('  @ ','  @ ')' 	 : (list[variable] list[variable])list[variable]	 pri 0 code 354;
+ @ '@'  @ 	 : (list[variable] list[variable])list[variable]	 pri 0 code 354;
+'ccat' '('  @ '*'  @ ')' 	 : (int list[variable])list[variable]	 pri 0 code 358;
+'ccat' '('  @ ','  @ ')' 	 : (int list[variable])list[variable]	 pri 0 code 358;
+'varlist_Vars' 	 : list[variable]	 pri 0 code 373;
+
+ b=false end
+
+ end end
+end
+
+--- stderr
+--- exit status 0

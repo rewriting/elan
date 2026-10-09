@@ -1,0 +1,753 @@
+$ elan -b -d prolog.lgi queens.spc
+--- stdout
+
+global rule truepropag:eqSystem/syntacticUnification[Ops,Vars] [1/1/fsym=425/vars=1]
+  true	 =>  true
+
+
+local rule topOccRule:list[int]/termCommons[Ops,Vars] [1/2/fsym=367/vars=1]
+  nvocc( VAR(0))	 =>  nil
+
+     if (not(isvar( VAR(0))))
+
+global rule falsepropag:eqSystem/syntacticUnification[Ops,Vars] [1/3/fsym=425/vars=1]
+  false	 =>  false
+
+
+local rule extractrule1:variable/list[variable] [1/4/fsym=357/vars=2]
+  elem(cons_variable( VAR(0), VAR(1)))	 =>  VAR(0)
+
+
+local rule extractrule2:variable/list[variable] [1/5/fsym=357/vars=2]
+  elem(cons_variable( VAR(0), VAR(1)))	 =>  elem( VAR(1))
+
+
+global rule new_var_elim:eqSystem/eqSystem[Ops,Vars] [1/6/fsym=427/vars=3]
+ ( VAR(0)&var( VAR(1))= VAR(2))	 =>  apply(var( VAR(1))-> VAR(2), VAR(0))
+
+
+local rule extractrule1:identifier/list[identifier] [1/7/fsym=323/vars=2]
+  elem(cons_identifier( VAR(0), VAR(1)))	 =>  VAR(0)
+
+
+local rule extractrule2:identifier/list[identifier] [1/8/fsym=323/vars=2]
+  elem(cons_identifier( VAR(0), VAR(1)))	 =>  elem( VAR(1))
+
+
+local rule extractrule1:pair[identifier,int]/list[pair[identifier,int]] [1/9/fsym=335/vars=2]
+  elem(cons_pair[identifier,int]( VAR(0), VAR(1)))	 =>  VAR(0)
+
+
+local rule extractrule2:pair[identifier,int]/list[pair[identifier,int]] [1/10/fsym=335/vars=2]
+  elem(cons_pair[identifier,int]( VAR(0), VAR(1)))	 =>  elem( VAR(1))
+
+
+local rule extractrule1:pair[atom,list[atom]]/list[pair[atom,list[atom]]] [1/11/fsym=412/vars=2]
+  elem(cons_pair[atom,list[atom]]( VAR(0), VAR(1)))	 =>  VAR(0)
+
+
+local rule extractrule2:pair[atom,list[atom]]/list[pair[atom,list[atom]]] [1/12/fsym=412/vars=2]
+  elem(cons_pair[atom,list[atom]]( VAR(0), VAR(1)))	 =>  elem( VAR(1))
+
+
+global rule eqPass:eqSystem/eqSystem[Ops,Vars] [1/13/fsym=427/vars=2]
+ ( VAR(0)& VAR(1))	 => ( VAR(1)& VAR(0))
+
+
+global rule delete:eqSystem/syntacticUnification[Ops,Vars] [1/14/fsym=427/vars=3]
+ ( VAR(0)& VAR(1)= VAR(2))	 =>  VAR(0)
+
+     if  eq_identifier( VAR(1), VAR(2))
+
+global rule delete:eqSystem/syntacticUnification[Ops,Vars] [2/15/fsym=427/vars=1]
+ ( VAR(0)&true)	 =>  VAR(0)
+
+     if  occurs(true, VAR(0))
+
+global rule unfold:eqSystem/eqSystem[Ops,Vars] [1/16/fsym=427/vars=3]
+ ( VAR(0)&( VAR(1)& VAR(2)))	 => (( VAR(0)& VAR(1))& VAR(2))
+
+
+local rule sldStep:sldState/sldResolution[Ops,Vars,Predicates,Clauses,VarStop] [1/17/fsym=438/vars=6]
+ (cons_atom(set(, VAR(0),), VAR(1))| VAR(2)| VAR(3))	 => (apply( VAR(4),nil)@ VAR(1)|plus( VAR(2),varnum_Vars)| VAR(5))
+
+     if  lesseq_int( VAR(2),VarStop)
+     where VAR(4) := ()  rename_subst(varlist_Vars, VAR(2))
+     where VAR(5) := (unifys:eqSystem/sldResolution[Ops,Vars,Predicates,Clauses,VarStop]) ( VAR(3)& VAR(0)=apply( VAR(4),1))
+
+local rule sldStep:sldState/sldResolution[Ops,Vars,Predicates,Clauses,VarStop] [2/18/fsym=438/vars=6]
+ (cons_atom(set(, VAR(0),), VAR(1))| VAR(2)| VAR(3))	 => (apply( VAR(4),nil)@ VAR(1)|plus( VAR(2),varnum_Vars)| VAR(5))
+
+     if  lesseq_int( VAR(2),VarStop)
+     where VAR(4) := ()  rename_subst(varlist_Vars, VAR(2))
+     where VAR(5) := (unifys:eqSystem/sldResolution[Ops,Vars,Predicates,Clauses,VarStop]) ( VAR(3)& VAR(0)=apply( VAR(4),2))
+
+local rule sldStep:sldState/sldResolution[Ops,Vars,Predicates,Clauses,VarStop] [3/19/fsym=438/vars=6]
+ (cons_atom(set(, VAR(0),), VAR(1))| VAR(2)| VAR(3))	 => (apply( VAR(4),nil)@ VAR(1)|plus( VAR(2),varnum_Vars)| VAR(5))
+
+     if  lesseq_int( VAR(2),VarStop)
+     where VAR(4) := ()  rename_subst(varlist_Vars, VAR(2))
+     where VAR(5) := (unifys:eqSystem/sldResolution[Ops,Vars,Predicates,Clauses,VarStop]) ( VAR(3)& VAR(0)=apply( VAR(4),3))
+
+local rule sldStep:sldState/sldResolution[Ops,Vars,Predicates,Clauses,VarStop] [4/20/fsym=438/vars=6]
+ (cons_atom(set(, VAR(0),), VAR(1))| VAR(2)| VAR(3))	 => (apply( VAR(4),nil)@ VAR(1)|plus( VAR(2),varnum_Vars)| VAR(5))
+
+     if  lesseq_int( VAR(2),VarStop)
+     where VAR(4) := ()  rename_subst(varlist_Vars, VAR(2))
+     where VAR(5) := (unifys:eqSystem/sldResolution[Ops,Vars,Predicates,Clauses,VarStop]) ( VAR(3)& VAR(0)=apply( VAR(4),4))
+
+local rule sldStep:sldState/sldResolution[Ops,Vars,Predicates,Clauses,VarStop] [5/21/fsym=438/vars=8]
+ (cons_atom(ok(, VAR(0), VAR(1), VAR(2),), VAR(3))| VAR(4)| VAR(5))	 => (apply( VAR(6),nil)@ VAR(3)|plus( VAR(4),varnum_Vars)| VAR(7))
+
+     if  lesseq_int( VAR(4),VarStop)
+     where VAR(6) := ()  rename_subst(varlist_Vars, VAR(4))
+     where VAR(7) := (unifys:eqSystem/sldResolution[Ops,Vars,Predicates,Clauses,VarStop]) ((( VAR(5)& VAR(0)=apply( VAR(6),Diff))& VAR(1)=apply( VAR(6),D))& VAR(2)=apply( VAR(6),nil))
+
+local rule sldStep:sldState/sldResolution[Ops,Vars,Predicates,Clauses,VarStop] [6/22/fsym=438/vars=8]
+ (cons_atom(ok(, VAR(0), VAR(1), VAR(2),), VAR(3))| VAR(4)| VAR(5))	 => (apply( VAR(6),cons_atom(D\=P,cons_atom(Dp is D-P,cons_atom(Dp\=Diff,cons_atom(Pd is P-D,cons_atom(Pd\=Diff,cons_atom(Diff1 is Diff+1,cons_atom(ok(,Diff1,D,L,),nil))))))))@ VAR(3)|plus( VAR(4),varnum_Vars)| VAR(7))
+
+     if  lesseq_int( VAR(4),VarStop)
+     where VAR(6) := ()  rename_subst(varlist_Vars, VAR(4))
+     where VAR(7) := (unifys:eqSystem/sldResolution[Ops,Vars,Predicates,Clauses,VarStop]) ((( VAR(5)& VAR(0)=apply( VAR(6),Diff))& VAR(1)=apply( VAR(6),D))& VAR(2)=apply( VAR(6),cons(P,L)))
+
+local rule sldStep:sldState/sldResolution[Ops,Vars,Predicates,Clauses,VarStop] [7/23/fsym=438/vars=7]
+ (cons_atom(eq(, VAR(0), VAR(1),), VAR(2))| VAR(3)| VAR(4))	 => (apply( VAR(5),nil)@ VAR(2)|plus( VAR(3),varnum_Vars)| VAR(6))
+
+     if  lesseq_int( VAR(3),VarStop)
+     where VAR(5) := ()  rename_subst(varlist_Vars, VAR(3))
+     where VAR(6) := (unifys:eqSystem/sldResolution[Ops,Vars,Predicates,Clauses,VarStop]) (( VAR(4)& VAR(0)=apply( VAR(5),X))& VAR(1)=apply( VAR(5),X))
+
+local rule sldStep:sldState/sldResolution[Ops,Vars,Predicates,Clauses,VarStop] [8/24/fsym=438/vars=6]
+ (cons_atom(queens(, VAR(0),), VAR(1))| VAR(2)| VAR(3))	 => (apply( VAR(4),cons_atom(set(,P1,),cons_atom(set(,P2,),cons_atom(eq(,PP1,cons(P1,nil),),cons_atom(ok(,1,P2,PP1,),cons_atom(set(,P3,),cons_atom(eq(,PP2,cons(P2,PP1),),cons_atom(ok(,1,P3,PP2,),cons_atom(set(,P4,),cons_atom(eq(,PP3,cons(P3,PP2),),cons_atom(ok(,1,P4,PP3,),cons_atom(eq(,X,cons(P4,PP3),),nil))))))))))))@ VAR(1)|plus( VAR(2),varnum_Vars)| VAR(5))
+
+     if  lesseq_int( VAR(2),VarStop)
+     where VAR(4) := ()  rename_subst(varlist_Vars, VAR(2))
+     where VAR(5) := (unifys:eqSystem/sldResolution[Ops,Vars,Predicates,Clauses,VarStop]) ( VAR(3)& VAR(0)=apply( VAR(4),X))
+
+local rule sldStep:sldState/sldResolution[Ops,Vars,Predicates,Clauses,VarStop] [9/25/fsym=438/vars=6]
+ (cons_atom( VAR(0)is VAR(1), VAR(2))| VAR(3)| VAR(4))	 => ( VAR(2)| VAR(3)|( VAR(4)& VAR(0)=eval(apply( VAR(5), VAR(1)))))
+
+     where VAR(5) := ()  system_to_subst( VAR(4))
+
+local rule sldStep:sldState/sldResolution[Ops,Vars,Predicates,Clauses,VarStop] [10/26/fsym=438/vars=6]
+ (cons_atom( VAR(0)\= VAR(1), VAR(2))| VAR(3)| VAR(4))	 => ( VAR(2)| VAR(3)| VAR(4))
+
+     where VAR(5) := ()  system_to_subst( VAR(4))
+     if  neq_identifier(apply( VAR(5), VAR(0)),apply( VAR(5), VAR(1)))
+
+local rule extractrule1:int/list[int] [1/27/fsym=349/vars=2]
+  elem(cons_int( VAR(0), VAR(1)))	 =>  VAR(0)
+
+
+local rule extractrule2:int/list[int] [1/28/fsym=349/vars=2]
+  elem(cons_int( VAR(0), VAR(1)))	 =>  elem( VAR(1))
+
+
+global rule trueadd:eqSystem/syntacticUnification[Ops,Vars] [1/29/fsym=0/vars=1]
+  VAR(0)	 => (true& VAR(0))
+
+
+local rule extractrule1:atom/list[atom] [1/30/fsym=394/vars=2]
+  elem(cons_atom( VAR(0), VAR(1)))	 =>  VAR(0)
+
+
+local rule extractrule2:atom/list[atom] [1/31/fsym=394/vars=2]
+  elem(cons_atom( VAR(0), VAR(1)))	 =>  elem( VAR(1))
+
+
+global rule coalesce:eqSystem/syntacticUnification[Ops,Vars] [1/32/fsym=427/vars=3]
+ ( VAR(0)& VAR(1)= VAR(2))	 => ( VAR(1)= VAR(2)&apply( VAR(1)-> VAR(2), VAR(0)))
+
+     if  neq_identifier( VAR(1), VAR(2))
+
+global rule occCheck1:eqSystem/syntacticUnification[Ops,Vars] [1/33/fsym=427/vars=3]
+ ( VAR(0)& VAR(1)= VAR(2))	 =>  false
+
+     if (occurs( VAR(1), VAR(2))and(not(isvar( VAR(2)))))
+
+global rule occCheck2:eqSystem/syntacticUnification[Ops,Vars] [1/34/fsym=427/vars=3]
+ ( VAR(0)& VAR(1)= VAR(2))	 =>  false
+
+     if (occurs( VAR(2), VAR(1))and(not(isvar( VAR(1)))))
+
+global rule conflict:eqSystem/syntacticUnification[Ops,Vars] [1/35/fsym=427/vars=3]
+ ( VAR(0)& VAR(1)= VAR(2))	 =>  false
+
+     if ((neq_identifier(head( VAR(1)),head( VAR(2)))and(not(isvar( VAR(1)))))and(not(isvar( VAR(2)))))
+
+global rule trueelim:eqSystem/syntacticUnification[Ops,Vars] [1/36/fsym=427/vars=1]
+ ( VAR(0)&true)	 =>  VAR(0)
+
+
+global rule truepass:eqSystem/syntacticUnification[Ops,Vars] [1/37/fsym=427/vars=1]
+ ( VAR(0)&true)	 => (true& VAR(0))
+
+
+local rule sldSucces:sldState/sldResolution[Ops,Vars,Predicates,Clauses,VarStop] [1/38/fsym=438/vars=3]
+ (nil| VAR(0)| VAR(1))	 => (nil|0| VAR(2))
+
+     where VAR(2) := (delete_new_variables:eqSystem/sldResolution[Ops,Vars,Predicates,Clauses,VarStop])  VAR(1)
+
+local rule decompose:eqSystem/syntacticUnification[Ops,Vars] [1/39/fsym=427/vars=5]
+ ( VAR(0)&cons( VAR(1), VAR(2))=cons( VAR(3), VAR(4)))	 => (( VAR(0)& VAR(1)= VAR(3))& VAR(2)= VAR(4))
+
+
+local rule decompose:eqSystem/syntacticUnification[Ops,Vars] [2/40/fsym=427/vars=1]
+ ( VAR(0)&nil=nil)	 =>  VAR(0)
+
+
+global rule mergePass1:eqSystem/syntacticUnification[Ops,Vars] [1/41/fsym=427/vars=3]
+ ( VAR(0)& VAR(1)= VAR(2))	 => ( VAR(1)= VAR(2)& VAR(0))
+
+
+global rule mergePass2:eqSystem/syntacticUnification[Ops,Vars] [1/42/fsym=427/vars=5]
+ ( VAR(0)& VAR(1)= VAR(2))	 =>  VAR(3)
+
+     where VAR(4) := ()  occurs( VAR(1), VAR(0))
+     try
+         choice
+             if (not( VAR(4)))
+             where VAR(3) := () ( VAR(1)= VAR(2)& VAR(0))
+         choice
+             if  VAR(4)
+             where VAR(3) := ()  VAR(0)
+     end
+
+global rule mergePass3:eqSystem/syntacticUnification[Ops,Vars] [1/43/fsym=0/vars=1]
+  VAR(0)	 =>  VAR(0)
+
+     if  false
+
+local rule inOccRule:list[int]/termCommons[Ops,Vars] [1/44/fsym=367/vars=3]
+  nvocc(cons( VAR(0), VAR(1)))	 =>  cons_int(1, VAR(2))
+
+     where VAR(2) := (chooseOccurence:list[int]/termCommons[Ops,Vars])  nvocc( VAR(0))
+
+local rule inOccRule:list[int]/termCommons[Ops,Vars] [2/45/fsym=367/vars=3]
+  nvocc(cons( VAR(0), VAR(1)))	 =>  cons_int(2, VAR(2))
+
+     where VAR(2) := (chooseOccurence:list[int]/termCommons[Ops,Vars])  nvocc( VAR(1))
+
+global rule eliminate1:eqSystem/syntacticUnification[Ops,Vars] [1/46/fsym=427/vars=3]
+ ( VAR(0)& VAR(1)= VAR(2))	 => ( VAR(1)= VAR(2)&apply( VAR(1)-> VAR(2), VAR(0)))
+
+     if (not(occurs( VAR(1), VAR(2))))
+
+global rule eliminate2:eqSystem/syntacticUnification[Ops,Vars] [1/47/fsym=427/vars=3]
+ ( VAR(0)& VAR(1)= VAR(2))	 => ( VAR(2)= VAR(1)&apply( VAR(2)-> VAR(1), VAR(0)))
+
+     if (not(occurs( VAR(2), VAR(1))))
+
+global rule matchClash:eqSystem/syntacticUnification[Ops,Vars] [1/48/fsym=427/vars=3]
+ ( VAR(0)& VAR(1)= VAR(2))	 =>  false
+
+     if (not(isvar( VAR(1))))
+
+global rule mergeClash:eqSystem/syntacticUnification[Ops,Vars] [1/49/fsym=427/vars=3]
+ ( VAR(0)& VAR(1)= VAR(2))	 =>  false
+
+     if  mergingClash( VAR(0), VAR(1), VAR(2))
+
+strategy global listExtract:pair[identifier,int]/list[pair[identifier,int]]
+ iterate (
+   dc one(extractrule2:pair[identifier,int] )
+ );
+ dc one(extractrule1:pair[identifier,int] )
+
+strategy global listExtract:identifier/list[identifier]
+ iterate (
+   dc one(extractrule2:identifier )
+ );
+ dc one(extractrule1:identifier )
+
+strategy global match:eqSystem/syntacticUnification[Ops,Vars]
+ dc one(trueadd:eqSystem );
+ repeat* (
+   dc one(unfold:eqSystem delete:eqSystem decompose:eqSystem conflict:eqSystem matchClash:eqSystem mergePass1:eqSystem )
+ );
+ dc one(truepass:eqSystem truepropag:eqSystem falsepropag:eqSystem );
+ repeat* (
+   dc one(unfold:eqSystem mergeClash:eqSystem mergePass2:eqSystem mergePass3:eqSystem )
+ );
+ dc one(trueelim:eqSystem truepropag:eqSystem falsepropag:eqSystem )
+
+strategy global listExtract:int/list[int]
+ iterate (
+   dc one(extractrule2:int )
+ );
+ dc one(extractrule1:int )
+
+strategy global listExtract:variable/list[variable]
+ iterate (
+   dc one(extractrule2:variable )
+ );
+ dc one(extractrule1:variable )
+
+strategy global unify:eqSystem/syntacticUnification[Ops,Vars]
+ dc one(trueadd:eqSystem );
+ repeat* (
+   dc one(unfold:eqSystem delete:eqSystem decompose:eqSystem conflict:eqSystem coalesce:eqSystem occCheck1:eqSystem occCheck2:eqSystem eliminate1:eqSystem eliminate2:eqSystem )
+ );
+ dc one(trueelim:eqSystem truepropag:eqSystem falsepropag:eqSystem )
+
+strategy global matchs:eqSystem/syntacticUnification[Ops,Vars]
+ repeat* (
+   dc one(unfold:eqSystem delete:eqSystem decompose:eqSystem conflict:eqSystem matchClash:eqSystem mergePass1:eqSystem )
+ );
+ dc one(truepass:eqSystem truepropag:eqSystem );
+ repeat* (
+   dc one(unfold:eqSystem mergeClash:eqSystem mergePass2:eqSystem mergePass3:eqSystem )
+ );
+ dc one(truepass:eqSystem truepropag:eqSystem )
+
+strategy global unifys:eqSystem/syntacticUnification[Ops,Vars]
+ repeat* (
+   dc one(unfold:eqSystem delete:eqSystem decompose:eqSystem conflict:eqSystem coalesce:eqSystem occCheck1:eqSystem occCheck2:eqSystem eliminate1:eqSystem eliminate2:eqSystem )
+ );
+ dc one(truepass:eqSystem truepropag:eqSystem )
+
+strategy global listExtract:pair[atom,list[atom]]/list[pair[atom,list[atom]]]
+ iterate (
+   dc one(extractrule2:pair[atom,list[atom]] )
+ );
+ dc one(extractrule1:pair[atom,list[atom]] )
+
+strategy global chooseOccurence:list[int]/termCommons[Ops,Vars]
+ dk(topOccRule:list[int] inOccRule:list[int] )
+
+strategy global listExtract:atom/list[atom]
+ iterate (
+   dc one(extractrule2:atom )
+ );
+ dc one(extractrule1:atom )
+
+strategy global sldResolution:sldState/sldResolution[Ops,Vars,Predicates,Clauses,VarStop]
+ iterate (
+   dk(sldStep:sldState )
+ );
+ dc(sldSucces:sldState )
+
+strategy global delete_new_variables:eqSystem/eqSystem[Ops,Vars]
+ repeat* (
+   dc one(new_var_elim:eqSystem unfold:eqSystem eqPass:eqSystem )
+ )
+
+Sorts
+intern int, <pair[atom,list[atom]]->pair[atom,list[atom]]>, ident, pair[identifier,int], builtinInt, 
+identifier, list[atom], <atom->atom>, <list[int]->list[int]>, pair[atom,list[atom]], 
+list[pair[identifier,int]], list[identifier], intern ident, list[pair[atom,list[atom]]], <pair[identifier,int]->pair[identifier,int]>, 
+int, sldState, variable, substitution, <identifier->identifier>, 
+intern string, eqSystem, equation, builtinString, <int->int>, 
+<sldState->sldState>, <variable->variable>, bool, atom, term, 
+<eqSystem->eqSystem>, list[int], list[variable], 
+
+Function symbols
+'listExtract' 	 : <pair[atom,list[atom]]->pair[atom,list[atom]]>	 pri 0 code 416;
+'['  @ ','  @ ']' 	 : (identifier int)pair[identifier,int]	 pri 0 code 328;
+'elem' '('  @ ')' 	 : (list[pair[identifier,int]])pair[identifier,int]	 pri 0 code 335;
+ @ '-' 'th' 'elem' '('  @ ')' 	 : (int list[pair[identifier,int]])pair[identifier,int]	 pri 0 code 336;
+ @ ':'  @ 	 : (identifier int)pair[identifier,int]	 pri 0 code 328;
+ @ '+'  @ 	 : (builtinInt builtinInt)builtinInt	 assocLeft 	 pri 500 code 3 sem 3;
+ @ '-'  @ 	 : (builtinInt builtinInt)builtinInt	 assocLeft 	 pri 600 code 4 sem 4;
+ @ '*'  @ 	 : (builtinInt builtinInt)builtinInt	 assocLeft 	 pri 700 code 5 sem 5;
+ @ '/'  @ 	 : (builtinInt builtinInt)builtinInt	 assocLeft 	 pri 800 code 6 sem 6;
+ @ '%'  @ 	 : (builtinInt builtinInt)builtinInt	 assocLeft 	 pri 800 code 27 sem 27;
+ @ '&'  @ 	 : (builtinInt builtinInt)builtinInt	 assocLeft 	 pri 800 code 28 sem 28;
+ @ '|'  @ 	 : (builtinInt builtinInt)builtinInt	 assocLeft 	 pri 800 code 29 sem 29;
+'-'  @ 	 : (builtinInt)builtinInt	 pri 900 code 20 sem 20;
+'('  @ '+'  @ ')' 	 : (builtinInt builtinInt)builtinInt	 assocLeft 	 pri 500 code 3 sem 3;
+'('  @ '-'  @ ')' 	 : (builtinInt builtinInt)builtinInt	 assocLeft 	 pri 600 code 4 sem 4;
+'('  @ '*'  @ ')' 	 : (builtinInt builtinInt)builtinInt	 assocLeft 	 pri 700 code 5 sem 5;
+'('  @ '/'  @ ')' 	 : (builtinInt builtinInt)builtinInt	 assocLeft 	 pri 800 code 6 sem 6;
+'('  @ '%'  @ ')' 	 : (builtinInt builtinInt)builtinInt	 assocLeft 	 pri 800 code 27 sem 27;
+'('  @ '&'  @ ')' 	 : (builtinInt builtinInt)builtinInt	 assocLeft 	 pri 800 code 28 sem 28;
+'('  @ '|'  @ ')' 	 : (builtinInt builtinInt)builtinInt	 assocLeft 	 pri 800 code 29 sem 29;
+'(' '-'  @ ')' 	 : (builtinInt)builtinInt	 pri 900 code 20 sem 20;
+'plus' '('  @ ','  @ ')' 	 : (builtinInt builtinInt)builtinInt	 pri 0 code 3 sem 3;
+'minus' '('  @ ','  @ ')' 	 : (builtinInt builtinInt)builtinInt	 pri 0 code 4 sem 4;
+'time' '('  @ ','  @ ')' 	 : (builtinInt builtinInt)builtinInt	 pri 0 code 5 sem 5;
+'div' '('  @ ','  @ ')' 	 : (builtinInt builtinInt)builtinInt	 pri 0 code 6 sem 6;
+'mod' '('  @ ','  @ ')' 	 : (builtinInt builtinInt)builtinInt	 pri 0 code 27 sem 27;
+'and' '('  @ ','  @ ')' 	 : (builtinInt builtinInt)builtinInt	 pri 0 code 28 sem 28;
+'or' '('  @ ','  @ ')' 	 : (builtinInt builtinInt)builtinInt	 pri 0 code 29 sem 29;
+'umin' '('  @ ')' 	 : (builtinInt)builtinInt	 pri 0 code 20 sem 20;
+'umin_builtinInt' '('  @ ')' 	 : (builtinInt)builtinInt	 pri 0 code 20 sem 20;
+'btoi' '('  @ ')' 	 : (bool)builtinInt	 pri 900 code 25 sem 25;
+'btoi_builtinInt' '('  @ ')' 	 : (bool)builtinInt	 pri 900 code 25 sem 25;
+'valueOf' '('  @ ')' 	 : (int)builtinInt	 pri 900 code 317;
+ @ 	 : (ident)identifier	 pri 0 code 319;
+'elem' '('  @ ')' 	 : (list[identifier])identifier	 pri 0 code 323;
+ @ '-' 'th' 'elem' '('  @ ')' 	 : (int list[identifier])identifier	 pri 0 code 324;
+'first' '('  @ ')' 	 : (pair[identifier,int])identifier	 pri 0 code 329;
+'1' '-' 'th' '('  @ ')' 	 : (pair[identifier,int])identifier	 pri 0 code 329;
+'head' '('  @ ')' 	 : (term)identifier	 pri 0 code 364;
+'head' '('  @ ')' 	 : (atom)identifier	 pri 0 code 399;
+'nil_atom' 	 : list[atom]	 pri 0 code 391;
+'nil' 	 : list[atom]	 pri 0 code 391;
+ @ '.'  @ 	 : (atom list[atom])list[atom]	 pri 0 code 392;
+ @  @ 	 : (atom list[atom])list[atom]	 pri 0 code 392;
+ @ ','  @ 	 : (atom list[atom])list[atom]	 pri 0 code 392;
+'cons' '('  @ ','  @ ')' 	 : (atom list[atom])list[atom]	 pri 0 code 392;
+'cons_atom' '('  @ ','  @ ')' 	 : (atom list[atom])list[atom]	 pri 0 code 392;
+'append' '('  @ ','  @ ')' 	 : (list[atom] list[atom])list[atom]	 pri 0 code 393;
+ @ '@'  @ 	 : (list[atom] list[atom])list[atom]	 pri 0 code 393;
+'ccat' '('  @ '*'  @ ')' 	 : (int list[atom])list[atom]	 pri 0 code 397;
+'ccat' '('  @ ','  @ ')' 	 : (int list[atom])list[atom]	 pri 0 code 397;
+'second' '('  @ ')' 	 : (pair[atom,list[atom]])list[atom]	 pri 0 code 407;
+'2' '-' 'th' '('  @ ')' 	 : (pair[atom,list[atom]])list[atom]	 pri 0 code 407;
+'.' 	 : list[atom]	 pri 0 code 391;
+ @ ','  @ 	 : (atom list[atom])list[atom]	 pri 0 code 392;
+'replace'  @ 'by'  @ 'in'  @ 	 : (term term list[atom])list[atom]	 pri 0 code 16 sem 16;
+'replace' '('  @ ')' 'by' '('  @ ')' 'in' '('  @ ')' 	 : (term term list[atom])list[atom]	 pri 0 code 16 sem 16;
+'replace' '('  @ ','  @ ','  @ ')' 	 : (term term list[atom])list[atom]	 pri 0 code 16 sem 16;
+ @ '('  @ ')' 	 : (substitution list[atom])list[atom]	 pri 0 code 435;
+'apply' '('  @ ','  @ ')' 	 : (substitution list[atom])list[atom]	 pri 0 code 435;
+'listExtract' 	 : <atom->atom>	 pri 0 code 398;
+'chooseOccurence' 	 : <list[int]->list[int]>	 pri 0 code 390;
+'['  @ ','  @ ']' 	 : (atom list[atom])pair[atom,list[atom]]	 pri 0 code 405;
+'elem' '('  @ ')' 	 : (list[pair[atom,list[atom]]])pair[atom,list[atom]]	 pri 0 code 412;
+ @ '-' 'th' 'elem' '('  @ ')' 	 : (int list[pair[atom,list[atom]]])pair[atom,list[atom]]	 pri 0 code 413;
+ @  @ 	 : (atom list[atom])pair[atom,list[atom]]	 pri 0 code 405;
+ @ ':' '-'  @ 	 : (atom list[atom])pair[atom,list[atom]]	 pri 0 code 405;
+'nil_pair' '[' 'identifier' ',' 'int' ']' 	 : list[pair[identifier,int]]	 pri 0 code 332;
+'nil' 	 : list[pair[identifier,int]]	 pri 0 code 332;
+ @ '.'  @ 	 : (pair[identifier,int] list[pair[identifier,int]])list[pair[identifier,int]]	 pri 0 code 333;
+ @  @ 	 : (pair[identifier,int] list[pair[identifier,int]])list[pair[identifier,int]]	 pri 0 code 333;
+ @ ','  @ 	 : (pair[identifier,int] list[pair[identifier,int]])list[pair[identifier,int]]	 pri 0 code 333;
+'cons' '('  @ ','  @ ')' 	 : (pair[identifier,int] list[pair[identifier,int]])list[pair[identifier,int]]	 pri 0 code 333;
+'cons_pair' '[' 'identifier' ',' 'int' ']' '('  @ ','  @ ')' 	 : (pair[identifier,int] list[pair[identifier,int]])list[pair[identifier,int]]	 pri 0 code 333;
+'append' '('  @ ','  @ ')' 	 : (list[pair[identifier,int]] list[pair[identifier,int]])list[pair[identifier,int]]	 pri 0 code 334;
+ @ '@'  @ 	 : (list[pair[identifier,int]] list[pair[identifier,int]])list[pair[identifier,int]]	 pri 0 code 334;
+'ccat' '('  @ '*'  @ ')' 	 : (int list[pair[identifier,int]])list[pair[identifier,int]]	 pri 0 code 338;
+'ccat' '('  @ ','  @ ')' 	 : (int list[pair[identifier,int]])list[pair[identifier,int]]	 pri 0 code 338;
+'BLANKLEXEM' 	 : list[pair[identifier,int]]	 pri 0 code 332;
+ @  @ 	 : (pair[identifier,int] list[pair[identifier,int]])list[pair[identifier,int]]	 pri 0 code 333;
+'nil_identifier' 	 : list[identifier]	 pri 0 code 320;
+'nil' 	 : list[identifier]	 pri 0 code 320;
+ @ '.'  @ 	 : (identifier list[identifier])list[identifier]	 pri 0 code 321;
+ @  @ 	 : (identifier list[identifier])list[identifier]	 pri 0 code 321;
+ @ ','  @ 	 : (identifier list[identifier])list[identifier]	 pri 0 code 321;
+'cons' '('  @ ','  @ ')' 	 : (identifier list[identifier])list[identifier]	 pri 0 code 321;
+'cons_identifier' '('  @ ','  @ ')' 	 : (identifier list[identifier])list[identifier]	 pri 0 code 321;
+'append' '('  @ ','  @ ')' 	 : (list[identifier] list[identifier])list[identifier]	 pri 0 code 322;
+ @ '@'  @ 	 : (list[identifier] list[identifier])list[identifier]	 pri 0 code 322;
+'ccat' '('  @ '*'  @ ')' 	 : (int list[identifier])list[identifier]	 pri 0 code 326;
+'ccat' '('  @ ','  @ ')' 	 : (int list[identifier])list[identifier]	 pri 0 code 326;
+'BLANKLEXEM' 	 : list[identifier]	 pri 0 code 320;
+ @  @ 	 : (identifier list[identifier])list[identifier]	 pri 0 code 321;
+'nil_pair' '[' 'atom' ',' 'list' '[' 'atom' ']' ']' 	 : list[pair[atom,list[atom]]]	 pri 0 code 409;
+'nil' 	 : list[pair[atom,list[atom]]]	 pri 0 code 409;
+ @ '.'  @ 	 : (pair[atom,list[atom]] list[pair[atom,list[atom]]])list[pair[atom,list[atom]]]	 pri 0 code 410;
+ @  @ 	 : (pair[atom,list[atom]] list[pair[atom,list[atom]]])list[pair[atom,list[atom]]]	 pri 0 code 410;
+ @ ','  @ 	 : (pair[atom,list[atom]] list[pair[atom,list[atom]]])list[pair[atom,list[atom]]]	 pri 0 code 410;
+'cons' '('  @ ','  @ ')' 	 : (pair[atom,list[atom]] list[pair[atom,list[atom]]])list[pair[atom,list[atom]]]	 pri 0 code 410;
+'cons_pair' '[' 'atom' ',' 'list' '[' 'atom' ']' ']' '('  @ ','  @ ')' 	 : (pair[atom,list[atom]] list[pair[atom,list[atom]]])list[pair[atom,list[atom]]]	 pri 0 code 410;
+'append' '('  @ ','  @ ')' 	 : (list[pair[atom,list[atom]]] list[pair[atom,list[atom]]])list[pair[atom,list[atom]]]	 pri 0 code 411;
+ @ '@'  @ 	 : (list[pair[atom,list[atom]]] list[pair[atom,list[atom]]])list[pair[atom,list[atom]]]	 pri 0 code 411;
+'ccat' '('  @ '*'  @ ')' 	 : (int list[pair[atom,list[atom]]])list[pair[atom,list[atom]]]	 pri 0 code 415;
+'ccat' '('  @ ','  @ ')' 	 : (int list[pair[atom,list[atom]]])list[pair[atom,list[atom]]]	 pri 0 code 415;
+'BLANKLEXEM' 	 : list[pair[atom,list[atom]]]	 pri 0 code 409;
+ @  @ 	 : (pair[atom,list[atom]] list[pair[atom,list[atom]]])list[pair[atom,list[atom]]]	 pri 0 code 410;
+'listExtract' 	 : <pair[identifier,int]->pair[identifier,int]>	 pri 0 code 339;
+ @ 	 : (builtinInt)int	 pri 1000 code 300;
+'['  @ ']' 	 : (builtinInt)int	 pri 1000 code 300;
+ @ '+'  @ 	 : (int int)int	 assocLeft 	 pri 500 code 301;
+ @ '-'  @ 	 : (int int)int	 assocLeft 	 pri 600 code 302;
+ @ '*'  @ 	 : (int int)int	 assocLeft 	 pri 700 code 303;
+ @ '%'  @ 	 : (int int)int	 assocLeft 	 pri 800 code 304;
+ @ '&'  @ 	 : (int int)int	 assocLeft 	 pri 800 code 305;
+ @ '/'  @ 	 : (int int)int	 assocLeft 	 pri 800 code 306;
+ @ '|'  @ 	 : (int int)int	 assocLeft 	 pri 800 code 307;
+'-'  @ 	 : (int)int	 pri 900 code 308;
+'('  @ '+'  @ ')' 	 : (int int)int	 pri 500 code 301;
+'('  @ '-'  @ ')' 	 : (int int)int	 pri 600 code 302;
+'('  @ '*'  @ ')' 	 : (int int)int	 pri 700 code 303;
+'('  @ '/'  @ ')' 	 : (int int)int	 pri 800 code 306;
+'('  @ '%'  @ ')' 	 : (int int)int	 pri 800 code 304;
+'('  @ '&'  @ ')' 	 : (int int)int	 pri 800 code 305;
+'('  @ '|'  @ ')' 	 : (int int)int	 pri 800 code 307;
+'(' '-'  @ ')' 	 : (int)int	 pri 900 code 308;
+'plus' '('  @ ','  @ ')' 	 : (int int)int	 pri 500 code 301;
+'minus' '('  @ ','  @ ')' 	 : (int int)int	 pri 600 code 302;
+'time' '('  @ ','  @ ')' 	 : (int int)int	 pri 700 code 303;
+'div' '('  @ ','  @ ')' 	 : (int int)int	 pri 800 code 306;
+'mod' '('  @ ','  @ ')' 	 : (int int)int	 pri 800 code 304;
+'and' '('  @ ','  @ ')' 	 : (int int)int	 pri 800 code 305;
+'or' '('  @ ','  @ ')' 	 : (int int)int	 pri 800 code 307;
+'umin' '('  @ ')' 	 : (int)int	 pri 900 code 308;
+'btoi' '('  @ ')' 	 : (bool)int	 pri 900 code 315;
+'btoi_int' '('  @ ')' 	 : (bool)int	 pri 900 code 315;
+ @ 	 : (builtinInt)int	 pri 1000 code 300;
+'size' '('  @ ')' 	 : (list[identifier])int	 pri 0 code 325;
+'size_of_identifier_list' '('  @ ')' 	 : (list[identifier])int	 pri 0 code 325;
+'second' '('  @ ')' 	 : (pair[identifier,int])int	 pri 0 code 330;
+'2' '-' 'th' '('  @ ')' 	 : (pair[identifier,int])int	 pri 0 code 330;
+'size' '('  @ ')' 	 : (list[pair[identifier,int]])int	 pri 0 code 337;
+'size_of_pair' '[' 'identifier' ',' 'int' ']' '_' 'list' '('  @ ')' 	 : (list[pair[identifier,int]])int	 pri 0 code 337;
+'elem' '('  @ ')' 	 : (list[int])int	 pri 0 code 349;
+ @ '-' 'th' 'elem' '('  @ ')' 	 : (int list[int])int	 pri 0 code 350;
+'size' '('  @ ')' 	 : (list[int])int	 pri 0 code 351;
+'size_of_int_list' '('  @ ')' 	 : (list[int])int	 pri 0 code 351;
+'size' '('  @ ')' 	 : (list[variable])int	 pri 0 code 359;
+'size_of_variable_list' '('  @ ')' 	 : (list[variable])int	 pri 0 code 359;
+'varnum_Vars' 	 : int	 pri 0 code 389;
+'size' '('  @ ')' 	 : (list[atom])int	 pri 0 code 396;
+'size_of_atom_list' '('  @ ')' 	 : (list[atom])int	 pri 0 code 396;
+'size' '('  @ ')' 	 : (list[pair[atom,list[atom]]])int	 pri 0 code 414;
+'size_of_pair' '[' 'atom' ',' 'list' '[' 'atom' ']' ']' '_' 'list' '('  @ ')' 	 : (list[pair[atom,list[atom]]])int	 pri 0 code 414;
+'('  @ '|'  @ '|'  @ ')' 	 : (list[atom] int eqSystem)sldState	 pri 0 code 438;
+'elem' '('  @ ')' 	 : (list[variable])variable	 pri 0 code 357;
+ @ '-' 'th' 'elem' '('  @ ')' 	 : (int list[variable])variable	 pri 0 code 358;
+'var' '('  @ ')' 	 : (int)variable	 pri 0 code 362;
+'X' 	 : variable	 pri 0 code 373;
+'D' 	 : variable	 pri 0 code 374;
+'P' 	 : variable	 pri 0 code 375;
+'L' 	 : variable	 pri 0 code 376;
+'Dp' 	 : variable	 pri 0 code 377;
+'Pd' 	 : variable	 pri 0 code 378;
+'Diff' 	 : variable	 pri 0 code 379;
+'Diff1' 	 : variable	 pri 0 code 380;
+'P1' 	 : variable	 pri 0 code 381;
+'PP1' 	 : variable	 pri 0 code 382;
+'P2' 	 : variable	 pri 0 code 383;
+'PP2' 	 : variable	 pri 0 code 384;
+'P3' 	 : variable	 pri 0 code 385;
+'PP3' 	 : variable	 pri 0 code 386;
+'P4' 	 : variable	 pri 0 code 387;
+'identity' 	 : substitution	 pri 0 code 343;
+ @ '-' '>'  @ 	 : (variable term)substitution	 pri 0 code 344;
+ @ 'o'  @ 	 : (substitution substitution)substitution	 assocLeft 	 pri 0 code 345;
+'rename_subst' '('  @ ','  @ ')' 	 : (list[variable] int)substitution	 pri 0 code 370;
+'system_to_subst' '('  @ ')' 	 : (eqSystem)substitution	 pri 0 code 428;
+'listExtract' 	 : <identifier->identifier>	 pri 0 code 327;
+'replace'  @ 'by'  @ 'in'  @ 	 : (term term eqSystem)eqSystem	 pri 0 code 16 sem 16;
+'replace' '('  @ ')' 'by' '('  @ ')' 'in' '('  @ ')' 	 : (term term eqSystem)eqSystem	 pri 0 code 16 sem 16;
+'replace' '('  @ ','  @ ','  @ ')' 	 : (term term eqSystem)eqSystem	 pri 0 code 16 sem 16;
+ @ '('  @ ')' 	 : (substitution eqSystem)eqSystem	 pri 0 code 423;
+'apply' '('  @ ','  @ ')' 	 : (substitution eqSystem)eqSystem	 pri 0 code 423;
+ @ 	 : (bool)eqSystem	 pri 0 code 425;
+ @ 	 : (equation)eqSystem	 pri 0 code 426;
+ @ '&'  @ 	 : (eqSystem eqSystem)eqSystem	 assocLeft 	 pri 0 code 427;
+'('  @ '&'  @ ')' 	 : (eqSystem eqSystem)eqSystem	 pri 0 code 427;
+ @ 	 : (equation)eqSystem	 pri 0 code 426;
+ @ '='  @ 	 : (term term)equation	 pri 0 code 424;
+ @ '='  @ 	 : (term term)equation	 pri 0 code 424;
+'listExtract' 	 : <int->int>	 pri 0 code 353;
+'sldResolution' 	 : <sldState->sldState>	 pri 0 code 440;
+'listExtract' 	 : <variable->variable>	 pri 0 code 361;
+'true' 	 : bool	 pri 0 code 1;
+'false' 	 : bool	 pri 0 code 0;
+ @ 'and'  @ 	 : (bool bool)bool	 assocLeft 	 pri 100 code 21 sem 21;
+ @ 'or'  @ 	 : (bool bool)bool	 assocLeft 	 pri 100 code 22 sem 22;
+'('  @ 'and'  @ ')' 	 : (bool bool)bool	 assocLeft 	 pri 100 code 21 sem 21;
+'('  @ 'or'  @ ')' 	 : (bool bool)bool	 assocLeft 	 pri 100 code 22 sem 22;
+'not' '('  @ ')' 	 : (bool)bool	 pri 200 code 24 sem 24;
+'not'  @ 	 : (bool)bool	 pri 200 code 24 sem 24;
+'(' 'not'  @ ')' 	 : (bool)bool	 pri 200 code 24 sem 24;
+'(' 'not' '('  @ ')' ')' 	 : (bool)bool	 pri 200 code 24 sem 24;
+ @ '=' '='  @ 	 : (bool bool)bool	 assocLeft 	 pri 200 code 8 sem 8;
+ @ '!' '='  @ 	 : (bool bool)bool	 assocLeft 	 pri 200 code 9 sem 9;
+ @ '<'  @ 	 : (bool bool)bool	 assocLeft 	 pri 200 code 10 sem 10;
+ @ '<' '='  @ 	 : (bool bool)bool	 assocLeft 	 pri 200 code 11 sem 11;
+ @ '>'  @ 	 : (bool bool)bool	 assocLeft 	 pri 200 code 12 sem 12;
+ @ '>' '='  @ 	 : (bool bool)bool	 assocLeft 	 pri 200 code 13 sem 13;
+'eq_bool' '('  @ ','  @ ')' 	 : (bool bool)bool	 pri 200 code 8 sem 8;
+'neq_bool' '('  @ ','  @ ')' 	 : (bool bool)bool	 pri 200 code 9 sem 9;
+'less_bool' '('  @ ','  @ ')' 	 : (bool bool)bool	 pri 200 code 10 sem 10;
+'lesseq_bool' '('  @ ','  @ ')' 	 : (bool bool)bool	 pri 200 code 11 sem 11;
+'greater_bool' '('  @ ','  @ ')' 	 : (bool bool)bool	 pri 200 code 12 sem 12;
+'greatereq_bool' '('  @ ','  @ ')' 	 : (bool bool)bool	 pri 200 code 13 sem 13;
+ @ '=' '='  @ 	 : (builtinInt builtinInt)bool	 pri 300 code 8 sem 8;
+ @ '!' '='  @ 	 : (builtinInt builtinInt)bool	 pri 300 code 9 sem 9;
+ @ '<'  @ 	 : (builtinInt builtinInt)bool	 pri 300 code 10 sem 10;
+ @ '<' '='  @ 	 : (builtinInt builtinInt)bool	 pri 300 code 11 sem 11;
+ @ '>'  @ 	 : (builtinInt builtinInt)bool	 pri 300 code 12 sem 12;
+ @ '>' '='  @ 	 : (builtinInt builtinInt)bool	 pri 300 code 13 sem 13;
+'eq_builtinInt' '('  @ ','  @ ')' 	 : (builtinInt builtinInt)bool	 pri 300 code 8 sem 8;
+'neq_builtinInt' '('  @ ','  @ ')' 	 : (builtinInt builtinInt)bool	 pri 300 code 9 sem 9;
+'less_builtinInt' '('  @ ','  @ ')' 	 : (builtinInt builtinInt)bool	 pri 300 code 10 sem 10;
+'lesseq_builtinInt' '('  @ ','  @ ')' 	 : (builtinInt builtinInt)bool	 pri 300 code 11 sem 11;
+'greater_builtinInt' '('  @ ','  @ ')' 	 : (builtinInt builtinInt)bool	 pri 300 code 12 sem 12;
+'greatereq_builtinInt' '('  @ ','  @ ')' 	 : (builtinInt builtinInt)bool	 pri 300 code 13 sem 13;
+'itob' '('  @ ')' 	 : (builtinInt)bool	 pri 900 code 26 sem 26;
+'itob_builtinInt' '('  @ ')' 	 : (builtinInt)bool	 pri 900 code 26 sem 26;
+ @ '=' '='  @ 	 : (int int)bool	 pri 300 code 309;
+ @ '!' '='  @ 	 : (int int)bool	 pri 300 code 310;
+ @ '>'  @ 	 : (int int)bool	 pri 300 code 311;
+ @ '>' '='  @ 	 : (int int)bool	 pri 300 code 312;
+ @ '<' '='  @ 	 : (int int)bool	 pri 300 code 313;
+ @ '<'  @ 	 : (int int)bool	 pri 300 code 314;
+'eq_int' '('  @ ','  @ ')' 	 : (int int)bool	 pri 300 code 309;
+'neq_int' '('  @ ','  @ ')' 	 : (int int)bool	 pri 300 code 310;
+'less_int' '('  @ ','  @ ')' 	 : (int int)bool	 pri 300 code 314;
+'lesseq_int' '('  @ ','  @ ')' 	 : (int int)bool	 pri 300 code 313;
+'greater_int' '('  @ ','  @ ')' 	 : (int int)bool	 pri 300 code 311;
+'greatereq_int' '('  @ ','  @ ')' 	 : (int int)bool	 pri 300 code 312;
+'itob' '('  @ ')' 	 : (int)bool	 pri 900 code 316;
+'itob_int' '('  @ ')' 	 : (int)bool	 pri 900 code 316;
+ @ '=' '='  @ 	 : (ident ident)bool	 pri 0 code 14 sem 14;
+ @ '!' '='  @ 	 : (ident ident)bool	 pri 0 code 15 sem 15;
+'eq_ident' '('  @ ','  @ ')' 	 : (ident ident)bool	 pri 0 code 14 sem 14;
+'neq_ident' '('  @ ','  @ ')' 	 : (ident ident)bool	 pri 0 code 15 sem 15;
+ @ '=' '='  @ 	 : (identifier identifier)bool	 pri 0 code 18 sem 18;
+ @ '!' '='  @ 	 : (identifier identifier)bool	 pri 0 code 19 sem 19;
+ @ '<'  @ 	 : (identifier identifier)bool	 pri 0 code 30 sem 30;
+ @ '<' '='  @ 	 : (identifier identifier)bool	 pri 0 code 31 sem 31;
+ @ '>'  @ 	 : (identifier identifier)bool	 pri 0 code 32 sem 32;
+ @ '>' '='  @ 	 : (identifier identifier)bool	 pri 0 code 33 sem 33;
+'eq_identifier' '('  @ ','  @ ')' 	 : (identifier identifier)bool	 pri 0 code 18 sem 18;
+'neq_identifier' '('  @ ','  @ ')' 	 : (identifier identifier)bool	 pri 0 code 19 sem 19;
+'less_identifier' '('  @ ','  @ ')' 	 : (identifier identifier)bool	 pri 0 code 30 sem 30;
+'lesseq_identifier' '('  @ ','  @ ')' 	 : (identifier identifier)bool	 pri 0 code 31 sem 31;
+'greater_identifier' '('  @ ','  @ ')' 	 : (identifier identifier)bool	 pri 0 code 32 sem 32;
+'greatereq_identifier' '('  @ ','  @ ')' 	 : (identifier identifier)bool	 pri 0 code 33 sem 33;
+ @ '=' '='  @ 	 : (identifier identifier)bool	 pri 0 code 18 sem 18;
+ @ '!' '='  @ 	 : (identifier identifier)bool	 pri 0 code 19 sem 19;
+'eq_identifier' '('  @ ','  @ ')' 	 : (identifier identifier)bool	 pri 0 code 18 sem 18;
+'neq_identifier' '('  @ ','  @ ')' 	 : (identifier identifier)bool	 pri 0 code 19 sem 19;
+'ispair' '('  @ ')' 	 : (pair[identifier,int])bool	 pri 0 code 331;
+ @ '=' '='  @ 	 : (term term)bool	 pri 0 code 18 sem 18;
+ @ '!' '='  @ 	 : (term term)bool	 pri 0 code 19 sem 19;
+ @ '<'  @ 	 : (term term)bool	 pri 0 code 30 sem 30;
+ @ '<' '='  @ 	 : (term term)bool	 pri 0 code 31 sem 31;
+ @ '>'  @ 	 : (term term)bool	 pri 0 code 32 sem 32;
+ @ '>' '='  @ 	 : (term term)bool	 pri 0 code 33 sem 33;
+'eq_term' '('  @ ','  @ ')' 	 : (term term)bool	 pri 0 code 18 sem 18;
+'neq_term' '('  @ ','  @ ')' 	 : (term term)bool	 pri 0 code 19 sem 19;
+'less_term' '('  @ ','  @ ')' 	 : (term term)bool	 pri 0 code 30 sem 30;
+'lesseq_term' '('  @ ','  @ ')' 	 : (term term)bool	 pri 0 code 31 sem 31;
+'greater_term' '('  @ ','  @ ')' 	 : (term term)bool	 pri 0 code 32 sem 32;
+'greatereq_term' '('  @ ','  @ ')' 	 : (term term)bool	 pri 0 code 33 sem 33;
+ @ '=' '='  @ 	 : (term term)bool	 pri 0 code 18 sem 18;
+ @ '!' '='  @ 	 : (term term)bool	 pri 0 code 19 sem 19;
+'eq_term' '('  @ ','  @ ')' 	 : (term term)bool	 pri 0 code 18 sem 18;
+'neq_term' '('  @ ','  @ ')' 	 : (term term)bool	 pri 0 code 19 sem 19;
+ @ '=' '='  @ 	 : (variable variable)bool	 pri 0 code 18 sem 18;
+ @ '!' '='  @ 	 : (variable variable)bool	 pri 0 code 19 sem 19;
+ @ '<'  @ 	 : (variable variable)bool	 pri 0 code 30 sem 30;
+ @ '<' '='  @ 	 : (variable variable)bool	 pri 0 code 31 sem 31;
+ @ '>'  @ 	 : (variable variable)bool	 pri 0 code 32 sem 32;
+ @ '>' '='  @ 	 : (variable variable)bool	 pri 0 code 33 sem 33;
+'eq_variable' '('  @ ','  @ ')' 	 : (variable variable)bool	 pri 0 code 18 sem 18;
+'neq_variable' '('  @ ','  @ ')' 	 : (variable variable)bool	 pri 0 code 19 sem 19;
+'less_variable' '('  @ ','  @ ')' 	 : (variable variable)bool	 pri 0 code 30 sem 30;
+'lesseq_variable' '('  @ ','  @ ')' 	 : (variable variable)bool	 pri 0 code 31 sem 31;
+'greater_variable' '('  @ ','  @ ')' 	 : (variable variable)bool	 pri 0 code 32 sem 32;
+'greatereq_variable' '('  @ ','  @ ')' 	 : (variable variable)bool	 pri 0 code 33 sem 33;
+ @ '=' '='  @ 	 : (variable variable)bool	 pri 0 code 18 sem 18;
+ @ '!' '='  @ 	 : (variable variable)bool	 pri 0 code 19 sem 19;
+'eq_variable' '('  @ ','  @ ')' 	 : (variable variable)bool	 pri 0 code 18 sem 18;
+'neq_variable' '('  @ ','  @ ')' 	 : (variable variable)bool	 pri 0 code 19 sem 19;
+'isvar' '('  @ ')' 	 : (term)bool	 pri 0 code 366;
+ @ '=' '='  @ 	 : (atom atom)bool	 pri 0 code 18 sem 18;
+ @ '!' '='  @ 	 : (atom atom)bool	 pri 0 code 19 sem 19;
+ @ '<'  @ 	 : (atom atom)bool	 pri 0 code 30 sem 30;
+ @ '<' '='  @ 	 : (atom atom)bool	 pri 0 code 31 sem 31;
+ @ '>'  @ 	 : (atom atom)bool	 pri 0 code 32 sem 32;
+ @ '>' '='  @ 	 : (atom atom)bool	 pri 0 code 33 sem 33;
+'eq_atom' '('  @ ','  @ ')' 	 : (atom atom)bool	 pri 0 code 18 sem 18;
+'neq_atom' '('  @ ','  @ ')' 	 : (atom atom)bool	 pri 0 code 19 sem 19;
+'less_atom' '('  @ ','  @ ')' 	 : (atom atom)bool	 pri 0 code 30 sem 30;
+'lesseq_atom' '('  @ ','  @ ')' 	 : (atom atom)bool	 pri 0 code 31 sem 31;
+'greater_atom' '('  @ ','  @ ')' 	 : (atom atom)bool	 pri 0 code 32 sem 32;
+'greatereq_atom' '('  @ ','  @ ')' 	 : (atom atom)bool	 pri 0 code 33 sem 33;
+ @ '=' '='  @ 	 : (atom atom)bool	 pri 0 code 18 sem 18;
+ @ '!' '='  @ 	 : (atom atom)bool	 pri 0 code 19 sem 19;
+'eq_atom' '('  @ ','  @ ')' 	 : (atom atom)bool	 pri 0 code 18 sem 18;
+'neq_atom' '('  @ ','  @ ')' 	 : (atom atom)bool	 pri 0 code 19 sem 19;
+'ispair' '('  @ ')' 	 : (pair[atom,list[atom]])bool	 pri 0 code 408;
+'occurs'  @ 'in'  @ 	 : (variable term)bool	 pri 0 code 17 sem 17;
+'occurs' '('  @ ','  @ ')' 	 : (variable term)bool	 pri 0 code 17 sem 17;
+'occurs'  @ 'in'  @ 	 : (variable eqSystem)bool	 pri 0 code 17 sem 17;
+'occurs' '('  @ ','  @ ')' 	 : (variable eqSystem)bool	 pri 0 code 17 sem 17;
+'occurs'  @ 'in'  @ 	 : (bool eqSystem)bool	 pri 0 code 17 sem 17;
+'occurs' '('  @ ','  @ ')' 	 : (bool eqSystem)bool	 pri 0 code 17 sem 17;
+'mergingClash' '('  @ ','  @ ','  @ ')' 	 : (eqSystem variable term)bool	 pri 0 code 430;
+'elem' '('  @ ')' 	 : (list[atom])atom	 pri 0 code 394;
+ @ '-' 'th' 'elem' '('  @ ')' 	 : (int list[atom])atom	 pri 0 code 395;
+'set' '('  @ ')' 	 : (term)atom	 pri 0 code 401;
+'set' '(' ','  @ ')' 	 : (term)atom	 pri 0 code 401;
+'set' '('  @ ',' ')' 	 : (term)atom	 pri 0 code 401;
+'set' '(' ','  @ ',' ')' 	 : (term)atom	 pri 0 code 401;
+'ok' '('  @ ','  @ ','  @ ')' 	 : (term term term)atom	 pri 0 code 402;
+'ok' '(' ','  @ ','  @ ','  @ ')' 	 : (term term term)atom	 pri 0 code 402;
+'ok' '('  @ ','  @ ','  @ ',' ')' 	 : (term term term)atom	 pri 0 code 402;
+'ok' '(' ','  @ ','  @ ','  @ ',' ')' 	 : (term term term)atom	 pri 0 code 402;
+'eq' '('  @ ','  @ ')' 	 : (term term)atom	 pri 0 code 403;
+'eq' '(' ','  @ ','  @ ')' 	 : (term term)atom	 pri 0 code 403;
+'eq' '('  @ ','  @ ',' ')' 	 : (term term)atom	 pri 0 code 403;
+'eq' '(' ','  @ ','  @ ',' ')' 	 : (term term)atom	 pri 0 code 403;
+'queens' '('  @ ')' 	 : (term)atom	 pri 0 code 404;
+'queens' '(' ','  @ ')' 	 : (term)atom	 pri 0 code 404;
+'queens' '('  @ ',' ')' 	 : (term)atom	 pri 0 code 404;
+'queens' '(' ','  @ ',' ')' 	 : (term)atom	 pri 0 code 404;
+'first' '('  @ ')' 	 : (pair[atom,list[atom]])atom	 pri 0 code 406;
+'1' '-' 'th' '('  @ ')' 	 : (pair[atom,list[atom]])atom	 pri 0 code 406;
+ @ '\' '='  @ 	 : (term term)atom	 pri 0 code 417;
+ @ 'is'  @ 	 : (term term)atom	 pri 0 code 418;
+'replace'  @ 'by'  @ 'in'  @ 	 : (term term atom)atom	 pri 0 code 16 sem 16;
+'replace' '('  @ ')' 'by' '('  @ ')' 'in' '('  @ ')' 	 : (term term atom)atom	 pri 0 code 16 sem 16;
+'replace' '('  @ ','  @ ','  @ ')' 	 : (term term atom)atom	 pri 0 code 16 sem 16;
+ @ '('  @ ')' 	 : (substitution atom)atom	 pri 0 code 436;
+'apply' '('  @ ','  @ ')' 	 : (substitution atom)atom	 pri 0 code 436;
+ @ 	 : (variable)term	 pri 1000 code 363;
+ @ '-' 'th' 'subterm' '('  @ ')' 	 : (int term)term	 pri 0 code 365;
+ @ 'at'  @ 	 : (term list[int])term	 pri 0 code 368;
+ @ '['  @ ']' 'at'  @ 	 : (term term list[int])term	 pri 0 code 369;
+'nil' '(' ')' 	 : term	 pri 0 code 371;
+'nil' 	 : term	 pri 0 code 371;
+'cons' '(' ','  @ ','  @ ')' 	 : (term term)term	 pri 0 code 372;
+'cons' '('  @ ','  @ ',' ')' 	 : (term term)term	 pri 0 code 372;
+'cons' '(' ','  @ ','  @ ',' ')' 	 : (term term)term	 pri 0 code 372;
+'cons' '('  @ ','  @ ')' 	 : (term term)term	 pri 0 code 372;
+ @ '-' 'th' 'subterm' '('  @ ')' 	 : (int atom)term	 pri 0 code 400;
+ @ 	 : (int)term	 pri 0 code 419;
+ @ '+'  @ 	 : (term term)term	 pri 0 code 420;
+ @ '-'  @ 	 : (term term)term	 pri 0 code 421;
+'replace'  @ 'by'  @ 'in'  @ 	 : (term term term)term	 pri 0 code 16 sem 16;
+'replace' '('  @ ')' 'by' '('  @ ')' 'in' '('  @ ')' 	 : (term term term)term	 pri 0 code 16 sem 16;
+'replace' '('  @ ','  @ ','  @ ')' 	 : (term term term)term	 pri 0 code 16 sem 16;
+ @ '('  @ ')' 	 : (substitution term)term	 pri 0 code 437;
+'apply' '('  @ ','  @ ')' 	 : (substitution term)term	 pri 0 code 437;
+'pplus' '('  @ ','  @ ')' 	 : (term term)term	 pri 0 code 420;
+'pminus' '('  @ ','  @ ')' 	 : (term term)term	 pri 0 code 421;
+'eval' '('  @ ')' 	 : (term)term	 pri 0 code 439;
+'delete_new_variables' 	 : <eqSystem->eqSystem>	 pri 0 code 429;
+'unify' 	 : <eqSystem->eqSystem>	 pri 0 code 431;
+'unifys' 	 : <eqSystem->eqSystem>	 pri 0 code 432;
+'match' 	 : <eqSystem->eqSystem>	 pri 0 code 433;
+'matchs' 	 : <eqSystem->eqSystem>	 pri 0 code 434;
+'nil_int' 	 : list[int]	 pri 0 code 346;
+'nil' 	 : list[int]	 pri 0 code 346;
+ @ '.'  @ 	 : (int list[int])list[int]	 pri 0 code 347;
+ @  @ 	 : (int list[int])list[int]	 pri 0 code 347;
+ @ ','  @ 	 : (int list[int])list[int]	 pri 0 code 347;
+'cons' '('  @ ','  @ ')' 	 : (int list[int])list[int]	 pri 0 code 347;
+'cons_int' '('  @ ','  @ ')' 	 : (int list[int])list[int]	 pri 0 code 347;
+'append' '('  @ ','  @ ')' 	 : (list[int] list[int])list[int]	 pri 0 code 348;
+ @ '@'  @ 	 : (list[int] list[int])list[int]	 pri 0 code 348;
+'ccat' '('  @ '*'  @ ')' 	 : (int list[int])list[int]	 pri 0 code 352;
+'ccat' '('  @ ','  @ ')' 	 : (int list[int])list[int]	 pri 0 code 352;
+'nvocc' '('  @ ')' 	 : (term)list[int]	 pri 0 code 367;
+'nil_variable' 	 : list[variable]	 pri 0 code 354;
+'nil' 	 : list[variable]	 pri 0 code 354;
+ @ '.'  @ 	 : (variable list[variable])list[variable]	 pri 0 code 355;
+ @  @ 	 : (variable list[variable])list[variable]	 pri 0 code 355;
+ @ ','  @ 	 : (variable list[variable])list[variable]	 pri 0 code 355;
+'cons' '('  @ ','  @ ')' 	 : (variable list[variable])list[variable]	 pri 0 code 355;
+'cons_variable' '('  @ ','  @ ')' 	 : (variable list[variable])list[variable]	 pri 0 code 355;
+'append' '('  @ ','  @ ')' 	 : (list[variable] list[variable])list[variable]	 pri 0 code 356;
+ @ '@'  @ 	 : (list[variable] list[variable])list[variable]	 pri 0 code 356;
+'ccat' '('  @ '*'  @ ')' 	 : (int list[variable])list[variable]	 pri 0 code 360;
+'ccat' '('  @ ','  @ ')' 	 : (int list[variable])list[variable]	 pri 0 code 360;
+'varlist_Vars' 	 : list[variable]	 pri 0 code 388;
+
+(nil|0|(X=cons(3,cons(1,cons(4,cons(2,nil))))&true)) end
+
+(nil|0|(X=cons(2,cons(4,cons(1,cons(3,nil))))&true)) end
+
+ end end
+end
+
+--- stderr
+--- exit status 0

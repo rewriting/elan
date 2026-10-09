@@ -1,8 +1,9 @@
 # Façade over CMake, the reference build and the test bench.
 #   make                 build the interpreter (build/)
 #   make install         install into $(PREFIX)
-#   make check           unit tests of the runner + interpreter tests (I, A) of the bench
-#                        + compiled tests (J, JO)
+#   make check           unit tests of the runner + golden tests + interpreter tests (I, A)
+#                        of the bench + compiled tests (J, JO)
+#   make check-golden    golden tests: .ref files, -d dump, statistics, errors
 #   make check-compiler  compiled tests (J, JO) only: elanc, REM, runtime libraries
 #   make reference       build the 2004 reference system (reference/install)
 #   make check-reference full bench (778 tests) against the reference
@@ -23,7 +24,7 @@ else
   ELAN_CXX ?= g++
 endif
 
-.PHONY: manual manual-update all configure install check check-compiler check-sanitize check-arch check-unit test-runner smoke reference check-reference clean toolchain
+.PHONY: manual manual-update all configure install check check-compiler check-golden check-sanitize check-arch check-unit test-runner smoke reference check-reference clean toolchain
 
 all: configure
 	cmake --build $(BUILD) -j
@@ -87,7 +88,14 @@ CHECK_COMPILER = if [ -x "$(PREFIX)/bin/elanc" ]; then \
 check-compiler: install
 	$(CHECK_COMPILER)
 
-check: smoke test-runner check-arch check-unit
+# Golden tests (tests/golden): what the bench does not compare, byte for
+# byte (.ref files, the -d dump, the statistics, stderr and exit status of
+# errors), against the installed interpreter.
+check-golden: install
+	cd tests/golden && python3 test_run_golden.py
+	python3 tests/golden/run_golden.py --prefix $(PREFIX)
+
+check: smoke test-runner check-arch check-unit check-golden
 	$(BENCH) --prefix $(PREFIX) --kinds I,A
 	@$(CHECK_COMPILER)
 

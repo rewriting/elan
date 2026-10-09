@@ -1,0 +1,41 @@
+$ elan -b -s prolog.lgi queens.spc
+--- stdout
+(nil|0|(X=cons(3,cons(1,cons(4,cons(2,nil))))&true)) end
+
+(nil|0|(X=cons(2,cons(4,cons(1,cons(3,nil))))&true)) end
+
+ end end
+end
+
+
+ Statistics:
+ total time	(<T>+<T>)=<T> sec	(main+subprocesses)
+
+ average speed = <N> inf/sec
+            109505 nonamed rules applied, 254944 tried
+            19523   named rules applied, 72257 tried
+
+ named rules
+           applied   tried    rule for symbol
+                 0      86    truepropag:eqSystem
+               120     244    new_var_elim:eqSystem
+                 2       4    eqPass:eqSystem
+                 0   10972    delete:eqSystem
+             13554   19044    unfold:eqSystem
+               445    4460    sldStep:sldState
+               435    5314    coalesce:eqSystem
+                 0    4879    occCheck1:eqSystem
+                 0    4879    occCheck2:eqSystem
+                86    5400    conflict:eqSystem
+               205     291    truepass:eqSystem
+                 2     446    sldSucces:sldState
+                86   10898    decompose:eqSystem
+              4418    4879    eliminate1:eqSystem
+               170     461    eliminate2:eqSystem
+
+
+	numberOfAllocTerm = 520683
+
+end of statistics
+--- stderr
+--- exit status 0
