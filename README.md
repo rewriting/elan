@@ -50,6 +50,7 @@ After a reboot, only the `hdiutil attach` line is needed.
 ```sh
 make                 # build the interpreter (CMake, into build/)
 make check           # runner unit tests + 368 interpreter tests of the bench
+make check-sanitize  # same under ASan+UBSan (UBSan only on macOS, see Makefile)
 make install PREFIX=/Volumes/elan-tools   # PREFIX must be case-sensitive (see above)
 make reference       # build the 2004 reference system (interpreter + compiler)
 make check-reference # full bench (778 tests) against the reference
@@ -62,7 +63,7 @@ the default compilers are the system Clang (`cc`/`c++`) on macOS and
 (a build directory keeps the compiler it was configured with: use another
 `BUILD`, or `make clean`, to switch). `make reference` uses Homebrew's
 `gcc-16`/`g++-16` on macOS unless `ELAN_CC`/`ELAN_CXX` are set. Linux needs
-`build-essential cmake bison flex libfl-dev default-jdk-headless libgc-dev automake tcsh python3`;
+`build-essential clang libclang-rt-18-dev cmake bison flex libfl-dev default-jdk-headless libgc-dev automake tcsh python3`;
 `ci/Dockerfile.linux` reproduces the Linux CI job locally. See
 `CONTRIBUTING.md` for the rules every change follows.
 

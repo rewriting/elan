@@ -1,7 +1,13 @@
 # S2 — Sanitising the modern interpreter
 
-Date: 2026-10-09 · Status: decided autonomously (the user asked to proceed
-without stopping); to be reviewed after the fact.
+Date: 2026-10-09 · Status: **done** (decided autonomously, the user asked to
+proceed without stopping; to be reviewed after the fact).
+
+Deviations found while implementing: the interpreter never used iostreams
+(no `elan_std.h` needed, `compat/` deleted); ASan hangs at startup on
+macOS 27 / Apple Clang 17, so `check-sanitize` is UBSan-only on macOS and
+ASan+UBSan on Linux; ASan's stack-use-after-return detector is off (100x
+slower on the recursive interpreter, no report found when enabled).
 
 ## 1. Context
 
