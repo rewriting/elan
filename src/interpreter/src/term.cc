@@ -704,9 +704,9 @@ void term::toptdelete()
     if (a>0) {
       st = t->subt;
       for (i=0; i<a; i++) st[i].decrcount();
-      DELETE1(st);
+      delete [] st;
     }
-    CFRE(t);
+    DELETE1(t);
   }
 }
 
@@ -762,7 +762,7 @@ void term::rewrite(term t2)
     for(i=0;i<a1;i++) {
       t->subt[i].decrcount(); t->subt[i].tdelete();
     }
-    DELETE1(t->subt);
+    delete [] t->subt;
   }
   t->fsymi = t2.head();
   t->infos = t2.inf();
@@ -966,9 +966,9 @@ void term::tdelete()
     if (a>0) {
       st = t->subt;
       for (i=0; i<a; i++) { st[i].decrcount(); st[i].tdelete();}
-      DELETE1(st);
+      delete [] st;
     }
-    CFRE(t);
+    DELETE1(t);
   }
 }
 
