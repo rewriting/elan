@@ -32,8 +32,8 @@ typedef bitSet32_type bitSet32;
 #define NBITS32 (sizeof(bitSet32_type)*8)
 #define BITALL32 0xffffffff
 #define ISSETBIT32(b,bit) ((b[0] >> bit)&1)
-#define SETBIT32(b,bit)   b[0] |= 1<< bit;
-#define NULLBIT32(b,bit)  b[0] &= ~(1<<bit);
+#define SETBIT32(b,bit)   b[0] |= 1u<< bit;
+#define NULLBIT32(b,bit)  b[0] &= ~(1u<<bit);
 
 extern bitSet32 *intern_bitSet32_create(int size);
 extern bitSet32 *bitSet32_copy(bitSet32 *b);

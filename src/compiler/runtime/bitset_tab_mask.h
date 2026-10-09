@@ -37,9 +37,10 @@ typedef bitSet_type bitSet;
 #define SETBIT(b,bit)   { b[1+(bit/NBITS)] |= 1<<(bit%NBITS);}
 #define NULLBIT(b,bit)  { b[1+(bit/NBITS)] &= ~(1<<(bit%NBITS));}
 */
-#define ISSETBIT(b,bit) ( b[1+(bit>>5)]  &  1<<(bit&0x1f))
-#define SETBIT(b,bit)   { b[1+(bit>>5)] |= 1<<(bit&0x1f);}
-#define NULLBIT(b,bit)  { b[1+(bit>>5)] &= ~(1<<(bit&0x1f)); }
+/* 1u: 1<<31 overflows an int (the bits are the same) */
+#define ISSETBIT(b,bit) ( b[1+(bit>>5)]  &  1u<<(bit&0x1f))
+#define SETBIT(b,bit)   { b[1+(bit>>5)] |= 1u<<(bit&0x1f);}
+#define NULLBIT(b,bit)  { b[1+(bit>>5)] &= ~(1u<<(bit&0x1f)); }
 
 #define HALFSHIFT NBITS/2
 #define HALFBITALL 0x0000ffff
