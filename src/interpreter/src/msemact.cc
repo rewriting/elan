@@ -323,7 +323,7 @@ void add_to_fsymtab(int actarityy,struct sgrammrule *gr, int defstrat)
 
 void mkmodname1(struct chlist *&actimp,lexem l)
 { struct chlist *chpp;
-        NNEW(chpp ,struct chlist);
+        AALLOS(chpp ,struct chlist);
 	AALLOSS(chpp->s ,strlen(l.alfsy())+1,char);
 	strcpy(chpp->s,l.alfsy());
         chpp->next = actimp; actimp=chpp;
