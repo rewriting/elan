@@ -67,8 +67,8 @@ void stringtab::init()
   strin=0;
 }
 
-int stringtab::member(char *s)
-{ char *p;
+int stringtab::member(const char *s)
+{ const char *p;
   p=s; posid=0;
   while (*p) posid=posid+ *(p++);
   posid=posid % tsize;
@@ -79,13 +79,13 @@ int stringtab::member(char *s)
   return(0);
 }
 
-int stringtab::index(char *s)
+int stringtab::index(const char *s)
 { 
   if (member(s)) return posid;
   else return -1;
 }
 
-int stringtab::addstr(char *s)
+int stringtab::addstr(const char *s)
 {
   if (!member(s)) {
     if (strin+1 >= tsize) {
@@ -125,7 +125,7 @@ void stringtab::dump(char *name)
   stout << ");\n";
 }
 
-void stringtab::earleyDump(ochstream &stout,char *name)
+void stringtab::earleyDump(ochstream &stout,const char *name)
 {
   int i;
   stout << "char *"<< name<<"[" <<tsize <<"] = {\n";

@@ -59,7 +59,7 @@ char *addsuffixs(char *str ... )
   return(s);
 }
 
-char *mstrdup(char *s)
+char *mstrdup(const char *s)
 { char *ss;
   AALLOSS(ss ,strlen(s)+1,char);
   strcpy(ss,s);

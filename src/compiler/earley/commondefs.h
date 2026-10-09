@@ -128,8 +128,8 @@ class ichstream
 #define EOFICHSTR EOF
 
   ichstream(char *name);
-  ichstream(FILE *file,char *name);
-  ichstream(FILE *file,char *name, int block);
+  ichstream(FILE *file,const char *name);
+  ichstream(FILE *file,const char *name, int block);
   ichstream(char *command,char *name);
   
   ~ichstream();
@@ -200,7 +200,7 @@ class lexem
   void crtypelex(int );
   int typeval();
 
-  void cridlex(char *ide);
+  void cridlex(const char *ide);
   void craidlex(char *ide);
   void cridlex();
   void crnumlex(int n);
@@ -229,8 +229,8 @@ class lexem
   void crstringlex();
   void crstringlex(char *s);
   int notendoftermlex(); // true if not a lexem for end of term
-  char *alfsy(); // body is in the 'lstream.c'
-  char *erralfsy(); // body is in the 'lstream.c'
+  const char *alfsy(); // body is in the 'lstream.c'
+  const char *erralfsy(); // body is in the 'lstream.c'
   void operator =(lexem );
   int operator ==(char );
   int operator !=(char );
@@ -278,7 +278,7 @@ inline int lexem::ischar() {return(lex<0 && lex >= -255);}
 inline int lexem::charval() {return(-lex);}
 
 inline int lexem::notendoftermlex() {return (lex!=NOLEXEM);}
-inline void lexem::cridlex(char *ide){ lex = BOFIDENT-tabofident.addstr(ide);}
+inline void lexem::cridlex(const char *ide){ lex = BOFIDENT-tabofident.addstr(ide);}
 inline void lexem::craidlex(char *ide){ lex = BOFIDENT-atabofident.addstr(ide);}
 inline void lexem::crnumlex(int n){ lex = n;}
 inline void lexem::cridlex(){ lex = IDENT;}
@@ -330,9 +330,9 @@ class lstream
   virtual void fulex(lexem &l);
   virtual void ilex(lexem &l);
   void oerr();
-  void oerr(char *);
+  void oerr(const char *);
   void owarn();
-  void owarn(char *);
+  void owarn(const char *);
   int isready();
   int isblock();
 };   
@@ -446,7 +446,7 @@ class grammar
 };
 
 // ELAN + LIBEARLEY
-extern char *mstrdup(char *s);         // body in 'misc.c'
+extern char *mstrdup(const char *s);         // body in 'misc.c'
 
 extern void *allo(unsigned n, unsigned s);// body in 'mallo.c'
 extern void  fre(void *p);

@@ -248,13 +248,13 @@ void lstream::owarn()
   }
 }
 
-void lstream::oerr(char *ch )
+void lstream::oerr(const char *ch )
 {
   oerr();
   sterr<<ch;
 }
 
-void lstream::owarn(char *ch )
+void lstream::owarn(const char *ch )
 {
   if (warnings) {
     owarn();
@@ -269,7 +269,7 @@ void lstream::owarn(char *ch )
 static char alfs[]=" ";
 static char alfs2[100];
 
-char *lexem::alfsy()
+const char *lexem::alfsy()
 {
  if (nonterminal()) {
    snprintf(alfs2,sizeof(alfs2),"sort(%d)",BOFTYPES-lex);return(alfs2);
@@ -285,7 +285,7 @@ char *lexem::alfsy()
  }
 }
 
-char *lexem::erralfsy()
+const char *lexem::erralfsy()
 { 
  if (lex <= 0 && lex >= -32) {
    snprintf(alfs2,sizeof(alfs2),"\'\\%d\'",-lex);return(alfs2);

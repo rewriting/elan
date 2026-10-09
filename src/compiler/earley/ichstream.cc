@@ -52,13 +52,13 @@ ichstream::ichstream(char *name)              // to open elan file in lib or .
 }
 
 
-ichstream::ichstream(FILE *fil,char *name)
+ichstream::ichstream(FILE *fil,const char *name)
 { 
   file = fil;
   commonopen(mstrdup(name),NFILE);
 }
 
-ichstream::ichstream(FILE *fil,char *name, int block)
+ichstream::ichstream(FILE *fil,const char *name, int block)
 { 
   file = fil;
   commonopen(mstrdup(name),NFILE);
