@@ -1,0 +1,59 @@
+name: ci
+on:
+  push:
+  pull_request:
+
+jobs:
+  build-and-test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-15]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: checkout
+
+      - name: Dependencies (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+            build-essential cmake bison flex libfl-dev default-jdk-headless libgc-dev automake python3
+          echo "ELAN_WS=$RUNNER_TEMP/elan" >> "$GITHUB_ENV"
+
+      - name: Dependencies and case-sensitive volume (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          brew install gcc openjdk bdw-gc bison flex libtool cmake
+          GCC=$(ls "$(brew --prefix)"/bin/gcc-[0-9]* | sort -V | tail -1)
+          echo "ELAN_CC=$(basename "$GCC")" >> "$GITHUB_ENV"
+          echo "ELAN_CXX=$(basename "$GCC" | sed 's/gcc/g++/')" >> "$GITHUB_ENV"
+          hdiutil create -size 4g -type SPARSE -fs "Case-sensitive APFS" -volname elan "$RUNNER_TEMP/elan.sparseimage"
+          mkdir -p "$RUNNER_TEMP/cs"
+          hdiutil attach "$RUNNER_TEMP/elan.sparseimage" -mountpoint "$RUNNER_TEMP/cs" -nobrowse
+          echo "ELAN_WS=$RUNNER_TEMP/cs/elan" >> "$GITHUB_ENV"
+
+      # Clone from the checkout: on macOS the checkout itself is on a
+      # case-insensitive file system, but its object store is complete.
+      - name: Case-sensitive working copy
+        run: |
+          git clone --quiet --no-checkout "$GITHUB_WORKSPACE/checkout" "$ELAN_WS"
+          git -C "$ELAN_WS" checkout --quiet "$(git -C "$GITHUB_WORKSPACE/checkout" rev-parse HEAD)"
+
+      - name: Reference build
+        run: make -C "$ELAN_WS" reference
+
+      - name: Full bench against the reference
+        run: make -C "$ELAN_WS" check-reference
+
+      - name: Modern interpreter, make check
+        run: make -C "$ELAN_WS" check
+
+      - name: Bench results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bench-results-${{ matrix.os }}
+          path: ${{ env.ELAN_WS }}/tests/legacy-bench/results/
