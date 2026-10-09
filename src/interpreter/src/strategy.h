@@ -106,7 +106,7 @@ extern struct ilist *symbappl[];
 
 struct Any_apply {
     term *var;
-    struct strat *str; };
+    class strat *str; };
 
 struct Any_if {
     term *cond; };
@@ -120,7 +120,7 @@ public:
     struct Any_if      any_if;
   };
   Any(term *con);
-  Any(term *va, struct strat *st);
+  Any(term *va, class strat *st);
   void dump(ochstream &och);
 };
 
@@ -136,7 +136,7 @@ class Alist
 class Slist
  {
     public:
-  struct strat *s;
+  class strat *s;
   Slist *next;
 
   Slist(strat *is, Slist *inext) { s = is; next = inext; }
@@ -151,15 +151,15 @@ class Appl
  {
     public:
   term *t;
-  struct strat *s;
-    Appl(term *tt, struct strat *ss) { t = tt; s = ss; }
+  class strat *s;
+    Appl(term *tt, class strat *ss) { t = tt; s = ss; }
   int dump(ochstream &och);
 };
 
 struct Let_k {
     term  *var;
     Appl  *appl;
-    struct strat *instr; };
+    class strat *instr; };
 
 struct Rule_k {
     term  *left;
@@ -168,8 +168,8 @@ struct Rule_k {
 
 struct If_k {
     term  *cond;
-    struct strat *then;
-    struct strat *els; };
+    class strat *then;
+    class strat *els; };
 
 struct Seq_k {
     Slist *slist; };
@@ -359,7 +359,7 @@ class profitab
     int equal(struct ilist *ilistptr1, struct ilist *ilistptr2); 
 };
 
-extern struct profitab profit;                       // table of profiles
+extern class profitab profit;                        // table of profiles
 
 #define MAXSPAIR    1000
 extern  int spairi;

@@ -1830,8 +1830,8 @@ term *deref_term;
 void term::syntacticMatching(int unify,term &dest,term subject, 
 			     term listVar, term fail)
 {
-  struct term tabVar[MAX_SYNTACTICMATCHING_VAR];
-  struct term tabRes[MAX_SYNTACTICMATCHING_VAR];
+  class term tabVar[MAX_SYNTACTICMATCHING_VAR];
+  class term tabRes[MAX_SYNTACTICMATCHING_VAR];
 
   /*struct term cons=listVar;*/
   int i,nbVar=0;

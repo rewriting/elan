@@ -176,38 +176,6 @@ void addproto2(struct rtnode * *prt,term *t,int fathervar)
   };
 }
 
-static void addproto1(struct rtnode *prt,term *t)
-{ int i,a,f,myvar;
-  term *s;
-  struct rtlistn * l;
-  struct rtna *p;
-  if (prt==NULL)
-    return;
-  f=prt->fsym; 
-  if (prt->infos != TNORMFS)
-    a=0;
-  else
-    a=fsymtab[f].arity();
-  for (i=0; i<a; i++) {
-    myvar = prt->subrt[i].affvar;
-    allocVarSetUsed(myvar); 
-    if (t->inf()!=TVAR)
-      s = t->subterm(i);
-    else
-      s=t;
-    f = s->head();
-    l=&((p=(&(prt->subrt[i])))->setrt);
-    if (s->inf()!=TVAR) {
-      while ((l=l->tail)!=NULL && l->head->fsym!=f);
-      if (l!=NULL)
-	addproto1(l->head,s);
-    } else {
-      while ((l=l->tail)!=NULL)
-	addproto1(l->head,s);
-    }
-  }
-}
-
 static void addproto0(struct rtnode *prt)
 { int i,a,f,myvar;
 /*term *s;*/

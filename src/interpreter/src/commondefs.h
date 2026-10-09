@@ -735,7 +735,7 @@ extern int isWhereBacktrackNextSol(struct wherelist *wheres,term *substarray,
                    struct wheress * &lastws, int trace, int varn);
 extern int isTseqBacktrackNextSol(term &res, struct tseq *rhs, term *substarray,
                    struct wheress * &lastws, int notbatch, int nback,
-	           struct wherelist *&lastwheres, struct term *&lastresult,
+	           struct wherelist *&lastwheres, class term *&lastresult,
 	           int varn);
 
 extern int traceind,tracelevel;

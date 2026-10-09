@@ -63,7 +63,7 @@ void odsek(ochstream &ff,int n)
 void interr()
 {
     sterr << " internal error\t\tfatal\n";
-   (*((int*)NULL)) = 0;
+   abort();
    failexit();
 }
 

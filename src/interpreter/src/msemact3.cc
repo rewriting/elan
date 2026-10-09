@@ -54,7 +54,7 @@ extern struct sgrammrule *dollar_vartab[MAXNOFVAR];
  char strategy_type[STRLEN];             // name of the first type in profile
 
  int pos_l = 0;                         // index of type X, when parsing <X->Y>
- struct profitab profit;                // table of profiles
+ class profitab profit;                 // table of profiles
  transrule *acttrrulelab;               // LAB_ RW rule
 
  struct RPair { struct sgrammrule *r1, *r2; struct RPair *next; };

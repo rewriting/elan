@@ -47,7 +47,7 @@ void fatal(char *s, char *a)
   if(*a)
     (void) fprintf(stderr, s, a);
   else
-    (void) fprintf(stderr, s);
+    (void) fprintf(stderr, "%s", s);
   exit(1);
 }
 

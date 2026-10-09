@@ -447,7 +447,7 @@ private:
 public:
     int nbacktr;
     struct wherelist *lastwheres;
-    struct term      *lastresult;
+    class term       *lastresult;
     contrule(){ nbacktr = 0; }
   contrule(transrule *r,term mt);
   ~contrule();

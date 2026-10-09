@@ -1186,7 +1186,7 @@ void printvars(char *s,int varn, term *substarray)
 
 int isTseqBacktrackNextSol(term &res, struct tseq *rhs, term *substarray,
                    struct wheress * &lastws, int notbatch, int nback,
-	           struct wherelist *&lastwheres, struct term *&lastresult,
+	           struct wherelist *&lastwheres, class term *&lastresult,
 	           int varn)
 {
 struct branch *br = NULL;
