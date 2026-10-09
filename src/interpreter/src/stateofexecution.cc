@@ -301,8 +301,8 @@ void stateofexecution::free()
      return;
   } else if (sl->actst == NULL) {      // it was state with NULL strategy
     sl->trt.tdelete();
-    CFRE(sl);
     strstore_free(sl->strstore); // DDD
+    CFRE(sl);  // S2: was freed before reading sl->strstore (use after free)
     actsl = sl = NULL;
     return;
   }
@@ -366,8 +366,8 @@ int stateofexecution::nextsolution(term &res)
 
   if (is_null_strategy) {		// NULL strategy
     res = actsl->trt;
-    CFRE(sl); 
     strstore_free(sl->strstore); // DDD
+    CFRE(sl);  // S2: was freed before reading sl->strstore (use after free)
     actsl = sl = NULL;
     return(1); }
   while (actsl != NULL) {
