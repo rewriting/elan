@@ -293,7 +293,7 @@ Gterm *termParser(int queryMode, int evaluationMode) {
 
   //printf("\n*************** in termParser ****************\n");
   MAXPOS = 0; // [Huy: May  1 00] 
-  for(i=0; i<sizeof(POS)/sizeof(int); i++) {
+  for(i=0; (size_t)i<sizeof(POS)/sizeof(int); i++) {
     position[i]=0;
   }
   if(coqMode) {

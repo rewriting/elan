@@ -197,7 +197,7 @@ int checkIntListStr (char **res, int *curToken, char **smiles)
   if (anInteger (*curToken))
     {
       int nb = toInteger (*curToken);
-      if (nb < 10u)
+      if ((unsigned)nb < 10u)
 	nb = sprintf (*res, "%u", nb);
       else
 	nb = sprintf (*res, "%%%u", nb);

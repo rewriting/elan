@@ -99,7 +99,7 @@ static void print_f_prefix(FILE *fich,Gterm *t) {
         //if(isReduced(t)) fprintf(fich,"[r]");
       fprintf(fich, "(");
 
-      for(i=0 ; i<getArity(tac) ; i++) {
+      for(i=0 ; (unsigned)i<getArity(tac) ; i++) {
            // print with multiplicity
 	if(getMult(tac,i)>1) {
 	  int j;
@@ -118,7 +118,7 @@ static void print_f_prefix(FILE *fich,Gterm *t) {
 	  term_print(fich,(Gterm *) getSubterm(tac,i));
 	}
 //        fprintf(fich,"{%d}",getColor(tac,i));
-	if(i<getArity(tac)-1) {
+	if((unsigned)i<getArity(tac)-1) {
 	  fprintf(fich,",");
 	}
       }
@@ -171,21 +171,21 @@ void term_printREF(FILE *fich,Gterm *t)
     struct termac *tac=(struct termac*)t;
     if(getArity(tac)>0) {
       int i,j;
-      for(i=0 ; i<getArity(tac) ; i++) {
+      for(i=0 ; (unsigned)i<getArity(tac) ; i++) {
 	for(j=0 ; j<getMult(tac,i) ; j++) {
-          if( !((i==getArity(tac)-1) && (j==getMult(tac,i)-1))) {
+          if( !(((unsigned)i==getArity(tac)-1) && (j==getMult(tac,i)-1))) {
             fprintf(fich,"FSYM(");
           }
 
           term_printREF(fich,(Gterm *) getSubterm(tac,i));
-          if( !((i==getArity(tac)-1) && (j==getMult(tac,i)-1))) {
+          if( !(((unsigned)i==getArity(tac)-1) && (j==getMult(tac,i)-1))) {
             fprintf(fich,".");
           }
         }
       }
-      for(i=0 ; i<getArity(tac) ; i++) {
+      for(i=0 ; (unsigned)i<getArity(tac) ; i++) {
 	for(j=0 ; j<getMult(tac,i) ; j++) {
-          if( !((i==getArity(tac)-1) && (j==getMult(tac,i)-1))) {
+          if( !(((unsigned)i==getArity(tac)-1) && (j==getMult(tac,i)-1))) {
             fprintf(fich,".nil,%d)",GgetSymb((Gterm *)tac));
           }
         }
@@ -250,11 +250,11 @@ void termac_alloc(struct termac **ptr_dest, int size, unsigned int funsym) {
 
    // ehm modification
 void termac_resize(struct termac *tac, int size) {
-  if(size > getSize(tac)) {
+  if((unsigned)size > getSize(tac)) {
     Gterm **newSubterm = (Gterm**) MALLOC((size*sizeof(Gterm*))<<1);
     int i;
 
-    for(i=0 ; i<2*getArity(tac) ; i++) {
+    for(i=0 ; (unsigned)i<2*getArity(tac) ; i++) {
       newSubterm[i]=tac->subterm[i];
     }
     setSize(tac,size);
@@ -268,7 +268,7 @@ static Gterm *subterm_unflatten(unsigned int funsym,
                                       int i,int multiplicity) {
   Gterm *res;
   Gterm *tmp1, *tmp2;
-  if(i==getArity(tac)-1 && multiplicity<=1) {
+  if((unsigned)i==getArity(tac)-1 && multiplicity<=1) {
       /* si c'est le dernier element de la liste */
       //printf("\nin subterm_unflatten arity de t = %d\n",fsymtab[322].arity);
     return term_unflatten(getSubterm(tac,i));
@@ -410,7 +410,7 @@ struct termac *intern_term_add_onf_term(int isAC,
     if(isAC) {
     //printf("\nin intern_term_add_onf_term I'm line 455 \n");
         // il faut colorier les sous-termes
-      for(i=0 ; i<getArity(subtermac) ; i++) {
+      for(i=0 ; (unsigned)i<getArity(subtermac) ; i++) {
         setColor(subtermac,i,color);
       }
       res=merge_sorted_term(tac,subtermac);
@@ -540,7 +540,7 @@ static void termac_insert_bubble(struct termac *tac, int pos) {
   }
     // Optimisation : simple deplacement en cas de resize
 
-  if(getArity(tac) > pos) {
+  if(getArity(tac) > (unsigned)pos) {
     Gterm** p1 = &(tac->subterm[2*getArity(tac)]);
     Gterm** p2 = p1+1;
 /*
@@ -587,7 +587,7 @@ static struct termac *merge_sorted_term(struct termac *tac1,
   TERMAC_ALLOC(res,getArity(tac1)+getArity(tac2),GgetSymbAC(tac1));
 //  (res->subterm)=(Gterm**) MALLOC(2*getSize(res)*sizeof(Gterm*));
   
-  for(i1=0, i2=0, indice=0 ; i1<getArity(tac1) && i2<getArity(tac2) ; ) {
+  for(i1=0, i2=0, indice=0 ; (unsigned)i1<getArity(tac1) && (unsigned)i2<getArity(tac2) ; ) {
     if((comp=Gterm_cmp(getSubterm(tac1,i1), getSubterm(tac2,i2)))) {
       if(comp<0) {
           // on copie t1
@@ -622,11 +622,11 @@ static struct termac *merge_sorted_term(struct termac *tac1,
       indice++;
     }
   }
-  for( ; i1<getArity(tac1) ; i1++, indice++) {
+  for( ; (unsigned)i1<getArity(tac1) ; i1++, indice++) {
     setSubterm(res,indice,getSubterm(tac1,i1));
     setColorMult(res,indice,getColor(tac1,i1),getMult(tac1,i1));
   }
-  for( ; i2<getArity(tac2) ; i2++, indice++) {
+  for( ; (unsigned)i2<getArity(tac2) ; i2++, indice++) {
     setSubterm(res,indice,getSubterm(tac2,i2));
     setColorMult(res,indice,getColor(tac2,i2),getMult(tac2,i2));
   }
@@ -735,7 +735,7 @@ Gterm* normalise(Gterm *t) {
   } else {
     struct termac *tac=(struct termac*)t;
 
-    for(i=0 ; i<getArity(tac) ; i++) {
+    for(i=0 ; (unsigned)i<getArity(tac) ; i++) {
 
       //nt = normalise(getSubterm(tac,i));
         //computeONF |= (nt!=getSubterm(tac,i));
@@ -750,7 +750,7 @@ Gterm* normalise(Gterm *t) {
       int i,j;
         // n'est plus utile
         // TERMAC_ALLOC(newtac,getArity(tac),GgetSymb(tac));
-      for(i=0 ; i<getArity(tac) ; i++) {
+      for(i=0 ; (unsigned)i<getArity(tac) ; i++) {
         for(j=0 ; j<getMult(tac,i) ; j++) {
 
           newtac = term_add_onf_term_color(newtac,GgetSymb((Gterm*)tac),getSubterm(tac,i),getColor(tac,i));
@@ -839,7 +839,7 @@ Gterm *term_rec_replace(Gterm *t1,
       //printf("not yet implemented\n");
       //exit(0);
     TERMAC_ALLOC(resac,getArity(tac1),GgetSymbAC(tac1));
-    for(i=0 ; i<getArity(tac1) ; i++) {
+    for(i=0 ; (unsigned)i<getArity(tac1) ; i++) {
 
       tmp = term_rec_replace(getSubterm(tac1,i),t2,t3);
         // Attention a la multiplicite et a la couleur
@@ -929,7 +929,7 @@ int term_occur(Gterm *t1,Gterm *t2)
     }
   } else {
     struct termac *tac1=(struct termac*)t1;
-    for(i=0 ; i<getArity(tac1) ; i++) {
+    for(i=0 ; (unsigned)i<getArity(tac1) ; i++) {
 
       if(term_occur(getSubterm(tac1,i),t2)) return 1;
     }
@@ -943,7 +943,7 @@ void termac_copyTopSymbol(struct termac *tac, struct termac *subterm) {
 //  exit(1);
   termac_resize(tac,getArity(subterm));
   setArity(tac,getArity(subterm));
-  for(i=0 ; i<getArity(subterm) ; i++) {
+  for(i=0 ; (unsigned)i<getArity(subterm) ; i++) {
 
     setSubterm(tac,i,(Gterm *) getSubterm(subterm,i));
     setColorMult(tac,i,getColor(subterm,i),getMult(subterm,i));
@@ -957,7 +957,7 @@ void termac_copyTopSymbolExcept(struct termac *dest,
   int idest,isource;
   termac_resize(dest,getArity(source));
   setArity(dest,getArity(source));
-  for(idest=0,isource=0 ; isource<getArity(source) ; isource++) {
+  for(idest=0,isource=0 ; (unsigned)isource<getArity(source) ; isource++) {
     if(isource==pos) {
       if(getMult(source,isource) > 1) {
 
@@ -1030,8 +1030,8 @@ int isMonoColor(Gterm *t) {
 
   color=getColor(tac,0);
   res = (color!=bicolor);
-  for(i=0 ; res && i<getArity(tac) ; i++) {
-    res = res && (color == getColor(tac,i));
+  for(i=0 ; res && (unsigned)i<getArity(tac) ; i++) {
+    res = res && ((unsigned long)color == getColor(tac,i));
   }
   return res;
 }
@@ -1045,14 +1045,14 @@ void setMonoColor(Gterm *t) {
     //freeColor = (freeColor+1)%4096;
     //color=freeColor;
 
-  for(i=0 ; color==bicolor && i<getArity(tac) ; i++) {
+  for(i=0 ; color==bicolor && (unsigned)i<getArity(tac) ; i++) {
     color=getColor(tac,i);
   }
 
     //printf("setMonoColor = %d\n",color);
 
   if(color==bicolor) color=1;
-  for(i=0 ; i<getArity(tac) ; i++) {
+  for(i=0 ; (unsigned)i<getArity(tac) ; i++) {
     setColor(tac,i,color);
   }
 }

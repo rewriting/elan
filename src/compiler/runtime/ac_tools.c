@@ -47,7 +47,7 @@ int is_maximal_identical_element(struct termac *t,
   struct termac *list_x;
   int i,res=1;
   
-  for(i=0; res && i<getArity(t) ; i++) {
+  for(i=0; res && (unsigned)i<getArity(t) ; i++) {
     res = res && (getMult(t,i)%multiplicity==0);
   }
 
@@ -56,7 +56,7 @@ int is_maximal_identical_element(struct termac *t,
   }
   TERMAC_ALLOC(list_x,getArity(t),GgetSymb((Gterm *)t));
   termac_copyTopSymbol(list_x,t);
-  for(i=0 ; i<getArity(t) ; i++) {
+  for(i=0 ; (unsigned)i<getArity(t) ; i++) {
     setMult(list_x,i,getMult(list_x,i)/multiplicity);
   }
   return 1;
@@ -76,7 +76,7 @@ void extract_maximal_identical_element(struct termac *t,
   list_x=(*ptr_list_x);
   list_y=(*ptr_list_y);
 
-  for(i=0 ; i<getArity(t) ; i++) {
+  for(i=0 ; (unsigned)i<getArity(t) ; i++) {
     int currentMult = getMult(t,i);
     if(currentMult>=multiplicity) {
 	// extract and copy the cell
@@ -108,7 +108,7 @@ void extract_minimal_identical_element(struct termac *t,
   list_x=(*ptr_list_x);
   list_y=(*ptr_list_y);
 
-  for(i=0 ; i<getArity(t) ; i++) {
+  for(i=0 ; (unsigned)i<getArity(t) ; i++) {
     int currentMult = getMult(t,i);
     if(!found && currentMult>=multiplicity) {
       found=1;
@@ -145,7 +145,7 @@ void substitution_build(struct termac *t, match_state *ms,
     //printf("sub_shared   %d\n",sub_shared++);
   TERMAC_ALLOC(list_x,getArity(t),GgetSymb((Gterm *)t));
 
-  for(i=0 ; i<getArity(t) ; i++) {
+  for(i=0 ; (unsigned)i<getArity(t) ; i++) {
       /*
        * S'il y a une variable AC (un contexte) 
        * les elements non completement capture sont copie dans le contexte
@@ -204,7 +204,7 @@ void substitution_build(struct termac *t, match_state *ms,
      * il ne doit pas y avoir de contexte : 
      */
   if(nb_variable_ac==0) {
-    for(i=0 ; i<getArity(t) ; i++) {
+    for(i=0 ; (unsigned)i<getArity(t) ; i++) {
       if(ms->bg_multiplicity[i] != 0) {
           //printf("not an empty context !!!\n");
 	fail();
@@ -271,7 +271,7 @@ void substitution_build_without_context(struct termac *t,
      * il ne doit pas y avoir de contexte : 
      */
   if(nb_variable_ac==0) {
-    for(i=0 ; i<getArity(t) ; i++) {
+    for(i=0 ; (unsigned)i<getArity(t) ; i++) {
       if(ms->bg_multiplicity[i] != 0) {
           /*
            * [pem: Oct 17 00]
@@ -294,7 +294,7 @@ struct termac *rest_extract(struct termac *t, match_state *ms) {
      */
   TERMAC_ALLOC(list_x,getArity(t),GgetSymb((Gterm *)t));
 
-  for(i=0 ; i<getArity(t) ; i++) {
+  for(i=0 ; (unsigned)i<getArity(t) ; i++) {
     if(ms->bg_multiplicity[i] != 0) {
       termac_add_lastColor(list_x,getSubterm(t,i),ms->bg_multiplicity[i],getColor(t,i));
     }
@@ -351,7 +351,7 @@ void extract_xy_from_pe(struct termac *t,
   setArity(list_x,0);
   setArity(list_y,0);
   
-  for(i=0 ; i<getArity(t) ; i++) {
+  for(i=0 ; (unsigned)i<getArity(t) ; i++) {
     if(sol[i] == 0) {
         //termac_add_lastColor(list_y,getSubterm(t,i),E[i],getColor(t,i));
         // [pem: Oct 24 00]

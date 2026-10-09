@@ -98,7 +98,7 @@ FSYM			{ /*printf("c_FSYM\n");*/
 char *remove_backslash(char *source) {
   int i,j;
   char *dest=(char*)AMALLOC(1+strlen(source));
-  for(i=1,j=0 ; i<strlen(source)-1 ; i++)
+  for(i=1,j=0 ; (size_t)i<strlen(source)-1 ; i++)
     {
       if(source[i]=='\\' && source[i+1]=='"')
 	i++;

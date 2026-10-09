@@ -349,7 +349,7 @@ static int count_same(AC_LIST *pp)
   int sym = pp->arg->sym;
 
   for(pp = pp->next_ac; pp; pp = pp->next_ac){
-    if(pp->arg->sym == sym)
+    if(pp->arg->sym == (unsigned long)sym)
       count++;
     else
       break;

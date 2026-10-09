@@ -231,7 +231,7 @@ got_term:
     m = vmult[k];
     if(m != 0){
       if(ac_binding){
-        if(b->sym == top_sym[k]){	/* binding caused ac nesting */
+        if(b->sym == (unsigned long)top_sym[k]){	/* binding caused ac nesting */
           for(p = b->rest.a.ac_list; p; p = p->next_ac){
             for(l = 0; l < n_term; l++){
               if(eker_term_cmp(term_tab[l].term, p->arg) == 0)

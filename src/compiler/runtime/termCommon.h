@@ -162,7 +162,7 @@ extern void termac_alloc(struct termac **ptr_dest,
 
 #define termac_add_lastColor(tac,subterm,mult,color) {\
   register int arity = getArity(tac);\
-  if(arity == getSize(tac)) termac_resize(tac,2*arity);\
+  if((unsigned)arity == getSize(tac)) termac_resize(tac,2*arity);\
   setColorMult(tac,arity,color,mult);\
   setSubterm(tac,arity,subterm);\
   setArity(tac,arity+1);}

@@ -179,7 +179,7 @@ char *intern_alloc(long size)
   char *res;
 
   memoround(size);
-  if(size >= MAX_SIZE_STRUCT)
+  if((size_t)size >= MAX_SIZE_STRUCT)
     {
       //fprintf(stderr,"intern_alloc --> Valloc(%d)\n",size+scale);
       res=Valloc(size+scale);
@@ -210,7 +210,7 @@ void intern_free(long *p)
   size=SIZE(p);
 
 
-  if(size >= MAX_SIZE_STRUCT)
+  if((size_t)size >= MAX_SIZE_STRUCT)
     {
       ADDDEBUG(free_calls);
       free(TRUEADR(p));

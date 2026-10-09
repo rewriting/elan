@@ -73,7 +73,7 @@ extern bitSet *intern_bitSet_GC_create(int size);
 #define bitSet_init_set(b) {\
   int i; for(i=1 ; i <= bitSet_tab_size(b) ; i++) b[i] = BITALL;}
 #define bitSet_init_clear(b) {\
-  int i; for(i=1 ; i <= bitSet_tab_size(b) ; i++) b[i] = 0; }
+  int i; for(i=1 ; (unsigned)i <= bitSet_tab_size(b) ; i++) b[i] = 0; }
 
 extern bitSet *bitSet_copy(bitSet *b);
 extern void bitSet_print(bitSet *b);

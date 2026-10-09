@@ -464,7 +464,7 @@ Gterm * norm_1(Gterm *t) {
 	struct termac *tac=(struct termac*)t;
 
 	//fprintf(stderr,"(");
-	for(i=0 ; i<getArity(tac) ; i++) {
+	for(i=0 ; (unsigned)i<getArity(tac) ; i++) {
 	    if(coqMode) {
 		pos1 = MAXPOS; 
 		position[MAXPOS]=i;
@@ -483,7 +483,7 @@ Gterm * norm_1(Gterm *t) {
 	    int i,j;
 	    // n'est plus utile
 	    // TERMAC_ALLOC(newtac,getArity(tac),getSymb(tac));
-	    for(i=0 ; i<getArity(tac) ; i++) {
+	    for(i=0 ; (unsigned)i<getArity(tac) ; i++) {
 		for(j=0 ; j<getMult(tac,i) ; j++) {
 		    newtac = term_add_onf_term_color(newtac,GgetSymb(tac),getSubterm(tac,i),getColor(tac,i));
 		}
@@ -526,7 +526,7 @@ Gterm * norm_3(Gterm *t) {
 	struct termac *tac=(struct termac*)t;
 	Gterm *nt;
 	
-	for(i=0 ; i<getArity(tac) ; i++) {
+	for(i=0 ; (unsigned)i<getArity(tac) ; i++) {
 	    if(coqMode) {
 		pos1 = MAXPOS; 
 		position[MAXPOS]=i;
@@ -546,7 +546,7 @@ Gterm * norm_3(Gterm *t) {
 	    int i,j;
 	    // n'est plus utile
 	    // TERMAC_ALLOC(newtac,getArity(tac),getSymb(tac));
-	    for(i=0 ; i<getArity(tac) ; i++) {
+	    for(i=0 ; (unsigned)i<getArity(tac) ; i++) {
 		for(j=0 ; j<getMult(tac,i) ; j++) {
 		    newtac = term_add_onf_term_color(newtac,GgetSymb(tac),getSubterm(tac,i),getColor(tac,i));
 		}
@@ -676,7 +676,7 @@ Gterm * subterm_remove(Gterm *t, Gterm *s)
     else{
 	struct termac *tac=(struct termac*)t;	
 	if (s==NULL || !isAC(s)){
-	    for(i=0;i<getArity(tac);i++){
+	    for(i=0;(unsigned)i<getArity(tac);i++){
 		for(j=0;j<getMult(tac,i);j++){
 		    if (s==NULL || Gterm_cmp(getSubterm(tac,i),s)!=0 || removed){
 			newt=(Gterm*)term_add_onf_term(newt,GgetSymb(tac),getSubterm(tac,i));
@@ -689,7 +689,7 @@ Gterm * subterm_remove(Gterm *t, Gterm *s)
 	    struct termac *sac=(struct termac*)s;
 	    if (GgetSymb(tac)!=GgetSymb(sac)|| (getArity(sac)==0 && getMult(sac,0)==0)){
 		
-		for(i=0;i<getArity(tac);i++){
+		for(i=0;(unsigned)i<getArity(tac);i++){
 		    for(j=0;j<getMult(tac,i);j++){
 			if (Gterm_cmp(getSubterm(tac,i),s)!=0 || removed){
 			    newt=(Gterm*)term_add_onf_term(newt,GgetSymb(tac),getSubterm(tac,i));
@@ -699,7 +699,7 @@ Gterm * subterm_remove(Gterm *t, Gterm *s)
 		    }
 		}
 	    } else { //s has the same sym with t
-		for(i=0;i<getArity(sac);i++){
+		for(i=0;(unsigned)i<getArity(sac);i++){
 		    for(j=0;j<getMult(sac,i);j++){
 			t=subterm_remove(t,getSubterm(sac,i));
 		    }

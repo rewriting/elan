@@ -248,8 +248,8 @@ long term_notDestructEqual(register Gterm *t1,register Gterm *t2) {
     struct termac *tac1=(struct termac*)t1;
     struct termac *tac2=(struct termac*)t2;
     for(p1=0, p2=0; ; p1++, p2++) {
-      if(p1==getArity(tac1)) return(p2==getArity(tac2)?1:0);
-      if(p2==getArity(tac2)) return(0);
+      if((unsigned)p1==getArity(tac1)) return((unsigned)p2==getArity(tac2)?1:0);
+      if((unsigned)p2==getArity(tac2)) return(0);
       if(!term_notDestructEqual(getSubterm(tac1,p1),getSubterm(tac2,p2) ))
         return (0);
       if(getMult(tac1,p1) != getMult(tac2,p2)) return (0);
@@ -345,8 +345,8 @@ int Gterm_cmp(register Gterm *t1, register Gterm *t2) {
       */
 
     for(p1=0, p2=0; ; p1++, p2++) {
-      if(p1==getArity(tac1)) return(p2==getArity(tac2)?0:(-1));
-      if(p2==getArity(tac2)) return(1);
+      if((unsigned)p1==getArity(tac1)) return((unsigned)p2==getArity(tac2)?0:(-1));
+      if((unsigned)p2==getArity(tac2)) return(1);
       if((r = Gterm_cmp(getSubterm(tac1,p1), getSubterm(tac2,p2)))) {
 
           /*

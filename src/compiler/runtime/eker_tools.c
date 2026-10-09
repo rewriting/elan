@@ -64,7 +64,7 @@ TERM *toEkerForm(struct term *t) {
       printf("Warning [toEkerForm]: empty term !\n");
       exit(0);
     } else {
-      for(i=0, acl=(AC_LIST*)NULL ; i<getArity(tac) ; i++) {
+      for(i=0, acl=(AC_LIST*)NULL ; (unsigned)i<getArity(tac) ; i++) {
         acl = make_ac_list(toEkerForm(getSubterm(tac,i)),(int)getMult(tac,i),acl);
       }
     }

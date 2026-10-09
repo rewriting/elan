@@ -65,7 +65,7 @@ int lazy_check(int code, int arg)
   int i;
    
   for (i=0; i<=index_lazy; i++){
-    if (lazy_annotation[i].symbol == code && lazy_annotation[i].arg == arg+1)
+    if (lazy_annotation[i].symbol == (unsigned)code && lazy_annotation[i].arg == (unsigned)(arg+1))
     {
       return 1;
     }

@@ -148,7 +148,7 @@ int MS_init(match_state **ptr_ms,
 
 
 #ifdef DEBUG
-  if(nb_pattern_in_cbg >= (MAX_CBG_SIZE*NBITS)) {
+  if((size_t)nb_pattern_in_cbg >= (MAX_CBG_SIZE*NBITS)) {
     fprintf(stderr,"Too many pattern in CBG. Increase MAX_CBG_SIZE\n");
     exit(1);
   }
@@ -156,7 +156,7 @@ int MS_init(match_state **ptr_ms,
 
   //bitSet_init_size(match_mask,nb_pattern_in_cbg);
 
-  for(no_arg_subject=0 ; no_arg_subject<getArity(subject); no_arg_subject++) {
+  for(no_arg_subject=0 ; (unsigned)no_arg_subject<getArity(subject); no_arg_subject++) {
       /*
      * match_mask contient les patterns sous le symbole AC qui filtrent
      * vers le sous-terme v
@@ -252,7 +252,7 @@ int MS_reinit(match_state *ms,struct termac *subject, int no_rule) {
     return -1;
   }
   
-  for(no_arg_subject=0 ; no_arg_subject<getArity(subject) ; no_arg_subject++) {
+  for(no_arg_subject=0 ; (unsigned)no_arg_subject<getArity(subject) ; no_arg_subject++) {
     /* initialisation de bg_multiplicity */
     ms->bg_multiplicity[no_arg_subject]=getMult(subject,no_arg_subject);
   }
@@ -401,7 +401,7 @@ void MS_print(match_state *ms)
   printf("]\n");
 
   printf("bg_multiplicity = [");
-  for(i=0 ; i<bitSet_size(BG_get(ms->cbg,0)) ; i++)
+  for(i=0 ; (unsigned)i<bitSet_size(BG_get(ms->cbg,0)) ; i++)
     printf("%d  ",ms->bg_multiplicity[i]);
   printf("]\n");
 

@@ -47,7 +47,7 @@ bitSet *bitSet_copy(bitSet *b)
   bitSet *res;
   Verif_void(b,"bitSet_copy(b)");
   bitSet_create(res,bitSet_size(b));
-  for(i=1 ; i <= bitSet_tab_size(b) ; i++)
+  for(i=1 ; (unsigned)i <= bitSet_tab_size(b) ; i++)
     res[i] = b[i];
   return res;
 }
@@ -59,7 +59,7 @@ void bitSet_print(bitSet *b)
   int res=0;
   Verif_void(b,"bitSet_print(b)");
   printf("[%d] ", bitSet_size(b));
-  for(i=0 ; i<bitSet_size(b) ; i++)
+  for(i=0 ; (unsigned)i<bitSet_size(b) ; i++)
     {
       res|=bitSet_get(b,i);
       if(bitSet_get(b,i))
@@ -76,10 +76,10 @@ void bitSet_or(bitSet *b1, bitSet *b2)
   Verif_void(b2,"bitSet_or(b2)");
 
   if(bitSet_size(b1) <= bitSet_size(b2))
-    for(i=1 ; i <= bitSet_tab_size(b1) ; i++)
+    for(i=1 ; (unsigned)i <= bitSet_tab_size(b1) ; i++)
       b1[i] |= b2[i];
   else
-    for(i=1 ; i <= bitSet_tab_size(b2) ; i++)
+    for(i=1 ; (unsigned)i <= bitSet_tab_size(b2) ; i++)
       b1[i] |= b2[i];
 }
 
@@ -87,7 +87,7 @@ int bitSet_nb_bit(bitSet *b)
 {
   int i;
   int res=0;
-  for(i=0 ; i<bitSet_size(b) ; i++) {
+  for(i=0 ; (unsigned)i<bitSet_size(b) ; i++) {
     if(bitSet_get(b,i))
       res++;
   }
@@ -98,7 +98,7 @@ int bitSet_isnull(bitSet *b) {
   int i;
   int isnull=1;
   Verif_void(b,"bitSet_isnull(b)");
-  for(i=1 ; isnull && i <= bitSet_tab_size(b) ; i++) {
+  for(i=1 ; isnull && (unsigned)i <= bitSet_tab_size(b) ; i++) {
     isnull &= (b[i] == 0);
   }
   return isnull;
