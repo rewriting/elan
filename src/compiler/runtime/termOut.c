@@ -134,7 +134,6 @@ void printTextFormTerm(FILE *fich, int pos, Gterm *t) {
 
 
 void termOut(FILE *fich,Gterm *t) {
-  int i;
 
   if(GisIntegerTagged(t)) {
     fprintf(fich,"%ld",GgetInt(t));

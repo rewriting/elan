@@ -115,13 +115,9 @@ int ts;
     t = GgetArgument(T,1);
     ts = term_defstrat(s);
     if (IS_LAB_FLAG(ts)) {
-      int apply_code = LAB_F(ts);   
-      int dstr_code = LAB_LAB(ts);
       semact = term_semact(s);
       return (*semact)(T);} 
     else if (IS_DSTR_FLAG(ts)) {
-      int apply_code = DSTR_F(ts);
-      int dstr_code = DSTR_LAB(ts);
       semact = term_semact(s);
       return (*semact)(T); }
     else
@@ -251,7 +247,6 @@ int is_one = 0;
       default:
 	if (IS_LAB_FLAG(defstrat)) {
 	  int apply_code = LAB_F(defstrat);
-	  int dstr_code = LAB_LAB(defstrat);
 	  Gterm *sv;
 	  Gterm* (*semact)(Gterm *);
  	  GmakeAppl2(sv,apply_code,s,t);
@@ -276,7 +271,6 @@ int is_one = 0;
 	    fail(); } }
 	else if (IS_DSTR_FLAG(defstrat)) {
 	  int apply_code = DSTR_F(defstrat);  
-	  int dstr_code = DSTR_LAB(defstrat);
 	  Gterm *sv;
 	  Gterm* (*semact)(Gterm *);
 	  GmakeAppl2(sv,apply_code,s,t);

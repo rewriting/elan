@@ -61,7 +61,6 @@ static char *actchunkend=NULL;
 /*
  * Statistics
  */
-static int total_mem;
 /* number of calls to malloc */
 static int malloc_calls;
 /* number of calls to free */
@@ -125,7 +124,6 @@ char *Valloc(int taille) {
 
 char *allocator(int size) { 
   char *res;
-  int indice = size/scale;
 
   //memoround(size); /* size est deja aligne' */
   ADDDEBUG(allocator_calls);

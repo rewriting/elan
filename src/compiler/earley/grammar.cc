@@ -79,7 +79,7 @@ void grammar::addsymbol_(lexem *ebuff,int *ebuffi,lexem &l)
 struct sgrammrule * grammar::addrul(lexem &leftside,lexem *body,int priority, int infos ,int num)
 {
   struct sgrammrule *gr;
-  struct grammrulelist *gl,**ggl;
+  struct grammrulelist *gl;
   AALLOS(gr,struct sgrammrule);
   gr->leftside= leftside;
   gr->priority=priority;

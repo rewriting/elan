@@ -28,6 +28,9 @@ char instr[1000];
 char *remove_backslash(char *source);
 %}
 
+/* yyunput and input are not used */
+%option nounput noinput
+
 %%
 [ \t]+			{ strcat(instr," "); }
 \n			{ instr[0]='\0' ; no_line++; }

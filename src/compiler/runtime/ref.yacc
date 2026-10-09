@@ -278,7 +278,6 @@ int yyerror(const char *s) { (void)s; return 0; }
 extern int fsymtabSize;
 
 int lookup(char *string) {
-  int i;
   if(string[0]=='"') {
     string[strlen(string)-1]='\0';
     string++;

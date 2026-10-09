@@ -213,6 +213,7 @@ static BOOL simplify(MATCH_OBJECT *obj, FREE_PROBLEM *fp, TERM *p, TERM *s)
  */
 static BOOL simplify_ac(MATCH_OBJECT *obj, FREE_PROBLEM *fp, int top, AC_LIST *pp, AC_LIST *ss)
 {
+  (void)obj;
   int i, diff, np, ns, g_left_overs, g_diff;
   TERM *p, *s;
   PATTERN *pa;

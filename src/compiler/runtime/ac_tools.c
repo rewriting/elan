@@ -43,6 +43,7 @@
 int is_maximal_identical_element(struct termac *t, 
 				 multiplicityType multiplicity,
 				 Gterm **ptr_list_x) {
+  (void)ptr_list_x;
   struct termac *list_x;
   int i,res=1;
   
@@ -125,8 +126,6 @@ void extract_minimal_identical_element(struct termac *t,
     //printf("xy noshared %d\n",xy_noshared++);
 }
 
-static int sub_noshared=0;
-static int sub_shared=0;
 
 void substitution_build(struct termac *t, match_state *ms,
 			int nb_variable, Gterm *substitution[],
@@ -134,6 +133,7 @@ void substitution_build(struct termac *t, match_state *ms,
 			void (*variable_extract)(Gterm *v0, int id_pattern, Gterm *extract_substitution[], int *indice, struct match_state *ms, int no_arg_subject, int no_pattern, int base_id_pattern),
 			int base_id_pattern
 			) {
+  (void)nb_variable;
   int no_pattern;
   struct termac *list_x;
   int *pattern_list;
@@ -225,6 +225,7 @@ void substitution_build_without_context(struct termac *t,
 					void (*variable_extract)(Gterm *v0, int id_pattern, Gterm *extract_substitution[], int *indice, struct match_state *ms, int no_arg_subject, int no_pattern, int base_id_pattern),
 					int base_id_pattern
 					) {
+  (void)nb_variable;
   int i,no_pattern;
   int *pattern_list;
   int indice;
@@ -301,8 +302,6 @@ struct termac *rest_extract(struct termac *t, match_state *ms) {
   return list_x;
 }
 
-static int xy_noshared=0;
-static int xy_shared=0;
 
 void extract_xy_from_pe(struct termac *t,
                         multiplicityType E[],
@@ -310,6 +309,7 @@ void extract_xy_from_pe(struct termac *t,
                         multiplicityType multiplicity,
 			struct termac **ptr_list_x,
                         struct termac **ptr_list_y) {
+  (void)E;
   struct termac *list_x;
   struct termac *list_y;
   int i;

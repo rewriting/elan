@@ -102,7 +102,7 @@ int MS_init(match_state **ptr_ms,
   multiplicityType *bg_multiplicity;
 
   int nb_subterm_subject=0;
-  int i,no_pattern,no_arg_subject;
+  int no_pattern,no_arg_subject;
   bitSet *mask;
   int no_bit,nb_bit; // pour optimiser l'initialisation de CBG
   
@@ -280,6 +280,7 @@ int MS_reinit(match_state *ms,struct termac *subject, int no_rule) {
 
 
 int MS_solve(match_state *ms, int mode) {
+  (void)mode;
   int indice_solution=-1;
   int i;
   Verif_void(ms,"MS_solve(ms)");

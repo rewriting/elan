@@ -89,7 +89,6 @@ static char *actchunkend = NULL;
 /*
  * Statistics
  */
-static int total_mem;
 /* number of calls to malloc */
 static int malloc_calls;
 /* number of calls to free */
@@ -229,7 +228,7 @@ void intern_free(long *p)
 void print_space_usage() 
 {
   int  total_tp = 0;
-  int  i, final;
+  int  i;
 
   printf("                 gets   frees     diff   allocator  lengths\n");
   for (i=0; i<FREELIST_SIZE; i++)

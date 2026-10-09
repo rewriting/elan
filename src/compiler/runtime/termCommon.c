@@ -152,7 +152,6 @@ void term_printREFln(FILE *fich,Gterm *t)
 
 void term_printREF(FILE *fich,Gterm *t)
 {
-  int i;
   Verif_void(t,"term_printREF(fich,t)");
   if(GisIntegerTagged(t)) {
     fprintf(fich,"INT(%ld)",GgetInt(t));
@@ -226,7 +225,8 @@ static int termac_lookup(Gterm *subterm,
 void termac_alloc(struct termac **ptr_dest, int size, unsigned int funsym) {
   struct termac *dest;
   // ehm temporaire
-  unsigned long cptTermacAlloc=0;
+  unsigned long cptTermacAlloc=0;  /* shadows the global counter (2004) */
+  (void)cptTermacAlloc;
   size = GinitMinimalSize(size);
 //  if(size<8) size=8;
 //  if(size<4) size=4;
@@ -301,7 +301,6 @@ static Gterm *subterm_unflatten(unsigned int funsym,
 Gterm *term_unflatten(Gterm *t) {
     //printf("term_unflatten: "); term_println(stdout,t);
   // ehm a modifier
-  Gterm* TabArgument[100],*t1,*ArrayArgs[256];
   //printf("\n in termCommon.c line 342 \n");
   if(GisTagged(t)) {
     return t;
@@ -375,7 +374,6 @@ struct termac *intern_term_add_onf_term(int isAC,
 {
   struct termac *res;
   int i;
-  int found;
   int isNullTac =(tac==NULL);
   struct termac *subtermac=(struct termac*)subterm; 
 
@@ -537,7 +535,6 @@ static int termac_lookup(Gterm *subterm,
  * t[pos]      <- subterm
  */
 static void termac_insert_bubble(struct termac *tac, int pos) {
-  int i;
   if(getArity(tac) == getSize(tac)) {
     termac_resize(tac,2*getSize(tac));
   }
@@ -719,12 +716,11 @@ Gterm* specialApply(Gterm *res) {
 }
 
 Gterm* normalise(Gterm *t) {
-  int code, arity, i;
+  int arity, i;
   //printf("\n******************* in normalise ************\n");
   if(GisTagged(t)) {
     return t;
   }
-  code  = GgetSymb(t);
   arity = term_arity(t);
   //printf("\n code = %d , arity = %d\n",code,arity);
   //printf("\nNormalise\tcode=%d\tarity=%d\n",code,arity);
@@ -738,8 +734,6 @@ Gterm* normalise(Gterm *t) {
     }
   } else {
     struct termac *tac=(struct termac*)t;
-    Gterm *nt;
-    int computeONF=0;
 
     for(i=0 ; i<getArity(tac) ; i++) {
 
@@ -787,7 +781,6 @@ Gterm *term_rec_replace(Gterm *t1,
   Gterm *res=NULL;
   int renormalise=0;
   //ehm modification a faire
-  Gterm *TabArgument[100];
 
   if(term_notDestructEqual(t1,t2)) {
     return t3;
@@ -1043,7 +1036,6 @@ int isMonoColor(Gterm *t) {
   return res;
 }
 
-static int freeColor=0;
 
 void setMonoColor(Gterm *t) {
   int i;
@@ -1201,7 +1193,6 @@ Gterm *term_metaApply(Gterm *t) {
 Gterm *term_rewriteStep(int strIndex,Gterm *t) {
   int i,arity;
   Gterm *res;
-  Gterm *save;
   Gterm *newTerm;
 
     //printf("term_rewriteStep on: "); internal_term_println(stdout,t,INTERNAL_IO);

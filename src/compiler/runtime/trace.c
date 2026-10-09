@@ -182,8 +182,7 @@ int Ginitialise_trace()
 }
 
 void GsetTermNoReduced(Gterm *t){
-    int code, arity, i;
-    Gterm* dest;
+    int arity, i;
     if(GisIntegerTagged(t) || GisIdentifierTagged(t) || GisStringTagged(t)) {
 	return;
     }
@@ -200,9 +199,9 @@ int Gtrace_pretty_print(TR_COQ * head,int deep, FILE * fp_trace)
 {
     TR_COQ *tr;
     NODE *node;
-    char tmp[5],rp[2];
+    char tmp[5];
     char output[1000],output1[1000];
-    int i,ret,j;
+    int i,j;
 
     if (coqMode == 0) return 2;
     i = 0;
@@ -413,9 +412,7 @@ extern int strMode;      //par default: leftmost-innermost
 /* Normalisation in set of unlaballed rules 
 used reduced flag */
 Gterm * norm_0(Gterm *t) {
-    int code, arity, i;
-    struct cell_term *p;
-    int pos1;
+    int arity, i;
 
     if (t == NULL) return NULL;
     if(GisIntegerTagged(t) || GisIdentifierTagged(t) || GisStringTagged(t)) {
@@ -423,7 +420,6 @@ Gterm * norm_0(Gterm *t) {
     }
 
     if (GisReduced(t)) return t;
-    code  = GgetSymb(t);
     arity = term_arity(t);
     for(i=0 ; i<arity ; i++) {
     	GsetArgument(t,i,norm_0((Gterm*)GgetArgument(t,i)));
@@ -438,8 +434,7 @@ Gterm * norm_0(Gterm *t) {
       **********************/
 
 Gterm * norm_1(Gterm *t) {
-    int code, arity, i;
-    struct cell_term *p;
+    int arity, i;
    Gterm *t_tmp;
    int pos1;
 
@@ -449,7 +444,6 @@ Gterm * norm_1(Gterm *t) {
       //if(GisReduced(t)) {
       //return t; // [Huy: Apr 30 00]
       //}
-    code  = GgetSymb(t);
     arity = term_arity(t);
   
     if(!term_isAC(t)) {
@@ -468,8 +462,6 @@ Gterm * norm_1(Gterm *t) {
       // *** TODO
 
 	struct termac *tac=(struct termac*)t;
-	Gterm *nt;
-	int computeONF=0;
 
 	//fprintf(stderr,"(");
 	for(i=0 ; i<getArity(tac) ; i++) {
@@ -511,15 +503,13 @@ Gterm * norm_1(Gterm *t) {
 
 /************** rightmost-innermost *****************/
 Gterm * norm_3(Gterm *t) {
-    int code, arity, i;
-    struct cell_term *p;
+    int arity, i;
     int pos1;
     if(GisIntegerTagged(t) || GisIdentifierTagged(t) || GisStringTagged(t)) {
 	return t;
     }
   
  
-    code  = GgetSymb(t);
     arity = term_arity(t);
   
     if(!term_isAC(t)) {
@@ -535,7 +525,6 @@ Gterm * norm_3(Gterm *t) {
  // [NGUYEN: Feb 21 01] 
 	struct termac *tac=(struct termac*)t;
 	Gterm *nt;
-	int computeONF=0;
 	
 	for(i=0 ; i<getArity(tac) ; i++) {
 	    if(coqMode) {
@@ -578,7 +567,6 @@ Gterm * norm_3(Gterm *t) {
 Gterm * norm_4(Gterm *t) {
     int arity,i;
     unsigned long r1,r2;
-    struct cell_term *p;
     int pos1;
     Gterm* t1;
     if(GisIntegerTagged(t) || GisIdentifierTagged(t) || GisStringTagged(t)) {
@@ -802,7 +790,7 @@ void trace_recover(int pt_backup, int MAXPOS_tmp,POS position_tmp){
 
 /* print context trace for AC normalisation */
 void rhoproofterm_print_AC(Gterm *pi){
-    int i, pt_backup;	
+    int i;	
     Gterm *t=globalT;
     Gterm * tmp_subterm;
     Gterm * tmpt;
@@ -874,7 +862,7 @@ void rhoproofterm_print_AC(Gterm *pi){
 
 /* print context trace for syntactic normalisation */
 void rhoproofterm_print(Gterm *pi){
-    int i, pt_backup;	
+    int i;	
     Gterm *t=globalT;
     Gterm * tmp_subterm;
     Gterm * tmpt;

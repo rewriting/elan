@@ -30,8 +30,6 @@
 
 
 int strategywasapplied = 0;
-static int lastIdentVal,lastNumVal;
-static char *lastStringVal;
 static int lookingforac =0;
 int acsymbolinleftside = 0;
 

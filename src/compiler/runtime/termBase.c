@@ -45,6 +45,7 @@ cptTermAlloc++;
 
 
 void Gterm_init(int argc,char **argv,long *ptr_bottomOfStack) {
+  (void)argc; (void)argv; (void)ptr_bottomOfStack;
 }
 
 void Gfsym_init(int code, int a, char *n, char *s,

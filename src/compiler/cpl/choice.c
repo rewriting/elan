@@ -299,6 +299,7 @@ void longjmperror() {
 #define ALLOCMARK -1
 
 inline void cCutMark(char *ra) {
+  (void)ra;
     //check_size_long("backCTrail",&backCTrail, backCTraili, &backCTrail_size,2);
   increment_backCTrail(2);
   backCTraili += 2;

@@ -73,7 +73,6 @@ void BG_print(BG *bg)
  */
 int BG_cbg2bg(int *liste_pattern, BG *cbg, BG *bg) {
   int i;
-  int j,find;
   bitSet *mask;
   for(i=0 ; i<BG_size(bg) ; i++) {
       /*

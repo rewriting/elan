@@ -265,6 +265,7 @@ int checkIntListMol (Molecule *mol, int *curToken, char **smiles, IntList **intL
 /* SYMBOL => C | c | O | o | H  */
 int checkSymbolMol (Molecule *mol, int *curToken, char **smiles, char *symbol, float *link)
 {
+  (void)mol;
   switch (*curToken)
     {
     case 'H':
@@ -304,6 +305,7 @@ int checkSymbolMol (Molecule *mol, int *curToken, char **smiles, char *symbol, f
 /* LINK => - | = | # | : */
 int checkLinkMol (Molecule *mol, int *curToken, char **smiles, float *link)
 {
+  (void)mol;
   switch (*curToken)
     {
     case '-':

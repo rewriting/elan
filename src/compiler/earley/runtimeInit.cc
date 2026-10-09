@@ -115,7 +115,6 @@ extern "C" void grammarInit(int gram[],int max)
 {
   int i,pos,nb_rhs;
   lexem le;
-  struct sgrammrule *textform;
 
   pos=0;
   while(pos < max)
@@ -145,7 +144,7 @@ extern "C" void grammarInit(int gram[],int max)
 	}
       // partie gauche
       le.crtypelex(gram[pos+3]); 
-      textform=topGrammar.addrule(le,gram[pos+1],gram[pos+0],gram[pos+2]);
+      topGrammar.addrule(le,gram[pos+1],gram[pos+0],gram[pos+2]);
 
       pos+=5+nb_rhs*2;
     }
@@ -180,6 +179,7 @@ char *lastStringVal ;
 
 int esemact(lstream *f,int rulenum,lexem lex,lexem sort)
 {
+  (void)f; (void)sort;
   if (earleyPos == EARLEYSIZE) {
     sterr << "[esemact] Not enough memory...\n" ;
     exit(-1) ;

@@ -100,7 +100,6 @@ void ichstream::commonopen(char *name,int ftype)
 
 void ichstream::ich(int &c)
 { 
-  int eno;
   c=fchar;
   if ((read_block) || (c!=EOF)) { 
     fchar= fgetc(file);

@@ -27,6 +27,7 @@
 
 bitSet32 *intern_bitSet32_create(int size)
 {
+  (void)size;
   bitSet32 *res;
   res=(bitSet32*) AMALLOC(sizeof(bitSet32_type));
   return res;

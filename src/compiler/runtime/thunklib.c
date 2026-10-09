@@ -215,13 +215,10 @@ Gterm * lazy_subterm_normalise(Gterm * t){
 
 /* normalise a term based on lazy evaluation */
 Gterm *norm_lazy(Gterm * t){
-  int code, arity, i;
 
   if(GisIntegerTagged(t) || GisIdentifierTagged(t) || GisStringTagged(t)) {
     return t;
   }
-  arity = term_arity(t);
-  code = GgetSymb(t);
   if (index_lazy == -1) {/* normal leftmost-innermost , no lazy */
       t = norm_in (t);
   }else
