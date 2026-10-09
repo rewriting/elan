@@ -46,6 +46,8 @@ OLDLIB_SRC = ROOT / "elan" / "src" / "elan-library" / "elanlib"
 BASELINE = HERE / "baseline.tsv"
 SNAPDIR = HERE / "snapshots"
 WORK = HERE / "work"   # scratch copies of the application directories
+REGRESSION = REPO / "tests" / "regression"
+EXCEPTIONS = HERE / "platform-exceptions.tsv"
 
 # Directories whose tst_all files are harvested
 SUITES = [ELAN3 / "applications", ELAN3 / "contributions", ROOT / "elan" / "sources"]
@@ -115,6 +117,44 @@ def discover():
     return tests
 
 
+def discover_regression(root=REGRESSION):
+    """tests/regression/<case>/{prog.lgi,*.eln,input.inp,expected.out}: one I test per case."""
+    if not root.is_dir():
+        return []
+    tests = []
+    for d in sorted(p for p in root.iterdir() if p.is_dir()):
+        if (d / "prog.lgi").exists():
+            tests.append(dict(id=f"regression/{d.name}::I::prog:no:input:expected", dir=d,
+                              kind="I", lgi="prog", spc="no", inp="input", out="expected",
+                              flags=[], long=False))
+    return tests
+
+
+def load_exceptions(path=EXCEPTIONS, platform=None):
+    """platform-exceptions.tsv: test-id <TAB> darwin|linux|all <TAB> reason."""
+    platform = platform or sys.platform
+    exc = {}
+    if path.exists():
+        for line in path.read_text().splitlines():
+            if not line.strip() or line.startswith("#"):
+                continue
+            tid, plat, reason = line.split("\t", 2)
+            if plat in (platform, "all"):
+                exc[tid] = reason
+    return exc
+
+
+def case_sensitive(directory):
+    directory.mkdir(parents=True, exist_ok=True)
+    probe = Path(tempfile.mkdtemp(prefix="case-", dir=directory))
+    try:
+        (probe / "a").touch()
+        (probe / "A").touch()
+        return len(list(probe.iterdir())) == 2
+    finally:
+        shutil.rmtree(probe, ignore_errors=True)
+
+
 # ---------------------------------------------------------------- execution
 def run(cmd, cwd, stdin=None, timeout=60):
     with open(stdin, "rb") if stdin else open(os.devnull, "rb") as fin:
@@ -127,7 +167,7 @@ def samples(d):
     for name in ("SAMPLES", "Sample", "Samples"):
         if (d / name).is_dir():
             return d / name
-    return d / "SAMPLES"
+    return d
 
 
 def run_test(t, timeout):
@@ -263,13 +303,19 @@ def main():
     if a.elanlib:
         os.environ["ELAN_TEST_LIB"] = str(Path(a.elanlib).resolve())
     kinds = set(a.kinds.split(","))
-    tests = [t for t in discover() if t["kind"] in kinds and (a.long or not t["long"])
-             and re.search(a.filter, t["id"])]
+    tests = [t for t in discover() + discover_regression()
+             if t["kind"] in kinds and (a.long or not t["long"]) and re.search(a.filter, t["id"])]
     if a.list:
         for t in tests:
             print(t["id"], "(long)" if t["long"] else "")
         print(len(tests), "tests")
         return 0
+
+    if not case_sensitive(WORK):
+        print(f"ERROR: {WORK} is on a case-insensitive file system "
+              "(ELAN sources contain files differing only by case; see README)")
+        return 2
+    exceptions = load_exceptions()
 
     stamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
     outdir = HERE / "results" / stamp
@@ -288,6 +334,8 @@ def main():
             sst = ""
             if snap.exists() and not a.save_snapshots:
                 sst = "SNAP-OK" if snap.read_text(encoding="latin-1") == out else "SNAP-DIFF"
+                if sst == "SNAP-DIFF" and t["id"] in exceptions:
+                    sst = "SNAP-EXC"
                 if sst == "SNAP-DIFF":
                     snapdiff.append(t["id"])
                     (outdir / (safe(t["id"]) + ".snapdiff.txt")).write_text("".join(
