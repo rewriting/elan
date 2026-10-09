@@ -236,7 +236,7 @@ char * alfa(int sy)
       case SWHTNET  : return("SWHTNET");
       case SWHT2NET : return("SWHT2NET");
     }
-    sprintf(alftyp,"\"%s\"",envirgetname(sy));
+    snprintf(alftyp,sizeof alftyp,"\"%s\"",envirgetname(sy));
     return(alftyp);
   }
   sy= -sy;

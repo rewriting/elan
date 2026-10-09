@@ -264,21 +264,23 @@
 
 // defstrat word:
 #define DS_FSYM     0x1000000                 // MAXFSYM*f1+f2
-#define FSYM_FLAG(f1,f2) (DS_FSYM | (((f1)<<12)+(f2)))
+/* shifts are done on unsigned: f may be -1 (no code found); same bits as
+   the 2004 two's complement result, without undefined behaviour */
+#define FSYM_FLAG(f1,f2) (DS_FSYM | ((int)((unsigned)(f1)<<12)+(f2)))
 #define IS_FSYM_FLAG(x)   (( (x) & 0xf000000) == DS_FSYM)
 #define FSYM_F1(x)        (((x) & 0xfff000)>>12)
 #define FSYM_F2(x)        ((x) & 0xfff)
 
 #define DS_LAB      0x2000000                 // rule_index
 //0106 #define LAB_FLAG(l) (DS_LAB | (l))
-#define LAB_FLAG(f,lab) (DS_LAB |  (((f)<<12)+(lab)))
+#define LAB_FLAG(f,lab) (DS_LAB |  ((int)((unsigned)(f)<<12)+(lab)))
 #define IS_LAB_FLAG(x) (( (x) & 0xf000000) == DS_LAB)
 #define LAB_F(x)          (((x) & 0xfff000)>>12)
 #define LAB_LAB(x)        ((x) & 0xfff)
 
 
 #define DS_DSTR     0x4000000
-#define DSTR_FLAG(f,lab)   (DS_DSTR | (((f)<<12)+(lab)))
+#define DSTR_FLAG(f,lab)   (DS_DSTR | ((int)((unsigned)(f)<<12)+(lab)))
 #define DSTR_F(x)          (((x) & 0xfff000)>>12)
 #define DSTR_LAB(x)        ((x) & 0xfff)
 #define IS_DSTR_FLAG(x) (( (x) & 0xf000000) == DS_DSTR)

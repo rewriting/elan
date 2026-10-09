@@ -21,7 +21,7 @@ else
   ELAN_CXX ?= g++
 endif
 
-.PHONY: all configure install check test-runner smoke reference check-reference clean toolchain
+.PHONY: all configure install check check-sanitize test-runner smoke reference check-reference clean toolchain
 
 all: configure
 	cmake --build $(BUILD) -j
@@ -37,7 +37,7 @@ configure: toolchain
 	@cached=$$(sed -n 's/^CMAKE_INSTALL_PREFIX:PATH=//p' $(BUILD)/CMakeCache.txt 2>/dev/null); \
 	if [ "$$cached" != "$(PREFIX)" ]; then \
 	  cmake -S . -B $(BUILD) -DCMAKE_C_COMPILER=$(ELAN_CC) -DCMAKE_CXX_COMPILER=$(ELAN_CXX) \
-	        -DCMAKE_INSTALL_PREFIX=$(PREFIX); \
+	        -DCMAKE_INSTALL_PREFIX=$(PREFIX) $(CMAKE_FLAGS); \
 	fi
 
 # The library contains files differing only by case (strategy/any.eln, Any.eln).
@@ -60,6 +60,20 @@ smoke: install
 
 check: smoke test-runner
 	$(BENCH) --prefix $(PREFIX) --kinds I,A
+
+# Interpreter tests under sanitizers (build-san/): AddressSanitizer + UBSan.
+# On macOS 27 with Apple Clang 17, ASan hangs at startup even for an empty
+# program, so the default there is UBSan only (ASan runs in CI on Linux and in
+# ci/Dockerfile.linux). Leak detection is off: terms are never freed, by design.
+ifeq ($(UNAME),Darwin)
+  SANITIZERS ?= undefined
+else
+  SANITIZERS ?= address,undefined
+endif
+check-sanitize:
+	ASAN_OPTIONS=detect_leaks=0 UBSAN_OPTIONS=print_stacktrace=1 \
+	$(MAKE) BUILD=build-san PREFIX=$(CURDIR)/build-san/install \
+	  CMAKE_FLAGS="-DELAN_SANITIZE=ON -DELAN_SANITIZERS=$(SANITIZERS)" check
 
 reference:
 	reference/build.sh

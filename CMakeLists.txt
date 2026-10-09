@@ -10,4 +10,13 @@ set(ELAN_CXX_COMPAT_OPTIONS -std=c++17 -fsigned-char -Wall -Wextra -Werror)
 set(ELAN_DEFINITIONS
     PACKAGE="elan-interpreter" VERSION="3.6g" YYTEXT_POINTER=1)
 
+# make check-sanitize: sanitizer build (ELAN_SANITIZERS, default address,undefined)
+option(ELAN_SANITIZE "Build with sanitizers" OFF)
+set(ELAN_SANITIZERS "address,undefined" CACHE STRING "-fsanitize= list")
+if(ELAN_SANITIZE)
+  add_compile_options(-fsanitize=${ELAN_SANITIZERS} -fno-sanitize-recover=undefined
+                      -fno-omit-frame-pointer -g)
+  add_link_options(-fsanitize=${ELAN_SANITIZERS})
+endif()
+
 add_subdirectory(src/interpreter)
