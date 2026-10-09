@@ -792,7 +792,7 @@ void strategy::Delete()
       break;
     default : dumpout << "\n[copy] unknown strategy in strdelete internal error\n";
   }
-  CFRE(this);
+  DELETE1(this); // allocated with new (term2strategy, meta.cc)
 }
 
 struct strlist *copies(struct strlist *sl)
