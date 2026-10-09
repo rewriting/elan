@@ -1,0 +1,46 @@
+module stdio
+
+import global int bool string; 
+end
+sort Pid;
+end
+operators global
+  getc(@)	: (Pid) int		code 113;
+  putc(@,@)	: (Pid int) int		code 114;  
+  create(@)	: (string) Pid		code 115; // a process
+  open(@,@)	: (string string) Pid	code 116; // open a file for read/write/append
+  close(@)	: (Pid) Pid		code 118; // close a file/kill a process
+  //------------------------------------
+  stdin 	: Pid;
+  stdout	: Pid;
+  stderr	: Pid;
+  iserr(@)	: (Pid) bool;
+  errno(@)	: (Pid) int;
+ local
+  @		: (int) Pid		code 121;
+  Error(@)	: (int) Pid		code 122;
+end
+
+rules for Pid
+x:Pid;
+local
+  []	stdin 	=> 0 	end
+  []	stdout 	=> 1	end
+  []	stderr 	=> 2	end
+end
+
+rules for bool
+x:Pid; e:int;
+local
+  []	iserr(Error(e)) => true		end
+  []	iserr(x) => false		end
+end
+
+rules for int
+x:Pid; e:int;
+local
+  [] 	errno(Error(e)) => e		end
+end
+
+end
+

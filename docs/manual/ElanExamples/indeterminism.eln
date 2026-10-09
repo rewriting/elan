@@ -1,0 +1,12 @@
+empty	:		set;
+@	: ( elem )	set;
+@ U @	: ( set set )	set	(AC);
+element(@): ( set )	elem;
+
+
+rules for elem
+	S : set;
+	e : elem;
+local
+  [extractrule]   element(S U e) => e 	end
+end

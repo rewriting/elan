@@ -1,0 +1,101 @@
+% [ck: Nov 17 95] de Marian
+
+\begin{center}
+\tablefirsthead{\hline
+                Code    & Op    & rank  & comment \\
+                \hline\hline
+                }
+\tablehead{\hline 
+           \multicolumn{4}{|l|}{\small\sl continued from previous page}\\
+           \hline 
+                Code    & Op    & rank  & comment \\
+           \hline\hline
+           }
+\tabletail{\hline
+           \multicolumn{4}{|r|}{\small\sl continued on next page}\\
+           \hline}
+\tablelasttail{\hline}
+\bottomcaption{Built ins codes}\label{Built-in codes}
+\par
+\begin{supertabular}{||l||c|l|l||}
+0               & false         & bool                  & \\
+1               & true          & bool                  & \\
+2 &&&\\
+3               & $+$           & ( int ~int ) int      & \\
+4               & $-$           & ( int ~int ) int      & \\
+5               & $*$           & ( int ~int ) int      & \\
+6               & $/$           & ( int ~int ) int      & \\
+7 &&&\\
+8               & $==$          &( int ~int ) bool      & \\
+9               & $!=$          &( int ~int ) bool      & \\
+10              & $<$           &( int ~int ) bool      & \\
+11              & $<=$          &( int ~int ) bool      & \\
+12              & $>$           &( int ~int ) bool      & \\
+13              & $>=$          &( int ~int ) bool      & \\
+14              & $==$          &( ident ~ident ) bool  & \\
+15              & $!=$          &( ident ~ident ) bool  & \\
+16              & replace       &( X ~X ) bool  & \\
+17              & occur         &( X ~X ) bool  & \\
+18              & equal         &( X ~X ) bool  & \\
+19              & nequal        &( X~ X ) bool  & \\
+20              & $-$           &( int ) int    & \\
+21              & and           &( bool ~bool ) bool    & \\
+22              & or            &( bool ~bool ) bool    & \\
+23              & xor           &( bool ~bool ) bool    & \\
+24              & not           &( bool ~bool ) bool    & \\
+25              & b2i           &( bool ) int   & \\
+26              & i2b           &( int ) bool   & \\
+27              & \%            &( int ~int ) int       & modulo \\
+28              & and           &( int ~int ) int       & bitwise ~and\\
+29              & or            &( int ~int ) int       & bitwise ~or\\
+30              & less          &( X ~X ) bool  & \\
+31              & lesseq        &( X ~X ) bool  & \\
+32              & greater       &( X ~X ) bool  & \\
+33              & greatereq     &( X ~X ) bool  & \\
+% [ck: Oct 30 97] il faut comprendre ce qu'on veut mettre sur les doubles
+%34              & dconst1       &( int ) double         & @.\\
+%35              & dconst2       &( int ~int ) double    & @.@\\
+%36              & dconst3       &( int ~int ~int ) double       & @.@E+@\\
+%37              & dconst4       &( int ~int ~int ) double       &  @.@E-@\\
+%38              & $+$           &( double ~double ) double      & \\
+%39              & $-$           &( double ~double ) double      & \\
+%40              & $*$           &( double ~double ) double      & \\
+%41              & $/$           &( double ~double ) double      & \\
+%42              & $-$           &( double ) double      & \\
+%43              & $==$          &( double ~double ) bool        & \\
+%44              & $!=$          &( double ~double ) bool        & \\
+%45              & $<$           &( double ~double ) bool        & \\
+%46              & $<=$          &( double ~double ) bool        & \\
+%47              & $>$           &( double ~double ) bool        & \\
+%48              & $>=$          &( double ~double ) bool        & \\
+%49              & doubleconstruct       & ( int ~int ) double   & \\
+%50              & exp           &( double ) double      & \\
+%51              & exp2          &( double ) double      & \\
+%52              & exp10         &( double ) double      & \\
+%53              & log           &( double ) double      & \\
+%54              & log2          &( double ) double      & \\
+%55              & log10         &( double ) double      & \\
+%56              & pow           &( double ) double      & \\
+%57              & sin           &( double ) double      & \\
+%58              & cos           &( double ) double      & \\
+%59              & tan           &( double ) double      & \\
+%60              & asin          &( double ) double      & \\
+%61              & acos          &( double ) double      & \\
+%62              & atan          &( double ) double      & \\
+%63              & i2double      &( int ) double         & \\
+%64              & dconst5       &( int ) double         &  .@\\
+%65              & dconst6       &( int ~int ) double    &  .@E-@\\
+%66              & dconst7       &( int ~int ) double    &  .@E-@\\
+%67              & anyInt2int    &$-->$ int              & \\
+%68              & anyIdent2ident&$-->$ ident            & \\
+%71              & dnconst1      &( int ) double         & -@.\\
+%72              & dnconst2      &( int ~int ) double    & -@.@\\
+%73              & dnconst3      &( int ~int ~int ) double       & -@.@E+@\\
+%74              & dnconst4      &( int ~int ~int ) double       &  -@.@E-@\\
+%75              & dnconst5      &( int ) double         &  -.@\\
+%76              & dnconst6      &( int ~int ) double    &  -.@E-@\\
+%77              & dnconst7      &( int ~int ) double    &  -.@E-@\\
+%78              & sqrt          &(double)double & \\
+%79              & $-$anyInt2int &$-->int$       & \\
+\end{supertabular}
+\end{center}

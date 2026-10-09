@@ -1,0 +1,10 @@
+module strany[X]
+
+import global strass strat[X];
+end
+operators  global
+  @ ':' '=' @	: (X X) strass;
+  @ ':' @	: (X <X>) strany;
+end
+
+end

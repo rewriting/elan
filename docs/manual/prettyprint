@@ -1,0 +1,18 @@
+#!/bin/sh
+echo
+#	prettyprint program to print ELAN programs
+#	usage: prettyprint file
+
+ELANDIR=..
+#/users/protheo/ckirchne/work/elan/elan-sources
+MANUAL=$ELANDIR/manual
+
+  cat <<PREAMBULE 
+\\let\\CF=\\rm
+PREAMBULE
+
+lgrind -i -d $MANUAL/prettyprintdataEco -lall $1
+
+  cat <<FINISH
+FINISH
+

@@ -1,0 +1,64 @@
+
+\let\CF=\rm
+% Remember to use the lgrind style
+
+\File{eqSystem.eln},{17:23},{Jun 21 1996}
+\L{\LB{\C{}\1\1}}
+}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{16}{(c)}\Tab{24}{INRIA-Lorraine \& CRIN}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{24}{615, rue du Jardin Botanique, BP 101}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{16}{        54602 Villers-les-Nancy}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{24}{France}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{24}{email: elan@loria.fr}}
+\CE{}\L{\LB{\C{}\1\1}}
+}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{8}{\$Source: /CVS/aircube/elan3/doc/elanlibTex/eqSystem.eln.tex,v $}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{8}{\$Revision: 1.2 $}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{8}{\$Date: 1996/08/05 20:24:07 $}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{8}{\$Author: ckirchne $}}
+\CE{}\L{\LB{\C{}\1\1}}
+}}
+\CE{}\L{\LB{}}
+\L{\LB{\K{module}_\V{eqSystem}}}
+\L{\LB{\K{import}_}\Tab{8}{\K{global}}\Tab{16}{\V{applySubstOn}[\V{eqSystem}];}}
+\L{\LB{}\Tab{8}{\K{local}}\Tab{16}{\V{bool}_\V{int}_\V{term};}}
+\L{\LB{\K{sort}_\V{eqSystem}_\V{equation};}}
+\L{\LB{\K{op}}}
+\L{\LB{\K{global}}}
+\L{\LB{__@_=_@}\Tab{16}{:_(_\V{term}_\V{term}_)_\V{equation};}}
+\L{\LB{}}
+\L{\LB{__@}\Tab{16}{:_(_\V{bool}_)_\V{eqSystem};}}
+\L{\LB{__@_}\Tab{16}{:_(_\V{equation}_)_\V{eqSystem};}}
+\L{\LB{__@_\&_@}\Tab{16}{:_(_\V{eqSystem}_\V{eqSystem}_)_\V{eqSystem}}\Tab{56}{\V{assocLeft};}}
+\L{\LB{__(@_\&_@)}\Tab{16}{:_(_\V{eqSystem}_\V{eqSystem}_)_\V{eqSystem}}\Tab{56}{\K{alias}_@_\&_@:;}}
+\L{\LB{}}
+\L{\LB{__\V{system\_to\_subst}(@)}\Tab{24}{:_(_\V{eqSystem}_)_\V{substitution};}}
+\L{\LB{\K{endop}}}
+\L{\LB{}}
+\L{\LB{\K{rules}__\K{for}_\V{substitution}}}
+\L{\LB{\K{declare}_\V{P},\V{Q},\V{R}:\V{eqSystem};_\V{t}:\V{term};_\V{x}:\V{variable};}}
+\L{\LB{\K{bodies}}}
+\L{\LB{__[\,]_\V{system\_to\_subst}(\V{true})_}\Tab{32}{=\>_\V{identity}}\Tab{64}{\K{end}}}
+\L{\LB{__[\,]_\V{system\_to\_subst}(\V{x}=\V{t})_}\Tab{32}{=\>_\V{x}\-\!\>\V{t}}\Tab{64}{\K{end}}}
+\L{\LB{__[\,]_\V{system\_to\_subst}(\V{P}_\&_\V{Q})_}\Tab{32}{=\>_\V{system\_to\_subst}(\V{P})_\V{o}_\V{system\_to\_subst}(\V{Q})}}
+\L{\LB{__\K{end}}}
+\L{\LB{\K{end}_\K{of}_\K{rules}}}
+\L{\LB{}}
+\L{\LB{\K{rules}_\K{for}_\V{eqSystem}}}
+\L{\LB{\K{declare}_\V{P},\V{Q},\V{R}:\V{eqSystem};_\V{n}:\V{int};_\V{t}:\V{term};_\V{e}:\V{equation};}}
+\L{\LB{\K{bodies}}}
+\L{\LB{__[\V{new\_var\_elim}]_\V{P}_\&_\V{var}(\V{n})_=_\V{t}_}\Tab{40}{=\>_\V{apply}(\V{var}(\V{n})\-\!\>\V{t},\V{P})}\Tab{64}{\K{end}}}
+\L{\LB{__[\V{unfold}]}\Tab{16}{_\V{P}_\&_(\V{Q}_\&_\V{R})}\Tab{40}{=\>_(\V{P}_\&_\V{Q})_\&_\V{R}}\Tab{64}{\K{end}}}
+\L{\LB{__[\V{eqPass}]_}\Tab{16}{_\V{P}_\&_\V{e}}\Tab{24}{_}\Tab{40}{=\>_\V{e}_\&_\V{P}}\Tab{64}{\K{end}}}
+\L{\LB{}}
+\L{\LB{}}
+\L{\LB{\K{end}_\K{of}_\K{rules}}}
+\L{\LB{}}
+\L{\LB{\K{strategy}_\V{delete\_new\_variables}}}
+\L{\LB{__\K{repeat}}}
+\L{\LB{____\K{dont}_\K{care}_\K{choose}(\V{new\_var\_elim}_\V{unfold}_\V{eqPass})}}
+\L{\LB{__\K{endrepeat}}}
+\L{\LB{\K{end}_\K{of}_\K{strategy}}}
+\L{\LB{}}
+\L{\LB{\K{end}_\K{of}_\K{module}}}
+\L{\LB{}}

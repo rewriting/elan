@@ -1,0 +1,10 @@
+LPL map description
+	query	of sort  	list[int]
+	result of sort 		list[int] 
+	import		 	int map[int] 
+	start with 		[start 2]query
+
+end
+
+
+

@@ -1,0 +1,237 @@
+% -*- Document-Type: LaTeX; Master-File: manual.tex -*- 
+
+% [ck: Aug  9 95]
+% \chapter{The standard library}
+
+
+This chapter presents the main features of the \elan\ standard
+library. Remember that the path to this library is specified in the system variable ELANLIB whose default value is set to the subdirectory {\tt elan\_library/elanlib} of the source directory. \elan\ can be used without any reference
+to this library, {\it except\/} for what concerns the use of the
+built-in objects which are documented in the second part of this chapter.
+
+This   library has  been   designed to  be small  and  as efficient as
+possible.   In  particular  {\it  no\/}  AC   operators  is used.  The
+resulting  code is more  efficient, at  the  price of sometimes heavier
+descriptions.
+
+
+\section{The \elan\ standard library}
+
+The standard library is fully documented in~\cite{elanlibManual-98} to 
+which we refer for details. We give below the list of files defined in
+the standard library. Some of them define built-in sorts and operators
+and in this case, they also appear in the next section 
+(section~\ref{les built-in}).
+
+\subsection{common}
+
+In this category, the most common abstract data types are defined.
+
+
+\begin{tabular}{l@{~~~~~}l}
+        anyIdentifier.eln            &  eq.eln\\
+        anyInteger.eln               &  identity.eln\\
+        array.eln                    &  int.eln\\
+        arrayLIN.eln                 &  integerConstants.eln\\
+        arrayLOG.eln                 &  IO.eln\\
+        bool.eln                     &  list.eln\\
+        builtinArray                 &  occur.eln\\
+        builtinHashTree              &  pair.eln\\
+        builtinInt.eln               &  prompt.eln\\
+        builtinIO.eln                &  replace.eln\\
+        builtinSidio.eln             &  stdio.eln\\
+        builtinString.eln            &  string.eln\\
+        builtinSyntacticMatching.eln &  strlist.eln\\
+        cmp.eln                   &  tuple.eln\\
+        Query.eln\\
+\end{tabular}
+
+\subsection{ref}
+
+All the modules needed to deal with the Reduced \elan\ Format.
+
+\begin{tabular}{l@{~~~~~}l}
+        Meta\_Apply.eln         ref\_modules.eln        ref\_terms.eln \\
+        REF.eln                ref\_read.eln           ref\_unify.eln \\
+        ref\_rules.eln          ref\_unify\_builtin.eln \\
+        ref2string.eln         ref\_sorts.eln          ref\_write.eln \\
+        ref2term.eln           ref\_strategies.eln     refstring2string.eln \\
+        ref\_idents.eln         ref\_tables.eln         string2refterm.eln
+\end{tabular}
+
+\subsection{noquote}
+
+These modules describe a possible syntax for the user
+specifications. More complicated syntax (e.g. mixfix) can also be
+defined.
+
+\begin{tabular}{l@{~~~~~}l}
+        applySubstOn.eln   hornClauseSyntax.eln    syntacticUnification.eln \\
+        atom.eln           ident.eln               termCommons.eln \\
+        atomP.eln          identifier.eln          sigSyntax.eln \\
+        eqSystem.eln       substitution.eln
+\end{tabular}
+
+\subsection{strategy}
+
+These modules are used for the definition and evaluation of defined
+strategies.
+
+\begin{tabular}{l@{~~~~~}l}
+        Any.eln          booleg.eln       meta.eln         strsig.eln \\
+        any.eln        Meta\_apply.eln   strapply.eln     symbol.eln \\
+        Meta\_capply.eln  commit.eln       strat.eln        tcstrat.eln \\
+        Meta\_strat.eln   strcapply.eln   loops.eln        strconc.eln
+\end{tabular}
+
+\section{The built-ins}\label{les built-in}
+
+\input{builtins}
+
+\section{Calling external programs}
+
+\elan\ allows using external programs like for instance the UNIF
+system~\cite{Ringeissen-RTA97}. Let us describe how it works.
+
+The external program is assumed to take as input a term and to return
+to \elan\ a set of terms. One could imagine the input term as an input
+constraint and the returned terms as the solved forms computed by the
+program. The program is called as a sub-process of the \elan\ session
+and it is linked to it via two UNIX pipes which are respectively
+attached to the standard input and output of the process (i.e. stdin,
+stdout). 
+
+Since it is useful to reuse a given process as much as possible,
+the description of the called process gives the number of
+terms that can be sent to the process before killing it and replacing
+it by another one.
+
+Data (i.e. terms) are sent in and out under a textual format. This
+format is determined by the signature of the module in which the
+process call is performed.
+
+The process call is realized through the use of the strategies
+\rw{dccall} and \rw{dkcall} (that stand for {\em dont care
+call} and {\em dont know call}), with three arguments:\\
+-- the first is the name of the process,\\
+-- the second is the number of terms that should be transmitted to the
+process before killing it,\\
+-- and the third is the (unique) sort of initial and result terms.\\
+The syntax is therefore the following:
+
+\grrule{strategy}{
+  \rw{dkcall}\sym(\nt{identifier}\sym,\nt{number}\sym,\nt{sort name}\sym)
+\gror
+  \rw{dccall}\sym(\nt{identifier}\sym,\nt{number}\sym,\nt{sort name}\sym)
+}
+
+The difference between the two calls is that the first one returns all
+the computed results while the second one returns only the first result,
+even if several are computed.
+
+In order to be able to communicate with \elan, the process which is called
+should obey to the following syntactic restrictions.\\
+The output should have the following syntax:
+\grrule{process output}{
+  \itone{\sym{\#}} \nt{next solution}
+}
+\grrule{next solution}{
+  \nt{number} \itone{\sym{*}} \nt{term} \itone{\sym{\#}} \nt{next solution}
+\gror
+  \rw{END} \itone{\sym{\#}}
+}
+where \nt{term} is one result.\\
+In the same way, the process should accept the syntax of the initial
+term, described as follows:
+
+\grrule{process input}{
+  \nt{term} \nt{next solution demand}
+}
+
+\grrule{next solution demand}{
+  \sym. \nt{next solution demand}
+\gror
+  \sym;
+}
+where \nt{term} is the term passed to the built-in process.
+
+The way the communication is organised between \elan\ and the built-in
+process is as follows. \elan\ first sends the initial term to the
+process and every time it needs another result, it sends the symbol
+``\sym.'' and waits for the answer of the process on its standard
+output. The answer should be in the syntax corresponding to the
+non-terminal \nt{next solution}. If \elan\ does not need anymore
+solution, it sends the symbol ``\sym;'' which makes the process stop,
+or it sends an ``end of file'' if the limit of the process use is
+reached.
+
+\Attention{Since the synchronization between \elan\ and the called
+process in made through pipes, the two process should reinitialise
+their buffers after each large output. As a consequence the called
+process should call the fflush(stdout) procedure after returning each
+solution.} 
+
+\EX
+
+Assume that one would like to use the shell command
+``sort'' for sorting a list of ``elements''. The first step is to create a
+file containing the shell script calling the sort command and that
+follows the syntactic conventions required by \elan\ as just described
+above. Let us call this file \texttt{elansort}:
+\begin{verbatim}
+#! /bin/sh
+cat /dev/null > /tmp/inputFile
+read r
+while (test "$r" != "") do
+  echo $r >> /tmp/inputFile 
+  read r 
+done
+echo "##0**"
+sort < /tmp/inputFile
+echo "##END#"
+read r
+while (test "$r" != ";") do 
+  read r 
+done
+/bin/rm /tmp/inputFile
+\end{verbatim}
+
+Then, we construct the syntax of ``elements'' by using a preprocessor
+instruction involving a list (\texttt{Vars}) of identifiers taken from
+a specification file:
+\begin{verbatim}
+import  global  List ;
+        local   Vars anyIdentifier list[identifier] ;
+end
+
+operators global
+    FOR EACH SS:identifier SUCH THAT SS:=(listExtract) elem(Vars) :{
+      SS     : elem ;
+    }
+end
+\end{verbatim}
+
+Lists are defined as sequences of elements, without any separator:
+\begin{verbatim}
+sort list; end
+
+operators global
+  @             : ( elem ) list;
+  @ @           : ( list list ) list    assocLeft;
+end
+\end{verbatim}
+
+Since \texttt{elansort} could only be used for sorting elements given
+successively on each line of a file, we have to convert lists in the
+right syntax before calling the external program:
+\insertExamples{listSort.eln}
+
+The main strategy \texttt{extSort} applies first the conversion rule
+and then applies the rule calling the external program through the
+\texttt{callSort} strategy defined in the following \elan\ module:
+\insertExamples{callSort.eln}
+This module can be considered as an encapsulation of the
+\texttt{elansort} program. According to the alias declarations,
+results are written in the initial syntax, as sequences of elements
+separated by spaces.
+\FEX

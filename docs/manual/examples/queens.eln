@@ -1,0 +1,61 @@
+module queens
+import bool int list[int];
+op
+  global
+    queens	: list[int];
+
+  local
+    ok(@,@,@)	: ( int int list[int] ) bool;
+
+endop
+
+rule queensrule for list[int]
+declare p1,p2,p3,p4,p5,p6,p7,p8 : int;
+body
+
+  queens => p1.p2.p3.p4.p5.p6.p7.p8.nil
+			// -- last: if all the local assignments and 
+			// condition are OK then the instanciated right 
+			// hand-side carry the values.
+		if ok(1,p8,p7.p6.p5.p4.p3.p2.p1.nil)
+		where p8:=(listExtract) elem(1.2.3.4.5.6.7.8.nil)
+		if ok(1,p7,p6.p5.p4.p3.p2.p1.nil)
+		where p7:=(listExtract) elem(1.2.3.4.5.6.7.8.nil)
+		if ok(1,p6,p5.p4.p3.p2.p1.nil)
+		where p6:=(listExtract) elem(1.2.3.4.5.6.7.8.nil)
+		if ok(1,p5,p4.p3.p2.p1.nil)
+		where p5:=(listExtract) elem(1.2.3.4.5.6.7.8.nil)
+		if ok(1,p4,p3.p2.p1.nil)
+		where p4:=(listExtract) elem(1.2.3.4.5.6.7.8.nil)
+		if ok(1,p3,p2.p1.nil)
+			// -- cinquo ...
+		where p3:=(listExtract) elem(1.2.3.4.5.6.7.8.nil)
+			// -- quarto: choose a position on the third raw
+			// and continue upward ...
+		if ok(1,p2,p1.nil)
+			// -- third: the positions on the first and
+			// second raws are checked to be compatible
+		where p2:=(listExtract) elem(1.2.3.4.5.6.7.8.nil)
+			// -- second: the position on the second raw
+			// is also choosen 
+		where p1:=(listExtract) elem(1.2.3.4.5.6.7.8.nil)
+			// -- first: the position on the first raw
+			// is choosen
+end of rule
+
+rules for bool
+declare p,d,diff : int;
+	l : list[int];
+bodies
+  [] ok(diff,d,nil)	=> true				end
+  [] ok(diff,d,p.l)	=> false	if d == p  	end
+  [] ok(diff,d,p.l)	=> false        if d-p == diff  end
+  [] ok(diff,d,p.l)	=> false        if p-d == diff  end
+  [] ok(diff,d,p.l)	=> ok(diff+1,d,l)		end
+end of rules
+
+strategy queens
+  dont care choose(queensrule)
+end of strategy
+
+end of module			

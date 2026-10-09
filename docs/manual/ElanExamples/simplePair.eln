@@ -1,0 +1,17 @@
+module simplePair
+import bool;
+  end
+sort X Y Pair;
+  end
+operators
+  global
+    [@,@]	: ( X Y ) Pair;
+    isPair(@)	: ( Pair ) bool;
+	\\ automatically generated selectors
+    @ .first  : (Pair) X;
+    @ .second : (Pair) Y;
+	\\ automatically generated modifiers
+    @[.first<-@]  : (Pair X) Pair; 
+    @[.second<-@] : (Pair Y) Pair;
+  end
+end

@@ -1,0 +1,35 @@
+module testWhere
+
+sort foo;
+
+op global
+    a : foo;
+    b : foo;
+    c : foo;
+    d : foo;
+    e : foo;
+endop
+
+rules for foo
+declare x : foo ;
+bodies
+  [r0] 	a  	=> x where x := (all)b end
+  [r1]  b 	=> d	end
+  [r2] 	b	=> c	end
+  [] 	e  	=> x where x := (all)b end
+
+end of rules
+
+strategy returnAll
+dont know choose (r0)
+end of strategy
+
+strategy returnOne
+dont care choose (r0)
+end of strategy
+
+strategy all
+dont know choose (r1 r2)
+end of strategy
+
+end of module

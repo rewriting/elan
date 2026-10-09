@@ -1,0 +1,101 @@
+
+\let\CF=\rm
+% Remember to use the lgrind style
+
+\File{termF.eln},{17:23},{Jun 21 1996}
+\L{\LB{\C{}\1\1}}
+}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{16}{(c)}\Tab{24}{INRIA-Lorraine \& CRIN}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{24}{615, rue du Jardin Botanique, BP 101}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{16}{        54602 Villers-les-Nancy}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{24}{France}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{24}{email: elan@loria.fr}}
+\CE{}\L{\LB{\C{}\1\1}}
+}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{8}{\$Source: /CVS/aircube/elan3/doc/elanlibTex/termF.eln.tex,v $}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{8}{\$Revision: 1.2 $}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{8}{\$Date: 1996/08/05 20:24:20 $}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{8}{\$Author: ckirchne $}}
+\CE{}\L{\LB{\C{}\1\1}}
+}}
+\CE{}\L{\LB{}}
+\L{\LB{\K{module}_\V{termF}[\V{Fss}]}}
+\L{\LB{\K{import}_\K{global}_}\Tab{16}{\V{term};}}
+\L{\LB{_______\K{local}_}\Tab{16}{\V{int}_\V{identifier}_\V{bool}_\V{Fss}_\V{pair}[\V{identifier},\V{int}]_}}
+\L{\LB{}\Tab{16}{\V{list}[\V{pair}[\V{identifier},\V{int}]]_\V{list}[\V{int}];}}
+\L{\LB{\K{op}}}
+\L{\LB{__\K{global}}}
+\L{\LB{}}
+\L{\LB{}\Tab{8}{\C{}\1\1_ This creates from the user specification the actual }}
+\CE{}\L{\LB{}\Tab{8}{\C{}\1\1_ rank for operators declared of arity zero (the constants)}}
+\CE{}\L{\LB{__\K{FOR}_\K{EACH}_\V{SS}:\V{pair}[\V{identifier},\V{int}];_\V{F}:\V{identifier};__\V{N}:\V{int}}}
+\L{\LB{__\K{SUCH}_\K{THAT}_\V{SS}:=(\V{listExtract})_\V{elem}(\V{Fss})_\K{AND}_\V{F}:=()\V{first}(\V{SS})_}}
+\L{\LB{}\Tab{8}{\K{AND}_\V{N}:=()\V{second}(\V{SS})_\K{ANDIF}_\V{N}==0_:\{}}
+\L{\LB{______\V{F}_____}\Tab{16}{:_\V{term};}}
+\L{\LB{______\V{F}()}\Tab{16}{:_\V{term}}\Tab{48}{\K{alias}_\V{F}:;}}
+\L{\LB{____\}}}
+\L{\LB{}}
+\L{\LB{}\Tab{8}{\C{}\1\1_ From the user specification, this creates the actual}}
+\CE{}\L{\LB{}\Tab{8}{\C{}\1\1_ rank for non constant operators}}
+\CE{}\L{\LB{\K{FOR}_\K{EACH}_\V{SS}:\V{pair}[\V{identifier},\V{int}];_\V{F}:\V{identifier};__\V{N}:\V{int}}}
+\L{\LB{\K{SUCH}_\K{THAT}_\V{SS}:=(\V{listExtract})_\V{elem}(\V{Fss})_\K{AND}_\V{F}:=()\V{first}(\V{SS})_}}
+\L{\LB{}\Tab{8}{\K{AND}_\V{N}:=()\V{second}(\V{SS})_\K{ANDIF}_\V{N}_\>_0_:\{}}
+\L{\LB{}}
+\L{\LB{_____\V{F}_(@_\{,@\}\~(\V{N}\-1))}\Tab{24}{:(\{\V{term}\}\~\V{N})_\V{term};}}
+\L{\LB{}}
+\L{\LB{_____\V{F}(\{,@\}\~\V{N})_}\Tab{24}{:_(\{\V{term}\}\~\V{N})\V{term}_}\Tab{48}{\K{alias}_\V{F}(@\{,@\}\~(\V{N}\-1)):;}}
+\L{\LB{_____\V{F}(\{@,\}\~\V{N})}\Tab{24}{:_(\{\V{term}\}\~\V{N})\V{term}_}\Tab{48}{\K{alias}_\V{F}(@\{,@\}\~(\V{N}\-1)):;}}
+\L{\LB{_____\V{F}(,\{@,\}\~\V{N})}\Tab{24}{:_(\{\V{term}\}\~\V{N})\V{term}_}\Tab{48}{\K{alias}_\V{F}(@\{,@\}\~(\V{N}\-1)):;}}
+\L{\LB{}}
+\L{\LB{____\}}}
+\L{\LB{}}
+\L{\LB{\K{endop}}}
+\L{\LB{}}
+\L{\LB{}}
+\L{\LB{\K{FOR}_\K{EACH}_\V{SS}:\V{pair}[\V{identifier},\V{int}];_\V{F}:\V{identifier};__\V{N}:\V{int}}}
+\L{\LB{\K{SUCH}_\K{THAT}_\V{SS}:=(\V{listExtract})_\V{elem}(\V{Fss})_\K{AND}_\V{F}:=()\V{first}(\V{SS})_}}
+\L{\LB{}\Tab{8}{\K{AND}_\V{N}:=()\V{second}(\V{SS})_\K{ANDIF}_\V{N}_\>_0_:\{}}
+\L{\LB{__\K{rules}_\K{for}_\V{term}}}
+\L{\LB{__\K{declare}_\V{t\_1},.\,.\,.,\V{t\_N}_:_\V{term};}}
+\L{\LB{__\K{bodies}}}
+\L{\LB{}}
+\L{\LB{___\{_[\,]_\V{I}\-\V{th}_\V{subterm}(\V{F}(\V{t\_1},.\,.\,.,\V{t\_N}))___=\>_\V{t\_I}}\Tab{56}{\K{end}}}
+\L{\LB{___\}\V{\_I}=1.\,.\,.N}}
+\L{\LB{}}
+\L{\LB{___\K{rule}_\K{for}_\V{ident}}}
+\L{\LB{___\K{body}__\V{head}(\V{F}(\V{t\_1},.\,.\,.,\V{t\_N}))_}\Tab{40}{=\>_\V{F}}\Tab{56}{\K{end}}}
+\L{\LB{}}
+\L{\LB{___\K{rules}_\K{for}_\V{list}[\V{int}]}}
+\L{\LB{___\K{declare}_\V{oocc}:\V{list}[\V{int}];}}
+\L{\LB{___\K{bodies}}}
+\L{\LB{___\{_[\V{inOccRule}]_\V{nvocc}(\V{F}(\V{t\_1},.\,.\,.,\V{t\_N}))}\Tab{40}{=\>_\V{J}.\V{oocc}_}}
+\L{\LB{}\Tab{16}{\K{where}_\V{oocc}:=(\V{chooseOccurence})_\V{nvocc}(\V{t\_J})}}
+\L{\LB{______\K{end}}}
+\L{\LB{___\}\V{\_J}=1.\,.\,.N}}
+\L{\LB{___\K{end}_\K{of}_\K{rules}}}
+\L{\LB{}}
+\L{\LB{__\K{end}_\K{of}_\K{rules}}}
+\L{\LB{\}}}
+\L{\LB{}}
+\L{\LB{\K{FOR}_\K{EACH}_\V{SS}:\V{pair}[\V{identifier},\V{int}];_\V{F}:\V{identifier};__\V{N}:\V{int}}}
+\L{\LB{\K{SUCH}_\K{THAT}_\V{SS}:=(\V{listExtract})_\V{elem}(\V{Fss})_\K{AND}_\V{F}:=()\V{first}(\V{SS})_}}
+\L{\LB{}\Tab{8}{\K{AND}_\V{N}:=()\V{second}(\V{SS})_:\{}}
+\L{\LB{___\K{rule}_\K{for}_\V{ident}}}
+\L{\LB{___\K{declare}_\V{t\_1},.\,.\,.,\V{t\_N}_:_\V{term};}}
+\L{\LB{___\K{body}__\V{head}(\V{F}(\V{t\_1},.\,.\,.,\V{t\_N}))_}\Tab{40}{=\>_\V{F}}\Tab{56}{}}
+\L{\LB{___\K{end}}}
+\L{\LB{\}}}
+\L{\LB{}}
+\L{\LB{\K{FOR}_\K{EACH}_\V{SS}:\V{pair}[\V{identifier},\V{int}];_\V{F}:\V{identifier};__\V{N}:\V{int}}}
+\L{\LB{\K{SUCH}_\K{THAT}_\V{SS}:=(\V{listExtract})_\V{elem}(\V{Fss})_\K{AND}_\V{F}:=()\V{first}(\V{SS})_}}
+\L{\LB{}\Tab{8}{\K{AND}_\V{N}:=()\V{second}(\V{SS})_\K{ANDIF}_\V{N}_!=_0_:\{}}
+\L{\LB{__\K{rules}_\K{for}_\V{term}}}
+\L{\LB{__\K{declare}_\V{t\_1},.\,.\,.,\V{t\_N}_:_\V{term};_\V{t},\V{s}:\V{term};_\V{l}:\V{list}[\V{int}];}}
+\L{\LB{__\K{bodies}}}
+\L{\LB{__\{_[\,]_\V{F}(\V{t\_1},.\,.\,.,\V{t\_N})[\V{s}]_\V{at}_\V{I}.\V{l}_=\>_\V{F}(\V{t\_1},.\,.\,.,\V{t\_}(\V{I}\-1),\V{t\_I}[\V{s}]_\V{at}_\V{l},\V{t\_}(\V{I}+1),.\,.\,.,\V{t\_N})}}
+\L{\LB{____\K{end}}}
+\L{\LB{__\}\V{\_I}=1.\,.\,.N}}
+\L{\LB{__\K{end}_\K{of}_\K{rules}}}
+\L{\LB{\}}}
+\L{\LB{}}
+\L{\LB{\K{end}_\K{of}_\K{module}}}

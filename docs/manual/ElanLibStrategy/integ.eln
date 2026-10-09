@@ -1,0 +1,47 @@
+module integ
+
+import global int bool;
+end
+sort integ;
+end
+operators global 
+  @	: (int) integ		pri 1000;
+  @ + @ : (integ integ) integ	pri 500;
+  @ - @ : (integ integ) integ	pri 600;
+  @ * @ : (integ integ) integ	pri 700;
+  @ % @ : (integ integ) integ	pri 800;
+  @ & @ : (integ integ) integ	pri 800;
+  @ / @ : (integ integ) integ	pri 800;
+  @ | @ : (integ integ) integ	pri 800;
+  - @  	: (integ) integ		pri 900;
+  @ > @ : (integ integ) bool	pri 300;
+  @ >= @ : (integ integ) bool	pri 300;
+  @ <= @ : (integ integ) bool	pri 300;
+  @ < @ : (integ integ) bool	pri 300;
+end
+
+rules for integ
+ a,b,c : int;
+local
+  [] a+b => c where c:=()a+b 	end
+  [] a-b => c where c:=()a-b 	end
+  [] a*b => c where c:=()a*b 	end
+  [] a%b => c where c:=()a%b 	end
+  [] a&b => c where c:=()a&b 	end
+  [] a|b => c where c:=()a|b 	end
+  [] a/b => c where c:=()a/b 	end
+  [] -a => c  where c:=()-a 	end
+end
+
+rules for bool
+ a,b: int; c : bool;
+local
+  [] a<=b => c  	where c:=()intlesseq(a,b)	end
+  [] a<b => c   	where c:=()intless(a,b)		end
+  [] a>=b => c  	where c:=()intgreatereq(a,b)	end
+  [] a>b => c   	where c:=()intgreater(a,b)	end
+end
+
+end
+
+

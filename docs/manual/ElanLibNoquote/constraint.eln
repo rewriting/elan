@@ -1,0 +1,29 @@
+module constraint[Fss,Vars]
+import 	global	applySubstOn[Fss,Vars,constraint];
+	local	bool int termCommons[Fss,Vars];
+sort constraint equation;
+op
+global
+  @ = @         : ( term term ) equation;
+
+  @             : ( bool ) constraint;
+  @             : ( equation ) constraint;
+  @ & @         : ( constraint constraint ) constraint        (AC);
+  (@ & @)       : ( constraint constraint ) constraint        alias @ & @:;
+
+  system_to_subst(@)	: ( constraint ) substitution;
+end
+
+rules  for substitution
+ 
+	P,Q,R	:constraint;
+	$t	:term;
+	$x	:variable;
+bodies
+  [] system_to_subst(true) 	=> identity			end
+  [] system_to_subst($x=$t) 	=> $x->$t			end
+  [] system_to_subst(P & Q) 	=> system_to_subst(P) o system_to_subst(Q)
+  end
+end
+
+end

@@ -1,0 +1,112 @@
+% -*- Document-Type: LaTeX; Master-File: manual.tex -*- 
+
+% [ck: Aug  9 95]
+% fichier de macros specifiques au manuel
+
+%%%%%%%%%%%%%% 
+\newcommand{\dc}{\textbf{dc}}
+\newcommand{\dk}{\textbf{dk}}
+\newcommand{\dcone}{\textbf{dc~one}}
+\newcommand{\one}{\textbf{one}}
+\newcommand{\first}{\textbf{first}}
+\newcommand{\firstone}{\textbf{first~one}}
+\newcommand{\all}{\textbf{all}}
+\newcommand{\selectone}{\textbf{select~one}}
+\newcommand{\selectall}{\textbf{select~all}}
+\newcommand{\rep}{\textbf{repeat*}}
+\newcommand{\iterate}{\textbf{iterate*}}
+\newcommand{\id}{\textbf{id}}
+\newcommand{\fail}{\textbf{fail}}
+\newcommand{\setchp}{\textbf{set-choice-point}}
+\newcommand{\Strat}[1]{\langle #1 \rangle}
+%%%%%%%%%%%%%
+
+%\newcommand{\elan}{{\sf ELAN}}
+\newcommand{\tto} {~\mbox{\tt ::=}~}
+\newcommand{\sor} {\mbox{\tt |}}
+\newcommand{\nt}[1] {~$<${\em #1}$>$~\index{#1@{$<${\em #1}$>$}}}
+\newcommand{\gror} {\\ \> \sor \>}
+\newcommand{\gor} {\\ \rule{2mm}{0mm} \sor ~~ }
+\newcommand{\rw}[1] {{\bf #1}\index{#1@{\textbf{#1}}}}
+\newcommand{\sym}[1] {{\Large\bf #1}}
+\newcommand{\symm}[1] {{\LARGE\bf #1}}
+\newcommand{\symmm}[1] {{\huge\bf #1}}
+\newcommand{\nl} {\\\>\>}
+\newcommand{\nlp}[1] {\\\>\>\hspace{#1 mm}}
+\newcommand{\itzero}[1] { \mbox{\tt \{ }~#1~\mbox{\tt \} }$^*$ }
+\newcommand{\itone}[1] {\mbox{\tt \{} ~#1~\mbox{\} } $^+$ }
+\newcommand{\omm}[1] {\mbox{\tt [} #1 \mbox{\tt ]}}
+\newcommand{\orr}[2] {\mbox{\tt (} #1 \sor #2 \mbox{\tt )}}
+\newcommand{\orrr}[3] {\mbox{\tt (} #1 \sor  #2 \sor #3 \mbox{\tt )}}
+\newcommand{\modname}[1]{{\tt #1}}
+\newcommand{\sortname}[1]{{\sf #1}}
+\newcommand{\symdef}[3]{
+  \hspace*{1cm}\makebox[4cm][l]{#1}\sym{:}~\makebox[4cm][l]{#2} \makebox[3cm][l]{#3}\\
+}
+\newcommand{\aliasdef}[4]{
+  \hspace*{1cm}\makebox[4cm][l]{#1}\sym{:}~\makebox[4cm][l]{#2} \makebox[3cm][l]{#3}
+   \rw{alias} #4:\\
+}
+\newcommand{\grrule}[2]{
+  \begin{tabbing}
+  \nt{#1}\=\tto\=\kill 
+  \nt{#1}\>\tto\>#2
+  \end{tabbing}
+}
+
+\newenvironment{elanCode}{\par\medskip
+\par\medskip\scriptsize\begin{lgrind}}%
+{\end{lgrind}\smallbreak}  
+
+% 2026: the lgrind formatter that produced #1/ElanTeX/#2.tex no longer
+% exists; the original sources are included verbatim instead.
+\newcommand{\insertCode}[2]{%
+\par\medskip\VerbatimInput[fontsize=\scriptsize]{#1/#2}\smallbreak}
+ 
+\newcommand{\insertExamples}[1]{\insertCode{ElanExamples}{#1}}
+
+% index pour les mots clefs
+\newcommand{\indexMC}[1]{%
+\index{{\tt #1}}
+}
+\newcommand{\Attention}[1]{\noindent$\rhd$ {\sf #1}\\}
+
+\renewcommand{\EX}{\begin{example}\begin{it}}
+\renewcommand{\FEX}{\end{it}\end{example}}
+
+% [ck: Apr  8 97]
+\newcommand{\releaseNote}[1]%
+{\noindent --- {\sf Release Note}: {\sl #1}}
+
+% [ck: Apr  8 97]
+\newcommand{\oldSynt}[1]{}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%% scories: ne sert plus [ck: Oct 29 98]
+% \newcommand{\insertLibCode}[2]{%
+% \index{#2}%
+% \begin{elanCode}\indent $\Diamond$ {\tt #1/#2} \dotfill%
+% \input{#1/ElanTeX/#2} %
+% \indent {. .\dotfill {\rm  end of} {\tt #2} $\Diamond$\end{elanCode}}}
+% \newcommand{\insertLibCommon}[1]{\insertLibCode{ElanLibCommon}{#1}}%
+% \newcommand{\insertLibNoquote}[1]{\insertLibCode{ElanLibNotquote}{#1}}%
+% \newcommand{\insertLibStrategy}[1]{\insertLibCode{ElanLibStrategy}{#1}}%
+
+%\newenvironment{elanenv}{\par\medskip\begin{lgrind}}{\end{lgrind}\smallbreak}
+
+%\newcommand{\insertExample}[1]{%
+%    \begin{elanenv}
+%    \input{examplesTex/#1}
+%    \end{elanenv}%
+%}
+
+%\newcommand{\insertLib}[1]{%
+%\indent $\Diamond$ {\tt #1} \dotfill
+%    {\index{#1}}
+%    \begin{elanenv}
+%    \input{elanlibTex/#1}
+%    \end{elanenv} 
+%\indent \dotfill {\rm  end of} {\tt #1} $\Diamond$\\
+%}

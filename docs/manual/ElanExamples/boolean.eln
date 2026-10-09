@@ -1,0 +1,35 @@
+module boolean
+	// This module defines two constants refered by the first 
+	// and second entries of the table of symbols
+
+op
+global
+  true		: boolean			code 1;
+  false		: boolean			code 2;
+	// The alias declaration is used in order to identify the parenthesised  
+	// and unparenthesised versions of the operators
+  @ and @	: ( boolean boolean ) boolean	assocLeft pri 100;
+  @ or @	: ( boolean boolean ) boolean	assocLeft pri 100;
+  (@ and @)	: ( boolean boolean ) boolean	alias @ and @:;
+  (@ or @)	: ( boolean boolean ) boolean	alias @ or  @:;
+  not(@)	: ( boolean ) boolean		pri 200;
+  not @		: ( boolean ) boolean		pri 200		alias not(@):;
+endop
+	// The operators ``and'' and ``or'' are not declared to be AC
+	// for efficiency reasons (?[ck: Aug 10 95]) 
+rules for boolean
+declare x:boolean;
+bodies
+ []   true and x 	=> x		end
+ []   x and true 	=> x		end
+ []   false and x 	=> false	end
+ []   x and false 	=> false	end
+ []   true or x 	=> true		end
+ []   x or true 	=> true		end
+ []   false or x 	=> x		end 
+ []   x or false 	=> x		end 
+ []   not true  	=> false	end
+ []   not false  	=> true		end
+end of rules
+
+end of module

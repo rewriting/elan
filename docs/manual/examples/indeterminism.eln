@@ -1,0 +1,13 @@
+
+empty	: set
+@ 	: ( elem ) set
+@ U @ 	: ( set set ) set 	(AC)
+element(@) : ( set ) elem
+
+
+rule extractrule for elem
+declare S : set;
+	e : elem;
+body
+    element(S U e) => e
+end of rule

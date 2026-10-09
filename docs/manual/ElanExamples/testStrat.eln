@@ -1,0 +1,26 @@
+module testStrat
+sort foo;
+   end
+operators
+  global
+    a : foo;    b : foo;    c : foo;
+    d : foo;    e : foo;    f : foo;
+   end
+stratop
+  global
+    strat : <foo -> foo> 	bs ;
+  end
+rules for foo
+  global
+    [r1]  a  	=> c	end
+    [r2]  a 	=> d	end
+    [r3]  b 	=> e	end
+    [r4]  b 	=> f	end
+    [r5]  c 	=> b	end
+   end
+
+strategies for foo
+  implicit
+    [] strat => dc(dk (r1), dk(r2), dk(r3, r4)) end
+  end
+end

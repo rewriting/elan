@@ -1,0 +1,23 @@
+module callSort[Vars]
+import 	global 	Elem[Vars] ;
+ 	local  	Vars anyIdentifier list[identifier]
+                List ;
+end
+
+operators local
+    FOR EACH SS:identifier SUCH THAT SS:=(listExtract) elem(Vars) :{
+      SS     : elem                 alias SS: ;
+    }
+	@ 		: (elem ) list alias @:; 
+	@ @             :(list list) list assocLeft alias @ @:; 
+end
+
+stratop global 
+callSort : < list -> list > bs ;
+end
+
+strategies for list
+implicit
+[] callSort => dkcall(elansort,1,list) end
+end
+end

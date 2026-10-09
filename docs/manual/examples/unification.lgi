@@ -1,0 +1,20 @@
+LPL unification description
+	// This part describes the syntax in which the user should
+	// complete the definition of the logic: i.e. how (s)he gives 
+	// the specification.
+  specification description
+    part Vars	of sort list[identifier]
+	 	modules sigSyntax
+    part Ops	of sort list[pair[identifier,int]]
+	 	modules sigSyntax
+  end
+
+	// This describes the way the user should gives the query 
+	// and how it will be evaluated
+  query 	of sort equation
+         	result of sort eqSystem
+	 	modules syntacticUnification[Vars,Ops]
+			termVExt[Vars] termFExt[Ops]
+         	start with (unify) query 
+
+end of LPL description

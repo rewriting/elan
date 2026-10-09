@@ -1,0 +1,36 @@
+module strsig[X,Y]
+
+import global bool eq[Y] eq[yesno] strass;
+end
+sort StrList[X,Y] Strat[X,Y] yesno;
+end
+operators global  
+  dc(@)		: (StrList[X,Y]) <X->Y>;
+  dk(@)		: (StrList[X,Y]) <X->Y>;
+  case(@)	: (StrList[X,Y]) <X->Y>	alias dc(@):;
+  fail		: <X->Y>;
+  if @ then @ else @ fi
+		: (bool <X->Y> <X->Y>) <X->Y>;
+  let @ in @    : (Strass <X->Y>) <X->Y>;
+  (let @ in @)  : (Strass <X->Y>) <X->Y> alias let @ in @:;
+  [@ => @]	: (X Y) <X->Y>;
+  [@ => @ => @]	: (X Strany Y) <X->Y>;
+  Epsilon	: StrList[X,Y];
+  @ @		: (<X->Y> StrList[X,Y]) StrList[X,Y];
+  @,@		: (<X->Y> StrList[X,Y]) StrList[X,Y] alias @ @:;
+  @ || @	: (<X->Y> StrList[X,Y]) StrList[X,Y] alias @ @:;
+   @]@		: (<X->Y> X) Y  pri 1; 	// 4000dirty hack because wheres
+  [@]@		: (<X->Y> X) Y  pri 1 alias @]@:; 
+end
+
+end
+
+
+
+
+
+
+
+
+
+

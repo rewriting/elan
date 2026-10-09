@@ -1,0 +1,22 @@
+module ruleWithWhere
+
+sort foo;
+
+op global
+    a : foo;
+    b : foo;
+endop
+
+rule r0 for foo
+declare x : foo ;
+body
+  a  	=> x where x := ()b end
+end of rule
+
+rule r1 for foo
+declare x : foo ;
+body
+  a  	=> x where x := (strat)b end
+end of rule
+
+end of module

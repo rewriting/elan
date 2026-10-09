@@ -1,0 +1,80 @@
+//
+//		(c)	INRIA-Lorraine & CRIN
+//			615, rue du Jardin Botanique, BP 101
+//		        54602 Villers-les-Nancy
+//			France
+//			email: elan@loria.fr
+//
+//	$Source: /CVS/aircube/elan3/doc/ElanLibCommon/int.eln,v $
+//	$Revision: 1.1 $
+//	$Date: 1997/03/25 16:46:46 $
+//	$Author: moreau $
+//
+
+module int 
+import 
+	global anyInteger;
+        local  bool;
+end
+sort int;
+end
+operators
+ global
+
+	// First this defines the standard operators on integers
+  @ + @		: ( int int ) int	pri 500 assocLeft  code 3;
+  @ - @		: ( int int ) int	pri 600 assocLeft  code 4;
+  @ * @		: ( int int ) int	pri 700 assocLeft  code 5;
+  @ / @		: ( int int ) int	pri 800 assocLeft  code 6;
+  @ % @		: ( int int ) int	pri 800 assocLeft  code 27;
+  @ & @		: ( int int ) int	pri 800 assocLeft  code 28;
+  @ | @		: ( int int ) int	pri 800 assocLeft  code 29;
+  - @		: ( int ) int		pri 900		   code 20;
+
+	// Now we define the parenthesised version of the previous operators
+  (@ + @)	: ( int int ) int	pri 500 assocLeft alias @ + @:;
+  (@ - @)	: ( int int ) int	pri 600 assocLeft alias @ - @:;
+  (@ * @)	: ( int int ) int	pri 700 assocLeft alias @ * @:;
+  (@ / @)	: ( int int ) int	pri 800 assocLeft alias @ / @:;
+  (@ % @)	: ( int int ) int	pri 800 assocLeft alias @ % @:;
+  (@ & @)	: ( int int ) int	pri 800 assocLeft alias @ & @:;
+  (@ | @)	: ( int int ) int	pri 800 assocLeft alias @ | @:;
+  (- @)		: ( int ) int		pri 900 	  alias - @:;
+
+	// And infix version of them
+  plus(@,@)	: ( int int ) int	alias @ + @:;
+  minus(@,@)	: ( int int ) int	alias @ - @:;
+  time(@,@)	: ( int int ) int	alias @ * @:;
+  div(@,@)	: ( int int ) int	alias @ / @:;
+  mod(@,@)	: ( int int ) int	alias @ % @:;
+  and(@,@)	: ( int int ) int	alias @ & @:;
+  or(@,@)	: ( int int ) int	alias @ | @:;
+  umin(@)	: ( int ) int		alias - @:;
+
+	// The following are the standard predicates on integers
+  @ == @ 	: ( int int ) bool	pri 300 code 8;
+  @ != @ 	: ( int int ) bool	pri 300 code 9;
+  @ <  @ 	: ( int int ) bool	pri 300 code 10;
+  @ <= @ 	: ( int int ) bool	pri 300 code 11;
+  @ >  @ 	: ( int int ) bool	pri 300 code 12;
+  @ >= @ 	: ( int int ) bool	pri 300 code 13;
+
+	// And the prefix versions are
+  inteq(@,@)	: ( int int ) bool	alias @ == @:;
+  intneq(@,@)	: ( int int ) bool	alias @ != @:;
+  intless(@,@)	: ( int int ) bool	alias @ <  @:;
+  intlesseq(@,@)	: ( int int ) bool	alias @ <= @:;
+  intgreater(@,@)	: ( int int ) bool	alias @ > @:;
+  intgreatereq(@,@)	: ( int int ) bool	alias @ >= @:;
+
+	// conversions from bool to int and conversely
+  btoi(@)	: ( bool ) int		code 25;
+	// false -> 0
+	// true  -> 1
+
+  itob(@)	: ( int ) bool		code 26;
+	// n+1 -> true
+	// 0   -> false
+end
+
+end

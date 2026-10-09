@@ -1,0 +1,93 @@
+module queens
+  import 
+    bool int list[int];
+  end
+
+operators
+  global
+    queens	: list[int];
+  local
+    ok(@,@,@)	: ( int int list[int] ) bool;
+end
+
+stratop
+  global
+    queens : <list[int] -> list[int]> bs;
+  local
+    try_step : <int -> int> bs;
+ 
+  
+end
+
+rules for list[int]
+	p1,p2,p3,p4,p5,p6,p7,p8 : int;
+	pp1,pp2,pp3,pp4,pp5,pp6,pp7,pp8 : list[int];
+local
+   [queensrule] queens	=> p8.pp7
+			// -- first: the position on the first raw is choosen
+			where p1:= (try_step) 0
+			// -- second: the position on the second raw is also choosen 
+			where p2:=(try_step) 0
+			where pp1:=() p1.nil
+			// -- third: the positions on the first and
+			// second raws are checked to be compatible
+			if ok(1,p2,pp1)
+			// -- quarto: choose a position on the third raw
+			// and continue ...
+			where p3:=(try_step) 0
+			where pp2:=() p2.pp1
+			if ok(1,p3,pp2)
+			where p4:=(try_step) 0
+			where pp3:=() p3.pp2
+			if ok(1,p4,pp3)
+			where p5:=(try_step) 0
+			where pp4:=() p4.pp3
+			if ok(1,p5,pp4)
+			where p6:=(try_step) 0
+			where pp5:=() p5.pp4
+			if ok(1,p6,pp5)
+			where p7:=(try_step) 0
+			where 	pp6:=() p6.pp5
+			if ok(1,p7,pp6)
+			where p8:=(try_step) 0
+			where pp7:=() p7.pp6
+			if ok(1,p8,pp7)
+  end
+end
+
+rules for bool
+    	p,d,diff : int;
+	l : list[int];
+  global
+    [] ok(diff,d,nil)	=> true				end
+    [] ok(diff,d,p.l)	=> false	if d == p  	end
+    [] ok(diff,d,p.l)	=> false        if d-p == diff  end
+    [] ok(diff,d,p.l)	=> false        if p-d == diff  end
+    [] ok(diff,d,p.l)	=> ok(diff+1,d,l)		end
+end
+
+rules for int
+	x:int;
+  local
+    [tryrule] x	=> 1	end
+    [tryrule] x	=> 2	end
+    [tryrule] x	=> 3	end
+    [tryrule] x	=> 4	end
+    [tryrule] x	=> 5	end
+    [tryrule] x	=> 6	end
+    [tryrule] x	=> 7	end
+    [tryrule] x	=> 8	end
+end
+
+
+strategies for int
+  implicit
+    [] try_step => dk(tryrule) end
+  end
+
+strategies for list[int]
+  implicit
+  
+  [] queens => dc(queensrule) end
+  end
+end

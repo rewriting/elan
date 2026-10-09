@@ -1,0 +1,335 @@
+% [ck: Feb  7 89]
+% les macros speciales pour le livre
+
+%%%%%%%% traitement des exercices a la Knuth:
+%%%%% 1. le fichier de reponses et le compteur
+\newwrite\ans
+\immediate\openout\ans=reponses
+\newcount\exno\global\exno=0
+% 2. la macro de definition de l'enonce
+\chardef\other=12
+\newcommand{\exercice}[1]
+   {\global\advance\exno by 1 
+    {\small\noindent {\bf Exercice~\the\exno~---} #1}\ifvmode\else\newline\fi
+   }
+%%%%% 3.  la macros de definition de la reponse
+% fait avec Eric [ck: Aug 20 93]
+\outer\def\answer{\par\medbreak
+  \immediate\write\ans{}
+  \immediate\write\ans{\the\exno:}
+  \copytoblankline}
+\def\copytoblankline{\begingroup\setupcopy\copyans}
+\def\setupcopy{\def\do##1{\catcode`##1=\other}\dospecials
+  \catcode`\|=\other \obeylines}
+{\obeylines \gdef\copyans#1
+  {\def\next{#1}%
+  \ifx\next\empty\let\next=\endgroup %
+  \else\immediate\write\ans{\next} \let\next=\copyans\fi\next}}
+
+%%%%% 4. Utiliser les reponses en chantant dans l'annexe A
+%    \immediate\closeout\ans \input{reponses}
+%%%%% 5. Utilisation typique
+%       \exercice{enonce'}
+%       \answer{reponse eventuelle (non obligatoire)}
+%              <- ligne blanche OBLIGATOIRE apres la reponse
+%                 Attention aux lignes blanches dans la reponse!
+%%%%% 6. Ancienne macro
+\newcommand{\exer}[2]{\global\advance\exno by 1 
+    {\small\noindent {\bf Exercice~\the\exno~---} #1}\ifvmode\else\newline\fi
+     }          %%%%%%% \noindent{\bf Answer}: #2}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\coq}{\textsf{Coq}}
+\newcommand{\elan}{\textsf{ELAN}}
+\let\ELAN=\elan
+\newcommand{\REF}{\textsf{REF}}
+
+% Lecture supplementaires: Further Readings
+\newcommand{\FR}[1]{\noindent{\it Further Readings: #1}}
+
+% attention passage dangereux
+\newcommand{\zz}{$\bigodot$}
+
+\newcommand{\Helene}{H{\'e}l{\`e}ne}
+
+% Impression d'un passage en deux colonnes
+% attention a la separation des colonnes et a leur largeur
+
+\newcommand{\deuxcol}[2]{
+        \noindent
+        \begin{minipage}[t]{5.5cm}
+        #1
+        \end{minipage} \ ~~~ \
+        \begin{minipage}[t]{5.5cm}
+        #2
+        \end{minipage}
+        }
+
+ % pour traiter les theories equationnelles introduites dans le livre
+ % et faire un index specifique des theo equa
+\newcommand{\thname}[1]{\index{#1|sfac}{\sf #1}}
+\newcommand{\trsname}[1]{\overrightarrow{\sf #1}} 
+
+% pour les fleches longues une abbrev:
+\newcommand{\vect}[1]{\overrightarrow{#1}}
+
+\newcommand{\bold}[1]{{\bf #1}}
+\newcommand{\ital}[1]{{\it #1}}
+\newcommand{\sfac}[1]{{\sf #1}}
+
+\newcommand{\ul}[1]{\underline{#1}}
+\newcommand{\ol}[1]{\overline{#1}}
+
+\newcommand{\subsubsubsection}[1]{{\sc #1 \break}}
+\newcommand{\DEF}{\begin{definition}\begin{rm}}
+\newcommand{\FDEF}{\end{rm}\end{definition}}
+\newcommand{\PROP}{\begin{proposition}\begin{rm}}
+\newcommand{\FPROP}{\end{rm}\end{proposition}}
+\newcommand{\COR}{\begin{corollary}\begin{rm}}
+\newcommand{\FCOR}{\end{rm}\end{corollary}}
+\newcommand{\EX}{\begin{example}\begin{rm}}
+\newcommand{\FEX}{\end{rm}\end{example}}
+\renewcommand{\TH}{\begin{theorem}}
+\newcommand{\FTH}{\end{theorem}}
+\newcommand{\LEM}{\begin{lemma}\begin{rm}}
+\newcommand{\FLEM}{\end{rm}\end{lemma}}
+
+\newcommand{\Def}[1]{{\em #1}\index{#1}} % |bold}}
+\newcommand{\Aut}[1]{{#1}\index{#1|ital}}
+        % typiquement pour indexer les auteurs cite's \Aut{Robinson}
+
+
+\newcommand{\exligne}[1]{\begin{quote}{\tt #1} \end{quote}}
+\newcommand{\Not}[1]{#1}
+        % typiquement pre'vu pour pouvoir creer un index des notations
+%\newcommand{\comment}[1]{**\marginpar{**{\sf\small #1}}}
+\newcommand{\comment}[1]{\footnote{{\bf CHK:} #1}}
+        % typiquement \comment{commentaire qui n'apparaitra pas dans
+        % la version finale}
+\newcommand{\apply}[2]{#1(#2)}
+
+
+\newcommand{\proc}{ {\bf proc} }
+\newcommand{\returns}{ {\bf returns} }
+\newcommand{\signals}{ {\bf signals} }
+\newcommand{\return}{ {\bf return} }
+\newcommand{\signal}{ {\bf signal} }
+\newcommand{\resignal}{ {\bf resignal} }
+\newcommand{\si}{ {\bf if} }
+\newcommand{\alors}{ {\bf then} }
+\newcommand{\sinon}{ {\bf else} }
+\newcommand{\fin}{ {\bf end} }
+\newcommand{\fsi}{ {\bf endif} }
+\newcommand{\pour}{ {\bf for} }
+\newcommand{\faire}{ {\bf do} }
+\newcommand{\dans}{ {\bf in} }
+\newcommand{\finpour}{ {\bf enddo} }
+\newcommand{\jusqua}{ {\bf to} }
+\newcommand{\cas}{ {\bf case} }
+\newcommand{\fincas}{ {\bf endcase} }
+
+ % pour les exemples
+
+\newcommand{\succe}{s}
+\newcommand{\prede}{p}
+
+\newcommand{\equi}{\rightleftharpoons}
+\newcommand{\equiA}{\rightleftharpoons_{\cal A}}
+
+\newcommand{\repla}{\hookleftarrow} 
+\newcommand{\simplif}{\hookrightarrow} 
+    % pour les preuves inductives par reecriture
+\newcommand{\la}{\leftarrow}
+\newcommand{\rra}{\rightarrow\!\!\!\!\rightarrow}
+\newcommand{\lla}{\leftarrow\!\!\!\!\leftarrow}
+\newcommand{\rrra}{\rightarrow\!\!\!\!\rightarrow\!\!\!\!\rightarrow}
+\newcommand{\da}[1]{\downarrow_{#1}}
+%\newcommand{\longla}{\longleftarrow}
+\newcommand{\La}{\Leftarrow}
+\newcommand{\Lra}{\Leftrightarrow}
+\newcommand{\Ra}{\Rightarrow}
+%-> notation \newcommand{\ra}{\rightarrow}
+%\newcommand{\Longla}{\Longleftarrow}
+\newcommand{\Longra}{\Longrightarrow}
+%\newcommand{\Longlra}{\Longleftrightarrow}
+%\newcommand{\Longra}[1]{\stackrel{#1}{\Longrightarrow}}
+\newcommand{\Longla}[1]{\stackrel{#1}{\Longleftarrow}}
+\newcommand{\Longlra}[1]{\stackrel{#1}{\Longleftrightarrow}}
+%\newcommand{\longra}{\longrightarrow}
+\newcommand{\longlra}{\longleftrightarrow}
+\newcommand{\rhu}{\rightharpoonup}
+\newcommand{\rlh}{\rightleftharpoons}
+\newcommand{\lrh}{\rightleftharpoons}
+\newcommand{\unequiv}{\vdash\!\dashv}
+\newcommand{\equiva}[2]{\vdash\!#1\!\dashv_{[#2]}}
+\newcommand{\longra}[1]{\stackrel{#1}{\longrightarrow}}
+\newcommand{\longla}[1]{\stackrel{#1}{\longleftarrow}}
+\newcommand{\lra}[1]{\stackrel{#1}{\longleftrightarrow}}
+\newcommand{\reec}[3]{\stackrel{#1}{\longrightarrow}^{#2}_{#3}}
+        % typiquement: \reec{*}{RE}{[3]} pour -*->RE[3] [ck: May 29 88]
+
+% pour la reecriture conditionelle
+%\newcommand{\condeq}[3]{{#1} \; \Rightarrow \;{#2} = {#3}}
+%\newcommand{\cond}[3]{{#1} \; \Rightarrow \;{#2} \rightarrow {#3}}
+%\newcommand{\horn}[2]{{#1} \Rightarrow {#2}}
+%\newcommand{\Grd}[1]{Ground{#1}} % a modifier peut-etre
+%\newcommand{\ord}{\succ}
+%\newcommand{\ordC}{\succ_C}
+%\newcommand{\ordE}{\succ_E}
+%\newcommand{\ordeq}{\succeq}
+\newcommand{\ordeqC}{\succeq_C}
+\newcommand{\ordeqE}{\succeq_E}
+
+\newcommand{\meta}[1]{\dot{#1}}
+
+
+\newcommand{\hligne}{\rule{\textwidth}{0.5pt}}
+
+
+
+%%%% pour avoir une numerotation x.y ou x est le numero de section ou
+%%%% de chapitre suivant le type de document. [ck: Jan 31 94] + Eric
+
+\edef\maxunit{\ifx\chapter\undefined section\else chapter\fi}
+
+\ifx\theorem\undefined
+\newtheorem{theorem}{Theorem}[\maxunit]
+\fi
+\ifx\proposition\undefined
+\newtheorem{proposition}{Proposition}[\maxunit]
+\fi
+\ifx\lemma\undefined
+\newtheorem{lemma}{Lemma}[\maxunit]
+\fi
+\ifx\example\undefined
+\newtheorem{example}{Example}[\maxunit]
+\fi
+\ifx\definition\undefined
+\newtheorem{definition}{Definition}[\maxunit]
+\fi
+\ifx\corollary\undefined
+\newtheorem{corollary}{Corollary}[\maxunit]
+\fi
+
+\newcommand{\NOT}{\noindent {\bf Notation: }}
+\newcommand{\FNOT}{}
+\newcommand{\EXER}{\noindent {\bf Exercise: }}
+\newcommand{\FEXER}{}
+\newcommand{\REM}{\noindent {\bf Remark: }}
+\newcommand{\FREM}{}
+
+\ifx\proof\undefined
+\newcommand{\proof}[1]{\begin{description}
+            \item[Proof:] #1 \(\Box\) \end{description}}
+\fi
+
+\newcommand{\Note}[1]{{\bf Note:} #1}
+
+%%%%%%%%%%%%%%%%% Les regles d'inferences
+
+%%%% le symbole de transformation
+\newcommand{\fleche}{\mathop{\mapsto\!\!\!\!\!\mapsto}}
+\newcommand{\LaFleche}{\mathop{\mapsto\!\!\!\!\!\mapsto}}
+
+
+%%%% Pour imprimer des ensembles de regles
+% la definition de l'environnement
+
+\newenvironment{ruleset}%
+{\[\begin{array}{llcl}}{\end{array}\]}%
+
+% la definition des re`gles a utiliser dans un environnement {ruleset}
+
+\newcommand{\regle}[3]{
+           {\mbox{\boldmath\bf #1}}     & {#2}  & \fleche       & {#3}\\}
+
+\newcommand{\cregle}[4]{
+           {\mbox{\boldmath\bf #1}}     & {#2}  & \fleche       & {#3}          \\
+                        &       &                       & {\sf if}~ {#4}\\}
+\newcommand{\wregle}[4]{
+           {\mbox{\boldmath\bf #1}}     & {#2}  & \fleche       & {#3}          \\
+                        &       &                       & {\sf where}~ {#4}\\}
+
+\newcommand{\cwregle}[5]{
+           {\mbox{\boldmath\bf #1}}     & {#2}  & \fleche       & {#3}          \\
+                        &       &                       & {\sf if}~ {#4}\\
+                        &       &                       & {\sf where}~ {#5}\\}
+
+% juste une regle: [ck: Mar 26 93]
+
+\newcommand{\uneregle}[3]{\begin{ruleset}\regle{#1}{#2}{#3}\end{ruleset}}
+\newcommand{\unecregle}[4]{\begin{ruleset}\cregle{#1}{#2}{#3}{#4}\end{ruleset}}
+\newcommand{\unegregle}[3]{\begin{gruleset}\gregle{#1}{#2}{#3}\end{gruleset}}
+
+
+%%%% Pour imprimer des ensembles de regles moyennes
+% la definition de l'environnement
+
+\newenvironment{mruleset}
+               {\[ \begin{array}{lll}}{\end{array} \] }
+
+\newcommand{\mregle}[3]{
+           {\bf #1}                     & {#2}  \\
+           \multicolumn{1}{r}{\fleche}  & {#3}  \\}
+
+\newcommand{\mcregle}[4]{
+           {\bf #1}     & {#2}  \\
+           \multicolumn{1}{r}{\fleche}  & {#3}  & {\sf if}~ {#4}\\}
+\newcommand{\mwregle}[4]{
+           {\bf #1}     & {#2}  \\
+           \multicolumn{1}{r}{\fleche}  & {#3}  & {\sf where}~ {#4}\\}
+
+% pour causer, en mode texte, du nom des regles
+\newcommand{\rname}[1]{\mbox{\boldmath\bf #1}}
+
+%%%% Pour imprimer des ensembles de grosses regles
+% la definition de l'environnement
+
+\newenvironment{gruleset}
+               {\[ \begin{array}{ll}}{\end{array} \] }
+
+% la definition des re`gles a utiliser dans un environnement {gruleset}
+
+\newcommand{\gregle}[3]{
+           {\mbox{\boldmath\bf #1}}     & {#2}                    \\
+                        & \fleche         \\
+                        & {#3}                    \\}
+
+
+\newcommand{\gcregle}[4]{
+           {\mbox{\boldmath\bf #1}}     & {#2}                    \\
+                        & \fleche         \\
+                        & {#3}                    \\
+                        & {\sf if}~ {#4}          \\}
+
+\newcommand{\gwregle}[4]{
+           {\mbox{\boldmath\bf #1}}     & {#2}                    \\
+                        & \fleche         \\
+                        & {#3}                    \\
+                        & {\sf where}~ {#4}          \\}
+\newcommand{\gcwregle}[5]{
+           {\mbox{\boldmath\bf #1}}     & {#2}                    \\
+                        & \fleche         \\
+                        & {#3}                    \\
+                        & {\sf if}~ {#4}          \\
+                        & {\sf where}~ {#5}          \\}
+
+%%%% Pour imprimer des ensembles de Tres Grosses regles
+% la definition de l'environnement
+
+\newenvironment{tgruleset}
+               {\[ \begin{array}{l}}{\end{array} \] }
+
+% la definition des re`gles a utiliser dans un environnement {tgruleset}
+
+\newcommand{\tgregle}[3]{
+           {\bf #1}     \\
+           {#2}         \\
+           \fleche        \\
+           {#3}     \\   }
+ 
+\newcommand{\tgcregle}[4]{
+           {\bf #1}     \\ 
+           {#2}         \\
+           \fleche        \\
+           {#3}         \\
+           {\rm if}~ {#4}\\  }

@@ -1,0 +1,67 @@
+//
+//		(c)	INRIA-Lorraine & CRIN
+//			615, rue du Jardin Botanique, BP 101
+//		        54602 Villers-les-Nancy
+//			France
+//			email: elan@loria.fr
+//
+//	$Source: /CVS/aircube/elan3/doc/ElanLibNoquote/eqSystem.eln,v $
+//	$Revision: 1.1 $
+//	$Date: 1997/03/25 16:46:58 $
+//	$Author: moreau $
+//
+
+module eqSystem[Fss,Vars]
+import 	global	applySubstOn[Fss,Vars,eqSystem];
+	local	bool int termCommons[Fss,Vars];
+end
+
+sort eqSystem equation;
+end
+
+operators
+global
+  @ = @		: ( term term ) equation;
+
+  @		: ( bool ) eqSystem;
+  @ 		: ( equation ) eqSystem;
+  @ & @		: ( eqSystem eqSystem ) eqSystem	assocLeft;
+  (@ & @)	: ( eqSystem eqSystem ) eqSystem	alias @ & @:;
+
+  system_to_subst(@)	: ( eqSystem ) substitution;
+end
+
+rules  for substitution
+ P,Q,R	: eqSystem;
+	$t	: term;
+	$x	: variable;
+local
+  [] system_to_subst(true) 	=> identity			end
+  [] system_to_subst($x=$t) 	=> $x->$t			end
+  [] system_to_subst(P & Q) 	=> system_to_subst(P) o system_to_subst(Q)
+  end
+end
+
+rules for eqSystem
+ P,Q,R	: eqSystem;
+	n	: int;
+	$t	: term;
+	e	: equation;
+global
+  [new_var_elim] P & var(n) = $t 	=> apply(var(n)->$t,P)	end
+  [unfold]	 P & (Q & R)		=> (P & Q) & R		end
+  [eqPass] 	 P & e	 		=> e & P		end
+
+
+end
+
+strategies for eqSystem
+global 
+  [delete_new_variables]
+  repeat* (
+    dc(new_var_elim || unfold || eqPass)
+  )
+  end
+end
+
+end

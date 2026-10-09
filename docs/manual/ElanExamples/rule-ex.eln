@@ -1,0 +1,11 @@
+rules for boolean
+	x : boolean;
+local
+[idempotency]    x and x  => x   end
+end
+
+rules for boolean
+	x : boolean;
+local
+[idempotency]    x or x  => x   end
+end

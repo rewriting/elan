@@ -1,0 +1,49 @@
+
+\let\CF=\rm
+% Remember to use the lgrind style
+
+\File{cmp.eln},{17:23},{Jun 21 1996}
+\L{\LB{\C{}\1\1}}
+}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{16}{(c)}\Tab{24}{INRIA-Lorraine \& CRIN}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{24}{615, rue du Jardin Botanique, BP 101}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{16}{        54602 Villers-les-Nancy}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{24}{France}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{24}{email: elan@loria.fr}}
+\CE{}\L{\LB{\C{}\1\1}}
+}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{8}{\$Source: /CVS/aircube/elan3/doc/elanlibTex/cmp.eln.tex,v $}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{8}{\$Revision: 1.2 $}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{8}{\$Date: 1996/08/05 20:24:04 $}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{8}{\$Author: ckirchne $}}
+\CE{}\L{\LB{\C{}\1\1}}
+}}
+\CE{}\L{\LB{}}
+\L{\LB{\K{module}_\V{cmp}[\V{X}]}}
+\L{\LB{}}
+\L{\LB{}\Tab{8}{\C{}\1\1_ Note that in the current implementation, X can NOT be }}
+\CE{}\L{\LB{}\Tab{8}{\C{}\1\1_ a built-in}}
+\CE{}\L{\LB{\K{import}_\V{bool};}}
+\L{\LB{\K{sort}_\V{X};}}
+\L{\LB{\K{op}_}}
+\L{\LB{__\K{global}}}
+\L{\LB{}}
+\L{\LB{}\Tab{8}{\C{}\1\1_ In Elan, one can only test equality of objects, never their}}
+\CE{}\L{\LB{}\Tab{8}{\C{}\1\1_ identity (i.e. to be the same internal object)}}
+\CE{}\L{\LB{____@_==_@}\Tab{24}{:_(_\V{X}_\V{X}_)_\V{bool}}\Tab{48}{\V{code}_18;}}
+\L{\LB{____@_!=_@}\Tab{24}{:_(_\V{X}_\V{X}_)_\V{bool}}\Tab{48}{\V{code}_19;}}
+\L{\LB{____@_\<__@}\Tab{24}{:_(_\V{X}_\V{X}_)_\V{bool}}\Tab{48}{\V{code}_30;}}
+\L{\LB{____@_\<=_@}\Tab{24}{:_(_\V{X}_\V{X}_)_\V{bool}}\Tab{48}{\V{code}_31;}}
+\L{\LB{____@_\>__@}\Tab{24}{:_(_\V{X}_\V{X}_)_\V{bool}}\Tab{48}{\V{code}_32;}}
+\L{\LB{____@_\>=_@}\Tab{24}{:_(_\V{X}_\V{X}_)_\V{bool}}\Tab{48}{\V{code}_33;}}
+\L{\LB{}}
+\L{\LB{____\V{eq}(@,@)}\Tab{24}{:_(_\V{X}_\V{X}_)_\V{bool}}\Tab{48}{\K{alias}_@_==_@:;}}
+\L{\LB{____\V{neq}(@,@)}\Tab{24}{:_(_\V{X}_\V{X}_)_\V{bool}}\Tab{48}{\K{alias}_@_!=_@:;}}
+\L{\LB{____\V{less}(@,@)}\Tab{24}{:_(_\V{X}_\V{X}_)_\V{bool}}\Tab{48}{\K{alias}_@_\<__@:;}}
+\L{\LB{____\V{lesseq}(@,@)}\Tab{24}{:_(_\V{X}_\V{X}_)_\V{bool}}\Tab{48}{\K{alias}_@_\<=_@:;}}
+\L{\LB{____\V{greater}(@,@)}\Tab{24}{:_(_\V{X}_\V{X}_)_\V{bool}}\Tab{48}{\K{alias}_@_\>_@:;}}
+\L{\LB{____\V{greatereq}(@,@)}\Tab{24}{:_(_\V{X}_\V{X}_)_\V{bool}}\Tab{48}{\K{alias}_@_\>=_@:;}}
+\L{\LB{}}
+\L{\LB{\K{endop}}}
+\L{\LB{}}
+\L{\LB{\K{end}_\K{of}_\K{module}}}

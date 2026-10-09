@@ -1,0 +1,51 @@
+module arrayLOG[N,X]
+
+import global bool int X array[10,X] array[10,arrayLOG[N,X]];
+end
+sort arrayLOG[N,X];
+end
+operators global
+	new(@)		: (X) arrayLOG[N,X];
+	set(@, @, @)	: (arrayLOG[N,X] int X) arrayLOG[N,X];
+	@[@<-@]		: (arrayLOG[N,X] int X) arrayLOG[N,X] alias set(@, @, @):;
+	get(@, @)	: (arrayLOG[N,X] int) X;
+	@[@]		: (arrayLOG[N,X] int) X alias get(@,@):;
+//local		
+	(@)		: (array[10,X]) arrayLOG[N,X];
+	[@]		: (array[10,arrayLOG[N,X]]) arrayLOG[N,X];
+	new(@,@)	: (int X) arrayLOG[N,X];
+end
+
+rules for arrayLOG[N,X]
+ e	: X;
+	a	: arrayLOG[N,X];
+	i: int;
+local
+  [] new(e)   => new(N,e)						end
+  [] new(i,e) => ([e e e e e  e e e e e]) if i < 10			end
+  [] new(i,e) => [[a a a a a  a a a a a]] where a:=()new(i/10,e) 	end
+end
+
+rules for X
+ as	: array[10,arrayLOG[N,X]];
+	es	: array[10,X];
+	i	: int;
+local
+[] get([as], i) => get(as[i%10],i/10)					end
+[] get((es), i) => es[i%10]						end
+end
+
+rules for arrayLOG[N,X]
+ as	: array[10,arrayLOG[N,X]];
+	es	: array[10,X];
+	i	: int;
+	e	: X;
+local
+[] set([as], i, e) => [as[i%10<-set(as[i%10], i/10, e)]]		end
+[] set((es), i, e) => (es[i%10<-e])					end
+end
+
+end
+
+
+

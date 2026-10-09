@@ -1,0 +1,38 @@
+
+\let\CF=\rm
+% Remember to use the lgrind style
+
+\File{termVExt.eln},{17:23},{Jun 21 1996}
+\L{\LB{\C{}\1\1}}
+}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{16}{(c)}\Tab{24}{INRIA-Lorraine \& CRIN}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{24}{615, rue du Jardin Botanique, BP 101}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{16}{        54602 Villers-les-Nancy}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{24}{France}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{24}{email: elan@loria.fr}}
+\CE{}\L{\LB{\C{}\1\1}}
+}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{8}{\$Source: /CVS/aircube/elan3/doc/elanlibTex/termVExt.eln.tex,v $}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{8}{\$Revision: 1.2 $}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{8}{\$Date: 1996/08/05 20:24:23 $}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{8}{\$Author: ckirchne $}}
+\CE{}\L{\LB{\C{}\1\1}}
+}}
+\CE{}\L{\LB{}}
+\L{\LB{\C{}\1\*}}
+\L{\LB{}\Tab{8}{This module allows to use quotes \".\,.\,.\" in order to write variables}}
+\L{\LB{}\Tab{8}{in situation where non quoting will induce parsing errors.}}
+\L{\LB{\*\1\CE{}}}
+\L{\LB{\K{module}_\V{termVExt}[\V{Vars}]}}
+\L{\LB{\K{import}_\K{global}_\V{term};}}
+\L{\LB{_______\K{local}_\V{Vars}_\V{anyIdentifier}_\V{list}[\V{identifier}]_\V{termV}[\V{Vars}];}}
+\L{\LB{\K{op}}}
+\L{\LB{__\K{global}}}
+\L{\LB{}}
+\L{\LB{____\K{FOR}_\K{EACH}_\V{SS}:\V{identifier}_\K{SUCH}_\K{THAT}_\V{SS}:=(\V{listExtract})_\V{elem}(\V{Vars})_:\{}}
+\L{\LB{______\V{SS}_____:_\V{variable}}\Tab{40}{\K{alias}_\"\V{SS}\":;}}
+\L{\LB{____\}}}
+\L{\LB{}}
+\L{\LB{\K{endop}}}
+\L{\LB{}}
+\L{\LB{\K{end}_\K{of}_\K{module}}}

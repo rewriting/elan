@@ -1,0 +1,41 @@
+//
+//		(c)	INRIA-Lorraine & CRIN
+//			615, rue du Jardin Botanique, BP 101
+//		        54602 Villers-les-Nancy
+//			France
+//			email: elan@loria.fr
+//
+//	$Source: /CVS/aircube/elan3/doc/ElanLibNoquote/sigSyntax.eln,v $
+//	$Revision: 1.1 $
+//	$Date: 1997/03/25 16:47:00 $
+//	$Author: moreau $
+//
+
+module sigSyntax
+
+	// This module describes a possible syntax for the user specification
+
+import 
+	global	identifier int;
+		//anyIdentifier anyInteger;
+	local	identifier list[identifier] pair[identifier,int] 
+		list[pair[identifier,int]];
+end
+operators
+ global
+
+//  @	  : ( ident ) identifier			alias @:;
+
+  @ ':' @ : ( identifier int ) pair[identifier,int]	alias [@,@]:;
+
+  Epsilon : list[identifier]		      		alias nil:;
+  @  @	  : ( identifier list[identifier] ) list[identifier]   
+							alias cons(@,@):;
+
+  Epsilon : list[pair[identifier,int]]			alias nil:;
+  @  @	  : ( pair[identifier,int] list[pair[identifier,int]] ) 
+			  list[pair[identifier,int]]	alias cons(@,@):;
+
+end
+
+end

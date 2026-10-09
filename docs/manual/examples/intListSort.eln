@@ -1,0 +1,12 @@
+module intListSort
+import global int list[int];
+
+  op local
+   @ '\10' @	: ( int list[int] ) list[int]	alias @.@:;
+  endop
+
+strategy sortIntList
+  dccall(elansort,1,list[int])
+end of strategy
+
+end of module

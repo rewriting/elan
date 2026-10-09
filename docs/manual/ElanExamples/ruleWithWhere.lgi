@@ -1,0 +1,6 @@
+LPL ruleWithWhere description
+	query    of sort	foo
+	result of sort		foo
+	import			ruleWithWhere
+	start with		()query
+end

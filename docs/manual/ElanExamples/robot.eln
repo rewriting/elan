@@ -1,0 +1,56 @@
+module robot
+
+import global 	state space
+		strat[state] strat[list[list[state]]]
+		int bool labyrint
+		strconc[list[list[state]],list[list[state]],list[list[state]]];
+end
+stratop global
+  up		: <state -> state>;
+  down		: <state -> state>;
+  left		: <state -> state>;
+  right		: <state -> state>;
+  exitable	: <state -> state>;
+  search	: <list[list[state]] -> list[list[state]]>;
+  allsearch	: <list[list[state]] -> list[list[state]]>;
+ local
+  moves		: <state -> state>;
+end
+
+rules for state
+	x,y,dx,dy,dir	: int;
+local
+  [move(dx,dy,dir)] 
+	state(x,y) => state(x+dx,y+dy)
+		if room(x,y) & dir != 0			
+  end
+end
+
+strategies for state
+implicit
+  [.] up => 		move( 1, 0, U)			end
+  [.] down => 	move(-1, 0, D)				end
+  [.] left => 	move( 0,-1, L) 				end
+  [.] right => 	move( 0, 1, R)				end
+  [.] exitable=>move(0,0,E)				end
+  [.] moves => 	dk(right, dk(down, dk(left, up)))	end
+end
+
+strategies for list[list[state]]
+implicit
+  [.] search => if call(exitable) then 
+		  narrow
+		orelse if loop then 
+		  	 next;search
+		       orelse 
+			 dc(call(moves);search, next;search)
+                       fi
+		fi  						end
+  [.] allsearch => dk(call(exitable);narrow,
+		       if loop then next 
+ 		       orelse 
+		          dk(call(moves), next)
+                       fi; 
+		     allsearch)					end
+  end
+end

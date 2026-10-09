@@ -1,0 +1,8 @@
+strategies for foo
+  implicit
+  [] conc =>
+	dc(r1) ;
+	dc(r5) ;
+	dk(r3 , r4)
+   end
+end

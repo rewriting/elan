@@ -1,0 +1,20 @@
+rules for eqSystem
+declare P   : eqSystem;
+
+bodies
+
+   rule decompose
+   declare s_1,s_2 : term;
+           t_1,t_2 : term;
+   body
+        P & f(s_1,s_2)=f(t_1,t_2) => P & s_1=t_1 & s_2=t_2 
+   end
+
+rule decompose
+   declare s_1 : term;
+           t_1 : term;
+   body
+        P & g(s_1)=g(t_1) => P & s_1=t_1
+   end
+
+end of rules

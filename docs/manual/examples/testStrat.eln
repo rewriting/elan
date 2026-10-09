@@ -1,0 +1,36 @@
+module testStrat
+
+sort foo;
+
+op
+  global
+
+    a : foo;
+    b : foo;
+    c : foo;
+    d : foo;
+    e : foo;
+    f : foo;
+    
+endop
+
+rules for foo
+bodies
+  [r1]  a  	=> c	end
+  [r2]  a 	=> d	end
+  [r3]  b 	=> e	end
+  [r4]  b 	=> f	end
+  [r5]  c 	=> b	end
+end of rules
+
+strategy strat
+ dont care choose(
+	dont know choose (r1)
+	||
+	dont know choose (r2)
+	||
+	dont know choose (r3 r4)
+)
+end of strategy
+
+end of module

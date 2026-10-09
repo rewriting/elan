@@ -1,0 +1,21 @@
+module commit[X]
+
+import global int strat[X] list[X] strapply[X];
+end
+operators global
+  commit @ do @ od			: (int <X>) <X>;
+end
+
+strategies for X
+	n	: int;
+	s	: <X>;
+	a,t	: X;
+	ts	: list[X];
+defined
+  [commit n do s od]t => a	
+					where a:=(listExtract)elem(ts)
+					where ts:=()setof(s,t,0,n)
+  end
+end
+
+end

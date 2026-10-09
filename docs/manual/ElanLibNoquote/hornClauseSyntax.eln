@@ -1,0 +1,36 @@
+//
+//		(c)	INRIA-Lorraine & CRIN
+//			615, rue du Jardin Botanique, BP 101
+//		        54602 Villers-les-Nancy
+//			France
+//			email: elan@loria.fr
+//
+//	$Source: /CVS/aircube/elan3/doc/ElanLibNoquote/hornClauseSyntax.eln,v $
+//	$Revision: 1.1 $
+//	$Date: 1997/03/25 16:46:59 $
+//	$Author: moreau $
+//
+
+module hornClauseSyntax[Fss,Vars]
+import 	atom[Fss,Vars] list[atom] pair[atom,list[atom]] 
+	list[pair[atom,list[atom]]];
+end
+
+operators 
+ global
+
+   .	: list[atom]				alias nil:;
+   @,@	: ( atom list[atom] ) list[atom]	alias cons(@,@):;
+
+
+   @ @		: ( atom list[atom] ) pair[atom,list[atom]]   alias [@,@]:;
+   @ ':'- @	: ( atom list[atom] ) pair[atom,list[atom]]   alias [@,@]:;
+
+   Epsilon	: list[pair[atom,list[atom]]]		alias nil:;
+   @ @  	: ( pair[atom,list[atom]] list[pair[atom,list[atom]]])
+			list[pair[atom,list[atom]]]	alias cons(@,@):;
+
+end
+end
+
+

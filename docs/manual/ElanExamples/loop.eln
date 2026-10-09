@@ -1,0 +1,22 @@
+module loop
+import global strat[int] int	
+	strconc[int,int,int];
+  end
+stratop global 
+  	loop		: <int -> int>;
+  end
+
+rules for int
+ 	x	: int;
+local
+     [sub1]	x => x-1 if x > 1	end
+  end
+
+strategies for int
+implicit
+     [.] loop => dk(id, sub1;loop)	end  
+  end
+end
+
+
+

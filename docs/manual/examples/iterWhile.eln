@@ -1,0 +1,15 @@
+	// the operators
+  @: ( elem ) nelist
+  @ . @: ( elem nelist ) nelist
+  element(@): ( nelist ) elem
+
+	// the rules 
+rules for elem
+declare e : elem;
+	l : nelist;
+bodies
+  [extract]  element(e) 	=> e 	end
+  [extract]  element(e.l) 	=> e 	end
+  [extract]  element(e.l) 	=> element(l) end
+end of rules
+

@@ -1,0 +1,6 @@
+
+strategy conc
+	dont care choose (r1)
+	dont care choose (r5)
+	dont know choose (r3 r4)
+end of strategy

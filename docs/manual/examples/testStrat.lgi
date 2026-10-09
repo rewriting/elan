@@ -1,0 +1,8 @@
+LPL testStrat description 
+
+query 		of sort foo
+      result 	of sort foo
+      modules   testStrat
+      start with (strat) query
+
+end of LPL description

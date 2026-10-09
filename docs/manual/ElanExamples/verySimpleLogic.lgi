@@ -1,0 +1,25 @@
+LPL verySimpleLogic description
+
+	// This example is so simple that it does not show the
+	// powerful mechanism allowing to describe the syntax of
+	// the ``.spc'' file. This will be introduced later.
+
+	// the end user will be allowed to ask queries of sort ``foo''
+  query    of sort foo
+
+	// and the answer will be of the same sort
+  result   of sort foo
+
+	// indeed in this case the sort of the query and of the answer
+	// are the same (foo). This sort is described in the module
+	// ``verySimpleModule'' which is given in the file 
+	// ``verysimpleModule.eln''.
+	// Note that these last two names (the module name and the file 
+	// name) should be the same.
+  modules  verySimpleModule
+
+	// We start the evaluation by reducing the term under query 
+	// using the strategy ``simpleStrategy''.
+  start with (simpleStrategy)query
+
+end of LPL description

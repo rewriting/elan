@@ -1,0 +1,15 @@
+module map[X,Mod,Fun]
+import list[X] Mod;
+op global
+     map_Fun(@): ( list[X] ) list[X];
+endop
+
+rules for list[X]
+declare e : X;
+        l : list[X];
+bodies
+  [] map_Fun(nil) => nil			end
+  [] map_Fun(e.l) => Fun(e) . map_Fun(l) 	end
+end of rules
+
+end of module

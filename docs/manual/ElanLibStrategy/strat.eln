@@ -1,0 +1,98 @@
+module strat[X]
+
+//--- Use this module, if you want to work with type-preserving strategies
+//--- over the type X, e.g. X->X
+
+import global eq[X] strsig[X,X]
+	bool eq[yesno] strass; //strcommons
+end
+//strcommons
+sort StrList[X,X] Strat[X,X] yesno;	// an auxiliary 'bool' sort 
+end
+operators global
+    id		: <X>;		// identity strategy
+    @		: (X) <X>	pri 2000; // strategy coercion
+    if @ then @ orelse @ fi	//  !!!! should be less than DELTA_PRIOR
+		: (<X> <X> <X>) <X>;	  // orelse strategy
+    return @	: (X) <X>;	// returns argument as a result of application
+local
+  yes		: yesno;	// an auxiliary 'true'
+  no		: yesno;	// an auxiliary 'false'
+  nf(@)		: (X) yesno;	// an auxiliary symbol for the rule FIN
+end
+
+//strcommons.begin
+rules for X
+ a, l	: X;			b, r	: X;
+ s1, s2 : <X>;		ss1 	: StrList[X,X];
+ cond	: bool;			kond	: yesno;
+global
+  [IF1] [if true then s1 else s2 fi]a => b 	where b :=[s1]a end
+  [IF2] [if false then s1 else s2 fi]a => b 	where b :=[s2]a end
+  [DK]  [dk(s1,ss1)]a => b where b:=[s1]a 			end
+//peval  [DK]  [dk(s1,ss1)]a => b where b:=[dk(ss1)]a 			end
+  [DK]  [dk(s1,ss1)]a => b where b:=(eval_DK)[dk(ss1)]a 	end
+  [DC1] [dc(s1,ss1)]a => b where b:=[s1]a 			end
+//peval  [DC2] [dc(s1,ss1)]a => b where b:=[dc(ss1)]a 			end
+  [DC2] [dc(s1,ss1)]a => b where b:=(eval_DC)[dc(ss1)]a 	end
+  [FIN] b => b where kond:=(dc(NF1||NF2))nf(b) if kond == yes   end
+end
+ 
+rules for yesno
+ a	: X;			b	: X;	
+ s	: <X>;
+local
+  [NF1]	nf([s]a)	=> no				end
+  [NF2]	nf(b)		=> yes				end
+end
+//strcommons.end
+
+rules for X
+ a, b, aa	: X;
+ s, s1, s2 	: <X>;
+global
+  [IFO1]  [if s then s1 orelse s2 fi]a =>[s1]b where b:=[s]a end
+  [IFO2]  [if s then s1 orelse s2 fi]a =>[s2]a	end
+  [IFO3]  [s1]a => b where b:=[s1]a			end
+  [DSTR]  [return a]b => a				end
+  [ID]    [id]a	=> a				end
+  [CONST] [a]b	=> b	if eq(a,b) 		end // shitty compiler
+  // the following rules are added because of `missing rule warning'
+  [FSYM] 	b => b if false					end
+  [LAB] 	b => b if false					end
+  [DSTR]	b => b if false					end
+  [CONCAT]	b => b if false					end
+end
+
+strategies for X	// evaluation ELAN-strategy of the interpreter
+global 
+  [eval_DC]
+//  repeat* (dc(dk(DC1) || dk(DC2) ) ); dc(FIN)
+  dc(dk(DC1) || dk(DC2) ) ; dc(FIN)
+  end
+  [eval_DK]
+//  repeat* (dc(dk(DK))); dc(FIN)
+  dc(dk(DK)); dc(FIN)
+  end
+  [eval]
+  repeat* (
+   dc(
+     dk(FSYM)  						||
+     dk(DSTR)  						||
+     dk(DK)						||
+     dk(DC1) || dk(DC2)					||
+     dk(LAB)  						||
+     dc(ID)						||
+     dc(CONST)						||
+     dk(CONCAT)  					||
+     dk(IF1) || dk(IF2) 				||
+     dc( dk(IFO1) 					|| 
+     dk(IFO2) ); dk(IFO3) )
+  );
+  dc(FIN)
+  end
+end
+
+end
+
+

@@ -1,0 +1,29 @@
+
+\let\CF=\rm
+% Remember to use the lgrind style
+
+\File{verySimple.eln},{17:36},{Nov 28 1995}
+\L{\LB{\K{module}_\V{verySimple}}}
+\L{\LB{}\Tab{8}{\C{}\1\1_ first define a sort}}
+\CE{}\L{\LB{\K{sort}_\V{foo};}}
+\L{\LB{}\Tab{8}{\C{}\1\1_ then operators that will be exported}}
+\CE{}\L{\LB{\K{op}_\K{global}}}
+\L{\LB{____\V{a}_:_\V{foo};}}
+\L{\LB{____\V{b}_:_\V{foo};}}
+\L{\LB{____\V{c}_:_\V{foo};}}
+\L{\LB{\K{endop}}}
+\L{\LB{}\Tab{8}{\C{}\1\1_ Then rewrite rules}}
+\CE{}\L{\LB{\K{rules}_\K{for}_\V{foo}}}
+\L{\LB{\K{bodies}}}
+\L{\LB{}\Tab{8}{\C{}\1\1_ The name of next rule is {`}{`}r1\'\'}}
+\CE{}\L{\LB{__[\V{r1}]}\Tab{8}{\V{a}__}\Tab{16}{=\>_\V{b}}\Tab{24}{\K{end}}}
+\L{\LB{__[\V{r2}]}\Tab{8}{\V{b}__}\Tab{16}{=\>_\V{c}}\Tab{24}{\K{end}}}
+\L{\LB{\K{end}_\K{of}_\K{rules}}}
+\L{\LB{}}
+\L{\LB{\K{strategy}_\V{simpleStrategy}}}
+\L{\LB{\K{repeat}}}
+\L{\LB{_\K{dont}_\K{care}_\K{choose}(\V{r1}_\V{r2})}}
+\L{\LB{\K{endrepeat}}}
+\L{\LB{\K{end}_\K{of}_\K{strategy}}}
+\L{\LB{}}
+\L{\LB{\K{end}_\K{of}_\K{module}}}

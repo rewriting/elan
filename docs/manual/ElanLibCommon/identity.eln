@@ -1,0 +1,39 @@
+//
+//		(c)	INRIA-Lorraine & CRIN
+//			615, rue du Jardin Botanique, BP 101
+//		        54602 Villers-les-Nancy
+//			France
+//			email: elan@loria.fr
+//
+//	$Source: /CVS/aircube/elan3/doc/ElanLibCommon/identity.eln,v $
+//	$Revision: 1.1 $
+//	$Date: 1997/03/25 16:46:46 $
+//	$Author: moreau $
+//
+
+module identity[X]
+sort X;
+end
+operators global
+
+  identity(@)	: ( X ) X;
+
+end
+
+rules for X
+ x : X;
+local
+  []	identity(x)	=> x		end
+end
+
+	// except his theoretical interest (this is the reflexivity 
+	// of the rewrite logic) the next rule could be used when one 
+	// wants a strategy to do always something
+rules for X
+ t : X;
+global
+  [identity]	t	=>	t	end
+end
+
+end
+ 

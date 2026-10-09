@@ -1,0 +1,12 @@
+module Vars
+import anyIdentifier sigSyntax; end
+operators
+	global
+	  Vars : list[identifier];
+   end
+
+rules for list[identifier]
+	global
+	  [] Vars => x y z ;
+   end
+end

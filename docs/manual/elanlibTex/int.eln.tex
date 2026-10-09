@@ -1,0 +1,85 @@
+
+\let\CF=\rm
+% Remember to use the lgrind style
+
+\File{int.eln},{17:23},{Jun 21 1996}
+\L{\LB{\C{}\1\1}}
+}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{16}{(c)}\Tab{24}{INRIA-Lorraine \& CRIN}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{24}{615, rue du Jardin Botanique, BP 101}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{16}{        54602 Villers-les-Nancy}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{24}{France}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{24}{email: elan@loria.fr}}
+\CE{}\L{\LB{\C{}\1\1}}
+}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{8}{\$Source: /CVS/aircube/elan3/doc/elanlibTex/int.eln.tex,v $}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{8}{\$Revision: 1.2 $}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{8}{\$Date: 1996/08/05 20:24:12 $}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{8}{\$Author: ckirchne $}}
+\CE{}\L{\LB{\C{}\1\1}}
+}}
+\CE{}\L{\LB{}}
+\L{\LB{\K{module}_\V{int}_}}
+\L{\LB{\K{import}_\K{global}_\V{anyInteger};}}
+\L{\LB{_______\K{local}__\V{bool};}}
+\L{\LB{\K{sort}_\V{int};}}
+\L{\LB{\K{op}}}
+\L{\LB{_\K{global}}}
+\L{\LB{}}
+\L{\LB{}\Tab{8}{\C{}\1\1_ First this defines the standard operators on integers}}
+\CE{}\L{\LB{__@_+_@}\Tab{16}{:_(_\V{int}_\V{int}_)_\V{int}}\Tab{40}{\V{pri}_500_\V{assocLeft}__\V{code}_3;}}
+\L{\LB{__@_\-_@}\Tab{16}{:_(_\V{int}_\V{int}_)_\V{int}}\Tab{40}{\V{pri}_600_\V{assocLeft}__\V{code}_4;}}
+\L{\LB{__@_\*_@}\Tab{16}{:_(_\V{int}_\V{int}_)_\V{int}}\Tab{40}{\V{pri}_700_\V{assocLeft}__\V{code}_5;}}
+\L{\LB{__@_\1_@}\Tab{16}{:_(_\V{int}_\V{int}_)_\V{int}}\Tab{40}{\V{pri}_800_\V{assocLeft}__\V{code}_6;}}
+\L{\LB{__@_\%_@}\Tab{16}{:_(_\V{int}_\V{int}_)_\V{int}}\Tab{40}{\V{pri}_800_\V{assocLeft}__\V{code}_27;}}
+\L{\LB{__@_\&_@}\Tab{16}{:_(_\V{int}_\V{int}_)_\V{int}}\Tab{40}{\V{pri}_800_\V{assocLeft}__\V{code}_28;}}
+\L{\LB{__@_\|_@}\Tab{16}{:_(_\V{int}_\V{int}_)_\V{int}}\Tab{40}{\V{pri}_800_\V{assocLeft}__\V{code}_29;}}
+\L{\LB{__\-_@}\Tab{16}{:_(_\V{int}_)_\V{int}}\Tab{40}{\V{pri}_900}\Tab{56}{___\V{code}_20;}}
+\L{\LB{}}
+\L{\LB{}\Tab{8}{\C{}\1\1_ Now we define the parenthesised version of the previous operators}}
+\CE{}\L{\LB{__(@_+_@)}\Tab{16}{:_(_\V{int}_\V{int}_)_\V{int}}\Tab{40}{\V{pri}_500_\V{assocLeft}_\K{alias}_@_+_@:;}}
+\L{\LB{__(@_\-_@)}\Tab{16}{:_(_\V{int}_\V{int}_)_\V{int}}\Tab{40}{\V{pri}_600_\V{assocLeft}_\K{alias}_@_\-_@:;}}
+\L{\LB{__(@_\*_@)}\Tab{16}{:_(_\V{int}_\V{int}_)_\V{int}}\Tab{40}{\V{pri}_700_\V{assocLeft}_\K{alias}_@_\*_@:;}}
+\L{\LB{__(@_\1_@)}\Tab{16}{:_(_\V{int}_\V{int}_)_\V{int}}\Tab{40}{\V{pri}_800_\V{assocLeft}_\K{alias}_@_\1_@:;}}
+\L{\LB{__(@_\%_@)}\Tab{16}{:_(_\V{int}_\V{int}_)_\V{int}}\Tab{40}{\V{pri}_800_\V{assocLeft}_\K{alias}_@_\%_@:;}}
+\L{\LB{__(@_\&_@)}\Tab{16}{:_(_\V{int}_\V{int}_)_\V{int}}\Tab{40}{\V{pri}_800_\V{assocLeft}_\K{alias}_@_\&_@:;}}
+\L{\LB{__(@_\|_@)}\Tab{16}{:_(_\V{int}_\V{int}_)_\V{int}}\Tab{40}{\V{pri}_800_\V{assocLeft}_\K{alias}_@_\|_@:;}}
+\L{\LB{__(\-_@)}\Tab{16}{:_(_\V{int}_)_\V{int}}\Tab{40}{\V{pri}_900_}\Tab{56}{__\K{alias}_\-_@:;}}
+\L{\LB{}}
+\L{\LB{}\Tab{8}{\C{}\1\1_ And infix version of them}}
+\CE{}\L{\LB{__\V{plus}(@,@)}\Tab{16}{:_(_\V{int}_\V{int}_)_\V{int}}\Tab{40}{\K{alias}_@_+_@:;}}
+\L{\LB{__\V{minus}(@,@)}\Tab{16}{:_(_\V{int}_\V{int}_)_\V{int}}\Tab{40}{\K{alias}_@_\-_@:;}}
+\L{\LB{__\V{time}(@,@)}\Tab{16}{:_(_\V{int}_\V{int}_)_\V{int}}\Tab{40}{\K{alias}_@_\*_@:;}}
+\L{\LB{__\V{div}(@,@)}\Tab{16}{:_(_\V{int}_\V{int}_)_\V{int}}\Tab{40}{\K{alias}_@_\1_@:;}}
+\L{\LB{__\V{mod}(@,@)}\Tab{16}{:_(_\V{int}_\V{int}_)_\V{int}}\Tab{40}{\K{alias}_@_\%_@:;}}
+\L{\LB{__\V{and}(@,@)}\Tab{16}{:_(_\V{int}_\V{int}_)_\V{int}}\Tab{40}{\K{alias}_@_\&_@:;}}
+\L{\LB{__\V{or}(@,@)}\Tab{16}{:_(_\V{int}_\V{int}_)_\V{int}}\Tab{40}{\K{alias}_@_\|_@:;}}
+\L{\LB{__\V{umin}(@)}\Tab{16}{:_(_\V{int}_)_\V{int}}\Tab{40}{\K{alias}_\-_@:;}}
+\L{\LB{}}
+\L{\LB{}\Tab{8}{\C{}\1\1_ The following are the standard predicates on integers}}
+\CE{}\L{\LB{__@_==_@_}\Tab{16}{:_(_\V{int}_\V{int}_)_\V{bool}}\Tab{40}{\V{pri}_300_\V{code}_8;}}
+\L{\LB{__@_!=_@_}\Tab{16}{:_(_\V{int}_\V{int}_)_\V{bool}}\Tab{40}{\V{pri}_300_\V{code}_9;}}
+\L{\LB{__@_\<__@_}\Tab{16}{:_(_\V{int}_\V{int}_)_\V{bool}}\Tab{40}{\V{pri}_300_\V{code}_10;}}
+\L{\LB{__@_\<=_@_}\Tab{16}{:_(_\V{int}_\V{int}_)_\V{bool}}\Tab{40}{\V{pri}_300_\V{code}_11;}}
+\L{\LB{__@_\>__@_}\Tab{16}{:_(_\V{int}_\V{int}_)_\V{bool}}\Tab{40}{\V{pri}_300_\V{code}_12;}}
+\L{\LB{__@_\>=_@_}\Tab{16}{:_(_\V{int}_\V{int}_)_\V{bool}}\Tab{40}{\V{pri}_300_\V{code}_13;}}
+\L{\LB{}}
+\L{\LB{}\Tab{8}{\C{}\1\1_ And the prefix versions are}}
+\CE{}\L{\LB{__\V{inteq}(@,@)}\Tab{16}{:_(_\V{int}_\V{int}_)_\V{bool}}\Tab{40}{\K{alias}_@_==_@:;}}
+\L{\LB{__\V{intneq}(@,@)}\Tab{16}{:_(_\V{int}_\V{int}_)_\V{bool}}\Tab{40}{\K{alias}_@_!=_@:;}}
+\L{\LB{__\V{intless}(@,@)}\Tab{16}{:_(_\V{int}_\V{int}_)_\V{bool}}\Tab{40}{\K{alias}_@_\<__@:;}}
+\L{\LB{__\V{intlesseq}(@,@)}\Tab{24}{:_(_\V{int}_\V{int}_)_\V{bool}}\Tab{48}{\K{alias}_@_\<=_@:;}}
+\L{\LB{__\V{intgreater}(@,@)}\Tab{24}{:_(_\V{int}_\V{int}_)_\V{bool}}\Tab{48}{\K{alias}_@_\>_@:;}}
+\L{\LB{__\V{intgreatereq}(@,@)}\Tab{24}{:_(_\V{int}_\V{int}_)_\V{bool}}\Tab{48}{\K{alias}_@_\>=_@:;}}
+\L{\LB{}}
+\L{\LB{}\Tab{8}{\C{}\1\1_ conversions from bool to int and conversely}}
+\CE{}\L{\LB{__\V{btoi}(@)}\Tab{16}{:_(_\V{bool}_)_\V{int}}\Tab{40}{\V{code}_25;}}
+\L{\LB{}\Tab{8}{\C{}\1\1_ false -\!\> 0}}
+\CE{}\L{\LB{}\Tab{8}{\C{}\1\1_ true  -\!\> 1}}
+\CE{}\L{\LB{}}
+\L{\LB{__\V{itob}(@)}\Tab{16}{:_(_\V{int}_)_\V{bool}}\Tab{40}{\V{code}_26;}}
+\L{\LB{}\Tab{8}{\C{}\1\1_ n+1 -\!\> true}}
+\CE{}\L{\LB{}\Tab{8}{\C{}\1\1_ 0   -\!\> false}}
+\CE{}\L{\LB{\K{endop}}}
+\L{\LB{}}
+\L{\LB{\K{end}_\K{of}_\K{module}}}

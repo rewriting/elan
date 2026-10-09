@@ -1,0 +1,18 @@
+module string
+import global anyString;
+end
+sort string;
+end
+operators global 
+   strlen(@)	: (string) int					code 150;
+   strcat(@,@)	: (string string) string	assocRight	code 151;
+   @+@		: (string string) string	assocRight	alias strcat(@,@):;
+   @[@]		: (string int) int				code 152;
+   @[@<-@]	: (string int int) string			code 153;
+   substr(@,@,@): (string int int) string			code 154;
+   strspn(@,@)	: (string string) int				code 156;
+   strcmp(@,@)	: (string string) int				code 157;
+   string(@)	: (int) string					code 158;
+end
+
+end

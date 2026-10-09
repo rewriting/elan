@@ -1,0 +1,11 @@
+module simplePairSelectors
+import bool;
+  end
+sort X Y Pair;
+  end
+operators
+  global
+    [@,@]	: ( first:X second:Y ) Pair;
+    isPair(@)	: ( Pair ) bool;
+  end
+end

@@ -1,0 +1,51 @@
+module Meta_capply[X]
+
+//###
+//#####  ONLY FOR COMPILER
+//###
+
+import global int list[X];
+end
+sort Label;
+end
+operators global
+    meta_apply(@,@)	: (Label X) X			code 129;
+    meta_apply(@,@,@)	: (Label X int) X		code 130;
+    //------------------ 
+    set_of(@,@)		: (Label X) list[X];         // all solutions
+    set_of(@,@,@)	: (Label X int) list[X];     // from n-th solution
+    set_of(@,@,@,@)	: (Label X int int) list[X]; // m sols from n-th
+end
+
+// Elan implementation of set_of is very naive and 'not very optimal', 
+// but it is clear.
+// The alternative low-level solution ('real' implementation in C++) needs
+// to build-in sorts list[X], which is (at this moment) a dirty hack
+// with no precedents.
+
+rules for list[X]
+ s	: Label;
+	t, res	: X;
+	n, m	: int;
+bodies
+  [] 	set_of(s,t) 	=> set_of(s,t,0,9999)				end
+  [] 	set_of(s,t,n) 	=> set_of(s,t,n,9999)				end
+
+  []	set_of(s,t,n,0) => nil						end
+  []	set_of(s,t,n,m) => res.set_of(s,t,n+1,m-1)
+			   where res:=(META)meta_apply(s,t,n)		end
+  []	set_of(s,t,n,m) => nil						end
+end
+
+strategy META for X 	// this is a strategy which interprets only terms of the form
+  builtin(2)		// meta_apply(s,t) or meta_apply(s,t,n)
+end
+
+end
+
+
+
+
+
+
+

@@ -1,0 +1,48 @@
+
+\let\CF=\rm
+% Remember to use the lgrind style
+
+\File{atomPExt.eln},{17:23},{Jun 21 1996}
+\L{\LB{\C{}\1\1}}
+}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{16}{(c)}\Tab{24}{INRIA-Lorraine \& CRIN}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{24}{615, rue du Jardin Botanique, BP 101}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{16}{        54602 Villers-les-Nancy}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{24}{France}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{24}{email: elan@loria.fr}}
+\CE{}\L{\LB{\C{}\1\1}}
+}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{8}{\$Source: /CVS/aircube/elan3/doc/elanlibTex/atomPExt.eln.tex,v $}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{8}{\$Revision: 1.2 $}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{8}{\$Date: 1996/08/05 20:24:03 $}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{8}{\$Author: ckirchne $}}
+\CE{}\L{\LB{\C{}\1\1}}
+}}
+\CE{}\L{\LB{}}
+\L{\LB{\K{module}_\V{atomPExt}[\V{Preds}]}}
+\L{\LB{\K{import}}\Tab{8}{\V{Preds}_\V{int}_\V{anyIdentifier}_\V{atomP}[\V{Preds}]_\V{pair}[\V{identifier},\V{int}]_}}
+\L{\LB{}\Tab{8}{\V{list}[\V{pair}[\V{identifier},\V{int}]];}}
+\L{\LB{\K{op}}}
+\L{\LB{}}
+\L{\LB{__\K{global}}}
+\L{\LB{}}
+\L{\LB{__\K{FOR}_\K{EACH}_\V{SS}:\V{pair}[\V{identifier},\V{int}];_\V{P}:\V{identifier};__\V{N}:\V{int}}}
+\L{\LB{__\K{SUCH}_\K{THAT}_\V{SS}:=(\V{listExtract})_\V{elem}(\V{Preds})_\K{AND}_\V{P}:=()\V{first}(\V{SS})_}}
+\L{\LB{}\Tab{8}{\K{AND}_\V{N}:=()\V{second}(\V{SS})_\K{ANDIF}_\V{N}==0_:\{}}
+\L{\LB{}}
+\L{\LB{______\V{P}_____}\Tab{16}{:\V{atom}}\Tab{40}{\K{alias}_\"\V{P}\"_:;}}
+\L{\LB{}}
+\L{\LB{____\}}}
+\L{\LB{}}
+\L{\LB{__\K{FOR}_\K{EACH}_\V{SS}:\V{pair}[\V{identifier},\V{int}];_\V{P}:\V{identifier};__\V{N}:\V{int}}}
+\L{\LB{__\K{SUCH}_\K{THAT}_\V{SS}:=(\V{listExtract})_\V{elem}(\V{Preds})_\K{AND}_\V{P}:=()\V{first}(\V{SS})_}}
+\L{\LB{}\Tab{8}{\K{AND}_\V{N}:=()\V{second}(\V{SS})_\K{ANDIF}_\V{N}_\>_0_:\{}}
+\L{\LB{}}
+\L{\LB{______\V{P}_(@_\{,@\}\~(\V{N}\-1))____:(\{\V{term}\}\~\V{N})_\V{atom}}\Tab{48}{\K{alias}__\"\V{P}\"_(@_\{,@\}\~(\V{N}\-1)):;}}
+\L{\LB{}}
+\L{\LB{__\}}}
+\L{\LB{}}
+\L{\LB{\K{endop}}}
+\L{\LB{}}
+\L{\LB{\K{end}_\K{of}_\K{module}}}
+\L{\LB{}}

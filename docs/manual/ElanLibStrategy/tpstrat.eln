@@ -1,0 +1,5 @@
+module tpstrat[X]
+
+import global strat[X];
+
+end

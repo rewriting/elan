@@ -1,0 +1,23 @@
+module strapply[X] 
+
+import global strat[X] int Meta_strat Meta_apply[X];
+end
+operators global
+  setof(@,@)	: (<X> X) list[X];
+  setof(@,@,@)	: (<X> X int) list[X];
+  setof(@,@,@,@): (<X> X int int) list[X];
+  eval		: Label;
+end
+ 
+rules for list[X] 
+	s	: <X>;
+	t	: X;
+	lst	: list[X];
+	m, n	: int;
+local
+  []	setof(s,t) 	=>  set_of(call(eval),[s]t)		end
+  []	setof(s,t,m) 	=>  set_of(call(eval),[s]t,m)		end
+  []	setof(s,t,m,n) 	=>  set_of(call(eval),[s]t,m,n)	end
+end
+
+end

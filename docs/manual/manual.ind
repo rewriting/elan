@@ -1,0 +1,306 @@
+\begin{theindex}
+
+  \item {\textbf  {:=}}, \hyperpage{37}
+
+  \indexspace
+
+  \item AC, \hyperpage{34}
+  \item {\textbf  {AC}}, \hyperpage{34}, \hyperpage{36}
+  \item alias
+    \subitem strategy, \hyperpage{35}
+  \item {\textbf  {alias}}, \hyperpage{32--35}
+  \item aliasing, \hyperpage{32}, \hyperpage{35}
+  \item {\textbf  {AND}}, \hyperpage{60}
+  \item {\textbf  {ANDIF}}, \hyperpage{60}
+  \item {$<${\em  arg.repetition}$>$}, \hyperpage{59}
+  \item assocLeft, \hyperpage{34}
+  \item {\textbf  {assocLeft}}, \hyperpage{34}, \hyperpage{36}
+  \item assocRight, \hyperpage{34}
+  \item {\textbf  {assocRight}}, \hyperpage{34}, \hyperpage{36}
+
+  \indexspace
+
+  \item {$<${\em  boolean term}$>$}, \hyperpage{37}, \hyperpage{57}, 
+		\hyperpage{60}
+  \item {\textbf  {bs}}, \hyperpage{36, 37}, \hyperpage{41}
+  \item {\textbf  {builtin}}, \hyperpage{34, 35}
+
+  \indexspace
+
+  \item {$<${\em  char}$>$}, \hyperpage{29, 30}, \hyperpage{59}
+  \item {\textbf  {check with}}, \hyperpage{57}
+  \item {\textbf  {choose}}, \hyperpage{37}
+  \item choose-try, \hyperpage{39}
+  \item {$<${\em  choosing}$>$}, \hyperpage{41}
+  \item code, \hyperpage{34}
+  \item {\textbf  {code}}, \hyperpage{34, 35}
+  \item Coercions, \hyperpage{34}
+  \item comments, \hyperpage{30}
+  \item {$<${\em  concatenation}$>$}, \hyperpage{41}
+  \item condition, \hyperpage{36}
+  \item {$<${\em  constant expression}$>$}, \hyperpage{59}
+
+  \indexspace
+
+  \item {\textbf  {dc}}, \hyperpage{41}
+  \item {\textbf  {dc one}}, \hyperpage{41, 42}
+  \item {\textbf  {dccall}}, \hyperpage{82, 83}
+  \item declaration
+    \subitem function, \hyperpage{32}
+    \subitem operator, \hyperpage{32}
+    \subitem sort, \hyperpage{31}
+    \subitem strategy, \hyperpage{35}
+  \item defined
+    \subitem strategy, \hyperpage{47}
+  \item defined strategies, \hyperpage{40}
+  \item {$<${\em  defined strategy option}$>$}, \hyperpage{36}
+  \item {$<${\em  defined strategy rule}$>$}, \hyperpage{40}, 
+		\hyperpage{47}
+  \item {\textbf  {description}}, \hyperpage{57}
+  \item {\textbf  {dk}}, \hyperpage{41}, \hyperpage{52}
+  \item {\textbf  {dkcall}}, \hyperpage{82, 83}
+  \item {$<${\em  Dstrategy term}$>$}, \hyperpage{37}, \hyperpage{47}
+
+  \indexspace
+
+  \item {$<${\em  elan identifier}$>$}, \hyperpage{29}, \hyperpage{32}, 
+		\hyperpage{37}
+  \item elementary strategies, \hyperpage{40}
+  \item elementary strategy, \hyperpage{41}
+  \item {$<${\em  elementary strategy option}$>$}, \hyperpage{36}
+  \item {$<${\em  elementary strategy rule}$>$}, \hyperpage{40, 41}
+  \item {\textbf  {END}}, \hyperpage{83}
+  \item {\textbf  {end}}, \hyperpage{30}, \hyperpage{36, 37}, 
+		\hyperpage{40, 41}, \hyperpage{47}, \hyperpage{57}
+  \item end-user, \hyperpage{7}
+  \item {$<${\em  Estrategy name}$>$}, \hyperpage{41}, \hyperpage{57}
+  \item {$<${\em  Estrategy term}$>$}, \hyperpage{37}, \hyperpage{41}
+  \item evaluation
+    \subitem mechanism in \elan, \hyperpage{48}
+  \item {\textbf  {explicit}}, \hyperpage{40, 41}
+
+  \indexspace
+
+  \item fail
+    \subitem strategy, \hyperpage{40}
+  \item {\textbf  {fail}}, \hyperpage{41}
+  \item {$<${\em  family of rules}$>$}, \hyperpage{30}, \hyperpage{36}
+  \item {$<${\em  family of strategies}$>$}, \hyperpage{30}, 
+		\hyperpage{40}
+  \item {\textbf  {first}}, \hyperpage{41}
+  \item {\textbf  {first one}}, \hyperpage{41, 42}
+  \item {\textbf  {FOR EACH}}, \hyperpage{60}
+  \item {$<${\em  for each const.}$>$}, \hyperpage{60}
+  \item {$<${\em  formal module name}$>$}, \hyperpage{30}, 
+		\hyperpage{56}
+  \item function symbol, \hyperpage{32}
+
+  \indexspace
+
+  \item {\textbf  {global}}, \hyperpage{36}
+  \item {$<${\em  global operator definition}$>$}, \hyperpage{31}
+  \item {$<${\em  global stratop definition}$>$}, \hyperpage{31}
+
+  \indexspace
+
+  \item {\textbf  {id}}, \hyperpage{41}
+  \item {$<${\em  identifier}$>$}, \hyperpage{29--31}, \hyperpage{33}, 
+		\hyperpage{36}, \hyperpage{56, 57}, \hyperpage{59}, 
+		\hyperpage{83}
+  \item if, \hyperpage{36}
+  \item {\textbf  {if}}, \hyperpage{37}
+  \item {$<${\em  if-where-choose}$>$}, \hyperpage{37}, \hyperpage{47}
+  \item {\textbf  {implicit}}, \hyperpage{40, 41}
+  \item {\textbf  {import}}, \hyperpage{57}
+  \item {$<${\em  imports}$>$}, \hyperpage{30}
+  \item {$<${\em  instantiated module name}$>$}, \hyperpage{30}, 
+		\hyperpage{57}
+  \item {\textbf  {iterate*}}, \hyperpage{41}, \hyperpage{44}
+  \item {\textbf  {iterate+}}, \hyperpage{41}, \hyperpage{44}
+  \item {$<${\em  iterator}$>$}, \hyperpage{41}
+
+  \indexspace
+
+  \item {$<${\em  labelled or unlabelled rule}$>$}, \hyperpage{36}
+  \item {$<${\em  labelled rule}$>$}, \hyperpage{36}
+  \item labelled rules, \hyperpage{36}
+  \item letter, \hyperpage{29}
+  \item {$<${\em  letter}$>$}, \hyperpage{29}
+  \item {$<${\em  lexem}$>$}, \hyperpage{59}
+  \item lexical unity, \hyperpage{29}
+  \item {$<${\em  LGI file name}$>$}, \hyperpage{27}
+  \item {\textbf  {local}}, \hyperpage{36}
+  \item local assignment, \hyperpage{36}
+  \item {$<${\em  local operator definition}$>$}, \hyperpage{31}
+  \item {$<${\em  local stratop definition}$>$}, \hyperpage{31}
+  \item {\textbf  {LPL}}, \hyperpage{57}
+  \item {$<${\em  lpl description}$>$}, \hyperpage{57}
+
+  \indexspace
+
+  \item {$<${\em  module}$>$}, \hyperpage{30}
+  \item {\textbf  {module}}, \hyperpage{30}
+
+  \indexspace
+
+  \item name
+    \subitem sort, \hyperpage{30, 31}
+  \item {$<${\em  name}$>$}, \hyperpage{32}, \hyperpage{35}
+  \item {$<${\em  nchar}$>$}, \hyperpage{29}, \hyperpage{32}
+  \item {$<${\em  new operator declaration}$>$}, \hyperpage{32}
+  \item {$<${\em  new strategy declaration}$>$}, \hyperpage{35}
+  \item {$<${\em  next solution}$>$}, \hyperpage{83}
+  \item {$<${\em  next solution demand}$>$}, \hyperpage{83}
+  \item {\textbf  {normalise}}, \hyperpage{41}
+  \item {$<${\em  normalize}$>$}, \hyperpage{41}
+  \item {\textbf  {normalize}}, \hyperpage{41}
+  \item {$<${\em  normalize with trace}$>$}, \hyperpage{41}
+  \item {\textbf  {normin}}, \hyperpage{25}, \hyperpage{41}, 
+		\hyperpage{46}
+  \item number, \hyperpage{30}
+  \item {$<${\em  number}$>$}, \hyperpage{30}, \hyperpage{32}, 
+		\hyperpage{34}, \hyperpage{36}, \hyperpage{59}, 
+		\hyperpage{83}
+  \item {$<${\em  numeral}$>$}, \hyperpage{29, 30}
+
+  \indexspace
+
+  \item {\textbf  {of sort}}, \hyperpage{57}
+  \item {$<${\em  old name}$>$}, \hyperpage{32}
+  \item {$<${\em  old operator name}$>$}, \hyperpage{32}
+  \item {$<${\em  old strategy name}$>$}, \hyperpage{35}
+  \item operator, \hyperpage{32}
+  \item {$<${\em  operator alias}$>$}, \hyperpage{32}
+  \item {$<${\em  operator declaration}$>$}, \hyperpage{32}
+  \item operator definition, \hyperpage{31}
+  \item {$<${\em  operator definition}$>$}, \hyperpage{30}
+  \item {$<${\em  operator name}$>$}, \hyperpage{32}
+  \item {$<${\em  operator option}$>$}, \hyperpage{32}, \hyperpage{34}
+  \item {$<${\em  options}$>$}, \hyperpage{27}
+
+  \indexspace
+
+  \item {\textbf  {part}}, \hyperpage{57}
+  \item pattern
+    \subitem in where, \hyperpage{38}
+  \item patterns, \hyperpage{38}
+  \item pri, \hyperpage{34}
+  \item {\textbf  {pri}}, \hyperpage{34}, \hyperpage{36}
+  \item primal strategy, \hyperpage{42}
+  \item priority, \hyperpage{34}
+  \item {$<${\em  process input}$>$}, \hyperpage{83}
+  \item {$<${\em  process output}$>$}, \hyperpage{83}
+
+  \indexspace
+
+  \item {$<${\em  qchar}$>$}, \hyperpage{29, 30}
+  \item {\textbf  {query}}, \hyperpage{57}
+  \item {$<${\em  query term}$>$}, \hyperpage{57}
+  \item {$<${\em  quoted identifier}$>$}, \hyperpage{29}, 
+		\hyperpage{32}
+  \item {$<${\em  quoted single lexem}$>$}, \hyperpage{32}
+
+  \indexspace
+
+  \item rank, \hyperpage{32}
+    \subitem strategy, \hyperpage{35}
+  \item {$<${\em  rank}$>$}, \hyperpage{32, 33}
+  \item {$<${\em  REF file name}$>$}, \hyperpage{27}
+  \item {\textbf  {repeat}}, \hyperpage{44}
+  \item {\textbf  {repeat*}}, \hyperpage{41}, \hyperpage{44}
+  \item {\textbf  {repeat+}}, \hyperpage{41}, \hyperpage{44}
+  \item {\textbf  {result of sort}}, \hyperpage{57}
+  \item {$<${\em  rule body}$>$}, \hyperpage{36, 37}
+  \item {$<${\em  rule label}$>$}, \hyperpage{36}, \hyperpage{47}
+  \item rules
+    \subitem labelled, \hyperpage{36}
+    \subitem unlabelled, \hyperpage{36}
+  \item {\textbf  {rules for}}, \hyperpage{36}
+
+  \indexspace
+
+  \item selectors, \hyperpage{32}
+  \item separators, \hyperpage{29}
+  \item {$<${\em  simple repetition}$>$}, \hyperpage{59}
+  \item {$<${\em  single lexem}$>$}, \hyperpage{32}
+  \item sort
+    \subitem built-in, \hyperpage{31}
+    \subitem declaration, \hyperpage{31}
+    \subitem definition, \hyperpage{30}
+    \subitem in pattern, \hyperpage{38}
+    \subitem name, \hyperpage{30, 31}
+    \subitem strategy, \hyperpage{35}
+  \item {\textbf  {sort}}, \hyperpage{30}
+  \item sort declaration, \hyperpage{31}
+  \item {$<${\em  sort definition}$>$}, \hyperpage{30}
+  \item {$<${\em  sort name}$>$}, \hyperpage{30, 31}, \hyperpage{33}, 
+		\hyperpage{35--37}, \hyperpage{40, 41}, \hyperpage{57}, 
+		\hyperpage{60}, \hyperpage{66}, \hyperpage{83}
+  \item {$<${\em  sort or strategy sort name}$>$}, \hyperpage{41}
+  \item {$<${\em  specification description}$>$}, \hyperpage{57}
+  \item {\textbf  {specification description}}, \hyperpage{57}
+  \item {$<${\em  specification part description}$>$}, \hyperpage{57}
+  \item {$<${\em  start term}$>$}, \hyperpage{57}
+  \item {\textbf  {start with}}, \hyperpage{57}
+  \item {\textbf  {strategies for}}, \hyperpage{40}
+  \item strategy, \hyperpage{40}
+    \subitem defined, \hyperpage{40}, \hyperpage{47}
+    \subitem elementary, \hyperpage{40, 41}
+    \subitem failure, \hyperpage{40}
+    \subitem family, \hyperpage{40}
+    \subitem primal, \hyperpage{42}
+  \item {$<${\em  strategy}$>$}, \hyperpage{83}
+  \item {$<${\em  strategy alias}$>$}, \hyperpage{35}
+  \item {$<${\em  strategy arg}$>$}, \hyperpage{35}
+  \item {$<${\em  strategy args}$>$}, \hyperpage{35}
+  \item {$<${\em  strategy body}$>$}, \hyperpage{47}
+  \item {$<${\em  strategy declaration}$>$}, \hyperpage{35}
+  \item {$<${\em  strategy name}$>$}, \hyperpage{35}, \hyperpage{60}, 
+		\hyperpage{66}
+  \item strategy operator, \hyperpage{35}
+  \item {$<${\em  strategy option}$>$}, \hyperpage{35, 36}
+  \item {$<${\em  strategy rank}$>$}, \hyperpage{35}
+  \item {$<${\em  strategy sort name}$>$}, \hyperpage{35, 36}, 
+		\hyperpage{41}
+  \item {$<${\em  strategy variable declare}$>$}, \hyperpage{40, 41}
+  \item stratop definition, \hyperpage{31}
+  \item {$<${\em  stratop definition}$>$}, \hyperpage{30}
+  \item {$<${\em  subexpression}$>$}, \hyperpage{59}
+  \item {\textbf  {SUCH THAT}}, \hyperpage{60}
+  \item super-user, \hyperpage{7}
+  \item {$<${\em  symbol}$>$}, \hyperpage{32}
+
+  \indexspace
+
+  \item {$<${\em  term}$>$}, \hyperpage{37}, \hyperpage{60}, 
+		\hyperpage{83}
+  \item {$<${\em  text}$>$}, \hyperpage{59, 60}
+  \item {\textbf  {try}}, \hyperpage{37}
+
+  \indexspace
+
+  \item {$<${\em  unlabelled rule}$>$}, \hyperpage{36}
+  \item unlabelled rules, \hyperpage{36}
+  \item user, \hyperpage{7}
+
+  \indexspace
+
+  \item {$<${\em  varaffect}$>$}, \hyperpage{60}
+  \item {$<${\em  vardecl}$>$}, \hyperpage{60}
+  \item {$<${\em  variable}$>$}, \hyperpage{36}
+  \item {$<${\em  variable declare}$>$}, \hyperpage{36, 37}
+  \item {$<${\em  variable name}$>$}, \hyperpage{37}, \hyperpage{41}
+  \item {$<${\em  varname}$>$}, \hyperpage{60}
+  \item visibility
+    \subitem {\em of} alias, \hyperpage{55}
+    \subitem {\em of} operator, \hyperpage{55}
+    \subitem {\em of} sort, \hyperpage{55}
+    \subitem rule labels, \hyperpage{40}
+
+  \indexspace
+
+  \item where, \hyperpage{38}
+    \subitem with pattern, \hyperpage{38}
+  \item {\textbf  {where}}, \hyperpage{37}
+
+\end{theindex}

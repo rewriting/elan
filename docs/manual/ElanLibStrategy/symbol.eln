@@ -1,0 +1,9 @@
+module symbol[N, T_1,...,T_N, TT]
+
+sort Symbol[T_1,...,T_N,TT];
+end
+operators global
+  @ (@ {,@}_I=2...N) : (Symbol[T_1,...,T_N,TT] {T_I}_I=1...N) TT;
+end
+
+end

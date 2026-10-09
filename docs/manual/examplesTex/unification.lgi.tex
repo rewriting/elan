@@ -1,0 +1,25 @@
+
+\let\CF=\rm
+% Remember to use the lgrind style
+
+\File{unification.lgi},{17:23},{Jun 21 1996}
+\L{\LB{\K{LPL}_\V{unification}_\K{description}}}
+\L{\LB{}\Tab{8}{\C{}\1\1_ This part describes the syntax in which the user should}}
+\CE{}\L{\LB{}\Tab{8}{\C{}\1\1_ complete the definition of the logic: i.e. how (s)he gives }}
+\CE{}\L{\LB{}\Tab{8}{\C{}\1\1_ the specification.}}
+\CE{}\L{\LB{__\K{specification}_\K{description}}}
+\L{\LB{____\K{part}_\V{Vars}}\Tab{16}{\K{of}_\K{sort}_\V{list}[\V{identifier}]}}
+\L{\LB{}\Tab{8}{_}\Tab{16}{\K{modules}_\V{sigSyntax}}}
+\L{\LB{____\K{part}_\V{Ops}}\Tab{16}{\K{of}_\K{sort}_\V{list}[\V{pair}[\V{identifier},\V{int}]]}}
+\L{\LB{}\Tab{8}{_}\Tab{16}{\K{modules}_\V{sigSyntax}}}
+\L{\LB{__\K{end}}}
+\L{\LB{}}
+\L{\LB{}\Tab{8}{\C{}\1\1_ This describes the way the user should gives the query }}
+\CE{}\L{\LB{}\Tab{8}{\C{}\1\1_ and how it will be evaluated}}
+\CE{}\L{\LB{__\K{query}_}\Tab{16}{\K{of}_\K{sort}_\V{equation}}}
+\L{\LB{_________}\Tab{16}{\K{result}_\K{of}_\K{sort}_\V{eqSystem}}}
+\L{\LB{}\Tab{8}{_}\Tab{16}{\K{modules}_\V{syntacticUnification}[\V{Vars},\V{Ops}]}}
+\L{\LB{}\Tab{24}{\V{termVExt}[\V{Vars}]_\V{termFExt}[\V{Ops}]}}
+\L{\LB{_________}\Tab{16}{\K{start}_\K{with}_(\V{unify})_\K{query}_}}
+\L{\LB{}}
+\L{\LB{\K{end}_\K{of}_\K{LPL}_\K{description}}}

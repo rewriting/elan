@@ -1,0 +1,64 @@
+
+\let\CF=\rm
+\File{\/users\/protheo\/pot\/ELAN\/version.1.17\/Pem.manual\/examples\/queens.eln},{12:53},{Nov 28 1995}
+\L{\LB{\K{module} queens}}
+\L{\LB{\K{import} bool int list[int];}}
+\L{\LB{\K{op}}}
+\L{\LB{  \K{global}}}
+\L{\LB{    queens}\Tab{16}{: list[int];}}
+\L{\LB{}}
+\L{\LB{  \K{local}}}
+\L{\LB{    ok(@,@,@)}\Tab{16}{: ( int int list[int] ) bool;}}
+\L{\LB{}}
+\L{\LB{\K{endop}}}
+\L{\LB{}}
+\L{\LB{\K{rule} queensrule \K{for} list[int]}}
+\L{\LB{\K{declare} p1,p2,p3,p4,p5,p6,p7,p8 : int;}}
+\L{\LB{\K{body}}}
+\L{\LB{}}
+\L{\LB{  queens =\> p1.p2.p3.p4.p5.p6.p7.p8.nil}}
+\L{\LB{}\Tab{24}{\C{}\/\/ \-\- last: if all the local assignments and }}
+\CE{}\L{\LB{}\Tab{24}{\C{}\/\/ condition are OK then the instanciated right }}
+\CE{}\L{\LB{}\Tab{24}{\C{}\/\/ hand\-side carry the values.}}
+\CE{}\L{\LB{}\Tab{16}{\K{if} ok(1,p8,p7.p6.p5.p4.p3.p2.p1.nil)}}
+\L{\LB{}\Tab{16}{\K{where} p8:=(listExtract) elem(1.2.3.4.5.6.7.8.nil)}}
+\L{\LB{}\Tab{16}{\K{if} ok(1,p7,p6.p5.p4.p3.p2.p1.nil)}}
+\L{\LB{}\Tab{16}{\K{where} p7:=(listExtract) elem(1.2.3.4.5.6.7.8.nil)}}
+\L{\LB{}\Tab{16}{\K{if} ok(1,p6,p5.p4.p3.p2.p1.nil)}}
+\L{\LB{}\Tab{16}{\K{where} p6:=(listExtract) elem(1.2.3.4.5.6.7.8.nil)}}
+\L{\LB{}\Tab{16}{\K{if} ok(1,p5,p4.p3.p2.p1.nil)}}
+\L{\LB{}\Tab{16}{\K{where} p5:=(listExtract) elem(1.2.3.4.5.6.7.8.nil)}}
+\L{\LB{}\Tab{16}{\K{if} ok(1,p4,p3.p2.p1.nil)}}
+\L{\LB{}\Tab{16}{\K{where} p4:=(listExtract) elem(1.2.3.4.5.6.7.8.nil)}}
+\L{\LB{}\Tab{16}{\K{if} ok(1,p3,p2.p1.nil)}}
+\L{\LB{}\Tab{24}{\C{}\/\/ \-\- cinquo ...}}
+\CE{}\L{\LB{}\Tab{16}{\K{where} p3:=(listExtract) elem(1.2.3.4.5.6.7.8.nil)}}
+\L{\LB{}\Tab{24}{\C{}\/\/ \-\- quarto: choose a position on the third raw}}
+\CE{}\L{\LB{}\Tab{24}{\C{}\/\/ and continue upward ...}}
+\CE{}\L{\LB{}\Tab{16}{\K{if} ok(1,p2,p1.nil)}}
+\L{\LB{}\Tab{24}{\C{}\/\/ \-\- third: the positions on the first and}}
+\CE{}\L{\LB{}\Tab{24}{\C{}\/\/ second raws are checked to be compatible}}
+\CE{}\L{\LB{}\Tab{16}{\K{where} p2:=(listExtract) elem(1.2.3.4.5.6.7.8.nil)}}
+\L{\LB{}\Tab{24}{\C{}\/\/ \-\- second: the position on the second raw}}
+\CE{}\L{\LB{}\Tab{24}{\C{}\/\/ is also choosen }}
+\CE{}\L{\LB{}\Tab{16}{\K{where} p1:=(listExtract) elem(1.2.3.4.5.6.7.8.nil)}}
+\L{\LB{}\Tab{24}{\C{}\/\/ \-\- first: the position on the first raw}}
+\CE{}\L{\LB{}\Tab{24}{\C{}\/\/ is choosen}}
+\CE{}\L{\LB{\K{end} \K{of} \K{rule}}}
+\L{\LB{}}
+\L{\LB{\K{rules} \K{for} bool}}
+\L{\LB{\K{declare} p,d,diff : int;}}
+\L{\LB{}\Tab{8}{l : list[int];}}
+\L{\LB{\K{bodies}}}
+\L{\LB{  [] ok(diff,d,nil)}\Tab{24}{=\> true}\Tab{56}{\K{end}}}
+\L{\LB{  [] ok(diff,d,p.l)}\Tab{24}{=\> false}\Tab{40}{\K{if} d == p  }\Tab{56}{\K{end}}}
+\L{\LB{  [] ok(diff,d,p.l)}\Tab{24}{=\> false        \K{if} d\-p == diff  \K{end}}}
+\L{\LB{  [] ok(diff,d,p.l)}\Tab{24}{=\> false        \K{if} p\-d == diff  \K{end}}}
+\L{\LB{  [] ok(diff,d,p.l)}\Tab{24}{=\> ok(diff+1,d,l)}\Tab{56}{\K{end}}}
+\L{\LB{\K{end} \K{of} \K{rules}}}
+\L{\LB{}}
+\L{\LB{\K{strategy} queens}}
+\L{\LB{  \K{dont} \K{care} \K{choose}(queensrule)}}
+\L{\LB{\K{end} \K{of} \K{strategy}}}
+\L{\LB{}}
+\L{\LB{\K{end} \K{of} \K{module}}\Tab{32}{}}

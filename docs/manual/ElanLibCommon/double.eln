@@ -1,0 +1,92 @@
+//
+//		(c)	INRIA-Lorraine & CRIN
+//			615, rue du Jardin Botanique, BP 101
+//		        54602 Villers-les-Nancy
+//			France
+//			email: elan@loria.fr
+//
+//	$Source: /CVS/aircube/elan3/doc/ElanLibCommon/double.eln,v $
+//	$Revision: 1.1 $
+//	$Date: 1997/03/25 16:46:45 $
+//	$Author: moreau $
+//
+
+module double 
+import 
+  	global	doubleConstants ;
+	local	bool ;
+op
+ global
+
+  @ + @		: ( double double ) double	pri 500 assocLeft  code 38;
+  @ - @		: ( double double ) double	pri 600 assocLeft  code 39;
+  @ * @		: ( double double ) double	pri 700 assocLeft  code 40;
+  @ / @		: ( double double ) double	pri 800 assocLeft  code 41;
+  - @		: ( double ) double		pri 900		   code 42;
+
+  exp(@)	: ( double ) double				code 50;
+  exp2(@)	: ( double ) double				code 51;
+  exp10(@)	: ( double ) double				code 52;
+  log(@)	: ( double ) double				code 53;
+  log2(@)	: ( double ) double				code 54;
+  log10(@)	: ( double ) double				code 55;
+  pow(@,@)	: ( double double ) double			code 56;
+  sin(@)	: ( double ) double				code 57;
+  cos(@)	: ( double ) double				code 58;
+  tan(@)	: ( double ) double				code 59;
+  asin(@)	: ( double ) double				code 60;
+  acos(@)	: ( double ) double				code 61;
+  atan(@)	: ( double ) double				code 62;
+
+  (@.)		: ( int ) double		alias @.	:;
+  (@.@)		: ( int int ) double		alias @.@	:;
+  (@.@E+@)	: ( int int int ) double 	alias @.@E+@	:;
+  (@.@E-@)	: ( int int int ) double 	alias @.@E-@	:;
+  (@.@e+@)	: ( int int int ) double 	alias @.@e+@	:;
+  (@.@e-@)	: ( int int int ) double 	alias @.@e-@	:;
+
+  (@ + @)	: ( double double ) double  pri 500 assocLeft alias @ + @:;
+  (@ - @)	: ( double double ) double  pri 600 assocLeft alias @ - @:;
+  (@ * @)	: ( double double ) double  pri 700 assocLeft alias @ * @:;
+  (@ / @)	: ( double double ) double  pri 800 assocLeft alias @ / @:;
+  (- @)		: ( double ) double	    pri 900 	      alias - @:;
+
+  plus(@,@)	: ( double double ) double	alias @ + @	:;
+  minus(@,@)	: ( double double ) double	alias @ - @	:;
+  time(@,@)	: ( double double ) double	alias @ * @ 	:;
+  div(@,@)	: ( double double ) double	alias @ / @	:;
+  umin(@)	: ( double ) double		alias - @	:;
+
+
+
+  @ == @ 	: ( double double ) bool	code 43;
+  @ != @ 	: ( double double ) bool	code 44;
+  @ <  @ 	: ( double double ) bool	code 45;
+  @ <= @ 	: ( double double ) bool	code 46;
+  @ >  @ 	: ( double double ) bool	code 47;
+  @ >= @ 	: ( double double ) bool	code 48;
+
+  eq(@,@)	: ( double double ) bool	alias @ == @	:;
+  neq(@,@)	: ( double double ) bool	alias @ != @	:;
+  less(@,@)	: ( double double ) bool	alias @ <  @	:;
+  lesseq(@,@)	: ( double double ) bool	alias @ <= @	:;
+  greater(@,@)	: ( double double ) bool	alias @ > @	:;
+  greatereq(@,@): ( double double ) bool	alias @ >= @	:;
+
+  doubleeq(@,@)		: ( double double ) bool	alias @ == @	:;
+  doubleneq(@,@)	: ( double double ) bool	alias @ != @	:;
+  doubleless(@,@)	: ( double double ) bool	alias @ <  @	:;
+  doublelesseq(@,@)	: ( double double ) bool	alias @ <= @	:;
+  doublegreater(@,@)	: ( double double ) bool	alias @ > @	:;
+  doublegreatereq(@,@)	: ( double double ) bool	alias @ >= @	:;
+
+  itod(@)		: ( int ) double		code 63;
+
+end
+
+end
+
+
+
+
+

@@ -1,0 +1,7 @@
+LPL robot description
+  query	of sort		state
+  result of sort	list[list[state]]
+  import int 		robot
+  start with 		(eval)[allsearch]query.nil.nil
+			// a typical is query:  state(0,0) end
+end

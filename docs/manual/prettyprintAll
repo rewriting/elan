@@ -1,0 +1,6 @@
+#!/bin/sh
+
+cd ElanExamples
+../makePrettyCode
+cd ..
+

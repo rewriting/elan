@@ -1,0 +1,31 @@
+[ck: Apr 16 97] CECI N'EST PLUS UTILISE -------------------
+
+
+
+
+rules for bool
+bodies
+
+  [not1]  not true => false end
+  [not2]  not false => true end
+
+  rules for bool
+  declare P : bool;
+  bodies
+    [or1]  P or true => true end
+    [or2]  P or false => P  end
+
+    rule and
+    declare Q : bool;
+    body
+	P and Q => not ( not P or not Q )
+    end
+  end of rules
+
+  rule inteq
+  declare n1, n2 : int;
+  body
+    n1 = n2 => inteq(n1,n2)
+  end
+
+end of rules

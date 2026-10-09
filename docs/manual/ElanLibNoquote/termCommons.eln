@@ -1,0 +1,190 @@
+//
+//		(c)	INRIA-Lorraine & CRIN
+//			615, rue du Jardin Botanique, BP 101
+//		        54602 Villers-les-Nancy
+//			France
+//			email: elan@loria.fr
+//
+//	$Source: /CVS/aircube/elan3/doc/ElanLibNoquote/termCommons.eln,v $
+//	$Revision: 1.1 $
+//	$Date: 1997/03/25 16:47:01 $
+//	$Author: moreau $
+//
+
+module termCommons[Fss,Vars]
+/*
+   This module defines notions common to all first-order terms.
+   Terms built w.r.t. some concrete signatures are then defined by
+   modules 'termV' for variables and 'termF' for terms built on
+   functional symbols, both parametrized by the corresponding
+   signatures.  This choice (which is not unique) allows in particular
+   an easy description of terms built on constructors and defined
+   operators.
+*/
+import global	eq[term] substitution;
+       local	int bool identifier list[int] list[variable] list[identifier] 
+		Fss Vars pair[identifier,int] list[pair[identifier,int]];
+end
+sort variable term;
+end
+operators global
+/*--- term ---*/
+  var(@)       		: ( int ) variable;
+  @            		: ( variable ) term		pri 1000;
+
+  head(@)		: ( term ) identifier;
+  @-th subterm(@) 	: ( int term ) term;
+  isvar(@)              : ( term ) bool;
+  nvocc(@)              : ( term ) list[int];
+
+  @ at @                : ( term list[int] ) term;
+  @[@] at @             : ( term term list[int] ) term;
+
+  rename_subst(@,@)     : ( list[variable] int ) substitution;
+/*--- termF ---*/
+	// This creates from the user specification the actual 
+	// rank for operators d of arity zero (the constants)
+  FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+  SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS) 
+	AND N:=()second(SS) ANDIF N==0 :{
+      F()     	: term;
+      F	: term				alias F():;
+    }
+
+	// From the user specification, this creates the actual
+	// rank for non constant operators
+FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS) 
+	AND N:=()second(SS) ANDIF N > 0 :{
+
+     F({,@}~N) 	: ({term}~N)term;
+
+     F({@,}~N)		: ({term}~N)term 	alias F({,@}~N):;
+     F(,{@,}~N)	: ({term}~N)term 	alias F({,@}~N):;
+     F(@ {,@}~(N-1))	:({term}~N) term 	alias F({,@}~N):;
+
+    }
+/*--- termV ---*/
+    FOR EACH SS:identifier SUCH THAT SS:=(listExtract) elem(Vars) :{
+      SS     : variable;
+    }
+    varlist_Vars	: list[variable];
+    varnum_Vars         : int;
+end
+
+
+/*--- termV ---*/
+rules for list[variable]
+local
+  [] varlist_Vars => 
+  FOR EACH SS:identifier SUCH THAT SS:=(listExtract) elem(Vars) :{ SS.} nil
+  end
+end
+
+FOR EACH N:int SUCH THAT 
+	N:=() size_of_variable_list(FOR EACH SS:identifier 
+				    SUCH THAT SS:=(listExtract) elem(Vars) 
+					:{ SS.} nil ) 
+:{
+rules for int 
+local
+  [] varnum_Vars => N end
+end
+}
+
+/* --- termF ---*/
+FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS) 
+	AND N:=()second(SS) ANDIF N > 0 :{
+  rules for term
+   t_1,...,t_N : term;
+  local
+
+   { [] I-th subterm(F(t_1,...,t_N))   => t_I		end
+   }_I=1...N
+
+   rules for identifier
+   local
+     [] head(F(t_1,...,t_N)) => F end
+   end
+
+   rules for list[int]
+    oocc:list[int];
+   local
+   { [inOccRule] nvocc(F(t_1,...,t_N))	=> J.oocc 
+		where oocc:=(chooseOccurence) nvocc(t_J)
+      end
+   }_J=1...N
+   end
+
+  end
+}
+
+FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS) 
+	AND N:=()second(SS) :{
+   rules for identifier
+    t_1,...,t_N : term;
+   local  
+     [] head(F(t_1,...,t_N)) => F end
+   end
+}
+
+FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS) 
+	AND N:=()second(SS) ANDIF N != 0 :{
+  rules for term
+   t_1,...,t_N : term;
+	  $s	: term;
+	  l	: list[int];
+  local
+  { [] F(t_1,...,t_N)[$s] at I.l => F(t_1,...,t_(I-1),t_I[$s] at l,t_(I+1),...,t_N)
+    end
+  }_I=1...N
+  end
+}
+
+/*--- term ---*/
+rules for term
+ t,s:term;  i:int;  l:list[int];
+local
+  [] t at nil   	=> t				end
+  [] t at i.l		=> i-th subterm(t) at l		end
+  [] t[s] at nil        => s				end
+end
+
+rules for bool
+ v:variable; t:term;
+local
+  [] isvar(v)   => true					end
+  [] isvar(t)   => false				end
+end
+
+rules for substitution
+ i:int; vn:variable; vl:list[variable];
+local
+  [] rename_subst(nil,i)     => identity			    end
+  [] rename_subst(vn.vl , i) => vn->var(i) o rename_subst(vl , i+1) end
+end
+
+rules for list[int]
+ t:term;
+local
+  [topOccRule]  nvocc(t)          => nil	if not isvar(t)	    end
+end
+
+rules for identifier
+ x:variable;
+local
+  [] head($x)	=> var			end
+end
+
+strategies for list[int]
+global
+ [chooseOccurence]
+  dk(topOccRule || inOccRule)		end
+end
+
+end
+
+

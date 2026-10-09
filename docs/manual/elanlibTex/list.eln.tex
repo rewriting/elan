@@ -1,0 +1,89 @@
+
+\let\CF=\rm
+% Remember to use the lgrind style
+
+\File{list.eln},{17:23},{Jun 21 1996}
+\L{\LB{\C{}\1\1}}
+}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{16}{(c)}\Tab{24}{INRIA-Lorraine \& CRIN}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{24}{615, rue du Jardin Botanique, BP 101}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{16}{        54602 Villers-les-Nancy}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{24}{France}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{24}{email: elan@loria.fr}}
+\CE{}\L{\LB{\C{}\1\1}}
+}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{8}{\$Source: /CVS/aircube/elan3/doc/elanlibTex/list.eln.tex,v $}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{8}{\$Revision: 1.2 $}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{8}{\$Date: 1996/08/05 20:24:13 $}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{8}{\$Author: ckirchne $}}
+\CE{}\L{\LB{\C{}\1\1}}
+}}
+\CE{}\L{\LB{}}
+\L{\LB{\K{module}_\V{list}[\V{X}]}}
+\L{\LB{\K{import}_\V{int}_\V{listCommons};}}
+\L{\LB{\K{sort}_\V{X}_\V{list}[\V{X}];}}
+\L{\LB{\K{op}}}
+\L{\LB{__\K{global}}}
+\L{\LB{}}
+\L{\LB{____\V{nil\_X}}\Tab{16}{:_\V{list}[\V{X}];}}
+\L{\LB{____\V{cons}(@,@)}\Tab{16}{:_(_\V{X}_\V{list}[\V{X}]_)_\V{list}[\V{X}];}}
+\L{\LB{}}
+\L{\LB{}\Tab{8}{\C{}\1\1_ alias version of the previous operators}}
+\CE{}\L{\LB{____\V{nil}}\Tab{16}{:_\V{list}[\V{X}]}\Tab{48}{\K{alias}_\V{nil\_X}:;}}
+\L{\LB{____@_@}\Tab{16}{:_(_\V{X}_\V{list}[\V{X}]_)_\V{list}[\V{X}]}\Tab{48}{\K{alias}_\V{cons}(@,@):;}}
+\L{\LB{____@_,_@}\Tab{16}{:_(_\V{X}_\V{list}[\V{X}]_)_\V{list}[\V{X}]}\Tab{48}{\K{alias}_\V{cons}(@,@):;}}
+\L{\LB{____@_._@}\Tab{16}{:_(_\V{X}_\V{list}[\V{X}]_)_\V{list}[\V{X}]}\Tab{48}{\K{alias}_\V{cons}(@,@):;}}
+\L{\LB{}}
+\L{\LB{____\V{append}(@,@)}\Tab{16}{:_(_\V{list}[\V{X}]_\V{list}[\V{X}]_)_\V{list}[\V{X}];}}
+\L{\LB{____@_\'@\'_@}\Tab{16}{:_(_\V{list}[\V{X}]_\V{list}[\V{X}]_)_\V{list}[\V{X}]}\Tab{48}{\K{alias}_\V{append}(@,@):;}}
+\L{\LB{}}
+\L{\LB{____\V{elem}(@)}\Tab{16}{:_(_\V{list}[\V{X}]_)_\V{X};}\Tab{48}{\C{}\1\1_ with listExtract str.}}
+\CE{}\L{\LB{}}
+\L{\LB{____@\-\V{th}_\V{elem}(@):_(_\V{int}_\V{list}[\V{X}]_)_\V{X};}\Tab{48}{\C{}\1\* n-th element of list \*\1\CE{}}}
+\L{\LB{}}
+\L{\LB{____\V{size}(@)}\Tab{16}{:_(_\V{list}[\V{X}]_)_\V{int};}}
+\L{\LB{____\V{size\_of\_X\_list}(@)_:_(_\V{list}[\V{X}]_)_\V{int}}\Tab{48}{\K{alias}_\V{size}(@):;}}
+\L{\LB{}}
+\L{\LB{____\V{ccat}(@\*@)}\Tab{16}{:_(_\V{int}_\V{list}[\V{X}]_)_\V{list}[\V{X}];}\Tab{48}{\C{}\1\1_ concat n-times  }}
+\CE{}\L{\LB{____\V{ccat}(@,@)}\Tab{16}{:_(_\V{int}_\V{list}[\V{X}]_)_\V{list}[\V{X}]}\Tab{48}{\K{alias}_\V{ccat}(@\*@):;}}
+\L{\LB{}}
+\L{\LB{\K{endop}}}
+\L{\LB{}}
+\L{\LB{\K{rules}_\K{for}_\V{list}[\V{X}]}}
+\L{\LB{\K{declare}}\Tab{8}{\V{e}_}\Tab{16}{:_\V{X};}}
+\L{\LB{}\Tab{8}{\V{l},\V{l1},\V{l2}}\Tab{16}{:_\V{list}[\V{X}];}}
+\L{\LB{\K{bodies}}}
+\L{\LB{__[\,]_}\Tab{16}{\V{append}(\V{nil},\V{l})}\Tab{40}{=\>_\V{l}}\Tab{64}{\K{end}}}
+\L{\LB{__[\,]_}\Tab{16}{\V{append}(\V{e}.\V{l1}_,_\V{l2})}\Tab{40}{=\>_\V{e}_._\V{append}(\V{l1},\V{l2})}\Tab{64}{\K{end}}}
+\L{\LB{\K{end}_\K{of}_\K{rules}}}
+\L{\LB{}}
+\L{\LB{}}
+\L{\LB{\K{rules}_\K{for}_\V{X}}}
+\L{\LB{\K{declare}_\V{e},\V{ee}_:_\V{X};}}
+\L{\LB{________\V{l}____:_\V{list}[\V{X}];}}
+\L{\LB{________\V{n},_\V{n1}:_\V{int};}}
+\L{\LB{\K{bodies}}}
+\L{\LB{__[\V{extractrule1}]_\V{elem}(\V{e}.\V{l})}\Tab{32}{=\>_\V{e}}\Tab{72}{\K{end}}}
+\L{\LB{__[\V{extractrule2}]_\V{elem}(\V{e}.\V{l})}\Tab{32}{=\>_\V{elem}(\V{l})}\Tab{72}{\K{end}}}
+\L{\LB{__[\,]_}\Tab{16}{1\-\V{th}_\V{elem}(\V{e}.\V{l})}\Tab{32}{=\>_\V{e}}\Tab{72}{\K{end}}}
+\L{\LB{__[\,]_}\Tab{16}{\V{n}\-\V{th}_\V{elem}(\V{e}.\V{l})}\Tab{32}{=\>_\V{n1}\-\V{th}_\V{elem}(\V{l})_\K{where}_\V{n1}:=()\V{n}\-1}\Tab{72}{\K{end}}}
+\L{\LB{\K{end}_\K{of}_\K{rules}}}
+\L{\LB{}}
+\L{\LB{\K{rules}_\K{for}_\V{list}[\V{X}]}}
+\L{\LB{\K{declare}_\V{n}_:_\V{int};}}
+\L{\LB{________\V{l}_:_\V{list}[\V{X}];}}
+\L{\LB{\K{bodies}}}
+\L{\LB{__[\,]_}\Tab{16}{\V{ccat}(0,\V{l})}\Tab{32}{=\>_\V{nil}}\Tab{64}{\K{end}}}
+\L{\LB{__[\,]_}\Tab{16}{\V{ccat}(\V{n},\V{l})}\Tab{32}{=\>_\V{l}_@_\V{ccat}(\V{n}\-1,\V{l})_\K{if}_\V{n}\>0}\Tab{64}{\K{end}}}
+\L{\LB{\K{end}_\K{of}_\K{rules}}}
+\L{\LB{}}
+\L{\LB{\K{rules}_\K{for}_\V{int}}}
+\L{\LB{\K{declare}_\V{e}_:_\V{X};}}
+\L{\LB{________\V{l}_:_\V{list}[\V{X}];}}
+\L{\LB{\K{bodies}}}
+\L{\LB{__[\,]_}\Tab{16}{\V{size}(\V{nil})}\Tab{32}{=\>_0}\Tab{64}{\K{end}}}
+\L{\LB{__[\,]_}\Tab{16}{\V{size}(\V{e}.\V{l})}\Tab{32}{=\>_1+\V{size}(\V{l})}\Tab{64}{\K{end}}}
+\L{\LB{\K{end}_\K{of}_\K{rules}}}
+\L{\LB{}}
+\L{\LB{\K{end}_\K{of}_\K{module}}}
+\L{\LB{}\Tab{8}{}}

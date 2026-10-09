@@ -1,0 +1,18 @@
+module ruleWithWhere
+  sort foo; end
+  operators global
+    	a : foo;
+    	b : foo;
+   end
+  stratop global
+        strat : <foo -> foo>   	bs;
+   end
+  rules for foo
+	x : foo ;
+    global
+     [r0]	a => b 				end
+     [r1]	a => x where x := ()b 		end
+     [r2]	a => x where x := (strat)b	end
+    end
+// ....
+end

@@ -1,0 +1,32 @@
+//
+//		(c)	INRIA-Lorraine & CRIN
+//			615, rue du Jardin Botanique, BP 101
+//		        54602 Villers-les-Nancy
+//			France
+//			email: elan@loria.fr
+//
+//	$Source: /CVS/aircube/elan3/doc/ElanLibCommon/occur.eln,v $
+//	$Revision: 1.1 $
+//	$Date: 1997/03/25 16:46:48 $
+//	$Author: moreau $
+//
+
+module occur[X,Y]
+
+	// The parameters X and Y must be non built-in
+
+import bool;
+end
+sort X Y;
+end
+operators
+  global
+
+	// check if the first term occurs in the second one
+    occurs @ in @ 	: ( X Y ) bool	code 17;
+
+	// Parenthesised version
+    occurs(@,@)		: ( X Y ) bool	alias occurs @ in @ :;
+
+end
+end

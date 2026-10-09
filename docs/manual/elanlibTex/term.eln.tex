@@ -1,0 +1,90 @@
+
+\let\CF=\rm
+% Remember to use the lgrind style
+
+\File{term.eln},{17:12},{Jul 10 1996}
+\L{\LB{\C{}\1\1_ }}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{16}{(c)}\Tab{24}{INRIA-Lorraine \& CRIN}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{24}{615, rue du Jardin Botanique, BP 101}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{16}{        54602 Villers-les-Nancy}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{24}{France}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{24}{email: elan@loria.fr}}
+\CE{}\L{\LB{\C{}\1\1_ }}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{8}{\$Source: /CVS/aircube/elan3/doc/elanlibTex/term.eln.tex,v $}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{8}{\$Revision: 1.2 $}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{8}{\$Date: 1996/08/05 20:24:19 $}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{8}{\$Author: ckirchne $}}
+\CE{}\L{\LB{\C{}\1\1_ }}
+\CE{}\L{\LB{}}
+\L{\LB{\K{module}_\V{term}}}
+\L{\LB{\C{}\1\*}}
+\L{\LB{___This module defines notions common to all first-order terms.}}
+\L{\LB{___Terms built w.r.t. some concrete signatures are then defined by}}
+\L{\LB{___modules \'termV\' for variables and \'termF\' for terms built on}}
+\L{\LB{___functional symbols, both parametrized by the corresponding}}
+\L{\LB{___signatures.  This choice (which is not unique) allows in particular}}
+\L{\LB{___an easy description of terms built on constructors and defined}}
+\L{\LB{___operators.}}
+\L{\LB{\*\1\CE{}}}
+\L{\LB{\K{import}_\K{global}}\Tab{16}{\V{eq}[\V{term}]_\V{substitution};}}
+\L{\LB{_______\K{local}}\Tab{16}{\V{int}_\V{bool}_\V{ident}_\V{list}[\V{int}]_\V{list}[\V{variable}];}}
+\L{\LB{\K{sort}_\V{variable}_\V{term};}}
+\L{\LB{\K{op}}}
+\L{\LB{__\K{global}}}
+\L{\LB{}}
+\L{\LB{__\V{var}(@)_______}\Tab{24}{:_(_\V{int}_)_\V{variable};}}
+\L{\LB{__@____________}\Tab{24}{:_(_\V{variable}_)_\V{term}}\Tab{56}{\V{pri}_1000;}}
+\L{\LB{}}
+\L{\LB{__\V{head}(@)}\Tab{24}{:_(_\V{term}_)_\V{ident};}}
+\L{\LB{__@\-\V{th}_\V{subterm}(@)_}\Tab{24}{:_(_\V{int}_\V{term}_)_\V{term};}}
+\L{\LB{__\V{isvar}(@)______________:_(_\V{term}_)_\V{bool};}}
+\L{\LB{__\V{nvocc}(@)______________:_(_\V{term}_)_\V{list}[\V{int}];}}
+\L{\LB{}}
+\L{\LB{__@_\V{at}_@________________:_(_\V{term}_\V{list}[\V{int}]_)_\V{term};}}
+\L{\LB{__@[@]_\V{at}_@_____________:_(_\V{term}_\V{term}_\V{list}[\V{int}]_)_\V{term};}}
+\L{\LB{}}
+\L{\LB{__\V{rename\_subst}(@,@)_____:_(_\V{list}[\V{variable}]_\V{int}_)_\V{substitution};}}
+\L{\LB{}}
+\L{\LB{\K{endop}}}
+\L{\LB{}}
+\L{\LB{\K{rules}_\K{for}_\V{term}}}
+\L{\LB{\K{declare}_\V{t},\V{s}:\V{term};__\V{i}:\V{int};__\V{l}:\V{list}[\V{int}];}}
+\L{\LB{\K{bodies}}}
+\L{\LB{__[\,]_\V{t}_\V{at}_\V{nil}___}\Tab{24}{=\>_\V{t}}\Tab{56}{\K{end}}}
+\L{\LB{__[\,]_\V{t}_\V{at}_\V{i}.\V{l}}\Tab{24}{=\>_\V{i}\-\V{th}_\V{subterm}(\V{t})_\V{at}_\V{l}}\Tab{56}{\K{end}}}
+\L{\LB{__[\,]_\V{t}[\V{s}]_\V{at}_\V{nil}________=\>_\V{s}}\Tab{56}{\K{end}}}
+\L{\LB{\K{end}_\K{of}_\K{rules}}}
+\L{\LB{}}
+\L{\LB{\K{rules}_\K{for}_\V{bool}}}
+\L{\LB{\K{declare}_\V{v}:\V{variable};_\V{t}:\V{term};}}
+\L{\LB{\K{bodies}}}
+\L{\LB{__[\,]_\V{isvar}(\V{v})___=\>_\V{true}}\Tab{56}{\K{end}}}
+\L{\LB{__[\,]_\V{isvar}(\V{t})___=\>_\V{false}}\Tab{56}{\K{end}}}
+\L{\LB{\K{end}_\K{of}_\K{rules}}}
+\L{\LB{}}
+\L{\LB{\K{rules}_\K{for}_\V{substitution}}}
+\L{\LB{\K{declare}_\V{i}:\V{int};_\V{vn}:\V{variable};_\V{vl}:\V{list}[\V{variable}];}}
+\L{\LB{\K{bodies}}}
+\L{\LB{__[\,]_\V{rename\_subst}(\V{nil},\V{i})_____=\>_\V{identity}}\Tab{64}{____\K{end}}}
+\L{\LB{__[\,]_\V{rename\_subst}(\V{vn}.\V{vl}_,_\V{i})_=\>_\V{vn}\-\!\>\V{var}(\V{i})_\V{o}_\V{rename\_subst}(\V{vl}_,_\V{i}+1)_\K{end}}}
+\L{\LB{\K{end}_\K{of}_\K{rules}}}
+\L{\LB{}}
+\L{\LB{\K{rules}_\K{for}_\V{list}[\V{int}]}}
+\L{\LB{\K{declare}_\V{t}:\V{term};}}
+\L{\LB{\K{bodies}}}
+\L{\LB{__[\V{topOccRule}]__\V{nvocc}(\V{t})__________=\>_\V{nil}}\Tab{48}{\K{if}_\V{not}_\V{isvar}(\V{t})}\Tab{64}{____\K{end}}}
+\L{\LB{\K{end}_\K{of}_\K{rules}}}
+\L{\LB{}}
+\L{\LB{\K{rules}_\K{for}_\V{ident}}}
+\L{\LB{\K{declare}_\V{x}:\V{variable};}}
+\L{\LB{\K{bodies}}}
+\L{\LB{__[\,]_\V{head}(\V{x})}\Tab{16}{=\>_\"\V{var}\"}\Tab{48}{\K{end}}}
+\L{\LB{\K{end}_\K{of}_\K{rules}}}
+\L{\LB{}}
+\L{\LB{\K{strategy}_\V{chooseOccurence}_}}
+\L{\LB{__\K{dont}_\K{know}_\K{choose}(\V{topOccRule}_\V{inOccRule})}}
+\L{\LB{\K{end}_\K{of}_\K{strategy}}}
+\L{\LB{}}
+\L{\LB{\K{end}_\K{of}_\K{module}}}
+\L{\LB{}}
+\L{\LB{}}

@@ -1,0 +1,11 @@
+rule idempotency for boolean
+declare x:boolean;
+body
+    x and x  => x  end
+end of rule
+
+rule idempotency for boolean
+declare x:boolean;
+body
+    x or x  => x  end
+end of rule

@@ -1,0 +1,39 @@
+module Meta_strat
+
+//###
+//#####  ONLY FOR INTERPRETER 
+//###
+
+// The idea of this module is that Marian's strategies are also elan data.
+// To be able to use this funny extension, at this moment, you should
+// define symbols 'rule_name : Label', for all labelled rules (with label
+// [rule_name] l=>r) of your
+// elan program, which you want to use in the meta_interpreter of strategies.
+
+sort Label Labels 
+     Strategies Strateg 
+     Strategy;
+end
+operators global
+  @			: (Strategy) Strategies			code 131;
+  @ || @		: (Strategy Strategies) Strategies	code 132;
+  //--------------------
+  @			: (Label) Labels			code 133;
+  @ @			: (Label Labels) Labels			code 134;
+  //--------------------
+  dc(@)	: (Labels) Strateg			code 135;
+  dk(@)	: (Labels) Strateg			code 136;
+  dc(@)	: (Strategies) Strateg			code 137;
+  dk(@)	: (Strategies) Strateg			code 138;
+  repeat @ endrepeat	: (Strategy) Strateg			code 139;
+  while @ endwhile	: (Strategy) Strateg	alias repeat @ endrepeat:;
+  iterate @ enditerate	: (Strategy) Strateg			code 140;
+  //-------------------- concatenation
+  @ 			: (Strateg) Strategy			code 141;
+  @ @			: (Strateg Strategy) Strategy		code 142;
+  //--------------------
+  id			: Strateg				code 143;
+  call(@)		: (Label) Strateg			code 144;
+end
+
+end

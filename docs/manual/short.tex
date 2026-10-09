@@ -1,0 +1,302 @@
+% -*- Document-Type: LaTeX; Master-File: manual.TX -*- 
+
+% \chapter{A short introduction to \elan}\label{short}
+
+This chapter presents in a top-down approach the \elan\ main
+features. If you are beginning to use \elan, you should
+certainly have a look at this chapter first. Complementarily
+Chapter~\ref{language} presents a bottom-up complete
+description of the language.
+
+For a gently introduction to \elan\ we recommend to
+read~\cite{BorovanskyKKMR-WRLA98} or to access to 
+\localisationWebElan{}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{What could you do in \elan?}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Relying on the premiss that inferences rules can be quite conveniently
+described by rewrite rules, we started in the early nineties to design
+and implement a language in which inference systems can be represented
+in a natural way, and executed reasonably efficiently.
+
+This leads us quickly to formalise such a language using the rewriting
+logic introduced by J.~Meseguer~\cite{MeseguerTCS92} and to see \elan\
+as a logical framework where the frame logic is rewriting logic
+extended with the fundamental notion of
+strategies~\cite{VittekThese,KirchnerKV-MIT95}.  A rewrite theory and
+an associated strategy is called a {\em computational system}.
+
+In \elan, a logic can be expressed by specifying its syntax, its
+inference rules and a description of how these rules should be
+applied. The syntax of the logic can be described using mixfix
+operators as in the OBJ language~\cite{obj3-88} or
+SDF~\cite{HeeringHendriksKlintRekers89}.  The inference rules of the
+logic are described by conditional rewrite rules with \texttt{where}
+assignments allowing to introduce variables local to a rule.
+
+From this description of the logic and a theory written in this logic,
+we infer   automatically  a  computational   system  consisting of   a
+rewriting theory plus strategies.
+
+Since we wanted \elan{} to be modular, with a syntactic level
+well-adapted to the user's needs, the language is designed in such a way
+that three programming levels are possible.
+
+\begin{itemize}
+\item  First   the  design of  a    logic is  done  by  the  so-called
+        \Def{super-user}, with the help of a powerful preprocessor that
+        expands specific macros into \elan\ constructions.
+\item Such a logic can be used by the (standard) \Def{user} in order
+        to write a specification.
+\item Finally,  the   \Def{end-user}  can  evaluate  queries  in   the
+        specification, following the semantics described by the logic.
+\end{itemize}
+This corresponds to the general diagram given in Figure~\ref{elan-principle}.
+The query is interactively given by the end-user at the \elan\ prompt
+level.
+
+\begin{figure}[hbt]
+\begin{center}
+\framebox{\parbox{11cm}{%\textwidth}{
+$$\epsfig{figure=elan.1, width=10cm}$$
+\caption{Elan: general execution schema \label{elan-principle}}
+}}
+\end{center}
+\end{figure}
+
+%A simple example, fully described later in this user manual, is the
+%design of syntactic unification, where the tasks are divided as
+%follows:
+%\begin{enumerate}
+%\item the super-user describes in a generic way the unification
+%        inferences, i.e. a logic for unification,
+%\item the user gives the specification of an algebra in which (s)he
+%        wants to unify terms; in this case, this is quite simple since
+%        it amounts to specify the function symbols of the 
+%        considered term algebra,
+%\item the end-user gives a unification problem.
+%\end{enumerate}
+%The diagram of Figure~\ref{elan-principle} thus instantiates  as
+%described in Figure~\ref{elan-principle-unif}.
+
+%\begin{figure}[hbt]
+%\begin{center}
+%\framebox{\parbox{11cm}{%\textwidth}{
+%$$\epsfig{figure=elan.2, width=10cm}$$
+%\caption{Elan: how to implement syntactic unification \label{elan-principle-unif}}
+%}}
+%\end{center}
+%\end{figure}
+
+%The description of the logic and of the specification are done in the
+%\elan\ syntax described in the Chapter~\ref{language} which can be
+%further extended by the super-user. These descriptions are
+%assumed to be done in files with specific extensions:
+%\begin{enumerate}
+%\item{\texttt{.lgi}}  for the top level logic description, this file is written
+%by the \elan\ super-user,
+%\item{\texttt{.eln}}  for a module used in a logic description, this file is
+%also written
+%by the \elan\ super-user,
+%\item{\texttt{.spc}}  for a specification, i.e. a program written in the
+%defined logic by an \elan\ user. 
+%\end{enumerate}
+
+%The query is interactively given by the end-user at the \elan\ prompt
+%level.
+
+%\commentCK{Attention langage de commande}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{A very simple example}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Let us fully detail a complete example.
+The next module illustrates what the programmer
+has to write in order to describe the derivative operation on simple
+polynomials. The first part contains:
+\begin{itemize}
+\item the module name: \texttt{poly1}
+\item modules you want  to  import: \texttt{int} (the  integer library
+        module)
+\item sort declaration: \texttt{variable} and \texttt{poly}
+\item operators definitions: constructors and functions declarations
+\end{itemize}
+
+The second part contains the computation definition.
+Given a query, \elan\ repeatedly normalises the term using unlabelled
+rules. 
+This is done in order to perform functional evaluation and thus
+it is recommended for the user to provide a confluent and terminating
+unlabelled rewrite system to ensure termination and unicity of the
+result. This normalisation process is built in the evaluation
+mechanism and consists in a leftmost innermost normalisation. This
+yields always a {\em single} result.
+
+You can control the \elan\ construction of terms by giving
+parsing annotations like associativity or priority to operators.
+\insertExamples{poly1.eln}
+
+The top level of the logic description given in
+the following module describes the way to run the
+system. The logic declaration just introduces the sorts of interest
+(query and result) and defines \texttt{.eln} modules to be imported:
+this is the ``top level''.
+\insertExamples{poly1.lgi}
+
+Once defined, we can use the two previous modules by calling the
+interpreter as detailed in section~\ref{Run the interpreter}.
+
+\vbox{
+{\small\begin{verbatim}
+% elan poly1.lgi
+enter query term finished by the key word 'end': 
+  deriv(X) end
+
+[] start with term: deriv(X)
+[] result term:       1
+
+enter query term finished by the key word 'end':
+  deriv(3*X*X + 2*X + 7) end
+
+[] start with term: deriv(3*X*X+2*X+7)
+[] result term:       0*X*X+3*1*X+X*1+0*X+2*1+0
+\end{verbatim}}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{A more generic example}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+The next example, introduces more \elan\ features.  It consists of the
+specification of  elementary polynomials  built  over a finite set  of
+variables, and the derivative  functions to compute the derivated form
+with respect to a given variable.
+%%%
+Tasks are divided as follows:
+\begin{enumerate}
+\item the  super-user describes in a  generic  way the derivative  and
+        factorisation   inferences,  i.e.    a  logic  for  polynomial
+        differentiation,
+\item the user gives the specification  of  an algebra in which  (s)he
+        wants to  derivate polynomials;  in this  case, this is  quite
+        simple  since it  amounts to   specify  the variables of   the
+        considered polynomial algebra,
+\item the end-user gives a differentiation problem.
+\end{enumerate}
+
+The diagram in Figure~\ref{elan-principle} thus instantiates  as
+described in Figure~\ref{elan-principle-derivation}.
+
+\begin{figure}[hbt]
+\begin{center}
+\framebox{\parbox{11cm}{%\textwidth}{
+$$\epsfig{figure=elan.3, width=10cm}$$
+\caption{Elan: how to implement polynomial differentiation 
+  \label{elan-principle-derivation}}
+}}
+\end{center}
+\end{figure}
+
+The description of the logic and of the specification is done in the
+\elan\ syntax described in the Chapter~\ref{language} and it can be
+further extended by the super-user. These descriptions are
+assumed to be done in files with specific extensions:
+\begin{enumerate}
+\item{\texttt{.lgi}} for the top level logic description, this file is
+        written by the \elan\ super-user,
+\item{\texttt{.eln}}  for a module used  in a  logic description, this
+        file is also written by the \elan\ super-user,
+\item{\texttt{.spc}} for a  specification, i.e.  a program written  in
+        the defined logic by an \elan\ user.
+\end{enumerate}
+%%%
+
+The \texttt{.eln} module of our example is the following:
+\insertExamples{poly2.eln}
+
+Then, the logic declaration
+describes the way to parse the specification file that contains a
+finite list of variables.
+\insertExamples{poly2.lgi}
+
+To instantiate the \textit{Logic} and build
+the \textit{Computational System}, you have to give a specification.
+An example of such specification is:
+\insertExamples{someVariables.spc}
+
+It contains a list of variables that is read and transformed into a
+rewrite rule: \texttt{Vars => X.Y.Z.nil}
+
+The \texttt{FOR EACH} preprocessor construction used in the
+\texttt{poly2.eln} module performs a textual
+replacement that extracts identifiers \texttt{X}, \texttt{Y},
+\texttt{Z} from the list \texttt{X.Y.Z.nil} and declare them of sort   
+\texttt{variable}.
+
+You can notice that operators \texttt{*} and \texttt{+} are now
+declared as associative and commutative, which is helpful to
+implement some simplification rules.
+One rule contains a conditional part.
+        %Dollar signs `\$' are only used to solve parsing ambiguities.
+
+Now let us call \elan\ with the specification
+\texttt{someVariables.spc}: 
+
+\vbox{{\small\begin{verbatim}
+% elan poly2 someVariables.spc
+enter query term finished by the key word 'end':
+  deriv(3*X*X + 2*X + 7 , X) end
+
+[] start with term: deriv(3*X*X+2*X+1,X)
+[] result term:       X+X*3+2
+\end{verbatim}}}
+
+The result has been simplified in a better way, but it is still difficult to
+read due to the lack of parenthesis.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{An extended example}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+This last example shows how to play with labelled rules and
+strategies.
+
+
+Unlabelled rules are applied repeatedly, at any position, to normalize
+the term. A labelled rule is applied only when a strategy calls it. In
+this case, the rule is applied at top position on the term. In the
+next module, you can recognize labelled rules: names are given between
+brackets.
+
+
+You can define strategies in  the same way  you  define rules and  use
+them  in local  affectation     parts introduced  by   the   key  word
+\texttt{where}. When   a  rule is    applied, before constructing  the
+right-hand-side,    conditional  parts  are   evaluated  and variables
+involved in local affectation parts are instantiated  by the result of
+the application of a strategy on a term.  
+\insertExamples{poly3.eln}
+\label{poly.example}
+
+And now we can use it:
+{\small
+\begin{verbatim}
+% elan poly3 someVariables.spc
+enter query term finished by the key word 'end':
+  deriv(3*X*X + 2*X + 7 , X) end
+
+[] start with term: deriv(3*X*X+2*X+1,X)
+[] result term:       ((X*6)+2)
+[] end
+\end{verbatim}
+} 
+
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: t
+%%% TeX-master: t
+%%% End: 

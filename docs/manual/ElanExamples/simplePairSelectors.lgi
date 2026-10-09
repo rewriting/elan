@@ -1,0 +1,6 @@
+LPL simplePairSelectors description
+	query    of sort	Pair
+	result of sort		Pair
+	import			simplePairSelectors
+	start with		()query
+end

@@ -1,0 +1,17 @@
+module strass
+import global bool;
+end
+sort Strany strany 
+     Strass strass;
+end
+operators global
+    if @	: (bool) strany			builtin 145;
+    // ---------
+    @		: (strany) Strany		builtin 146;
+    @ , @	: (Strany strany) Strany	builtin 147;
+    // ---------
+    @		: (strass) Strass		builtin 146;
+    @ , @	: (Strass strass) Strass	builtin 147;
+end
+
+end
