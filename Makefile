@@ -21,7 +21,7 @@ else
   ELAN_CXX ?= g++
 endif
 
-.PHONY: all configure install check check-sanitize check-arch test-runner smoke reference check-reference clean toolchain
+.PHONY: all configure install check check-sanitize check-arch check-unit test-runner smoke reference check-reference clean toolchain
 
 all: configure
 	cmake --build $(BUILD) -j
@@ -68,7 +68,11 @@ check-arch:
 	cd tests/architecture && python3 test_check_deps.py
 	python3 tests/architecture/check_deps.py
 
-check: smoke test-runner check-arch
+# C++ unit tests of the interpreter modules (tests/unit, CTest)
+check-unit: all
+	cd $(BUILD) && ctest --output-on-failure
+
+check: smoke test-runner check-arch check-unit
 	$(BENCH) --prefix $(PREFIX) --kinds I,A
 
 # Interpreter tests under sanitizers (build-san/): AddressSanitizer + UBSan.

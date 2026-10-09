@@ -20,3 +20,15 @@ if(ELAN_SANITIZE)
 endif()
 
 add_subdirectory(src/interpreter)
+
+# C++ unit tests (tests/unit/test_*.cc), linked with elan_core; run by CTest.
+enable_testing()
+file(GLOB ELAN_UNIT_TESTS ${PROJECT_SOURCE_DIR}/tests/unit/test_*.cc)
+foreach(t ${ELAN_UNIT_TESTS})
+  get_filename_component(n ${t} NAME_WE)
+  add_executable(${n} ${t})
+  target_compile_options(${n} PRIVATE ${ELAN_CXX_COMPAT_OPTIONS})
+  target_include_directories(${n} PRIVATE ${ELAN_INCLUDE_DIRS} ${PROJECT_SOURCE_DIR}/tests/unit)
+  target_link_libraries(${n} PRIVATE elan_core)
+  add_test(NAME ${n} COMMAND ${n})
+endforeach()

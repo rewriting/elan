@@ -77,6 +77,7 @@ elan_cxx_target(elan_core)
 target_include_directories(elan_core PRIVATE ${ELAN_GEN_DIR})
 add_dependencies(elan_core elan_parsers)
 target_link_libraries(elan_core PUBLIC match m)
+set(ELAN_INCLUDE_DIRS ${ELAN_INCLUDE_DIRS} PARENT_SCOPE)   # for tests/unit
 
 # --- elan: the interpreter ---------------------------------------------------
 add_executable(elan driver/main.cc)

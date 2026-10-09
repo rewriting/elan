@@ -25,6 +25,12 @@ build of 2004.
    root cause, never silenced, unless the tool is provably wrong (then say why
    in a comment and in the commit).
 
+8. Module dependencies follow `tests/architecture/check_deps.py` (`make
+   check-arch`). Never add an entry to `allowed-exceptions.txt` to make a new
+   include pass: restructure instead. Removing entries is always welcome.
+9. New or changed interpreter behaviour gets a unit test in `tests/unit/`
+   (characterisation tests first when touching old code).
+
 ## Before pushing
 
     make check            # always

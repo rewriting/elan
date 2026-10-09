@@ -12,7 +12,9 @@ backtracking. This repository preserves the original system and revives it.
 | `legacy/` | verbatim archive of the historical sources (never edited) |
 | `reference/` | rebuild of ELAN 3 (2004) from `legacy/` with minimal portability patches; the behavioural reference |
 | `tests/legacy-bench/` | the historical test bench (778 tests), its baseline and reference snapshots |
-| `src/interpreter/`, `src/lib/elanlib/` | the modern, maintained interpreter and its standard library (S1: sources still identical to the reference) |
+| `src/interpreter/` | the modern interpreter, one directory per module (see below) |
+| `src/lib/elanlib/` | the standard library |
+| `tests/unit/`, `tests/architecture/` | C++ unit tests of the modules; module dependency rules |
 | `tests/regression/` | targeted regression tests (one directory per case) |
 | `ci/`, `.github/workflows/` | Linux image for local checks, CI on Ubuntu and macOS |
 
@@ -66,6 +68,29 @@ directory automatically). `make reference` uses Homebrew's
 `build-essential clang libclang-rt-18-dev cmake bison flex libfl-dev default-jdk-headless libgc-dev automake tcsh python3`;
 `ci/Dockerfile.linux` reproduces the Linux CI job locally. See
 `CONTRIBUTING.md` for the rules every change follows.
+
+## Interpreter modules
+
+`src/interpreter/` is split into modules; a module may only include headers of
+the modules below it (checked by `make check-arch`, existing exceptions listed
+with their reason in `tests/architecture/allowed-exceptions.txt`):
+
+| Module | Contents |
+|--------|----------|
+| `driver` | `main`, command line, query loop |
+| `command`, `compile`, `peval`, `ref`, `meta` | command language (`-C`); C code generation (`-c`); partial evaluation; REF export/import/reduce; meta level |
+| `load` | `.lgi`/`.eln` semantic actions, module system, global tables |
+| `rewrite` | rules, strategies, rewrite system, reduction, strategy interpreter, builtins |
+| `match` | matching (syntactic, AC via `acmatcher/`), processes |
+| `term` | terms, symbols, printing |
+| `parse` | grammars (macc inputs), Earley parser, term building |
+| `lex` | lexems, lexer, preprocessor |
+| `base` | streams, string/int tables, allocation, options |
+
+`parser/` is the parser-table generator `macc`, `acmatcher/` the AC matcher.
+Everything except `driver/main.cc` is the library `elan_core`, which the unit
+tests (`tests/unit/test_*.cc`, using `tests/unit/check.h`) link against: add a
+file `tests/unit/test_<module>.cc` and `make check` runs it.
 
 ## License
 
