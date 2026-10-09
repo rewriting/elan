@@ -131,6 +131,15 @@ int ts;
     exit(1); }
 }
 
+/* S5b-TODO(fail): fail() (choice.h) expands to two statements, so in
+   `if (c) fail();` only its "no more choices" check depends on c: the
+   failure itself is unconditional, and the next alternative of DC/ONE and
+   the else branch of IFTOE are never tried. This is the parse of the 2004
+   code, spelled out; the intent was evidently to fail only when c holds. */
+#define FAIL_CHECKED_THEN_FAIL(c) \
+  if (c) { if(stack_ptr<0) { printf("Error: no more choices.\n"); exit(0); } } \
+  if((tab_pile[stack_ptr].size) == (-1)) { localFail(); } else { globalFail(); }
+
 Gterm *str_eval2(Gterm *s, Gterm *t)
 {
 int defstrat = term_defstrat(s);
@@ -203,7 +212,8 @@ int is_one = 0;
 		if (*((int*)getStablePointer(wasr_index)) == 0) *((int*)getStablePointer(wasr_index)) = 1;
 		goto lab_dc;
 	      }
-	      if (*((int*)getStablePointer(wasr_index)) != 0) fail();
+	      /* S5b-TODO(fail): see FAIL_CHECKED_THEN_FAIL */
+	      FAIL_CHECKED_THEN_FAIL(*((int*)getStablePointer(wasr_index)) != 0);
 	    } else // is_last
 	      res = str_eval2(GgetArgument(strlist,0),t);
 	  }
@@ -234,7 +244,8 @@ int is_one = 0;
 	    if (*((int*)getStablePointer(wasr_index)) == 0) *((int*)getStablePointer(wasr_index)) = 1;
 	    return str_eval2(s1,res);
 	  }
-	  if (*((int*)getStablePointer(wasr_index)) != 0) fail();
+	  /* S5b-TODO(fail): see FAIL_CHECKED_THEN_FAIL */
+	  FAIL_CHECKED_THEN_FAIL(*((int*)getStablePointer(wasr_index)) != 0);
 	  return str_eval2(s2,t);
 	}
       default:
@@ -261,8 +272,8 @@ int is_one = 0;
 	      return res;
 	    }
 	  }
-	  else
-	    fail(); }
+	  else {
+	    fail(); } }
 	else if (IS_DSTR_FLAG(defstrat)) {
 	  int apply_code = DSTR_F(defstrat);  
 	  int dstr_code = DSTR_LAB(defstrat);
