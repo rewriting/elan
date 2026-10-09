@@ -165,7 +165,7 @@ void increment_stack_ptr() {
 void increment_backTrail(int size) {
   if( backTraili+size >= backTrail_size ) {
     backTrail_size = compute_size(backTrail_size,size);
-    backTrail = (char*) AT_REALLOC_PROTECT(backTrail, backTrail_size*sizeof(char));
+    backTrail = (char*) AT_REALLOC_PROTECT((void *)backTrail, backTrail_size*sizeof(char));
 #ifdef DEBUG
     printf("resized 'backTrail' to %d bytes\n",backTrail_size);
 #endif

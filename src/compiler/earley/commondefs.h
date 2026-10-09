@@ -326,7 +326,7 @@ class lstream
   lstream(ichstream *file,char c);
   lstream(ichstream *file,char c, int block);
   lstream(char *command,char *name);
-  ~lstream();
+  virtual ~lstream();
   virtual void fulex(lexem &l);
   virtual void ilex(lexem &l);
   void oerr();

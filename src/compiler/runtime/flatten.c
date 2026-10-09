@@ -100,6 +100,8 @@ void ac_compress(TERM *t)
   case AC_NORMAL:
     ac = TRUE;
     break;
+  case AC_COMPRESSED:     /* excluded by the ASSERT above */
+    break;
   }
   for(p = t->rest.f.arg_list; p; p = p->next_arg)
     ac_compress(p->arg);

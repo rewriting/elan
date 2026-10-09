@@ -52,7 +52,7 @@ int batch=0;
 void interr()
 {
     sterr << " internal error\t\tfatal\n";
-   (*((int*)NULL)) = 0;
+   abort();
    failexit();
 }
 

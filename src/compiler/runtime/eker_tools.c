@@ -39,7 +39,7 @@ TERM *toEkerForm(struct term *t) {
     /*
      * on passe directement la valeur taggee
      */
-    return make_term((long)t,NULL,BUILTIN);
+    return make_term((long)t,NULL,(SYM_TYPE)BUILTIN);
   } 
 
   if((arity=term_arity(t))==0) {
@@ -132,7 +132,7 @@ TERM *make_term(int id, TERM_LIST *args, SYM_TYPE type) {
       t->type = VARIABLE;
     }
     else{
-      if(type == BUILTIN) {
+      if((int)type == (int)BUILTIN) {
         t->type = BUILTIN;
       } else {
         t->type = CONSTANT;
@@ -165,7 +165,7 @@ TERM *make_ac_term(int id, AC_LIST *args,SYM_TYPE type) {
   AC_LIST *p;                              /*  tail of args  */
   int len;                                   /* lenght of args */
 
-  ASSERT(type != AC_NORMAL, "make_ac_term() - not an AC symbol");
+  ASSERT((int)type != (int)AC_NORMAL, "make_ac_term() - not an AC symbol");
 
   t->sym = id;
   t->type = AC_COMPRESSED;
