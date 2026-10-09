@@ -262,6 +262,28 @@ def load_baseline():
 RANK = {"PASS": 0, "PASS~": 1, "PASS≈": 2}
 
 
+def judge(statuses, base, exceptions):
+    """Compare test statuses with the baseline: return (regressions, improvements),
+    lists of (id, old, new). Cases of tests/regression must PASS exactly (their
+    expected.out is the oracle, whatever the baseline says); tests listed in the
+    platform exceptions are exempt."""
+    regress, improve = [], []
+    for tid, new in sorted(statuses.items()):
+        if tid in exceptions:
+            continue
+        if tid.startswith("regression/"):
+            if new != "PASS":
+                regress.append((tid, "PASS", new))
+            continue
+        if tid in base:
+            old = base[tid]
+            if RANK.get(new, 9) > RANK.get(old, 9):
+                regress.append((tid, old, new))
+            elif RANK.get(new, 9) < RANK.get(old, 9):
+                improve.append((tid, old, new))
+    return regress, improve
+
+
 def run_repeated(t, timeout, repeat):
     """Run a test `repeat` times; outputs that vary between runs => FLAKY."""
     st, detail, out = run_test(t, timeout)
@@ -359,15 +381,8 @@ def main():
     print(f"details: {outdir}")
 
     base = load_baseline()
-    regress, improve = [], []
-    for tid in ids:
-        if tid in base:
-            old, new = base[tid], results[tid][0]
-            if RANK.get(new, 9) > RANK.get(old, 9):
-                regress.append((tid, old, new))
-            elif RANK.get(new, 9) < RANK.get(old, 9):
-                improve.append((tid, old, new))
-    if base:
+    regress, improve = judge({tid: results[tid][0] for tid in ids}, base, exceptions)
+    if base or regress:
         print(f"vs baseline: {len(regress)} regressions, {len(improve)} improvements")
         for tid, old, new in regress:
             print(f"  REGRESSION {tid}: {old} -> {new}")

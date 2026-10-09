@@ -59,6 +59,32 @@ class ExceptionsTest(unittest.TestCase):
         self.assertEqual(rt.load_exceptions(rt.HERE / "nope.tsv", "linux"), {})
 
 
+class JudgeTest(unittest.TestCase):
+    def test_worse_status_than_baseline_is_a_regression(self):
+        regress, improve = rt.judge({"t::I::x": "FAIL"}, {"t::I::x": "PASS"}, {})
+        self.assertEqual(regress, [("t::I::x", "PASS", "FAIL")])
+        self.assertEqual(improve, [])
+
+    def test_better_status_than_baseline_is_an_improvement(self):
+        regress, improve = rt.judge({"t::I::x": "PASS"}, {"t::I::x": "FAIL"}, {})
+        self.assertEqual((regress, improve), ([], [("t::I::x", "FAIL", "PASS")]))
+
+    def test_failing_regression_case_fails_even_without_baseline(self):
+        rid = "regression/dot::I::prog:no:input:expected"
+        regress, _ = rt.judge({rid: "FAIL"}, {}, {})
+        self.assertEqual(regress, [(rid, "PASS", "FAIL")])
+
+    def test_regression_case_must_pass_exactly_even_if_baseline_says_fail(self):
+        rid = "regression/dot::I::prog:no:input:expected"
+        regress, _ = rt.judge({rid: "PASS≈"}, {rid: "FAIL"}, {})
+        self.assertEqual(regress, [(rid, "PASS", "PASS≈")])
+
+    def test_platform_exception_exempts_status_regression(self):
+        regress, _ = rt.judge({"t::I::x": "FAIL"}, {"t::I::x": "PASS"},
+                              {"t::I::x": "platform: printf of doubles"})
+        self.assertEqual(regress, [])
+
+
 class CaseSensitivityTest(unittest.TestCase):
     def test_repository_volume_is_case_sensitive(self):
         self.assertTrue(rt.case_sensitive(rt.HERE / "work"))
