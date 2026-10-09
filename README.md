@@ -14,6 +14,8 @@ backtracking. This repository preserves the original system and revives it.
 | `tests/legacy-bench/` | the historical test bench (778 tests), its baseline and reference snapshots |
 | `src/interpreter/` | the modern interpreter, one directory per module (see below) |
 | `src/lib/elanlib/` | the standard library |
+| `examples/` | runnable examples of the manual (checked by `make check`) |
+| `docs/manual/` | the ELAN 3.6 user manual (LaTeX sources, PDF) |
 | `tests/unit/`, `tests/architecture/` | C++ unit tests of the modules; module dependency rules |
 | `tests/regression/` | targeted regression tests (one directory per case) |
 | `ci/`, `.github/workflows/` | Linux image for local checks, CI on Ubuntu and macOS |
@@ -49,11 +51,40 @@ After a reboot, only the `hdiutil attach` line is needed. This is only needed
 for the repository (because of `legacy/`): the installed interpreter and its
 library work on any file system.
 
-## Quick start
+## Getting started
+
+```sh
+make install PREFIX=$HOME/.local        # build and install elan + its library
+export PATH=$HOME/.local/bin:$PATH
+cd examples/poly1
+elan poly1.lgi                          # interactive: type  deriv(X) end
+elan -b poly1.lgi < input.inp           # batch: the queries of input.inp
+```
+
+`poly1` (section 1.2 of the manual) differentiates polynomials:
+
+```
+$ cat input.inp
+deriv(X) end
+deriv(3*X*X + 2*X + 7) end
+$ elan -b poly1.lgi < input.inp
+ 1 end
+ ...
+ 0*X*X+3*1*X+X*1+0*X+2*1+0 end
+```
+
+* `examples/` — 13 runnable examples of the manual, each with its queries
+  and expected output (`examples/README.md`);
+* `docs/manual/manual.pdf` — the ELAN 3.6 user manual (99 pages, rebuilt from
+  the 2003 LaTeX sources with `make manual`);
+* `legacy/elan3/applications/` — larger historical applications (completion,
+  unification, constraint solving, ...).
+
+## Quick start (development)
 
 ```sh
 make                 # build the interpreter (CMake, into build/)
-make check           # runner unit tests + 368 interpreter tests of the bench
+make check           # unit tests, architecture, 368 bench tests + 13 examples
 make check-sanitize  # same under ASan+UBSan (UBSan only on macOS, see Makefile)
 make install PREFIX=$HOME/.local   # any file system
 make reference       # build the 2004 reference system (interpreter + compiler)
