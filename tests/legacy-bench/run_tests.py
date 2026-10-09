@@ -173,6 +173,17 @@ def samples(d):
     return d
 
 
+SANITIZER_MARKERS = ("ERROR: AddressSanitizer", "ERROR: LeakSanitizer", "runtime error:")
+
+
+def sanitizer_report(err):
+    """First line of an ASan/UBSan report in a program's stderr, or None."""
+    for line in err.splitlines():
+        if any(m in line for m in SANITIZER_MARKERS):
+            return line.strip()
+    return None
+
+
 def run_test(t, timeout):
     expected = samples(t["dir"]) / f"{t['out']}.out"
     if not expected.exists():
@@ -196,6 +207,8 @@ def run_test(t, timeout):
         elif k == "A":
             rc, o1, e1 = run(["elan", "-b", *flags, "--export", f"{t['lgi']}.ref",
                               f"{t['lgi']}.lgi", *spc], wd, None, timeout)
+            if sanitizer_report(e1):
+                return "SANITIZER", f"export: {sanitizer_report(e1)}\n{e1[-4000:]}", o1
             if rc != 0:
                 return "ERROR", f"export rc={rc}\n{e1[-2000:]}", o1
             rc, out, err = run(["elan", "-b", "--import", f"{t['lgi']}.ref"], wd, inp, timeout)
@@ -209,6 +222,8 @@ def run_test(t, timeout):
             if rc != 0 or not (wd / "a.out").exists():
                 return "ERROR", f"make rc={rc}\n{(o2 + e2)[-3000:]}", ""
             rc, out, err = run(["./a.out", "-noInput", "-quiet"], wd, None, timeout)
+        if sanitizer_report(err):
+            return "SANITIZER", f"{sanitizer_report(err)}\n{err[-4000:]}", out
         exp = expected.read_text(encoding="latin-1", errors="replace")
         if out == exp:
             return "PASS", "", out
@@ -272,6 +287,9 @@ def judge(statuses, base, exceptions):
     platform exceptions are exempt."""
     regress, improve = [], []
     for tid, new in sorted(statuses.items()):
+        if new == "SANITIZER":          # a sanitizer report is always a failure
+            regress.append((tid, base.get(tid, "PASS"), new))
+            continue
         if tid in exceptions:
             continue
         if tid.startswith("regression/"):

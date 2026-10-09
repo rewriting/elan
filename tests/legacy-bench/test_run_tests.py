@@ -85,6 +85,23 @@ class JudgeTest(unittest.TestCase):
         self.assertEqual(regress, [])
 
 
+class SanitizerTest(unittest.TestCase):
+    def test_detects_address_sanitizer_report(self):
+        err = "==123==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x60\n#0 ..."
+        self.assertIn("heap-buffer-overflow", rt.sanitizer_report(err))
+
+    def test_detects_undefined_behaviour_report(self):
+        err = "term.cc:12:5: runtime error: signed integer overflow: 2147483647 + 1\n"
+        self.assertIn("signed integer overflow", rt.sanitizer_report(err))
+
+    def test_ordinary_stderr_is_not_a_report(self):
+        self.assertIsNone(rt.sanitizer_report("[error] can't open input file 'eq.eln'\n"))
+
+    def test_sanitizer_status_always_regresses(self):
+        regress, _ = rt.judge({"t::I::x": "SANITIZER"}, {"t::I::x": "FAIL"}, {})
+        self.assertEqual(regress, [("t::I::x", "FAIL", "SANITIZER")])
+
+
 class RunTest(unittest.TestCase):
     def test_unrunnable_program_is_reported_not_raised(self):
         # e.g. elanc is a #!/bin/tcsh script and tcsh is not installed
