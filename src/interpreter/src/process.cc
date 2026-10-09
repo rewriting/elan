@@ -146,6 +146,7 @@ struct processdata *newprocess(char *command,
 
     NNEW(res ,struct processdata);
     res->counter = maxcount-1;
+    res->nofreads = 0;
     res->actplist = & processlists[pli];
 
     // add a vagon
@@ -301,6 +302,7 @@ struct processdata *newsubprocess(stateofexecution *stexec,
 
     NNEW(res ,struct processdata);
     res->counter = maxcount-1;
+    res->nofreads = 0;
     res->actplist = & processlists[pli];
 
     // add a vagon

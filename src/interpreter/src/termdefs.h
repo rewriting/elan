@@ -70,6 +70,7 @@ struct processdata {
   ichstream *is;            // output from pipe (just to can close it)
   struct processdatalist ** actplist;  // from which list of processus is taken
   int noblocking;              // read is blocking or not
+  int nofreads;                // number of terms read (S2: was FILES[pid])
 };
 
 struct processdatalist {

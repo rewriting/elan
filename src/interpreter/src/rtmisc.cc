@@ -787,9 +787,11 @@ static int standardreduction(term &t)
               pd->counter = 1;
               pd->s->ilex(le);   //# This is an anachronism from M.V. code
               pd->s->ilex(le); } //#
-            if (FILES[pid].nofreads) pd->s->ilex(le);  // read 'end'
+            // S2: was FILES[pid].nofreads, out of bounds (pid is a process
+            // id, >= FOPEN_MAX here); the count is now kept per process.
+            if (pd->nofreads) pd->s->ilex(le);  // read 'end'
             if (GET_LSTREAM(pd->s,pid,(fsymtab[t.head()].textform())->leftside,rt)) {
-              FILES[pid].nofreads++;
+              pd->nofreads++;
               rt->incrcount();
               t.rewrite(*rt);
               rt->tdelete(); //t.incrcount();
@@ -1099,7 +1101,7 @@ void reduce(term &mt,int trace)		// main reduce loop;
     indent(); traceout << "[reduce] stop :\n"; 
     traceind-=3;
   }
-  delete rstack;
+  delete [] rstack;
 }
 
 
