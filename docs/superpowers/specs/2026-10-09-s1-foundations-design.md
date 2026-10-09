@@ -100,7 +100,9 @@ with the collision).
 The `CMakeLists.txt` reproduces the steps of the 2003 `Makefile.am` files:
 
 1. build the host tools: `macc` (from `parser/`), `mtokdef` and `mabident`
-   (from `src/`), and the `match` library of `acmatcher/` (flex + bison);
+   (from `src/`), and the AC-matching library `libmatch` of `acmatcher/matcher/`
+   (the stand-alone `match` program of `acmatcher/`, built with flex and bison,
+   is not used by `elan` and is not built);
 2. generate the parser tables with them, exactly as the `$(generated_c)` rule
    of `src/Makefile.am` does (`ppexgram.t`, `modgram.t`, `ldmodgram.t`,
    `aterm.*` → `*parsertab.cc`, `tabofident.cc`, `commtokens.h`, ...) as
