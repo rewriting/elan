@@ -35,9 +35,10 @@ brew install gcc openjdk bdw-gc bison flex libtool   # reference system
 
 ### Case-sensitive file system
 
-Some legacy files differ only by the case of their name
-(`strategy/any.eln` / `strategy/Any.eln`, `Robot.lgi` / `robot.lgi`, ...), and
-the default macOS file system is case-insensitive. Work in a case-sensitive
+Some files of `legacy/` (and of the manual's example copies in `docs/manual/`)
+differ only by the case of their name (`any.eln` / `Any.eln`, `Robot.lgi` /
+`robot.lgi`, ...), and the default macOS file system is case-insensitive.
+Work in a case-sensitive
 APFS volume:
 
 ```sh

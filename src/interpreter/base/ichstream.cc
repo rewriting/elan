@@ -57,7 +57,9 @@ FILE *fopen_exact(const char *path)
 ichstream::ichstream(const char *name)              // to open elan file in lib or .
 { char *fn;
 
-  if ((file=fopen_exact(name))) { fn = mstrdup(name); commonopen(fn,NFILE); return; }
+  // the name as given (user's file, current directory): plain fopen, as in 2004;
+  // the library lookups below are exact-case (any[X] vs Any on macOS)
+  if ((file=fopen(name,"r"))) { fn = mstrdup(name); commonopen(fn,NFILE); return; }
 
   fn = addsuffix(perslib,name);
   if ((file=fopen_exact(fn))) { commonopen(fn,NFILE); return; }

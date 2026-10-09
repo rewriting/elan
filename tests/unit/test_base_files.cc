@@ -6,10 +6,16 @@
 #include <cstdlib>
 #include <string>
 #include <unistd.h>
+#include <filesystem>
+#include <vector>
+
+// Temporary directories created by the tests, removed at the end of main.
+static std::vector<std::string> &tmpdirs() { static std::vector<std::string> v; return v; }
 
 static std::string make_dir_with(const char *file) {
   char tmpl[] = "/tmp/elan-case-XXXXXX";       // /tmp: the default (case-insensitive) volume on macOS
   std::string d = mkdtemp(tmpl);
+  tmpdirs().push_back(d);
   FILE *f = fopen((d + "/" + file).c_str(), "w");
   fputs("module Foo end\n", f);
   fclose(f);
@@ -49,4 +55,26 @@ TEST(fopen_exact_relative_name_in_current_directory) {
   CHECK(chdir(old) == 0);
 }
 
-int main() { return run_tests(); }
+// A file named by the user (current directory, first attempt of the search)
+// opens as in 2004, whatever its case: only library lookups are exact-case.
+TEST(ichstream_user_named_file_keeps_2004_behaviour) {
+  std::string d = make_dir_with("Foo.eln");
+  char old[4096];
+  CHECK(getcwd(old, sizeof old) != NULL);
+  CHECK(chdir(d.c_str()) == 0);
+  FILE *probe = fopen("foo.eln", "r");
+  if (probe) {                                 // case-insensitive volume
+    fclose(probe);
+    ichstream in("foo.eln");                   // failexit() (exit) if refused
+    int c;
+    in.ich(c);
+    CHECK_EQ(c, 'm');
+  }
+  CHECK(chdir(old) == 0);
+}
+
+int main() {
+  int status = run_tests();
+  for (auto &d : tmpdirs()) std::filesystem::remove_all(d);
+  return status;
+}

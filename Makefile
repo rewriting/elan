@@ -38,6 +38,7 @@ toolchain:
 ELAN_CONFIG = $(ELAN_CC)|$(ELAN_CXX)|$(PREFIX)|$(CMAKE_FLAGS)
 configure: toolchain
 	@case "$(BUILD)" in ""|.|..|/|"$(CURDIR)") echo "ERROR: refusing BUILD='$(BUILD)'"; exit 1;; esac
+	@case "$(PREFIX)" in ""|/|*" "*) echo "ERROR: refusing PREFIX='$(PREFIX)' (empty, / or containing spaces)"; exit 1;; esac
 	@if [ "$$(cat $(BUILD)/.elan-configure 2>/dev/null)" != "$(ELAN_CONFIG)" ]; then \
 	  rm -rf $(BUILD); \
 	  cmake -S . -B $(BUILD) -DCMAKE_C_COMPILER=$(ELAN_CC) -DCMAKE_CXX_COMPILER=$(ELAN_CXX) \
@@ -46,7 +47,7 @@ configure: toolchain
 	fi
 
 install: all
-	rm -rf $(PREFIX)/share/elanlib   # library files removed from the sources must not linger
+	rm -rf "$(PREFIX)/share/elanlib"   # library files removed from the sources must not linger
 	cmake --install $(BUILD)
 
 test-runner:
@@ -94,7 +95,9 @@ check-sanitize:
 # The ELAN 3.6 user manual (docs/manual, LaTeX from 2003): latex x3 + dvipdf
 # (figures are MetaPost/EPS). Built in build-manual/manual.pdf; `make
 # manual-update` copies it over the committed docs/manual/manual.pdf (the PDF
-# bytes differ between builds: Ghostscript stamps the build time).
+# bytes differ between builds: Ghostscript stamps the build time). The
+# bibliography and index (manual.bbl, manual.ind) are the 2003 ones: bibtex
+# and makeindex are not rerun, so edit them directly if needed.
 manual:
 	rm -rf build-manual && cp -R docs/manual build-manual
 	cd build-manual && for i in 1 2 3; do latex -interaction=nonstopmode manual.tex > latex.log 2>&1 || true; done
