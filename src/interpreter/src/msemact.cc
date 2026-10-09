@@ -855,7 +855,7 @@ void appactstrat()
 }
 
 void var_renameinit()
-{ register int p;
+{ int p;
   actvarnum = 0; maxvarnum = 0;
   for (p=0; p<MAXNOFVAR; p++) actvarrename[p] = NORENAME;
 }

@@ -143,7 +143,7 @@ char *intern_alloc(int size)
   memoround(size);
   indice=size/scale;
 
-  if(size >= MAX_SIZE_STRUCT)
+  if((size_t)size >= MAX_SIZE_STRUCT)
     {
       //fprintf(stderr,"intern_alloc --> Valloc(%d)\n",size+scale);
       //ADDDEBUG(malloc_calls);
@@ -174,7 +174,7 @@ void intern_free(long *p)
   size=SIZE(p);
 
   // on suppose MAGICNUMBER > MAX_SIZE_STRUCT
-  if(size >= MAX_SIZE_STRUCT)
+  if((size_t)size >= MAX_SIZE_STRUCT)
     {
       ADDDEBUG(free_calls);
       free(TRUEADR(p));
@@ -200,7 +200,7 @@ void print_space_usage()
     {
       if(freelist[i])
 	{
-	  printf("freelist[%4d]",i*scale);
+	  printf("freelist[%4d]",(int)(i*scale));
 	  printf("%7d ",   nb_alloc[i]);
 	  printf("%7d ",   nb_free[i]);
 	  printf("%7d ",   nb_alloc[i] - nb_free[i]);

@@ -56,7 +56,7 @@ static void asocpri(unsigned a)
   };
 }
 
-void static rules(void)
+static void rules(void)
 { int t;
   inruleb=1; inimport=1;
   t=nsym();
@@ -149,7 +149,7 @@ static int houtsg(int t,FILE *f)
 static void oasocpri(int a,FILE *f)
 { int i;
   for (i=0; i<NTER; i++) {
-    if (terpri[i]!=UNDEFPRI && (terpri[i] & ASOCMSK)==a) {
+    if (terpri[i]!=UNDEFPRI && (terpri[i] & ASOCMSK)==(unsigned)a) {
       houtsg(-i,f); fprintf(f,"%d  ",terpri[i]&PRIMSK);
     }
   }

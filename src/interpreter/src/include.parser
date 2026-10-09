@@ -89,7 +89,7 @@ int PARSER(lstream &f,int state,void (*lextomodlex)(lexem lex,lexem &modlex))
           case HANDERRORIM : return(0);
         }     
         f.fulex(nnls); lextomodlex(nnls,ls);
-        {register int l;
+        {int l;
 	l=p->actpar.left;
 	istack-=p->actpar.lenght;
         state=stack[istack++];
