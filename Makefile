@@ -49,10 +49,11 @@ configure: toolchain
 	fi
 
 # Files removed from the sources must not linger in PREFIX: the library, the
-# compiler's classes and elanc are reinstalled from scratch (elanc only when the
-# compiler is built, -DELAN_COMPILER=ON, the default).
+# compiler's classes, its runtime headers and elanc are reinstalled from
+# scratch (the last three only when the compiler is built, -DELAN_COMPILER=ON,
+# the default).
 install: all
-	rm -rf "$(PREFIX)/share/elanlib" "$(PREFIX)/classes" "$(PREFIX)/bin/elanc"
+	rm -rf "$(PREFIX)/share/elanlib" "$(PREFIX)/classes" "$(PREFIX)/include/elan-compiler" "$(PREFIX)/bin/elanc"
 	cmake --install $(BUILD)
 
 test-runner:

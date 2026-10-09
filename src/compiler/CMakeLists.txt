@@ -69,11 +69,13 @@ set_source_files_properties(${RT_GEN}/y.tab.c PROPERTIES OBJECT_DEPENDS ${RT_GEN
 # one target owns the generated files (both runtime variants use them)
 add_custom_target(runtime_parser DEPENDS ${RT_GEN}/y.tab.c ${RT_GEN}/y.tab.h ${RT_GEN}/lex.yy.c)
 
-# runtime/Makefile.am: ALLSRCS = COMMONSRCS ACMATCHERSRC termBase.c (same order)
+# runtime/Makefile.am: ALLSRCS = COMMONSRCS ACMATCHERSRC termBase.c (same order),
+# without bitset_tab_mask.c (#included by bitset.c, it defined the same
+# symbols a second time) and bitset_tab_int.c (the BITSETINT variant, removed)
 set(RUNTIME_SOURCES
   bgraph.c bitset.c bitset_32.c link.c match_state.c builtinMatching.c
   tools.c streval.c ac_tools.c thunklib.c builtin.c ${RT_GEN}/y.tab.c
-  termCommon.c trace.c termIn.c termOut.c bitset_tab_mask.c bitset_tab_int.c
+  termCommon.c trace.c termIn.c termOut.c
   build_free.c build_pure.c flatten.c solve_free.c build_match.c eker_tools.c
   gccmatch.c solve_pure.c termBase.c)
 list(TRANSFORM RUNTIME_SOURCES PREPEND ${RT}/ REGEX "^[^/]")
