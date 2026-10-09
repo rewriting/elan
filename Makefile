@@ -65,6 +65,9 @@ check: smoke test-runner
 # On macOS 27 with Apple Clang 17, ASan hangs at startup even for an empty
 # program, so the default there is UBSan only (ASan runs in CI on Linux and in
 # ci/Dockerfile.linux). Leak detection is off: terms are never freed, by design.
+# Stack-use-after-return detection is off: its fake stack makes the deeply
+# recursive rewriting engine ~100 times slower (applications/Features m: 7 s
+# instead of more than 11 min), so 29 tests would time out.
 ifeq ($(UNAME),Darwin)
   SANITIZERS ?= undefined
 else
@@ -73,7 +76,7 @@ endif
 # SAN_BUILD selects the build directory (e.g. one per compiler).
 SAN_BUILD ?= build-san
 check-sanitize:
-	ASAN_OPTIONS=detect_leaks=0 UBSAN_OPTIONS=print_stacktrace=1 \
+	ASAN_OPTIONS=detect_leaks=0:detect_stack_use_after_return=0 UBSAN_OPTIONS=print_stacktrace=1 \
 	$(MAKE) BUILD=$(SAN_BUILD) PREFIX=$(CURDIR)/$(SAN_BUILD)/install \
 	  CMAKE_FLAGS="-DELAN_SANITIZE=ON -DELAN_SANITIZERS=$(SANITIZERS)" check
 
