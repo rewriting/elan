@@ -803,6 +803,7 @@ int term::stermreplace(int vp,term wt, term byt, term &intothis)
 			st[j].incrcount();
 		}
 						// case will continue to case 3
+	       [[fallthrough]];
       case 3 : st[i] = tt;
 	       break;
       case 2 : st[i] = t->subt[i];

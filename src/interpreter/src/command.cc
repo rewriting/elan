@@ -297,6 +297,7 @@ int n = t.head();
       fsymtabbreakk(n == BREAK_N);
       SPEC_N = 0;
       //////// ******* !!!!!!!!! break;
+      [[fallthrough]];
   case DUMP_N:
       SPEC_N = t.subterm(0)->head();
       globtermgr.write(dumpout,RGLOP,&typet,     
@@ -312,6 +313,7 @@ int n = t.head();
       fsymtabbreakk(n == BREAK_I);
       SPEC_I = NULL;
       ////////// ********* !!!!! break;
+      [[fallthrough]];
   case DUMP_I:
       term2string(t.subterm(0),strname);
       SPEC_I = strname;

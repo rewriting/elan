@@ -1879,6 +1879,7 @@ int semact1(int n,lexem l,lstream *f)
 	actstrategy->setprocmaxn(calledstr);
         actstrategy->setname(STRCALL,impmoduli);
         /* ---  !!! a continue !!! --- */
+        [[fallthrough]];
   case 160:				// another element. strategy
 	appactstrat();
 	break;

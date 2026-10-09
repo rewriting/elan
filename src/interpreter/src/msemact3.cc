@@ -298,6 +298,7 @@ int semact3(int n,lexem l,lstream *f)
     break;
   case 319:// __ :: (imodule1) imodule2;  -- parsing a simple type profi
     selectorn = 0;				      
+    [[fallthrough]];
   case 320:      // case 319 should be without break;
      ACTIMP2POS;
      if (selectorn) {
