@@ -83,6 +83,7 @@ extern void Gfsym_init(int code, int a, char *n, char *sort,
 extern void term_print(FILE *fich,Gterm *t);
 extern void internal_term_printnl(FILE *fich,Gterm *t, int mode);
 extern void internal_term_print(FILE *fich,Gterm *t, int mode);
+extern void internal_term_println(FILE *fich,Gterm *t, int mode);
 
 #define NO_IO       0
 #define REF_IO      1

@@ -31,7 +31,7 @@ if(NOT EXISTS ${ELAN_GC_PREFIX}/include/gc.h AND NOT EXISTS ${ELAN_GC_PREFIX}/in
 endif()
 
 # Pre-standard C and C++ (reference/build.sh: CC_FLAGS, CXX_FLAGS)
-set(ELAN_RT_C_OPTIONS   -std=gnu89 -w -fcommon -fsigned-char)
+set(ELAN_RT_C_OPTIONS   -std=c17 -fno-common -w -fsigned-char)
 set(ELAN_RT_CXX_OPTIONS -std=c++17 -w -fsigned-char)
 
 # --- REM: javac -> classes/ -------------------------------------------------------

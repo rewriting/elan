@@ -27,6 +27,7 @@
 #include "trace.h"
 #include "termIn.h"
 #include "builtin.h"
+#include "termOut.h"
 
 /*
 #ifdef __cplusplus
@@ -42,6 +43,10 @@ extern int earleyQueryStrategy;
 extern int rewrite_real_step;
 extern Gterm * T;
 
+
+char trace_file[MAX_FILENAME_LEN];
+char query_file[MAX_FILENAME_LEN];
+char query_sort_file[MAX_FILENAME_LEN];
 
 POS position;     // suite de position
 int MAXPOS;       // lg de la suite de position

@@ -38,6 +38,12 @@
 #include "termIn.h"
 #include "trace.h"
 
+char buf[STRINGLENGTH];
+int  currentSort ;
+int  arity[TABOFARITY_SIZE] ; /* upper bound ??? */
+char *tabIdent[TABOFIDENT_SIZE] ;
+char *tabSort[TABOFSORT_SIZE] ;
+
 extern int gram[] ;
 extern int globalGramSize;
 int BGr=0 ;

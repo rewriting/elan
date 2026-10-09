@@ -51,9 +51,9 @@ typedef struct TR_COQ{
 } TR_COQ;
 
 /* temporary files for communicating with Coq */
-char trace_file[MAX_FILENAME_LEN];
-char query_file[MAX_FILENAME_LEN];
-char query_sort_file[MAX_FILENAME_LEN];
+extern char trace_file[MAX_FILENAME_LEN];
+extern char query_file[MAX_FILENAME_LEN];
+extern char query_sort_file[MAX_FILENAME_LEN];
 
 extern POS position;     // suite de position
 extern int MAXPOS;       // lg de la suite de position
@@ -65,19 +65,20 @@ extern unsigned int nb_node;
 extern Gterm * T;
 extern int strCall;
 
-extern int initialise_trace();
-extern int trace_pretty_print(TR_COQ * head,int deep, FILE *fp_trace);
-extern void setTermNoReduced(Gterm *t);
+extern int Ginitialise_trace();
+extern int Gtrace_pretty_print(TR_COQ * head,int deep, FILE *fp_trace);
+extern void GsetTermNoReduced(Gterm *t);
 extern int add_trace(TR_COQ *head_cond_left_tr,
 	      TR_COQ *head_cond_right_tr);
 
 extern int trace_display();
 extern int trace_free();
+extern int tree_free(NODE *node);
 extern Gterm* norm_in(Gterm *t);
 extern Gterm* norm_out(Gterm *t);
 extern Gterm* norm_lazy(Gterm *t);
-extern Gterm *coqEarleyParser(char *querySortName);
-extern int coqprefixParser(char *s1, char *s2);
+extern Gterm *GcoqEarleyParser(char *querySortName);
+extern int GcoqprefixParser(char *s1, char *s2);
 extern Gterm * subterm_remove(Gterm * t, Gterm * s);
 extern void termOutTrace(FILE *fich,Gterm *t,Gterm *pi);
 extern int getCodeByNamePrefix(char * sym_name);

@@ -61,6 +61,8 @@ extern char instr[];
 GtermList *list;
 Gterm *query;
 int lookup(char *string);
+int yylex(void);
+int yyerror(const char *s);
 %}
 
 
@@ -270,7 +272,7 @@ ASFIDF    :
 %%
 #include "lex.yy.c"
 
-int yyerror() {}
+int yyerror(const char *s) { (void)s; return 0; }
 
 /*extern fsym fsymtab[];*/
 extern int fsymtabSize;

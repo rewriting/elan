@@ -51,16 +51,18 @@
 #define IDENTRULE          70
 #define DEFAULTRULE        0
 
-char buf[STRINGLENGTH];
-int  currentSort ;
-int  arity[TABOFARITY_SIZE] ; /* upper bound ??? */
-char *tabIdent[TABOFIDENT_SIZE] ;
-char *tabSort[TABOFSORT_SIZE] ;
+extern char buf[STRINGLENGTH];
+extern int  currentSort ;
+extern int  arity[TABOFARITY_SIZE] ; /* upper bound ??? */
+extern char *tabIdent[TABOFIDENT_SIZE] ;
+extern char *tabSort[TABOFSORT_SIZE] ;
 
 
 extern Gterm *termParser(int queryMode, int evaluationMode);
 extern Gterm *EarleyParser();
 extern void EarleyParserInit();
+extern int findTab(char *s[],int n,char *str);
+extern void addstandards(void);
 
 extern void esemactinit();
 extern void tabofidentInit();
@@ -82,8 +84,8 @@ extern char *tabStrategyStr[];
 extern int tabStrategyIndex[];
 extern int tabStrategySize;
 
-extern earleyQuerySort ; 
-extern earleyQueryStrategy ; 
+extern int earleyQuerySort ; 
+extern int earleyQueryStrategy ; 
 extern int coqMode;
 extern int printMode;
 extern int strCall;

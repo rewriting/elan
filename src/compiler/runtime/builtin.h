@@ -32,7 +32,7 @@ struct TabFile {
     //  int size;
   FILE *files[MAXFILE];
 };
-int tabfile_free_case[MAXFILE];
+extern int tabfile_free_case[MAXFILE];
 extern struct TabFile *tabfile;
 
 // 1ere version

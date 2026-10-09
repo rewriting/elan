@@ -25,6 +25,7 @@
 #include "termBase.h"
 #include "builtin.h"
 #include "termIn.h"
+#include "termOut.h"
 
 void term_alloc(Gterm **ptr_dest, int size_sname, unsigned int funsym) {
   Gterm *dest;

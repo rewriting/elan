@@ -39,6 +39,7 @@
 /*
  *	macros
  */
+extern void fatal(char *s, char *a);
 #define ASSERT(c, m)    if(!(c)) fatal("ASSERT failed: %s", (m))
 
 #define EMALLOC(t)      ((t *) MALLOC(sizeof(t)))

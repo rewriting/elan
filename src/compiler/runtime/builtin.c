@@ -26,6 +26,7 @@
 
 
 struct TabFile* tabfile;
+int tabfile_free_case[MAXFILE];
 
 void Ginit_builtin() {
     int i;

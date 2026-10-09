@@ -23,6 +23,7 @@
 
 */
 #include "termCommon.h"
+#include "termOut.h"
 
 
 static void print_f_prefix(FILE *fich,Gterm *t);

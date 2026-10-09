@@ -82,7 +82,7 @@ int findTextForm(int code) {
 
 int alnumF = 0 ;
 
-int LetterOrDigit(c) {
+int LetterOrDigit(int c) {
   return 
     (('a' <= c) && (c <= 'z')) ||
     (('A' <= c) && (c <= 'Z')) ||
