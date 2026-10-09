@@ -108,7 +108,7 @@ target_compile_options(earley PRIVATE ${ELAN_RT_CXX_OPTIONS} -O2 -g)
 # STRINGS META SEMANTIC IOS NORM EXTEND ATERM CSTRAT PARTE COMPRIM RUNTIME) was
 # resolved in the sources with unifdef (S5b).
 target_include_directories(earley PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/earley
-  ${CMAKE_CURRENT_SOURCE_DIR}/compat ${ELAN_GC_PREFIX}/include)
+  ${ELAN_GC_PREFIX}/include)
 
 # --- libchoice: choice points by stack copying (cpl) -----------------------------
 # cpl/src/Makefile.am: CFLAGS = -Wall -O2; the -dbg variant: -Wall -g -DDEBUG
