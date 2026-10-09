@@ -270,16 +270,16 @@ void handlfarg(ar)
 int ar;
 { int i,am;
  if (ar) {
-  exp('['); i=0;
+  expect_sym('['); i=0;
   do {
-    exp(UNDID);
+    expect_sym(UNDID);
     am=idadd(uit->id[uival],strlen(uit->id[uival]),mactab);
     bmac[am].arity=0;
     bmac[am].body=ALLOSS(strlen(aarg[i])+1,char);
     strcpy(bmac[am].body,aarg[i]);
     CFRE(aarg[i]);
     i++;
-    exp((i==ar)?']':',');
+    expect_sym((i==ar)?']':',');
   } while (i<ar);
  }
 }

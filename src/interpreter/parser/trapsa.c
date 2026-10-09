@@ -35,7 +35,7 @@
 #define nl() lexan(rwt,uit,&inf)
 
 
-void exp(s)
+void expect_sym(s)
 int s;
 { 
   /* added NULL arg to satisfy prototype */
@@ -104,14 +104,14 @@ static void hop(void)
     };
     if (t==STcode) {
       /* if (amodn>LASTSTMOD) oerr(&inf,'w',"option 'code' was used"); */
-      exp(NUMBER); rbody[begr]=nval; t=nl();
+      expect_sym(NUMBER); rbody[begr]=nval; t=nl();
     }
     else {
 	 actopn++;
 	 if (actopn>=NOPINMN) {actmon=envirnumallo(amodn,actmon); actopn=0;}
     }
     if (t==STpri) {
-      exp(NUMBER); rbody[begr+1]=nval; t=nl();
+      expect_sym(NUMBER); rbody[begr+1]=nval; t=nl();
     }
     if (t!=';') oferr(&inf,"\t; expected after op dec.");
     inruleb=1; t=nsym();

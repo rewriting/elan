@@ -323,7 +323,7 @@ int nsym(void);/* op citania gramat. (citaju z *rinf) */
 
 void outruleb(int b, int e, FILE *f);                       /* vystup gramat */
 
-void exp(int s);
+void expect_sym(int s);
 void trapsa(char *name);
 int hasocpri(INFILE *f, int sy);        /* synt analyza modulu */
 
