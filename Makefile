@@ -70,9 +70,11 @@ ifeq ($(UNAME),Darwin)
 else
   SANITIZERS ?= address,undefined
 endif
+# SAN_BUILD selects the build directory (e.g. one per compiler).
+SAN_BUILD ?= build-san
 check-sanitize:
 	ASAN_OPTIONS=detect_leaks=0 UBSAN_OPTIONS=print_stacktrace=1 \
-	$(MAKE) BUILD=build-san PREFIX=$(CURDIR)/build-san/install \
+	$(MAKE) BUILD=$(SAN_BUILD) PREFIX=$(CURDIR)/$(SAN_BUILD)/install \
 	  CMAKE_FLAGS="-DELAN_SANITIZE=ON -DELAN_SANITIZERS=$(SANITIZERS)" check
 
 reference:
