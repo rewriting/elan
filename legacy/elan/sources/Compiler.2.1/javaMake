@@ -1,0 +1,70 @@
+#!/bin/sh
+#-------------------------------------------------------------------------------
+# Name:   make
+# Author: Mark Volkmann
+# EMail:  m224873@svmstr01.mdc.com
+#
+# This script compiles all Java programs in the current directory if needed.
+# The CLASSES enviroment variable must be set to indicate where the .class
+# files of packages should be placed.
+#
+# NOTE: Because no attempt is being made to track the dependencies between
+#       source files, ordering of the compiles can affect their success.
+#       If one file imports another that will be compiled after it then it
+#       may be necessary to run this script again to get a successful compile.
+#
+# NOTE: In shell 0 is true and 1 is false.
+#-------------------------------------------------------------------------------
+
+options="" # Put options which should be used for all compiles here.
+
+if [ "$CLASSES" = "" ]
+then
+    echo "The environment variable CLASSES must be set to the directory"
+    echo "where the .class files of packages should be placed."
+    exit 1
+fi
+
+# For each .java file in the current directory ...
+for javaFile in *.java
+do
+    # Determine the name of the corresponding .class file.
+    name=`echo $javaFile | cut -f1 -d.`
+    classFile=$name.class
+
+    # If the .java file contains a package statement ...
+    package=`grep package $javaFile`
+    if [ $? -eq 0 ]
+    then
+        # Strip off the word package and the semi-colon at the end, then
+        # change the periods to slashes.
+        subDir=`echo $package | cut -f2 -d" " | cut -f1 -d";" | \
+               sed -e 's/\./\//g'`
+        classFile="$CLASSES/$subDir/$classFile"
+        opt="$options -d $CLASSES"
+    else
+        opt="$options -d $CLASSES"
+	classFile="$CLASSES/$classFile"
+#        opt=$options
+    fi
+
+    # If the .class file exists ...
+    if [ -s $classFile ]
+    then
+        # If the .java file is newer than the .class file then delete the
+        # class file.
+        find . -name $javaFile -newer $classFile -exec rm $classFile \;
+    fi
+
+    # If there is no .class file then compile the .java file.
+    if [ ! -s $classFile ]
+    then
+#        echo "---"
+#        echo "compiling $javaFile to produce $classFile"
+
+#        echo javac $opt $javaFile
+#        javac $opt $javaFile
+        echo guavac $opt $javaFile
+        /users/protheo/moreau/guavac-0.3.1/compiler/guavac $opt $javaFile
+    fi
+done

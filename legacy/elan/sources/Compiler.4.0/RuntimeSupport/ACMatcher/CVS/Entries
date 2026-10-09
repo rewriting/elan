@@ -1,0 +1,21 @@
+/Makefile.common/1.2/Mon Jul 23 14:15:17 2001//
+/acmatchdefs.h/1.2/Mon Jul 23 14:15:17 2001//
+/build_free.c/1.2/Mon Jul 23 14:15:17 2001//
+/build_match.c/1.2/Mon Jul 23 14:15:17 2001//
+/build_pure.c/1.3/Mon Jul 23 14:15:17 2001//
+/copyright.text/1.1/Mon Jul 23 14:15:17 2001//
+/defs.h/1.3/Mon Jul 23 14:15:17 2001//
+/flatten.c/1.4/Mon Jul 23 14:15:17 2001//
+/free_types.h/1.1/Mon Jul 23 14:15:17 2001//
+/functions.h/1.2/Mon Jul 23 14:15:17 2001//
+/gccmatch.c/1.2/Mon Jul 23 14:15:17 2001//
+/minitools.h/1.1/Mon Jul 23 14:15:17 2001//
+/pure_types.h/1.1/Mon Jul 23 14:15:17 2001//
+/solve_free.c/1.2/Mon Jul 23 14:15:17 2001//
+/solve_pure.c/1.2/Mon Jul 23 14:15:17 2001//
+/state_types.h/1.1/Mon Jul 23 14:15:17 2001//
+/sym_types.h/1.1/Mon Jul 23 14:15:17 2001//
+/term_types.h/1.2/Mon Jul 23 14:15:17 2001//
+/eker_tools.c/1.7/Mon Jul 23 14:15:17 2001//
+/eker_tools.h/1.2/Mon Jul 23 14:15:17 2001//
+D

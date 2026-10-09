@@ -1,0 +1,79 @@
+module nim
+
+import global 
+   int 
+   space 
+   state
+   strat[list[list[state]]]
+   strconc[list[list[state]],list[list[state]],list[list[state]]];
+end
+stratop global
+  movetowin	: <list[list[state]]>;
+  findawinner	: <list[list[state]]>;
+end
+
+strategies for list[list[state]]
+implicit
+  [.] movetowin => if call(win) then 
+			id
+		     orelse 
+			call(moves); findawinner 
+		     fi
+  end
+  [.] findawinner => if movetowin then 
+			  exit; next; findawinner
+		       orelse 
+			  exit
+		       fi
+  end
+end
+
+/*
+[movetowin]state(2,1).nil.nil end
+[movetowin]state(3,1).nil.nil end			
+[movetowin]state(3,2).nil.nil end			
+[movetowin]state(4,1).nil.nil end			
+[movetowin]state(4,2).nil.nil end
+[movetowin]state(4,3).nil.nil end
+[movetowin]state(4,4).nil.nil end
+
+[movetowin]state(5,1).nil.nil end
+[movetowin]state(5,2).nil.nil end
+[movetowin]state(5,3).nil.nil end
+[movetowin]state(5,4).nil.nil end
+
+[movetowin]state(6,1).nil.nil end
+[movetowin]state(6,2).nil.nil end
+[movetowin]state(6,3).nil.nil end
+[movetowin]state(6,4).nil.nil end
+
+[movetowin]state(15,1).nil.nil end
+[movetowin]state(16,1).nil.nil end
+[movetowin]state(17,1).nil.nil end
+[movetowin]state(18,1).nil.nil end
+  
+
+//----
+[call(win)]state(4,1).nil.nil end			fails
+[call(moves)]state(4,1).nil.nil end	state(3,2).nil.state(4,1).nil.nil
+[findawinner]state(3,2).nil.state(4,1).nil.nil	end  	fails
+[movetowin]state(3,2).nil.state(4,1).nil.nil  end
+[exit]state(3,2).nil.state(4,1).nil.nil  end
+[if movetowin then id orelse id fi]state(3,2).nil.state(4,1).nil.nil  end
+[if movetowin then id orelse exit fi]state(3,2).nil.state(4,1).nil.nil  end
+[if fail then id orelse exit fi]state(3,2).nil.state(4,1).nil.nil  end
+*/
+end
+
+
+
+
+
+
+
+
+
+
+
+
+

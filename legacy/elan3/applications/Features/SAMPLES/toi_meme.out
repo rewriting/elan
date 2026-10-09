@@ -1,0 +1,49 @@
+module toi_meme
+import global int bool string; end
+operators global
+  toi(@)        : (int) string;
+  loop(@,@,@)   : (int int int) string;
+  trans(@,@)    : (int string) string;
+  toi_meme      : string;
+end
+rules for string
+i, j, k: int; 
+s      : string;
+global
+  [] moi(00) => "module toi_meme" end
+  [] moi(01) => "import global int bool string; end" end
+  [] moi(02) => "operators global" end
+  [] moi(03) => "  toi(@)        : (int) string;" end
+  [] moi(04) => "  loop(@,@,@)   : (int int int) string;" end
+  [] moi(05) => "  trans(@,@)    : (int string) string;" end
+  [] moi(06) => "  toi_meme      : string;" end
+  [] moi(07) => "end" end
+  [] moi(08) => "rules for string" end
+  [] moi(09) => "i, j, k: int; " end
+  [] moi(10) => "s      : string;" end
+  [] moi(11) => "global" end
+  [] moi(12) => "[] loop(i,j,k) => toi(i)+string(10)+loop(i+1,j,k) if i <= j and k == 0" end
+  [] moi(13) => "  end" end
+  [] moi(14) => "  [] loop(i,j,k) => trans(i,toi(i))+loop(i+1,j,k) if i <= j and k == 1" end
+  [] moi(15) => "  end" end
+  [] moi(16) => "  [] loop(i,j,k) => string(0)" end
+  [] moi(17) => "  end" end
+  [] moi(18) => "  [] trans(i,s) => string(32)+string(32)+string(91)+string(93)+string(32)+string(109)+string(111)+string(105)+" end
+  [] moi(19) => "                   string(40)+string(48+i/10)+string(48+i%10)+string(41)+string(32)+string(61)+string(62)+string(32)+" end
+  [] moi(20) => "                   string(34)+s+string(34)+string(32)+string(101)+string(110)+string(100)+string(10) end" end
+  [] moi(21) => "  [] toi_meme => loop(0,11,0)+loop(0,23,1)+loop(12,23,0) end" end
+  [] moi(22) => "end" end
+  [] moi(23) => "end" end
+[] loop(i,j,k) => toi(i)+string(10)+loop(i+1,j,k) if i <= j and k == 0
+  end
+  [] loop(i,j,k) => trans(i,toi(i))+loop(i+1,j,k) if i <= j and k == 1
+  end
+  [] loop(i,j,k) => string(0)
+  end
+  [] trans(i,s) => string(32)+string(32)+string(91)+string(93)+string(32)+string(109)+string(111)+string(105)+
+                   string(40)+string(48+i/10)+string(48+i%10)+string(41)+string(32)+string(61)+string(62)+string(32)+
+                   string(34)+s+string(34)+string(32)+string(101)+string(110)+string(100)+string(10) end
+  [] toi_meme => loop(0,11,0)+loop(0,23,1)+loop(12,23,0) end
+end
+end
+

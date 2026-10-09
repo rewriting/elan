@@ -1,0 +1,155 @@
+module GenericSignature[Variables,Type]
+
+import
+global	bool 
+	Variables Type
+	tuple[2,identifier,identifier]
+	tuple[2,list[constraint],list[constraint]]
+	tuple[3,list[constraint],list[constraint],list[constraint]]
+	tuple[4,list[constraint],list[constraint],list[constraint],list[constraint]]
+	list[identifier] list[var] list[Type] list[term] list[constraint] 
+	list[tuple[identifier,identifier]]
+	eq[var] eq[constraint]
+	eq[list[var]] eq[list[Type]] eq[list[term]] eq[list[constraint]]
+	;
+end
+
+sort
+
+	var term constraint;
+
+end
+
+operators
+
+global
+
+FOR EACH x:identifier SUCH THAT x:=(listExtract)elem(Variables): {x: var;}
+
+// Terms
+
+@		: (Type)				term;
+@		: (var)					term;
+(@)		: (term)				term;
+
+// Constraint
+
+@		: (bool)				constraint;
+
+// Operators that depend on the specific signature
+
+VarsOfTerm(@,@)			: (term       list[var])	list[var];
+VarsOfConstraint(@,@)		: (constraint list[var])	list[var];
+
+ArityOfTerm(@)			: (term)			int;
+ArityOfConstraint(@)		: (constraint)			int;
+
+GetVarOfListOfTerm(@,@)		: (list[term] list[var])	list[var];
+GetTermOfConstraint(@)		: (constraint)			term;
+
+SimplifyConstraint(@)		: (constraint)			constraint;
+SimplifyConstants(@)		: (constraint)			constraint;
+GetCanonicalForm(@,@,@)		: (constraint term term)	constraint;
+
+EvaluateConstraint(@)		: (constraint)			bool;
+EvaluateConstraint(@)		: (constraint)			constraint;
+EvaluateGroundConstraint(@)	: (constraint)			bool;
+EvaluateGroundTerm(@,@)		: (term Type)			Type;
+
+CardinalityEqualsOne(@)		: (list[constraint])		bool;
+GetVarInHead(@,@,@)		: (var list[constraint] list[constraint])	list[constraint];
+CreateFunction(@)		: (constraint)			term;
+
+end
+
+
+rules for bool
+
+global 
+
+[]	EvaluateGroundConstraint(true)
+	=>
+	true
+end
+[]	EvaluateGroundConstraint(false)
+	=>
+	false
+end
+
+end
+
+
+rules for constraint
+
+	t1, t2	: term;
+
+global 
+
+[]	SimplifyConstraint(true)
+	=>
+	true
+end
+
+[]	SimplifyConstraint(false)
+	=>
+	false
+end
+
+[]	SimplifyConstants(true)
+	=>
+	true
+end
+
+[]	SimplifyConstants(false)
+	=>
+	false
+end
+
+[]	GetCanonicalForm(true, t1, t2)
+	=>
+	true
+end
+
+[]	GetCanonicalForm(false, t1, t2)
+	=>
+	false
+end
+
+end
+
+
+rules for int
+
+	t	: term;
+	c	: constraint;
+
+global 
+
+[]	ArityOfTerm(t)
+	=>
+	size(VarsOfTerm(t,nil))
+end
+
+end
+
+
+rules for list[var]
+
+	l	: list[var];
+
+global 
+
+[]	VarsOfConstraint(true,l)
+	=>
+	l
+end
+
+[]	VarsOfConstraint(false,l)
+	=>
+	l
+end
+
+end
+
+
+end

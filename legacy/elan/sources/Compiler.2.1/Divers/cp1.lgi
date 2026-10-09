@@ -1,0 +1,9 @@
+LPL cp1 description 
+
+query 		of sort Foo
+      result 	of sort Foo
+      import   	cp1
+      start with (do)do( query)
+//      start with (do)do( c )
+
+end

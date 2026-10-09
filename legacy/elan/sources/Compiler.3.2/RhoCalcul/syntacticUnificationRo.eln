@@ -1,0 +1,120 @@
+module syntacticUnificationRo[Fss,Vars]
+        import  global  
+			eqSystem[Fss,Vars] 			; 
+                local   
+			Fss Vars
+			int identifier bool 
+			pair[identifier,int]
+                        list[pair[identifier,int]] 
+			eq[variable] eq[term]
+                        occur[bool,eqSystem]
+                ;
+        end 
+
+operators
+              global
+                @ = @       : (term term) equation          alias @=@:;
+                @           : ( equation ) eqSystem alias @:;   
+              local
+                mergingClash(@,@,@) : ( eqSystem variable term ) bool;    
+          	free @ in @           : ( variable eqSystem ) bool; 
+end 
+
+stratop
+          global 
+            match       : <eqSystem>            bs;
+end
+
+rules for eqSystem
+                P,Q,R:eqSystem;
+                $s,$t:term;
+                $x,$y:variable;
+                b : bool;
+global
+          [delete]      P & $x=$y       => P            
+                                if eq_variable($x,$y)
+          end
+
+          [delete]      P & true        => P            
+                                if occurs true in P
+          end
+
+          [conflict]    P & $s=$t       => false
+                                if neq_identifier(head($s),head($t))
+                                   and not(isvar($s)) and isfun($t)
+          end
+          [matchClash]  P & $s=$x       => false
+                                if not isvar($s) 
+          end
+          [mergeClash]  P & $x=$s => false
+                                if mergingClash(P,$x,$s)
+          end
+          [mergePass1]  P & $x=$s => $x=$s & P
+          end
+
+          [mergePass2]  P & $x=$s => R
+                        where b:=() free $x in P
+                        choose
+                        try     if not(b)
+                                where R:=() $x=$s & P
+                        try     if b
+                                where R:=()P
+                        end
+          end
+          [mergePass3]  P => P if false  end
+
+
+        // initial and final transitions rules
+
+          [trueelim]    P & true        => P                            end
+          [truepass]    P & true        => true & P                     end
+          [trueadd]     P               => true & P                     end
+          [falsepropag] false           => false                        end
+          [truepropag]  true            => true                         end
+
+        end
+
+        FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+        SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS) 
+                AND N:=()second(SS) :{
+           rules for eqSystem
+              P:eqSystem;
+                     s_1,...,s_N:term; t_1,...,t_N:term;
+           local
+             [decompose] P & F(s_1,...,s_N)=F(t_1,...,t_N)      => P { & s_I=t_I }_I=1...N end
+           end
+        }
+
+        rules for bool
+                P,Q     : eqSystem;
+                $s,$t   : term;
+                $x,$y   : variable;
+        global
+          [] mergingClash(true,$x,$s) => false                          end
+          [] mergingClash(P & Q,$x,$s) => mergingClash(P,$x,$s) 
+                                        or mergingClash(Q,$x,$s)                end
+          [] mergingClash($x=$s,$y,$t) => eq_variable($x,$y) and neq_term($s,$t)
+	  end
+
+	  [] free $x in true   =>  false
+	  end  
+	  [] free $x in false  =>  false
+	  end  
+	  [] free $x in ($s=$t & P)  =>  free($x,$s) and free $x in P 
+	  end  
+        end
+
+        strategies for eqSystem
+        implicit
+
+          [.] match =>  dc one(trueadd);
+                repeat*( dc one( unfold, delete, decompose, conflict,
+                         matchClash, mergePass1) );
+                dc one(truepass, truepropag, falsepropag);
+                repeat*( dc one( unfold, mergeClash, mergePass2, mergePass3) );
+                dc one(trueelim, truepropag, falsepropag)
+          end
+
+        end 
+end  
+

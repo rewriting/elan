@@ -1,0 +1,7 @@
+LPL match2 description
+  query    of sort term
+  result   of sort term
+  import  match2
+  start with () f(1,a)
+
+end

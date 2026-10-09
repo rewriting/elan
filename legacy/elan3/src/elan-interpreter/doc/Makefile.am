@@ -1,0 +1,4 @@
+
+data_DATA  = README 
+EXTRA_DIST = README 
+

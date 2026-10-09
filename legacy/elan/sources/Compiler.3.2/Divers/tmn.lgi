@@ -1,0 +1,7 @@
+LPL tmn description 
+ query of sort state 
+  result of sort state
+  import tmn
+  start with (com) //query 
+a+SLEEP+JK(dai,dai).nil  <> b+SLEEP+JK(dai,dai).nil <>nil#nil <> nil <> nil <> 0
+end

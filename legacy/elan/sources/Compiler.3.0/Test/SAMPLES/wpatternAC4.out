@@ -1,0 +1,4 @@
+
+result = g()([](1))
+
+rewrite_step = 2

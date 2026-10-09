@@ -1,0 +1,4 @@
+
+result = g(,)(F(,)*(a1,a2,a3,a4),g(,)(b2,G(,)*(b1,b3,b4)))
+
+rewrite_step = 2

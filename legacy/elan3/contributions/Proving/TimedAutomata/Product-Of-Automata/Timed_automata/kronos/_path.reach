@@ -1,0 +1,63 @@
+location: 0
+propositions: BMOV SEMPTY GINSPECT DWAIT
+constraint: B<=134 and X=Y and X=Z and X=B
+transition: 133<=B and B<=134 => BMOV ; RESET{ B } ; goto 1
+
+location: 1
+propositions: SEMPTY GINSPECT DWAIT BINSPECT
+constraint: B<=21 and X=Y and X=Z and X<=B+134 and B+133<=X
+transition: B<=21 => MIDDLE ; RESET{ Y } ; goto 2
+
+location: 2
+propositions: SEMPTY DWAIT BINSPECT GPICK
+constraint: Y<=8 and B<=21 and X=Z and X<=B+134 and B+133<=X and Y<=B
+transition: 3<=Y and Y<=8 and B<=21 => GPICK ; RESET{ Y } ; goto 3
+
+location: 3
+propositions: SEMPTY DWAIT BONG GTURNR
+constraint: Y<=10 and X=Z and X<=B+134 and B+133<=X and Y+3<=B and B<=Y+21
+transition: 6<=Y and Y<=10 => GTURNR ; RESET{ Y } ; goto 4
+
+location: 4
+propositions: SEMPTY DWAIT BONG GWAIT
+constraint: X=Z and X<=B+134 and B+133<=X and Y+9<=B and B<=Y+31
+transition: TRUE => SEMPTY ; RESET{ Y } ; goto 5
+
+location: 5
+propositions: SEMPTY DWAIT BONG GPUT
+constraint: Y<=2 and X=Z and X<=B+134 and B+133<=X and Y+9<=B
+transition: 1<=Y and Y<=2 => GPUT ; RESET{ Y Z } ; goto 6
+
+location: 6
+propositions: DWAIT BONS SBUSY GTURNL
+constraint: Y<=10 and X<=B+134 and B+133<=X and Y=Z and Y+10<=B
+transition: 8<=Y and Y<=10 and Z<=10 => GTURNL ; RESET{ Y } ; goto 7
+
+location: 7
+propositions: GINSPECT DWAIT BONS SBUSY
+constraint: Z<=10 and X<=B+134 and B+133<=X and Y+8<=Z and Z+10<=B
+transition: 8<=Z and Z<=10 => SBUSY ; RESET{ Z } ; goto 9
+
+location: 9
+propositions: GINSPECT DWAIT BONS SREADY
+constraint: X<=B+134 and B+133<=X and Y<=Z+2 and Z<=Y and Y+18<=B
+transition: TRUE => SREADY ; RESET{ X } ; goto 11
+
+location: 11
+propositions: GINSPECT BONS SREADY DPICK
+constraint: X<=2 and X<=Z and Y<=Z+2 and Z<=Y and Y+18<=B
+transition: 1<=X and X<=2 => DPICK ; RESET{ X Z } ; goto 13
+
+location: 13
+propositions: SEMPTY GINSPECT BOND DTURNR
+constraint: X<=6 and X+1<=Y and X=Z and Y+18<=B
+transition: 5<=X and X<=6 => DTURNR ; RESET{ X } ; goto 15
+
+location: 15
+propositions: SEMPTY GINSPECT BOND DPUT
+constraint: X<=2 and X+5<=Z and Z<=X+6 and Z+1<=Y and Y+18<=B
+transition: 1<=X and X<=2 => DPUT ; RESET{ X B } ; goto 17
+
+location: 17
+propositions: BMOV SEMPTY GINSPECT DTURNL
+constraint: X<=6 and X+6<=Z and Z<=X+8 and X=B and Z+1<=Y

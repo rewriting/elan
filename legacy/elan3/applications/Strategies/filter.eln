@@ -1,0 +1,25 @@
+module filter
+
+import global strat[int] strat[list[int]]
+		int list[int];
+end
+stratop global
+  filter(@) : (<int>) <list[int]>;
+end
+
+rules for int
+n:int;
+global
+  [large]	n => n+1 if n > 10			end
+end
+
+strategies for list[int]
+s : <int>; h : int; t : list[int];
+implicit
+  [.] filter(s) => dc(	nil,
+		 	dc( s.filter(s),
+			    [h.t => t] ; filter(s)))
+  end
+end
+
+end

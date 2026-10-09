@@ -1,0 +1,19 @@
+module termUnifFA
+import 	global 	term ctes ;
+ 	local  	int ; 
+end
+
+operators
+
+global
+
+        @               : (int) term ;
+        (@)             : (term) term ;
+        C.@(@)          : (int term) term        pri 900 ;
+        @ + @           : (term term) term       pri 500 assocLeft ;
+        @ * @           : (term term) term       pri 700 assocLeft ;
+
+end
+
+end
+

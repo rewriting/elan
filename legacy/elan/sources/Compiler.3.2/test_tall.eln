@@ -1,0 +1,87 @@
+module test_tall
+
+import bool;
+end
+
+sort Term Foo;
+end 
+
+operators global
+  go     : Term;
+  a      : Term; 
+  b      : Term; 
+  c      : Term; 
+  f(@,@) : (Term Term) Term;
+  j(@,@,@) : (Term Term Term) Term;
+  h(@)   : (Term) Term;
+  g(@,@) : (Term Foo) Term;
+
+  F(@,@) : (Term Term) Term (AC);
+
+  fa     : Foo;
+  fb     : Foo;
+  fc     : Foo;
+end
+
+stratop global
+  S      : <Term>   bs;
+//  S      : <Term> -> <Foo>   bs;
+end
+
+rules for Term
+ x,y : Term;
+global
+
+[] go => x
+   where x:=(S) f(a,a) end
+
+[R1] a => b end
+//[R1] a => c end
+//[R1] b => c end
+
+end
+
+rules for Foo
+ x,y : Foo;
+global
+
+[R2] fa => fb end
+[R2] fa => fc end
+end
+
+
+strategies for Term
+implicit
+//  [] S => tsome(dk(R1)) end
+
+  [] S => tall(dk(dk(R1),id)) end
+//  [] S => tall(dk(id,id)) end
+
+//  [] S => dc one(tsome(dk(R1))) end
+
+//  [] S => tone(dk(R1)) end
+
+//  [] S => tone(dc one(R1)) end
+//  [] S => dc one(tone(dk(R1))) end
+//  [] S => dc one(tone(dc one(R1))) end
+
+
+//  [] S => iterate*(tone(dk(R1))) end
+//  [] S => repeat*(tone(dk(R1))) end
+//  [] S => tone(dk(R1)) ; iterate*(tone(dk(R1))) end
+
+
+
+//  [] S => dc one(tone(dc one(R1))) end
+//  [] S => dc one(tone(dk(R1))) end
+
+//  BUG HERE : [] S => iterate+(tone(dk(R1))) end
+end
+
+
+end
+				
+
+
+
+

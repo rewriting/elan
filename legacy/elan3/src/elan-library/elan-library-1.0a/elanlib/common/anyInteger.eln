@@ -1,0 +1,22 @@
+// This file is generated automatically: do not edit it directly. 
+module anyInteger
+/*
+        This module is          ***built-in***
+        What follows are only   ***comments*** 
+        for explaining its semantics
+
+sort int;
+op
+ global
+
+ 0      : int ;
+ 1      : int ;
+ -1     : int ;
+ 2      : int ;
+ -2     : int ;
+ ... ... ...
+end
+*/
+end
+  
+

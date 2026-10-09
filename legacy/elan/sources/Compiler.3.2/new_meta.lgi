@@ -1,0 +1,18 @@
+LPL new_meta description
+/*
+   query of sort  	Foo
+   result of sort 	Foo
+   import 		new_meta
+   start with 		(DDD)do(a)
+*/
+
+   query of sort  	list[Foo]
+   result of sort 	list[Foo]
+   import 		new_meta
+//   start with 	(MMM)dolist(a)
+   start with 		(MMM) query
+
+end
+
+
+

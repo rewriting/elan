@@ -1,0 +1,19 @@
+LPL combi0plusFA description
+
+  specification description
+
+    part Vars	of sort list[identifier]
+	 	import sigSyntax
+    part Ops	of sort list[pair[identifier,int]]
+	 	import sigSyntax
+
+  end
+
+  query 	of sort gencombiSystem
+         	result of sort gencombiSystem
+	 	import term bool eqSystem 
+                        list[variable] pair[list[variable],list[variable]]
+                        combi0plusFA[Vars,Ops] 
+         	start with (gencombiStrat) query 
+
+end

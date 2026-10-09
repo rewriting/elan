@@ -1,0 +1,35 @@
+LPL eqSystem description
+
+	specification description
+
+		part Vars of sort list[identifier]
+	 	import sigSyntax
+
+		part Ops of sort list[pair[identifier,int]]
+	 	import sigSyntax
+
+		part Prec of sort list[pair[identifier,int]]
+	 	import sigSyntax
+
+		part System of sort list[equation]
+		import 	sigSyntax
+			list[equation]
+			eqSystem[Ops,Vars]
+			termCommons[Ops,Vars]
+	end
+
+	query of sort int
+
+	result of sort int
+
+	import eqSystem[Ops,Vars]
+
+       	start with ()query 
+end
+
+
+
+
+
+
+

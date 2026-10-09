@@ -1,0 +1,47 @@
+module rewriting[Fss,Vars,Mvs,rwrules]
+import  global  //rwRules[Fss,Vars,Mvs]
+		rwrules
+                myEqSystem[Fss,Vars,Mvs]
+                highOrderApplySubstOn[Fss,Vars,Mvs]
+                highOrderSubstitution
+                pair[term,term]
+                list[pair[term,term]]
+                list[term]
+        ;
+        local   highOrderSyntacticUnification[Fss,Vars,Mvs]
+                bool    
+        ;
+end
+
+stratop
+  global
+    s_rewrite	: <term> 	builtin;
+end
+
+rules for term
+	match   : eqSystemPlus;
+        s,l,r,ss: term;
+        theta   : highOrderSubstitution;
+        omega   : list[int];
+        rwr     : pair[term,term];
+        rssub   : term;
+global
+  [rewrite] s     => s[ss] at omega
+                where rwr:= (listExtract) elem(rwrules)
+                where r := () second(rwr)
+                where l := () first(rwr)
+                where omega := (chooseOccurence) nvocc(s)
+                where match := (highOrderMatchs) <true & l = s at omega, r, nil>
+                where rssub := () second(match)
+                if checkVarOcc(first(match),third(match))
+                where theta := (hosubstitute) system_to_subst(first(match))
+                where ss    := (highOrderSubst) theta(rssub)
+  end
+end
+
+strategies for term
+implicit
+  [.] s_rewrite => repeat*(first one(rewrite))   end
+end
+
+end

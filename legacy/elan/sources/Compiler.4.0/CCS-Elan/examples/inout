@@ -1,0 +1,8 @@
+def In=in.'pipe.In
+def Out=pipe.out.Out
+
+def Buffer = (In | Out) \ L
+
+def L = {pipe}
+
+prop NoDeadlock = max X.<->tt && [-]X

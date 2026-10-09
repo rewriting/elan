@@ -1,0 +1,18 @@
+module symbol[Fss]
+import local Fss pair[identifier, int]	list[pair[identifier, int]] ;
+end
+
+sort symbol;
+end
+
+operators global
+
+FOR EACH SS:pair[identifier,int]; F:identifier
+SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS) :{
+				
+		F	:symbol;
+}
+end
+end
+
+

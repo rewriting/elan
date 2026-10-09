@@ -1,0 +1,8 @@
+LPL ccs description
+  query    of sort rccst
+  result   of sort rccst
+  import   identifier ccs 
+  start with (start_str) query
+
+end
+

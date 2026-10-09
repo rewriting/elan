@@ -1,0 +1,40 @@
+module bug
+
+import bool eq[Term];
+end
+
+sort Term;
+end 
+
+operators global
+  go     : Term;
+  a      : Term; 
+  b      : Term; 
+  c      : Term; 
+  f(@,@) : (Term Term) Term (AC);
+  g(@)   : (Term) Term;
+  h(@)   : (Term) Term;
+end
+
+rules for Term
+ x,y : Term;
+global
+
+[] go      => f(a,g(a))
+end
+
+[] f(x,g(x)) => g(x) 
+end
+
+[] f(g(x),x) => h(x) 
+end
+
+end
+
+
+end
+				
+
+
+
+

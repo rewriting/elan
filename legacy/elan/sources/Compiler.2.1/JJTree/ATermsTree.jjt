@@ -1,0 +1,131 @@
+options {
+   MULTI=true;
+}
+
+PARSER_BEGIN(ATermsTree)
+
+public class ATermsTree {
+}
+
+PARSER_END(ATermsTree)
+
+SKIP :
+{
+  " "
+| "\t"
+| "\n"
+| "\r"
+}
+
+TOKEN : {
+ <INTEGER_LITERAL: <DECIMAL_LITERAL> (["l","L"])? | <HEX_LITERAL> (["l","L"])? |
+ <OCTAL_LITERAL> (["l","L"])?>
+|  <#DECIMAL_LITERAL: ["1"-"9"] (["0"-"9"])*>
+|  <#HEX_LITERAL: "0" ["x","X"] (["0"-"9","a"-"f","A"-"F"])+>
+|  <#OCTAL_LITERAL: "0" (["0"-"7"])*>
+|  <FLOATING_POINT_LITERAL: (["0"-"9"])+ "." (["0"-"9"])* (<EXPONENT>)? (["f","F","d","D"])? | "." (["0"-"9"])+ (<EXPONENT>)? (["f","F","d","D"])? | (["0"-"9"])+ <EXPONENT> (["f","F","d","D"])? | (["0"-"9"])+ (<EXPONENT>)? ["f","F","d","D"]>
+|  <#EXPONENT: ["e","E"] (["+","-"])? (["0"-"9"])+>
+|  <CHARACTER_LITERAL: "\'" (~["\'","\\","\n","\r"] | "\\" (["n","t","b","r","f","\\","\'","\""] | ["0"-"7"] (["0"-"7"])? | ["0"-"3"] ["0"-"7"] ["0"-"7"])) "\'">
+|  <STRING_LITERAL: "\"" (~["\"","\\","\n","\r"] | "\\" (["n","t","b","r","f","\\","\'","\""] | ["0"-"7"] (["0"-"7"])? | ["0"-"3"] ["0"-"7"] ["0"-"7"]))* "\"">
+}
+
+TOKEN : {
+  < PROD: "prod">
+| < ATTRS: "attrs">
+| < ATR: "atr">
+| < SORT: "sort">
+| < LIT: "lit">
+| < APPL: "appl">
+| < AMB: "amb">
+| < CHARCLASS: "char-class">
+| < RANGE: "range">
+| < NOATTRS: "no-attrs">
+}
+
+TOKEN : {
+ <IDENTIFIER: <LETTER> (<LETTER> | <DIGIT>)*>
+|  <#LETTER: ["$","A"-"Z","_","a"-"z"]>
+|  <#DIGIT: ["0"-"9"]>
+}
+
+
+void Start() :
+{
+  String s;
+}
+{
+  ( ATerms() ";"
+    )*
+    <EOF>
+}
+
+void ATerms() #void:
+{}
+{
+  ATerm()
+  ( "," ATerm() )*
+}
+
+void ATermList() :
+{}
+{
+  "[" [ ATerms() ] "]"
+}
+
+void ACon() #void:
+{
+	Token t;
+}
+{
+  (
+   t=<INTEGER_LITERAL>
+   {
+     jjtThis.setVal(Integer.parseInt(t.image));
+   }
+  )#IntCon
+}
+
+void AFun() #void:
+{
+  String s;
+  Token t;
+}
+{
+  Literal()
+  | t=<PROD>      #Prod
+  | t=<ATTRS>     #Attrs
+  | t=<ATR>       #Atr
+  | t=<SORT>      #Sort
+  | t=<LIT>       #Lit
+  | t=<APPL>      #Appl
+  | t=<AMB>       #Amb
+  | t=<CHARCLASS> #CharClass
+  | t=<RANGE>     #Range
+  | t=<NOATTRS>   #NoAttrs
+}
+
+void Literal() :
+{
+  Token t;
+}
+{
+  t=<STRING_LITERAL>
+    {
+      jjtThis.setVal(t.image);
+    }
+}
+
+void Ann() :
+{}
+{
+  "{" ATerms() "}"
+}
+
+void ATerm() #void:
+{}
+{
+  ACon() [ Ann() ]
+  | ATermList() [ Ann() ]
+  | AFun() [ "(" ATerms() ")" ] [Ann()]
+}
+

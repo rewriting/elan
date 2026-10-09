@@ -1,0 +1,81 @@
+module fact[vars,ops]
+
+import 	global	EtermCommons[ops,vars]
+		list[symbole];
+end
+
+sort 	fact  lm_symbole symbole;
+end
+
+operators 	global
+
+	+ @	: (term) fact;
+	- @	: (term) fact;
+
+	fact_to_term(@)	: (fact) term;
+
+//	(@)		: (identifier) symbole;
+	|@|		: (identifier) symbole;
+//	@		: (identifier) symbole alias |@|:;
+
+	@		: (variable) symbole;
+	id_to_symb(@)	: (identifier) symbole;
+	symb_to_id(@)	: (symbole) identifier;
+
+
+	@ +	: (list[symbole]) lm_symbole;
+	@ -	: (list[symbole]) lm_symbole;
+
+	lm_to_lsymb(@)		: (lm_symbole) list[symbole];
+
+end
+
+
+rules for term
+
+	t	: term;
+
+global
+
+[] fact_to_term(+t) => t
+end
+[] fact_to_term(-t) => t
+end
+end
+
+
+rules for symbole
+
+	i 	: identifier;
+
+global
+
+[] id_to_symb(i) => |i|
+end
+end
+
+
+rules for identifier
+
+	i	: identifier;
+
+global
+
+[] symb_to_id(|i|) => i
+end
+end
+
+
+rules for list[symbole]
+
+	lsymb	: list[symbole];
+
+global
+
+[] lm_to_lsymb(lsymb+) => lsymb
+end
+[] lm_to_lsymb(lsymb-) => lsymb
+end
+end
+
+end

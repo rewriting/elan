@@ -1,0 +1,51 @@
+module space
+
+import global 	list[state] 		
+		list[list[state]]	
+		eq[state] eq[list[state]]
+	  	strapply[state]
+		bool
+		strat[state] 
+		strat[list[list[state]]];
+  end
+sort state; end
+stratop global
+  	  next		: <list[list[state]] -> list[list[state]]>;
+  	  exit		: <list[list[state]] -> list[list[state]]>;
+	  cut		: <list[list[state]] -> list[list[state]]>;
+  	  call(@)	: (<state -> state>) <list[list[state]] -> list[list[state]]>;
+  	  loop		: <list[list[state]] -> list[list[state]]>;
+  	  narrow	: <list[list[state]] -> list[list[state]]>;
+ 	local
+  	  occurs @ in @	: (state list[list[state]]) bool;
+  end
+rules for bool
+  	state1, state2	: state;
+  	level		: list[state];
+  	space		: list[list[state]];
+   global
+     []	occurs state1 in nil => false					end
+     []	occurs state1 in state2.level.space => true if state1 == state2	end
+     []	occurs state1 in state2.level.space => occurs state1 in space	end
+  end
+
+strategies for list[list[state]]
+  	state			: state;
+  	s			: <state -> state>;
+  	level			: list[state];
+  	space			: list[list[state]];
+  	new_level		: list[state];
+  	new_space		: list[list[state]];
+  explicit
+    [.] [next]state.level.space	=> level.space		end
+    [.] [exit]state.level.space	=> space		end
+    [.] [cut]state.level.space	=> state.nil.space	end
+    [.] [call(s)]state.level.space 	=> new_level.state.level.space
+					where new_level:=()setof(s,state)
+					if new_level != nil	end
+    [.] [loop]state.level.space => state.level.space if occurs state in space end
+    [.] [narrow]state.level.space => state.nil.new_space
+			where new_space:=[narrow]space	end
+    [.] [narrow]nil => nil				end
+  end
+end

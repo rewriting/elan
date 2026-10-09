@@ -1,0 +1,8 @@
+LPL testStrat description 
+
+query 		of sort foo
+      result 	of sort foo
+      import    testStrat
+      start with (strat) query
+
+end

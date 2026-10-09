@@ -1,0 +1,2 @@
+f(x,f(y,x))=f(a,f(f(z,f(u,v)),u)) 
+end

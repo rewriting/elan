@@ -1,0 +1,167 @@
+#
+# Test filtrage AC
+#
+
+i686 (charbon)
+**************
+Java Compiler
+  Java Compilation test of bimatch : no.spc
+  Java Compilation test of bimatch : no.spc  optimiseChoicePoint
+  Java Compilation test of bool3 : no.spc
+  Java Compilation test of bool3 : no.spc  optimiseChoicePoint
+  Java Compilation test of choice1 : no.spc
+  Java Compilation test of choice1 : no.spc  optimiseChoicePoint
+  Java Compilation test of choice2 : no.spc
+  Java Compilation test of choice2 : no.spc  optimiseChoicePoint
+  Java Compilation test of condac1 : no.spc
+  Java Compilation test of condac1 : no.spc  optimiseChoicePoint
+  Java Compilation test of condac2 : no.spc
+  Java Compilation test of condac2 : no.spc  optimiseChoicePoint
+  Java Compilation test of cons1 : no.spc
+  Java Compilation test of cons1 : no.spc  optimiseChoicePoint
+  Java Compilation test of dcfail1 : no.spc
+  Java Compilation test of dcfail1 : no.spc  optimiseChoicePoint
+  Java Compilation test of dcfail2 : no.spc
+  Java Compilation test of dcfail2 : no.spc  optimiseChoicePoint
+  Java Compilation test of dcfail3 : no.spc
+  Java Compilation test of dcfail3 : no.spc  optimiseChoicePoint
+  Java Compilation test of enum : no.spc
+  Java Compilation test of enum : no.spc  optimiseChoicePoint
+  Java Compilation test of enum2 : no.spc
+  Java Compilation test of enum2 : no.spc  optimiseChoicePoint
+  Java Compilation test of ident1 : no.spc
+  Java Compilation test of ident1 : no.spc  optimiseChoicePoint
+  Java Compilation test of manySortedSet1 : no.spc
+  Java Compilation test of manySortedSet1 : no.spc  optimiseChoicePoint
+  *** failed
+  Java Compilation test of manySortedSet2 : no.spc
+  Java Compilation test of manySortedSet2 : no.spc  optimiseChoicePoint
+  *** failed
+  Java Compilation test of manySortedSet3 : no.spc
+  Java Compilation test of manySortedSet3 : no.spc  optimiseChoicePoint
+  *** failed
+  Java Compilation test of match11 : no.spc
+  Java Compilation test of match11 : no.spc  optimiseChoicePoint
+  Java Compilation test of match12 : no.spc
+  Java Compilation test of match12 : no.spc  optimiseChoicePoint
+  Java Compilation test of match13 : no.spc
+  Java Compilation test of match13 : no.spc  optimiseChoicePoint
+  Java Compilation test of match14 : no.spc
+  Java Compilation test of match14 : no.spc  optimiseChoicePoint
+  Java Compilation test of match2 : no.spc
+  Java Compilation test of match2 : no.spc  optimiseChoicePoint
+  Java Compilation test of match3 : no.spc
+  Java Compilation test of match3 : no.spc  optimiseChoicePoint
+  Java Compilation test of match4 : no.spc
+  Java Compilation test of match4 : no.spc  optimiseChoicePoint
+  Java Compilation test of propc1 : no.spc
+  Java Compilation test of propc1 : no.spc  optimiseChoicePoint
+  Java Compilation test of propc2 : no.spc
+  Java Compilation test of propc2 : no.spc  optimiseChoicePoint
+  Java Compilation test of rep : no.spc
+  Java Compilation test of rep : no.spc  optimiseChoicePoint
+  Java Compilation test of testACNumbering : no.spc
+  Java Compilation test of testACNumbering : no.spc  optimiseChoicePoint
+  Java Compilation test of testSubstitution : no.spc
+  *** too many variables in the first level
+  Java Compilation test of testSubstitution : no.spc  optimiseChoicePoint
+  *** too many variables in the first level
+  Java Compilation test of wpattern : no.spc
+  Java Compilation test of wpattern : no.spc  optimiseChoicePoint
+  Java Compilation test of wpatternAC1 : no.spc
+  Java Compilation test of wpatternAC1 : no.spc  optimiseChoicePoint
+  Java Compilation test of wpatternAC2 : no.spc
+  Java Compilation test of wpatternAC2 : no.spc  optimiseChoicePoint
+  Java Compilation test of wpatternAC3 : no.spc
+  Java Compilation test of wpatternAC3 : no.spc  optimiseChoicePoint
+  Java Compilation test of wpatternAC4 : no.spc
+  Java Compilation test of wpatternAC4 : no.spc  optimiseChoicePoint
+  Java Compilation test of wpatternAC5 : no.spc
+  Java Compilation test of wpatternAC5 : no.spc  optimiseChoicePoint
+  Java Compilation test of wpatternAC6 : no.spc
+  Java Compilation test of wpatternAC6 : no.spc  optimiseChoicePoint
+
+
+sun4u (craffe)
+**************
+idem
+
+------------------------------------------------------------
+#
+# Test general
+#
+
+i686 (charbon)
+**************
+Test of  Simplest
+Java Compiler
+  Java Compilation test of prim_jc : no.spc
+  Java Compilation test of prim_jc : no.spc  optimiseChoicePoint
+  Java Compilation test of primes_jc : no.spc
+  Java Compilation test of primes_jc : no.spc  optimiseChoicePoint
+  Java Compilation test of main_jc : no.spc
+  Java Compilation test of main_jc : no.spc  optimiseChoicePoint
+  Java Compilation test of hanoi_jc : no.spc
+  Java Compilation test of hanoi_jc : no.spc  optimiseChoicePoint
+  Java Compilation test of nhorse_jc : no.spc
+  Java Compilation test of nhorse_jc : no.spc  optimiseChoicePoint
+  Java Compilation test of fib_jc : no.spc
+  Java Compilation test of fib_jc : no.spc  optimiseChoicePoint
+  Java Compilation test of nqueens_jc : no.spc
+  Java Compilation test of nqueens_jc : no.spc  optimiseChoicePoint
+  Java Compilation test of queens_jc : no.spc
+  Java Compilation test of queens_jc : no.spc  optimiseChoicePoint
+Test of  Prolog
+Test of  Unification
+Test of  Features
+Test of  Scharff
+Test of  Csp
+Test of  HOR
+Test of  APT
+Test of  HOU_1_18
+Test of  HOU_NORM
+Test of  Strategies
+Test of  CStrategies
+Test of  Prover
+Test of  Robot
+Test of  FastCompletion
+Java Compiler
+  Java Compilation test of ans : KNZ86.spc
+  Java Compilation test of ans : KNZ86.spc  optimiseChoicePoint
+  Java Compilation test of ans : Zeh89.spc
+  Java Compilation test of ans : Zeh89.spc  optimiseChoicePoint
+  Java Compilation test of ans : curry.spc
+  Java Compilation test of ans : curry.spc  optimiseChoicePoint
+  Java Compilation test of ans : exa79.spc
+  Java Compilation test of ans : exa79.spc  optimiseChoicePoint
+  Java Compilation test of ans : exa80.spc
+  Java Compilation test of ans : exa80.spc  optimiseChoicePoint
+  Java Compilation test of ans : exa85.spc
+  Java Compilation test of ans : exa85.spc  optimiseChoicePoint
+  Java Compilation test of ans : expf.spc
+  Java Compilation test of ans : expf.spc  optimiseChoicePoint
+  Java Compilation test of ans : expoclos.spc
+  Java Compilation test of ans : expoclos.spc  optimiseChoicePoint
+  Java Compilation test of ans : furtin.spc
+  Java Compilation test of ans : furtin.spc  optimiseChoicePoint
+  Java Compilation test of ans : gdiv.spc
+  Java Compilation test of ans : gdiv.spc  optimiseChoicePoint
+  Java Compilation test of ans : group.spc
+  Java Compilation test of ans : group.spc  optimiseChoicePoint
+  Java Compilation test of ans : p2.spc
+  Java Compilation test of ans : p2.spc  optimiseChoicePoint
+  Java Compilation test of ans : p8.spc
+  Java Compilation test of ans : p8.spc  optimiseChoicePoint
+  Java Compilation test of ans : sample.spc
+  Java Compilation test of ans : sample.spc  optimiseChoicePoint
+  Java Compilation test of ans : taussky.spc
+  Java Compilation test of ans : taussky.spc  optimiseChoicePoint
+Test of  Gpo
+Test of  MinelaComp
+Test of  Rewriting
+Test of  Poly
+
+
+sun4u (craffe)
+**************
+idem

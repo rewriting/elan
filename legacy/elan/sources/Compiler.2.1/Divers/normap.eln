@@ -1,0 +1,35 @@
+module normap
+
+import global list[Foo];
+end
+sort	Foo;
+end
+
+operators
+global
+
+	a	: Foo;
+	b	: Foo;
+	c	: Foo;
+
+	go	: list[Foo];
+end
+
+
+rules for Foo
+global 
+  [R1]	a => b	end
+  [R2]	b => c	end
+end
+
+rules for list[Foo]
+	l : list[Foo];
+global 
+  []	go => l where l:= (normalise( dc one (R1,R2) )) a.b.c.nil
+end
+
+end
+
+
+end
+

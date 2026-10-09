@@ -1,0 +1,15 @@
+#! /bin/csh -f
+#        LGI         SPC        INP        OUT
+
+
+if ($1 =~ *I*) then
+
+#
+#  some easy examples ....
+#
+itest     compbasic2 group  kbgroup1c kbgroup1c
+
+if ($1 =~ *L*) then
+#itest     compbasic2 group  group group
+endif
+endif

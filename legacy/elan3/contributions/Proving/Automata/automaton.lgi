@@ -1,0 +1,18 @@
+LPL automaton description 
+
+  specification description
+
+    part Ops	of sort list[pair[identifier,int]]
+	 	import sigSyntax
+
+    part Automata of sort list[automaton]
+                import automaton[Ops] list[automaton]
+
+  end
+
+  query 	of sort automaton
+         	result of sort automaton
+	 	import automaton[Ops] tools[Ops] aut_name references[Ops, Automata]
+         	start with () query
+end
+

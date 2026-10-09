@@ -1,0 +1,8 @@
+LPL bimatch description
+  query    of sort term
+  result   of sort term
+  import   bimatch
+
+  start with () match(a)
+
+end

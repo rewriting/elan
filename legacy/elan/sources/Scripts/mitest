@@ -1,0 +1,13 @@
+#!/bin/csh
+#  make output files for itest
+#  usage:
+#    mitest lgi_file spc_file input_file output_file
+#  !!! all files are without extensions !!!
+#
+echo "  creation of " $4.out
+if(-f SAMPLES/$4.out) then
+  rm SAMPLES/$4.out
+endif
+set ELAN = $ELANLIB/../bin/`uname -m`/elan
+$ELAN -b $1.lgi $2.spc < SAMPLES/$3.inp > SAMPLES/$4.out
+

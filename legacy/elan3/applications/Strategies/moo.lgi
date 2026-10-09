@@ -1,0 +1,9 @@
+LPL moo description
+
+query		of sort  	Any
+		result of sort 	bool
+		modules 	lis_lterm
+		start with 	(hoo)nf(query)
+
+end
+

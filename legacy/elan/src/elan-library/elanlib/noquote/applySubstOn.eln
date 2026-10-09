@@ -1,0 +1,27 @@
+// This file is generated automatically: do not edit it directly. 
+module applySubstOn[Fss,Vars,X]
+        import local
+                termCommons[Fss,Vars]
+                replace[term,X]
+                substitution
+                ;
+        end  
+        sort X;
+        end  
+        operators
+          global
+            @(@)        : ( substitution X ) X;
+            apply(@,@)  : ( substitution X ) X          alias @(@):;
+        end 
+        rules for X
+                $tt     : X;
+                $s1,$s2 : substitution;
+                $v      : variable;
+                $t      : term; 
+        global
+          [] apply(identity,$tt)        => $tt                          end
+          [] apply($s1 o $s2 ,$tt)      => apply($s2,apply($s1,$tt))    end
+          [] apply($v->$t,$tt)          => replace($v,$t,$tt)           end
+        end
+end  
+

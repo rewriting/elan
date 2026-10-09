@@ -1,0 +1,2 @@
+deriv(X*X+5*Y+7,X)
+end

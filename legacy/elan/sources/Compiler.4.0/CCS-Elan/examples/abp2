@@ -1,0 +1,140 @@
+**********************************************************************
+*  abp.ccs   
+*  Author:  Rance Cleaveland
+*
+*  This file contains a version of the Alternating Bit Protocol.
+*
+*  The specification of the protocol is represented by the agent
+*  "Spec", and there are two implementations, "ABP-lossy", which
+*  uses a lossy medium "Mlossy", and "ABP-safe, which uses a
+*  reliable medum "Msafe".
+*
+*  "ABP-lossy" is correct in the sense that it is observationally
+*  equivalent to "Spec", whereas "ABP-safe" is not.  "ABP-safe"
+*  in fact may deadlock as can be detected with the model checker.
+*
+**********************************************************************
+
+**********************************************************************
+*  The definition of the specification "Spec"
+**********************************************************************
+
+def Spec = send.'receive.Spec 
+
+**********************************************************************
+*  The definition of the sender
+**********************************************************************
+
+def S0 = send.S0'
+
+def S0' = 's0.(rack0.S1 + rack1.S0' + tau.S0')
+
+def S1 = send.S1'
+
+def S1' = 's1.(rack1.S0 + rack0.S1' + tau.S1')
+
+**********************************************************************
+*  The definition of the receiver
+**********************************************************************
+
+def R0 = r0.'receive.'sack0.R1 + r1.'sack1.R0 + tau.'sack1.R0
+
+def R1 = r1.'receive.'sack1.R0 + r0.'sack0.R1 + tau.'sack0.R1
+
+**********************************************************************
+*  The definition of the reliable medium "Msafe"
+**********************************************************************
+
+def Msafe =    s0.'r0.Msafe + s1.'r1.Msafe +     sack0.'rack0.Msafe + sack1.'rack1.Msafe
+
+**********************************************************************
+*  The definition of the lossy medium "Mlossy"
+**********************************************************************
+
+def Mlossy = s0.('r0.Mlossy + Mlossy) + s1.('r1.Mlossy + Mlossy)\
+             + sack0.('rack0.Mlossy + Mlossy) + sack1.('rack1.Mlossy + Mlossy)
+
+**********************************************************************
+*  The Internal actions to be hidden
+**********************************************************************
+
+set Internals = { r0,r1,s0,s1,rack0,rack1,sack0,sack1 }
+
+**********************************************************************
+*  The definition of the safe implementation "ABP-safe"
+**********************************************************************
+
+def ABP-safe = (R0 | Msafe | S0) \ Internals
+
+**********************************************************************
+*  The definition of the lossy implementation "ABP-lossy"
+**********************************************************************
+
+def ABP-lossy = (R0 | Mlossy | S0) \ Internals
+
+**********************************************************************
+*  Two-link network can be built by chaining ABP links
+*  Added by Steve Sims (8-16-95)
+**********************************************************************
+
+**********************************************************************
+*  Specification
+**********************************************************************
+
+def Spec2 = send.Spec2'
+
+def Spec2' = send.Spec2'' + 'receive.Spec2
+
+def Spec2'' = 'receive.Spec2' 
+
+**********************************************************************
+*  Implementation
+**********************************************************************
+
+def Two-link-netw =   (ABP-lossy[inode/receive]|ABP-lossy[inode/send])\{inode}
+
+**********************************************************************
+*  Three-link network
+**********************************************************************
+
+**********************************************************************
+*  Specification
+**********************************************************************
+
+def Spec3 = send.Spec3'
+
+def Spec3' = send.Spec3'' + 'receive.Spec3
+
+def Spec3'' = send.Spec3''' + 'receive.Spec3'
+
+def Spec3''' = 'receive.Spec3''
+
+**********************************************************************
+*  Implementation
+**********************************************************************
+
+def Three-link-netw = ( ABP-lossy[inode1/receive]|\
+                        ABP-lossy[inode1/send,inode2/receive]|\
+                        ABP-lossy[inode2/send])\{inode1,inode2}
+
+prop AG(P) = max X.P && [-]X
+prop Can_deadlock =   min X.[-]ff || <->X
+prop Can_send =   min Y.<send>tt || <tau>Y
+prop Can_receive =   min Z.<'receive>tt || <tau>Z
+prop Always_can_send_or_receive =  AG (Can_send() || Can_receive())
+prop No_repeat =   AG ([send](~Can_send()) || ['receive](~Can_receive()))
+prop P1 = [send](max X.<'receive>tt || ([send]ff && [-]X))
+prop P2 = ['receive](max X.<send>tt || (['receive]ff && [-]X))
+prop No_repeat1 = AG (P1() && P2())
+prop Fair = max Y. min X. [-]((<send>tt && Y) || X)
+
+*tab Two-link-netw Can_deadlock
+*tab Three-link-netw Can_deadlock
+*tab Two-link-netw Can_receive
+*tab Three-link-netw Can_receive
+*tab Two-link-netw Always_can_send_or_receive
+*tab Three-link-netw Always_can_send_or_receive
+*tab Two-link-netw No_repeat
+*tab Three-link-netw No_repeat
+*tab Two-link-netw No_repeat1
+*tab Three-link-netw No_repeat1

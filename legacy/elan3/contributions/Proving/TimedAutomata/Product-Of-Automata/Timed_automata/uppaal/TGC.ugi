@@ -1,0 +1,61 @@
+process Train graphinfo {
+templateName (5, 5);
+paramList (5, 20);
+location Far (96, 96);
+locationName Far (-10, -30);
+location Near (288, 96);
+locationName Near (-10, -30);
+invariant Near (-10, 15);
+location On (288, 288);
+locationName On (-10, -30);
+invariant On (-10, 15);
+location After (96, 288);
+locationName After (-10, -30);
+invariant After (-10, 15);
+sync Far Near 1 (-60, -15);
+assign Far Near 1 (-60, 15);
+guard Near On 1 (-60, -30);
+sync After Far 1 (-60, -15);
+}
+process Gate graphinfo {
+templateName (5, 5);
+paramList (5, 20);
+location Up (96, 64);
+locationName Up (-10, -30);
+location t1 (288, 64);
+locationName t1 (-10, -30);
+invariant t1 (-10, 15);
+location Down (288, 256);
+locationName Down (-10, -30);
+location t2 (96, 256);
+locationName t2 (-10, -30);
+invariant t2 (-10, 15);
+sync Up t1 1 (-60, -15);
+assign Up t1 1 (-60, 15);
+sync Down t2 1 (-60, -15);
+assign Down t2 1 (-60, 15);
+guard t2 Up 1 (-60, -30);
+}
+process Controller graphinfo {
+templateName (5, 5);
+paramList (5, 20);
+location U0 (352, 128);
+locationName U0 (-10, -30);
+location U1 (576, 128);
+locationName U1 (-10, -30);
+invariant U1 (-10, 15);
+location U2 (128, 128);
+locationName U2 (-10, -30);
+invariant U2 (-10, 15);
+trans U0 U1 1 (-80, -64), (80, -64);
+sync U0 U1 1 (-60, -15);
+assign U0 U1 1 (-60, 15);
+trans U1 U0 1 (80, 64), (-80, 64);
+guard U1 U0 1 (-60, -30);
+sync U1 U0 1 (-60, -15);
+trans U0 U2 1 (80, -64), (-80, -64);
+sync U0 U2 1 (-60, -15);
+assign U0 U2 1 (-60, 15);
+trans U2 U0 1 (-80, 64), (80, 64);
+sync U2 U0 1 (-60, -15);
+}

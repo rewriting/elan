@@ -1,0 +1,19 @@
+/*										    */
+/* Strategy                        Results                                          */
+/*										    */
+/* ForwardCheckingFirstToLastOne   CSP[nil,Yb=2.Mb=9.Db=10.Nb=1000.Ye=2.            */
+/* 				       Me=8.De=30.Ne=1000.nil,nil,nil,nil]          */
+/*										    */
+/* ForwardCheckingFirstToLastAll   CSP[nil,Yb=2.Mb=9.Db=10.Nb=1000.Ye=2.            */
+/* 				       Me=8.De=30.Ne=1000.nil,nil,nil,nil]          */
+/*										    */
+Nb =?360(*)Yb (+) 30(*)Mb (+) Db & 
+Db <?30 & 
+Mb <?12 &
+Ne =?365(*)Ye (+) 30(*)Me (+) De & 
+De <=?30 & 
+Me <=?13 & 
+Me !=?12 V De<?6 &
+Nb =?Ne &
+Nb =? 1000
+end

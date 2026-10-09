@@ -1,0 +1,32 @@
+module pwhere1
+
+sort Foo; end
+
+operators global
+	a	: Foo;
+	b	: Foo;
+	c	: Foo;
+	d	: Foo;
+	e	: Foo;
+	f	: Foo;
+	@+@	: (Foo Foo) Foo		(AC);
+	[@,@,@] : (Foo Foo Foo) Foo;
+end
+
+stratop global
+  all	: <Foo->Foo>		builtin;
+end
+
+rules for Foo
+Res1, Res2, t,x,y,z,w	:Foo;
+global
+  [ALL] t => [x,y,z]
+			where (Foo)x+y+z:=()t		end
+end
+
+strategies for Foo
+implicit
+  [.]	all => dk(ALL)		end
+end
+
+end

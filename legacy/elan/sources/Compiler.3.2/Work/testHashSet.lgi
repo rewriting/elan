@@ -1,0 +1,10 @@
+LPL testHashSet  description
+
+query of sort  Term
+result of sort Term
+	  
+import testHashSet int
+start with () go
+
+end
+

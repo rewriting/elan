@@ -1,0 +1,29 @@
+module depth_int
+
+import global int primesy symbol[1,int,bool] depth[int] strat[int];
+end
+stratop global
+  hop	: <int>;	
+  foo	: <int>;
+end
+
+rules for bool
+ n:int;
+global
+  [] prime(n) => true if n < 10 		end
+  [] prime(n) => false				end
+end 
+
+rules for int
+ x,n	: int;
+global
+  [ass(n)] x => n 				end
+  [add(n)] x => x+n 				end
+end
+
+strategies for int
+implicit
+  [.] hop => dk(add(3),add(5))			end
+end
+
+end

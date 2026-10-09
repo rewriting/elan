@@ -1,0 +1,40 @@
+#! /bin/csh -f
+clear
+
+
+
+#
+# I - iterpretor
+# C - compiler
+# A - aterm exporter, loader
+# P - partial evaluation
+# L - long test (all examples)
+# J - java compiler
+#
+
+limit cputime 2000s
+
+tst_one Simplest $1
+tst_one Prolog $1
+tst_one Unification $1
+tst_one Features $1
+tst_one Scharff $1
+tst_one Csp $1
+tst_one HOR $1
+tst_one APT $1
+tst_one HOU_1_18 $1
+tst_one HOU_NORM $1
+#tst_one Hou (in syntax.alpha) $1
+tst_one Strategies $1
+tst_one CStrategies $1
+tst_one Prover $1
+tst_one Robot $1
+#tst_one UnifElanRCF (in syntax.alpha) $1
+#tst_one UnifElanGen $1
+tst_one FastCompletion $1
+tst_one Gpo $1
+#tst_one HOU_1_17 $1 
+tst_one MinelaComp $1
+tst_one Rewriting $1
+tst_one Poly $1
+##tst_one IO_Call $1   <- corriger

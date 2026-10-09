@@ -1,0 +1,45 @@
+module dcfail
+
+//import eq[term];
+//end
+
+sort term;
+end
+
+operators global
+	a : term;
+	b : term;
+	c : term;
+	f(@) : (term) term;
+	g(@) : (term) term;
+end
+
+stratop global
+  s0    : <term>        builtin;
+end
+
+
+
+rules for term
+  x,y,z,t : term;
+global
+[] g(x) => y where y:=(s0) f(x) end
+[R1] f(a) => c end
+[R2] f(b) => c end
+
+end
+
+strategies for term
+implicit
+  [] s0 => dk( dk(R1),dk(R2) )
+//  [] s0 => dc( dk(R1),dk(R2) )
+//  [] s0 => dc one( dk(R1),dk(R2) )
+
+//  [] s0 => dc( dc(dk(R1)),dc(dk(R2)) )
+  end
+end
+
+
+
+end
+

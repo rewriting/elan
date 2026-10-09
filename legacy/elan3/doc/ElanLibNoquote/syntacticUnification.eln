@@ -1,0 +1,158 @@
+//
+//		(c)	INRIA-Lorraine & CRIN
+//			615, rue du Jardin Botanique, BP 101
+//		        54602 Villers-les-Nancy
+//			France
+//			email: elan@loria.fr
+//
+//	$Source: /CVS/aircube/elan3/doc/ElanLibNoquote/syntacticUnification.eln,v $
+//	$Revision: 1.1 $
+//	$Date: 1997/03/25 16:47:01 $
+//	$Author: moreau $
+//
+
+module syntacticUnification[Fss,Vars]
+import 	global 	termCommons[Fss,Vars]; // before term termV[Vars] termF[Fss];
+ 	local  	Fss int identifier bool pair[identifier,int]
+		list[pair[identifier,int]] eq[variable] eq[term]
+		eqSystem[Fss,Vars] 
+		occur[variable,term] occur[variable,eqSystem];
+end
+
+operators
+  global
+    @ = @	: (term term) equation 		alias @=@:;
+    @ 		: ( equation ) eqSystem		alias @:;
+  local
+    mergingClash(@,@,@)	: ( eqSystem variable term ) bool;
+
+end
+
+rules for eqSystem
+	P,Q,R:eqSystem;
+	$s,$t:term;
+	$x,$y:variable;
+local
+
+  [delete] 	P & $x=$y	=> P		
+			if eq($x,$y)
+  end
+  [coalesce] 	P & $x=$y	=> $x=$y & apply($x->$y,P)
+			if neq($x,$y)
+  end
+  [conflict]	P & $s=$t	=> false
+			if head($s)!=head($t)
+			   and not(isvar($s)) and not(isvar($t))
+  end
+  [occCheck1]	P & $x=$s	=> false
+			if occurs $x in $s and not isvar($s)
+  end
+  [occCheck2]	P & $s=$x	=> false
+			if occurs $x in $s and not isvar($s)
+  end
+  [eliminate1]	P & $x=$s	=> $x=$s & apply($x->$s,P)
+			if not(occurs $x in $s) 
+  end
+  [eliminate2]	P & $s=$x	=> $x=$s & apply($x->$s,P)
+			if not(occurs $x in $s) 
+  end
+  [matchClash]	P & $s=$x	=> false
+			if not isvar($s) 
+  end
+  [mergeClash] 	P & $x=$s => false
+			if mergingClash(P,$x,$s)
+  end
+  [mergePass1] 	P & $x=$s => $x=$s & P
+  end
+  [mergePass2] 	P & $x=$s => $x=$s & P
+			if not(occurs $x in P) // and not mergingClash(P,$x,$s)
+  end
+  [mergePass3] 	P & $x=$s => P
+			if occurs $x in P // and  not mergingClash(P,$x,$s)
+  end
+
+//  [unfold]	 P & (Q & R)		=> (P & Q) & R		end
+
+// initial and final transitions rules
+
+  [trueelim]	P & true	=> P				end
+  [truepass]	P & true	=> true & P			end
+  [trueadd]	P 		=> true & P			end
+  [falsepropag]	false		=> false			end
+  [truepropag]	true		=> true				end
+
+end
+
+FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS) 
+	AND N:=()second(SS) :{
+   rules for eqSystem
+      P:eqSystem;
+             s_1,...,s_N:term; t_1,...,t_N:term;
+   local
+     [decompose] P & F(s_1,...,s_N)=F(t_1,...,t_N)	=> P { & s_I=t_I }_I=1...N end
+   end
+}
+
+rules for bool
+ P,Q	: eqSystem;
+	$s,$t	: term;
+	$x,$y	: variable;
+local
+  [] mergingClash(true,$x,$s) => false				end
+  [] mergingClash(P & Q,$x,$s) => mergingClash(P,$x,$s) 
+				or mergingClash(Q,$x,$s) 		end
+  [] mergingClash($x=$s,$y,$t) => eq($x,$y) and neq($s,$t)			end
+end
+
+strategies for eqSystem
+global 
+  [unify]
+  dc(trueadd);
+  repeat* (
+    dc(
+      	unfold || 
+	delete || decompose || conflict || coalesce ||
+        occCheck1 || occCheck2 || eliminate1 || eliminate2 )
+  );
+  dc(trueelim || truepropag || falsepropag)
+  end
+  [unifys]
+  repeat* (
+    dc(
+      	unfold || 
+	delete || decompose || conflict || coalesce || 
+        occCheck1 || occCheck2 || eliminate1 || eliminate2 )
+  ) ;
+  dc(truepass || truepropag)
+  end
+  [match]
+  dc(trueadd);
+  repeat* (
+    dc( unfold || 
+	delete || decompose || conflict || 
+		     matchClash || mergePass1)
+  );
+  dc(truepass || truepropag || falsepropag);
+  repeat* (
+    dc( unfold || 
+	mergeClash || mergePass2 || mergePass3)
+  );
+  dc(trueelim || truepropag || falsepropag)
+  end
+  [matchs]
+  repeat* (
+    dc( unfold || 
+	delete || decompose || conflict ||
+		     matchClash || mergePass1)
+  );
+  dc(truepass || truepropag);
+  repeat* (
+    dc( unfold || 
+	mergeClash || mergePass2 || mergePass3)
+  );
+  dc(truepass || truepropag)
+  end
+end
+
+end

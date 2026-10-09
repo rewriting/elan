@@ -1,0 +1,42 @@
+module bblock
+
+import global string bool io[string] //io[Pid] 
+	io[int]; end
+
+operators global
+  floop(@,@) 	: (string int) int;
+  rloop(@,@,@) 	: (Pid int int) int;
+  ord(@)	: (bool) int;
+end
+
+rules for int
+	s1, s2, n, n1, n2, i, mm , N1	: int;
+        pid, pid1, pid2    		: Pid;
+	Id, Id1			: string;
+	delai			: int;
+global
+ []	ord(true) => 1 end
+ []	ord(false) => 0 end
+ [] floop(Id,n) => n1	
+			where pid :=()create(Id)
+                        if iserr(pid) == false
+//			where pid2:=()write(stdout,pid)
+
+			where n2:=()write(pid,n)
+			where Id1:=()write(pid," \n") 
+
+			where n1  :=()rloop(pid,n,10)
+			where pid1:=()close(pid)
+			if iserr(pid1) == false
+  end
+  [] rloop(pid,0,delai) => 0 						end
+  [] rloop(pid,n,delai) => n1+N1
+			where n1:=()read(pid)
+			where n2:=()write(stdout,n1) 
+			where N1:=()rloop(pid,n-1,
+				delai+5*ord(iserror(n1)))
+	end
+end
+
+end
+

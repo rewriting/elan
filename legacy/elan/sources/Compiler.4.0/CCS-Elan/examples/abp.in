@@ -1,0 +1,17 @@
+(def ABP = (S | K | L | E)\R
+,def E = E_0
+,def E_0 = !c_x0.f_x.d_0.E_1 + !c_x1.d_1.E_0 + !c_bottom.d_1.E_0
+,def E_1 = !c_x1.f_x.d_1.E_0 + !c_x0.d_0.E_1 + !c_bottom.d_0.E_1
+,def K = !b_x0.(c_x0.K + c_bottom.K) + !b_x1.(c_x1.K + c_bottom.K)
+,def L = !d_0.(e_0.L + e_bottom.L) + !d_1.(e_1.L + e_bottom.L)
+,def S = S_0
+,def S_0 = !a_x.S_x0
+,def S_1 = !a_x.S_x1
+,def S_x0 = b_x0.T_x0
+,def S_x1 = b_x1.T_x1
+,def Spec = !a_x.f_x.Spec
+,def T_x0 = !e_0.S_1 + !e_1.S_x0 + !e_bottom.S_x0
+,def T_x1 = !e_1.S_0 + !e_0.S_x1 + !e_bottom.S_x1
+,def R = [b_x0,b_x1,c_x0,c_x1,d_0,d_1,e_0,e_1,c_bottom,e_bottom]
+,def Big = ABP|ABP|ABP
+; ABP ) @

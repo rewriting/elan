@@ -1,0 +1,67 @@
+Reduce ELAN Machine v.2.1
+	(c) LORIA (CNRS, INPL, INRIA, UHP, U-Nancy 2), 1998, 1999
+Author: P.-E. Moreau
+Reduce ELAN Machine. Reading from file ans.ref . . .
+Parsing
+linearise lhs: (and)(var0,not()(var2))
+
+rule = [] (and)(var0,not()(var2)) => (FALSE)
+	if eq_formula(,)(var0,var2)
+
+lhsACPattern = (and)(var0,not()(var2))
+
+nbACSubterms = 1
+nbSingleACVariable  = 1
+nbMultiACVariable   = 0
+nbSingleACSubterm   = 1
+nbMultiACSubterm    = 0
+constrainedVariable = true
+
+
+Warning: (and)(var0,not()(var2))
+This pattern is not compiled
+linearise lhs: (and)(var5$,(and)(var0,not()(var7)))
+
+rule = [] (and)(var0,var5$,not()(var7)) => (and)(var5$,(FALSE))
+	if eq_formula(,)(var0,var7)
+
+lhsACPattern = (and)(var0,var5$,not()(var7))
+
+nbACSubterms = 1
+nbSingleACVariable  = 2
+nbMultiACVariable   = 0
+nbSingleACSubterm   = 1
+nbMultiACSubterm    = 0
+constrainedVariable = true
+
+
+rule = [] (and)(var0,not()(var0)) => (FALSE)
+
+lhsACPattern = (and)(var0,not()(var0))
+
+nbACSubterms = 1
+nbSingleACVariable  = 1
+nbMultiACVariable   = 0
+nbSingleACSubterm   = 1
+nbMultiACSubterm    = 0
+constrainedVariable = false
+
+
+rule = [] (and)(var0,var5$,not()(var0)) => (and)(var5$,(FALSE))
+
+lhsACPattern = (and)(var0,var5$,not()(var0))
+
+nbACSubterms = 1
+nbSingleACVariable  = 2
+nbMultiACVariable   = 0
+nbSingleACSubterm   = 1
+nbMultiACSubterm    = 0
+constrainedVariable = false
+
+
+Warning: (and)(var0,var5$,not()(var0))
+This pattern is not compiled
+Compiling nonamed rules...
+Compiling strategies
+execute the following line to build your program
+	gmake --file ans.make

@@ -1,0 +1,8 @@
+LPL hanoi description 
+
+query 		of sort list
+      result 	of sort list
+      import    hanoi 
+      start with () query
+
+end

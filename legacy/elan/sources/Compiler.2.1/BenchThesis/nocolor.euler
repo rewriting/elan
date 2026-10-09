@@ -1,0 +1,56 @@
+------------------------------------------------------------
+nqueensAC
+compiler
+nqueens(7)
+50 runs : moyenne = 492373 rwr/sec
+nqueens(8)
+50 runs : moyenne = 571701 rwr/sec
+nqueens(9)
+50 runs : moyenne = 606363 rwr/sec
+nqueens(10)
+20 runs : moyenne = 648787 rwr/sec
+nqueens(11)
+20 runs : moyenne = 684051 rwr/sec
+------------------------------------------------------------
+Bool3
+compiler
+q3
+50 runs : moyenne = 22181 rwr/sec
+q4
+50 runs : moyenne = 20307 rwr/sec
+q5
+50 runs : moyenne = 18040 rwr/sec
+q6
+50 runs : moyenne = 14889 rwr/sec
+q8
+50 runs : moyenne = 9506 rwr/sec
+------------------------------------------------------------
+Set
+compiler
+powerSet(4)
+50 runs : moyenne = 32056 rwr/sec
+powerSet(5)
+50 runs : moyenne = 36084 rwr/sec
+powerSet(6)
+50 runs : moyenne = 35636 rwr/sec
+powerSet(7)
+50 runs : moyenne = 28502 rwr/sec
+powerSet(8)
+50 runs : moyenne = 19167 rwr/sec
+------------------------------------------------------------
+Nat10
+compiler
+fib(10)
+50 runs : moyenne = 76294 rwr/sec
+fib(11)
+50 runs : moyenne = 78693 rwr/sec
+fib(12)
+50 runs : moyenne = 80369 rwr/sec
+fib(13)
+50 runs : moyenne = 81228 rwr/sec
+fib(14)
+50 runs : moyenne = 81496 rwr/sec
+fib(15)
+50 runs : moyenne = 82379 rwr/sec
+fib(16)
+50 runs : moyenne = 82557 rwr/sec

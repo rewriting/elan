@@ -1,0 +1,655 @@
+module definitionsRo[Fss,Vars]
+
+import 	global  eq[term] eq[variable] substitution;
+	local   int bool identifier cmp[eqSystem]
+		termCommonsRo[Fss,Vars] syntacticUnificationRo[Fss,Vars]
+		list[int] list[variable] Alist[variable] list[identifier] 
+		cmp[list[variable]]
+		Fss Vars 
+		pair[identifier,int] list[pair[identifier,int]];
+end  
+
+sort variable term;
+end 
+
+operators global
+          linear(@)             : ( term ) bool;
+          functional(@)         : ( term ) bool;
+          no_doubletons(@)      : ( term ) bool;
+          no_empty(@)           : ( term ) bool;
+          no_redex(@)           : ( term ) bool;
+          no_failure(@)         : ( term ) bool;
+
+          w_subsume(@,@)        : ( term term ) bool;
+          s_subsume(@,@)        : ( term term ) bool;
+
+          safe(@)		: ( term ) bool;
+
+          strict_linear(@)      : ( term ) bool;
+          regular(@)		: ( term ) bool;
+          regular_wrt(@,@)	: ( list[variable] term ) bool;
+end 
+
+//*************** FOR EACH N==0 *************************************************
+
+        FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+        SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS) 
+                AND N:=()second(SS) ANDIF N == 0 :{
+
+//------------------------ functional ------------------------
+rules for bool
+global
+	[] functional(F) =>  true
+	end
+end
+
+//---------------- weakly subsume ----------------
+        		FOR EACH SSS:pair[identifier,int]; G:identifier;  M:int
+        		SUCH THAT SSS:=(listExtract) elem(Fss) AND G:=()first(SSS) 
+		                AND M:=()second(SSS) ANDIF M == 0 :{
+rules for bool
+global
+	[] w_subsume(F,G) =>  true
+	end
+end
+			}
+
+        		FOR EACH SSS:pair[identifier,int]; G:identifier;  M:int
+        		SUCH THAT SSS:=(listExtract) elem(Fss) AND G:=()first(SSS) 
+		                AND M:=()second(SSS) ANDIF M > 0 :{
+rules for bool
+	u_1,...,u_M : term;
+global
+	[] w_subsume(F,G(u_1,...,u_M)) =>  true
+	end
+end
+			}
+
+rules for bool
+	$t : term;
+global
+	[] w_subsume(F,$t) =>  false
+	end
+end
+
+//------------------------ no_doubletons ------------------------
+rules for bool
+global
+	[] no_doubletons(F) =>  true
+	end
+end
+
+//------------------------ no_empty ------------------------
+rules for bool
+global
+	[] no_empty(F) =>  true
+	end
+end
+
+//------------------------ no_redex ------------------------
+rules for bool
+global
+	[] no_redex(F) =>  true
+	end
+end
+
+//------------------------ no_failure ------------------------
+rules for bool
+global
+	[] no_failure(F) =>  true
+	end
+end
+//------------------------ strict_linear ------------------------
+rules for bool
+global
+	[] strict_linear(F) =>  true
+	end
+end
+//------------------------ regular ------------------------
+rules for bool
+	vl:list[variable];
+global
+	[] regular(F) =>  true
+	end
+	[] regular_wrt(vl,F) =>  true
+	end
+end
+	}//END*************** FOR EACH N==0 *************************************************
+
+//*************** FOR EACH N==0 *************************************************
+
+        FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+        SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS) 
+                AND N:=()second(SS) ANDIF N > 0 :{
+
+//------------------------ functional ------------------------
+rules for bool
+	t_1,...,t_N : term;
+global
+	[] functional(F(t_1,...,t_N)) => 
+		{ functional(t_I) and }_I=1...N  true
+	end
+end
+
+//---------------- weakly subsume ----------------
+        		FOR EACH SSS:pair[identifier,int]; G:identifier;  M:int
+        		SUCH THAT SSS:=(listExtract) elem(Fss) AND G:=()first(SSS) 
+		                AND M:=()second(SSS) ANDIF M == 0 :{
+rules for bool
+	t_1,...,t_N : term;
+global
+	[] w_subsume(F(t_1,...,t_N),G) =>  true
+	end
+end
+			}
+
+        		FOR EACH SSS:pair[identifier,int]; G:identifier;  M:int
+        		SUCH THAT SSS:=(listExtract) elem(Fss) AND G:=()first(SSS) 
+		                AND M:=()second(SSS) ANDIF M > 0 :{
+rules for bool
+	t_1,...,t_N : term;
+	u_1,...,u_M : term;
+global
+	[] w_subsume(F(t_1,...,t_N),G(u_1,...,u_M)) =>  
+		w_subsume({ t_I : }_I=1...N var(0),{ u_J : }_J=1...M ct)
+	end
+end
+			}
+
+rules for bool
+	t_1,...,t_N : term;
+	$t : term;
+global
+	[] w_subsume(F(t_1,...,t_N),$t) =>  false
+	end
+end
+
+//------------------------ no_doubletons ------------------------
+rules for bool
+	t_1,...,t_N : term;
+global
+	[] no_doubletons(F(t_1,...,t_N)) => 
+		{ no_doubletons(t_I) and }_I=1...N  true
+	end
+end
+
+//------------------------ no_empty ------------------------
+rules for bool
+	t_1,...,t_N : term;
+global
+	[] no_empty(F(t_1,...,t_N)) => 
+		{ no_empty(t_I) and }_I=1...N  true
+	end
+end
+
+//------------------------ no_redex ------------------------
+rules for bool
+	t_1,...,t_N : term;
+global
+	[] no_redex(F(t_1,...,t_N)) => false
+		if { head(t_I)==SET or }_I=1...N  false
+	end
+	[] no_redex(F(t_1,...,t_N)) =>
+		{ no_redex(t_I) and }_I=1...N  true
+	end
+end
+
+//------------------------ no_failure ------------------------
+rules for bool
+	t_1,...,t_N : term;
+global
+	[] no_failure(F(t_1,...,t_N)) =>
+		{ no_failure(t_I) and }_I=1...N  true
+	end
+end
+
+//------------------------ strict_linear ------------------------
+rules for bool
+	t_1,...,t_N : term;
+global
+	[] strict_linear(F(t_1,...,t_N)) =>
+		{ strict_linear(t_I) and }_I=1...N  true
+	end
+end
+//------------------------ regular ------------------------
+rules for bool
+	vl:list[variable];
+	t_1,...,t_N : term;
+global
+	[] regular(F(t_1,...,t_N)) =>
+		{ regular(t_I) and }_I=1...N  true
+	end
+	[] regular_wrt(vl,F(t_1,...,t_N)) =>
+		{ regular_wrt(vl,t_I) and }_I=1...N  true
+	end
+end
+	}//END*************** FOR EACH N>0 *************************************************
+
+//------------------------ all to right ------------------------
+rules for term
+	$u,$v,$t,$s : term;
+global
+	[] $u:$v =>  $t:$s:$v
+		where (term) $t:$s := () $u
+	end
+end
+
+//------------------------ linear ------------------------
+rules for bool
+	$t:term;
+global
+	[] linear($t) =>   unicates(free_variables_of($t))   
+	end
+end
+
+//------------------------ functional ------------------------
+rules for bool
+	$u : term;
+global
+	[] functional($u) => false 	// all the others
+	end
+end
+
+//---------------- weakly subsume ----------------
+rules for bool
+	$v : variable;
+	$t : term;
+global
+	[] w_subsume($v,$t) =>  true
+	end
+end
+
+rules for bool
+	$t,$s,$u,$v : term;
+global
+	[] w_subsume($t:$s,$u:$v) =>  w_subsume($t,$u) and w_subsume($s,$v)
+	end
+	[] w_subsume($t:$s,$u) =>  w_subsume($t,$u)
+	end
+	[] w_subsume($t,$u:$v) =>  w_subsume($t,$u)
+	end
+end
+
+//------------------------- subsume ----------------------
+rules for bool
+	$u,$v : term;
+	sol : eqSystem;
+global
+	[] s_subsume($u,$v) =>  true
+		where sol := (match) $u = $v
+		if neq_eqSystem(sol,false)
+	end
+	[] s_subsume($u,$v) =>  false
+	end
+end
+
+//------------------------ no_doubletons ------------------------
+rules for bool
+	$vv : variable;
+	$u,$v,$t,$s : term;
+	vl:list[variable];
+global
+	[] no_doubletons($vv) =>  true
+	end
+
+	[] no_doubletons([$u]($v)) => no_doubletons($u) and no_doubletons($v)
+	end
+	[] no_doubletons($u +> $v) =>  no_doubletons($u) and no_doubletons($v)
+	end
+	[] no_doubletons(|$u|) =>  no_doubletons($u)
+	end
+	[] no_doubletons(#) =>  true
+	end
+	[] no_doubletons($u.$v) =>  false
+	end
+	[] no_doubletons(FIRSTT($u)) =>  no_doubletons($u)
+	end
+
+	[] no_doubletons(<$u>) => true
+		if neq_identifier(head($u),SEP)
+		where vl := () free_variables_of($u)	//  <u> does not reduce to |u| if
+		if neq_list[variable](vl,nil) 		//   1. has free variables
+		if no_redex($u) 			//   2. but in normal form  
+	end
+	[] no_doubletons(<$u>) => no_doubletons($u)
+	end
+//	[] no_doubletons($u:$v) =>  true
+//		where vl := () free_variables_of($u)	//  <u:v> does not reduce to |u| if
+//		if neq_list[variable](vl,nil) 		//   1. has free variables
+//		if no_terminate($u) 			//   2. but in normal form  
+//	end
+	[] no_doubletons($u:$v) =>  true
+		where vl := () free_variables_of($u)	//  <u:v> does not reduce to |u| if
+		if neq_list[variable](vl,nil) 		//   1. has free variables
+		if no_redex($u) 			//   2. but in normal form  
+	end
+	[] no_doubletons($u:$v) =>  no_doubletons($u) and no_doubletons($v)
+	end
+
+	[] no_doubletons(PHI($u)) =>  no_doubletons($u)
+	end
+	[] no_doubletons(PSI($u)) =>  no_doubletons($u)
+	end
+end
+
+//------------------------ no_empty ------------------------
+rules for bool
+	$vv : variable;
+	$u,$v,$t,$s : term;
+	vl:list[variable];
+global
+	[] no_empty($vv) =>  true
+	end
+	[] no_empty([$u]($v)) => no_empty($u) and no_empty($v)
+	end
+	[] no_empty($u +> $v) =>  no_empty($u) and no_empty($v)
+	end
+	[] no_empty(|$u|) =>  no_empty($u)
+	end
+	[] no_empty(#) => false 
+	end
+	[] no_empty($u.$v) =>  true
+	end
+	[] no_empty(FIRSTT($u)) =>  no_empty($u)
+	end
+	[] no_empty(<$u>) => no_empty($u)
+	end
+	[] no_empty($u:$v) =>  no_empty($u) and no_empty($v)
+	end
+
+	[] no_empty(PHI($u)) =>  no_empty($u)
+	end
+	[] no_empty(PSI($u)) =>  no_empty($u)
+	end
+end
+
+//------------------------ no_redex ------------------------
+rules for bool
+	$vv : variable;
+	$x,$y,$xx,$yy,$z:variable;
+	$u,$v,$t,$s : term;
+vl:list[variable];
+global
+	[] no_redex($vv) =>  true
+	end
+
+	[] no_redex([$u]($v)) => false
+			if head($u)==SET or head($v)==SET
+	end
+	//[] no_redex([|#|]($v)) => false
+	//end
+	//[] no_redex([$u](|#|)) => false
+	//end
+
+	//---- application that doesn't terminates considered as no_redex
+	//---- [[Theta](t)](x) => [[t]([Theta](t))](x)	if v!=|#|
+	//---- [PHI([Theta](t))](x) => [[t]([Theta](t))](x)	if v!=|#|
+	//---- 
+	[] no_redex(
+[[[$x+>($y+>[$y]([[$x]($x)]($y)))]($xx+>($yy+>[$yy]([[$xx]($xx)]($yy))))]($u)]($z)
+)	 
+	=>  true
+			//if $u != |#|
+			if no_redex($u)
+	end
+	[] no_redex(
+[PHI([[$x+>($y+>[$y]([[$x]($x)]($y)))]($xx+>($yy+>[$yy]([[$xx]($xx)]($yy))))]($u))]($z)
+)	 
+	=>  true
+			//if $u != |#|
+			if no_redex($u)
+	end
+
+	[] no_redex([$u]($y)) => no_redex($u)
+	end
+	[] no_redex([$x]($v)) => no_redex($v)
+	end
+	[] no_redex([$u]($v)) => false
+			if (headT($u)==FUN or head($u)==PHH or head($u)==PSS) and headT($v)==FUN
+	end
+	[] no_redex([FIRSTT($u)]($v)) => false
+	end
+	[] no_redex([$u]($v)) => false
+			if (head($u)==PHH or head($u)==PSS) and headT($v)==FUN
+	end
+
+	[] no_redex([$u +> $v]($t)) => no_redex($v)
+			if head($u)!=var and no_redex($t) and  headT($t)!=FUN
+	end
+	[] no_redex([$u +> $v]($t)) => false
+	end
+	[] no_redex([$u]($v)) => no_redex($u) and no_redex($v)
+	end
+
+	[] no_redex($u +> |#|) =>  false
+	end
+	[] no_redex(|#| +> $v) =>  false
+	end
+
+	[] no_redex($u +> $v) =>  no_redex($u) and no_redex($v)
+	end
+
+	[] no_redex(|$u|) =>  false
+			if head($u)==SET
+	end
+	[] no_redex(|$u|) =>  no_redex($u)
+			if head($u)!=SET
+	end
+	[] no_redex(#) =>  true
+	end
+	[] no_redex(|#|.$v) =>  false
+	end
+	[] no_redex($u.$v) =>  no_redex($u) and no_redex($v)
+	end
+
+	[] no_redex(<|#|:$v>) => false
+	end
+	[] no_redex(<$u:$v>) => true 			//*** ATT ***
+		where vl := () free_variables_of($u)
+		if neq_list[variable](vl,nil)
+		if no_redex($u)	
+	end
+	[] no_redex(<$u:$v>) => no_redex($u) and no_redex($v)
+	end
+	[] no_redex(<$u>) => false
+	end
+
+	[] no_redex(FIRSTT($u)) =>  no_redex($u)
+	end
+	[] no_redex($u:$v) => no_redex($u) and no_redex($v)
+	end
+
+	[] no_redex(PHI($u)) =>  no_redex($u)
+	end
+	[] no_redex(PSI($u)) =>  no_redex($u)
+	end
+end
+
+//------------------------ no_failure ------------------------
+rules for bool
+	$x,$y:variable;
+	$u,$v,$t,$s : term;
+	vl:list[variable];
+global
+	[] no_failure($x) =>  true
+	end
+
+	[] no_failure([$t +> $u]($v)) => s_subsume($t,$v) and no_failure($u) and no_failure($v) 
+	end
+	[] no_failure([$u]($v)) => false
+	//		if headT($u)==FUN and headT($v)==FUN
+	end
+	//[] no_failure([$u]($v)) => no_failure($u) and no_failure($v)
+	//end
+	[] no_failure($u +> $v) =>  no_failure($u) and no_failure($v)
+	end
+	[] no_failure(|$u|) =>  no_failure($u)
+	end
+	[] no_failure(#) =>  true
+	end
+	[] no_failure($u.$v) =>  no_failure($u) and no_failure($v)
+	end
+	[] no_failure(FIRSTT($u)) =>  no_failure($u)
+	end
+	[] no_failure(<$u>) => no_failure($u)
+	end
+	[] no_failure($u:$v) => no_failure($u) and no_failure($v)
+	end
+
+	[] no_failure(PHI($u)) =>  no_failure($u)
+	end
+	[] no_failure(PSI($u)) =>  no_failure($u)
+	end
+end
+
+//------------------------ safe ------------------------
+rules for bool
+	$t:term;
+global
+	[] safe($t) =>  no_doubletons($t) and  no_empty($t) and no_failure($t)    
+	end
+end
+
+
+//------------------------ max_var ------------------------
+rules for int
+	n,m:int;
+global
+	[] max(n,n)=>  n	end
+	[] max(n,m)=>  n
+		if n>m 		end
+	[] max(n,m)=>  m
+		if n<m 		end
+end
+
+rules for int
+	n:int;
+	$v:variable;
+	lv:list[variable];
+global
+	[] max_var(nil)=>  0
+	end
+	[] max_var(var(n).lv)	=>  max(n+1,max_var(lv))
+	end
+	[] max_var($v.lv)	=>  max_var(lv)		
+	end
+end
+
+//------------------------- strict_linear ----------------------
+rules for bool
+	$vv : variable;
+	$u,$v : term;
+	fvu,fvv,ffuv : list[variable];
+global
+	[] strict_linear($vv) =>  true
+	end
+
+	[] strict_linear([$u]($v)) => strict_linear($u) and strict_linear($v)
+	end
+
+	[] strict_linear($u +> $v) =>  true
+		where fvu := () list2set(free_variables_of($u))
+		where fvv := () free_variables_of($v)
+		where ffuv := () intersectRight(fvu,fvv)
+		if unicates(ffuv) and strict_linear($v)
+	end
+	[] strict_linear($u +> $v) =>  false
+	end
+
+	[] strict_linear(|$u|) =>  strict_linear($u)
+	end
+	[] strict_linear(#) =>  true
+	end
+	[] strict_linear($u.$v) =>  strict_linear($u) and strict_linear($v)
+	end
+	[] strict_linear(FIRSTT($u)) =>  strict_linear($u)
+	end
+	[] strict_linear(<$u>) => strict_linear($u)
+	end
+	[] strict_linear($u:$v) => strict_linear($u) and strict_linear($v)
+	end
+
+	[] strict_linear(PHI($u)) =>  strict_linear($u)
+	end
+	[] strict_linear(PSI($u)) =>  strict_linear($u)
+	end
+end
+
+
+//------------------------- regular ----------------------
+rules for bool
+	$vv : variable;
+	$u,$v,$t,$s : term;
+	fvu,fvv,vl : list[variable];
+global
+	[] regular($vv) =>  true
+	end
+
+	[] regular([$u]($v)) => regular($u) and regular($v)
+	end
+
+	[] regular($u +> $v) =>  regular_wrt(fvu,$v)
+		where fvu := () free_variables_of($u)
+		where fvv := () present_variables_of($v)
+		if included(fvu,fvv)
+	end
+	[] regular($u +> $v) =>  false
+	end
+
+	[] regular(|$u|) =>  regular($u)
+	end
+	[] regular(#) =>  true
+	end
+	[] regular($u.$v) =>  regular($u) and regular($v)
+	end
+	[] regular(FIRSTT($u)) =>  regular($u)
+	end
+	[] regular(<$u>) => regular($u)
+	end
+	[] regular($u:$v) => regular($u) and regular($v)
+	end
+
+	[] regular(PHI($u)) =>  regular($u)
+	end
+	[] regular(PSI($u)) =>  regular($u)
+	end
+
+
+
+	[] regular_wrt(vl,$vv) =>  true
+	end
+
+	[] regular_wrt(vl,[$u]($v)) => regular([$u]($v))
+		if intersect(free_variables_of($v),vl) != nil
+	end
+	[] regular_wrt(vl,[$u]($v)) => regular_wrt(vl,$u)
+		// if intersect(free_variables_of($v),vl) == nil
+	end
+
+	[] regular_wrt(vl,$u +> $v) =>  regular_wrt(vl,$s)
+		where (term)$t+>$s := () alpha_conv(vl,$u +> $v)
+	end
+
+	[] regular_wrt(vl,|$u|) =>  regular_wrt(vl,$u)
+	end
+	[] regular_wrt(vl,#) =>  true
+	end
+	[] regular_wrt(vl,$u.$v) =>  regular_wrt(vl,$u) and regular_wrt(vl,$v)
+	end
+	[] regular_wrt(vl,FIRSTT($u)) =>  regular_wrt(vl,$u)
+	end
+	[] regular_wrt(vl,<$u>) => regular_wrt(vl,$u)
+	end
+	[] regular_wrt(vl,$u:$v) => regular_wrt(vl,$u) and regular_wrt(vl,$v)
+	end
+
+	[] regular_wrt(vl,PHI($u)) =>  regular_wrt(vl,$u)
+	end
+	[] regular_wrt(vl,PSI($u)) =>  regular_wrt(vl,$u)
+	end
+
+end
+
+
+end  
+

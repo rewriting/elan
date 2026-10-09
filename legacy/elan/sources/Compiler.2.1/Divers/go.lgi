@@ -1,0 +1,9 @@
+LPL go description
+
+query           of sort pair[listac[pair[int,int]],listac[pair[int,int]]]  
+      result    of sort pair[listac[pair[int,int]],listac[pair[int,int]]]  
+      import go
+      start with  (jouer) [nil,nil]  
+			  //[[10,10].nil,nil]		
+
+end

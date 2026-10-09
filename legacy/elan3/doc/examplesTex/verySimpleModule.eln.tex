@@ -1,0 +1,36 @@
+
+\let\CF=\rm
+% Remember to use the lgrind style
+
+\File{verySimpleModule.eln},{16:17},{Jul  9 1996}
+\L{\LB{\K{module}_\V{verySimpleModule}}}
+\L{\LB{}}
+\L{\LB{}\Tab{8}{\C{}\1\1_ first introduce the sort {`}{`}foo\'\'}}
+\CE{}\L{\LB{\K{sort}_\V{foo};}}
+\L{\LB{}}
+\L{\LB{}\Tab{8}{\C{}\1\1_ then constant operators that are exported}}
+\CE{}\L{\LB{\K{op}_\K{global}}}
+\L{\LB{____\V{a}_:_\V{foo};}}
+\L{\LB{____\V{b}_:_\V{foo};}}
+\L{\LB{____\V{c}_:_\V{foo};}}
+\L{\LB{\K{endop}}}
+\L{\LB{}}
+\L{\LB{}\Tab{8}{\C{}\1\1_ Then the rewrite rules}}
+\CE{}\L{\LB{\K{rules}_\K{for}_\V{foo}}}
+\L{\LB{\K{bodies}}}
+\L{\LB{}\Tab{8}{\C{}\1\1_ The name of the next rule is {`}{`}r1\'\'}}
+\CE{}\L{\LB{__[\V{r1}]}\Tab{8}{\V{a}__}\Tab{16}{=\>_\V{b}}\Tab{24}{\K{end}}}
+\L{\LB{__[\V{r2}]}\Tab{8}{\V{b}__}\Tab{16}{=\>_\V{c}}\Tab{24}{\K{end}}}
+\L{\LB{\K{end}_\K{of}_\K{rules}}}
+\L{\LB{}}
+\L{\LB{}\Tab{8}{\C{}\1\1_ and now we describe the way we want to apply the rules:}}
+\CE{}\L{\LB{}\Tab{8}{\C{}\1\1_ i.e. apply the rules {`}{`}r1\'\' and {`}{`}r2\'\' (in any order) until }}
+\CE{}\L{\LB{}\Tab{8}{\C{}\1\1_ none is no more applicable.}}
+\CE{}\L{\LB{}}
+\L{\LB{\K{strategy}_\V{simpleStrategy}}}
+\L{\LB{\K{repeat}}}
+\L{\LB{_\K{dont}_\K{care}_\K{choose}(\V{r1}_\V{r2})}}
+\L{\LB{\K{endrepeat}}}
+\L{\LB{\K{end}_\K{of}_\K{strategy}}}
+\L{\LB{}}
+\L{\LB{\K{end}_\K{of}_\K{module}}}

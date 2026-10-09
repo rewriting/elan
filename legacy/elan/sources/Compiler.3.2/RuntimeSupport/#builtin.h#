@@ -1,0 +1,140 @@
+#ifndef _builtin_h
+#define _builtin_h
+#include "term.h"
+
+
+// 1ere version
+//#define getInt(n) (((long)(n))/2)
+//#define setTag(n) ((struct term*)(((long)(n))*2+1))
+
+  /*
+   * Machine dependent
+   * >> doit inserer le bit de signe si necessaire
+   */
+
+// 2eme version
+//#define setTag(n) ((struct term*)((((long)(n))<<1)|1))
+//#define isTagged(n) (((long)(n))&1)
+
+#define bool2term(n) ((n)?con_1:con_0)
+extern struct term *con_0,*con_1;
+/*
+ * ...xx1 : Integer
+ * ...010 : Identifier
+ * ...100 : String
+ * ...110 : not defined
+ */
+
+#define TAG_MASK ((unsigned long)7)
+#define isTagged(n) (((long)(n))&TAG_MASK)
+
+
+#define INTEGER_MASK ((unsigned long)1)
+#define getInt(n) (((long)(n))>>1)
+#define setIntegerTag(n) ((struct term*)((((long)(n))<<1)|INTEGER_MASK))
+#define isIntegerTagged(n) (((long)(n))&INTEGER_MASK)
+
+//#define IDENTIFIER_MASK ((unsigned long)2)
+#define IDENTIFIER_MASK 0x0000000000000002
+
+#define getIdentifier(n) (((unsigned long)(n))>>4)
+#define setIdentifierTag(n) ((struct term*)((((unsigned long)(n))<<4)|IDENTIFIER_MASK))
+#define isIdentifierTagged(n) ((!isIntegerTagged(n)) &&\
+                              (((unsigned long)(n))&IDENTIFIER_MASK))
+
+//#define STRING_MASK ((unsigned long)4)
+#define STRING_MASK 0x0000000000000004
+
+#define getString(n) ((char*)(((unsigned long)(n))&(~STRING_MASK)))
+#define setStringTag(n) ((struct term*)(((unsigned long)(n))|STRING_MASK))
+//#define isStringTagged(n) ((!isIntegerTagged(n)) &&\
+//                          (((unsigned long)(n))&STRING_MASK))
+#define isStringTagged(n) 0
+
+// con_0 : false
+// con_1 : true
+// 2 : emballage des variables
+#define fun_3(a,b) setIntegerTag(getInt(a) + getInt(b))
+#define fun_4(a,b) setIntegerTag(getInt(a) - getInt(b))
+#define fun_5(a,b) setIntegerTag(getInt(a) * getInt(b))
+#define fun_6(a,b) setIntegerTag(getInt(a) / getInt(b))
+// 7
+#define fun_8(a,b) bool2term(getInt(a) == getInt(b)) 
+#define fun_9(a,b) bool2term(getInt(a) != getInt(b))
+#define fun_10(a,b) bool2term(getInt(a) <  getInt(b))
+#define fun_11(a,b) bool2term(getInt(a) <= getInt(b))
+#define fun_12(a,b) bool2term(getInt(a) >  getInt(b))
+#define fun_13(a,b) bool2term(getInt(a) >= getInt(b))
+#define fun_14(a,b) bool2term(getIdentifier(a) == getIdentifier(b)) 
+#define fun_15(a,b) bool2term(getIdentifier(a) != getIdentifier(b))
+// 14 : eq ident
+// 15 : neq ident
+#define fun_16(a,b,c) term_rec_replace((c),(a),(b))
+#define fun_17(a,b) bool2term(term_occur((b),(a)))
+#define fun_18(x,y) bool2term(term_notDestructEqual(x,y))
+#define fun_19(x,y) bool2term(!term_notDestructEqual(x,y))
+#define fun_20(a) setIntegerTag((-(getInt(a))))
+
+#define fun_21(a,b) bool2term(getSymb(a) && getSymb(b))
+#define fun_22(a,b) bool2term(getSymb(a) || getSymb(b))
+// 23 : xor
+// [pem: Sep 24 99] bug fixed
+//#define fun_24(a) bool2term(!getSymb(a))
+#define fun_24(a) bool2term(a!=con_1)
+#define fun_25(a) (a) 
+#define fun_26(a) (a) 
+
+#define fun_27(a,b) setIntegerTag(getInt(a) % getInt(b))
+#define fun_28(a,b) setIntegerTag(getInt(a) & getInt(b))
+#define fun_29(a,b) setIntegerTag(getInt(a) | getInt(b))
+// 30 : <
+// 31 : <=
+// 32 : >
+// 33 : >=
+
+
+#define fun_114
+#define fun_118
+#define fun_119
+#define fun_120
+#define fun_121
+
+
+#define fun_128(code,strategy,list,start,end) term_build(4,128,\
+                strategy,list,start,end)
+#define fun_129(code,strategy,term) term_build(2,code,strategy,term)
+#define fun_130(code,strategy,term,noSol) term_build(3,code,strategy,term,noSol)
+
+#define fun_141(a)     term_build(1,141,a)
+#define fun_144(a)     term_build(1,144,a)
+#define fun_152(a,b)   term_build(2,152,a,b)
+#define fun_153(a,b,c) term_build(3,153,a,b,c)
+#define fun_154(a,b,c) term_build(3,154,a,b,c)
+#define fun_158(a)     term_build(1,158,a)
+
+//builtinSyntacticUnification
+// fun_175: TODO
+
+// builtinSyntacticMatching
+#define fun_191(pattern,subject,listVar,fail)\
+        term_syntacticMatching(pattern,subject,listVar,fail)
+
+#define fun_192()      asfNull()
+#define fun_193(a,b)   asfCons(a,b)
+#define fun_194(a)     asfHead(a)
+#define fun_195(a)     asfTail(a)
+#define fun_196(a)     asfPrefix(a)
+#define fun_197(a)     asfLast(a)
+#define fun_198(a)     asfNotEmptyList(a)
+#define fun_199(a)     asfIsSingleElement(a)
+
+#define fun_200(a,b)   term_newArray(getInt(a),b)   // newArray(a,b)
+#define fun_201(a,b)   term_getArray(a,getInt(b))   // getArray(a,b) 
+#define fun_202(a,b,c) term_setArray(a,getInt(b),c) // setArray(a,b,c) 
+#define fun_203(a)     setIntegerTag((int) (((struct term**)a)[0])) // length(a)
+// 205
+// 206
+// 207
+#define fun_210(a)     setIntegerTag((int)getHcode(a)) // hashCode
+
+#endif

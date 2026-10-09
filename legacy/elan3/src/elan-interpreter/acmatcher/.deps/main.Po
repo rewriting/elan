@@ -1,0 +1,63 @@
+main.o: main.c /usr/include/unistd.h /usr/include/sys/cdefs.h \
+  /usr/include/sys/types.h /usr/include/sys/appleapiopts.h \
+  /usr/include/machine/types.h /usr/include/ppc/types.h \
+  /usr/include/machine/ansi.h /usr/include/ppc/ansi.h \
+  /usr/include/machine/endian.h /usr/include/ppc/endian.h \
+  /usr/include/sys/unistd.h /usr/include/signal.h \
+  /usr/include/sys/signal.h /usr/include/machine/signal.h \
+  /usr/include/ppc/signal.h /usr/include/stdio.h /usr/include/stdlib.h \
+  /usr/include/alloca.h matcher/sym_types.h externs.h matcher/defs.h \
+  matcher/term_types.h matcher/functions.h matcher/pure_types.h \
+  matcher/free_types.h matcher/state_types.h
+
+/usr/include/unistd.h:
+
+/usr/include/sys/cdefs.h:
+
+/usr/include/sys/types.h:
+
+/usr/include/sys/appleapiopts.h:
+
+/usr/include/machine/types.h:
+
+/usr/include/ppc/types.h:
+
+/usr/include/machine/ansi.h:
+
+/usr/include/ppc/ansi.h:
+
+/usr/include/machine/endian.h:
+
+/usr/include/ppc/endian.h:
+
+/usr/include/sys/unistd.h:
+
+/usr/include/signal.h:
+
+/usr/include/sys/signal.h:
+
+/usr/include/machine/signal.h:
+
+/usr/include/ppc/signal.h:
+
+/usr/include/stdio.h:
+
+/usr/include/stdlib.h:
+
+/usr/include/alloca.h:
+
+matcher/sym_types.h:
+
+externs.h:
+
+matcher/defs.h:
+
+matcher/term_types.h:
+
+matcher/functions.h:
+
+matcher/pure_types.h:
+
+matcher/free_types.h:
+
+matcher/state_types.h:

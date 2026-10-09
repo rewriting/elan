@@ -1,0 +1,571 @@
+options {
+    STATIC = false;
+}
+
+PARSER_BEGIN(Parser)
+
+    package completion.parser;
+import java.io.*;
+import java.util.*;
+import completion.*;
+
+public class Parser{
+    
+    private static final int KBC_OPEN = 1;
+    private static final int KBC_SAVE = 2;
+    private static final int ORIENT = 3;
+    private static final int CRITIC = 4;
+    private static final int COMPLETION = 5;
+    
+    /* Fields for the critical pairs parser */
+    private String error = "";
+    private String warning = "";
+    private boolean okForPrec = true;
+    private Vector pairs = null;
+    private Vector operators = null;
+    private Vector variables = null;
+    private Vector rules = null;
+    private Vector prio = null;
+
+
+    public Parser(Vector op, Vector va, ByteArrayInputStream ba){
+	this(ba);
+	operators = op;
+	variables = va;
+	prio = new Vector();
+	error = "";
+    }
+    
+    public Vector getVariables(){
+	return variables;
+    }
+
+    public Vector getOperators(){
+	return operators;
+    }
+
+    public Vector getRules(){
+	return rules;
+    }
+
+    public String getWarning(){
+	return warning;
+    }
+
+    
+
+    /* Method for Orient  and Completion */
+    private void addRule(Rule r){
+	if(rules == null)
+	    rules = new Vector();
+	rules.add(r);
+    }
+
+    private void addRuleInHead(Rule r){
+	if(rules == null)
+	    rules = new Vector();
+	rules.insertElementAt(r, 0);
+    }
+
+    /* method for System */
+    private void addOp(OpTree op, int choice){//, int arity){
+	boolean ok = true;
+	if(operators == null)
+	    operators = new Vector();
+	for(int i = 0; i < variables.size(); i++){
+	    if(op.getName().equals(((String) variables.get(i)))){
+		ok = false;
+		break;
+	    }	    
+	}
+	if(ok){
+	    for(int i = 0; i < operators.size(); i++){
+		if(op.getName().equals(((Operator) operators.get(i)).getName())){
+		    ok = false;
+		    if(op.nbChildren() != ((Operator) operators.get(i)).getArity()){
+			if(((Operator) operators.get(i)).getArity() != -1)
+			    error += "Invalid arity for operator " + op + "\n";
+			else
+			    ((Operator) operators.get(i)).setArity(op.nbChildren());
+		    }
+		    break;
+		}
+	    }
+	}
+	if(ok){
+	    if(choice == KBC_SAVE)
+		error += "Error : identifier " + op.getName() + " is not defined.\n";
+	    else
+		warning += "Warning : identifier " + op.getName() + " is not defined. Will be defined as an operator.\n";
+	    operators.add(new Operator(op.getName(), op.nbChildren(), 0));
+	}
+    }
+
+    /* Methods for Precedance */
+    public boolean exists(String n){
+	boolean b = false;
+	for(int i = 0; i < prio.size(); i++){
+	    if(((OpTree) prio.get(i)).getName().equals(n)){
+		b = true;
+		break;
+	    }
+	}
+	return b;
+    }
+	
+    public OpTree find(String n){
+	if(exists(n)){
+	    int r = 0;
+	    for(int i = 0; i < prio.size(); i++){
+		if(((OpTree) prio.get(i)).getName().equals(n)){
+		    r = i;
+		    break;
+		}
+	    }
+	    return (OpTree) prio.get(r);
+	}
+	else {
+	    return null;
+	}
+    }
+
+    public void findLoop(int choice){
+	try{
+	    for(int i = 0; i < prio.size(); i++){
+		Vector list = ((OpTree) prio.get(i)).getAllDescendant();
+	    }
+	}
+	catch(Exception e){
+	    if(choice == KBC_OPEN)
+		warning += e.getMessage();
+	    else
+		error += e.getMessage();
+	    okForPrec = false;
+	}
+    }
+    
+    public void findPrec(){
+	if(operators == null)
+	    operators = new Vector();
+	for(int i = 0; i < prio.size(); i++){
+	    operators = ((OpTree) prio.get(i)).doPrec(operators, 0);
+	}
+    }
+    
+    /* for parsing the kbc file */
+    public boolean isVariable(String s){
+	boolean b = false;
+	for(int i = 0; i < variables.size(); i++){
+	    if(s.equals((String) variables.get(i))){
+		b = true;
+		break;
+	    }
+	}
+	return b;
+    }
+    
+    public boolean isOperator(String s){
+	boolean b = false;
+	for(int i = 0; i < operators.size(); i++){
+	    if(s.equals(((Operator) operators.get(i)).getName())){
+		b = true;
+		break;
+	    }
+	}
+	return b;
+    }
+
+    public void setPriority(String name, int p){
+	for(int i = 0; i < operators.size(); i++){
+	    if(name.equals(((Operator) operators.get(i)).getName())){
+		((Operator) operators.get(i)).setPriority(p);
+		break;
+	    }
+	}
+    }
+
+    private void checkUnusedOperators(){
+	for(int i = 0; i < operators.size();){
+	    if(((Operator) operators.get(i)).getArity() == -1){
+		warning += "Warning : the operator '" + ((Operator) operators.get(i)).getName() + "' is not used in the system.\n";
+		operators.removeElementAt(i);
+	    }
+	    else
+		i++;
+	}
+    }
+
+
+}
+
+PARSER_END(Parser)
+
+TOKEN:
+{
+    <VIRG: ",">
+	       | <UNDER: "_">
+	       |<ARROW: "->">
+	       |<PARO: "(">
+	       |<PARF: ")">
+	       |<EQ: "=">
+	       |<DOT: ".">
+	       |<SEMICOLON: ";">
+	       |<INF: "<">
+	       |<DP: ":">
+	       |<PERCENT: "%">
+}
+
+TOKEN:
+{
+    <RES: "result">
+	      |<CP: "CP">
+	      |<ID: "identity">
+	      |<NIL: "nil">
+	      |<VAR: "var">
+	      |<COMPOSE: "o">
+	      |<PREC: "prec">
+	      |<VARS: "vars">
+	      |<SYST: "syst">
+	      }
+
+SKIP:
+{
+    " "
+	| "\t"
+	| "\n"
+	| "\r"
+}
+
+TOKEN:
+{
+    <NUMBER: (<DIGIT>)+>
+		 |<DIGIT: ["0"-"9"]>
+}
+
+TOKEN:
+{
+    <IDF: <LETTER> (<LETTER> | <NUMBER> | <UNDER>)*>
+	       |<LETTER: ["A"-"Z","a"-"z"]>
+}
+
+
+Vector precedanceList():
+{
+    Vector list, blist, blist1 = null;
+}
+{
+    blist=precedance() [ blist1=precedanceList() ]
+	{
+	    
+		if(blist1 == null)
+		    blist1 = new Vector();
+		blist1.insertElementAt(blist, 0);
+		return blist1;
+		
+	    
+		
+	}
+}
+
+Vector precedance():
+{
+    Vector rlist = null, list = null;
+    Vector llist = null;
+    Vector blist = null;
+}
+{
+    //( LOOKAHEAD(2) 
+      llist=operatorList() [ <INF> rlist=operatorList() [ blist=endPrecedance() ] ]
+      //list=operatorList() )
+	  {
+	      if(rlist != null){
+		  if(blist != null){
+		      for(int i = 0; i < rlist.size(); i++){
+			  ((OpTree) rlist.get(i)).addChildren(blist);
+		      }
+		  }
+		  for(int i = 0; i < llist.size(); i++){
+		      ((OpTree) llist.get(i)).addChildren(rlist);
+		  }
+	      }
+	      return llist;
+	  }
+}
+
+Vector endPrecedance():
+{
+    Vector list = null;
+    Vector blist = null;
+}
+{
+    <INF> list=operatorList() [ blist=endPrecedance() ]
+	{
+	    if(list != null){
+		if(blist != null){
+		    for(int i = 0; i < list.size(); i++){
+			int index;
+			if((index = ((OpTree) list.get(i)).isIn(prio)) >= 0)
+			    ((OpTree) prio.get(index)).addChildren(blist);
+		    }
+		}
+		return list;
+	    }
+	    else
+		return blist;
+	    
+	}   
+}
+
+Vector operatorList():
+{
+    Token id = null;
+    Vector list = null;
+}
+{
+    id=<IDF> [ <VIRG> list=operatorList() ]
+	{
+	    if(isVariable(id.image)){
+		warning += "Warning : " + id.image + " is already defined as a variable. \n";
+		return list;
+	    }
+	    if(prio == null)
+		prio = new Vector();
+	    if(! exists(id.image)){
+		OpTree ident = new OpTree(id.image);
+		prio.add(ident);
+	    }
+	    if(list == null)
+		list = new Vector();
+	    list.add(find(id.image));
+	    return list;
+	    
+	    
+	    
+	}
+    
+}
+
+
+
+/* for orientation */
+Vector inputOrient():{}
+{
+    <RES> <EQ>  ruleList()<EOF>
+	{
+	    return rules;
+	}
+}
+
+
+
+void ruleList():{}
+{
+    rule(ORIENT) [ <PERCENT> ruleList() ]
+}
+
+
+Vector inputCP():{}
+{
+    <RES> <EQ> result() <EOF>
+	{
+	    return pairs;
+	}
+}
+
+void result():
+{
+    Pair p = null;
+}
+{
+    ( <CP> <PARO> p=pair() <PARF> [ <VIRG> result() ] 
+      | <NIL> )
+	{
+	    if(p != null){
+		if(pairs == null)
+		    pairs = new Vector();
+		pairs.add(p);
+	    }
+	}
+	   
+}
+
+Pair pair():
+{
+    Token n1, n2;
+    OpTree op1, op2, op3, op4;
+    Vector u, l, r1, r2;
+    Pair pair;
+}
+{
+    op1=member(CRITIC) <VIRG> op2=member(CRITIC) <VIRG> 
+	u=substitution() <VIRG> l=list() <VIRG> 
+	r1=substitution() <VIRG> r2=substitution() <VIRG> 
+	op3=member(CRITIC) <VIRG> op4=member(CRITIC) <VIRG>
+	n1=<NUMBER> <VIRG> n2=<NUMBER>
+	{
+	    op1.setFlag(l);
+	    pair = new Pair(op1, op2, op3, op4, u, r1, r2, Integer.parseInt(n1.image), Integer.parseInt(n2.image));
+	    return pair;
+	}
+}
+
+OpTree member(int choice):
+{
+    Token id1 = null, id2 = null, n = null;
+    Vector v = null;
+    OpTree tree = null;
+}
+{
+    ( LOOKAHEAD(2)
+      id1=<IDF> <PARO> v=args(choice) <PARF> |
+      id2=<IDF> |
+      <VAR> <PARO> n=<NUMBER> <PARF> )
+	{
+	    if(id1 != null)
+		tree = new OpTree(id1.image, v);
+	    else if(id2 != null)
+		tree = new OpTree(id2.image);
+	    else 
+		tree = new OpTree("var("+n.image+")");
+	    if(choice == KBC_OPEN || choice == KBC_SAVE)
+	    	addOp(tree, choice);
+	    return tree;
+	}
+}
+
+Vector args(int choice):
+{
+    OpTree tree;
+    Vector v = null;
+}
+{
+    tree=member(choice) [ <VIRG> v=args(choice) ]
+	{
+	    if(v == null)
+		v = new Vector();
+	    v.insertElementAt(tree, 0);
+	    return v;
+	}
+}
+
+Vector substitution():
+{
+    String v = null, v1 = null;
+    Token i = null;
+    OpTree t = null;
+    Substitution s = null;
+    Vector list = null;
+}
+{
+    ( LOOKAHEAD(2) 
+      v=var() <ARROW> t=member(CRITIC) |
+      i=<IDF> <ARROW> v1=var() |
+      <ID> )
+      [ <COMPOSE> list=substitution() ]
+	{
+	    if(list == null)
+		list = new Vector();
+	    if(v != null){
+		s = new Substitution(v, t);
+		list.insertElementAt(s, 0);
+	    }
+	    else if(v1 != null){
+		s = new Substitution(i.image, new OpTree(v1));
+		list.insertElementAt(s, 0);
+	    }
+	    return list;
+	}
+}
+
+String var():
+{
+    Token n = null;
+}
+{
+    <VAR> <PARO> n=<NUMBER> <PARF> 
+	{
+	    return "var(" + n.image + ")";
+	}
+}
+
+Vector list():
+{
+    Token n = null;
+    Vector v = null;
+}
+{
+    (n=<NUMBER> <VIRG>  v=list() 
+     | <NIL> )
+	{
+	    if(n != null){
+		if(v == null)
+		    v = new Vector();
+		v.insertElementAt(n.image, 0);
+	    }
+	    return v;
+	}
+}
+
+Vector inputCompletion():{}
+{
+    <RES> <EQ> rule(COMPLETION) <EOF>
+	{
+	    return rules;
+	}
+}
+
+void rule(int choice):
+{
+    OpTree left = null, right = null;
+}
+{
+    ( LOOKAHEAD(2) 
+      left=member(choice) ( <ARROW> | <EQ> ) right=member(choice) [ [<VIRG> ]  rule(choice) ] |
+      <NIL> )
+	{
+	    if(left != null){
+		if(choice == ORIENT)
+		    addRule(new Rule(left, right));
+		else 
+		    addRuleInHead(new Rule(left, right));
+	    }
+	}
+}
+
+
+String inputKbc(int choice):
+{
+    Vector v = null;
+}
+{
+    <VARS> [ varList() ]  <PREC> v=precedanceList() 
+	{
+	    if(v != null){
+		findLoop(choice);
+		if(error.equals("") && okForPrec)
+		    findPrec();
+	    }
+	}
+    <SYST> rule(choice) <EOF>
+	{
+	    checkUnusedOperators();
+	    return error;
+	}
+}
+
+void varList():
+{
+    Token id = null;
+}
+{
+    id=<IDF> [ varList() ]
+	{
+	    if(variables == null)
+		variables = new Vector();
+	    if(isVariable(id.image))
+		error += "the variable " + id.image + " is already defined\n";
+	    variables.add(id.image);
+	}
+}
+
+

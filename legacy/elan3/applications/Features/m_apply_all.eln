@@ -1,0 +1,36 @@
+module m_apply_all
+
+import global builtinInt string REF Meta_Apply; end
+
+operators global
+  foo(@)	: (int) list[string];
+  goo(@)	: (int) list[Term];
+end
+
+rules for list[string]
+x	: int;
+xx	: builtinInt;
+s	: list[string];
+global
+  []   foo(xx) => s
+		where s:=(META)meta_apply(
+		"call(126)",
+		"FSYM( FSYM( INT(4).nil, 200).nil,223)".nil,
+		spec2ref("nqueens",""),//SPEC("nqueens",""),
+		xx,9999)	end
+end
+
+rules for list[Term]
+x	: int;
+xx	: builtinInt;
+s	: list[Term];
+global
+  []   goo(xx) => s
+		where s:=()meta_apply(
+		call(126),
+		FSYM( FSYM(INT(4).nil, 200).nil,223):"list",
+		spec2ref("nqueens",""),//SPEC("nqueens",""),
+		xx,9999)	end
+end
+
+end

@@ -1,0 +1,628 @@
+module nsh
+import
+ global
+    bool int 
+    // list[int] list[message] list[AgentId] 
+    cmp[AgentId]
+    // cmp[Nonce]
+;end
+
+/*****************************************************************/
+
+sort
+  AgentId SWC Nonce
+  Actor intruder
+  TypMes Key Address
+  message
+  network 
+  state
+  listActor listNonce;
+end
+
+/*****************************************************************/
+
+operators
+ global
+   a   : AgentId;
+   b   : AgentId; 
+   c   : AgentId;
+   e   : AgentId;
+   d   : AgentId; 
+   ii  : AgentId;
+   dai   : AgentId;  //dummy AgentId
+  
+   SLEEP  : SWC;
+   WAIT   : SWC;
+   COMMIT :SWC;
+
+   MNA  : TypMes;
+   MNNA : TypMes;
+   MN   : TypMes;
+
+
+   K(@)   : (AgentId) Key;
+
+   N(@,@) : (AgentId AgentId) Nonce;
+   DN     :  Nonce;  // Dummy Nonce
+
+   A(@)   : (AgentId) Address;
+   DA     :  Address;  // Dummy Address
+
+   @ + @ + @  : ( AgentId SWC Nonce ) Actor; 
+
+   @*@*@*@*@*@*@ : (AgentId AgentId Key TypMes Nonce Nonce Address) message;
+
+   @  : (message) network;
+   @ & @  : (network  network) network (AC);
+   [@ & @]  : (network  network) network ;
+//   @ & @  : (message  network) network (AC);
+   nill :network;
+
+   @ # @ # @ : ( AgentId listNonce network ) intruder; 
+
+   @ <> @ <> @ <> @ <> @ <> @ <> @ : ( listActor listActor intruder network int int int) state;
+   ATTACK  : state;
+   ERROR   : state;
+
+   @  : (Nonce) listNonce;
+   @ | @ : ( listNonce listNonce) listNonce (AC);
+   [@ | @] : ( Nonce listNonce) listNonce;
+   nl : listNonce;
+
+   @ : (Actor) listActor;
+   @ || @ : ( listActor  listActor ) listActor (AC);
+   [@ || @] : ( Actor  listActor ) listActor;
+   nnl  : listActor;
+
+   delElem(@,@) : (Nonce listNonce) listNonce ;
+   existNonce(@,@)  : (Nonce listNonce) bool; 
+
+   existActor(@,@)  : (Actor listActor) bool;
+   delActor(@,@)  : (Actor listActor) listActor;
+
+   elemIN(@)   : (listNonce) Nonce ;
+   elemIA(@)   : (listActor) Actor ;
+
+   sizeNet(@)   : (network) int ;
+
+end
+
+/*****************************************************************/
+
+stratop
+ global
+   com        : < state -> state > 		bs;
+   attStrat   : < state -> state > 		bs;
+   extAgent   : < AgentId -> AgentId >  	bs; 
+   extNonce   : < Nonce -> Nonce >  		bs;
+   extActor   : < Actor -> Actor >  		bs;
+   selectNonce   : < listNonce -> listNonce >           bs;
+   selectActor   : < listActor -> listActor >           bs;
+   selectNetwork : < network -> network >           bs;
+end
+ 
+/*****************************************************************/
+
+rules for state
+	
+         x,x1,x2,y,y1,y2,y3,z,w,w1,v,v1,t,k,r,xadd : AgentId;
+         n1,n2,n3,n4 : AgentId;
+	
+         resp,init,dn,dn1 : Nonce;
+
+         I  : intruder;
+         A,B  : Actor;
+         E,E1,D,D1  : listActor;
+         l,l1,ln  : listNonce;
+         ls,ls1,ll : network;
+         st : TypMes;
+         cmp, nrm, MaxNr : int;
+         std, std1 : SWC;
+
+global
+
+//--------------------------------------------------------------------
+// 3 (A --> B)
+
+// sender creates message
+// sender waits a message from y(or ii) with the nonce N(x,y)(or N(x,ii))
+
+[rulescomai]
+x+SLEEP+resp || E <> D <> I <> ls <> nrm <> MaxNr <> cmp => 
+x+WAIT+N(x,ii) || E <> D <> I <> x*ii*K(ii)*MNA*N(x,ii)*N(x,ii)*DA & ls <> nrm+1 <> MaxNr <> cmp+1
+ 	if nrm < MaxNr
+	//   if  sizeNet(ls)<1 
+end
+
+
+[rulescomaa]
+x+SLEEP+resp || E <> D <> I <> ls <> nrm <> MaxNr <> cmp => 
+x+WAIT+N(x,y) || E <> D <> I <> x*y*K(y)*MNA*N(x,y)*N(x,y)*DA & ls <> nrm+1 <> MaxNr <> cmp+1 
+		if nrm < MaxNr
+		//    if sizeNet(ls) <1 
+                 where (Actor)y+std+init :=(extActor) elemIA(D)
+end
+
+
+
+//--------------------------------------------------------------------
+// 3/6 (--> B --> A)
+
+// receiver checks if 
+//  - y is the dest
+//  - message encrypted with K(y)
+//  - message type is MNA
+// receiver sends
+//  - to n2 (identifier of sender; normally N(n1,n3)==N(n2,n4))
+//  - received nonce (N(n1,n3)) and its nonce (N(y,n1))
+// receiver waits a message from n1 with the nonce N(y,n1)
+
+[rulescomb]
+E <> y+SLEEP+init||D <> I <> ls <> nrm <> MaxNr <> cmp => 
+E <> y+WAIT+N(y,n2) || D <> I <>
+y*n2*K(n2)*MNNA*N(n1,n3)*N(y,n2)*A(y) & ls1 <> nrm <> MaxNr <> cmp+1
+
+		where (network) 
+		[ii*y1*K(y1)*MNA*N(n1,n3)*N(n2,n4)*A(z)&ls1]:=
+		(selectNetwork) ls
+		if y1==y
+end
+
+//--------------------------------------------------------------------
+// 6/7 (--> A --> B)
+
+// sender checks if 
+//  - x is the dest
+//  - message encrypted with K(x)
+//  - message type is MNNA
+//  - nonce is N(x,v) --> if not: ERROR
+//  ?? (eventually checks address : A(v) ) ??
+
+// sender sends a message 
+//   - to the the initial receiver (stored in N(x,v)->v)
+//   - with the received nonce
+
+[rulescoma]
+x+WAIT+N(x2,v)||E <> D <> I <> ls <> nrm <> MaxNr <> cmp  =>
+x+COMMIT+N(x,v) || E <> D <> I <> x*v*K(v)*MN*N(n2,n4)*DN*DA & ls1 <> nrm <> MaxNr <> cmp+1
+		if x==x2
+		where (network) 
+		[ii*x1*K(x1)*MNNA*N(x1,v1)*N(n2,n4)*A(z)&ls1]:=
+		(selectNetwork) ls
+		if x1==x
+		if v1==v
+//		 if v==z // ***** Lowe's correction *****
+end
+
+[rulescoma]
+x+WAIT+N(x2,v)||E <> D <> I <> ls <> nrm <> MaxNr <> cmp =>
+ERROR
+		if x==x2
+		where (network) 
+		[ii*x1*K(x1)*MNNA*N(n1,n3)*N(n2,n4)*A(z)&ls1]:=
+		(selectNetwork) ls
+
+		if x1==x
+		if x1!=n1 or v!=n3
+//		 if v!=z // ***** Lowe's correction *****
+end
+
+//--------------------------------------------------------------------
+// 7 (B --> A)
+
+// receiver checks if 
+//  - y is the dest
+//  - message encrypted with K(y)
+//  - message type is MN
+//  - nonce is N(y,x) --> if not: ERROR
+
+// receiver sends
+//  - to n2 (identifier of sender; normally N(n1,n3)==N(n2,n4))
+//  - received nonce (N(n1,n3)) and its nonce (N(y,n1))
+// receiver waits a message from n1 with the nonce N(y,n1)
+
+[rulescomb] 
+E <> D <> I <> ii*y*K(y2)*MN*N(y3,x)*N(n2,n4)*A(v) & ls <> nrm <> MaxNr <> cmp =>
+E <> y+COMMIT+N(y,x) || D1 <> I <> ls <> nrm-1 <> MaxNr <> cmp+1
+		if y==y2
+		if y==y3
+        	// if z==ii
+                where (listActor) [y1+WAIT+N(y1,x1)||D1]:=(selectActor) D
+		if y1==y
+		if x1==x
+end
+
+[rulescomb] 
+E <> D <> I <> ii*y*K(y2)*MN*N(n1,n3)*N(n2,n4)*A(v) & ls <> nrm <> MaxNr <> cmp =>
+ERROR
+		if y==y2
+                // if z==ii
+                where (Actor)y1+WAIT+N(y1,x1) :=(extActor) elemIA(D)
+		if y1==y
+		if y1!=n1 or x1!=n3
+end
+
+
+//--------------------------------------------------------------------
+// intruder intercepts message
+
+//--------------------------------------------------------------------
+// intruder intercepts message encrypted with its key
+// we may replace N(n1,n3) with a variable Nonce:n13
+// 		  N(n2,n4) with a variable Nonce:n24
+// 		  A(v) with a variable Address:add
+
+[rulescomi11]
+E <> D <> w#l#ll <> z*x*K(w1)*MN*N(n1,n3)*N(n2,n4)*A(v) &ls <> nrm <> MaxNr <> cmp =>
+E <> D <> w#N(n1,n3)|l#ll <> ls <> nrm-1 <> MaxNr <> cmp+1
+     if w==w1
+     if w!=z	 // not its messages
+end
+
+[rulescomi12]
+E <> D <> w#l#ll <> z*x*K(w1)*MNA*N(n1,n3)*N(n2,n4)*A(v) & ls <> nrm <> MaxNr <> cmp =>
+E <> D <> w#N(n1,n3)|l#ll <> ls <> nrm-1 <> MaxNr <> cmp+1
+  if w==w1
+  if w!=z	 // not its messages
+end
+
+[rulescomi13]
+E <> D <> w#l#ll <> z*y*K(w1)*MNNA*N(n1,n3)*N(n2,n4)*A(x) & ls <> nrm <> MaxNr <> cmp =>
+E <> D <> w#N(n1,n3)|N(n2,n4)|l#ll <> ls <> nrm-1 <> MaxNr <> cmp+1
+  if w==w1
+  if w!=z	 // not its messages
+end
+
+//--------------------------------------------------------------
+// learn messages
+// intruder should check if has not already intercepted it
+// (with nonamed rules --> we might get infinite loops ???)
+
+[rulescomi21] 
+E <> D <> w#l#ll <> z*x*K(y)*st*N(n1,n3)*N(n2,n4)*A(v) & ls <> nrm <> MaxNr <> cmp =>
+E <> D <> w#l#z*x*K(y)*st*N(n1,n3)*N(n2,n4)*A(v) &ll <> ls <> nrm-1 <> MaxNr <> cmp+1
+			if w!=z  // not its messages
+			if w!=y	 // not encrypted with its key
+end
+
+//--------------------------------------------------------------
+// intruder sends (random) stored messages to
+//		  (random) agents from E and D
+
+[rulescomi31]
+E <> D <> w#l#x*y*K(z)*MNA*N(n1,n3)*N(n2,n4)*A(v) & ll <> ls <> nrm <> MaxNr <> cmp =>
+E <> D <> w#l#x*y*K(z)*MNA*N(n1,n3)*N(n2,n4)*A(v) & ll <> w*t*K(z)*MNA*N(n1,n3)*N(n2,n4)*A(v) & ls <> nrm+1 <> MaxNr <> cmp+1
+		if nrm < MaxNr
+		// 	if sizeNet(ls) <1 
+		where (Actor)t+std+dn :=(extActor) elemIA(D)
+end
+
+[rulescomi32]
+E <> D <> w#l#x*y*K(z)*MN*N(n1,n3)*N(n2,n4)*A(v) & ll <> ls <> nrm <> MaxNr <> cmp =>
+E <> D <> w#l#x*y*K(z)*MN*N(n1,n3)*N(n2,n4)*A(v) & ll <> w*t*K(z)*MN*N(n1,n3)*N(n2,n4)*A(v) & ls <> nrm+1 <> MaxNr <> cmp+1
+		if nrm < MaxNr
+		// 	if sizeNet(ls) <1 
+	where (Actor)t+std+dn :=(extActor) elemIA(D)
+end
+
+[rulescomi33]
+E <> D <> w#l#x*y*K(z)*MNNA*N(n1,n3)*N(n2,n4)*A(v) & ll <> ls <> nrm <> MaxNr <> cmp =>
+E <> D <> w#l#x*y*K(z)*MNNA*N(n1,n3)*N(n2,n4)*A(v) & ll <> w*t*K(z)*MNNA*N(n1,n3)*N(n2,n4)*A(v) & ls <> nrm+1 <> MaxNr <> cmp+1
+		if nrm < MaxNr
+		// 	if sizeNet(ls) <1 
+	where (Actor)t+std+dn :=(extActor) elemIA(E)
+end
+
+//--------------------------------------------------------------
+// intruder sends mnessages starting from the 
+//		(random) nonces it knows with --> resp, init
+//		  (random) destination   --> y
+//		  (random) message type  --> 3 rules
+//		  (random) nonce1 --> resp
+//		  (random) nonce2 --> init
+//		  (random) address --> A(xadd)
+
+[rulescomi41]
+E <> y+std+dn || D <> w # l # ll <> ls <> nrm <> MaxNr <> cmp =>
+E <> y+std+dn || D <> w # l # ll <> w*y*K(y)*MNA*resp*resp*A(w) & ls <> nrm+1 <> MaxNr <> cmp+1
+		if nrm < MaxNr
+		//     if sizeNet(ls) <1 
+                where resp := (extNonce) elemIN(l)
+end
+
+[rulescomi42]
+E <> y+std+dn || D <> w # l # ll <> ls <> nrm <> MaxNr <> cmp =>
+E <> y+std+dn || D <> w # l # ll <> w*y*K(y)*MN*resp*resp*A(w) & ls <> nrm+1 <> MaxNr <> cmp+1
+		if nrm < MaxNr
+		// 	if sizeNet(ls) <1  
+                where resp := (extNonce) elemIN(l)
+end
+
+[rulescomi43]
+/*
+* ... # resp|init|l # ll ...
+*/
+y+std+dn || E <> D <> w # l # ll <> ls <> nrm <> MaxNr <> cmp =>
+y+std+dn || E <> D <> w # l # ll <> w*y*K(y)*MNNA*resp*init*A(w) & ls <> nrm+1 <> MaxNr <> cmp+1
+		if nrm < MaxNr
+		//    if sizeNet(ls) <1  
+        //	where (Actor)xadd+std1+dn1 :=(extActor) elemIA(y+std+dn || E) 
+			// ***** Lowe's correction *****
+		where (listNonce) [resp|l1]:=(selectNonce) l
+                where init := (extNonce) elemIN(l1) 
+end
+
+
+//--------------------------------------------------------------------
+// the ATTACK
+
+//--------------------------------------------------------------------
+// attack on the receiver
+
+[rulescomAT1]
+x+COMMIT+N(x2,y) || E <> D <> I <> ls <> nrm <> MaxNr <> cmp => 
+ATTACK
+	if x==x2	
+	if y!=ii
+	if not(existActor(y+WAIT+N(y,x),D)) 
+	if not(existActor(y+COMMIT+N(y,x),D))  
+end
+
+
+//--------------------------------------------------------------------
+// attack on the sender
+
+[rulescomAT2]
+E <> y+COMMIT+N(y2,x) || D <> I <> ls <> nrm <> MaxNr <> cmp => 
+ATTACK
+	if y==y2
+	if x!=ii
+	if not(existActor(x+COMMIT+N(x,y),E))
+end
+
+[attackFound]
+ATTACK => ATTACK
+end
+//--------------------------------------------------------------
+end
+
+
+//--------------------------------------------------------------
+// generate dummies
+
+rules for Nonce
+global
+	[] DN => N(dai,dai)		 end 
+end
+
+rules for Address
+global
+	[] DA => A(dai)			 end 
+end
+
+//--------------------------------------------------------------
+// eliminate duplicates
+// delete elements
+//  *** We must have always nl in listNonce ***
+
+rules for listNonce
+         m ,b : Nonce;
+         l : listNonce; 
+global
+	[] l | l => l		 	end
+
+	[] delElem(m,nl)  => nl 		end
+	[] delElem(m,m|l) => l   		end
+	[] delElem(m,b|l) => b | delElem(m,l)
+		 // if m!=b
+						end
+end
+
+//--------------------------------------------------------------
+//  *** We must have always nl in listNonce ***
+
+rules for bool
+     x,y : Nonce;
+     l : listNonce ;
+global
+    [] existNonce(x,nl)   => false		end
+    [] existNonce(x,x|l)  => true		end
+    [] existNonce(x,y|l)  => existNonce(x,l)
+		 // if y!=x
+					end
+end
+
+rules for bool
+     x,y : Actor;
+     l : listActor ;
+global
+    //[] existActor(x,x)    => true		end
+    //[] existActor(x,y)    => false
+		 // if y!=x
+						//end
+//    [] existActor(x,nnl)   => false		end
+
+// On utilise l'ordre des regles
+    [] existActor(x,x || l)  => true		end
+    [] existActor(x,l)       => false		end
+
+//    [] existActor(x,y || l)  => existActor(x,l)   
+		 // if y!=x
+//					end
+end
+
+rules for listActor
+     x,y : Actor;
+     l : listActor ;
+global
+    [] delActor(x,nnl)  => nnl 		end
+    [] delActor(x,x || l) => l   		end
+    [] delActor(x,y || l) => y || delActor(x,l)
+		 // if y!=x
+						end
+end
+
+//--------------------------------------------------------------
+// eliminate doubletons in the network
+// ***** DO WE LOSE MESSAGES ????  *****
+
+
+rules for network
+         resp,init : Nonce;
+         x,y,z,w,v : AgentId;
+	 ll : network;
+global
+  []  ll & ll => ll end
+/*
+[] z*x*K(y)*MN*resp*init*A(v) & z*x*K(y)*MN*resp*init*A(v) & ll =>
+		z*x*K(y)*MN*resp*init* A(v) & ll      end
+[] z*x*K(y)*MNA*resp*init*A(v) & z*x*K(y)*MNA*resp*init*A(v) & ll =>
+		z*x*K(y)*MNA*resp*init* A(v) & ll     end
+[] z*x*K(y)*MNNA*resp*init*A(v) & z*x*K(y)*MNNA*resp*init*A(v )& ll =>
+		z*x*K(y)*MNNA*resp*init* A(v) & ll     end
+*/
+end
+
+
+//--------------------------------------------------------------
+// Extract Rules
+
+rules for Nonce
+        m : Nonce;
+	l : listNonce; 
+global
+	[extRuleNonce] elemIN(m | l) => m 		 end
+end
+
+rules for Actor
+        m : Actor;
+	l : listActor; 
+global
+	[extRuleActor] elemIA(m || l) => m		 end
+end
+
+rules for listNonce
+        m : Nonce;
+        l : listNonce;
+global
+        [selectRuleNonce] m|l => [m|l]  end
+end
+
+rules for listActor
+        m : Actor;
+        l : listActor;
+global
+        [selectRuleActor] m||l => [m||l] end
+end
+
+rules for network
+        m : message;
+        l : network;
+global
+        [selectRuleNetwork] m&l => [m&l]  end
+end
+
+//--------------------------------------------------------------
+// Size Network
+/*
+rules for int
+         m : message;
+         n : network;
+global
+    []sizeNet(m & n) 	=>  1 + sizeNet(n)  	end
+    []sizeNet(nill) 	=>  0			end
+end
+*/
+//--------------------------------------------------------------
+// Extract Strategies
+
+strategies for Nonce
+implicit 
+    []extNonce => dk(extRuleNonce) end
+end
+
+strategies for Actor
+implicit 
+    [] extActor => dk(extRuleActor) end
+end
+
+strategies for listNonce
+implicit
+    []selectNonce => dk(selectRuleNonce) end
+end
+
+strategies for listActor
+implicit
+    [] selectActor => dk(selectRuleActor) end
+end
+
+strategies for network
+implicit
+    [] selectNetwork => dk(selectRuleNetwork) end
+end
+
+//--------------------------------------------------------------
+
+strategies for state 
+implicit 
+    []com => 
+		repeat*(
+		        dk(
+                           rulescomAT1,
+                           rulescomAT2,
+
+			   rulescomi11,
+                           rulescomi12,
+                           rulescomi13,
+                           rulescomi21,
+                           rulescomi31,
+                           rulescomi32,
+                           rulescomi33,
+                           rulescomi41,
+                           rulescomi42,
+                           rulescomi43,
+
+                           rulescomai,  
+                           rulescomaa,  
+
+                           rulescoma,   
+                           rulescomb    
+			)
+		) end
+/*
+    []attStrat => 
+	dc(
+		repeat*(
+		        dk(
+                           rulescomAT1,
+                           rulescomAT2,
+
+			   rulescomi11,
+                           rulescomi12,
+                           rulescomi13,
+                           rulescomi21,
+                           rulescomi31,
+                          // rulescomi32,
+                          // rulescomi33,
+                           rulescomi41,
+                           rulescomi42,
+                           rulescomi43,
+
+                           rulescomai,  
+                           rulescomaa,  
+
+                           rulescoma,   
+                           rulescomb    
+			)
+		);
+		attackFound
+	)
+	end
+*/
+
+end
+
+//--------------------------------------------------------------
+
+end
+

@@ -1,0 +1,12 @@
+#!/bin/csh
+#  make output files for itest
+#  usage:
+#    mjtest lgi_file spc_file input_file output_file
+#  !!! all files are without extensions !!!
+#
+echo "  creation of " SAMPLES/$3.out
+if(-f SAMPLES/$3.out) then
+  rm SAMPLES/$3.out
+endif
+$ELANLIB/../bin/elanc  -b -nosplit -nocode -quiet $1 $2
+a.out > SAMPLES/$3.out

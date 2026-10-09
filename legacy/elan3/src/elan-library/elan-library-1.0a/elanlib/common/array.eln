@@ -1,0 +1,40 @@
+// This file is generated automatically: do not edit it directly. 
+module array[N,X]
+        import global int;
+        end
+
+        sort array[N,X];
+        end
+
+            operators global
+              [ {@}_I=1...N ]       : ({X}_I=1...N) array[N,X];
+              @[@]                  : (array[N,X] int) X;
+              @[@<-@]               : (array[N,X] int X) array[N,X];
+              new(@)                : (X) array[N,X];
+            end
+   
+
+        rules for array[N,X]
+         { x_J : X; }_J=0...(N-1)
+                u : X;
+        global
+          [] new(u) => [{u}_J=0...(N-1) ]
+          end
+          {
+          [] [ {x_J}_J=0...(N-1) ][I<-u] => 
+                        [{x_J}_J=0...(I-1) u {x_J}_J=(I+1)...(N-1)]
+          end
+          }_I=0...(N-1)
+        end
+
+        rules for X
+         { x_J : X; }_J=0...(N-1)
+        global
+          {
+          [] [ {x_J}_J=0...(N-1) ][I] => x_I
+          end
+          }_I=0...(N-1)
+        end
+
+end  
+ 

@@ -1,0 +1,62 @@
+module str1
+
+import bool;
+end
+
+sort term;
+end
+
+operators global
+
+  f(@)		: (term) term;
+  g(@,@)	: (term term) term ;
+  cons(@,@)	: (term term) term ;
+  
+  
+  a     : term;
+  R1    : term;
+  R2    : term;
+  R3    : term;
+  nil   : term; 
+end
+
+stratop global
+  s0	: <term>	builtin;
+  s1	: <term>	builtin;
+end
+
+rules for term
+	x,y,z,u,v : term;
+global
+
+  [R1] g(f(x),y) => g(x,cons(y,R1)) end
+  [R2] g(f(x),y) => g(a,cons(y,R2)) end
+  [R3] g(f(x),y) => g(x,cons(y,R3)) end
+end
+
+strategies for term
+implicit
+  [.] s0 => repeat*( dk( R1,R2,R3 ) )
+  end
+  [.] s1 => iterate( dk( dk(R1) || dk(R2) ) )
+  end
+
+end
+
+end
+
+/*
+start with (s0) g( f(f(a)) , nil )
+Result:
+	g(a,cons(cons(nil,R1),R1))
+	g(a,cons(cons(nil,R1),R2))
+	g(a,cons(nil,R2))
+
+start with (s1) g( f(f(a)) , nil )
+Result:
+	g(f(f(a)),nil)
+	g(f(a),cons(nil,R1))
+	g(a,cons(cons(nil,R1),R1))
+	g(a,cons(cons(nil,R1),R2))
+	g(a,cons(nil,R2))
+*/

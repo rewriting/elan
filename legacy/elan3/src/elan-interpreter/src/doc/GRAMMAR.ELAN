@@ -1,0 +1,124 @@
+<module> =
+	module <formal module name>
+	[ <imports> ]
+	[ <sort definition> ]
+	[ <signature definition> ]
+	{ <familly of rules> }*
+	{ <familly of strategies> }*
+	end
+
+------------------------------------------------------------
+
+<imports> =
+	import
+	[ global { <module name> }+ ; ]
+	[ local  { <module name> }+ ; ]
+	end
+
+------------------------------------------------------------
+
+<sort name> =
+	  <identifier>
+	| <identifier> [ <identifier> { ,<identifier> }* ]
+
+<sort definition> =
+	sort { <sort name> }+ ;
+	end
+
+------------------------------------------------------------
+
+<signature definition> =
+	operators
+	[ global { <symbol declaration> ; }+ ]
+	[ local  { <symbol declaration> ; }+ ]
+	end
+
+------------------------------------------------------------
+
+<familly of rules> =
+	rules for <sort name>
+	[ { <variables declar> }+ ]
+	[ global { <non complete rule> }+ ]
+	[ local	 { <non complete rule> }+ ]
+        end	
+
+<non complete rule> = 
+	'[' <rule name> ']' <rule body> end
+      | '[' ']' <rule body> end
+
+<rule body> =
+	<term> => <rhs>
+
+<rhs> =
+        <term>
+      | <rhs> if <boolean term>
+      | <rhs> where <var name> := ( [ <strategy> ] ) <term>
+      | <rhs> where <var name> := '[' <Pstrategy> ']' <term>
+      | <rhs> where (<sort>) <term> := ( [ <strategy> ] ) <term>
+      | <rhs> where (<sort>) <term> := '[' <Pstrategy> ']' <term>
+      | switch
+          { case <boolean term> then <rhs> }+
+	  [ otherwise <rhs> ]
+        end
+	
+------------------------------------------------------------
+
+<familly of strategies> =
+	strategies for <sort name>
+	[global	{ <non complete strategy> }+]
+	[local	{ <non complete strategy> }+]
+        end	
+
+<non complete strategy> = 
+	'[' <strategy name> ']' <strategy> end
+
+<strategy> =
+	<strategy name> 
+      | <choosing>
+      | <concatenation>
+      | <iterator>
+      | <normalise>
+      | id
+
+<strategy'> =
+	<strategy>
+      | <rule name>
+
+<choosing> =
+	dont care choose( <strategy'> { || <strategy'> }* ) 
+      | dont know choose( <strategy'> { || <strategy'> }* ) 
+      | dc( <strategy'> { || <strategy'> }* ) 
+      | dk( <strategy'> { || <strategy'> }* ) 
+
+<concatenation> =
+	<strategy> ; <strategy>
+
+<iterator> =
+	iterate( <strategy> )
+      | repeat*( <strategy> )
+      | repeat+( <strategy> )
+
+<normalise> =
+	normalise( <strategy> )
+
+------------------------------------------------------------
+
+<Pstrategy> =
+	dc( { <Pstrategy> }* ) 
+      |	dk( { <Pstrategy> }* ) |
+      |	first( { <Pstrategy> }* ) |                         .....
+      | if <bool term> then <Pstrategy> else <Pstrategy> fi
+      | let {<var> := <term>}* in <Pstrategy>
+      | `[` <term> => {<var>:<Pstrategy> | if <bool term> }* => <term> `]'
+      | fail
+      | id
+      | if <Pstrategy> then <Pstrategy> else <Pstrategy> fi
+      | forall <var>:=<int> [[ to | dowto ]] <int> do <Pstrategy> end
+      | exist  <var>:=<int> [[ to ]] <int> do <Pstrategy> end
+      | commit <int> do <Pstrategy> end
+      | . . . . . 
+
+------------------------------------------------------------
+
+
+Note : 'import' remplace 'modules' dans le .lgi

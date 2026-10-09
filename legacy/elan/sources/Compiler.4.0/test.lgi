@@ -1,0 +1,17 @@
+LPL test  description
+
+// query of sort  bidon
+// result of sort bidon
+
+query of sort  string
+result of sort string
+
+// query of sort  int
+// result of sort int
+	  
+import test
+
+start with () query
+
+end
+

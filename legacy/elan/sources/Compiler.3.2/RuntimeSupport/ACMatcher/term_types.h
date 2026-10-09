@@ -1,0 +1,64 @@
+/*
+		(c) 	Steven Eker, 1992
+			INRIA-Lorraine & CRIN
+        		615, rue du Jardin Botanique, BP 101
+		        54602 Villers-les-Nancy
+			France
+*/
+/*
+ *	typedefs
+ */
+
+/*
+ *	enumerations
+ */
+/* typedef enum {FALSE, TRUE} BOOL;  */
+
+typedef int BOOL; 
+#define FALSE 0
+#define TRUE 1
+
+
+typedef enum {VARIABLE, AC_NORMAL, AC_COMPRESSED,
+		FUNCTION, CONSTANT, BUILTIN} TERM_TYPE;
+
+/*
+ *	terms
+ */
+typedef struct term_struct {
+  TERM_TYPE type;		/* type of term */
+  unsigned long sym;             /* index to symbol table */
+  union {
+    struct {
+      int list_len;				/* length of arg list */
+      struct term_list_struct *arg_list;	/* pointer to argument list */
+      struct term_list_struct *arg_tail;	/* tail of argument list */
+    } f;	/* for AC_NORMAL & FUNCTION */
+    struct {
+      int arg_count;			/* total number of AC args */
+      struct ac_list_struct *ac_list;	/* pointer to AC list */
+      struct ac_list_struct *ac_tail;	/* tail of AC list */
+    } a;	/* for AC_COMPRESSED */
+    struct {
+      int var_nr;		/* variable number */
+    } v;	/* for VARIABLE */
+  } rest;
+} TERM;
+
+/*
+ *	lists of terms
+ */
+typedef struct term_list_struct {
+  struct term_struct *arg;			/* pointer to term */
+  struct term_list_struct *next_arg;		/* pointer to rest */
+} TERM_LIST;
+
+/*
+ *	AC lists
+ */
+typedef struct ac_list_struct {
+  struct term_struct *arg;		/* pointer to term */
+  int mult;				/* multiplicity */
+  struct ac_list_struct *next_ac;	/* pointer to rest */
+} AC_LIST;
+

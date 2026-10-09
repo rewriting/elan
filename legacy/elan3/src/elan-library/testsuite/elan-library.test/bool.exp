@@ -1,0 +1,43 @@
+test_case "test_bool" "true and true" "true"
+test_case "test_bool" "true and false" "false"
+test_case "test_bool" "false and true" "false"
+test_case "test_bool" "false and false" "false"
+
+test_case "test_bool" "true or true" "true"
+test_case "test_bool" "true or false" "true"
+test_case "test_bool" "false or true" "true"
+test_case "test_bool" "false or false" "false"
+
+test_case "test_bool" "not true" "false"
+test_case "test_bool" "not false" "true"
+
+test_case "test_bool" "true == true" "true"
+test_case "test_bool" "true == false" "false"
+test_case "test_bool" "false == true" "false"
+test_case "test_bool" "false == false" "true"
+
+test_case "test_bool" "true != true" "false"
+test_case "test_bool" "true != false" "true"
+test_case "test_bool" "false != true" "true"
+test_case "test_bool" "false != false" "false"
+
+test_case "test_bool" "true < true" "false"
+test_case "test_bool" "true < false" "false"
+test_case "test_bool" "false < true" "true"
+test_case "test_bool" "false < false" "false"
+
+test_case "test_bool" "true <= true" "true"
+test_case "test_bool" "true <= false" "false"
+test_case "test_bool" "false <= true" "true"
+test_case "test_bool" "false <= false" "true"
+
+test_case "test_bool" "true > true" "false"
+test_case "test_bool" "true > false" "true"
+test_case "test_bool" "false > true" "false"
+test_case "test_bool" "false > false" "false"
+
+test_case "test_bool" "true >= true" "true"
+test_case "test_bool" "true >= false" "true"
+test_case "test_bool" "false >= true" "false"
+test_case "test_bool" "false >= false" "true"
+

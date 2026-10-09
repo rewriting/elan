@@ -1,0 +1,25 @@
+LPL  orient description 
+
+  specification description
+
+    part Vars	of sort list[identifier]
+	 	import sigSyntax
+    part Ops	of sort list[pair[identifier,int]]
+	 	import sigSyntax
+    part Prec	of sort list[pair[identifier,int]]
+	 	import sigSyntax
+    part System of sort list[equation]
+                import sigSyntax
+			termCommons[Ops,Vars]
+			equation[Vars,Ops,Prec]
+			list[equation]
+  end
+
+  query 	of sort equation_set
+         	result of sort equation_set
+	 	import critical_pairs[Vars,Ops,System]
+                        list[equation] list[int] list[list[int]] int bool
+                        EtermCommons[Ops,Vars]
+         	start with () query
+end
+ 

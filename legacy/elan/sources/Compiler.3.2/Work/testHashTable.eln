@@ -1,0 +1,65 @@
+module testHashTable
+
+import bool hashTable[Term,Term] cmp[Term];
+end
+
+sort Term;
+end 
+
+operators global
+  go     : Term;
+  emptyTerm  : Term; 
+  a      : Term; 
+  b      : Term; 
+  c      : Term; 
+  g(@)	 : (Term) Term;
+
+  hset1  : hashTable[Term,Term];
+
+  [@]	 : (bool) Term;
+  int(@) : (int) Term;
+
+  build(@) : (int) hashTable[Term,Term];
+  test(@,@) : (hashTable[Term,Term] int) Term;
+end
+
+rules for Term
+  x,y : Term; 
+  hs : hashTable[Term,Term];
+  b  : bool;
+  i  : int;
+global
+
+//  [] go      => hset1.get(g(a))
+  [] go      => [hset1.containsKey(g(a)) and hset1.get(g(a))==c]
+  end
+
+  [] test(hs,0) => [hs.containsKey(int(0))]		end
+  [] test(hs,i) => [b and hs.containsKey(int(i%123))]
+		   if i>0
+		   where (Term) [b]:=() test(hs,i-1) 
+  end
+
+end
+
+rules for hashTable[Term,Term]
+  i  : int;
+global
+  [] hset1      => new(3,emptyTerm)
+		   .add(a,a)
+		   .add(g(a),a)
+		   .add(g(a),b)
+		   .add(g(a),c)
+  end
+
+  [] build(0) => new(3,emptyTerm).add(int(0),int(0))		end
+  [] build(i) => build(i-1).add(int(i),int(i%123)) if i>0	end
+
+end
+
+end
+				
+
+
+
+

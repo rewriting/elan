@@ -1,0 +1,1952 @@
+//--------------------------------------------------------------------------------
+////////  Proving part       -----------------------------------------------------
+//--------------------------------------------------------------------------------
+// 	replaceVars(C)	: replaces the vars $x from the clause C with v-$x
+//			  used in generating rules in order to avoid conflicts
+//	replaceFreshVars(ls,lt,t) : replaces the vars lt from t with the vars ls
+//	freshVars(n,t/lt/[v,lt])  : replaces the vars from (t/lt/[v,lt]) with 
+//				    fresh variables of the form x.k (k>=n)
+//	maxVar(lv, k) : gets the max var (x.n -> max n) from lt
+//
+//	makeSubst([x,t1..tn].[y,s1..sm]...) -> (x->t1) o (y->s1) . (x->t1) o (y->s2) ....
+//	buildSubst(t,s1..sn) -> t o s1. .. t o sn
+//
+//	makeGroup([nat,x].[list,y]..., TestSet) -> [x, lt-nat]. [y, lt-list]. ...
+//--------------------------------------------------------------------------------
+//
+//	cons_Clause_Neg/Pos_L/R : builds a list [PreCond_i, Clause_i]....
+//
+//	Get_Precond : gets PreCond_i and makes a clause
+//	Get_Clauses : gets Clause_i and makes a clause
+//
+//--------------------------------------------------------------------------------
+//	getArgs(d,lt) : get the list of possible arguments (of type d) from lt
+//	getClasses(lt, TS) : organizes the TestSet by types
+//	insert(d,t,TS) : auxiliary for getClasses - puts the term t of type d in the TS
+//	getOneTs(d,TS) : get the TS for the specific type d
+//
+//	consTerm(F,lt) : constructs a term with the head F and arguments from lt
+//
+//	get_variables($f.lf) : get variables of the form v-$f
+//
+//	elim_Term_Vars(d, lt) : elim the terms with vars at depth < d
+//	elim_Term_Strict(d,lt) : elim the terms with strict at depth d
+//
+//	freshListTerm(lt) : makes fresh the variables from the terms t from lt 
+//-------------------------------------------------------------------------------
+//	subsumes(@,@)	   : checks if two clauses subsume
+//	subsumesAux(@,@,@) : checks if two list[equation] subsume and gives the substitution
+//
+//	convert(@) 	: equationS ---> list[equation] 
+//	convertEq(@) 	: equationS ---> term (u=v ---> equalT(u,v))
+//
+//	freecons(@)	: is it a free constructor?
+//	constructor(@)	: is it a constructor?
+//--------------------------------------------------------------------------------
+//	decomposePos(@)	: decompose the positive part
+//	decomposeNeg(@)	: decompose the negative part
+//--------------------------------------------------------------------------------
+//	funSf(@)	: the Sf for the induction positions
+//	pos_zero(@)	: pos_0(f)
+//
+//--------------------------------------------------------------------------------
+//	indVariables(@,@): the list of induction variables of a term
+//	indVars(@,@,@)	 :  auxiliary
+//
+//	listVariables	: list of variables - each var listed only once
+//---------------------------------------------------------------------------------
+//	depthT(@)	: depth of a term
+//	sdepthT(@)	: sdepth of a term
+//
+//	depthR		: depth of the rewriting system --> sdepth(R)
+//	sdepthR		: sdepth of the rewriting system --> sdepth(R)
+//	DepthR		: --> D(R)
+//	
+//	max(@,@)	: of two integers
+//------------------------------------------------------------------------------------
+//	dom-@(@)	: the type of the @-th argument
+//	domall(@)	: the type of all arguments
+//	codom(@)	: the type of the result
+//
+//	getArgs(@,@)	: get possible args for an identifier according 
+//				to the type of its args
+//
+//	consTerm(@,@)	: construct a term having a list of args
+//
+//	get_variables(@)	: get list of variables for a list of types
+//	elim_Term_Vars(@,@)	: elim terms with var positions < depth
+//	elim_Term_Strict(@,@)	: elim terms with strict positions = depth
+//
+//	testsetOne(@,@,@,@)	: auxiliary TestSet
+//
+//-----------------------------------------------------------------------------------
+//
+//
+//-----------------------------------------------------------------------------------
+
+
+module prove[Vars,Ars,Sorts,Css,Fss,Axs,Es,Lm,Lss,Equiv,Status]
+
+import  global
+		definitions[Vars,Ars,Sorts,Css,Fss,Axs,Es,Lm,Lss,Equiv,Status]
+
+		builtinSyntacticMatching[term,list[term]]
+
+		ordre_rpo[Vars,Ars,Lss,Equiv,Status]
+
+		syntacticUnification[Vars,Ars]
+		applySubstOn[Vars,Ars,list[equation]]
+		applySubstOn[Vars,Ars,equationS]
+		applySubstOn[Vars,Ars,term]
+
+		pair[equationS,equationS]
+		pair[list[equation],list[equation]]
+		pair[bool,substitution]
+		pair[indpos,clause]
+		pair[equationS, term]
+		pair[equationS, clause]
+		pair[ident,list[term]]
+		pair[ident,variable]
+		pair[variable,list[term]]
+
+		eq[equationS] eq[clause] eq[eqSystem]
+		eq[list[int]]
+
+		list[equation]
+		list[list[int]]
+		list[indp]
+		list[pair[equationS, term]]
+		list[pair[equationS, clause]]
+		list[pair[ident,list[term]]]
+		list[pair[ident,variable]]
+		list[pair[variable,list[term]]]
+		list[substitution]
+
+		Alist[int]
+		Alist[indp]
+		Alist[list[int]]
+		Alist[variable]
+		Alist[pair[ident,variable]]
+
+		string
+                prompt[string]
+                prompt[equationS]
+                prompt[clause]
+;end  // END import
+
+//--------------------------------------------------------------------------------
+sort
+	ipf		// list of induction positions (one position = list[int])
+	indp		// fun_symb: list_induction_positions
+	indpos		// list[indp] or pair(list[indp], Rewrite Rules) -> for compute
+
+	testset
+
+	clause		// set of pair[equationS,equationS] + EmptyC
+	step		// all atributes for induction
+
+	claux		// clause not AC
+
+;end // END sort
+
+
+//--------------------------------------------------------------------------------------
+
+operators
+  global   
+
+	//Pierrot
+    MF           : list[term];
+//------ query -----------------------------------------------------------------------
+
+	prove(@): (clause) Rez;		// one clause
+	Start 	: step;			// all clauses from E
+	@	: (step) Rez;
+	@	: (testset) Rez;	// TestSet
+	@	: (indpos) Rez;		// IndPos
+	@	: (clause) Rez;		// for printing the Rules, Lemma, Clauses
+
+//------ clause ---------------------------------------------------------------------
+
+	@ 	: (equation) equationS;
+	@ ':' @	: (equationS equationS)  equationS  	(AC);
+	EmptyT	:  equationS;
+
+	@ 	: (pair[equationS,equationS]) clause;
+	@ '*' @	: (clause clause)  clause	(AC) assocLeft;
+	EmptyC	:  clause;
+	FailC	:  clause;
+	@ ':' (@)	: (ident clause)  clause;
+	RulesW	:  clause;
+	EClause	:  clause;
+	Lemma	:  clause;
+	LHsides	:  clause;
+
+//	True	:  term;	// rule complement
+//	False	:  term;
+
+	@'#'@'#'@'#'@'#'@'#'@ : (clause clause clause clause indpos testset) step;
+
+	getClauses(@) 	: (Rez) clause;
+
+	IsLeftLin : bool;
+	ListCons : list[ident];
+
+//------ inductive positions -------------------------------------------------------
+
+	@ : ( list[list[int]] )  ipf;
+	@ ':' @ : ( ident ipf )  indp;
+	@ : ( list[indp] )  indpos;
+	IndPos : indpos;
+
+	funSf(@)		: ( ident ) list[term];
+	pos_zero(@)		: ( ident ) ipf;
+
+//------- TestSet --------------------------------------------------------------------
+	//@ : ( list[term] )  			testset;
+	@ : ( list[pair[ident,list[term]]] )  	testset;
+	TestSET	: 				testset;
+	TestSETbrief : 				testset; 
+
+	testsetOne(@,@,@,@)	:( list[ident] list[term] int int) list[term];
+	TestSet(@,@,@)		:( list[ident] int int) list[term];
+
+	getArgs(@,@)	:( ident list[term]) list[term];
+	getClasses(@,@)	:( list[term] list[pair[ident,list[term]]]) 
+						list[pair[ident,list[term]]];
+	insert(@,@,@)	:( ident term list[pair[ident,list[term]]]) 
+						list[pair[ident,list[term]]];
+	getOneTs(@,@) 	: ( ident testset) 	list[term];
+
+	consTerm(@,@)	:( ident list[term]) list[term];
+
+	get_variables(@)	:( list[ident] ) list[term];
+
+	elim_Term_Vars(@,@)	:( int list[term]) list[term];
+	elim_Term_Strict(@,@)	:( int list[term]) list[term];
+
+	freshListTerm(@,@)	: (int list[term]) list[term];
+
+//------ subsume ---------------------------------------------------------------------
+	@ 	: (pair[list[equation],list[equation]]) claux;
+
+	subsumes(@,@)	: (clause clause) bool;
+	subsumesAux(@,@,@,@) : (list[equation] list[equation]  list[equation] substitution) pair[bool,substitution];
+
+	convert(@) 	: (equationS) list[equation];
+	convertEq(@) 	: (equationS) term;
+
+	freecons(@)	: (ident) bool;
+	constructor(@)	: (ident) bool;
+//-----------------------------------------------------------------------------------
+	decomposePos(@)	: (clause) clause;
+	decomposeNeg(@)	: (equationS) equationS;
+//------------------------------------------------------------------------------------
+	listVariables(@) : ( list[term] ) list[variable];
+	listVariables(@) : ( equationS ) list[variable];
+	listVariables(@) : ( clause ) list[variable];
+
+	indVariables(@,@)	: ( term indpos ) list[pair[ident,variable]];
+	indVariables(@,@)	: ( equationS indpos ) list[pair[ident,variable]];
+	indVariables(@,@)	: ( pair[equationS,equationS] indpos ) 
+					list[pair[ident,variable]];
+	indVars(@,@,@)	: ( term indpos indpos ) list[pair[ident,variable]];
+//-----------------------------------------------------------------------------------
+	listTerms(@)	: ( equationS ) list[term];
+//------------------------------------------------------------------------------------
+	depthT(@)	: (term) int;
+	sdepthT(@)	: (term) int;
+
+	depthR	: int;
+	sdepthR	: int;
+	DepthR	: int;
+
+	max(@,@)	: (int int) int;
+//--------------------------------------------------------------------------------------
+
+	replaceVars(@) : (clause) clause;
+	replaceVars(@) : (equationS) equationS;
+	replaceVars(@) : (term) term;
+
+	replaceFreshVars(@,@,@) : (list[variable] list[variable] term) term;
+	freshVars(@,@) : (int term) term;
+	freshVars(@,@) : (int list[term]) list[term];
+	freshVars(@,@) : (int list[pair[variable,list[term]]]) 
+				list[pair[variable,list[term]]];
+
+	maxVar(@,@) : (list[variable] int) int;
+
+	makeSubst(@) 	: ( list[pair[variable,list[term]]]) list[substitution];
+	buildSubst(@,@) : (substitution list[substitution]) list[substitution];
+	
+	makeGroup(@,@) 	: ( list[pair[ident,variable]] testset ) 
+				list[pair[variable,list[term]]];
+	
+//-----------------------------------------------------------------------------------
+	cons_Clause_Neg_L(@,@,@,@,@) : (term equationS equationS equationS clause) 
+					list[pair[equationS, clause]];
+	cons_Clause_Neg_R(@,@,@,@,@) : (term equationS equationS equationS clause) 
+					list[pair[equationS, clause]];
+	cons_Clause_Pos_L(@,@,@,@,@) : (term equationS equationS equationS clause) 
+					list[pair[equationS, clause]];
+	cons_Clause_Pos_R(@,@,@,@,@) : (term equationS equationS equationS clause) 
+					list[pair[equationS, clause]];
+
+	make_Precond(@) : (list[pair[equationS, clause]]) equationS;
+	Get_Precond(@) : (list[pair[equationS, clause]]) clause;
+	Get_Clauses(@) : (list[pair[equationS, clause]]) clause;
+
+//-----------------------------------------------------------------------------------
+	dom-@(@)	: ( int ident ) ident;
+	domall(@)	: ( ident ) list[ident];
+	codom(@)	: ( ident ) ident;
+
+//---------- order ------------------------------------------------------------------
+
+	OrderNp(@)  : (clause) clause;		// puts order in a clause(s)
+	OrderEqs(@) : (equationS) equationS;    // puts order in an equation(s)
+
+//---------- pretty-print --------------------------------------------------------
+
+	printClause(@,@) 	: (string clause) string;
+	printE(@) 		: (clause ) string;
+	printH(@) 		: (clause ) string;
+	printCl(@) 		: (clause ) string;
+//-----------------------------------------------------------------------------------
+end 	//END operators
+
+//--------------------------------------------------------------------------------------
+rules for bool
+	F : ident;
+global
+		[] freecons($F) => true			end
+end
+
+//--------------------------------------------------------------------------------------
+rules for clause
+   Np, Pp : equationS;
+global
+	[] replaceVars([Np,Pp]) => [replaceVars(Np) ,replaceVars(Pp) ]
+	end
+end
+
+rules for equationS
+   S, T : term;
+   Np, L : equationS;
+global
+	[] replaceVars(EmptyT) => EmptyT
+	end
+	[] replaceVars(S=T) => replaceVars(S)=replaceVars(T)
+	end
+	[] replaceVars(Np:L) => replaceVars(Np):replaceVars(L)
+	end
+end
+
+
+//--------------------------------------------------------------------------------------
+rules for bool
+global
+
+  	FOR EACH SS:pair[ident,pair[list[ident],ident]]; 
+		F:ident
+  	SUCH THAT SS:=(listExtract) elem(Fss)
+		AND F:=()first(SS) :{
+
+		[] constructor(F) => false			end
+   	}
+	
+  	FOR EACH SS:pair[ident,pair[list[ident],ident]]; 
+		F:ident
+  	SUCH THAT SS:=(listExtract) elem(Css)
+		AND F:=()first(SS) :{
+
+		[] constructor(F) => true			end
+	}
+
+end
+//--------------------------------------------------------------------------------------
+
+rules for equationS
+	u:equationS;
+global
+	[]	EmptyT:EmptyT	=> 	EmptyT		end
+end
+
+rules for clause
+	u:clause;
+global
+	[]	EmptyC	*EmptyC	=> 	EmptyC		end
+
+	[] [EmptyT,EmptyT]	=> 	EmptyC		end
+end
+
+//--------------------------------------------------------------------------------------
+
+rules for clause 
+	D, H, L, R : clause;
+	Ip : indpos;
+	Ts : testset;
+global	
+	[] getClauses(D#H#L#R#Ip#Ts)	=> 	D
+	end 
+end
+
+//--------------------------------------------------------------------------------------
+
+FOR EACH SS:pair[ident,pair[int,int]]; 
+	F:ident;  A:pair[int,int]; 
+	AL:int; AR:int
+SUCH THAT SS:=(listExtract) elem(Ars) 
+	AND F:=()first(SS) 
+	AND A:=()second(SS) 
+	AND AL:=()first(A) 
+	AND AR:=()second(A) 
+	ANDIF AL==0 
+	ANDIF AR==0 :{
+
+rules for term
+global
+	[] replaceVars(F) => F
+	end
+end
+}
+//--------------------------------------------------------------------------------------
+
+FOR EACH SS:pair[ident,pair[int,int]]; 
+	F:ident;  A:pair[int,int]; N:int; NEXT:int;
+	AL:int; AR:int
+SUCH THAT SS:=(listExtract) elem(Ars) 
+	AND F:=()first(SS) 
+	AND A:=()second(SS) 
+	AND AL:=()first(A) 
+	AND AR:=()second(A) 
+	AND NEXT:=()AL+1
+	AND N:=()AL+AR
+	ANDIF AL>0 :{
+
+rules for term
+   t_1,...,t_N : term;
+global
+	[] replaceVars({t_I }_I=1...AL F {t_I }_I=NEXT...N) => 
+		{replaceVars(t_I) }_I=1...AL F {replaceVars(t_I) }_I=NEXT...N	
+
+	end
+end
+
+rules for clause
+   t_1,...,t_N,s_1,...,s_N : term;
+   Np, Pp : equationS;
+global
+
+	[] decomposePos([Np,{t_I }_I=1...AL F {t_I }_I=NEXT...N
+		=    {s_I }_I=1...AL F {s_I }_I=NEXT...N:Pp]) => 
+	{
+	[Np,J-th subterm({t_I }_I=1...AL F {t_I }_I=NEXT...N) 
+	= 
+	J-th subterm({s_I }_I=1...AL F {s_I }_I=NEXT...N):Pp]*
+	}_J=1...N  EmptyC
+
+	end
+end
+
+rules for equationS
+   t_1,...,t_N,s_1,...,s_N : term;
+global
+
+	[] decomposeNeg({t_I }_I=1...AL F {t_I }_I=NEXT...N
+		=    {s_I }_I=1...AL F {s_I }_I=NEXT...N) => 
+	{
+	J-th subterm({t_I }_I=1...AL F {t_I }_I=NEXT...N) 
+	= 
+	J-th subterm({s_I }_I=1...AL F {s_I }_I=NEXT...N):
+	}_J=1...N  EmptyT
+
+	end
+end
+
+rules for list[pair[ident,variable]]
+	{t_I,}_I=1...N s, t : term;
+	v : variable;
+	f, d : ident;
+	u : list[int];
+	l : list[list[int]];
+	Lpi, LpiN : list[indp];	
+global
+  	[] indVars({t_I }_I=1...AL F {t_I }_I=NEXT...N, $f:nil . Lpi, LpiN)	=> 
+			nil
+			{ @ indVariables(t_I, LpiN)}_I=1...N
+		if eq_ident(F,$f)
+	end
+
+  	[] indVars({t_I }_I=1...AL F {t_I }_I=NEXT...N, $f:u.l . Lpi, LpiN)	=> 
+		  [$d,v] . indVars({t_I }_I=1...AL F {t_I }_I=NEXT...N, $f:l . Lpi, LpiN)
+		if eq_ident(F,$f)
+		where s:=()({t_I }_I=1...AL F {t_I }_I=NEXT...N) at u
+		if isvar(s)
+		where v:=()term_to_variable(s)
+		where t:=()({t_I }_I=1...AL F {t_I }_I=NEXT...N) at firstList(u)
+		where d:=() dom-lastElem(u)(head(t))
+	end
+
+  	[] indVars({t_I }_I=1...AL F {t_I }_I=NEXT...N, $f:u.l . Lpi, LpiN)	=> 
+		   indVars({t_I }_I=1...AL F {t_I }_I=NEXT...N, $f:l . Lpi, LpiN)
+		if eq_ident(F,$f)
+		where s:=()({t_I }_I=1...AL F {t_I }_I=NEXT...N) at u
+		if not isvar(s)
+	end
+
+  	[] indVars({t_I }_I=1...AL F {t_I }_I=NEXT...N, $f:l . Lpi, LpiN)	=> 
+			indVars({t_I }_I=1...AL F {t_I }_I=NEXT...N, Lpi, LpiN)
+		if not eq_ident(F,$f)
+	end
+  end	
+
+rules for int
+   t_1,...,t_N : term;
+global
+	[] depthT({t_I }_I=1...AL F {t_I }_I=NEXT...N) => 1 +
+					{ max( depthT(t_I), }_I=1...N  
+					0
+					{ ) }_I=1...N 
+	end
+	[] sdepthT({t_I }_I=1...AL F {t_I }_I=NEXT...N) => 1 +
+					{ max( sdepthT(t_I), }_I=1...N  
+					0
+					{ ) }_I=1...N 
+	end
+end
+
+}
+
+FOR EACH SS:pair[ident,pair[int,int]]; 
+	F:ident;  A:pair[int,int];
+	AL:int; AR:int; N:int
+SUCH THAT SS:=(listExtract) elem(Ars)
+	AND F:=()first(SS) 
+	AND A:=()second(SS) 
+	AND AL:=()first(A) 
+	AND AR:=()second(A) 
+	AND N:=()AL+AR
+	ANDIF AL==0 
+	ANDIF N>0 :{
+
+rules for term
+   t_1,...,t_N : term;
+global
+	[] replaceVars(F(t_1,...,t_N)) => 
+		F(replaceVars(t_1){,replaceVars(t_I)}_I=2...N)
+	end
+end
+
+rules for clause
+   t_1,...,t_N,s_1,...,s_N : term;
+   Np, Pp : equationS;
+global
+
+	[] decomposePos([Np,F(t_1,...,t_N)=F(s_1,...,s_N):Pp]) => 
+	{
+	[Np,J-th subterm(F(t_1,...,t_N)) = J-th subterm(F(s_1,...,s_N)):Pp]*
+	}_J=1...N  EmptyC
+
+	end
+end
+
+rules for equationS
+   t_1,...,t_N,s_1,...,s_N : term;
+global
+
+	[] decomposeNeg(F(t_1,...,t_N)=F(s_1,...,s_N)) => 
+	{
+	J-th subterm(F(t_1,...,t_N)) = J-th subterm(F(s_1,...,s_N)):
+	}_J=1...N  EmptyT
+
+	end
+end
+
+rules for list[pair[ident,variable]]
+	{t_I,}_I=1...N s, t : term;
+	v : variable;
+	f, d : ident;
+	u : list[int];
+	l : list[list[int]];
+	Lpi, LpiN : list[indp];	
+global
+  	[] indVars(F(t_1,...,t_N), $f:nil . Lpi, LpiN)	=> 
+			nil
+			{ @ indVariables(t_I, LpiN)}_I=1...N
+		if eq_ident(F,$f)
+	end
+
+  	[] indVars(F(t_1,...,t_N), $f:u.l . Lpi, LpiN)	=> 
+			[$d,v] . indVars(F(t_1,...,t_N), $f:l . Lpi, LpiN)
+		if eq_ident(F,$f)
+		where s:=()F(t_1,...,t_N) at u
+		if isvar(s)
+		where v:=()term_to_variable(s)
+		where t:=() F(t_1,...,t_N) at firstList(u)
+		where d:=() dom-lastElem(u)(head(t))
+	end
+
+  	[] indVars(F(t_1,...,t_N), $f:u.l . Lpi, LpiN)	=> 
+			indVars(F(t_1,...,t_N), $f:l . Lpi, LpiN)
+		if eq_ident(F,$f)
+		where s:=()F(t_1,...,t_N) at u
+		if not isvar(s)
+	end
+
+  	[] indVars(F(t_1,...,t_N), $f:l . Lpi, LpiN)	=> 
+			indVars(F(t_1,...,t_N), Lpi, LpiN)
+		if not eq_ident(F,$f)
+	end
+
+end
+
+rules for int
+	t_1,...,t_N,s_1,...,s_N : term;
+global
+	[] depthT(F(t_1,...,t_N)) => 1 +
+					{ max( depthT(t_I), }_I=1...N  
+					0
+					{ ) }_I=1...N 
+	end
+
+	[] sdepthT(F(t_1,...,t_N)) => 1 +
+					{ max( sdepthT(t_I), }_I=1...N  
+					0
+					{ ) }_I=1...N 
+	end
+end
+		
+}
+
+//--------------------------------------------------------------------------------------
+
+rules for term
+   v : variable;
+global
+	[] replaceVars($v) => var-$v
+	end
+end
+
+//--------------------------------------------------------------------------------------
+
+rules for term
+   v,u : variable;
+   lv,lu : list[variable];
+   t : term;
+global
+	[] replaceFreshVars(nil,nil,t) => t
+	end
+	[] replaceFreshVars(v.lv,u.lu,t) => replaceFreshVars(lv,lu,replace v by u in t)
+	end
+end
+//--------------------------------------------------------------------------------------
+
+rules for term
+   n,k : int;
+   lv,lu : list[variable];
+   t, tp : term;
+global
+	[] freshVars(n,t) => tp
+			where lv :=() unicate(variables_of(t))
+			where k :=() size(lv)
+			where lu :=() get_list_variables(n,k) 
+			where tp := () replaceFreshVars(lv,lu,t)
+	end
+end
+
+rules for list[term]
+   n,k : int;
+   lv,lu : list[variable];
+   t, tp : term;
+   lt : list[term];
+global
+	[] freshVars(n,nil) => nil
+	end
+	[] freshVars(n,t.lt) => tp. freshVars(n+k,lt)
+			where lv :=() unicate(variables_of(t))
+			where k :=() size(lv)
+			where lu :=() get_list_variables(n,k) 
+			where tp := () replaceFreshVars(lv,lu,t)
+	end
+end
+
+rules for list[pair[variable,list[term]]]
+   n,k : int;
+   v : variable;
+   lv : list[variable];
+   lt : list[term];
+   L : list[pair[variable,list[term]]];
+global
+	[] freshVars(n,nil) => nil
+	end
+	[] freshVars(n,[v,lt] . L) => [v,freshVars(n,lt)]. freshVars(n+k,L)
+			where lv :=() listVariables(lt)
+			where k :=() size(lv)
+	end
+end
+//--------------------------------------------------------------------------------------
+
+  rules for int
+	n, k : int;
+	v : variable;
+	lv : list[variable];	
+  global
+  	[] maxVar(nil,n) => n
+  	end
+  	[] maxVar(x.k .lv,n) =>  
+		switch
+		case k >= n then maxVar(lv,k+1)
+		otherwise maxVar(lv,n) 
+	 	end
+	end
+  	[] maxVar(v .lv,n) => maxVar(lv,n) 	
+  	end
+  end
+
+//--------------------------------------------------------------------------------------
+
+rules for list[substitution]
+   s,t : substitution;
+   ls : list[substitution];
+global
+	//normally we don't need this rule
+	[] buildSubst(t,nil) => t. nil 
+	end
+	[] buildSubst(t,s.nil) => t o s. nil
+	end
+	[] buildSubst(t,s.ls) => t o s. buildSubst(t,ls)
+	end
+end
+
+rules for list[substitution]
+   x, y : variable;
+   s,t : term;
+   ls,lt : list[term];
+   L : list[pair[variable,list[term]]];
+global
+	//normally we don't need this rule
+	[] makeSubst(nil)		=>	nil
+	end
+	[] makeSubst([$x, nil].nil)	=>	nil
+	end
+	[] makeSubst([$x, t.nil].nil)	=>	$x->t . nil
+	end
+	[] makeSubst([$x, t.lt].nil)	=>	$x->t . makeSubst([$x, lt].nil)
+	end
+	[] makeSubst([$x, nil].L)	=> 	nil
+	end
+	[] makeSubst([$x, t.lt].[$y, s.ls].L)	=>	
+		buildSubst($x->t , makeSubst([$y, s.ls].L) )
+		@ makeSubst([$x, lt].[$y, s.ls].nil)
+	end
+end
+
+//--------------------------------------------------------------------------------------
+
+rules for list[pair[variable,list[term]]]
+   x : variable;
+   ts : list[pair[ident,list[term]]];
+   L : list[pair[ident,variable]];
+   d : ident;
+global
+	//normally we don't need this rule
+	[] makeGroup(nil, ts) =>  nil  
+	end
+	[] makeGroup([$d,$x].nil, ts) => [$x, getOneTs($d, ts)] . nil
+	end
+	[] makeGroup([$d,$x].L, ts) => [$x, getOneTs($d, ts)] . makeGroup(L, ts)
+	end
+end
+
+//--------------------------------------------------------------------------------------
+
+rules for bool
+	pbs : pair[bool,substitution];
+	E, F, Np, Pp : equationS;
+	C : clause;
+	e, f, np, pp, spp : list[equation];
+	sigma : substitution;
+global
+	[] subsumes(C, C) 		=>	true	
+					if neq_clause(C, EmptyC)	end
+	[] subsumes([Np,Pp],[Np,E:Pp]) 	=>	true		end
+	[] subsumes([Np,Pp],[E:Np,Pp]) 	=>	true		end
+	[] subsumes([Np,Pp],[E:Np,F:Pp]) =>	true		end
+
+	[] subsumes([Np,Pp],[Np,F]) 	=>	true
+				where pp:= ()convert(Pp)
+				where f := ()convert(F)
+				if first(subsumesAux(pp,f,nil,identity))
+	end
+	[] subsumes([Np,Pp],[E:Np,F]) 	=>	true
+				where pp:= ()convert(Pp)
+				where f := ()convert(F)
+				if first(subsumesAux(pp,f,nil,identity))
+	end
+	[] subsumes([Np,Pp],[E,Pp]) 	=>	true
+				where np:= ()convert(Np)
+				where e := ()convert(E)
+				if first(subsumesAux(np,e,nil,identity))
+	end
+	[] subsumes([Np,Pp],[E,F:Pp]) 	=>	true
+				where np:= ()convert(Np)
+				where e := ()convert(E)
+				if first(subsumesAux(np,e,nil,identity))
+	end
+	[] subsumes([Np,Pp],[E,F]) 	=>	true
+				where np:= ()convert(Np)
+				where pp:= ()convert(Pp)
+				where e := ()convert(E)
+				where f := ()convert(F)
+				where pbs:= ()subsumesAux(np,e,nil,identity)
+				if first(pbs)
+				where sigma:= ()second(pbs)
+				where spp:= ()apply(sigma,pp)
+				if first(subsumesAux(spp,f,nil,identity))
+	end
+	[] subsumes([Np,Pp],[E,F]) 	=>	false
+	end
+end
+
+//--------------------------------------------------------------------------------------
+
+rules for pair[bool,substitution]
+	s, t, u, v, T, S : term;
+	e, f : equation;
+	c, l : list[equation];
+	np, snp, pp, spp : list[equation];
+	matchRez : list[term]; 
+        listVar : list[term];
+	s, sigma : substitution;
+global
+	[] subsumesAux(c, c, l, s) 		=>	[true,s]		end
+
+	[] subsumesAux(nil, c, l, s) 		=>	[true,s]		end
+	[] subsumesAux(c, nil, l, s) 		=>	[false,s]	end
+
+	[] subsumesAux(e . np, e . pp, l, s) 	=> subsumesAux(np, pp, l, s)
+	end
+	[] subsumesAux(e . np, f . pp, l, s) =>
+			where T :=() convertEq(e)
+			where S :=() convertEq(f)
+			where listVar :=() unicate(variables_ofLT(T))
+			where matchRez := () builtinSyntacticMatching(T,S,listVar,MF)
+		switch
+		case eq_list[term](matchRez,MF) then subsumesAux(e . np, pp, f.l, s)
+		otherwise subsumesAux(snp,spp, pp, s o sigma)
+			where sigma := () system_to_subst(listVar,matchRez)
+			where snp := () apply(sigma,np)
+			where spp := () l @ pp
+	 	end
+	end
+
+	[] subsumesAux(e . np, f . np, l, s) 	=>	
+			where T :=() convertEq(e)
+			where S :=() convertEq(f)
+			where listVar :=() unicate(variables_ofLT(T))
+			where matchRez := () builtinSyntacticMatching(T,S,listVar,MF)
+		switch
+		case eq_list[term](matchRez,MF) then [false,s]
+		otherwise [true,s o sigma]
+			where sigma := ()system_to_subst(listVar,matchRez)
+	 	end
+	end
+
+end
+
+//--------------------------------------------------------------------------------------
+
+rules for list[equation]
+	u, v : term;
+	np : equationS;
+global
+	[] convert(EmptyT) 	=>	nil			end
+	[] convert(u=v) 	=>	u=v .nil	 	end
+	[] convert(u=v:np) 	=>	u=v . convert(np) 	end
+	[] convert(EmptyT:np) 	=>	convert(np) 		end
+
+end
+
+rules for term
+	u, v : term;
+global
+	[] convertEq(u=v) 	=>	equalT(u,v)		end
+end
+
+//--------------------------------------------------------------------------------------
+
+  rules for list[term]
+  global
+//------------------------------------- for each symbol ------- Sf -------------
+FOR EACH SS:pair[ident,pair[int,int]]; F:ident
+SUCH THAT SS:=(listExtract) elem(Ars) 
+  AND F:=()first(SS) :{
+	[] funSf(F)	=>
+    //--------------------------------- for each rule -----------
+    FOR EACH SSS:pair[list[pair[term,term]],list[pair[term,term]]]; 
+	LC:list[pair[term,term]];  R:list[pair[term,term]]; 
+	r:pair[term,term];
+	g:term
+    SUCH THAT SSS:=(listExtract) elem(Axs)
+	AND LC:=()first(SSS) // /\ ui=vi
+	AND R:=()second(SSS) // g -> d,.
+	ANDIF neq_list[pair[term,term]](R,nil) // g -> d, ... ,.
+	AND r:=()1-th elem(R) // g -> d
+	AND g:=()first(r)
+	:{
+				getTerms(F,g) @ getTermsPair(F,LC) @
+	}
+				nil
+	end
+  }
+  end
+
+//----------------------------------------------------------------------------------
+
+  rules for ipf
+  global
+//------------------------------------- for each symbol ------- pos_zero -------------
+FOR EACH SS:pair[ident,pair[int,int]]; F:ident
+SUCH THAT SS:=(listExtract) elem(Ars) 
+  AND F:=()first(SS) :{
+	[] pos_zero(F)	=> unicate(
+    //--------------------------------- for each Sf -----------
+    FOR EACH S:term; LV:list[variable]
+    SUCH THAT S:=(listExtract) elem(funSf(F))
+	AND LV:=()var_lin(S):{
+    	//--------------------------------- for each Strict Position -----------
+    	FOR EACH SPos:list[int]
+    	SUCH THAT SPos:=(chooseOccurence) nvocc(S)
+		ANDIF neq_list[int](SPos,nil):{
+			SPos.
+		}
+    	//--------------------------------- for each Non-linear Position -----------
+    	FOR EACH NLVPos:list[int]
+    	SUCH THAT NLVPos:=(NLVchooseOccurence) nlvocc(S,LV)
+		ANDIF neq_list[int](NLVPos,nil):{
+			NLVPos.
+	}
+    }
+			nil)
+	end
+}
+
+  end
+
+//----------------------------------------------------------------------------------
+
+  rules for indpos
+  global
+	[] IndPos	=>	
+//------------------------------------- for each symbol ------- pos_zero -------------
+FOR EACH SS:pair[ident,pair[int,int]]; F:ident
+SUCH THAT SS:=(listExtract) elem(Ars) 
+  AND F:=()first(SS) :{
+				F:pos_zero(F).
+}
+				nil
+
+	end
+  end
+
+//----------------------------------------------------------------------------------
+
+  rules for testset 
+  global
+	[] TestSET	=>	
+		getClasses( freshListTerm(1, TestSet(ListCons, DepthR, DepthR)), nil )
+			//getClasses( TestSet(ListCons, DepthR, DepthR), nil )	
+			//TestSet(ListCons, DepthR, DepthR)
+	end
+	[] TestSETbrief	=>
+			getClasses( TestSet(ListCons, DepthR, DepthR), nil )	
+			//TestSet(ListCons, DepthR, DepthR)
+	end
+  end
+
+//----------------------------------------------------------------------------------
+
+  rules for clause
+  global
+	[] LHsides	=>
+  //the left-hand sides of the rules
+  FOR EACH SSS:pair[list[pair[term,term]],list[pair[term,term]]];
+		PP:list[pair[term,term]]
+  SUCH THAT SSS:=(listExtract) elem(Axs)
+	AND PP:=()second(SSS)
+	:{
+
+	[
+	EmptyT,
+  	FOR EACH SS:pair[term,term]; 
+		Lt:term; Rt:term
+  	SUCH THAT SS:=(listExtract) elem(PP)
+		AND Lt:=()first(SS) 
+		AND Rt:=()second(SS):{
+			Lt = Rt : 
+   	}
+	EmptyT]*
+	}
+	EmptyC
+
+	end
+  end
+
+//----------------------------------------------------------------------------------
+
+  rules for clause
+  global
+	[] RulesW	=>
+  //the rewrite rules that will be used (non-empty RHS)
+  FOR EACH SSS:pair[list[pair[term,term]],list[pair[term,term]]]; 
+		NP:list[pair[term,term]];  PP:list[pair[term,term]]; F:ident
+  SUCH THAT SSS:=(listExtract) elem(Axs)
+	AND NP:=()first(SSS) 
+	AND PP:=()second(SSS)
+	ANDIF neq_list[pair[term,term]](PP,nil)
+	AND F:=()head(first(1-th elem(PP)))
+	:{
+	F : ( replaceVars(
+	[
+  	FOR EACH SS:pair[term,term]; 
+		Lt:term; Rt:term
+  	SUCH THAT SS:=(listExtract) elem(NP)
+		AND Lt:=()first(SS) 
+		AND Rt:=()second(SS):{
+			Lt = Rt : 
+   	}
+	EmptyT,
+  	FOR EACH SS:pair[term,term]; 
+		Lt:term; Rt:term
+  	SUCH THAT SS:=(listExtract) elem(PP)
+		AND Lt:=()first(SS) 
+		AND Rt:=()second(SS):{
+			Lt = Rt : 
+   	}
+	EmptyT]))*
+	}
+  //the rewrite rules that will be used (empty RHS)
+  FOR EACH SSS:pair[list[pair[term,term]],list[pair[term,term]]]; 
+		NP:list[pair[term,term]];  PP:list[pair[term,term]]
+  SUCH THAT SSS:=(listExtract) elem(Axs)
+	AND NP:=()first(SSS) 
+	AND PP:=()second(SSS)
+	ANDIF eq_list[pair[term,term]](PP,nil)
+	:{
+	NRWR : ( replaceVars(
+	[
+  	FOR EACH SS:pair[term,term]; 
+		Lt:term; Rt:term
+  	SUCH THAT SS:=(listExtract) elem(NP)
+		AND Lt:=()first(SS) 
+		AND Rt:=()second(SS):{
+			Lt = Rt : 
+   	}
+	EmptyT,
+	EmptyT]))*
+	}
+	EmptyC
+	//end rewrite rules part
+
+	end
+  end
+
+  rules for clause
+	f : ident;
+	C1, C2 : clause;
+  global
+	[] $f:(C1) * $f:(C2)	=>	$f:(C1 * C2)
+	end
+  end
+
+//----------------------------------------------------------------------------------
+
+  rules for clause
+  global
+	[] EClause	=>
+//the clauses to be proved
+  FOR EACH SSS:pair[list[pair[term,term]],list[pair[term,term]]]; 
+		NP:list[pair[term,term]];  PP:list[pair[term,term]]
+  SUCH THAT SSS:=(listExtract) elem(Es)
+	AND NP:=()first(SSS) 
+	AND PP:=()second(SSS)
+	:{
+
+	[
+  	FOR EACH SS:pair[term,term]; 
+		Lt:term; Rt:term
+  	SUCH THAT SS:=(listExtract) elem(NP)
+		AND Lt:=()first(SS) 
+		AND Rt:=()second(SS):{
+			Lt = Rt : 
+   	}
+	EmptyT,
+  	FOR EACH SS:pair[term,term]; 
+		Lt:term; Rt:term
+  	SUCH THAT SS:=(listExtract) elem(PP)
+		AND Lt:=()first(SS) 
+		AND Rt:=()second(SS):{
+			Lt = Rt : 
+   	}
+	EmptyT]*
+
+	}
+	EmptyC
+
+	end
+  end
+
+//----------------------------------------------------------------------------------
+
+  rules for clause
+  global
+	[] Lemma	=>
+  FOR EACH SSS:pair[list[pair[term,term]],list[pair[term,term]]]; 
+		NP:list[pair[term,term]];  PP:list[pair[term,term]]
+  SUCH THAT SSS:=(listExtract) elem(Lm)
+	AND NP:=()first(SSS) 
+	AND PP:=()second(SSS)
+	:{
+
+	[
+  	FOR EACH SS:pair[term,term]; 
+		Lt:term; Rt:term
+  	SUCH THAT SS:=(listExtract) elem(NP)
+		AND Lt:=()first(SS) 
+		AND Rt:=()second(SS):{
+			Lt = Rt : 
+   	}
+	EmptyT,
+  	FOR EACH SS:pair[term,term]; 
+		Lt:term; Rt:term
+  	SUCH THAT SS:=(listExtract) elem(PP)
+		AND Lt:=()first(SS) 
+		AND Rt:=()second(SS):{
+			Lt = Rt : 
+   	}
+	EmptyT]*
+
+	}
+	EmptyC
+
+	end
+  end
+
+//----------------------------------------------------------------------------------
+/***********************************************************************************
+  rules for bool
+  global
+	[] IsLeftLin	=>
+  //the left-hand sides of the rules
+  FOR EACH SSS:pair[list[pair[term,term]],list[pair[term,term]]];
+		PP:list[pair[term,term]]
+  SUCH THAT SSS:=(listExtract) elem(Axs)
+	AND PP:=()second(SSS) :{
+
+  	FOR EACH SS:pair[term,term]; 
+		Lt:term
+  	SUCH THAT SS:=(listExtract) elem(PP)
+		AND Lt:=()first(SS) :{
+			is_lin(variables_of(Lt)) and
+   	}
+  }			true
+
+	end
+  end
+
+***********************************************************************************/
+//----------------------------------------------------------------------------------
+
+  rules for list[ident]
+  global
+	[] ListCons	=> 
+FOR EACH SS:pair[ident,pair[list[ident],ident]]; F:ident
+SUCH THAT SS:=(listExtract) elem(Css)
+	AND F:=()first(SS) :{
+			F.	
+}
+			nil
+	end
+  end
+
+//----------------------------------------------------------------------------------
+/***********************************************************************************
+
+  rules for int
+  global
+	[] depthR	=>
+    //--------------------------------- for each rule -----------
+    FOR EACH SSS:pair[list[pair[term,term]],list[pair[term,term]]]; 
+	LC:list[pair[term,term]];  R:list[pair[term,term]]; 
+	r:pair[term,term];
+	g:term
+    SUCH THAT SSS:=(listExtract) elem(Axs)
+	AND LC:=()first(SSS) // /\ ui=vi
+	AND R:=()second(SSS) // g -> d,.
+	ANDIF neq_list[pair[term,term]](R,nil) // g -> d, ... ,.
+	AND r:=()1-th elem(R) // g -> d
+	AND g:=()first(r) :{
+		 max( depthT(g), 
+	}
+		0
+    FOR EACH SSS:pair[list[pair[term,term]],list[pair[term,term]]]; 
+	LC:list[pair[term,term]];  R:list[pair[term,term]]
+    SUCH THAT SSS:=(listExtract) elem(Axs)
+	AND LC:=()first(SSS) // /\ ui=vi
+	AND R:=()second(SSS) // g -> d,.
+	ANDIF neq_list[pair[term,term]](R,nil):{
+		 )
+	}
+	end
+  end
+
+***********************************************************************************/
+//----------------------------------------------------------------------------------
+
+  rules for int
+  global
+	[] sdepthR	=>
+    //--------------------------------- for each rule -----------
+    FOR EACH SSS:pair[list[pair[term,term]],list[pair[term,term]]]; 
+	LC:list[pair[term,term]];  R:list[pair[term,term]]; 
+	r:pair[term,term];
+	g:term
+    SUCH THAT SSS:=(listExtract) elem(Axs)
+	AND LC:=()first(SSS) // /\ ui=vi
+	AND R:=()second(SSS) // g -> d,.
+	ANDIF neq_list[pair[term,term]](R,nil) // g -> d, ... ,.
+	AND r:=()1-th elem(R) // g -> d
+	AND g:=()first(r) :{
+		 max( sdepthT(g), 
+	}
+		0
+    FOR EACH SSS:pair[list[pair[term,term]],list[pair[term,term]]]; 
+	LC:list[pair[term,term]];  R:list[pair[term,term]]
+    SUCH THAT SSS:=(listExtract) elem(Axs)
+	AND LC:=()first(SSS) // /\ ui=vi
+	AND R:=()second(SSS) // g -> d,.
+	ANDIF neq_list[pair[term,term]](R,nil):{
+		 )
+	}
+	end
+  end
+
+//----------------------------------------------------------------------------------
+
+  rules for int
+  global
+/*------------- Theory ---------------------------------------
+	[] DepthR	=>	depthR - 1
+			if sdepthR < depthR 
+			if IsLeftLin
+	end
+	[] DepthR	=>	depthR
+	end
+------------- Practice ---------------------------------------*/
+	[] DepthR	=>	sdepthR
+	end
+  end
+
+//----------------------------------------------------------------------------------
+
+//--------------------------------------------------------------------------------------
+
+  rules for list[term]
+	v:variable;
+	s,t:term;
+	Lpt:equationS;
+  global
+  	[] listTerms(EmptyT)		=> nil	
+	end
+  	[] listTerms(s=t) 		=> s.t. nil
+	end
+  	[] listTerms(EmptyT:Lpt) 	=> listTerms(Lpt)
+	end
+  	[] listTerms(s=t:Lpt) 		=> s.t. listTerms(Lpt)
+	end
+  end
+//--------------------------------------------------------------------------------------
+
+  rules for list[pair[ident,variable]]
+	v : variable;
+	Lpi : list[indp];	
+  global
+  	[] indVariables($v, Lpi) =>  nil
+  	end
+  end
+
+//--------------------------------------------------------------------------------------
+
+  rules for list[variable]
+	C1, C2 : clause;
+	Np, Pp : equationS;
+	s, t : term;
+	lt : list[term];	
+  global
+  	[] listVariables(nil) => nil
+  	end
+  	[] listVariables(t.lt) => unicate(variables_of(t)) @ listVariables(lt)
+  	end
+
+  	[] listVariables(EmptyC) => nil
+  	end
+  	[] listVariables(C1*C2) =>  listVariables(C1) @ listVariables(C2)
+  	end
+  	[] listVariables([Np,Pp]) =>  listVariables(Np) @ listVariables(Pp)
+  	end
+  	[] listVariables(EmptyT) => nil
+  	end
+  	[] listVariables(s=t:Pp) =>  variables_of(s) @ variables_of(t) @ 
+					listVariables(Pp)
+  	end
+  end
+
+//--------------------------------------------------------------------------------------
+
+  rules for int
+	v : variable;	
+  global
+  	[] depthT($v) =>  1
+  	end
+  	[] sdepthT($v) =>  0
+  	end
+  end
+
+//--------------------------------------------------------------------------------------
+
+FOR EACH SS:pair[ident,pair[int,int]]; 
+	F:ident;  A:pair[int,int];
+	AL:int; AR:int
+SUCH THAT SS:=(listExtract) elem(Ars) 
+	AND F:=()first(SS) 
+	AND A:=()second(SS) 
+	AND AL:=()first(A) 
+	AND AR:=()second(A) 
+	ANDIF AL==0  
+	ANDIF AR==0 :{
+
+  rules for list[pair[ident,variable]]
+	Lpi : list[indp];	
+  global
+  	[] indVariables(F, Lpi) =>  nil
+  	end
+  end
+
+  rules for int	
+  global
+  	[] depthT(F) =>  1
+  	end
+  	[] sdepthT(F) =>  1
+  	end
+  end
+}
+
+//--------------------------------------------------------------------------------------
+ 
+rules for list[pair[ident,variable]]
+	s,t : term;
+	Lpi : list[indp];
+	n,p : equationS;
+global
+  	[] indVariables(s, Lpi)	=> unicate(indVars(s, Lpi, Lpi)	)
+	end
+
+  	[] indVariables(EmptyT, Lpi) =>  nil
+	end
+  	[] indVariables(s=t, Lpi) =>  unicate(indVariables(s,Lpi) @ indVariables(t,Lpi))
+	end
+
+  	[] indVariables(n:p, Lpi) =>  unicate(indVariables(n,Lpi) @ indVariables(p,Lpi))
+	end
+  	[] indVariables([n,p],Lpi) =>  unicate(indVariables(n,Lpi) @ indVariables(p,Lpi))
+	end
+end
+
+//--------------------------------------------------------------------------------------
+
+  rules for int	
+	a, b : int;
+  global
+  	[] max(a, b) => 
+		switch
+		case a >= b then a
+		otherwise b
+	 	end
+	end 
+  end
+//--------------------------------------------------------------------------------------
+
+//--------- GET domain and codomain ------------------------------------
+FOR EACH SS:pair[ident,pair[list[ident],ident]]; 
+	F:ident;  DC:pair[list[ident],ident]; 
+	D:list[ident]; C:ident; N:int
+SUCH THAT SS:=(listExtract) elem(Css)
+	AND F:=()first(SS) 
+	AND DC:=()second(SS) 
+	AND D:=()first(DC)
+	AND N:=()size(D)
+	AND C:=()second(DC):{
+
+rules for ident
+global
+	{ [] dom-I(F) => I-th elem(D)
+	end
+	}_I=1...N
+
+	[] codom(F) => C
+	end
+end
+
+rules for list[ident]
+global
+	[] domall(F) => D
+	end
+end
+
+}
+
+//--------- GET domain and codomain ------------------------------------
+FOR EACH SS:pair[ident,pair[list[ident],ident]]; 
+	F:ident;  DC:pair[list[ident],ident]; 
+	D:list[ident]; C:ident; N:int
+SUCH THAT SS:=(listExtract) elem(Fss)
+	AND F:=()first(SS) 
+	AND DC:=()second(SS) 
+	AND D:=()first(DC)
+	AND N:=()size(D)
+	AND C:=()second(DC):{
+
+rules for ident
+global
+	{ [] dom-I(F) => I-th elem(D)
+	end
+	}_I=1...N
+
+	[] codom(F) => C
+	end
+end
+
+rules for list[ident]
+global
+	[] domall(F) => D
+	end
+end
+
+}
+
+// for the variables v-$
+rules for ident
+	f:ident;
+global
+	[] codom($f) => $f
+	end
+end
+
+//--------------------------------------------------------------------------------------
+
+rules for list[pair[ident,list[term]]]
+	lt : list[term];
+	t : term;
+	Lts : list[pair[ident,list[term]]];
+	v : variable;
+	type, d : ident;
+global
+	[] getClasses(nil, Lts)	=>	Lts
+	end
+	[] getClasses(t.lt, Lts)	=> getClasses(lt, insert(codom(head(t)), t, Lts))
+	end
+
+
+	[] insert($d, t, [$d, lt].Lts)		=> [$d, t.lt].Lts
+	end
+	[] insert($d, t, [$type, lt].Lts)	=> [$type, lt].	insert($d, t, Lts)
+	end
+	[] insert($d, t, nil)			=> [$d, t.nil].nil
+	end
+end
+
+//--------------------------------------------------------------------------------------
+
+rules for list[term]
+	lt : list[term];
+	t : term;
+	Lts : list[pair[ident,list[term]]];
+	v : variable;
+	type, d : ident;
+global
+	[] getOneTs($d, nil)			=> nil
+	end
+	[] getOneTs($d, [$d, lt].Lts)		=> lt
+	end
+	[] getOneTs($d, [$type, lt].Lts)	=> getOneTs($d, Lts)
+	end
+end
+
+//--------------------------------------------------------------------------------------
+
+rules for list[term]
+	lt : list[term];
+	t : term;
+	v : variable;
+	type : ident;
+global
+	[] getArgs($type, nil)	=>	nil
+	end
+
+	[] getArgs($type, t.lt)	=>	
+		switch
+		case eq_ident($type, codom(head(t))) then t. getArgs($type,lt)
+		otherwise getArgs($type,lt)
+	 	end
+	end
+end
+
+//--------------------------------------------------------------------------------------
+FOR EACH SS:pair[ident,pair[int,int]]; 
+	F:ident;  A:pair[int,int];
+	AL:int; AR:int; N:int
+SUCH THAT SS:=(listExtract) elem(Ars)
+	AND F:=()first(SS) 
+	AND A:=()second(SS) 
+	AND AL:=()first(A) 
+	AND AR:=()second(A) 
+	AND N:=()AL+AR
+	ANDIF N==0:{
+
+  rules for list[term]
+	lt_1,...,lt_N : list[term];
+	TS : list[term];
+  global
+	[] consTerm(F, TS) =>	F.nil
+  	end
+  end
+
+}
+
+FOR EACH SS:pair[ident,pair[int,int]]; 
+	F:ident;  A:pair[int,int];
+	AL:int; AR:int; N:int
+SUCH THAT SS:=(listExtract) elem(Ars)
+	AND F:=()first(SS) 
+	AND A:=()second(SS) 
+	AND AL:=()first(A) 
+	AND AR:=()second(A) 
+	AND N:=()AL+AR
+	ANDIF N>0:{
+
+  rules for list[term]
+	lt_1,...,lt_N : list[term];
+	TS : list[term];
+  global
+	[] consTerm(F, TS) =>	makeTerm(F {,lt_I}_I=1...N)
+			{where lt_I := ()getArgs(dom-I(F), TS) }_I=1...N
+  	end
+  end
+
+}
+
+//--------------------------------------------------------------------------------------
+
+  rules for list[term]
+	f : ident;
+	lf : list[ident];
+  global
+  	[] get_variables(nil) 	=> 	nil
+  	end
+  	[] get_variables($f.lf) 	=> 	v-$f . get_variables(lf) 
+  	end
+  end
+//--------------------------------------------------------------------------------------
+
+  rules for list[term]
+	k : int;
+	t : term;
+	lt : list[term];
+  global
+  	[] freshListTerm(k,nil) 	=> 	nil
+  	end
+  	[] freshListTerm(k,t.lt) 	=> 	freshTerm(k,t).freshListTerm(k,lt)
+  	end
+  end
+//--------------------------------------------------------------------------------------
+
+  rules for list[term]
+	d : int;
+	t : term;
+	lt : list[term];
+  global
+  	[] elim_Term_Vars(d, nil) 	=> 	nil
+  	end
+  	[] elim_Term_Vars(d, t.lt) 	=> 	t.  elim_Term_Vars(d, lt)
+					if not Var_at(d, t)
+  	end
+  	[] elim_Term_Vars(d, t.lt) 	=>	elim_Term_Vars(d, lt)
+					if  Var_at(d, t)	
+  	end
+
+  	[] elim_Term_Strict(d, nil) 	=> 	nil
+  	end
+  	[] elim_Term_Strict(d, t.lt) 	=> 	t.  elim_Term_Strict(d, lt)
+					if not Strict_at(d, t)
+  	end
+  	[] elim_Term_Strict(d, t.lt) 	=>	elim_Term_Strict(d, lt)
+					if  Strict_at(d, t)	
+  	end
+  end
+//--------------------------------------------------------------------------------------
+
+  rules for list[term]
+	TS : list[term];
+	f : ident;
+	LC : list[ident];
+	p, d : int;
+  global
+	[] testsetOne(nil, TS, p, d) =>	TS
+  	end
+	[] testsetOne($f.LC, TS, p,d) => 
+		consTerm($f,TS @ get_variables(domall($f))) @ testsetOne(LC, TS, p, d)
+  	end
+  end
+
+//--------------------------------------------------------------------------------------
+
+//--------------------------------------------------------------------------------------
+
+FOR EACH SS:pair[ident,pair[int,int]]; 
+	F:ident;  A:pair[int,int]; N:int; NEXT:int;
+	AL:int; AR:int
+SUCH THAT SS:=(listExtract) elem(Ars) 
+	AND F:=()first(SS) 
+	AND A:=()second(SS) 
+	AND AL:=()first(A) 
+	AND AR:=()second(A) 
+	AND NEXT:=()AL+1
+	AND N:=()AL+AR
+	ANDIF N==0 :{
+  rules for list[term]
+	LC : list[ident];
+	p, d : int;
+  global
+	[] TestSet(F.LC, 1, d)	=>	F.TestSet(LC, 1, d)
+  	end
+  end
+}
+FOR EACH SS:pair[ident,pair[int,int]]; 
+	F:ident;  A:pair[int,int]; N:int; NEXT:int;
+	AL:int; AR:int
+SUCH THAT SS:=(listExtract) elem(Ars) 
+	AND F:=()first(SS) 
+	AND A:=()second(SS) 
+	AND AL:=()first(A) 
+	AND AR:=()second(A) 
+	AND NEXT:=()AL+1
+	AND N:=()AL+AR
+	ANDIF N>0 :{
+  rules for list[term]
+	TS : list[term];
+	LC : list[ident];
+	p, d : int;
+  global
+	[] TestSet(F.LC, 1, d)	=>	TestSet(LC, 1, d)
+  	end
+  end
+
+}
+
+  rules for list[term]
+	TS : list[term];
+	LC : list[ident];
+	p, d : int;
+  global
+	[] TestSet(nil, 1, d)	=>	nil
+  	end
+	[] TestSet(LC, p, p)	=>	elim_Term_Strict( p, elim_Term_Vars(p-1, 
+					unicate(testsetOne(LC, TS, p, p)) ))
+				where TS := ()unicate(TestSet(LC, p-1, p))
+  	end
+	[] TestSet(LC, p, d)	=>	testsetOne(LC, TS, p, d)
+				where TS := ()unicate(TestSet(LC, p-1, d))
+  	end
+  end
+
+//--------------------------------------------------------------------------------------
+  rules for list[pair[equationS, clause]]
+	pos : list[int];
+	S, SSigma, T, Tr : term;
+	Np, Pp, Pi, PiSigma : equationS;
+	Li, Ri, RiSigma : term;
+	matchRez : list[term]; 
+        listVar : list[term];
+	sigma : substitution;
+	LR : clause;
+  global
+	//[] cons_Clause_Neg_L(pos, S=T, Np, Pp, EmptyC) => nil
+  	//end
+	//[] cons_Clause_Neg_L(pos, S=T, Np, Pp, EmptyC*LR) => 
+	//		cons_Clause_Neg_L(pos, S=T, Np, Pp, LR)
+  	//end
+
+	[] cons_Clause_Neg_L(Tr, S=T, Np, Pp, [Pi, Li=Ri:EmptyT]) =>
+	   [PiSigma, [PiSigma:SSigma=T:Np,Pp]] . nil
+			where listVar :=() unicate(variables_ofLT(Li))
+			where matchRez := () builtinSyntacticMatching(Li,Tr,listVar,MF)
+			if neq_list[term](matchRez,MF)
+			where sigma := ()system_to_subst(listVar,matchRez)
+			where PiSigma := ()apply(sigma,Pi)
+			where RiSigma := ()apply(sigma,Ri)	
+			where SSigma := ()replace Tr by RiSigma in S	
+  	end
+
+	[] cons_Clause_Neg_L(Tr, S=T, Np, Pp, [Pi, Li=Ri:EmptyT]*LR) =>
+	   [PiSigma, [PiSigma:SSigma=T:Np,Pp]] . cons_Clause_Neg_L(Tr, S=T, Np, Pp,LR)
+			where listVar :=() unicate(variables_ofLT(Li))
+			where matchRez := () builtinSyntacticMatching(Li,Tr,listVar,MF)
+			if neq_list[term](matchRez,MF)
+			where sigma := ()system_to_subst(listVar,matchRez)
+			where PiSigma := ()apply(sigma,Pi)
+			where RiSigma := ()apply(sigma,Ri)	
+			where SSigma := ()replace Tr by RiSigma in S	
+  	end
+
+	[] cons_Clause_Neg_L(Tr, S=T, Np, Pp, [Pi, Li=Ri:EmptyT]) =>	nil
+			//where listVar :=() unicate(variables_ofLT(Li))
+			//where matchRez := () builtinSyntacticMatching(Li,Tr,listVar,MF)
+			//if neq_list[term](matchRez,MF)		
+  	end
+
+	[] cons_Clause_Neg_L(Tr, S=T, Np, Pp, [Pi, Li=Ri:EmptyT]*LR) =>
+		cons_Clause_Neg_L(Tr, S=T, Np, Pp,LR)
+			//where listVar :=() unicate(variables_ofLT(Li))
+			//where matchRez := () builtinSyntacticMatching(Li,Tr,listVar,MF)
+			//if neq_list[term](matchRez,MF)		
+  	end
+
+//--------------------------------------------------------------------------------------
+
+	[] cons_Clause_Neg_R(Tr, S=T, Np, Pp, [Pi, Li=Ri:EmptyT]) =>
+	   [PiSigma, [PiSigma:S=SSigma:Np,Pp]] . nil
+			where listVar :=() unicate(variables_ofLT(Li))
+			where matchRez := () builtinSyntacticMatching(Li,Tr,listVar,MF)
+			if neq_list[term](matchRez,MF)
+			where sigma := ()system_to_subst(listVar,matchRez)
+			where PiSigma := ()apply(sigma,Pi)
+			where RiSigma := ()apply(sigma,Ri)	
+			where SSigma := ()replace Tr by RiSigma in T	
+  	end
+
+	[] cons_Clause_Neg_R(Tr, S=T, Np, Pp, [Pi, Li=Ri:EmptyT]*LR) =>
+	   [PiSigma, [PiSigma:S=SSigma:Np,Pp]] . cons_Clause_Neg_R(Tr, S=T, Np, Pp,LR)
+			where listVar :=() unicate(variables_ofLT(Li))
+			where matchRez := () builtinSyntacticMatching(Li,Tr,listVar,MF)
+			if neq_list[term](matchRez,MF)
+			where sigma := ()system_to_subst(listVar,matchRez)
+			where PiSigma := ()apply(sigma,Pi)
+			where RiSigma := ()apply(sigma,Ri)	
+			where SSigma := ()replace Tr by RiSigma in T	
+  	end
+
+	[] cons_Clause_Neg_R(Tr, S=T, Np, Pp, [Pi, Li=Ri:EmptyT]) =>	nil
+  	end
+
+	[] cons_Clause_Neg_R(Tr, S=T, Np, Pp, [Pi, Li=Ri:EmptyT]*LR) =>
+		cons_Clause_Neg_R(Tr, S=T, Np, Pp,LR)		
+  	end
+
+//--------------------------------------------------------------------------------------
+
+	[] cons_Clause_Pos_L(Tr, S=T, Np, Pp, [Pi, Li=Ri:EmptyT]) =>
+	   [PiSigma, [PiSigma:Np,SSigma=T:Pp]] . nil
+			where listVar :=() unicate(variables_ofLT(Li))
+			where matchRez := () builtinSyntacticMatching(Li,Tr,listVar,MF)
+			if neq_list[term](matchRez,MF)
+			where sigma := ()system_to_subst(listVar,matchRez)
+			where PiSigma := ()apply(sigma,Pi)
+			where RiSigma := ()apply(sigma,Ri)	
+			where SSigma := ()replace Tr by RiSigma in S	
+  	end
+
+	[] cons_Clause_Pos_L(Tr, S=T, Np, Pp, [Pi, Li=Ri:EmptyT]*LR) =>
+	   [PiSigma, [PiSigma:Np,SSigma=T:Pp]] . cons_Clause_Pos_L(Tr, S=T, Np, Pp,LR)
+			where listVar :=() unicate(variables_ofLT(Li))
+			where matchRez := () builtinSyntacticMatching(Li,Tr,listVar,MF)
+			if neq_list[term](matchRez,MF)
+			where sigma := ()system_to_subst(listVar,matchRez)
+			where PiSigma := ()apply(sigma,Pi)
+			where RiSigma := ()apply(sigma,Ri)	
+			where SSigma := ()replace Tr by RiSigma in S	
+  	end
+
+	[] cons_Clause_Pos_L(Tr, S=T, Np, Pp, [Pi, Li=Ri:EmptyT]) =>	nil
+  	end
+
+	[] cons_Clause_Pos_L(Tr, S=T, Np, Pp, [Pi, Li=Ri:EmptyT]*LR) =>
+		cons_Clause_Pos_L(Tr, S=T, Np, Pp,LR)		
+  	end
+
+//--------------------------------------------------------------------------------------
+
+	[] cons_Clause_Pos_R(Tr, S=T, Np, Pp, [Pi, Li=Ri:EmptyT]) =>
+	   [PiSigma, [PiSigma:Np,S=SSigma:Pp]] . nil
+			where listVar :=() unicate(variables_ofLT(Li))
+			where matchRez := () builtinSyntacticMatching(Li,Tr,listVar,MF)
+			if neq_list[term](matchRez,MF)
+			where sigma := ()system_to_subst(listVar,matchRez)
+			where PiSigma := ()apply(sigma,Pi)
+			where RiSigma := ()apply(sigma,Ri)	
+			where SSigma := ()replace Tr by RiSigma in T	
+  	end
+
+	[] cons_Clause_Pos_R(Tr, S=T, Np, Pp, [Pi, Li=Ri:EmptyT]*LR) =>
+	   [PiSigma, [PiSigma:Np,S=SSigma:Pp]] . cons_Clause_Pos_R(Tr, S=T, Np, Pp,LR)
+			where listVar :=() unicate(variables_ofLT(Li))
+			where matchRez := () builtinSyntacticMatching(Li,Tr,listVar,MF)
+			if neq_list[term](matchRez,MF)
+			where sigma := ()system_to_subst(listVar,matchRez)
+			where PiSigma := ()apply(sigma,Pi)
+			where RiSigma := ()apply(sigma,Ri)	
+			where SSigma := ()replace Tr by RiSigma in T	
+  	end
+
+	[] cons_Clause_Pos_R(Tr, S=T, Np, Pp, [Pi, Li=Ri:EmptyT]) =>	nil
+  	end
+
+	[] cons_Clause_Pos_R(Tr, S=T, Np, Pp, [Pi, Li=Ri:EmptyT]*LR) =>
+		cons_Clause_Pos_R(Tr, S=T, Np, Pp,LR)		
+  	end
+
+  end
+
+//--------------------------------------------------------------------------------------
+rules for clause
+	P : equationS;
+	C : clause;
+	L : list[pair[equationS, clause]];
+global
+//	[] Get_Precond(nil) => EmptyC
+//	end
+//	[] Get_Precond([P,C] . L) => [EmptyT,P] * Get_Precond(L)
+//	end
+	[] Get_Precond(L) => [EmptyT,make_Precond(L):EmptyT]
+	end
+
+	[] Get_Clauses(nil) => EmptyC
+	end
+	[] Get_Clauses([P,C] . L) => C * Get_Clauses(L)
+	end
+end
+
+rules for equationS
+	P : equationS;
+	C : clause;
+	L : list[pair[equationS, clause]];
+global
+	[] make_Precond(nil) => EmptyT
+	end
+	[] make_Precond([P,C] . L) => P : make_Precond(L)
+	end
+end
+
+//--------------------------------------------------------------------------------------
+
+rules for clause
+	P, R : equationS;
+	C, L : clause;
+global
+	[] OrderNp(EmptyC) => EmptyC
+	end
+	[] OrderNp([R,P]) => [R,OrderEqs(P)]
+	end
+	[] OrderNp(C * L) => OrderNp(C) * OrderNp(L)
+	end
+end
+
+rules for equationS
+	C, L : equationS;
+	s, t : term;
+global
+	[] OrderEqs(EmptyT) => EmptyT
+	end
+	[] OrderEqs(s=t) => 
+			switch
+			case rpo(s,t) then s=t
+			otherwise t=s
+	 		end
+	end
+	[] OrderEqs(C : L) => OrderEqs(C) : OrderEqs(L)
+	end
+end
+
+//--------------------------------------------------------------------------------------
+
+rules for string
+	C : clause;
+	S : string;
+	ct, pt,qt,rt,st,tt,ut : string;
+	cp : clause;
+global
+	[] printClause(S,C) => S
+			where ut := ()print("\n")
+			where pt := ()print("\n")
+			where qt := ()print("%%%%%%%%%%%%%%%%%% Execute =>")
+			where rt := ()print(S)
+			where tt := ()print(" on:\n")
+			where ct := ()printCl(C)
+			where st := ()print("\n")
+	end
+end
+
+rules for string
+	C : clause;
+	S : string;
+	ct,pt,qt,rt,st,tt : string;
+	cp : clause;
+global
+	[] printE(C) => pt
+			where pt := ()print("\n")
+			where qt := ()print("Clauses to prove:\n")
+			where tt := ()print("---------------------------------------\n")
+			where ct := ()printCl(C)
+	end
+end
+
+rules for string
+	C : clause;
+	S : string;
+	ct, pt,qt,rt,st,tt : string;
+	cp : clause;
+global
+	[] printH(C) => pt
+			where pt := ()print("\n")
+			where qt := ()print("Hypothesis:\n")
+			where tt := ()print("---------------------------------------\n")
+			where ct := ()printCl(C)
+	end
+end
+
+rules for string
+	C,L : clause;
+	Np, Pp : equationS;
+	ct,dt,pt,rt : string;
+	cp,dp : clause;
+global
+	[] printCl(EmptyC) => pt
+			where pt := ()print(" ")
+	end
+	[] printCl([Np,Pp]) => pt
+			where cp := ()print([Np,Pp])
+			where pt := ()print(" ")
+	end
+	[] printCl(EmptyC*L) => ct
+			where ct := ()printCl(L)
+	end
+	[] printCl(C*L) => ct
+			where dt := ()printCl(C)
+			where pt := ()print("\n")
+			where ct := ()printCl(L)
+	end
+end
+
+//--------------------------------------------------------------------------------------
+
+end

@@ -1,0 +1,34 @@
+LPL fib description
+  query    of sort int
+  result   of sort int
+  import   fib
+//  start with () fib(15) 
+  start with () query
+//  start with () fib(33) 
+
+end
+
+/*
+avec int :
+fib(33) (DEBUG)
+	result[34217317] = (5702887)
+	129.703u 0.449s 2:23.82
+
+fib(33) (fast)
+	47.768u 0.332s 0:50.28
+
+fib(33) end
+	[] result term: 
+	     5702887
+	total time : 7.700 sec
+
+avec builtinInt :
+fib(33) (fast)
+	result[11405773] = 5702887
+	rewrite_step = 11405773
+	3.856u 0.105s 0:04.04 
+
+fib(33) end
+	total time : 1.556 sec
+
+*/

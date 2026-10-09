@@ -1,0 +1,16 @@
+module plus
+
+import global int;
+
+rules for int
+declare x:int;
+bodies
+  [DO1] x => x+x end
+  [DO2] x => x+x+x end
+end
+
+strategy do
+  dk(DO1 DO2)
+end
+
+end

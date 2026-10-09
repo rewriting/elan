@@ -1,0 +1,16 @@
+package
+identification
+         name=elan
+      version=3.6g
+     location=http://www.loria.fr/ELAN/Soft
+         info=http://www.loria.fr/ELAN
+  description='The ELAN system provides an environment for specifying
+  and prototyping deduction systems in a language based on rewrite
+  rules controlled by strategies.'
+     keywords=rewrite rules, strategies
+
+interface
+
+requires
+  elan-interpreter 3.6g
+  elan-compiler 4.3f

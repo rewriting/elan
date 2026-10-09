@@ -1,0 +1,9 @@
+def B1 = in.'out.B1
+
+def B2 = (B1[int/out] # B1[int/in]) \ Internal
+
+def Internal = {int}
+
+def B4 = B2|B2|B2|B2
+def B5 = B2|B2|B2|B2|B2
+def B6 = B2|B2|B2|B2|B2|B2

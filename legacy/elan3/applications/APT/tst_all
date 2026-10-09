@@ -1,0 +1,13 @@
+#! /bin/csh -f
+if ($1 =~ *I*) then
+echo "Interpreter"
+itest queens queens queens queens
+itest queensLIN queensLIN queensLIN queensLIN
+itest queensLOG queensLOG queensLOG queensLOG
+#itest S28 S28 S28 S28
+##itest S28LIN S28LIN S28LIN S28LIN
+#itest S28LOG S28LOG S28LOG S28LOG
+itest buble buble buble buble
+#itest bubleLIN bubleLIN bubleLIN bubleLIN
+#itest bubleLOG bubleLOG bubleLOG bubleLOG
+endif

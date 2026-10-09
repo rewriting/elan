@@ -1,0 +1,7 @@
+LPL tlist description
+  query    of sort term
+  result   of sort term
+  import   tlist
+  start with () query
+
+end

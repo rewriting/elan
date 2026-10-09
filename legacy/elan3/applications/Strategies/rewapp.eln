@@ -1,0 +1,17 @@
+module rewapp[X]
+
+import global list[X] symbol[3,X,list[X],list[X],list[X]];
+
+op global
+  app(@,@,@)  : (X list[X] list[X]) list[X];
+end
+
+rules for list[X]
+ a	: X;
+	r, l	: list[X];
+bodies
+  [] app(a,r,l) => a.l		end
+end
+
+end
+

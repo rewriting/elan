@@ -1,0 +1,58 @@
+module fact
+import 
+global 
+	int //list[int]
+	//bool
+;end
+
+stratop
+  global
+	factorial	: <int -> int>			builtin;
+
+	addone 		: <int -> int>			builtin;
+	strat 		: <int -> int>			builtin;
+end	
+
+operators global
+ @ '&''&' @  : (int int) int ;
+end
+
+rules for int
+          x, y     : int;
+global
+
+  [r1]  1	=>	1					end
+  [r1b] 2	=>	4					end
+  [r2]  x	=> 	x && y
+			if x >= 1		
+			where y := (factorial) x-1		end
+
+
+  [] x && y	=>	x * y		end
+  [add] x	=>	x+1		end
+
+end
+
+
+
+strategies for  int
+implicit
+ [] factorial => dk(r1b, r1, r2) 
+ end
+
+/*
+ [] addone => dc(add)
+ end
+
+ [] strat => factorial;addone
+*/
+
+// [] strat => dk(r1b, r1, r2)  ; dc(add)
+ [] strat => factorial ; dc(add)
+ end
+
+end
+
+
+end
+

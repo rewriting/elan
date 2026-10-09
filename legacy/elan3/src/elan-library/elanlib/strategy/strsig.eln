@@ -1,0 +1,48 @@
+// This file is generated automatically: do not edit it directly. 
+  module strsig[X,Y]
+          import global bool eq[Y]; end
+          sort <X->Y> StrList[X,Y]
+               IfApplication IfApplicationList 
+               Assignment AssignmentList; 
+          end
+
+          stratop global  //--- le symbole d'application de strategies
+             @]@          : (<X->Y> X) Y  pri 1                                           code -180; 
+            [@]@          : (<X->Y> X) Y  pri 1 alias @]@:;
+            ((@))@        : (StrList[X,Y] X) Y;
+                          //--- les strategies elementaires
+            dk(@)         : (StrList[X,Y]) <X->Y>                                         code -182;
+            dc(@)         : (StrList[X,Y]) <X->Y>                                         code -181;
+            first(@)      : (StrList[X,Y]) <X->Y> alias dc(@):;
+            one(@)        : (StrList[X,Y]) <X->Y>                                         code -190;
+
+            fail          : <X->Y>                                                        code -183;
+                          //---  une suite de strategies sequentielle, parallelle
+            @ @           : (<X->Y> StrList[X,Y]) StrList[X,Y]                            code -185;
+            @,@           : (<X->Y> StrList[X,Y]) StrList[X,Y] alias @ @:;
+            @ , @ : (<X->Y> StrList[X,Y]) StrList[X,Y]                            code -179 alias @ @:;  // ca possera de pbs
+
+            Epsilon       : StrList[X,Y]                                                  code -189;
+                          //--- les extenstions du langage de strategies
+            if @ then @ else @ fi : (bool <X->Y> <X->Y>) <X->Y>                           code -184;
+                          //--- les strategies 'let-in'
+            let @ in @    : (AssignmentList <X->Y>) <X->Y>;
+            (let @ in @)  : (AssignmentList <X->Y>) <X->Y>  alias let @ in @:;
+            @             : (Assignment) AssignmentList                                   code 146;
+            @ , @         : (AssignmentList Assignment) AssignmentList                    code 147;
+
+                          //--- la syntaxe de strategies primales
+            [@ => @]      : (X Y) <X->Y>;
+            [@ => @ @]    : (X Y IfApplicationList) <X->Y>;
+
+            if @          : (bool) IfApplication                                          code 145;
+            @             : (IfApplication) IfApplicationList                             code 146;
+            @ , @         : (IfApplicationList IfApplication)             IfApplicationList           code 147;
+
+	    tone(@)        : (<X->Y>) <X->Y> code -205;
+	    tall(@)        : (<X->Y>) <X->Y> code -206;
+	    tsome(@)       : (<X->Y>) <X->Y> code -207;
+          end
+  end  
+   
+

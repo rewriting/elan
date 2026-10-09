@@ -1,0 +1,69 @@
+module lt
+
+import 	global eq[Bool]	strat[lterm]; 				end
+sort Bool Int lterm; 						end
+operators global
+        FALSE		: Bool;
+        TRUE		: Bool;
+	@ OR @		: (Bool Bool) Bool;
+
+        // zero		: Int;
+        one		: Int;
+        succ(@)		: (Int) Int;
+
+  	@		: (Int) lterm;
+	(@ @)		: (lterm lterm) lterm;
+	la @		: (lterm) lterm;
+//  local
+	repl(@,@,@)	: (Int lterm lterm) lterm;
+	free(@,@)	: (Int lterm) Bool;
+end
+
+stratop global
+	repeat	: <lterm>;
+  	lis  	: <lterm>;
+  	los  	: <lterm>;
+end
+
+rules for Bool
+b, bb	: Bool;
+v, w	: Int;
+M, N	: lterm;
+global
+  []	TRUE OR b => TRUE				end
+  []    b OR bb	=> bb					end
+
+  []	free(v,w) => TRUE if v == w			end
+  []	free(v,(M N)) => free(v,M) OR free(v,N)		end
+  []	free(v,la M) => free(succ(v),M)			end
+  []	free(v,M) => FALSE				end
+end
+
+rules for lterm
+v, w	: Int;
+M, N, Q	: lterm;
+global
+  []	repl(v,w,M) => M if v == w				end
+  []	repl(v,w,M) => w				end
+  []	repl(v,(M N),Q) => (repl(v,M,Q) repl(v,N,Q))	end
+  []	repl(v,la N,M) => la repl(succ(v),N,M)		end
+  [beta](la M N) => repl(one,M,N)		end
+  [eta]	(la M one) => M 
+		if free(one,M) == FALSE 		end
+end
+
+strategies for lterm
+s	: <lterm>;
+implicit
+  [.] lis => dc((lis id),(id lis), la lis, dc(beta,eta) )	end
+  [.] los => dc(dc(beta,eta), (los id),(id los), la los )	end
+  [.] repeat => dc( lis; repeat, id)				end
+end
+
+end
+
+
+
+
+
+

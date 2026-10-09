@@ -1,0 +1,20 @@
+ state(O,[X,-,-],[-,-,-],[-,-,-]) end
+
+ end end
+end
+
+ state(O,[X,-,O],[X,-,-],[-,-,-]) end
+
+ end end
+end
+
+ state(O,[X,-,O],[X,X,-],[O,-,-]) end
+
+ end end
+end
+
+ state(O,[X,-,O],[X,X,X],[O,-,O]) end
+
+ end end
+end
+

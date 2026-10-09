@@ -1,0 +1,40 @@
+// This file is generated automatically: do not edit it directly. 
+  module string2refterm
+          import global string REF 
+                  divers2string//[X]
+                  ref2string[Term]; 
+          local
+             io[string];
+          end
+          sort X; end
+              operators global
+                string2refterm(@':'@,@)       : (string string Program) Term;
+                refterm2string(@,@)           : (Term Program) string;
+              end
+   
+          rules for Term
+          s, sorte        : string;
+          P               : Program;
+          global
+            []    string2refterm(s:sorte,P) =>
+                      string2term(string2refstring(s:sorte,P):"Term","REF.ref")
+            end
+          end
+
+          rules for string
+          x       : Term;
+          P       : Program;
+          void    : string;
+          void1   : string;
+          void2   : string;
+          global
+            []    refterm2string(x,P) => 
+                          refstring2string(term2string(x,"REF.ref"),P)
+          //              where void1:=()writeln(stdout,"term2string=")
+          //              where void:=()writeln(stdout,term2string(x,"REF.ref"))
+          //              where void2:=()writeln(stdout,"-----------")
+            end
+          end
+  end  
+   
+

@@ -1,0 +1,34 @@
+module test
+
+import
+  local
+    bool
+    eq[bool]
+  ;
+end
+
+
+sort
+  term
+;
+end
+
+
+operators
+  global
+    a : term;
+    b : term;
+
+    f(@) : (term) term;
+end
+
+rules for term
+    x : term;
+  global
+
+  [] f(x) => x
+  end
+
+end
+
+end

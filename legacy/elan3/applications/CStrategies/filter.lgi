@@ -1,0 +1,8 @@
+LPL filter description
+  
+query		of sort  	list[integ]
+		result of sort 	list[integ]
+		import 	filter
+		start with 	[filter(large)]query
+end
+

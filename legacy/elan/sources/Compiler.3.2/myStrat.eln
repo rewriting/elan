@@ -1,0 +1,21 @@
+module myStrat[Sort,Strat]
+
+import global exp1;
+end
+
+sort Sort;
+end
+
+stratop global
+  bottomup_Strat : <Sort> bs;
+end
+
+strategies for Sort
+implicit
+ [.] bottomup_Strat => dc one( Strat )
+ end
+
+end
+
+
+end

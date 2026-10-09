@@ -1,0 +1,82 @@
+
+
+              --> ELAN Tree Automata Library <--
+
+                           Sept. 98
+
+
+
+implements basic algorithms on tree automata, such as: intersection,
+union, cleaning and renaming as well as algorithms described in 	
+
+[1] T. Genet Decidable approximations of sets of descendants and sets
+    of normal forms. In T. Nipkow, editor, Proceedings 9th
+    International Conference on Rewriting Tecniques and Applications, 
+    Tsukuba (Japan), volume 1379 of Lecture Notes in Computer Science, 
+    pages 151-165. Springer-Verlag, 1998.
+
+
+This ELAN Library requires ELAN version 3.0 or greater.
+
+
+The Library can be directly used through three different interfaces:
+-------------------------------------------------------------------
+
+1) For basic automata manipulation and computation, use the interface
+   "automaton.lgi". An example of specification is also provided:
+   "ex_automaton.spc". To run basic operations on this specification
+   simply type:
+
+	elan automaton.lgi ex_automaton.spc
+
+   Have a look at the file "ex_automaton.spc" for specification syntax
+   and examples of queries.
+
+
+
+
+2) For computing approximation automaton (see [1]) or automaton
+   recognising set of irreducible terms, use the interface
+   "nf_automaton.lgi". To see an example, try:
+
+	elan nf_automaton.lgi ex_nf_automaton.spc
+
+   Have a look at the file "ex_nf_automaton.spc" for specification
+   syntax and examples of queries. 
+
+
+
+3) For proving termination of sequential reduction relation (see [1]), 
+   use the interface "nf_automaton.lgi".
+   module. For example, try:
+
+	elan termination.lgi ex_termination.spc
+
+   Have a look at the file "ex_termination.spc" for specification
+   syntax examples of queries.
+
+For a compiled version
+elan <file>.lgi <spec_file>.spc ; gmake --file <file>.make ; a.out
+
+
+*******************************************************************************
+*                                                                             *
+*   VERY IMPORTANT: Please check that for all rules l->r in your TRSs,        *
+*   the set of variables of r is INCLUDED in the set of variables of l, and   *
+*   l is a linar term.                                                        *
+*                                                                             *
+*******************************************************************************
+
+
+
+
+
+                                      Thomas Genet - 9 september 1998
+                                      
+                                      genet@loria.fr
+                                      
+                                      LORIA - INRIA Lorraine - BP 101 
+                                      54602 VILLERS-LES-NANCY 
+                                      CEDEX FRANCE
+                                      
+                                      

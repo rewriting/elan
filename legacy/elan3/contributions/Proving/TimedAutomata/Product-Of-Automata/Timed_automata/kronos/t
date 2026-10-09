@@ -1,0 +1,26 @@
+/*TRAIN*/
+
+#locs 4
+#trans 4
+#clocks X
+#sync approach exit
+
+loc: 0
+     prop: FAR
+     invar: TRUE
+     trans: TRUE => approach; X:=0;  goto 1
+
+loc: 1
+     prop: NEAR
+     invar: X<=5
+     trans: X>2 => in; ;  goto 2
+
+loc: 2
+     prop: ON
+     invar: X<=5
+     trans: TRUE => out; ;  goto 3
+
+loc: 3
+     prop: AFTER
+     invar: X<=5
+     trans: TRUE => exit; ;  goto 0

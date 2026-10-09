@@ -1,0 +1,83 @@
+module nqueensAC
+
+import bool builtinInt list[builtinInt];
+end
+
+sort set;
+end
+
+operators
+global
+  nqueens(@)  : (builtinInt) list[builtinInt] ;
+local
+  queens(@,@) : (set list[builtinInt]) list[builtinInt] ;
+  ok(@,@,@)   : (builtinInt builtinInt list[builtinInt]) bool ;
+  @ U @       : (set set) set (AC) ;
+  (@)         : (builtinInt) set ;
+  [@,@]       : (builtinInt set) set ;
+  Set(@)      : (builtinInt) set ;
+  Empty       : set ;
+end
+
+stratop 
+ global
+   queens	: <list[builtinInt]> bs ;
+ local
+   extractPos   : <set>	bs ;
+end
+
+rules for set 
+  S: set ;
+  i: builtinInt ;
+global 
+  [] Set(0) => Empty U (0)       end
+  [] Set(i) => Set(i-1) U (i)    end
+  [extractrule] (i) U S => [i,S] end
+end
+
+rules for list[builtinInt]
+  n:builtinInt;
+global
+  [] nqueens(n) => queens(Set(n-1),nil) end
+end
+
+rules for list[builtinInt]
+  pos        : builtinInt;
+  set,newSet : set ;
+  sol        : list[builtinInt];
+
+local
+
+   [final] queens(Empty,sol) => sol     end  
+
+   [queensrule]  queens(set,sol) => queens(newSet,pos.sol)
+		   where (set) [pos,newSet] :=(extractPos) set
+		   if ok(1,pos,sol)
+   end
+   
+end
+
+rules for bool
+  p,d,diff : builtinInt;
+  l : list[builtinInt];
+global
+  [] ok(diff,d,nil)	=> true				end
+//  [] ok(diff,d,p.l)	=> false	if d == p  	end
+//  no more necessary
+  [] ok(diff,d,p.l)	=> false        if d-p == diff  end
+  [] ok(diff,d,p.l)	=> false        if p-d == diff  end
+  [] ok(diff,d,p.l)	=> ok(diff+1,d,l)		end
+end
+
+
+strategies for set
+implicit
+  [] extractPos => dk(extractrule) end
+end
+
+strategies for list[builtinInt]
+implicit
+  [] queens => repeat*(dk(queensrule)); dc(final) end
+end
+
+end			

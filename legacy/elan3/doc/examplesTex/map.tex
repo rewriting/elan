@@ -1,0 +1,18 @@
+
+\let\CF=\rm
+\File{\/users\/protheo\/pot\/ELAN\/version.1.17\/Pem.manual\/examples\/map.eln},{12:53},{Nov 28 1995}
+\L{\LB{\K{module} map[X,Mod,Fun]}}
+\L{\LB{\K{import} list[X] Mod;}}
+\L{\LB{\K{op} \K{global}}}
+\L{\LB{     map\_Fun(@): ( list[X] ) list[X];}}
+\L{\LB{\K{endop}}}
+\L{\LB{}}
+\L{\LB{\K{rules} \K{for} list[X]}}
+\L{\LB{\K{declare} e : X;}}
+\L{\LB{        l : list[X];}}
+\L{\LB{\K{bodies}}}
+\L{\LB{  [] map\_Fun(nil) =\> nil}\Tab{48}{\K{end}}}
+\L{\LB{  [] map\_Fun(e.l) =\> Fun(e) . map\_Fun(l) }\Tab{48}{\K{end}}}
+\L{\LB{\K{end} \K{of} \K{rules}}}
+\L{\LB{}}
+\L{\LB{\K{end} \K{of} \K{module}}}

@@ -1,0 +1,19 @@
+LPL llterm description
+
+query		of sort  	lterm
+		result of sort 	lterm
+		import		lterm
+		start with 	[reduce]query
+
+// (la 1.(1 1) la 1.(1 1))
+// (la (1 1) la (1 1))
+
+/*
+zero = la la 1
+add  = la la la (2 ((3 2) 1))
+one  = (  la la la (2 ((3 2) 1))  la la 1   ) = la la (2 1)
+two  = (  la la la (2 ((3 2) 1))  la la (2 1)  ) = la la (2 (2 1))
+three= (  la la la (2 ((3 2) 1))  la la (2 (2 1)) ) = la la (2 (2 (2 1)))
+*/
+
+end

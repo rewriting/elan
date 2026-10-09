@@ -1,0 +1,38 @@
+// elan.t4 -q UnifFA sigFA
+
+
+X + Y = X*Y end 
+
+X + C.0(X) = 1 end
+
+C.0(X) = X end
+
+X + Y = C.0(X) end
+
+X+Y = U*X end
+
+X+Y = U*X & X*Y=U end
+
+X+Y = U*X & X*Y=U+1 end
+
+// elan.t4 -q RestrictUnifFA sigFA
+
+(X=a | elim(a,X)) end
+
+(X=Y*a | elim(a,X)) end 
+
+(X=C.0(Y*a) | elim(a,X)) end
+
+(X = Y*a & Z = Y+a | elim(a,X) & elim(a,Z)) end
+
+// elan.t4 -q combi0plusFA sig0plusFA
+
+(f(x,y) =f(a,z) , z =  C.0(x) , true | x.y.z.nil , [nil,nil] , nil) end
+
+(x = g(y) , y = z*x , true | x.y.z.nil , [nil,nil] , nil) end
+
+(f(x,y) = f(a,b) , true , true | x.y.nil , [nil,nil] , nil) end
+
+(f(x,y) = x , true , true | x.y.nil , [nil,nil] , nil) end
+
+(f(x,x) = y, y = z + x, true | x.y.z.nil , [nil,nil] , nil) end

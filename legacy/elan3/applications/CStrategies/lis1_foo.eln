@@ -1,0 +1,34 @@
+module lis1_foo
+
+import global 	any[foo] foo
+		any[tree[foo]] tree[foo] 
+		Any strat[Any]
+		lis1;
+op global
+  swap	: <Any>;
+end
+
+strategies for <Any>
+ x,z	: tree[foo];
+	y	: foo;
+bodies
+//  []	[swap] (tree[foo])node(x,y,z) => (tree[foo])node(z,y,x)	end
+//  []	[swap] (tree[foo])node(x,y,z) => (tree[foo])node(z,cc,x)	end
+  []	[swap] (foo)aa => (foo)bb	end
+  []	[swap] (foo)bb => (foo)cc	end
+  []	[swap] (foo)cc => (foo)aa	end
+end
+
+end
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,11 @@
+#! /bin/csh -f
+#        LGI             SPC           INP          OUT
+
+if ($1 =~ *I*) then
+echo "Interpreter"
+itest    rewriting       diff          diff         idiff
+if ($1 =~ *L*) then
+itest    rewriting       lambdaMember  lambdaMember ilambdaMember
+endif
+endif
+

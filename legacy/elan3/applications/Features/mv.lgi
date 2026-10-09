@@ -1,0 +1,9 @@
+LPL mv description 
+
+        query           of sort Foo
+        result          of sort Foo
+        import          mv
+
+        start with      ()query
+
+end

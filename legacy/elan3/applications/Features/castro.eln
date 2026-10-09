@@ -1,0 +1,20 @@
+module castro[X]
+
+import global int eq[int]
+IF X == 5 : { bool }
+IF X == 6 : { string }
+	; 
+end
+
+operators global
+  foo(@)	: (int) int;
+end
+
+rules for int
+x:int;
+global
+IF X == 5 : { 		[]	foo(x) => x+1		end		}
+IF X == 6 : {		[]	foo(x) => x-1		end		}
+			[]	foo(x) => x		end	
+end
+

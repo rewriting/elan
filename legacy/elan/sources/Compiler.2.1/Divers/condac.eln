@@ -1,0 +1,113 @@
+module condac
+
+import global eq[term];
+end
+
+sort term;
+end
+
+operators global
+  F(@,@)	: (term term) term (AC);
+  G(@,@)	: (term term) term (AC);
+
+  f(@)		: (term) term ;
+  g(@,@)	: (term term) term ;
+  h(@)		: (term) term ;
+  h1(@)		: (term) term ;
+  h2(@)		: (term) term ;
+
+  start : term;
+  a     : term;
+  a1    : term;
+  a2    : term;
+  a3    : term;
+  a4    : term;
+  b1    : term;
+  b2    : term;
+  b3    : term;
+  b4    : term;
+  b     : term;
+  c     : term;
+  d     : term;
+end
+
+stratop global
+  S  : <term>   builtin;
+end
+
+
+rules for term
+	x,y,z,u,v : term;
+global
+//  [] start => F(h(a),F(h(b),F(h(b),h(c)))) 	end
+//  [] start => F(c,c) 	end
+
+//  [] start => F(a1,F(a2,F(a3,F(a4,G(b1,G(b2,G(b3,b4))))))) end
+
+//  [] start => f(G(a1,G(a1,G(b1,b1)))) end
+//  [] start => f(f(G(a1,G(f(a1),G(b1,b1))))) end
+
+
+
+//  [] f(G(x,y)) => g(x,y) end
+//  [] f(G(x,x)) => f(x) end
+//  [] f(G(x,G(x,y))) => g(x,y) end
+
+//  [] f(f(G(x,f(a1)))) => h(x) end
+
+
+//  [] start => F(f(G(a1,G(a2,G(a3,f(a4))))),F(b1,b2)) end
+//  [] F(f(G(f(x),y)),z) => g(f(x),g(y,z)) end
+
+
+//  [] F(x,x)      => x end
+//  [] F(x,a2)      => a2 end
+//  [] F(x,F(x,x)) => b end
+//  [] F(x,b)      => a end
+
+//  [] F(x,G(y,z)) => g(x,g(y,z)) end
+
+/*
+  [] F(x,G(y,z)) => g(x,g(y,z))
+	if x==a2
+   end
+*/
+
+//  [] F(x,G(y,z)) => x if x!=x end
+
+//  [] start => F(a1,F(a2,G(h(a1),G(h(a2),G(h(a1),h(a2)))))) end
+
+  [] start => F(a1,F(a2,G(h2(a1),h2(a2)))) end
+  [] F(x,G(h1(y),h1(y))) => g(x,y) end
+  [] F(x,G(h2(y),h2(y))) => g(x,y) end
+
+/*
+  [] F(x,h(a)) => x if x==c	end
+  [] F(x,h(b)) => x if x==h(d)	end
+  [] F(x,h(y)) => x
+	if y==a
+	if x==h(c)	
+  end
+*/
+
+//  [] F(x,a4) => x if x != x end
+
+
+
+  [r1]	a => a end
+  [r2]	b => b end
+  [r3]	c => c end
+
+end
+
+/*
+strategies for term
+implicit
+  [] S => one(r1,r2,r3) end
+end
+*/
+
+
+
+end
+

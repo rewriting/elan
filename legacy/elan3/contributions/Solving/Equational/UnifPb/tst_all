@@ -1,0 +1,12 @@
+#! /bin/csh
+#        LGI         SPC        INP        OUT
+
+if ($1 =~ *I*) then
+echo "Interpreter"
+itest    unification  simplesig     ex1       ex1
+itest    unification  simplesig     ex2       ex2
+itest    unification  simplesig     ex3       ex3
+itest    unificationC ctesig        exC1      exC1
+itest    unificationC ctesig        exC2      exC2
+endif
+

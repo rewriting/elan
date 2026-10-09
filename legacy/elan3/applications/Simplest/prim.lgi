@@ -1,0 +1,8 @@
+LPL prim description 
+
+      query 		of sort list
+      result 		of sort list
+      import   		prim 
+      start with 	(qqq) query
+
+end

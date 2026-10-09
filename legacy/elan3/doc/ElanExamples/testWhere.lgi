@@ -1,0 +1,8 @@
+LPL testWhere description 
+
+query 		of sort foo
+      result 	of sort foo
+      modules   testWhere
+      start with (toto)query
+
+end of LPL description

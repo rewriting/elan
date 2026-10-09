@@ -1,0 +1,3 @@
+SUBDIRS = algo datatypes parser
+
+

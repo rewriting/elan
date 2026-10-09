@@ -1,0 +1,9 @@
+LPL normap description 
+
+	query		of sort list[Foo]
+	result		of sort list[Foo]
+	import		normap
+
+	start with () go
+
+end

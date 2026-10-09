@@ -1,0 +1,54 @@
+obj lambda is
+
+sort lterm .
+protecting INT .
+op	la _		: lterm -> lterm       [strat (0 1)] .
+op	( _ _ )		: lterm lterm -> lterm [strat (0 1 2)].
+op	# _		: Int -> lterm .
+
+op 	repl(_,_,_)	: Int lterm lterm -> lterm .
+op	free(_,_)	: Int lterm -> Bool .
+
+vars v w : Int .
+vars M N Q : lterm .
+
+
+eq 	free(v,# v) = true .
+eq	free(v,(M N)) = free(v,M) or free(v,N) .
+eq	free(v,la M) = free( v + 1, M) .
+eq 	free(v, M) = false .
+
+eq	repl(v,# v,M) = M .
+eq 	repl(v, # w ,M) = # w .
+eq	repl(v, (M N), Q) = (repl(v,M,Q) repl(v,N,Q)) .
+eq	repl(v, la N, M) = la repl(v + 1, N, M) .
+
+eq	(la M N) = repl(1, M, N) .
+eq	(la M # 1) = if free(1,M) == false then M fi .
+
+endo
+
+reduce (la la (# 2 # 1) la la # 1) .
+reduce (la la la (# 2 ((# 3 # 2) # 1)) la la # 1) .
+reduce (la la la (# 2 ((# 3 # 2) # 1))
+               (la la la (# 2 ((# 3 # 2) # 1))
+		la la # 1 )) .
+
+
+reduce 
+(la la la (# 2 ((# 3 # 2) # 1))
+ (la la la (# 2 ((# 3 # 2) # 1))
+  (la la la (# 2 ((# 3 # 2) # 1))
+   (la la la (# 2 ((# 3 # 2) # 1))
+    (la la la (# 2 ((# 3 # 2) # 1))
+     (la la la (# 2 ((# 3 # 2) # 1))
+      (la la la (# 2 ((# 3 # 2) # 1))
+	(la la la (# 2 ((# 3 # 2) # 1))
+         (la la la (# 2 ((# 3 # 2) # 1))
+          (la la la (# 2 ((# 3 # 2) # 1))
+           (la la la (# 2 ((# 3 # 2) # 1))
+            (la la la (# 2 ((# 3 # 2) # 1))
+             (la la la (# 2 ((# 3 # 2) # 1))
+              (la la la (# 2 ((# 3 # 2) # 1))
+               (la la la (# 2 ((# 3 # 2) # 1))
+	       la la # 1 ))))))))))))))) .

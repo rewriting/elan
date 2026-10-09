@@ -1,0 +1,132 @@
+module unification0
+import 	global 	term ctes ;
+ 	local  	int identifier bool pair[identifier,int]
+		list[pair[identifier,int]] eq[variable] eq[term]
+		eqSystem occur[variable,term] occur[variable,eqSystem];
+end
+
+operators
+  global
+    @ = @	: (term term) equation 		alias @=@:;
+    @ 		: ( equation ) eqSystem		alias @:;
+  local
+    mergingClash(@,@,@)	: ( eqSystem variable term ) bool;
+
+// CR modif (15/01/97) 
+
+    fold(@) : (eqSystem) eqSystem ;
+    cunj(@,@): (eqSystem eqSystem) eqSystem ;
+
+end
+
+// CR modif (15/01/97) 
+
+rules for eqSystem
+
+// declare 
+        P,Q:eqSystem ;
+        s,t:term ;
+
+global
+
+[] cunj(P,Q & s=t) => cunj(P,Q) & s=t end
+[] cunj(P,s=t) => P & s=t end
+[] cunj(P,true) => P end
+[] cunj(P,false) => false end
+
+[] fold(P & Q) => cunj(fold(P),fold(Q)) end
+[] fold(s = t) => s = t end 
+[] fold(true)  => true end
+[] fold(false) => false end
+
+[foldrule] P => fold(P) end 
+
+end
+
+
+
+
+
+rules for eqSystem
+// declare	
+       P,Q,R:eqSystem; s,t:term; x,y:variable; n:int ;
+global
+
+  [delete] 	P & x=y	=> P		
+			if x==y			
+  end
+
+// CR modif
+
+  [delete]      P & t=t => P
+  end
+
+  [coalesce] 	P & x=y	=> x=y & apply(x->y,P)
+			if x!=y
+  end
+  [conflict]	P & s=t	=> false
+			if head(s) != head(t) 
+			   and not(isvar(s)) and not(isvar(t))
+  end
+
+  [conflict]    P & cte.n = t => false 
+                    if cte.n != t and not(isvar(t)) 
+  end
+
+  [conflict]    P & t = cte.n => false
+                    if cte.n != t and not(isvar(t)) 
+  end
+ 
+  [occCheck1]	P & x=s	=> false
+			if occurs x in s and not isvar(s)
+  end
+  [occCheck2]	P & s=x	=> false
+			if occurs x in s and not isvar(s)
+  end
+  [eliminate1]	P & x=s	=> x=s & apply(x->s,P)
+			if not(occurs x in s) 
+  end
+  [eliminate2]	P & s=x	=> x=s & apply(x->s,P)
+			if not(occurs x in s) 
+  end
+  [matchClash]	P & s=x	=> false
+			if not isvar(s) 
+  end
+  [mergeClash] 	P & x=s => false
+			if mergingClash(P,x,s)
+  end
+  [mergePass1] 	P & x=s => x=s & P
+  end
+  [mergePass2] 	P & x=s => x=s & P
+			if not(occurs x in P) // and not mergingClash(P,x,s)
+  end
+  [mergePass3] 	P & x=s => P
+			if occurs x in P // and  not mergingClash(P,x,s)
+  end
+
+
+//  [unfold]	 P & (Q & R)		=> (P & Q) & R		end
+
+
+// initial and final transitions rules
+
+  [trueelim]	P & true	=> P				end
+  [truepass]	P & true	=> true & P			end
+  [trueadd]	P 		=> true & P			end
+  [falsepropag]	false		=> false			end
+  [truepropag]	true		=> true				end
+
+end
+
+rules for bool
+// declare 
+       P,Q:eqSystem; s,t:term; x,y:variable;
+global
+  [] mergingClash(true,x,s) => false				end
+  [] mergingClash(P & Q,x,s) => mergingClash(P,x,s) 
+				or mergingClash(Q,x,s) 		end
+  [] mergingClash(x=s,y,t) => x==y and s!=t			end
+end
+
+
+end

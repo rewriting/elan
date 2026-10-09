@@ -1,0 +1,13 @@
+module builtinEqMolecule[X]
+import global bool;
+end
+
+sort X;
+end
+
+operators global
+  builtinIsEqMolecule(@,@)    : (X X) bool                 code 215;
+end
+
+end  
+ 

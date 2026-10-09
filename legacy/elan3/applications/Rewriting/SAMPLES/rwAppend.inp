@@ -1,0 +1,2 @@
+append( cons(a,cons(b,nil)) , cons(b,cons(c,nil)) )
+end

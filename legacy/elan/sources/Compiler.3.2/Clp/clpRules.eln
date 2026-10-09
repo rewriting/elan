@@ -1,0 +1,228 @@
+module clpRules
+
+import 	global
+
+        int bool term eqSystem decompose syntacticUnification
+        atomEq sldState list[atom] ;
+   
+        local 
+        
+        pair[atom,list[atom]]
+        list[pair[atom,list[atom]]]
+
+	occur[variable,atom] 
+	applySubstOn[list[atom]] 
+        applySubstOn[atom] 
+        applySubstOn[term]
+	eq[Psymbol] eq[term] eq[eqSystem] pair[eqSystem,eqSystem] ;
+
+end
+
+sort sldState ;
+
+end
+
+
+operators 
+
+  local 
+ 
+   eqSystemProj(@)       : (sldState) eqSystem ;        
+
+   existhead(@)          : (atom) bool;
+   infer(@,@)            : (eqSystem eqSystem) pair[eqSystem,eqSystem];
+   consistent(@)         : (eqSystem) bool;
+
+end
+
+stratop 
+
+global
+
+sldResolution : <sldState>      builtin ;
+clpStrat      : <eqSystem>      builtin ;
+
+inferStrat    : <pair[eqSystem,eqSystem]> builtin ;
+
+end 
+
+
+
+  rules for eqSystem
+
+          P : eqSystem ;
+          s1,s2  : sldState;
+          l: list[atom] ;
+
+  global
+ 
+  [] eqSystemProj( E Vars(0): (nil | P , true) ) => P end
+
+  [execution] clpExecute(l)=> eqSystemProj(s2)
+			     where s1 := () E Vars(0): (l | true , true)
+                             where s2 := (sldResolution) s1 end
+
+  end
+
+
+   
+  rules for sldState
+        
+          HC:pair[atom,list[atom]]; 
+          H:atom; 
+          B:list[atom];
+
+          C,S	: eqSystem;
+	  A    : list[atom];
+	  a    : atom;
+	  sigma : substitution;
+	  n	: int;
+
+  global
+
+  [rew] E Vars(n): (a.A | C , S )      => 
+
+  E Vars(n+varnum_Vars): (sigma(B) @ A | C , decompose a=sigma(H) and add to S)
+                        where HC:= (listExtract) elem(clpProg)
+                        where H:= () first(HC)
+                        where B:= () second(HC)
+        		where sigma := () rename_subst(varlist_Vars,n)
+                        if head(H)==head(a) 
+                        end
+  end
+
+
+   rules for bool
+
+      HC:pair[atom,list[atom]]; 
+      H:atom; 
+      
+      a : atom ;
+
+   global
+
+   []  existhead(a)=>true
+                   where HC:= (listExtract) elem(clpProg)
+                   where H:= () first(HC)
+                   if head(H)==head(a) end
+
+   [] existhead(a)=>false end
+
+   end
+
+
+
+
+  rules for sldState
+  
+   C,S,SolvedForm, SolvedFormEQE, FirstComponent, SecondComponent : eqSystem;
+     
+     A   : list[atom];
+     a   : atom;
+     n   :int;
+     t,u : term;
+
+  global
+
+  [failrule]   E Vars(n): (a.A | C , S)=> fail
+                   if not existhead(a) end
+
+  [add_constraint]    E Vars(n): (t=u.A | C , S) =>
+                      E Vars(n): (A | C , S & t=u) end
+
+
+  [inconsistency]     E Vars(n): (A | C , S) => fail
+                      if not consistent(C)  end 
+
+  [success]      E Vars(n): (nil | C , true) => 
+                 E Vars(0): (nil | SolvedFormEQE , true)
+                 where SolvedForm := (unify) C 
+                 where SolvedFormEQE := (delete_new_variable) SolvedForm end
+
+
+  [inference]    E Vars(n): (A | C , S) =>
+                 E Vars(n): (A | FirstComponent , SecondComponent)
+                  where FirstComponent := () first(infer(C,S))
+                  where SecondComponent:= () second(infer(C,S))
+                  if neq_eqSystem(S,true)  end
+
+  end
+
+
+  rules for bool
+
+   C,SolvedForm  :eqSystem;
+
+   global
+
+   [] consistent(C)=> neq_eqSystem(SolvedForm,false)
+              where SolvedForm := (unify) C end
+
+   end
+
+ 
+   rules for pair[eqSystem,eqSystem]
+  
+   C,S  :eqSystem ;
+
+   PeqS: pair[eqSystem,eqSystem] ;
+
+   global
+
+    [] infer(C,S)=> PeqS
+                    where PeqS:= (inferStrat) [C,S] end
+   end
+
+
+
+
+
+   rules for pair[eqSystem,eqSystem]
+  
+   C,S  :eqSystem ;
+
+   global
+
+   [inferRule] [C,S] => [conj(C,S),true] end
+   end
+
+
+strategies for pair[eqSystem,eqSystem]
+
+implicit
+
+[] inferStrat => dc(inferRule) end
+
+end
+
+
+
+
+strategies for sldState
+
+implicit
+
+[] sldResolution =>
+repeat*(
+      dc( 
+         dc one(add_constraint,inference, inconsistency, failrule),
+         dk(rew))
+) ;
+dc(success)
+end
+
+end
+
+strategies for eqSystem
+
+implicit 
+
+[] clpStrat => dk(execution) 
+end
+
+end
+
+end
+
+
+

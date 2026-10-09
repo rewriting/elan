@@ -1,0 +1,8 @@
+LPL sieve description
+
+query		of sort  	LazyList
+		result of sort 	LazyList
+		import 		sieve
+		start with 	()query
+
+end

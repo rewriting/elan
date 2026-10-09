@@ -1,0 +1,101 @@
+module queens10
+import 
+  bool builtinInt list[builtinInt] occur[builtinInt,list[builtinInt]];
+end
+operators
+  global
+    queens	: list[builtinInt];
+  local
+    ok(@,@,@)	: ( builtinInt builtinInt list[builtinInt] ) bool;
+    give(@)	: (list[builtinInt]) builtinInt;
+
+end
+
+stratop 
+  global
+	queens	: <list[builtinInt]>	builtin;
+  local
+	try	: <builtinInt>		builtin;
+end
+
+rules for list[builtinInt]
+        p1,p2,p3,p4,p5,p6,p7,p8,p9,p10 : builtinInt;
+	pp1,pp2,pp3,pp4,pp5,pp6,pp7,pp8,pp9,pp10 : list[builtinInt];
+local
+   [queensrule] queens	=> p10.pp9
+			where p1:=(try) 0 //give(nil)
+			where p2:=(try) 0 //give(p1.nil)
+			where pp1:=() p1.nil
+			if ok(1,p2,pp1)
+			where p3:=(try) 0 //give(p2.pp1)
+			where pp2:=() p2.pp1
+			if ok(1,p3,pp2)
+			where p4:=(try) 0 //give(p3.pp2)
+			where pp3:=() p3.pp2
+			if ok(1,p4,pp3)
+			where p5:=(try) 0 //give(p4.pp3)
+			where pp4:=() p4.pp3
+			if ok(1,p5,pp4)
+			where p6:=(try) 0 //give(p5.pp4)
+			where pp5:=() p5.pp4
+			if ok(1,p6,pp5)
+			where p7:=(try) 0 //give(p6.pp5)
+			where 	pp6:=() p6.pp5
+			if ok(1,p7,pp6)
+			where p8:=(try) 0 //give(p7.pp6)
+			where pp7:=() p7.pp6
+			if ok(1,p8,pp7)
+			where p9:=(try) 0 //give(p8.pp7)
+			where pp8:=() p8.pp7
+			if ok(1,p9,pp8)
+			where p10:=(try) 0 //give(p9.pp8)
+			where pp9:=() p9.pp8
+			if ok(1,p10,pp9)
+
+  end
+end
+
+rules for bool
+          p,d,diff : builtinInt;
+	l : list[builtinInt];
+global
+  [] ok(diff,d,nil)	=> true				end
+  [] ok(diff,d,p.l)	=> false	if d == p  	end
+  [] ok(diff,d,p.l)	=> false        if d-p == diff  end
+  [] ok(diff,d,p.l)	=> false        if p-d == diff  end
+  [] ok(diff,d,p.l)	=> ok(diff+1,d,l)		end
+end
+
+
+rules for builtinInt
+	x:builtinInt;
+	l : list[builtinInt];
+local
+
+{
+//  [tryrule] give(l) => I if not(occurs(I,l))	end
+  [tryrule] x => I end
+}_I=1...10
+
+end
+
+strategies for builtinInt
+implicit
+  [] try => dk(tryrule) end
+end
+
+strategies for list[builtinInt]
+implicit
+  [] queens => dk(queensrule) end
+end
+
+//strategies for builtinInt
+//local
+//  [try] dk(tryrule) end
+//end
+//strategies for list[builtinInt]
+//global
+//  [queens] dk(queensrule) end
+//end
+
+end			

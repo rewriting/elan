@@ -1,0 +1,997 @@
+PARSER_BEGIN(REFParser)
+package rem.parser;
+  import java.util.*;
+  import rem.compiler.*;
+  import rem.exception.*;
+
+public class REFParser {
+
+}
+
+PARSER_END(REFParser)
+
+  SKIP :
+{
+  " "
+    | "\t"
+    | "\n"
+    | "\r"
+    |  <"//" (~["\n","\r"])* ("\n" | "\r" | "\r\n")>
+    |  <"/*" (~["*"])* "*" ("*" | ~["*","/"] (~["*"])* "*")* "/">
+    }
+
+TOKEN : {
+  <INTEGER: (["0"-"9"])+>
+              |  <CHARACTER_LITERAL: "\'" (~["\'","\\","\n","\r"] | "\\" (["n","t","b","r","f","\\","\'","\""] | ["0"-"7"] (["0"-"7"])? | ["0"-"3"] ["0"-"7"] ["0"-"7"])) "\'">
+/*
+  |  <STRING_LITERAL: "\"" (~["\"","\\","\n","\r"] | "\\" (["n","t","b","r","f","\\","\'","\""] | ["0"-"7"] (["0"-"7"])? | ["0"-"3"] ["0"-"7"] ["0"-"7"]))* "\"">
+*/
+              |  <STRING_LITERAL: "\"" (~["\"","\\","\r"] | "\\" (["n","t","b","r","f","\\","\'","\""] | ["0"-"7"] (["0"-"7"])? | ["0"-"3"] ["0"-"7"] ["0"-"7"]))* "\"">
+              }
+
+TOKEN : {
+  < LEXEM_DECLARATION: "Identifiers" >
+                         | < SORT_DECLARATION: "Sorts" >
+                         | < MODULE_DECLARATION: "Modules" >
+                         | < RULENAME_DECLARATION: "RuleNames" >
+                         | < STRATEGYNAME_DECLARATION: "StrategyNames" >
+                         | < ENDDEF: "EndDef" >
+                         | < END: "end" >
+                         | < NIL: "nil" >
+                         | < DOT: "." >
+                         | < COMMA: "," >
+                         }
+
+/*
+TOKEN : {
+ <IDENTIFIER: <LETTER> (<LETTER> | <DIGIT>)*>
+|  <#LETTER: ["$","A"-"Z","_","a"-"z"]>
+|  <#DIGIT: ["0"-"9"]>
+}
+*/
+
+int readInt() :
+{
+  boolean negative = false;
+  Token token;	
+  int res;
+}
+{
+  ["-" {negative=true;}]
+    token = <INTEGER>
+  {
+    res = Integer.parseInt(token.image);
+    if(negative)
+    res = -res;
+    return res;
+  }
+}
+
+Query Start(OutputCode s) :
+{
+  Query query;
+  int numberOfGrammarRule = 0;
+}
+{
+  
+  <LEXEM_DECLARATION>        LexemIdentifierDeclaration()
+     ( <END> | <COMMA> )
+    { if(!Flags.quiet && !Flags.debug) System.out.print("."); }
+  <SORT_DECLARATION>         LexemSortDeclaration()
+     ( <END> | <COMMA> )
+    { if(!Flags.quiet && !Flags.debug) System.out.print("."); }
+  <MODULE_DECLARATION>       LexemModuleDeclaration()
+     ( <END> | <COMMA> )
+    { if(!Flags.quiet && !Flags.debug) System.out.print("."); }
+  <RULENAME_DECLARATION>     LexemRuleNameDeclaration()
+     ( <END> | <COMMA> )
+    { if(!Flags.quiet && !Flags.debug) System.out.print("."); }
+  <STRATEGYNAME_DECLARATION> LexemStrategyNameDeclaration()
+     ( <END> | <COMMA> )
+    {
+      if(!Flags.quiet && !Flags.debug) System.out.print(".");
+        // Tables for Earley
+      s.write("int gram[] = {\n");
+    }
+
+  numberOfGrammarRule = GrammarDeclaration(s,numberOfGrammarRule)
+    ( <END> | <COMMA> )
+  { if(!Flags.quiet && !Flags.debug) System.out.print("."); }
+  numberOfGrammarRule = GrammarDeclaration(s,numberOfGrammarRule)
+    ( <END> | <COMMA> )
+  { if(!Flags.quiet && !Flags.debug) System.out.print("."); }
+  numberOfGrammarRule = GrammarDeclaration(s,numberOfGrammarRule)
+  {
+    if(!Flags.quiet && !Flags.debug) System.out.print(".");
+      // Tables for Earley
+    s.write("0};\n");
+    s.write("int pos = " + numberOfGrammarRule + ";\n");
+  }
+
+  ( <END> | <COMMA> )
+    { if(!Flags.quiet && !Flags.debug) System.out.print("."); }
+  RuleDeclaration()
+    ( <END> | <COMMA> )
+    { if(!Flags.quiet && !Flags.debug) System.out.print("."); }
+  StrategyDeclaration()
+    ( <END> | <COMMA> )
+    { if(!Flags.quiet && !Flags.debug) System.out.print("."); }
+  query = QueryDeclaration()
+  { if(!Flags.quiet && !Flags.debug) System.out.print("."); }
+  [ <END> ]
+    <EOF>
+    { if(!Flags.quiet && !Flags.debug) System.out.println(""); }
+
+  {
+    return query;
+  }
+}
+
+void LexemIdentifierDeclaration() :
+{
+  Token tokenId;
+  int id;
+  String lexName;
+  Lexem lex;
+}
+{
+  ( id=readInt() ":" tokenId=<STRING_LITERAL> <DOT>
+    {
+      lexName = tokenId.image.substring(1,tokenId.image.length()-1);
+      lex = new LexemIdentifier( id, lexName );
+      lex.put();
+    }
+    )* <NIL>
+    }
+
+void LexemSortDeclaration() :
+{
+  Token tokenId;
+  int id;
+  String lexName;
+  Lexem lex;
+}
+{
+  ( id=readInt() ":" tokenId=<STRING_LITERAL> <DOT>
+    {
+      lexName = tokenId.image.substring(1,tokenId.image.length()-1);
+      lex = new LexemSort( id, lexName );
+      lex.put();
+    }
+    )* <NIL>
+    }
+
+void LexemModuleDeclaration() :
+{
+  Token tokenId;
+  int id;
+  String lexName;
+  Lexem lex;
+}
+{
+  ( id=readInt() ":" tokenId=<STRING_LITERAL> <DOT>
+    {
+      lexName = tokenId.image.substring(1,tokenId.image.length()-1);
+      lex = new LexemModule( id, lexName );
+      lex.put();
+    }
+    )* <NIL>
+    }
+
+void LexemRuleNameDeclaration() :
+{
+  Token tokenId;
+  int id;
+  String lexName;
+  Lexem lex;
+}
+{
+  ( id=readInt() ":" tokenId=<STRING_LITERAL> <DOT>
+    {
+      lexName = tokenId.image.substring(1,tokenId.image.length()-1);
+      lex = new LexemRuleName( id, lexName );
+      lex.put();
+    }
+    )* <NIL>
+    }
+
+void LexemStrategyNameDeclaration() :
+{
+  Token tokenId;
+  int id;
+  String lexName;
+  Lexem lex;
+}
+{
+  ( id=readInt() ":" tokenId=<STRING_LITERAL> <DOT>
+    {
+      lexName = tokenId.image.substring(1,tokenId.image.length()-1);
+      lex = new LexemStrategyName( id, lexName );
+      lex.put();
+    }
+    )* <NIL>
+    }
+
+
+int GrammarDeclaration(OutputCode s,int numberOfGrammarRule) :
+{
+  int idSort;
+  int isBuiltin;
+  LexemSort lexSort;
+}
+{
+  (
+   
+    "GrammarForSort" idSort=readInt()  ":" isBuiltin=readInt() ":" 
+    {
+      lexSort = LexemSort.get(idSort);
+      if(isBuiltin==1) {
+        lexSort.setBuiltin();
+      }
+    }
+    ( numberOfGrammarRule = SymbolDeclaration(lexSort,s,numberOfGrammarRule) <DOT> )* <NIL>
+    ( <END> | <DOT> )
+    )*
+    <ENDDEF>
+    {
+      return numberOfGrammarRule;
+    }
+}
+
+int SymbolDeclaration(Lexem lexSort, OutputCode s,int numberOfGrammarRule) :
+{
+  int intGrammar;
+  int intSym;
+  int intArity;
+  int intInfo;
+  int intSemantic;
+  int intStrategy;
+  int intTheory;
+  int intLocStrat;
+
+  Symbol sym;
+  Lexem lexem;
+  Vector vectorLex = new Vector(10);
+  Lexem[] arrayLex;
+    // for Earley tables
+  int i,type;
+  int vectorLexSize = 0;
+}
+{
+  intGrammar  = readInt() ":"  // unused
+    intSym      = readInt() ":"
+    intArity    = readInt() ":"  // unused
+    intInfo     = readInt() ":"  // unused
+    intSemantic = readInt() ":"
+    intTheory   = readInt() ":"
+    intStrategy = readInt() ":"
+
+    ( lexem = ALexem() <DOT>
+      {
+	vectorLex.addElement(lexem);
+        if (lexem != LexemIdentifier.blank) {
+          vectorLexSize++;
+        }
+      }
+      )+ <NIL> ":"
+    ( intLocStrat = readInt() <DOT>
+      {
+          // unused
+          // Do nothing
+      }
+      )* <NIL>
+  {
+
+    arrayLex = new Lexem[vectorLex.size()];
+    vectorLex.copyInto(arrayLex);
+    vectorLex.removeAllElements();
+
+      /*
+       * Generation des tableaux pour Earley
+       */
+      // Global Rule
+    s.write("1,");
+    int info = intArity+(intInfo*(007777+1));
+    s.write(info + ",");
+    s.write(intSym + ",");
+    s.write(lexSort.getCode() + ",");
+    s.write(vectorLexSize + ",");
+
+    numberOfGrammarRule += 5;
+    for(i=0 ; i<arrayLex.length ; i++) {
+      lexem = (Lexem)arrayLex[i];
+      if(lexem != LexemIdentifier.blank) {
+          // Type
+        if(lexem instanceof LexemIdentifier) type = 0;
+        else if(lexem instanceof LexemSort) type = 1;
+        else if(lexem instanceof LexemChar) type = 2;
+        else if(lexem instanceof LexemNum) type = 3;
+        else 	throw new InternalError("Wrong lexem in REF file");
+        s.write(type + ",");
+        s.write(lexem.getCode() + ",");
+        numberOfGrammarRule += 2;
+      }
+    }
+    s.write("\n");
+      
+    if(Flags.strat > 0 && intStrategy != 0) {	// Peter
+      if (ElanConstants.isFsym(intStrategy)) {
+        sym = new SymbolFsym(intSym,arrayLex,lexSort,intSemantic,intStrategy);
+        sym.put(); }
+      else if (ElanConstants.isLab(intStrategy)) {
+        sym = new SymbolLab(intSym,arrayLex,lexSort,intSemantic,intStrategy);
+        sym.put(); }
+      else if (ElanConstants.isApply(intStrategy)) {
+        sym = new SymbolApply(intSym,arrayLex,lexSort,intSemantic,intStrategy);
+        sym.put(); }
+      else { // if (ElanConstants.isDstr(intStrategy))
+        sym = new SymbolDstr(intSym,arrayLex,lexSort,intSemantic,intStrategy);
+        sym.put(); }					// Peter
+    } else if( intSemantic != 0 ) {
+      sym = new SymbolBuiltin(intSym,arrayLex,lexSort,intSemantic,intTheory);
+      sym.put();
+      if(intSemantic<0 && Symbol.get(-intSemantic)==null) {
+        sym = new SymbolBuiltin(-intSemantic,arrayLex,lexSort,-intSemantic,intTheory);
+        sym.put();
+      }
+    } else if( intTheory == 0 ) {
+      sym = new SymbolFree(intSym,arrayLex,lexSort);
+      sym.put();
+    } else if( intTheory == 2 ) {
+      sym = new SymbolAC(intSym,arrayLex,lexSort);
+      sym.put();
+    } 
+    return numberOfGrammarRule;
+  }
+  
+}
+
+Lexem ALexem() :
+{
+  Lexem lex;
+  int id;
+}
+{
+  "Ident(" id=readInt() ")"
+  {
+    return LexemIdentifier.get(id);
+  }
+  | "Type(" id=readInt() ")"
+    {
+      return LexemSort.get(id);
+    }
+  | "Char(" id=readInt() ")"
+    {
+      lex=LexemChar.get(id);
+      if(lex==null) {
+	lex = new LexemChar(id);
+	lex.put();
+      }
+      return lex;
+    }
+  | "Num(" id=readInt() ")"
+    {
+      lex=LexemNum.get(id);
+      if(lex==null) {
+	lex = new LexemNum(id);
+	lex.put();
+      }
+      return lex;
+    }
+  | "Blank"
+    {
+      return LexemIdentifier.blank;
+    }
+}
+
+void RuleDeclaration() :
+{
+  int intModule;
+  int intInfo;
+  int intAC;
+  int intVarNum;
+
+  Term leftside;
+  Term rightside;
+  Lexem ruleName=null;
+  Lexem ruleSort;
+  int idSort;
+  RewriteRule rule;
+  int id;
+  int ruleNameIndex;
+  int i;
+  List linearConditions;
+  BranchEvaluation branch;
+}
+{
+  ( "RULE("
+    ruleNameIndex = readInt() ","
+    {
+      if( ruleNameIndex != -1 ) {
+        ruleName = LexemRuleName.get(ruleNameIndex);
+      } else {
+        ruleName = null;
+      }
+    }
+    idSort   = readInt() ","
+    {
+      ruleSort = LexemSort.get(idSort);
+    }
+    intModule = readInt() ","
+    intInfo   = readInt() ","
+    intAC     = readInt() ","
+
+      
+      // Nombre de variables apparaissant dans la regle
+    intVarNum = readInt() ","
+    leftside=unflattenedElanTerm()  ","
+    rightside=ElanTerm() ","
+    {
+        // calcul de l'ONF
+      leftside.flatten();
+      leftside.orderedNormalForm();
+        // construction de la regle sans wheres
+      rule = new RewriteRule(ruleName,
+                             ruleSort,
+                             leftside,rightside,
+                             null,
+                             intVarNum);
+      if(Flags.debug) {
+        System.out.println("Rule:\t" + ruleName + "\n\tlhs = " + leftside);
+      }
+    }
+      // parse et ajoute les wheres
+    branch = Wheres(rule)
+    {
+      rule.setBranch(branch);
+    }
+    ")"
+    ( <END> | <DOT> )
+    {
+      if(rule.getLeftside().containsExtensionVariable()) {
+        if(Flags.debug) {
+          System.out.println("extended rules are not compiled:\n" + rule);
+        }
+      } else {
+          // Linearise leftside
+        if(Flags.debug) {
+          System.out.println("Linearisation");
+        }
+        linearConditions = leftside.linearise(rule);
+          // insertion des conditions en tete
+        branch.addAll(0,linearConditions);
+        
+        if(Flags.debug && !linearConditions.isEmpty()) {
+            //System.out.println("  --> " + leftside);
+          System.out.println(rule);
+        }
+
+        if(Flags.debug) {
+          System.out.println("Transformation phase 2");
+        }
+        try{
+          rule.transformation();
+        } catch (RuleTransformed e) {
+          System.out.println("Rule Transformed");
+        } catch (RuleCompiled e) {
+          System.out.println("Rule Compiled");
+        } catch (CompileError e) {
+          System.out.println("Compile Error");
+        }
+  
+          /**************************************************
+           *** DEBUT DE LA COMPILATION
+           **************************************************/
+        rule.variableNumbering();
+        
+        RewriteRule.addElement(rule);
+      }
+        /*
+      try{
+        if(rule.isCompilable()) {
+          RewriteRule.addElement(rule);
+        } 
+      } catch (ACPatternNotCompiled e) {
+	if(!Flags.quiet) {
+          if(Flags.warnings) {
+            System.out.println("\nWarning: " + leftside);
+            System.out.println("This pattern is not compiled");
+          }
+	}
+      } catch (ACPatternWithSeveralACSubterms e) {
+        System.out.println("\nProblem with pattern: " + leftside);
+        System.out.println("\n" + e);
+        System.out.println("This pattern cannot be compiled");
+        System.out.println("Please, apply a program transformation as described in the manual");
+        System.exit(1);
+      } catch (CompileError e) {
+        System.out.println("\nError with pattern: " + leftside);
+        System.out.println("\n" + e);
+        System.out.println("This pattern cannot be compiled");
+        System.out.println("Please, apply a program transformation as described in the manual");
+        System.exit(1);
+      }
+        */
+
+      
+    }
+    )+
+    <ENDDEF>
+    }
+
+Term ElanTerm() :
+{
+  Term term;
+}
+{
+  term = BuildElanTerm()
+  {
+      //System.out.println("term before flatten = " + term);
+    term.flatten();
+    term.orderedNormalForm();
+    return term;
+  }
+}
+
+Term unflattenedElanTerm() :
+{
+  Term term;
+}
+{
+  term = BuildElanTerm()
+  {
+    return term;
+  }
+}
+
+
+Term BuildElanTerm() :
+{
+  Symbol symbol;
+  Lexem lex;
+  Lexem sort;
+  Vector subterms=null;
+  int idFsym;
+  int idVar;
+  int idSort;
+  Object value;
+  int intValue;
+  String stringValue;
+}
+{
+  "FSYM(" subterms=ElanTerms() "," idFsym=readInt() ")"
+  {
+    symbol=Symbol.get(idFsym);
+    if(symbol == null) {
+      throw new InternalError("symbol sym" + idFsym + " not found");
+    }
+    return new Term(symbol,subterms);
+  }
+  | "VAR(" idVar=readInt() "," idSort=readInt() ")"
+    {
+      sort = LexemSort.get(idSort);
+      symbol=SymbolVariable.getCreate(idVar,sort);
+      return new Term(symbol,subterms);
+    }
+  | "EVAR(" idVar=readInt() "," idSort=readInt() ")"
+    {
+      sort = LexemSort.get(idSort);
+      symbol=SymbolExtensionVariable.getCreate(idVar,sort);
+      return new Term(symbol,subterms);
+    }
+  | "INT(" intValue=readInt() ")"
+    {
+      symbol = SymbolInteger.get(intValue);
+      if(symbol == null) {
+	symbol = new SymbolInteger(intValue, LexemSort.sortInteger);
+	symbol.put();
+      }
+      return new Term(symbol,subterms);
+    }
+  | "IDENT(" intValue=readInt() ")"
+    {
+      symbol = SymbolIdentifier.get(intValue);
+      if(symbol == null) {
+	symbol = new SymbolIdentifier(intValue, LexemSort.sortIdentifier);
+	symbol.put();
+      }
+      return new Term(symbol,subterms);
+    }
+  | "STRING(" stringValue=ElanString() ")"
+    {
+      symbol = SymbolString.get(stringValue);
+      if(symbol == null) {
+	symbol = new SymbolString(stringValue, LexemSort.sortString);
+	symbol.put();
+      }
+      return new Term(symbol,subterms);
+    }
+
+}
+
+
+String ElanString() :
+{
+  String stringValue = new String();
+  int code;
+}
+{
+  (
+    code=readInt() <DOT>
+    {
+      stringValue+= (new Character((char)code)).toString();
+    }
+    )* <NIL>
+    {
+      return "\"" + stringValue + "\"";
+    }
+}
+
+
+
+Vector ElanTerms() :
+{
+  Vector subterms = new Vector(2);
+  Term t;
+}
+{
+  ( t=BuildElanTerm()
+    {
+      subterms.addElement(t);
+    }
+    <DOT>
+    )* <NIL>
+    {
+      return subterms;
+    }
+}
+
+
+  // ajoute les wheres a la regle
+BranchEvaluation Wheres(RewriteRule rule) :
+{
+  LocalEvaluation locEval;
+  List list = new LinkedList();
+  List conditions;
+}
+{
+  ( 
+    (   locEval = Condition()
+      {
+        list.add(locEval);
+      }
+        | locEval = Choice(rule)
+      {
+        list.add(locEval);
+      }
+        | locEval = LocalAffectation()
+      {
+        list.add(locEval);
+          // linearise locEval et ajoute eventuellement des conditions
+        conditions = ((LocalAffectation)locEval).linearise(rule);
+        list.addAll(conditions);
+      }
+        )
+     
+    <DOT>
+    )* <NIL>
+    {
+      return new BranchEvaluation(list);
+    }
+}
+
+Condition Condition() :
+{
+  Term term;
+}
+{
+  "IFF(" term=ElanTerm() ")"
+  {
+    return new Condition(term);
+  }
+}
+
+LocalAffectation LocalAffectation() :
+{
+  Term leftside;
+  Term rightside;
+  Lexem strategyName=null;
+  LocalAffectation where;
+  int stratNameIndex;
+  int intSort;
+}
+{
+  "WHERE("
+    leftside=ElanTerm() ","
+    stratNameIndex = readInt() ","
+    rightside=ElanTerm()
+    ")"
+  {
+    if( stratNameIndex != -1 ) {
+      strategyName = LexemStrategyName.get(stratNameIndex);
+    }
+    where = new LocalAffectation(leftside,strategyName,rightside);
+    return where;
+  }
+  | "PWHERE("
+      leftside=ElanTerm() ","
+      intSort = readInt() ","
+      stratNameIndex = readInt() ","
+      rightside=ElanTerm()
+      ")"
+    {
+      if( stratNameIndex != -1 ) {
+	strategyName = LexemStrategyName.get(stratNameIndex);
+      }
+      where = new LocalAffectation(leftside,strategyName,rightside);
+      return where;
+    }
+}
+
+Choice Choice(RewriteRule rule) :
+{
+  List list = new ArrayList();
+  BranchEvaluation branch; 
+}
+{
+  "TRY("
+    ( LOOKAHEAD(2) branch = Wheres(rule) <DOT>
+      {
+	list.add(branch);
+      } 
+      )* <NIL> ")"
+    {
+      return new Choice(list);
+    }
+}
+
+void StrategyDeclaration() :
+{
+  Strategy strat;
+  Lexem stratName;
+  int intModule;
+  StrategyTerm rightside;
+  int id;
+  int idSort;
+  Lexem sort;
+}
+{
+  (
+    "STRATEGY("
+    id        = readInt() ","
+    idSort    = readInt() ","
+    intModule = readInt() ","
+    rightside = StrategyBody()
+    ")"
+    ( <END> | <DOT> )
+    {
+      if(!Flags.quiet && !Flags.debug) {
+          //System.out.print(".");
+      }
+      stratName = LexemStrategyName.get(id);
+      sort = LexemSort.get(idSort);
+      strat = new Strategy(stratName,sort,rightside);
+      Strategy.addElement(strat);
+    }
+    )*
+    <ENDDEF>
+    }
+
+StrategyTerm StrategyBody() :
+{
+  StrategyTerm head;
+  StrategyTerm tail=null;
+  Vector subterms = new Vector(2);
+}
+{
+  head=StrategyTerm()
+  {
+    subterms.addElement(head);
+  }
+  ( ";" tail=StrategyTerm()
+    {
+      subterms.addElement(tail);
+    }
+    )*
+    {
+      if(subterms.size() <= 1) {
+	return head;
+      } else {
+	return new StrategyCons(subterms);
+      }
+    }
+}
+
+StrategyTerm StrategyTerm() :
+{
+  Vector subterms;
+  StrategyTerm stratBody;
+  StrategyTerm stratTerm;
+  Lexem stratName;
+  int id;
+}
+{
+  "id"
+    {
+      return new StrategyId();
+    }
+  | "fail"
+    {
+      return new StrategyFail();
+    }
+  | "META"
+    {
+      return new StrategyMeta();
+    }
+  | "one(" subterms=RuleNames() ")" 
+    {
+      return new StrategyOneRule(subterms);
+    }
+  | "dc(" subterms=RuleNames() ")" 
+    {
+      return new StrategyDcRule(subterms);
+    }
+  | "dk(" subterms=RuleNames() ")" 
+    {
+      return new StrategyDkRule(subterms);
+    }
+  | "ONE(" subterms=StrategyTerms() ")" 
+    {
+      return new StrategyOneStrat(subterms);
+    }
+  | "DC(" subterms=StrategyTerms() ")" 
+    {
+      return new StrategyDcStrat(subterms);
+    }
+  | "DK(" subterms=StrategyTerms() ")" 
+    {
+      return new StrategyDkStrat(subterms);
+    }
+  | "repeat*(" stratBody=StrategyBody() ")" 
+    {
+      subterms = new Vector(1);
+      subterms.addElement(stratBody);
+      return new StrategyRepeat(subterms);
+    }
+  | "iterate*(" stratBody=StrategyBody() ")" 
+    {
+      subterms = new Vector(1);
+      subterms.addElement(stratBody);
+      return new StrategyIterate(subterms);
+    }
+  | "call(" stratName = StrategyName() ")" 
+    {
+      return new StrategyCall(stratName);
+    }
+  | "normin(" subterms=RuleNames() ")"          // [Huy: May  4 00] 
+    {
+      return new StrategyNormInRule(subterms);
+    }
+  | "normout(" subterms=RuleNames() ")"          //  [Huy: May  4 00] 
+    {
+      return new StrategyNormOutRule(subterms);
+    }
+  | "tall(" stratBody=StrategyBody() ")" // [pem: Oct 27 00]
+    {
+      subterms = new Vector(1);
+      subterms.addElement(stratBody);
+      return new StrategyTraversalAll(subterms);
+    }
+  | "tone(" stratBody=StrategyBody() ")" 
+    {
+      subterms = new Vector(1);
+      subterms.addElement(stratBody);
+      return new StrategyTraversalOne(subterms);
+    }
+  | "tsome(" stratBody=StrategyBody() ")" 
+    {
+      subterms = new Vector(1);
+      subterms.addElement(stratBody);
+      return new StrategyTraversalSome(subterms);
+    }
+}
+
+Lexem StrategyName() :
+{
+  Lexem name;
+  int id;
+}
+{
+  id = readInt()
+  {
+    name = LexemStrategyName.get(id);
+    if(name == null) {
+      throw new InternalError("strategyName sym" + id + " not found");
+    }
+    return name;
+  }
+}
+
+
+StrategyTerm RuleName() :
+{
+  Lexem name;
+  int id;
+}
+{
+  id = readInt()
+  {
+    name = LexemRuleName.get(id);
+    if(name == null) {
+      throw new InternalError("ruleName sym" + id + " not found");
+    }
+    return new StrategyRuleName(name);
+  }
+}
+
+Vector RuleNames() :
+{
+  Vector subterms = new Vector(3);
+  StrategyTerm t;
+}
+{
+  t=RuleName()
+  {
+    subterms.addElement(t);
+  }
+  [ <DOT> ( t=RuleName() <DOT>
+    {
+      subterms.addElement(t);
+    }
+            )* <NIL>
+  ]
+    {
+      return subterms;
+    }
+}
+
+
+Vector StrategyTerms() :
+{
+  Vector subterms = new Vector(3);
+  StrategyTerm t;
+}
+{
+  t=StrategyBody()
+  {
+    subterms.addElement(t);
+  }
+  [
+    ( "," t=StrategyBody()
+      {
+        subterms.addElement(t);
+      }
+      )+
+  ]
+    {
+      return subterms;
+    }
+}
+
+Query QueryDeclaration() :
+{
+
+  int intSourceSort;
+  int intResultSort;
+  Term startWith;
+  Term checkWith;
+  int stratNameIndex;	
+  Lexem strategyName=null;
+  int id;	
+}
+{
+  "QUERY("
+    intSourceSort   = readInt() ","
+    intResultSort   = readInt() ","
+    stratNameIndex = readInt() ","
+    startWith         = ElanTerm() ","
+    checkWith         = ElanTerm()
+    ")"
+  {
+    if( stratNameIndex != -1 ) {
+      strategyName = LexemStrategyName.get(stratNameIndex);
+    } 
+    return new Query(intSourceSort,strategyName,startWith);
+  }
+}
+

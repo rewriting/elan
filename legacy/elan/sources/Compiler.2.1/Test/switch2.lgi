@@ -1,0 +1,9 @@
+LPL switch2 description
+  query    of sort term
+  result   of sort term
+  import   switch2
+
+//  start with (s0) a
+  start with () a
+
+end

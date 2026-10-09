@@ -1,0 +1,11 @@
+LPL ac2 description
+
+  query 	of sort term
+         	result of sort term
+	 	import ac2
+//         	start with () query 
+//         	start with () g(U(a,V(a,c)),V(a,b))
+//         	start with () U(a,U(V(a,b),V(a,c)))
+         	start with () U(a,U(V(a,b),U(V(a,c),V(a,d))))
+end
+

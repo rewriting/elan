@@ -1,0 +1,255 @@
+module ForwardCheckingWithCD1[Variables,Type,Values]
+
+import
+global
+	ConstructiveDisjunctionStrategies[Variables,Type,Values]
+	EnumerationRules[Variables,Type,Values]
+	PropagationRules[Variables,Type,Values]
+	ChoicePointStrategies[Variables,Type,Values]
+	;
+end
+
+stratop
+global
+	FCWithCD1FirstToLastAll			: < csp -> csp >	bs;
+	FCWithCD1FirstToLastOne			: < csp -> csp >	bs;
+	FCWithCD1LastToFirstAll			: < csp -> csp >	bs;
+	FCWithCD1LastToFirstOne			: < csp -> csp >	bs;
+	FCWithCD1SplitFirstToLastAll		: < csp -> csp >	bs;
+	FCWithCD1SplitFirstToLastOne		: < csp -> csp >	bs;
+	FCWithCD1SplitLastToFirstAll		: < csp -> csp >	bs;
+	FCWithCD1SplitLastToFirstOne		: < csp -> csp >	bs;
+end
+
+
+strategies for csp
+implicit
+
+/* Strategy		: Forward Checking with Constructive Disjunction 1	*/
+/* Value selection	: Value enumeration first to last			*/
+/* Number of solutions	: All 							*/
+
+[] FCWithCD1FirstToLastAll =>
+dk (LocalConsistencyForECandDCWithCD1);
+repeat* (
+	dk (iterate* (EliminateFirstValueOfDomain));
+	first one (InstantiateFirstValueOfDomain);
+	first one (ExtractConstraintsOnEqualityVar, id);
+	first one (Elimination, id);
+	first one (LocalConsistencyInEC, id)
+	);
+first one (GetSolutionCSP)
+end
+
+
+/* Strategy		: Forward Checking with Constructive Disjunction 1	*/
+/* Value selection	: Value enumeration first to last			*/
+/* Number of solutions	: First 						*/
+
+[] FCWithCD1FirstToLastOne =>
+first one (FCWithCD1FirstToLastAll)
+end
+
+
+/* Strategy		: Forward Checking with Constructive Disjunction 1	*/
+/* Value selection	: Value enumeration last to first			*/
+/* Number of solutions	: All 							*/
+
+[] FCWithCD1LastToFirstAll =>
+dk (LocalConsistencyForECandDCWithCD1);
+repeat* (
+	dk (iterate* (EliminateLastValueOfDomain));
+	first one (InstantiateLastValueOfDomain);
+	first one (ExtractConstraintsOnEqualityVar, id);
+	first one (Elimination, id);
+	first one (LocalConsistencyInEC, id)
+	);
+first one (GetSolutionCSP)
+end
+
+
+/* Strategy		: Forward Checking with Constructive Disjunction 1	*/
+/* Value selection	: Value enumeration last to first			*/
+/* Number of solutions	: First 						*/
+
+[] FCWithCD1LastToFirstOne =>
+first one (FCWithCD1LastToFirstAll)
+end
+
+
+/* Strategy		: Forward Checking with Constructive Disjunction 1	*/
+/* Value selection	: Split domain first to last				*/
+/* Number of solutions	: All 							*/
+
+[] FCWithCD1SplitFirstToLastAll =>
+dk (LocalConsistencyForECandDCWithCD1);
+repeat* (
+	dk (first one (SplitDomainFirstMiddle), first one (SplitDomainSecondMiddle));
+	first one (first one (ExtractConstraintsOnEqualityVar);
+		   first one (Elimination, id);
+		   first one (LocalConsistencyInEC, id)
+		   ,
+		   first one (ExtractConstraintsOnDomainVar);
+		   first one (LocalConsistencyInEC, id)
+		   ,
+		   id)
+	);
+first one (GetSolutionCSP)
+end
+
+
+/* Strategy		: Forward Checking with Constructive Disjunction 1	*/
+/* Value selection	: Split domain first to last				*/
+/* Number of solutions	: First							*/
+
+[] FCWithCD1SplitFirstToLastOne =>
+first one (FCWithCD1SplitFirstToLastAll)
+end
+
+
+/* Strategy		: Forward Checking with Constructive Disjunction 1	*/
+/* Value selection	: Split domain last to first				*/
+/* Number of solutions	: All 							*/
+
+[] FCWithCD1SplitLastToFirstAll =>
+dk (LocalConsistencyForECandDCWithCD1);
+repeat* (
+	dk (first one (SplitDomainSecondMiddle), first one (SplitDomainFirstMiddle));
+	first one (first one (ExtractConstraintsOnEqualityVar);
+		   first one (Elimination, id);
+		   first one (LocalConsistencyInEC, id)
+		   ,
+		   first one (ExtractConstraintsOnDomainVar);
+		   first one (LocalConsistencyInEC, id)
+		   ,
+		   id)
+	);
+first one (GetSolutionCSP)
+end
+
+
+/* Strategy		: Forward Checking with Constructive Disjunction 1	*/
+/* Value selection	: Split domain last to first				*/
+/* Number of solutions	: First							*/
+
+[] FCWithCD1SplitLastToFirstOne =>
+first one (FCWithCD1SplitLastToFirstAll)
+end
+
+end
+
+
+rules for csop
+
+	x, y				: var;
+	ub, lb, newub, newlb, middle	: Type;
+	P, Q				: csp;
+	lmc, lec, EC, DC, store		: list[constraint];
+	l				: list[constraint];
+
+global
+
+[FCWithCD1FirstToLastOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[Q,x,lb,ub]
+	where	Q :=(FCWithCD1FirstToLastOne)P
+end
+
+[FCWithCD1LastToFirstOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[Q,x,lb,ub]
+	where	Q :=(FCWithCD1LastToFirstOne)P
+end
+
+[FCWithCD1SplitFirstToLastOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[Q,x,lb,ub]
+	where	Q :=(FCWithCD1SplitFirstToLastOne)P
+end
+
+[FCWithCD1SplitLastToFirstOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[Q,x,lb,ub]
+	where	Q :=(FCWithCD1SplitLastToFirstOne)P
+end
+
+[GetUBFCWithCD1FirstToLastOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[P,x,lb,newub]
+	where	Q :=(FCWithCD1FirstToLastOne)P
+	if	Q != Unsatisfiable
+	where	(list[constraint]) y = newub.l := ()GetVarInHead(x,GetLEC(Q),nil)
+end
+
+[GetUBFCWithCD1LastToFirstOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[P,x,lb,newub]
+	where	Q :=(FCWithCD1LastToFirstOne)P
+	if	Q != Unsatisfiable
+	where	(list[constraint]) y = newub.l := ()GetVarInHead(x,GetLEC(Q),nil)
+end
+
+[GetUBFCWithCD1SplitFirstToLastOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[P,x,lb,newub]
+	where	Q :=(FCWithCD1SplitFirstToLastOne)P
+	if	Q != Unsatisfiable
+	where	(list[constraint]) y = newub.l := ()GetVarInHead(x,GetLEC(Q),nil)
+end
+
+[GetUBFCWithCD1SplitLastToFirstOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[P,x,lb,newub]
+	where	Q :=(FCWithCD1SplitLastToFirstOne)P
+	if	Q != Unsatisfiable
+	where	(list[constraint]) y = newub.l := ()GetVarInHead(x,GetLEC(Q),nil)
+end
+
+[GetLBFCWithCD1FirstToLastOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[P,x,newlb,ub]
+	where	Q :=(FCWithCD1FirstToLastOne)P
+	if	Q != Unsatisfiable
+	where	(list[constraint]) y = newlb.l := ()GetVarInHead(x,GetLEC(Q),nil)
+end
+
+[GetLBFCWithCD1LastToFirstOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[P,x,newlb,ub]
+	where	Q :=(FCWithCD1LastToFirstOne)P
+	if	Q != Unsatisfiable
+	where	(list[constraint]) y = newlb.l := ()GetVarInHead(x,GetLEC(Q),nil)
+end
+
+[GetLBFCWithCD1SplitFirstToLastOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[P,x,newlb,ub]
+	where	Q :=(FCWithCD1SplitFirstToLastOne)P
+	if	Q != Unsatisfiable
+	where	(list[constraint]) y = newlb.l := ()GetVarInHead(x,GetLEC(Q),nil)
+end
+
+[GetLBFCWithCD1SplitLastToFirstOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[P,x,newlb,ub]
+	where	Q :=(FCWithCD1SplitLastToFirstOne)P
+	if	Q != Unsatisfiable
+	where	(list[constraint]) y = newlb.l := ()GetVarInHead(x,GetLEC(Q),nil)
+end
+
+end
+
+
+end

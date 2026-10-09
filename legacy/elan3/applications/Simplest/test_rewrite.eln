@@ -1,0 +1,54 @@
+module test_rewrite
+import global int;
+end
+
+sort Term;
+end
+
+operators global
+ a : Term;
+ b : Term;
+ f(@) : (Term ) Term;
+ g(@,@) : (Term Term ) Term;
+
+ go1: Term;
+ go2: Term;
+
+end
+
+stratop 
+global
+	S1	: <Term>	bs;
+	SR1	: <Term>	bs;
+	S2	: <Term>	bs;
+	S3	: <Term>	bs;
+end
+
+rules for Term
+ t : Term;
+global
+  [R1] a => b end
+  [R2] b => a end
+
+   [] go1 => t
+		 where t:=(S1) f(f(a))
+  end
+
+ [] go2 => t
+		 where t:=(S1) f(g(a,a))
+  end
+
+
+end
+
+
+
+strategies for Term
+implicit
+  [] S1 => rewrite(SR1) end
+  [] SR1 => dc one(R1,R2) end
+  [] S2 => dk(rewrite(SR1)) end
+end
+
+
+end

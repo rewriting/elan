@@ -1,0 +1,301 @@
+module MinSatToUnForwardCheckingMinimumDomain[Variables,Type,Values]
+
+import
+global
+	OptimizationRules[Variables,Type,Values]
+	ForwardCheckingMinimumDomain[Variables,Type,Values]
+	ForwardCheckingChoicePointMinimumDomain[Variables,Type,Values]
+	ForwardCheckingChoicePointIIMinimumDomain[Variables,Type,Values]
+	;
+end
+
+stratop
+global
+	MinSatToUnFCMinimumDomainFirstToLast			: < csop -> csop >	bs;
+	MinSatToUnFCMinimumDomainLastToFirst			: < csop -> csop >	bs;
+	MinSatToUnFCMinimumDomainSplitFirstToLast		: < csop -> csop >	bs;
+	MinSatToUnFCMinimumDomainSplitLastToFirst		: < csop -> csop >	bs;
+	MinSatToUnFCChoicePointMinimumDomainFirstToLast		: < csop -> csop >	bs;
+	MinSatToUnFCChoicePointMinimumDomainLastToFirst		: < csop -> csop >	bs;
+	MinSatToUnFCChoicePointMinimumDomainSplitFirstToLast	: < csop -> csop >	bs;
+	MinSatToUnFCChoicePointMinimumDomainSplitLastToFirst	: < csop -> csop >	bs;
+	MinSatToUnFCChoicePointIIMinimumDomainFirstToLast	: < csop -> csop >	bs;
+	MinSatToUnFCChoicePointIIMinimumDomainLastToFirst	: < csop -> csop >	bs;
+	MinSatToUnFCChoicePointIIMinimumDomainSplitFirstToLast	: < csop -> csop >	bs;
+	MinSatToUnFCChoicePointIIMinimumDomainSplitLastToFirst	: < csop -> csop >	bs;
+end
+
+
+strategies for csop
+implicit
+
+/* Optimization Strategy: */
+/* Search Strategy	: */
+/* Variable selection	: */
+/* Value selection	: */
+
+[] MinSatToUnFCMinimumDomainFirstToLast =>
+first one (PostLTEUpperBound);
+LocalConsistencyForEC;
+first one (GetUBFCMinimumDomainFirstToLastOne);
+repeat* (
+	first one( first one (PostLTUpperBound);
+		   LocalConsistencyForEC;
+		   first one (GetUBFCMinimumDomainFirstToLastOne)
+		   ,
+		   first one (SetLowerBoundToUpperBound)
+		 )
+	);
+first one (FCMinimumDomainFirstToLastOne);
+first one (GetSolutionCSOP)
+end
+
+
+/* Optimization Strategy: */
+/* Search Strategy	: */
+/* Variable selection	: */
+/* Value selection	: */
+
+[] MinSatToUnFCMinimumDomainLastToFirst =>
+first one (PostLTEUpperBound);
+LocalConsistencyForEC;
+first one (GetUBFCMinimumDomainLastToFirstOne);
+repeat* (
+	first one( first one (PostLTUpperBound);
+		   LocalConsistencyForEC;
+		   first one (GetUBFCMinimumDomainLastToFirstOne)
+		   ,
+		   first one (SetLowerBoundToUpperBound)
+		 )
+	);
+first one (FCMinimumDomainLastToFirstOne);
+first one (GetSolutionCSOP)
+end
+
+
+/* Optimization Strategy: */
+/* Search Strategy	: */
+/* Variable selection	: */
+/* Value selection	: */
+
+[] MinSatToUnFCMinimumDomainSplitFirstToLast =>
+first one (PostLTEUpperBound);
+LocalConsistencyForEC;
+first one (GetUBFCMinimumDomainSplitFirstToLastOne);
+repeat* (
+	first one( first one (PostLTUpperBound);
+		   LocalConsistencyForEC;
+		   first one (GetUBFCMinimumDomainSplitFirstToLastOne)
+		   ,
+		   first one (SetLowerBoundToUpperBound)
+		 )
+	);
+first one (FCMinimumDomainSplitFirstToLastOne);
+first one (GetSolutionCSOP)
+end
+
+
+/* Optimization Strategy: */
+/* Search Strategy	: */
+/* Variable selection	: */
+/* Value selection	: */
+
+[] MinSatToUnFCMinimumDomainSplitLastToFirst =>
+first one (PostLTEUpperBound);
+LocalConsistencyForEC;
+first one (GetUBFCMinimumDomainSplitLastToFirstOne);
+repeat* (
+	first one( first one (PostLTUpperBound);
+		   LocalConsistencyForEC;
+		   first one (GetUBFCMinimumDomainSplitLastToFirstOne)
+		   ,
+		   first one (SetLowerBoundToUpperBound)
+		 )
+	);
+first one (FCMinimumDomainSplitLastToFirstOne);
+first one (GetSolutionCSOP)
+end
+
+
+/* Optimization Strategy: */
+/* Search Strategy	: */
+/* Variable selection	: */
+/* Value selection	: */
+
+[] MinSatToUnFCChoicePointMinimumDomainFirstToLast =>
+first one (PostLTEUpperBound);
+LocalConsistencyForEC;
+first one (GetUBFCChoicePointMinimumDomainFirstToLastOne);
+repeat* (
+	first one( first one (PostLTUpperBound);
+		   LocalConsistencyForEC;
+		   first one (GetUBFCChoicePointMinimumDomainFirstToLastOne)
+		   ,
+		   first one (SetLowerBoundToUpperBound)
+		 )
+	);
+first one (FCChoicePointMinimumDomainFirstToLastOne);
+first one (GetSolutionCSOP)
+end
+
+
+/* Optimization Strategy: */
+/* Search Strategy	: */
+/* Variable selection	: */
+/* Value selection	: */
+
+[] MinSatToUnFCChoicePointMinimumDomainLastToFirst =>
+first one (PostLTEUpperBound);
+LocalConsistencyForEC;
+first one (GetUBFCChoicePointMinimumDomainLastToFirstOne);
+repeat* (
+	first one( first one (PostLTUpperBound);
+		   LocalConsistencyForEC;
+		   first one (GetUBFCChoicePointMinimumDomainLastToFirstOne)
+		   ,
+		   first one (SetLowerBoundToUpperBound)
+		 )
+	);
+first one (FCChoicePointMinimumDomainLastToFirstOne);
+first one (GetSolutionCSOP)
+end
+
+
+/* Optimization Strategy: */
+/* Search Strategy	: */
+/* Variable selection	: */
+/* Value selection	: */
+
+[] MinSatToUnFCChoicePointMinimumDomainSplitFirstToLast =>
+first one (PostLTEUpperBound);
+LocalConsistencyForEC;
+first one (GetUBFCChoicePointMinimumDomainSplitFirstToLastOne);
+repeat* (
+	first one( first one (PostLTUpperBound);
+		   LocalConsistencyForEC;
+		   first one (GetUBFCChoicePointMinimumDomainSplitFirstToLastOne)
+		   ,
+		   first one (SetLowerBoundToUpperBound)
+		 )
+	);
+first one (FCChoicePointMinimumDomainSplitFirstToLastOne);
+first one (GetSolutionCSOP)
+end
+
+
+/* Optimization Strategy: */
+/* Search Strategy	: */
+/* Variable selection	: */
+/* Value selection	: */
+
+[] MinSatToUnFCChoicePointMinimumDomainSplitLastToFirst =>
+first one (PostLTEUpperBound);
+LocalConsistencyForEC;
+first one (GetUBFCChoicePointMinimumDomainSplitLastToFirstOne);
+repeat* (
+	first one( first one (PostLTUpperBound);
+		   LocalConsistencyForEC;
+		   first one (GetUBFCChoicePointMinimumDomainSplitLastToFirstOne)
+		   ,
+		   first one (SetLowerBoundToUpperBound)
+		 )
+	);
+first one (FCChoicePointMinimumDomainSplitLastToFirstOne);
+first one (GetSolutionCSOP)
+end
+
+
+/* Optimization Strategy: */
+/* Search Strategy	: */
+/* Variable selection	: */
+/* Value selection	: */
+
+[] MinSatToUnFCChoicePointIIMinimumDomainFirstToLast =>
+first one (PostLTEUpperBound);
+LocalConsistencyForEC;
+first one (GetUBFCChoicePointIIMinimumDomainFirstToLastOne);
+repeat* (
+	first one( first one (PostLTUpperBound);
+		   LocalConsistencyForEC;
+		   first one (GetUBFCChoicePointIIMinimumDomainFirstToLastOne)
+		   ,
+		   first one (SetLowerBoundToUpperBound)
+		 )
+	);
+first one (FCChoicePointIIMinimumDomainFirstToLastOne);
+first one (GetSolutionCSOP)
+end
+
+
+/* Optimization Strategy: */
+/* Search Strategy	: */
+/* Variable selection	: */
+/* Value selection	: */
+
+[] MinSatToUnFCChoicePointIIMinimumDomainLastToFirst =>
+first one (PostLTEUpperBound);
+LocalConsistencyForEC;
+first one (GetUBFCChoicePointIIMinimumDomainLastToFirstOne);
+repeat* (
+	first one( first one (PostLTUpperBound);
+		   LocalConsistencyForEC;
+		   first one (GetUBFCChoicePointIIMinimumDomainLastToFirstOne)
+		   ,
+		   first one (SetLowerBoundToUpperBound)
+		 )
+	);
+first one (FCChoicePointIIMinimumDomainLastToFirstOne);
+first one (GetSolutionCSOP)
+end
+
+
+/* Optimization Strategy: */
+/* Search Strategy	: */
+/* Variable selection	: */
+/* Value selection	: */
+
+[] MinSatToUnFCChoicePointIIMinimumDomainSplitFirstToLast =>
+first one (PostLTEUpperBound);
+LocalConsistencyForEC;
+first one (GetUBFCChoicePointIIMinimumDomainSplitFirstToLastOne);
+repeat* (
+	first one( first one (PostLTUpperBound);
+		   LocalConsistencyForEC;
+		   first one (GetUBFCChoicePointIIMinimumDomainSplitFirstToLastOne)
+		   ,
+		   first one (SetLowerBoundToUpperBound)
+		 )
+	);
+first one (FCChoicePointIIMinimumDomainSplitFirstToLastOne);
+first one (GetSolutionCSOP)
+end
+
+
+/* Optimization Strategy: */
+/* Search Strategy	: */
+/* Variable selection	: */
+/* Value selection	: */
+
+[] MinSatToUnFCChoicePointIIMinimumDomainSplitLastToFirst =>
+first one (PostLTEUpperBound);
+LocalConsistencyForEC;
+first one (GetUBFCChoicePointIIMinimumDomainSplitLastToFirstOne);
+repeat* (
+	first one( first one (PostLTUpperBound);
+		   LocalConsistencyForEC;
+		   first one (GetUBFCChoicePointIIMinimumDomainSplitLastToFirstOne)
+		   ,
+		   first one (SetLowerBoundToUpperBound)
+		 )
+	);
+first one (FCChoicePointIIMinimumDomainSplitLastToFirstOne);
+first one (GetSolutionCSOP)
+end
+
+end
+
+
+end
+
+
+

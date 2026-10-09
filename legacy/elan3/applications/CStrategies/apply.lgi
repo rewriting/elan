@@ -1,0 +1,10 @@
+LPL apply description
+
+	query of sort 	list[integ] 
+	result of sort 	list[booleg]
+	import 	apply[integ,booleg] 
+	start with 	[apply(dk(tr(5),trr(6)))]query
+
+end
+
+	

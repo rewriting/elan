@@ -1,0 +1,2011 @@
+------------------------------------------------------------
+fib_builtin
+***
+*** The compiled query is not ground
+***
+execute the following line to build your program
+	gmake -f fib_builtin.make
+compiler
+code  = 200	arity = 1
+start with: fib()(5)
+
+result = 8
+                      	fails	success
+
+rewrite_step  = 15
+total time    = 0.000 sec
+code  = 200	arity = 1
+start with: fib()(10)
+
+result = 89
+                      	fails	success
+
+rewrite_step  = 177
+total time    = 0.000 sec
+code  = 200	arity = 1
+start with: fib()(15)
+
+result = 987
+                      	fails	success
+
+rewrite_step  = 1973
+total time    = 0.001 sec
+average speed = 2021516 rwr/sec
+code  = 200	arity = 1
+start with: fib()(20)
+
+result = 10946
+                      	fails	success
+
+rewrite_step  = 21891
+total time    = 0.002 sec
+average speed = 11214651 rwr/sec
+code  = 200	arity = 1
+start with: fib()(25)
+
+result = 121393
+                      	fails	success
+
+rewrite_step  = 242785
+total time    = 0.031 sec
+average speed = 7773597 rwr/sec
+interpreter
+ 8 end
+
+ end end
+end
+
+
+ Statistics:
+ total time	(0.002+0.000)=0.002 sec	(main+subprocesses)
+
+ average speed = 7500 inf/sec
+               15 nonamed rules applied,    34 tried
+                0   named rules applied,     0 tried
+
+ named rules
+           applied   tried    rule for symbol
+
+
+	numberOfAllocTerm = 79
+
+end of statistics
+ 89 end
+
+ end end
+end
+
+
+ Statistics:
+ total time	(0.008+0.000)=0.008 sec	(main+subprocesses)
+
+ average speed = 22125 inf/sec
+              177 nonamed rules applied,   408 tried
+                0   named rules applied,     0 tried
+
+ named rules
+           applied   tried    rule for symbol
+
+
+	numberOfAllocTerm = 970
+
+end of statistics
+ 987 end
+
+ end end
+end
+
+
+ Statistics:
+ total time	(0.055+0.000)=0.055 sec	(main+subprocesses)
+
+ average speed = 35872 inf/sec
+             1973 nonamed rules applied,  4555 tried
+                0   named rules applied,     0 tried
+
+ named rules
+           applied   tried    rule for symbol
+
+
+	numberOfAllocTerm = 10848
+
+end of statistics
+ 2584 end
+
+ end end
+end
+
+
+ Statistics:
+ total time	(0.144+0.000)=0.144 sec	(main+subprocesses)
+
+ average speed = 35881 inf/sec
+             5167 nonamed rules applied, 11930 tried
+                0   named rules applied,     0 tried
+
+ named rules
+           applied   tried    rule for symbol
+
+
+	numberOfAllocTerm = 28415
+
+end of statistics
+ 10946 end
+
+ end end
+end
+
+
+ Statistics:
+ total time	(0.606+0.000)=0.606 sec	(main+subprocesses)
+
+ average speed = 36123 inf/sec
+            21891 nonamed rules applied, 50546 tried
+                0   named rules applied,     0 tried
+
+ named rules
+           applied   tried    rule for symbol
+
+
+	numberOfAllocTerm = 120397
+
+end of statistics
+ 17711 end
+
+ end end
+end
+
+
+ Statistics:
+ total time	(0.990+0.000)=0.990 sec	(main+subprocesses)
+
+ average speed = 35778 inf/sec
+            35421 nonamed rules applied, 81787 tried
+                0   named rules applied,     0 tried
+
+ named rules
+           applied   tried    rule for symbol
+
+
+	numberOfAllocTerm = 194812
+
+end of statistics
+ 28657 end
+
+ end end
+end
+
+
+ Statistics:
+ total time	(1.586+0.000)=1.586 sec	(main+subprocesses)
+
+ average speed = 36136 inf/sec
+            57313 nonamed rules applied, 132336 tried
+                0   named rules applied,     0 tried
+
+ named rules
+           applied   tried    rule for symbol
+
+
+	numberOfAllocTerm = 315218
+
+end of statistics
+ 46368 end
+
+ end end
+end
+
+
+ Statistics:
+ total time	(2.621+0.000)=2.621 sec	(main+subprocesses)
+
+ average speed = 35381 inf/sec
+            92735 nonamed rules applied, 214126 tried
+                0   named rules applied,     0 tried
+
+ named rules
+           applied   tried    rule for symbol
+
+
+	numberOfAllocTerm = 510039
+
+end of statistics
+ 75025 end
+
+ end end
+end
+
+
+ Statistics:
+ total time	(4.216+0.000)=4.216 sec	(main+subprocesses)
+
+ average speed = 35590 inf/sec
+            150049 nonamed rules applied, 346465 tried
+                0   named rules applied,     0 tried
+
+ named rules
+           applied   tried    rule for symbol
+
+
+	numberOfAllocTerm = 825266
+
+end of statistics
+ 121393 end
+
+ end end
+end
+
+
+ Statistics:
+ total time	(6.759+0.000)=6.759 sec	(main+subprocesses)
+
+ average speed = 35920 inf/sec
+            242785 nonamed rules applied, 560594 tried
+                0   named rules applied,     0 tried
+
+ named rules
+           applied   tried    rule for symbol
+
+
+	numberOfAllocTerm = 1335314
+
+end of statistics
+------------------------------------------------------------
+nqueensAC
+
+lhsACPattern = U(var1,()(var0))
+
+nbACSubterms = 1
+nbSingleACVariable  = 1
+nbMultiACVariable   = 0
+nbSingleACSubterm   = 1
+nbMultiACSubterm    = 0
+constrainedVariable = false
+
+***
+*** The compiled query is not ground
+***
+execute the following line to build your program
+	gmake -f nqueensAC.make
+compiler
+code  = 200	arity = 1
+code  = 226	arity = 1
+start with: nqueens()([](4))
+
+result = .([](2),.([](4),.([](1),.([](3),nil))))
+
+result = .([](3),.([](1),.([](4),.([](2),nil))))
+                      	fails	success
+tab_rewrite_step[201] :	0	20
+tab_rewrite_step[202] :	0	67
+tab_rewrite_step[209] :	0	64
+tab_rewrite_step[227] :	0	52
+tab_rewrite_step[232] :	0	4
+
+rewrite_step  = 257
+total time    = 0.002 sec
+average speed = 131659 rwr/sec
+code  = 200	arity = 1
+code  = 226	arity = 1
+start with: nqueens()([](5))
+
+result = .([](2),.([](4),.([](1),.([](3),.([](5),nil)))))
+
+result = .([](3),.([](1),.([](4),.([](2),.([](5),nil)))))
+
+result = .([](1),.([](3),.([](5),.([](2),.([](4),nil)))))
+
+result = .([](2),.([](5),.([](3),.([](1),.([](4),nil)))))
+
+result = .([](1),.([](4),.([](2),.([](5),.([](3),nil)))))
+
+result = .([](5),.([](2),.([](4),.([](1),.([](3),nil)))))
+
+result = .([](4),.([](1),.([](3),.([](5),.([](2),nil)))))
+
+result = .([](5),.([](3),.([](1),.([](4),.([](2),nil)))))
+
+result = .([](3),.([](5),.([](2),.([](4),.([](1),nil)))))
+
+result = .([](4),.([](2),.([](5),.([](3),.([](1),nil)))))
+                      	fails	success
+tab_rewrite_step[201] :	0	130
+tab_rewrite_step[202] :	0	336
+tab_rewrite_step[209] :	0	332
+tab_rewrite_step[227] :	0	231
+tab_rewrite_step[232] :	0	5
+
+rewrite_step  = 1198
+total time    = 0.004 sec
+average speed = 306864 rwr/sec
+code  = 200	arity = 1
+code  = 226	arity = 1
+start with: nqueens()([](6))
+
+result = .([](2),.([](4),.([](6),.([](1),.([](3),.([](5),nil))))))
+
+result = .([](3),.([](6),.([](2),.([](5),.([](1),.([](4),nil))))))
+
+result = .([](4),.([](1),.([](5),.([](2),.([](6),.([](3),nil))))))
+
+result = .([](5),.([](3),.([](1),.([](6),.([](4),.([](2),nil))))))
+                      	fails	success
+tab_rewrite_step[201] :	0	580
+tab_rewrite_step[202] :	0	1471
+tab_rewrite_step[209] :	0	1466
+tab_rewrite_step[227] :	0	936
+tab_rewrite_step[232] :	0	6
+
+rewrite_step  = 4971
+total time    = 0.005 sec
+average speed = 1018647 rwr/sec
+code  = 200	arity = 1
+code  = 226	arity = 1
+start with: nqueens()([](7))
+
+result = .([](2),.([](4),.([](6),.([](1),.([](3),.([](5),.([](7),nil)))))))
+
+result = .([](3),.([](6),.([](2),.([](5),.([](1),.([](4),.([](7),nil)))))))
+
+result = .([](4),.([](1),.([](5),.([](2),.([](6),.([](3),.([](7),nil)))))))
+
+result = .([](5),.([](3),.([](1),.([](6),.([](4),.([](2),.([](7),nil)))))))
+
+result = .([](2),.([](5),.([](3),.([](1),.([](7),.([](4),.([](6),nil)))))))
+
+result = .([](1),.([](3),.([](5),.([](7),.([](2),.([](4),.([](6),nil)))))))
+
+result = .([](2),.([](5),.([](1),.([](4),.([](7),.([](3),.([](6),nil)))))))
+
+result = .([](2),.([](4),.([](1),.([](7),.([](5),.([](3),.([](6),nil)))))))
+
+result = .([](2),.([](5),.([](7),.([](4),.([](1),.([](3),.([](6),nil)))))))
+
+result = .([](3),.([](7),.([](4),.([](1),.([](5),.([](2),.([](6),nil)))))))
+
+result = .([](4),.([](2),.([](7),.([](5),.([](3),.([](1),.([](6),nil)))))))
+
+result = .([](4),.([](1),.([](3),.([](6),.([](2),.([](7),.([](5),nil)))))))
+
+result = .([](3),.([](1),.([](6),.([](4),.([](2),.([](7),.([](5),nil)))))))
+
+result = .([](7),.([](2),.([](4),.([](6),.([](1),.([](3),.([](5),nil)))))))
+
+result = .([](1),.([](4),.([](7),.([](3),.([](6),.([](2),.([](5),nil)))))))
+
+result = .([](3),.([](7),.([](2),.([](4),.([](6),.([](1),.([](5),nil)))))))
+
+result = .([](2),.([](6),.([](3),.([](7),.([](4),.([](1),.([](5),nil)))))))
+
+result = .([](3),.([](1),.([](6),.([](2),.([](5),.([](7),.([](4),nil)))))))
+
+result = .([](1),.([](5),.([](2),.([](6),.([](3),.([](7),.([](4),nil)))))))
+
+result = .([](2),.([](7),.([](5),.([](3),.([](1),.([](6),.([](4),nil)))))))
+
+result = .([](6),.([](1),.([](3),.([](5),.([](7),.([](2),.([](4),nil)))))))
+
+result = .([](7),.([](3),.([](6),.([](2),.([](5),.([](1),.([](4),nil)))))))
+
+result = .([](5),.([](7),.([](2),.([](6),.([](3),.([](1),.([](4),nil)))))))
+
+result = .([](6),.([](2),.([](5),.([](1),.([](4),.([](7),.([](3),nil)))))))
+
+result = .([](5),.([](1),.([](6),.([](4),.([](2),.([](7),.([](3),nil)))))))
+
+result = .([](7),.([](4),.([](1),.([](5),.([](2),.([](6),.([](3),nil)))))))
+
+result = .([](1),.([](6),.([](4),.([](2),.([](7),.([](5),.([](3),nil)))))))
+
+result = .([](5),.([](7),.([](2),.([](4),.([](6),.([](1),.([](3),nil)))))))
+
+result = .([](4),.([](7),.([](5),.([](2),.([](6),.([](1),.([](3),nil)))))))
+
+result = .([](4),.([](6),.([](1),.([](3),.([](5),.([](7),.([](2),nil)))))))
+
+result = .([](5),.([](1),.([](4),.([](7),.([](3),.([](6),.([](2),nil)))))))
+
+result = .([](6),.([](3),.([](1),.([](4),.([](7),.([](5),.([](2),nil)))))))
+
+result = .([](6),.([](4),.([](7),.([](1),.([](3),.([](5),.([](2),nil)))))))
+
+result = .([](6),.([](3),.([](7),.([](4),.([](1),.([](5),.([](2),nil)))))))
+
+result = .([](7),.([](5),.([](3),.([](1),.([](6),.([](4),.([](2),nil)))))))
+
+result = .([](6),.([](3),.([](5),.([](7),.([](1),.([](4),.([](2),nil)))))))
+
+result = .([](3),.([](5),.([](7),.([](2),.([](4),.([](6),.([](1),nil)))))))
+
+result = .([](4),.([](7),.([](3),.([](6),.([](2),.([](5),.([](1),nil)))))))
+
+result = .([](5),.([](2),.([](6),.([](3),.([](7),.([](4),.([](1),nil)))))))
+
+result = .([](6),.([](4),.([](2),.([](7),.([](5),.([](3),.([](1),nil)))))))
+                      	fails	success
+tab_rewrite_step[201] :	0	2834
+tab_rewrite_step[202] :	0	6865
+tab_rewrite_step[209] :	0	6859
+tab_rewrite_step[227] :	0	4179
+tab_rewrite_step[232] :	0	7
+
+rewrite_step  = 22680
+total time    = 0.022 sec
+average speed = 1010334 rwr/sec
+code  = 200	arity = 1
+code  = 226	arity = 1
+start with: nqueens()([](8))
+
+result = .([](5),.([](7),.([](2),.([](6),.([](3),.([](1),.([](4),.([](8),nil))))))))
+
+result = .([](4),.([](7),.([](5),.([](2),.([](6),.([](1),.([](3),.([](8),nil))))))))
+
+result = .([](6),.([](4),.([](7),.([](1),.([](3),.([](5),.([](2),.([](8),nil))))))))
+
+result = .([](6),.([](3),.([](5),.([](7),.([](1),.([](4),.([](2),.([](8),nil))))))))
+
+result = .([](4),.([](2),.([](8),.([](6),.([](1),.([](3),.([](5),.([](7),nil))))))))
+
+result = .([](5),.([](3),.([](1),.([](6),.([](8),.([](2),.([](4),.([](7),nil))))))))
+
+result = .([](6),.([](3),.([](1),.([](8),.([](5),.([](2),.([](4),.([](7),nil))))))))
+
+result = .([](4),.([](6),.([](1),.([](5),.([](2),.([](8),.([](3),.([](7),nil))))))))
+
+result = .([](4),.([](2),.([](5),.([](8),.([](6),.([](1),.([](3),.([](7),nil))))))))
+
+result = .([](5),.([](8),.([](4),.([](1),.([](3),.([](6),.([](2),.([](7),nil))))))))
+
+result = .([](6),.([](3),.([](5),.([](8),.([](1),.([](4),.([](2),.([](7),nil))))))))
+
+result = .([](5),.([](2),.([](4),.([](6),.([](8),.([](3),.([](1),.([](7),nil))))))))
+
+result = .([](3),.([](5),.([](7),.([](1),.([](4),.([](2),.([](8),.([](6),nil))))))))
+
+result = .([](3),.([](5),.([](2),.([](8),.([](1),.([](7),.([](4),.([](6),nil))))))))
+
+result = .([](8),.([](2),.([](5),.([](3),.([](1),.([](7),.([](4),.([](6),nil))))))))
+
+result = .([](3),.([](1),.([](7),.([](5),.([](8),.([](2),.([](4),.([](6),nil))))))))
+
+result = .([](3),.([](7),.([](2),.([](8),.([](5),.([](1),.([](4),.([](6),nil))))))))
+
+result = .([](5),.([](2),.([](8),.([](1),.([](4),.([](7),.([](3),.([](6),nil))))))))
+
+result = .([](4),.([](1),.([](5),.([](8),.([](2),.([](7),.([](3),.([](6),nil))))))))
+
+result = .([](5),.([](1),.([](8),.([](4),.([](2),.([](7),.([](3),.([](6),nil))))))))
+
+result = .([](7),.([](2),.([](4),.([](1),.([](8),.([](5),.([](3),.([](6),nil))))))))
+
+result = .([](8),.([](2),.([](4),.([](1),.([](7),.([](5),.([](3),.([](6),nil))))))))
+
+result = .([](7),.([](4),.([](2),.([](5),.([](8),.([](1),.([](3),.([](6),nil))))))))
+
+result = .([](5),.([](7),.([](2),.([](4),.([](8),.([](1),.([](3),.([](6),nil))))))))
+
+result = .([](4),.([](2),.([](8),.([](5),.([](7),.([](1),.([](3),.([](6),nil))))))))
+
+result = .([](3),.([](5),.([](8),.([](4),.([](1),.([](7),.([](2),.([](6),nil))))))))
+
+result = .([](4),.([](8),.([](5),.([](3),.([](1),.([](7),.([](2),.([](6),nil))))))))
+
+result = .([](4),.([](7),.([](3),.([](8),.([](2),.([](5),.([](1),.([](6),nil))))))))
+
+result = .([](3),.([](6),.([](2),.([](7),.([](1),.([](4),.([](8),.([](5),nil))))))))
+
+result = .([](7),.([](2),.([](6),.([](3),.([](1),.([](4),.([](8),.([](5),nil))))))))
+
+result = .([](2),.([](6),.([](8),.([](3),.([](1),.([](4),.([](7),.([](5),nil))))))))
+
+result = .([](4),.([](8),.([](1),.([](3),.([](6),.([](2),.([](7),.([](5),nil))))))))
+
+result = .([](8),.([](4),.([](1),.([](3),.([](6),.([](2),.([](7),.([](5),nil))))))))
+
+result = .([](6),.([](3),.([](1),.([](8),.([](4),.([](2),.([](7),.([](5),nil))))))))
+
+result = .([](3),.([](6),.([](8),.([](2),.([](4),.([](1),.([](7),.([](5),nil))))))))
+
+result = .([](2),.([](4),.([](6),.([](8),.([](3),.([](1),.([](7),.([](5),nil))))))))
+
+result = .([](2),.([](6),.([](1),.([](7),.([](4),.([](8),.([](3),.([](5),nil))))))))
+
+result = .([](4),.([](6),.([](8),.([](2),.([](7),.([](1),.([](3),.([](5),nil))))))))
+
+result = .([](7),.([](4),.([](2),.([](8),.([](6),.([](1),.([](3),.([](5),nil))))))))
+
+result = .([](6),.([](3),.([](7),.([](4),.([](1),.([](8),.([](2),.([](5),nil))))))))
+
+result = .([](3),.([](8),.([](4),.([](7),.([](1),.([](6),.([](2),.([](5),nil))))))))
+
+result = .([](1),.([](6),.([](8),.([](3),.([](7),.([](4),.([](2),.([](5),nil))))))))
+
+result = .([](7),.([](1),.([](3),.([](8),.([](6),.([](4),.([](2),.([](5),nil))))))))
+
+result = .([](4),.([](2),.([](7),.([](3),.([](6),.([](8),.([](1),.([](5),nil))))))))
+
+result = .([](6),.([](3),.([](7),.([](2),.([](4),.([](8),.([](1),.([](5),nil))))))))
+
+result = .([](3),.([](7),.([](2),.([](8),.([](6),.([](4),.([](1),.([](5),nil))))))))
+
+result = .([](6),.([](2),.([](7),.([](1),.([](3),.([](5),.([](8),.([](4),nil))))))))
+
+result = .([](3),.([](6),.([](2),.([](7),.([](5),.([](1),.([](8),.([](4),nil))))))))
+
+result = .([](5),.([](7),.([](2),.([](6),.([](3),.([](1),.([](8),.([](4),nil))))))))
+
+result = .([](2),.([](8),.([](6),.([](1),.([](3),.([](5),.([](7),.([](4),nil))))))))
+
+result = .([](8),.([](3),.([](1),.([](6),.([](2),.([](5),.([](7),.([](4),nil))))))))
+
+result = .([](6),.([](1),.([](5),.([](2),.([](8),.([](3),.([](7),.([](4),nil))))))))
+
+result = .([](3),.([](6),.([](2),.([](5),.([](8),.([](1),.([](7),.([](4),nil))))))))
+
+result = .([](2),.([](5),.([](7),.([](1),.([](3),.([](8),.([](6),.([](4),nil))))))))
+
+result = .([](5),.([](3),.([](1),.([](7),.([](2),.([](8),.([](6),.([](4),nil))))))))
+
+result = .([](7),.([](3),.([](8),.([](2),.([](5),.([](1),.([](6),.([](4),nil))))))))
+
+result = .([](7),.([](5),.([](3),.([](1),.([](6),.([](8),.([](2),.([](4),nil))))))))
+
+result = .([](6),.([](3),.([](1),.([](7),.([](5),.([](8),.([](2),.([](4),nil))))))))
+
+result = .([](3),.([](6),.([](8),.([](1),.([](5),.([](7),.([](2),.([](4),nil))))))))
+
+result = .([](1),.([](5),.([](8),.([](6),.([](3),.([](7),.([](2),.([](4),nil))))))))
+
+result = .([](5),.([](1),.([](8),.([](6),.([](3),.([](7),.([](2),.([](4),nil))))))))
+
+result = .([](7),.([](3),.([](1),.([](6),.([](8),.([](5),.([](2),.([](4),nil))))))))
+
+result = .([](2),.([](7),.([](3),.([](6),.([](8),.([](5),.([](1),.([](4),nil))))))))
+
+result = .([](6),.([](3),.([](7),.([](2),.([](8),.([](5),.([](1),.([](4),nil))))))))
+
+result = .([](5),.([](2),.([](6),.([](1),.([](7),.([](4),.([](8),.([](3),nil))))))))
+
+result = .([](5),.([](1),.([](4),.([](6),.([](8),.([](2),.([](7),.([](3),nil))))))))
+
+result = .([](6),.([](4),.([](1),.([](5),.([](8),.([](2),.([](7),.([](3),nil))))))))
+
+result = .([](5),.([](7),.([](1),.([](4),.([](2),.([](8),.([](6),.([](3),nil))))))))
+
+result = .([](4),.([](2),.([](7),.([](5),.([](1),.([](8),.([](6),.([](3),nil))))))))
+
+result = .([](2),.([](5),.([](7),.([](4),.([](1),.([](8),.([](6),.([](3),nil))))))))
+
+result = .([](1),.([](7),.([](5),.([](8),.([](2),.([](4),.([](6),.([](3),nil))))))))
+
+result = .([](2),.([](7),.([](5),.([](8),.([](1),.([](4),.([](6),.([](3),nil))))))))
+
+result = .([](4),.([](8),.([](1),.([](5),.([](7),.([](2),.([](6),.([](3),nil))))))))
+
+result = .([](5),.([](8),.([](4),.([](1),.([](7),.([](2),.([](6),.([](3),nil))))))))
+
+result = .([](4),.([](7),.([](1),.([](8),.([](5),.([](2),.([](6),.([](3),nil))))))))
+
+result = .([](6),.([](2),.([](7),.([](1),.([](4),.([](8),.([](5),.([](3),nil))))))))
+
+result = .([](6),.([](8),.([](2),.([](4),.([](1),.([](7),.([](5),.([](3),nil))))))))
+
+result = .([](1),.([](7),.([](4),.([](6),.([](8),.([](2),.([](5),.([](3),nil))))))))
+
+result = .([](6),.([](4),.([](7),.([](1),.([](8),.([](2),.([](5),.([](3),nil))))))))
+
+result = .([](6),.([](4),.([](2),.([](8),.([](5),.([](7),.([](1),.([](3),nil))))))))
+
+result = .([](4),.([](7),.([](5),.([](3),.([](1),.([](6),.([](8),.([](2),nil))))))))
+
+result = .([](3),.([](6),.([](4),.([](1),.([](8),.([](5),.([](7),.([](2),nil))))))))
+
+result = .([](4),.([](1),.([](5),.([](8),.([](6),.([](3),.([](7),.([](2),nil))))))))
+
+result = .([](5),.([](7),.([](4),.([](1),.([](3),.([](8),.([](6),.([](2),nil))))))))
+
+result = .([](5),.([](3),.([](8),.([](4),.([](7),.([](1),.([](6),.([](2),nil))))))))
+
+result = .([](3),.([](6),.([](8),.([](1),.([](4),.([](7),.([](5),.([](2),nil))))))))
+
+result = .([](4),.([](6),.([](8),.([](3),.([](1),.([](7),.([](5),.([](2),nil))))))))
+
+result = .([](5),.([](7),.([](1),.([](3),.([](8),.([](6),.([](4),.([](2),nil))))))))
+
+result = .([](3),.([](6),.([](4),.([](2),.([](8),.([](5),.([](7),.([](1),nil))))))))
+
+result = .([](3),.([](5),.([](2),.([](8),.([](6),.([](4),.([](7),.([](1),nil))))))))
+
+result = .([](5),.([](2),.([](4),.([](7),.([](3),.([](8),.([](6),.([](1),nil))))))))
+
+result = .([](4),.([](2),.([](7),.([](3),.([](6),.([](8),.([](5),.([](1),nil))))))))
+                      	fails	success
+tab_rewrite_step[201] :	0	13752
+tab_rewrite_step[202] :	0	32689
+tab_rewrite_step[209] :	0	32682
+tab_rewrite_step[227] :	0	19260
+tab_rewrite_step[232] :	0	8
+
+rewrite_step  = 106047
+total time    = 0.081 sec
+average speed = 1309092 rwr/sec
+interpreter
+ 2.4.1.3.nil end
+
+ 3.1.4.2.nil end
+
+ end end
+end
+
+
+ Statistics:
+ total time	(0.153+0.000)=0.153 sec	(main+subprocesses)
+
+ average speed = 1679 inf/sec
+              207 nonamed rules applied,   294 tried
+               50   named rules applied,    35 tried
+
+ named rules
+           applied   tried    rule for symbol
+                 2       1    queensRule:list[int]
+                16      17    oneStep:state
+                32      17    extractrule:set
+
+
+	numberOfAllocTerm = 1386
+
+end of statistics
+ 2.4.1.3.5.nil end
+
+ 3.1.4.2.5.nil end
+
+ 1.3.5.2.4.nil end
+
+ 2.5.3.1.4.nil end
+
+ 1.4.2.5.3.nil end
+
+ 5.2.4.1.3.nil end
+
+ 4.1.3.5.2.nil end
+
+ 5.3.1.4.2.nil end
+
+ 3.5.2.4.1.nil end
+
+ 4.2.5.3.1.nil end
+
+ end end
+end
+
+
+ Statistics:
+ total time	(0.884+0.000)=0.884 sec	(main+subprocesses)
+
+ average speed = 1355 inf/sec
+             1034 nonamed rules applied,  1500 tried
+              164   named rules applied,   109 tried
+
+ named rules
+           applied   tried    rule for symbol
+                10       1    queensRule:list[int]
+                53      54    oneStep:state
+               101      54    extractrule:set
+
+
+	numberOfAllocTerm = 6115
+
+end of statistics
+ 2.4.6.1.3.5.nil end
+
+ 3.6.2.5.1.4.nil end
+
+ 4.1.5.2.6.3.nil end
+
+ 5.3.1.6.4.2.nil end
+
+ end end
+end
+
+
+ Statistics:
+ total time	(2.938+0.000)=2.938 sec	(main+subprocesses)
+
+ average speed = 1691 inf/sec
+             4459 nonamed rules applied,  6510 tried
+              512   named rules applied,   307 tried
+
+ named rules
+           applied   tried    rule for symbol
+                 4       1    queensRule:list[int]
+               152     153    oneStep:state
+               356     153    extractrule:set
+
+
+	numberOfAllocTerm = 25114
+
+end of statistics
+ 2.4.6.1.3.5.7.nil end
+
+ 3.6.2.5.1.4.7.nil end
+
+ 4.1.5.2.6.3.7.nil end
+
+ 5.3.1.6.4.2.7.nil end
+
+ 2.5.3.1.7.4.6.nil end
+
+ 1.3.5.7.2.4.6.nil end
+
+ 2.5.1.4.7.3.6.nil end
+
+ 2.4.1.7.5.3.6.nil end
+
+ 2.5.7.4.1.3.6.nil end
+
+ 3.7.4.1.5.2.6.nil end
+
+ 4.2.7.5.3.1.6.nil end
+
+ 4.1.3.6.2.7.5.nil end
+
+ 3.1.6.4.2.7.5.nil end
+
+ 7.2.4.6.1.3.5.nil end
+
+ 1.4.7.3.6.2.5.nil end
+
+ 3.7.2.4.6.1.5.nil end
+
+ 2.6.3.7.4.1.5.nil end
+
+ 3.1.6.2.5.7.4.nil end
+
+ 1.5.2.6.3.7.4.nil end
+
+ 2.7.5.3.1.6.4.nil end
+
+ 6.1.3.5.7.2.4.nil end
+
+ 7.3.6.2.5.1.4.nil end
+
+ 5.7.2.6.3.1.4.nil end
+
+ 6.2.5.1.4.7.3.nil end
+
+ 5.1.6.4.2.7.3.nil end
+
+ 7.4.1.5.2.6.3.nil end
+
+ 1.6.4.2.7.5.3.nil end
+
+ 5.7.2.4.6.1.3.nil end
+
+ 4.7.5.2.6.1.3.nil end
+
+ 4.6.1.3.5.7.2.nil end
+
+ 5.1.4.7.3.6.2.nil end
+
+ 6.3.1.4.7.5.2.nil end
+
+ 6.4.7.1.3.5.2.nil end
+
+ 6.3.7.4.1.5.2.nil end
+
+ 7.5.3.1.6.4.2.nil end
+
+ 6.3.5.7.1.4.2.nil end
+
+ 3.5.7.2.4.6.1.nil end
+
+ 4.7.3.6.2.5.1.nil end
+
+ 5.2.6.3.7.4.1.nil end
+
+ 6.4.2.7.5.3.1.nil end
+
+ end end
+end
+
+
+ Statistics:
+ total time	(16.243+0.000)=16.243 sec	(main+subprocesses)
+
+ average speed = 1396 inf/sec
+            20744 nonamed rules applied, 30443 tried
+             1936   named rules applied,  1105 tried
+
+ named rules
+           applied   tried    rule for symbol
+                40       1    queensRule:list[int]
+               551     552    oneStep:state
+              1345     552    extractrule:set
+
+
+	numberOfAllocTerm = 112838
+
+end of statistics
+ 5.7.2.6.3.1.4.8.nil end
+
+ 4.7.5.2.6.1.3.8.nil end
+
+ 6.4.7.1.3.5.2.8.nil end
+
+ 6.3.5.7.1.4.2.8.nil end
+
+ 4.2.8.6.1.3.5.7.nil end
+
+ 5.3.1.6.8.2.4.7.nil end
+
+ 6.3.1.8.5.2.4.7.nil end
+
+ 4.6.1.5.2.8.3.7.nil end
+
+ 4.2.5.8.6.1.3.7.nil end
+
+ 5.8.4.1.3.6.2.7.nil end
+
+ 6.3.5.8.1.4.2.7.nil end
+
+ 5.2.4.6.8.3.1.7.nil end
+
+ 3.5.7.1.4.2.8.6.nil end
+
+ 3.5.2.8.1.7.4.6.nil end
+
+ 8.2.5.3.1.7.4.6.nil end
+
+ 3.1.7.5.8.2.4.6.nil end
+
+ 3.7.2.8.5.1.4.6.nil end
+
+ 5.2.8.1.4.7.3.6.nil end
+
+ 4.1.5.8.2.7.3.6.nil end
+
+ 5.1.8.4.2.7.3.6.nil end
+
+ 7.2.4.1.8.5.3.6.nil end
+
+ 8.2.4.1.7.5.3.6.nil end
+
+ 7.4.2.5.8.1.3.6.nil end
+
+ 5.7.2.4.8.1.3.6.nil end
+
+ 4.2.8.5.7.1.3.6.nil end
+
+ 3.5.8.4.1.7.2.6.nil end
+
+ 4.8.5.3.1.7.2.6.nil end
+
+ 4.7.3.8.2.5.1.6.nil end
+
+ 3.6.2.7.1.4.8.5.nil end
+
+ 7.2.6.3.1.4.8.5.nil end
+
+ 2.6.8.3.1.4.7.5.nil end
+
+ 4.8.1.3.6.2.7.5.nil end
+
+ 8.4.1.3.6.2.7.5.nil end
+
+ 6.3.1.8.4.2.7.5.nil end
+
+ 3.6.8.2.4.1.7.5.nil end
+
+ 2.4.6.8.3.1.7.5.nil end
+
+ 2.6.1.7.4.8.3.5.nil end
+
+ 4.6.8.2.7.1.3.5.nil end
+
+ 7.4.2.8.6.1.3.5.nil end
+
+ 6.3.7.4.1.8.2.5.nil end
+
+ 3.8.4.7.1.6.2.5.nil end
+
+ 1.6.8.3.7.4.2.5.nil end
+
+ 7.1.3.8.6.4.2.5.nil end
+
+ 4.2.7.3.6.8.1.5.nil end
+
+ 6.3.7.2.4.8.1.5.nil end
+
+ 3.7.2.8.6.4.1.5.nil end
+
+ 6.2.7.1.3.5.8.4.nil end
+
+ 3.6.2.7.5.1.8.4.nil end
+
+ 5.7.2.6.3.1.8.4.nil end
+
+ 2.8.6.1.3.5.7.4.nil end
+
+ 8.3.1.6.2.5.7.4.nil end
+
+ 6.1.5.2.8.3.7.4.nil end
+
+ 3.6.2.5.8.1.7.4.nil end
+
+ 2.5.7.1.3.8.6.4.nil end
+
+ 5.3.1.7.2.8.6.4.nil end
+
+ 7.3.8.2.5.1.6.4.nil end
+
+ 7.5.3.1.6.8.2.4.nil end
+
+ 6.3.1.7.5.8.2.4.nil end
+
+ 3.6.8.1.5.7.2.4.nil end
+
+ 1.5.8.6.3.7.2.4.nil end
+
+ 5.1.8.6.3.7.2.4.nil end
+
+ 7.3.1.6.8.5.2.4.nil end
+
+ 2.7.3.6.8.5.1.4.nil end
+
+ 6.3.7.2.8.5.1.4.nil end
+
+ 5.2.6.1.7.4.8.3.nil end
+
+ 5.1.4.6.8.2.7.3.nil end
+
+ 6.4.1.5.8.2.7.3.nil end
+
+ 5.7.1.4.2.8.6.3.nil end
+
+ 4.2.7.5.1.8.6.3.nil end
+
+ 2.5.7.4.1.8.6.3.nil end
+
+ 1.7.5.8.2.4.6.3.nil end
+
+ 2.7.5.8.1.4.6.3.nil end
+
+ 4.8.1.5.7.2.6.3.nil end
+
+ 5.8.4.1.7.2.6.3.nil end
+
+ 4.7.1.8.5.2.6.3.nil end
+
+ 6.2.7.1.4.8.5.3.nil end
+
+ 6.8.2.4.1.7.5.3.nil end
+
+ 1.7.4.6.8.2.5.3.nil end
+
+ 6.4.7.1.8.2.5.3.nil end
+
+ 6.4.2.8.5.7.1.3.nil end
+
+ 4.7.5.3.1.6.8.2.nil end
+
+ 3.6.4.1.8.5.7.2.nil end
+
+ 4.1.5.8.6.3.7.2.nil end
+
+ 5.7.4.1.3.8.6.2.nil end
+
+ 5.3.8.4.7.1.6.2.nil end
+
+ 3.6.8.1.4.7.5.2.nil end
+
+ 4.6.8.3.1.7.5.2.nil end
+
+ 5.7.1.3.8.6.4.2.nil end
+
+ 3.6.4.2.8.5.7.1.nil end
+
+ 3.5.2.8.6.4.7.1.nil end
+
+ 5.2.4.7.3.8.6.1.nil end
+
+ 4.2.7.3.6.8.5.1.nil end
+
+ end end
+end
+
+
+ Statistics:
+ total time	(71.823+0.000)=71.823 sec	(main+subprocesses)
+
+ average speed = 1476 inf/sec
+            98391 nonamed rules applied, 144832 tried
+             7656   named rules applied,  4115 tried
+
+ named rules
+           applied   tried    rule for symbol
+                92       1    queensRule:list[int]
+              2056    2057    oneStep:state
+              5508    2057    extractrule:set
+
+
+	numberOfAllocTerm = 523514
+
+end of statistics
+------------------------------------------------------------
+compiler
+FastCompletion
+execute the following line to build your program
+	gmake -f ans.make
+
+result = .(->(f(,)(e1,(var()([](0)))),(var()([](0)))),.(->(f(,)((var()([](0))),i1()((var()([](0))))),e1),.(->(i1()(e1),e1),.(->(f(,)((var()([](0))),f(,)(i1()((var()([](0)))),(var()([](1))))),(var()([](1)))),.(->(f(,)(i1()((var()([](0)))),f(,)((var()([](0))),(var()([](1))))),(var()([](1)))),.(->(f(,)(f(,)((var()([](0))),(var()([](1)))),(var()([](2)))),f(,)((var()([](0))),f(,)((var()([](1))),(var()([](2)))))),.(->(i1()(i1()((var()([](0))))),f(,)((var()([](0))),e1)),.(->(f(,)(i1()((var()([](0)))),e1),i1()((var()([](0))))),.(->(i1()(f(,)((var()([](0))),(var()([](1))))),f(,)(i1()((var()([](1)))),i1()((var()([](0)))))),nil)))))))))
+                      	fails	success
+tab_rewrite_step[202] :	0	11109
+tab_rewrite_step[203] :	0	1468
+tab_rewrite_step[210] :	0	43
+tab_rewrite_step[212] :	0	36
+tab_rewrite_step[213] :	0	16727
+tab_rewrite_step[215] :	0	359
+tab_rewrite_step[255] :	0	128
+tab_rewrite_step[263] :	0	12270
+tab_rewrite_step[264] :	0	4627
+tab_rewrite_step[265] :	0	22999
+tab_rewrite_step[267] :	0	9746
+tab_rewrite_step[268] :	0	574
+tab_rewrite_step[269] :	0	104
+tab_rewrite_step[279] :	0	36
+tab_rewrite_step[280] :	0	43
+tab_rewrite_step[281] :	0	158
+tab_rewrite_step[291] :	0	264
+tab_rewrite_step[292] :	0	88
+tab_rewrite_step[297] :	0	171
+tab_rewrite_step[298] :	0	215
+tab_rewrite_step[299] :	0	3800
+tab_rewrite_step[300] :	0	28377
+tab_rewrite_step[301] :	0	19557
+tab_rewrite_step[302] :	0	8660
+tab_rewrite_step[303] :	0	131
+tab_rewrite_step[304] :	0	14
+tab_rewrite_step[305] :	0	184
+tab_rewrite_step[306] :	0	71
+tab_rewrite_step[307] :	0	110
+tab_rewrite_step[308] :	0	19
+tab_rewrite_step[309] :	0	14
+tab_rewrite_step[314] :	0	321
+tab_rewrite_step[319] :	0	1444
+tab_rewrite_step[322] :	0	384
+tab_rewrite_step[323] :	0	9
+tab_rewrite_step[326] :	0	2332
+tab_rewrite_step[327] :	0	39
+tab_rewrite_step[328] :	0	2371
+tab_rewrite_step[330] :	0	39
+tab_rewrite_step[331] :	0	39
+tab_rewrite_step[332] :	0	2525
+tab_rewrite_step[333] :	0	1416
+tab_rewrite_step[338] :	0	2528
+tab_rewrite_step[345] :	0	2908
+tab_rewrite_step[346] :	0	1427
+tab_rewrite_step[355] :	0	1
+tab_rewrite_step[356] :	0	1
+tab_rewrite_step[361] :	0	418
+tab_rewrite_step[364] :	0	126
+tab_rewrite_step[366] :	0	123
+tab_rewrite_step[367] :	0	16
+tab_rewrite_step[368] :	0	18
+tab_rewrite_step[369] :	0	18
+tab_rewrite_step[371] :	0	63
+tab_rewrite_step[372] :	0	473
+tab_rewrite_step[374] :	0	10
+tab_rewrite_step[375] :	0	18
+tab_rewrite_step[376] :	0	4
+tab_rewrite_step[377] :	0	1
+tab_rewrite_step[385] :	0	9
+
+rewrite_step  = 185557
+total time    = 0.286 sec
+average speed = 648873 rwr/sec
+execute the following line to build your program
+	gmake -f ans.make
+
+result = .(->(f(,)(e1,(var()([](0)))),(var()([](0)))),.(->(f(,)(e2,(var()([](0)))),(var()([](0)))),.(->(f(,)((var()([](0))),i1()((var()([](0))))),e1),.(->(i1()(e1),e1),.(->(i1()(e2),e1),.(->(f(,)((var()([](0))),f(,)(i1()((var()([](0)))),(var()([](1))))),(var()([](1)))),.(->(f(,)(i1()((var()([](0)))),f(,)((var()([](0))),(var()([](1))))),(var()([](1)))),.(->(f(,)(f(,)((var()([](0))),(var()([](1)))),(var()([](2)))),f(,)((var()([](0))),f(,)((var()([](1))),(var()([](2)))))),.(->(i1()(i1()((var()([](0))))),f(,)((var()([](0))),e1)),.(->(f(,)(i1()((var()([](0)))),e1),i1()((var()([](0))))),.(->(i2()((var()([](0)))),f(,)(i1()((var()([](0)))),e2)),.(->(i1()(f(,)((var()([](0))),(var()([](1))))),f(,)(i1()((var()([](1)))),i1()((var()([](0)))))),nil))))))))))))
+                      	fails	success
+tab_rewrite_step[202] :	0	29379
+tab_rewrite_step[203] :	0	2547
+tab_rewrite_step[210] :	0	71
+tab_rewrite_step[212] :	0	63
+tab_rewrite_step[213] :	0	35491
+tab_rewrite_step[215] :	0	1256
+tab_rewrite_step[255] :	0	178
+tab_rewrite_step[263] :	0	27528
+tab_rewrite_step[264] :	0	10808
+tab_rewrite_step[265] :	0	51078
+tab_rewrite_step[267] :	0	22717
+tab_rewrite_step[268] :	0	873
+tab_rewrite_step[269] :	0	170
+tab_rewrite_step[281] :	0	63
+tab_rewrite_step[282] :	0	71
+tab_rewrite_step[283] :	0	268
+tab_rewrite_step[293] :	0	405
+tab_rewrite_step[294] :	0	126
+tab_rewrite_step[299] :	0	226
+tab_rewrite_step[300] :	0	350
+tab_rewrite_step[301] :	0	8243
+tab_rewrite_step[302] :	0	62939
+tab_rewrite_step[303] :	0	41244
+tab_rewrite_step[304] :	0	26013
+tab_rewrite_step[305] :	0	184
+tab_rewrite_step[306] :	0	15
+tab_rewrite_step[307] :	0	244
+tab_rewrite_step[308] :	0	101
+tab_rewrite_step[309] :	0	145
+tab_rewrite_step[310] :	0	36
+tab_rewrite_step[311] :	0	15
+tab_rewrite_step[316] :	0	512
+tab_rewrite_step[321] :	0	2187
+tab_rewrite_step[324] :	0	1082
+tab_rewrite_step[325] :	0	21
+tab_rewrite_step[328] :	0	5696
+tab_rewrite_step[329] :	0	71
+tab_rewrite_step[330] :	0	5767
+tab_rewrite_step[332] :	0	71
+tab_rewrite_step[333] :	0	71
+tab_rewrite_step[334] :	0	6093
+tab_rewrite_step[335] :	0	4976
+tab_rewrite_step[340] :	0	6787
+tab_rewrite_step[347] :	0	4531
+tab_rewrite_step[348] :	0	1886
+tab_rewrite_step[357] :	0	1
+tab_rewrite_step[358] :	0	1
+tab_rewrite_step[363] :	0	812
+tab_rewrite_step[366] :	0	231
+tab_rewrite_step[368] :	0	237
+tab_rewrite_step[369] :	0	43
+tab_rewrite_step[370] :	0	33
+tab_rewrite_step[371] :	0	33
+tab_rewrite_step[373] :	0	147
+tab_rewrite_step[374] :	0	1524
+tab_rewrite_step[376] :	0	17
+tab_rewrite_step[377] :	0	33
+tab_rewrite_step[378] :	0	6
+tab_rewrite_step[379] :	0	1
+tab_rewrite_step[387] :	0	21
+
+rewrite_step  = 417760
+total time    = 0.539 sec
+average speed = 775421 rwr/sec
+execute the following line to build your program
+	gmake -f ans.make
+
+result = .(->(f(,)(e1,(var()([](0)))),(var()([](0)))),.(->(f(,)(e2,(var()([](0)))),(var()([](0)))),.(->(f(,)(e3,(var()([](0)))),(var()([](0)))),.(->(f(,)((var()([](0))),i1()((var()([](0))))),e1),.(->(i1()(e1),e1),.(->(i1()(e2),e1),.(->(i1()(e3),e1),.(->(f(,)((var()([](0))),f(,)(i1()((var()([](0)))),(var()([](1))))),(var()([](1)))),.(->(f(,)(i1()((var()([](0)))),f(,)((var()([](0))),(var()([](1))))),(var()([](1)))),.(->(f(,)(f(,)((var()([](0))),(var()([](1)))),(var()([](2)))),f(,)((var()([](0))),f(,)((var()([](1))),(var()([](2)))))),.(->(i1()(i1()((var()([](0))))),f(,)((var()([](0))),e1)),.(->(f(,)(i1()((var()([](0)))),e1),i1()((var()([](0))))),.(->(i2()((var()([](0)))),f(,)(i1()((var()([](0)))),e2)),.(->(i3()((var()([](0)))),f(,)(i1()((var()([](0)))),e3)),.(->(i1()(f(,)((var()([](0))),(var()([](1))))),f(,)(i1()((var()([](1)))),i1()((var()([](0)))))),nil)))))))))))))))
+                      	fails	success
+tab_rewrite_step[202] :	0	75601
+tab_rewrite_step[203] :	0	4542
+tab_rewrite_step[210] :	0	111
+tab_rewrite_step[212] :	0	102
+tab_rewrite_step[213] :	0	74694
+tab_rewrite_step[215] :	0	4029
+tab_rewrite_step[255] :	0	228
+tab_rewrite_step[263] :	0	60166
+tab_rewrite_step[264] :	0	23991
+tab_rewrite_step[265] :	0	110520
+tab_rewrite_step[267] :	0	50884
+tab_rewrite_step[268] :	0	1277
+tab_rewrite_step[269] :	0	252
+tab_rewrite_step[283] :	0	102
+tab_rewrite_step[284] :	0	111
+tab_rewrite_step[285] :	0	426
+tab_rewrite_step[295] :	0	566
+tab_rewrite_step[296] :	0	164
+tab_rewrite_step[301] :	0	303
+tab_rewrite_step[302] :	0	515
+tab_rewrite_step[303] :	0	17822
+tab_rewrite_step[304] :	0	137011
+tab_rewrite_step[305] :	0	86695
+tab_rewrite_step[306] :	0	73674
+tab_rewrite_step[307] :	0	259
+tab_rewrite_step[308] :	0	16
+tab_rewrite_step[309] :	0	327
+tab_rewrite_step[310] :	0	145
+tab_rewrite_step[311] :	0	194
+tab_rewrite_step[312] :	0	61
+tab_rewrite_step[313] :	0	16
+tab_rewrite_step[318] :	0	767
+tab_rewrite_step[323] :	0	3185
+tab_rewrite_step[326] :	0	2577
+tab_rewrite_step[327] :	0	38
+tab_rewrite_step[330] :	0	13280
+tab_rewrite_step[331] :	0	113
+tab_rewrite_step[332] :	0	13393
+tab_rewrite_step[334] :	0	113
+tab_rewrite_step[335] :	0	113
+tab_rewrite_step[336] :	0	14055
+tab_rewrite_step[337] :	0	16034
+tab_rewrite_step[342] :	0	18889
+tab_rewrite_step[349] :	0	6697
+tab_rewrite_step[350] :	0	2430
+tab_rewrite_step[359] :	0	1
+tab_rewrite_step[360] :	0	1
+tab_rewrite_step[365] :	0	1445
+tab_rewrite_step[368] :	0	371
+tab_rewrite_step[370] :	0	396
+tab_rewrite_step[371] :	0	82
+tab_rewrite_step[372] :	0	53
+tab_rewrite_step[373] :	0	53
+tab_rewrite_step[375] :	0	313
+tab_rewrite_step[376] :	0	4611
+tab_rewrite_step[378] :	0	26
+tab_rewrite_step[379] :	0	53
+tab_rewrite_step[380] :	0	8
+tab_rewrite_step[381] :	0	1
+tab_rewrite_step[389] :	0	38
+
+rewrite_step  = 932840
+total time    = 1.263 sec
+average speed = 738623 rwr/sec
+execute the following line to build your program
+	gmake -f ans.make
+
+result = .(->(f(,)(e1,(var()([](0)))),(var()([](0)))),.(->(f(,)(e2,(var()([](0)))),(var()([](0)))),.(->(f(,)(e3,(var()([](0)))),(var()([](0)))),.(->(f(,)(e4,(var()([](0)))),(var()([](0)))),.(->(f(,)((var()([](0))),i1()((var()([](0))))),e1),.(->(i1()(e1),e1),.(->(i1()(e2),e1),.(->(i1()(e3),e1),.(->(i1()(e4),e1),.(->(f(,)((var()([](0))),f(,)(i1()((var()([](0)))),(var()([](1))))),(var()([](1)))),.(->(f(,)(i1()((var()([](0)))),f(,)((var()([](0))),(var()([](1))))),(var()([](1)))),.(->(f(,)(f(,)((var()([](0))),(var()([](1)))),(var()([](2)))),f(,)((var()([](0))),f(,)((var()([](1))),(var()([](2)))))),.(->(i1()(i1()((var()([](0))))),f(,)((var()([](0))),e1)),.(->(f(,)(i1()((var()([](0)))),e1),i1()((var()([](0))))),.(->(i2()((var()([](0)))),f(,)(i1()((var()([](0)))),e2)),.(->(i3()((var()([](0)))),f(,)(i1()((var()([](0)))),e3)),.(->(i4()((var()([](0)))),f(,)(i1()((var()([](0)))),e4)),.(->(i1()(f(,)((var()([](0))),(var()([](1))))),f(,)(i1()((var()([](1)))),i1()((var()([](0)))))),nil))))))))))))))))))
+                      	fails	success
+tab_rewrite_step[202] :	0	182341
+tab_rewrite_step[203] :	0	7801
+tab_rewrite_step[210] :	0	163
+tab_rewrite_step[212] :	0	153
+tab_rewrite_step[213] :	0	147848
+tab_rewrite_step[215] :	0	11465
+tab_rewrite_step[255] :	0	278
+tab_rewrite_step[263] :	0	122462
+tab_rewrite_step[264] :	0	48881
+tab_rewrite_step[265] :	0	222989
+tab_rewrite_step[267] :	0	104956
+tab_rewrite_step[268] :	0	1786
+tab_rewrite_step[269] :	0	350
+tab_rewrite_step[285] :	0	153
+tab_rewrite_step[286] :	0	163
+tab_rewrite_step[287] :	0	632
+tab_rewrite_step[297] :	0	747
+tab_rewrite_step[298] :	0	202
+tab_rewrite_step[303] :	0	402
+tab_rewrite_step[304] :	0	710
+tab_rewrite_step[305] :	0	35965
+tab_rewrite_step[306] :	0	277353
+tab_rewrite_step[307] :	0	171186
+tab_rewrite_step[308] :	0	191927
+tab_rewrite_step[309] :	0	356
+tab_rewrite_step[310] :	0	17
+tab_rewrite_step[311] :	0	433
+tab_rewrite_step[312] :	0	203
+tab_rewrite_step[313] :	0	257
+tab_rewrite_step[314] :	0	94
+tab_rewrite_step[315] :	0	17
+tab_rewrite_step[320] :	0	1086
+tab_rewrite_step[325] :	0	4438
+tab_rewrite_step[328] :	0	5379
+tab_rewrite_step[329] :	0	60
+tab_rewrite_step[332] :	0	28164
+tab_rewrite_step[333] :	0	165
+tab_rewrite_step[334] :	0	28329
+tab_rewrite_step[336] :	0	165
+tab_rewrite_step[337] :	0	165
+tab_rewrite_step[338] :	0	29587
+tab_rewrite_step[339] :	0	45736
+tab_rewrite_step[344] :	0	50648
+tab_rewrite_step[351] :	0	9406
+tab_rewrite_step[352] :	0	3059
+tab_rewrite_step[361] :	0	1
+tab_rewrite_step[362] :	0	1
+tab_rewrite_step[367] :	0	2415
+tab_rewrite_step[370] :	0	546
+tab_rewrite_step[372] :	0	602
+tab_rewrite_step[373] :	0	134
+tab_rewrite_step[374] :	0	78
+tab_rewrite_step[375] :	0	78
+tab_rewrite_step[377] :	0	609
+tab_rewrite_step[378] :	0	12616
+tab_rewrite_step[380] :	0	37
+tab_rewrite_step[381] :	0	78
+tab_rewrite_step[382] :	0	10
+tab_rewrite_step[383] :	0	1
+tab_rewrite_step[391] :	0	60
+
+rewrite_step  = 1970342
+total time    = 2.614 sec
+average speed = 753843 rwr/sec
+execute the following line to build your program
+	gmake -f ans.make
+
+result = .(->(f(,)(e1,(var()([](0)))),(var()([](0)))),.(->(f(,)(e2,(var()([](0)))),(var()([](0)))),.(->(f(,)(e3,(var()([](0)))),(var()([](0)))),.(->(f(,)(e4,(var()([](0)))),(var()([](0)))),.(->(f(,)(e5,(var()([](0)))),(var()([](0)))),.(->(f(,)((var()([](0))),i1()((var()([](0))))),e1),.(->(i1()(e1),e1),.(->(i1()(e2),e1),.(->(i1()(e3),e1),.(->(i1()(e4),e1),.(->(i1()(e5),e1),.(->(f(,)((var()([](0))),f(,)(i1()((var()([](0)))),(var()([](1))))),(var()([](1)))),.(->(f(,)(i1()((var()([](0)))),f(,)((var()([](0))),(var()([](1))))),(var()([](1)))),.(->(f(,)(f(,)((var()([](0))),(var()([](1)))),(var()([](2)))),f(,)((var()([](0))),f(,)((var()([](1))),(var()([](2)))))),.(->(i1()(i1()((var()([](0))))),f(,)((var()([](0))),e1)),.(->(f(,)(i1()((var()([](0)))),e1),i1()((var()([](0))))),.(->(i2()((var()([](0)))),f(,)(i1()((var()([](0)))),e2)),.(->(i3()((var()([](0)))),f(,)(i1()((var()([](0)))),e3)),.(->(i4()((var()([](0)))),f(,)(i1()((var()([](0)))),e4)),.(->(i5()((var()([](0)))),f(,)(i1()((var()([](0)))),e5)),.(->(i1()(f(,)((var()([](0))),(var()([](1))))),f(,)(i1()((var()([](1)))),i1()((var()([](0)))))),nil)))))))))))))))))))))
+                      	fails	success
+tab_rewrite_step[202] :	0	406613
+tab_rewrite_step[203] :	0	12696
+tab_rewrite_step[210] :	0	227
+tab_rewrite_step[212] :	0	216
+tab_rewrite_step[213] :	0	273529
+tab_rewrite_step[215] :	0	28846
+tab_rewrite_step[255] :	0	328
+tab_rewrite_step[263] :	0	230718
+tab_rewrite_step[264] :	0	91697
+tab_rewrite_step[265] :	0	417083
+tab_rewrite_step[267] :	0	199160
+tab_rewrite_step[268] :	0	2400
+tab_rewrite_step[269] :	0	464
+tab_rewrite_step[287] :	0	216
+tab_rewrite_step[288] :	0	227
+tab_rewrite_step[289] :	0	886
+tab_rewrite_step[299] :	0	948
+tab_rewrite_step[300] :	0	240
+tab_rewrite_step[305] :	0	523
+tab_rewrite_step[306] :	0	935
+tab_rewrite_step[307] :	0	67098
+tab_rewrite_step[308] :	0	518847
+tab_rewrite_step[309] :	0	314363
+tab_rewrite_step[310] :	0	454488
+tab_rewrite_step[311] :	0	475
+tab_rewrite_step[312] :	0	18
+tab_rewrite_step[313] :	0	562
+tab_rewrite_step[314] :	0	275
+tab_rewrite_step[315] :	0	334
+tab_rewrite_step[316] :	0	135
+tab_rewrite_step[317] :	0	18
+tab_rewrite_step[322] :	0	1469
+tab_rewrite_step[327] :	0	5946
+tab_rewrite_step[330] :	0	10130
+tab_rewrite_step[331] :	0	87
+tab_rewrite_step[334] :	0	54402
+tab_rewrite_step[335] :	0	227
+tab_rewrite_step[336] :	0	54629
+tab_rewrite_step[338] :	0	227
+tab_rewrite_step[339] :	0	227
+tab_rewrite_step[340] :	0	56863
+tab_rewrite_step[341] :	0	115210
+tab_rewrite_step[346] :	0	125571
+tab_rewrite_step[353] :	0	12658
+tab_rewrite_step[354] :	0	3773
+tab_rewrite_step[363] :	0	1
+tab_rewrite_step[364] :	0	1
+tab_rewrite_step[369] :	0	3843
+tab_rewrite_step[372] :	0	756
+tab_rewrite_step[374] :	0	857
+tab_rewrite_step[375] :	0	200
+tab_rewrite_step[376] :	0	108
+tab_rewrite_step[377] :	0	108
+tab_rewrite_step[379] :	0	1095
+tab_rewrite_step[380] :	0	30941
+tab_rewrite_step[382] :	0	50
+tab_rewrite_step[383] :	0	108
+tab_rewrite_step[384] :	0	12
+tab_rewrite_step[385] :	0	1
+tab_rewrite_step[393] :	0	87
+
+rewrite_step  = 3898207
+total time    = 5.049 sec
+average speed = 772098 rwr/sec
+interpreter
+ f(e1,var(0))->var(0).f(var(0),i1(var(0)))->e1.i1(e1)->e1.f(var(0),f(i1(var(0)),var(1)))->var(1).f(i1(var(0)),f(var(0),var(1)))->var(1).f(f(var(0),var(1)),var(2))->f(var(0),f(var(1),var(2))).i1(i1(var(0)))->f(var(0),e1).f(i1(var(0)),e1)->i1(var(0)).i1(f(var(0),var(1)))->f(i1(var(1)),i1(var(0))).nil end
+
+ end end
+end
+
+
+ Statistics:
+ total time	(98.703+0.000)=98.703 sec	(main+subprocesses)
+
+ average speed = 1879 inf/sec
+            161183 nonamed rules applied, 361035 tried
+            24374   named rules applied, 165150 tried
+
+ named rules
+           applied   tried    rule for symbol
+                18     154    Regle1:compute_state
+                59     136    Regle2:compute_state
+                54      77    Regle3:compute_state
+                10      23    Regle4:compute_state
+                12      13    Regle5:compute_state
+                40    4823    truepropag:eqSystem
+              5134    8573    topOccRule:list[int]
+                 1      79    compose_ics_ok_T:internal_compute_state
+                72     144    compose_ics_stop:internal_compute_state
+                12      12    choix_C:compute_state
+                87     143    delete:list[equation]
+               141     285    compose_ics_echec:internal_compute_state
+                72     144    collapse_ics_stop:internal_compute_state
+                59      59    delete_E:compute_state
+               132     276    collapse_ics_echec:internal_compute_state
+                59      77    orient_E:compute_state
+                54      54    deduce_NC:compute_state
+               235    2227    simplify_list_ok:internal_compute_state
+                18      18    compose_A:compute_state
+                18      18    compose_C:compute_state
+                28     125    simplify_list_stop:internal_compute_state
+                 1       1    commande:list[equation]
+                18      18    compose_N:compute_state
+                18      18    compose_T:compute_state
+               788     913    simplify_list_echec:internal_compute_state
+                18      18    collapse_A:compute_state
+                18      18    collapse_C:compute_state
+                18      18    collapse_N:compute_state
+                18      18    collapse_T:compute_state
+                59      59    simplify_E:compute_state
+                 1       1    completion:list[equation]
+                18      18    choix_orient1:list[equation]
+                10      10    internal_deduce:compute_state
+               167    1998    rewrite:term
+                 0   28050    delete:eqSystem
+               160     316    deduce:equation
+              1907   16568    unfold:eqSystem
+                75     316    deduce_list:internal_compute_state
+                 1     142    compose:equation
+                97     156    simplify_ics:internal_compute_state
+                67     773    coalesce:eqSystem
+                 6     706    occCheck1:eqSystem
+                 6     700    occCheck2:eqSystem
+              3641   11175    conflict:eqSystem
+                 9     141    collapse:equation
+               535    5358    truepass:eqSystem
+               166    1856    simplify:equation
+              2850   37904    decompose:eqSystem
+              1015    5694    mergePass1:eqSystem
+               334     573    mergePass2:eqSystem
+                 0     239    mergePass3:eqSystem
+                 0     207    compose_ics_ok:internal_compute_state
+              4627   24801    inOccRule:list[int]
+               188     694    eliminate1:eqSystem
+                66     506    eliminate2:eqSystem
+              1067    6761    matchClash:eqSystem
+                63     636    mergeClash:eqSystem
+                11      18    orient_eq1:equation
+                 7       7    orient_eq2:equation
+                 9     285    collapse_ics_ok:internal_compute_state
+
+
+	numberOfAllocTerm = 756054
+
+end of statistics
+ f(e1,var(0))->var(0).f(e2,var(0))->var(0).f(var(0),i1(var(0)))->e1.i1(e1)->e1.i1(e2)->e1.f(var(0),f(i1(var(0)),var(1)))->var(1).f(i1(var(0)),f(var(0),var(1)))->var(1).f(f(var(0),var(1)),var(2))->f(var(0),f(var(1),var(2))).i1(i1(var(0)))->f(var(0),e1).f(i1(var(0)),e1)->i1(var(0)).i2(var(0))->f(i1(var(0)),e2).i1(f(var(0),var(1)))->f(i1(var(1)),i1(var(0))).nil end
+
+ end end
+end
+
+
+ Statistics:
+ total time	(211.540+0.000)=211.540 sec	(main+subprocesses)
+
+ average speed = 1974 inf/sec
+            365738 nonamed rules applied, 878632 tried
+            52022   named rules applied, 440307 tried
+
+ named rules
+           applied   tried    rule for symbol
+                33     299    Regle1:compute_state
+                99     266    Regle2:compute_state
+               130     167    Regle3:compute_state
+                17      37    Regle4:compute_state
+                19      20    Regle5:compute_state
+                76   11458    truepropag:eqSystem
+             11932   19735    topOccRule:list[int]
+                 1     212    compose_ics_ok_T:internal_compute_state
+               132     264    compose_ics_stop:internal_compute_state
+                19      19    choix_C:compute_state
+               158     276    delete:list[equation]
+               425     689    compose_ics_echec:internal_compute_state
+               132     264    collapse_ics_stop:internal_compute_state
+                99      99    delete_E:compute_state
+               404     668    collapse_ics_echec:internal_compute_state
+                99     132    orient_E:compute_state
+               130     130    deduce_NC:compute_state
+               362    5105    simplify_list_ok:internal_compute_state
+                33      33    compose_A:compute_state
+                33      33    compose_C:compute_state
+                59     231    simplify_list_stop:internal_compute_state
+                 1       1    commande:list[equation]
+                33      33    compose_N:compute_state
+                33      33    compose_T:compute_state
+              2016    2247    simplify_list_echec:internal_compute_state
+                33      33    collapse_A:compute_state
+                33      33    collapse_C:compute_state
+                33      33    collapse_N:compute_state
+                33      33    collapse_T:compute_state
+                99      99    simplify_E:compute_state
+                 1       1    completion:list[equation]
+                33      33    choix_orient1:list[equation]
+                17      17    internal_deduce:compute_state
+               250    4874    rewrite:term
+                 0   61742    delete:eqSystem
+               256     680    deduce:equation
+              3030   34792    unfold:eqSystem
+               120     680    deduce_list:internal_compute_state
+                 1     426    compose:equation
+               172     271    simplify_ics:internal_compute_state
+                97    1375    coalesce:eqSystem
+                 6    1278    occCheck1:eqSystem
+                 6    1272    occCheck2:eqSystem
+              9157   25539    conflict:eqSystem
+                21     425    collapse:equation
+               802   12260    truepass:eqSystem
+               249    4448    simplify:equation
+              5332  137234    decompose:eqSystem
+              1816   12874    mergePass1:eqSystem
+               460     811    mergePass2:eqSystem
+                 0     351    mergePass3:eqSystem
+                 0     478    compose_ics_ok:internal_compute_state
+             10808   76885    inOccRule:list[int]
+               286    1266    eliminate1:eqSystem
+               129     980    eliminate2:eqSystem
+              2133   15007    matchClash:eqSystem
+                80     891    mergeClash:eqSystem
+                20      33    orient_eq1:equation
+                13      13    orient_eq2:equation
+                21     689    collapse_ics_ok:internal_compute_state
+
+
+	numberOfAllocTerm = 1681052
+
+end of statistics
+ f(e1,var(0))->var(0).f(e2,var(0))->var(0).f(e3,var(0))->var(0).f(var(0),i1(var(0)))->e1.i1(e1)->e1.i1(e2)->e1.i1(e3)->e1.f(var(0),f(i1(var(0)),var(1)))->var(1).f(i1(var(0)),f(var(0),var(1)))->var(1).f(f(var(0),var(1)),var(2))->f(var(0),f(var(1),var(2))).i1(i1(var(0)))->f(var(0),e1).f(i1(var(0)),e1)->i1(var(0)).i2(var(0))->f(i1(var(0)),e2).i3(var(0))->f(i1(var(0)),e3).i1(f(var(0),var(1)))->f(i1(var(1)),i1(var(0))).nil end
+
+ end end
+end
+
+
+ Statistics:
+ total time	(465.533+0.000)=465.533 sec	(main+subprocesses)
+
+ average speed = 2003 inf/sec
+            823940 nonamed rules applied, 2150848 tried
+            108900   named rules applied, 1120327 tried
+
+ named rules
+           applied   tried    rule for symbol
+                53     544    Regle1:compute_state
+               152     491    Regle2:compute_state
+               284     339    Regle3:compute_state
+                26      55    Regle4:compute_state
+                28      29    Regle5:compute_state
+               128   26234    truepropag:eqSystem
+             26926   43858    topOccRule:list[int]
+                 1     493    compose_ics_ok_T:internal_compute_state
+               212     424    compose_ics_stop:internal_compute_state
+                28      28    choix_C:compute_state
+               254     458    delete:list[equation]
+              1054    1478    compose_ics_echec:internal_compute_state
+               212     424    collapse_ics_stop:internal_compute_state
+               152     152    delete_E:compute_state
+              1016    1440    collapse_ics_echec:internal_compute_state
+               152     205    orient_E:compute_state
+               284     284    deduce_NC:compute_state
+               537   11447    simplify_list_ok:internal_compute_state
+                53      53    compose_A:compute_state
+                53      53    compose_C:compute_state
+               102     377    simplify_list_stop:internal_compute_state
+                 1       1    commande:list[equation]
+                53      53    compose_N:compute_state
+                53      53    compose_T:compute_state
+              4896    5273    simplify_list_echec:internal_compute_state
+                53      53    collapse_A:compute_state
+                53      53    collapse_C:compute_state
+                53      53    collapse_N:compute_state
+                53      53    collapse_T:compute_state
+               152     152    simplify_E:compute_state
+                 1       1    completion:list[equation]
+                53      53    choix_orient1:list[equation]
+                26      26    internal_deduce:compute_state
+               365   11451    rewrite:term
+                 0  132730    delete:eqSystem
+               384    1376    deduce:equation
+              4705   72290    unfold:eqSystem
+               181    1376    deduce_list:internal_compute_state
+                 1    1055    compose:equation
+               275     427    simplify_ics:internal_compute_state
+               135    2393    coalesce:eqSystem
+                 6    2258    occCheck1:eqSystem
+                 6    2252    occCheck2:eqSystem
+             22058   56763    conflict:eqSystem
+                38    1054    collapse:equation
+              1159   27393    truepass:eqSystem
+               364   10396    simplify:equation
+              9602  416965    decompose:eqSystem
+              3094   28373    mergePass1:eqSystem
+               623    1123    mergePass2:eqSystem
+                 0     500    mergePass3:eqSystem
+                 0     986    compose_ics_ok:internal_compute_state
+             23991  215316    inOccRule:list[int]
+               416    2246    eliminate1:eqSystem
+               216    1830    eliminate2:eqSystem
+              3939   32312    matchClash:eqSystem
+                97    1220    mergeClash:eqSystem
+                32      53    orient_eq1:equation
+                21      21    orient_eq2:equation
+                38    1478    collapse_ics_ok:internal_compute_state
+
+
+	numberOfAllocTerm = 3709396
+
+end of statistics
+ f(e1,var(0))->var(0).f(e2,var(0))->var(0).f(e3,var(0))->var(0).f(e4,var(0))->var(0).f(var(0),i1(var(0)))->e1.i1(e1)->e1.i1(e2)->e1.i1(e3)->e1.i1(e4)->e1.f(var(0),f(i1(var(0)),var(1)))->var(1).f(i1(var(0)),f(var(0),var(1)))->var(1).f(f(var(0),var(1)),var(2))->f(var(0),f(var(1),var(2))).i1(i1(var(0)))->f(var(0),e1).f(i1(var(0)),e1)->i1(var(0)).i2(var(0))->f(i1(var(0)),e2).i3(var(0))->f(i1(var(0)),e3).i4(var(0))->f(i1(var(0)),e4).i1(f(var(0),var(1)))->f(i1(var(1)),i1(var(0))).nil end
+
+ end end
+end
+
+
+ Statistics:
+ total time	(954.638+0.000)=954.638 sec	(main+subprocesses)
+
+ average speed = 2063 inf/sec
+            1755943 nonamed rules applied, 4998916 tried
+            214399   named rules applied, 2607642 tried
+
+ named rules
+           applied   tried    rule for symbol
+                78     938    Regle1:compute_state
+               219     860    Regle2:compute_state
+               564     641    Regle3:compute_state
+                37      77    Regle4:compute_state
+                39      40    Regle5:compute_state
+               196   55155    truepropag:eqSystem
+             56120   90054    topOccRule:list[int]
+                 1    1024    compose_ics_ok_T:internal_compute_state
+               312     624    compose_ics_stop:internal_compute_state
+                39      39    choix_C:compute_state
+               377     693    delete:list[equation]
+              2259    2883    compose_ics_echec:internal_compute_state
+               312     624    collapse_ics_stop:internal_compute_state
+               219     219    delete_E:compute_state
+              2199    2823    collapse_ics_echec:internal_compute_state
+               219     297    orient_E:compute_state
+               564     564    deduce_NC:compute_state
+               760   23779    simplify_list_ok:internal_compute_state
+                78      78    compose_A:compute_state
+                78      78    compose_C:compute_state
+               158     565    simplify_list_stop:internal_compute_state
+                 1       1    commande:list[equation]
+                78      78    compose_N:compute_state
+                78      78    compose_T:compute_state
+             10689   11254    simplify_list_echec:internal_compute_state
+                78      78    collapse_A:compute_state
+                78      78    collapse_C:compute_state
+                78      78    collapse_N:compute_state
+                78      78    collapse_T:compute_state
+               219     219    simplify_E:compute_state
+                 1       1    completion:list[equation]
+                78      78    choix_orient1:list[equation]
+                37      37    internal_deduce:compute_state
+               512   24482    rewrite:term
+                 0  266462    delete:eqSystem
+               544    2596    deduce:equation
+              7067  141921    unfold:eqSystem
+               258    2596    deduce_list:internal_compute_state
+                 1    2260    compose:equation
+               407     626    simplify_ics:internal_compute_state
+               181    4025    coalesce:eqSystem
+                 6    3844    occCheck1:eqSystem
+                 6    3838    occCheck2:eqSystem
+             48119  116990    conflict:eqSystem
+                60    2259    collapse:equation
+              1606   56761    truepass:eqSystem
+               511   22222    simplify:equation
+             16241 1090499    decompose:eqSystem
+              4984   58132    mergePass1:eqSystem
+               823    1509    mergePass2:eqSystem
+                 0     686    mergePass3:eqSystem
+                 0    1860    compose_ics_ok:internal_compute_state
+             48881  533414    inOccRule:list[int]
+               578    3832    eliminate1:eqSystem
+               327    3254    eliminate2:eqSystem
+              6714   64846    matchClash:eqSystem
+               114    1623    mergeClash:eqSystem
+                47      78    orient_eq1:equation
+                31      31    orient_eq2:equation
+                60    2883    collapse_ics_ok:internal_compute_state
+
+
+	numberOfAllocTerm = 7742925
+
+end of statistics
+------------------------------------------------------------
+Bool3
+compiler
+
+lhsACPattern = p(,)(var0[3])
+
+nbACSubterms = 1
+nbSingleACVariable  = 0
+nbMultiACVariable   = 1
+nbSingleACSubterm   = 0
+nbMultiACSubterm    = 0
+constrainedVariable = false
+
+
+lhsACPattern = p(,)(var0[3],var7$)
+
+nbACSubterms = 1
+nbSingleACVariable  = 1
+nbMultiACVariable   = 1
+nbSingleACSubterm   = 0
+nbMultiACSubterm    = 0
+constrainedVariable = false
+
+
+lhsACPattern = p(,)(var0,b0)
+
+nbACSubterms = 1
+nbSingleACVariable  = 1
+nbMultiACVariable   = 0
+nbSingleACSubterm   = 1
+nbMultiACSubterm    = 0
+constrainedVariable = false
+
+
+lhsACPattern = p(,)(var0,var7$,b0)
+
+nbACSubterms = 1
+nbSingleACVariable  = 2
+nbMultiACVariable   = 0
+nbSingleACSubterm   = 1
+nbMultiACSubterm    = 0
+constrainedVariable = false
+
+
+lhsACPattern = m(,)(var0,b1)
+
+nbACSubterms = 1
+nbSingleACVariable  = 1
+nbMultiACVariable   = 0
+nbSingleACSubterm   = 1
+nbMultiACSubterm    = 0
+constrainedVariable = false
+
+
+lhsACPattern = m(,)(var0,var7$,b1)
+
+nbACSubterms = 1
+nbSingleACVariable  = 2
+nbMultiACVariable   = 0
+nbSingleACSubterm   = 1
+nbMultiACSubterm    = 0
+constrainedVariable = false
+
+
+lhsACPattern = m(,)(var0[3])
+
+nbACSubterms = 1
+nbSingleACVariable  = 0
+nbMultiACVariable   = 1
+nbSingleACSubterm   = 0
+nbMultiACSubterm    = 0
+constrainedVariable = false
+
+
+lhsACPattern = m(,)(var0[3],var7$)
+
+nbACSubterms = 1
+nbSingleACVariable  = 1
+nbMultiACVariable   = 1
+nbSingleACSubterm   = 0
+nbMultiACSubterm    = 0
+constrainedVariable = false
+
+
+lhsACPattern = m(,)(var0,b0)
+
+nbACSubterms = 1
+nbSingleACVariable  = 1
+nbMultiACVariable   = 0
+nbSingleACSubterm   = 1
+nbMultiACSubterm    = 0
+constrainedVariable = false
+
+
+lhsACPattern = m(,)(var0,var7$,b0)
+
+nbACSubterms = 1
+nbSingleACVariable  = 2
+nbMultiACVariable   = 0
+nbSingleACSubterm   = 1
+nbMultiACSubterm    = 0
+constrainedVariable = false
+
+
+lhsACPattern = m(,)(var2,p(,)(var0,var1))
+
+nbACSubterms = 2
+nbSingleACVariable  = 1
+nbMultiACVariable   = 0
+nbSingleACSubterm   = 1
+nbMultiACSubterm    = 0
+constrainedVariable = false
+
+Deux niveaux de symboles AC
+*** leftside = m(,)(var2,p(,)(var0,var1))
+
+lhsACPattern = m(,)(var2,var7$,p(,)(var0,var1))
+
+nbACSubterms = 2
+nbSingleACVariable  = 2
+nbMultiACVariable   = 0
+nbSingleACSubterm   = 1
+nbMultiACSubterm    = 0
+constrainedVariable = false
+
+Deux niveaux de symboles AC
+*** leftside = m(,)(var2,var7$,p(,)(var0,var1))
+***
+*** The compiled query is not ground
+***
+execute the following line to build your program
+	gmake -f bool3.make
+code  = 217	arity = 0
+start with: q2
+
+result = true
+                      	fails	success
+tab_rewrite_step[202] :	0	7
+tab_rewrite_step[211] :	71	16
+tab_rewrite_step[212] :	41	103
+tab_rewrite_step[213] :	0	1
+tab_rewrite_step[214] :	0	1
+tab_rewrite_step[215] :	0	3
+tab_rewrite_step[217] :	0	1
+
+rewrite_step  = 132
+total time    = 0.006 sec
+average speed = 22540 rwr/sec
+code  = 218	arity = 0
+start with: q3
+
+result = true
+                      	fails	success
+tab_rewrite_step[202] :	0	12
+tab_rewrite_step[211] :	336	92
+tab_rewrite_step[212] :	328	478
+tab_rewrite_step[213] :	0	2
+tab_rewrite_step[214] :	0	2
+tab_rewrite_step[215] :	0	4
+tab_rewrite_step[218] :	0	1
+
+rewrite_step  = 591
+total time    = 0.024 sec
+average speed = 24221 rwr/sec
+code  = 219	arity = 0
+start with: q4
+
+result = true
+                      	fails	success
+tab_rewrite_step[202] :	0	17
+tab_rewrite_step[211] :	599	134
+tab_rewrite_step[212] :	621	858
+tab_rewrite_step[213] :	0	3
+tab_rewrite_step[214] :	0	3
+tab_rewrite_step[215] :	0	5
+tab_rewrite_step[219] :	0	1
+
+rewrite_step  = 1021
+total time    = 0.037 sec
+average speed = 27529 rwr/sec
+code  = 220	arity = 0
+start with: q5
+
+result = true
+                      	fails	success
+tab_rewrite_step[202] :	0	22
+tab_rewrite_step[211] :	1269	280
+tab_rewrite_step[212] :	1583	1872
+tab_rewrite_step[213] :	0	4
+tab_rewrite_step[214] :	0	4
+tab_rewrite_step[215] :	0	6
+tab_rewrite_step[220] :	0	1
+
+rewrite_step  = 2189
+total time    = 0.131 sec
+average speed = 16737 rwr/sec
+code  = 221	arity = 0
+start with: q6
+
+result = true
+                      	fails	success
+tab_rewrite_step[202] :	0	27
+tab_rewrite_step[211] :	3049	432
+tab_rewrite_step[212] :	5070	4805
+tab_rewrite_step[213] :	0	5
+tab_rewrite_step[214] :	0	5
+tab_rewrite_step[215] :	0	7
+tab_rewrite_step[221] :	0	1
+
+rewrite_step  = 5282
+total time    = 0.534 sec
+average speed = 9893 rwr/sec
+code  = 222	arity = 0
+start with: q8
+
+result = true
+                      	fails	success
+tab_rewrite_step[202] :	0	37
+tab_rewrite_step[211] :	7143	778
+tab_rewrite_step[212] :	10995	10660
+tab_rewrite_step[213] :	0	7
+tab_rewrite_step[214] :	0	7
+tab_rewrite_step[215] :	0	9
+
+rewrite_step  = 11499
+total time    = 1.841 sec
+average speed = 6246 rwr/sec
+interpreter
+ true end
+
+ end end
+end
+
+
+ Statistics:
+ total time	(0.174+0.000)=0.174 sec	(main+subprocesses)
+
+ average speed = 850 inf/sec
+              148 nonamed rules applied,  5726 tried
+                0   named rules applied,     0 tried
+
+ named rules
+           applied   tried    rule for symbol
+
+
+	numberOfAllocTerm = 3759
+
+end of statistics
+ true end
+
+ end end
+end
+
+
+ Statistics:
+ total time	(2.111+0.000)=2.111 sec	(main+subprocesses)
+
+ average speed = 278 inf/sec
+              588 nonamed rules applied, 57511 tried
+                0   named rules applied,     0 tried
+
+ named rules
+           applied   tried    rule for symbol
+
+
+	numberOfAllocTerm = 45481
+
+end of statistics
+ true end
+
+ end end
+end
+
+
+ Statistics:
+ total time	(13.170+0.000)=13.170 sec	(main+subprocesses)
+
+ average speed = 97 inf/sec
+             1282 nonamed rules applied, 286806 tried
+                0   named rules applied,     0 tried
+
+ named rules
+           applied   tried    rule for symbol
+
+
+	numberOfAllocTerm = 316605
+
+end of statistics
+ true end
+
+ end end
+end
+
+
+ Statistics:
+ total time	(37.726+0.000)=37.726 sec	(main+subprocesses)
+
+ average speed = 67 inf/sec
+             2535 nonamed rules applied, 703463 tried
+                0   named rules applied,     0 tried
+
+ named rules
+           applied   tried    rule for symbol
+
+
+	numberOfAllocTerm = 950682
+
+end of statistics
+------------------------------------------------------------

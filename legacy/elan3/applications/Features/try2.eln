@@ -1,0 +1,29 @@
+module choose2
+
+
+sort Foo; end
+
+operators global
+  a	: Foo;
+  b	: Foo;
+  c	: Foo;
+  d	: Foo;
+
+  f(@,@): (Foo Foo) Foo;
+  g(@,@): (Foo Foo) Foo;
+end
+
+
+rules for Foo
+  x,y,z : Foo;
+global
+  []	f(x,y) => z where z:=()g(x,y)
+  end 
+end 
+
+end
+
+
+
+
+

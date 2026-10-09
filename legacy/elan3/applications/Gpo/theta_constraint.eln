@@ -1,0 +1,25 @@
+module theta_constraint[Vars,Ops]
+import	global termCommons[Ops, Vars];
+	local	Vars Ops;
+end
+
+sort theta_term theta_constraint;  
+end
+
+operators 
+global
+	T(@) > T(@)	: (term term) theta_term;
+	T(@) = T(@)	: (term term) theta_term;
+
+	Ttheta		: theta_constraint;
+
+	@ ^ @		: (theta_term theta_constraint) theta_constraint;
+	(@ ^ @)		: (theta_term theta_constraint) theta_constraint alias @ ^ @:;
+end
+
+end
+
+
+
+
+

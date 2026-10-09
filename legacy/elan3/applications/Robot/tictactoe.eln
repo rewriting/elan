@@ -1,0 +1,46 @@
+module tictactoe
+
+import global
+	space
+	tictac
+	strat[list[list[state]]];
+end
+
+stratop global
+  movetowin	: <list[list[state]]>;
+  findawinner	: <list[list[state]]>;
+  heuristic	: <list[list[state]]>;
+  step		: <list[list[state]]>;
+end
+
+rules for state
+position, state	: state;
+level		: list[state];
+space		: list[list[state]];
+global
+  [guess]  position => state
+		where (list[list[state]]) state.level.space :=
+					  [step]position.nil.nil
+  end
+end
+
+strategies for list[list[state]]
+level	: list[state];
+space	: list[list[state]];
+implicit
+  [.] step =>  dc(movetowin, call(moves); heuristic)
+  end
+  [.] heuristic => id
+  end
+  [.] movetowin => first( call(win),
+ 		    call(moves); findawinner; cut )
+  end
+  [.] findawinner => if movetowin then 
+		  exit; next; findawinner
+		orelse 
+		  id
+		fi
+  end
+end
+
+end

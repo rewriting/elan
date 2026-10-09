@@ -1,0 +1,10 @@
+LPL testMatrice  description
+
+query of sort  Term
+result of sort Term
+	  
+import testMatrice
+start with () go
+
+end
+

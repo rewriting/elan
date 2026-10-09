@@ -1,0 +1,73 @@
+% Specification fields
+
+constructors :
+b0 : bool ;
+b1 : bool ;
+t : bool ;
+f : bool ;
+
+a1 : bool ;
+a2 : bool ;
+a3 : bool ;
+a4 : bool ;
+
+defined functions :
+p__ : bool bool -> bool ; ac ;
+m__ : bool bool -> bool ; ac ;
+
+and__ : bool bool -> bool ; 
+or__  : bool bool -> bool ; 
+equal__  : bool bool -> bool ; 
+not_  : bool -> bool ; 
+b2 : bool ;
+
+
+axioms:
+   p(X, p(X, X)) = b0 ;
+   p(Y,p(X, p(X, X))) = p(Y,b0) ;
+
+   p(b0, X) = X ;
+
+   m(b1, X) = X ;
+   m(X, m(X, X)) = X ;
+   m(Y, m(X,m(X, X))) = m(Y,X) ;
+
+   m(b0, X) = b0 ;
+   m(p(X, Y), Z) = p(m(X, Z), m(Y, Z)) ;
+
+   b2 = p(b1, b1) ;
+ 
+   and(X,Y) = p( m(m(X,X), m(Y,Y)),
+                   p( m(b2, m(m(X,X), Y)),
+                   p( m(b2, m(m(Y,Y), X)),
+                   m(b2, m(X, Y)) ))) ;
+
+   or(X,Y)  = p( m(b2, m(m(X,X), m(Y,Y))),
+                  p( m(m(X,X), Y),
+                  p( m(m(Y,Y), X),
+                  p( m(X, Y),
+                  p(X, Y) )))) ;
+
+   not(X) = p(m(b2, X), b1) ;
+
+   equal(X,X) = t ;
+
+status:
+p m MS ;
+
+norm:
+equal( and(a1, a2) , not(or(not(a1),not(a2))) ) ;
+
+%equal( and(and(a1, a2),and(a3,a4)) ,
+%       not(or(or(not(a1),not(a2)),or(not(a3),not(a4)))) ) ;
+
+%and(a1, a2) ;
+%not(or(not(a1),not(a2))) ;
+%or(not(a1),not(a2)) ;
+
+%m(p(a1,a2),a1) ;
+
+%p(a1,p(a1,a1)) ;
+%p(a1,p(a2,p(a1,p(a2,a1)))) ;
+%p(a1,p(a1,p(a2,p(a2,a2)))) ;
+

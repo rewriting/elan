@@ -1,0 +1,9 @@
+LPL manySortedSet3 description
+
+  query 	of sort bool
+         	result of sort bool
+
+	 	import manySortedSet
+         	start with () q3
+end
+

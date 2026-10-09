@@ -1,0 +1,15 @@
+
+* pas de String dans les termes AC avec l'interpreteur
+* pas de string dans les matching conditions AC (interpreteur ou compilateur)
+* pas de string dans la query donnee au code generee
+* pas de string dans les patterns
+
+
+* cp modules.cc elan-interpreter/src puis gmake install
+* cp main_skeleton_lib.c elan-compiler/runtime puis gmake install
+
+
+rm -f server *.a *.o .elan.fac ; elanc -O -lib -output libfac.a fac ;
+gmake --file fac.make ; gmake ; ./server
+
+elan-interpreter ne compile pas sous gcc3

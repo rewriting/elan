@@ -1,0 +1,35 @@
+% Specification fields
+
+% use: nat ;
+
+sorts: foo ;
+
+constructors :
+  a             : foo;
+  b             : foo;
+  c             : foo;
+  bot		: foo;
+  g_		: foo -> foo;
+
+defined functions :
+  _+_		: foo foo -> foo; ac;
+axioms:
+   X=Y => X + g(Y) = bot ;
+   X=Y => Z + X + g(Y) = Z + bot ;
+
+status:
++ MS ;
+
+norm:
+
+%a + b + g(b) ;
+
+a + a + a + a + a + a + a +
+b +
+g(b) + g(b) + g(b) + g(b) + g(b) + g(b) + g(b) ;
+
+% state(buildSet(100),empty,0) ;
+
+
+
+

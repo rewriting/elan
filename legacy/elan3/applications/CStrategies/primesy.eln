@@ -1,0 +1,10 @@
+module primesy
+
+import global symbol[1,integ,booleg];
+end
+
+operators global
+  prime(@)	: (integ) booleg;
+end
+ 
+end

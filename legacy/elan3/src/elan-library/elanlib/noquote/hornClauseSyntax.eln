@@ -1,0 +1,22 @@
+// This file is generated automatically: do not edit it directly. 
+module hornClauseSyntax[Fss,Vars]
+        import  atom[Fss,Vars] list[atom] pair[atom,list[atom]] 
+                list[pair[atom,list[atom]]];
+        end
+        operators 
+         global
+
+           .    : list[atom]                            alias nil:;
+           @,@  : ( atom list[atom] ) list[atom]        alias cons(@,@):;
+
+
+           @ @          : ( atom list[atom] ) pair[atom,list[atom]]   alias [@,@]:;
+           @ ':'- @     : ( atom list[atom] ) pair[atom,list[atom]]   alias [@,@]:;
+
+           Epsilon      : list[pair[atom,list[atom]]]           alias nil:;
+           @ @          : ( pair[atom,list[atom]] list[pair[atom,list[atom]]])
+                                list[pair[atom,list[atom]]]     alias cons(@,@):;
+
+        end 
+end  
+

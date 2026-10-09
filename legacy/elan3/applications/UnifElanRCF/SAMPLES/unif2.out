@@ -1,0 +1,41 @@
+(u=x&v=f0(y,x)) end
+
+(u=f0(x,x)&v=y) end
+
+((x=f0(var(2),var(1))&u=f0(f0(var(2),var(2)),var(1)))&v=f0(y,var(1))) end
+
+(x=f0(var(3),u)&v=f0(y,f0(f0(var(3),var(3)),u))) end
+
+((x=f0(var(3),var(2))&u=f0(var(2),var(2)))&v=f0(y,f0(var(3),var(3)))) end
+
+((x=f0(var(3),f0(var(2),var(1)))&u=f0(f0(var(2),var(2)),var(1)))&v=f0(y,f0(f0(var(3),var(3)),var(1)))) end
+
+(u=f0(y,x)&v=x) end
+
+(x=f0(var(2),v)&u=f0(y,f0(f0(var(2),var(2)),v))) end
+
+(u=y&v=f0(x,x)) end
+
+((x=f0(var(3),var(1))&u=f0(y,var(1)))&v=f0(f0(var(3),var(3)),var(1))) end
+
+((x=f0(var(3),var(2))&u=f0(y,f0(var(2),var(2))))&v=f0(var(3),var(3))) end
+
+((x=f0(var(3),f0(var(2),var(1)))&u=f0(y,f0(f0(var(2),var(2)),var(1))))&v=f0(f0(var(3),var(3)),var(1))) end
+
+((y=f0(var(5),var(4))&u=f0(var(5),x))&v=f0(var(4),x)) end
+
+(y=f0(var(5),v)&u=f0(var(5),f0(x,x))) end
+
+(((x=f0(var(2),var(1))&y=f0(var(5),var(4)))&u=f0(var(5),f0(f0(var(2),var(2)),var(1))))&v=f0(var(4),var(1))) end
+
+(y=f0(u,var(4))&v=f0(var(4),f0(x,x))) end
+
+(((x=f0(var(3),var(1))&y=f0(var(5),var(4)))&u=f0(var(5),var(1)))&v=f0(var(4),f0(f0(var(3),var(3)),var(1)))) end
+
+(((x=f0(var(3),var(2))&y=f0(var(5),var(4)))&u=f0(var(5),f0(var(2),var(2))))&v=f0(var(4),f0(var(3),var(3)))) end
+
+(((x=f0(var(3),f0(var(2),var(1)))&y=f0(var(5),var(4)))&u=f0(var(5),f0(f0(var(2),var(2)),var(1))))&v=f0(var(4),f0(f0(var(3),var(3)),var(1)))) end
+
+ end end
+end
+

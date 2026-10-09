@@ -1,0 +1,36 @@
+module wpatternAC6
+
+// pattern with multiplicity
+sort term;
+end
+
+operators global
+ a      : term;
+ b      : term;
+ c      : term;
+ d      : term;
+ e      : term;
+ f      : term;
+
+ go     : term;
+
+ F(@,@) : (term term) term (AC);
+ f(@,@) : (term term) term;
+ g(@) : (term) term;
+ h(@,@) : (term term) term;
+end
+
+rules for term
+  x1,x2,x3 : term;
+  y1,y2,y3 : term;
+  z1,z2,z3 : term;
+global
+  [] go => g(F(f(a,b), f(c,d)))
+  end
+
+  [] g(x1) => h(y1,y2)
+	where (term) F(y1,y2) :=() x1
+  end
+end
+
+end

@@ -1,0 +1,58 @@
+module renvar[Vars,Fss]
+import 	global 	term varabst varUnif[Vars] termUnif[Fss] ;
+ 	local  	int bool eq[variable] eq[term] 
+		eqSystem occur[variable,term] occur[variable,eqSystem] ;
+end
+
+
+operators
+
+global 
+
+        renamevar(@,@,@)  : (eqSystem int int) eqSystem ;
+
+        maxvar(@,@)     : (eqSystem variable) int ;
+
+end
+
+
+      rules for int 
+      // declare 
+            n:int; P:eqSystem; t1,t2:term ;
+      global       
+      
+      []  maxvar(P & t1 = t2,xnew.n) => 
+             maxvar(P,xnew.n) ?max  maxv(t1,xnew.n) ?max maxv(t2,xnew.n)
+          end
+      []  maxvar(P & t1 = t2,var(n)) => 
+             maxvar(P,var(n)) ?max  maxv(t1,var(n)) ?max maxv(t2,var(n))
+          end
+
+      []  maxvar(t1 = t2,xnew.n) => maxv(t1,xnew.n) ?max maxv(t2,xnew.n)
+          end
+      []  maxvar(t1 = t2,var(n)) => maxv(t1,var(n)) ?max maxv(t2,var(n))
+          end
+
+
+      []  maxvar(true,var(n))     => n end
+      []  maxvar(true,xnew.n)    =>  n end 
+      
+      end
+
+
+rules for eqSystem
+// declare 
+	P: eqSystem;
+        i,n:int;
+global
+
+  []             renamevar(P,i,n) => renamevar(apply(var(i) -> xnew.(i+n), P),i-1,n) 
+                 if i > 0 end
+  []             renamevar(P,i,n) => P if i == 0 end
+
+
+end
+
+
+end
+

@@ -1,0 +1,22 @@
+
+\let\CF=\rm
+% Remember to use the lgrind style
+
+\File{decomposition.eln},{17:23},{Jun 21 1996}
+\L{\LB{\K{rules}_\K{for}_\V{eqSystem}}}
+\L{\LB{\K{declare}_\V{P}_:_\V{eqSystem};}}
+\L{\LB{}}
+\L{\LB{\K{bodies}}}
+\L{\LB{}}
+\L{\LB{\K{FOR}_\K{EACH}_\V{SS}:\V{pair}[\V{identifier},\V{int}];_\V{F}:\V{identifier};__\V{N}:\V{int}}}
+\L{\LB{\K{SUCH}_\K{THAT}_\V{SS}:=(\V{listExtract})_\V{elem}(\V{Fss})_\K{AND}_\V{F}:=()\V{first}(\V{SS})_}}
+\L{\LB{________\K{AND}_\V{N}:=()\V{second}(\V{SS})_:\{}}
+\L{\LB{___\K{rule}_\V{decompose}}}
+\L{\LB{___\K{declare}_\V{s\_1},.\,.\,.,\V{s\_N}_:_\V{term};}}
+\L{\LB{___________\V{t\_1},.\,.\,.,\V{t\_N}_:_\V{term};}}
+\L{\LB{___\K{body}}}
+\L{\LB{________\V{P}_\&_\V{F}(\V{s\_1},.\,.\,.,\V{s\_N})=\V{F}(\V{t\_1},.\,.\,.,\V{t\_N})_=\>_\V{P}_\{_\&_\V{s\_I}=\V{t\_I}_\}\V{\_I}=1.\,.\,.N}}
+\L{\LB{___\K{end}}}
+\L{\LB{__\}}}
+\L{\LB{}}
+\L{\LB{\K{end}_\K{of}_\K{rules}}}

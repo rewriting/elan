@@ -1,0 +1,138 @@
+module msTermCommons[Vars,Ops,Types]
+import
+global
+	eq[term] substitution
+;
+local	Vars Ops Types
+	int bool
+	list[int] list[variable]
+	sigFunctions[Types]
+;
+end
+
+sort variable term;
+end
+
+operators
+  global
+/*--- term ---*/
+  var(@)                : ( int ) variable;
+  @                     : ( variable ) term             pri 1000;
+  head(@)               : ( term ) symbol;
+  @-th subterm(@)       : ( int term ) term;
+  isvar(@)              : ( term ) bool;
+  nvocc(@)              : ( term ) list[int];
+  @ at @                : ( term list[int] ) term;
+  @[@] at @             : ( term term list[int] ) term;
+  rename_subst(@,@)     : ( list[variable] int ) substitution;
+
+/*--- termV ---*/
+  FOR EACH X:pair[identifier,type]
+  SUCH THAT X:=(listExtract)elem(Vars) :{
+      X     : variable; }
+
+/*--- termF ---*/
+  FOR EACH F:pair[identifier,sig]
+  SUCH THAT F:=(listExtract) elem(Ops) ANDIF arity(F)==0 :{
+      F         : term;
+      F()       : term                                  alias F:;
+    }
+
+  FOR EACH F:pair[identifier,sig]; N:int
+  SUCH THAT F:=(listExtract) elem(Ops) AND N:=() arity(F)
+  ANDIF N > 0 :{
+     F (@ {,@}~(N-1))   :({term}~N) term;
+     F({,@}~N)          : ({term}~N)term	alias F(@{,@}~(N-1)):;
+     F({@,}~N)          : ({term}~N)term	alias F(@{,@}~(N-1)):;
+     F(,{@,}~N)         : ({term}~N)term	alias F(@{,@}~(N-1)):;
+    }
+end
+
+stratop
+  global
+   chooseOccurence	: <list[int]>	builtin;
+end
+
+/*--- termV ---*/
+rules for symbol
+global
+    FOR EACH X:pair[identifier,type]
+    SUCH THAT X:=(listExtract)elem(Vars)
+    :{ [] head(X)	=> X end }
+end
+
+/* --- termF ---*/
+FOR EACH F:pair[identifier,sig];N:int
+SUCH THAT F:=(listExtract)elem(Ops)
+AND N:=()arity(F) ANDIF N>0:{
+rules for term
+   t_1,...,t_N : term;
+global
+   { [] I-th subterm(F(t_1,...,t_N))	=> t_I end }_I=1...N
+
+    rules for symbol
+    global
+      [] head(F(t_1,...,t_N)) 	=> F end
+    end
+
+    rules for list[int]
+      oocc        : list[int];
+    local
+    { [inOccRule] nvocc(F(t_1,...,t_N))        => J.oocc
+                 where oocc:=(chooseOccurence) nvocc(t_J)
+      end
+    }_J=1...N
+    end
+end
+}
+
+FOR EACH F:pair[identifier,sig];N:int
+SUCH THAT F:=(listExtract)elem(Ops) AND N:=()arity(F) ANDIF N!=0:{
+  rules for term
+   t_1,...,t_N : term;
+	  t,s : term;
+	  l : list[int];
+  global
+    { [] F(t_1,...,t_N)[s] at I.l => F(t_1,...,t_(I-1),t_I[s] at l,t_(I+1),...,t_N)
+      end
+    }_I=1...N
+  end
+}
+
+/*--- term ---*/
+rules for term
+ t,s:term;  i:int;  l:list[int];
+global
+  [] t at nil           => t                            end
+  [] t at i.l           => i-th subterm(t) at l         end
+  [] t[s] at nil        => s                            end
+end
+
+rules for bool
+ v:variable; t:term;
+global
+  [] isvar(v)   => true                                 end
+  [] isvar(t)   => false                                end
+end
+
+rules for substitution
+ i:int; vn:variable; vl:list[variable];
+global
+  [] rename_subst(nil,i)     => identity                            end
+  [] rename_subst(vn.vl , i) => vn->var(i) o rename_subst(vl , i+1) end
+end
+
+rules for list[int]
+ t:term;
+local
+  [topOccRule]  nvocc(t)          => nil        if not isvar(t)     end
+end
+
+strategies for list[int]
+implicit
+  [.] chooseOccurence => dk(topOccRule , inOccRule)
+  end
+end
+
+end
+

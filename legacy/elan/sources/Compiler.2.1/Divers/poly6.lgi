@@ -1,0 +1,13 @@
+LPL poly6 description
+
+  specification description
+    part Vars   of sort list[identifier]
+                import identifier list[identifier]
+  end
+
+  query    of sort              poly
+           result of sort       pair[poly,variable]
+           import               poly6[Vars]
+           start with           (strat0)eval(1 + 1*X + 2*X*X + 3*X*X*X + 4*Y*Y)
+
+end

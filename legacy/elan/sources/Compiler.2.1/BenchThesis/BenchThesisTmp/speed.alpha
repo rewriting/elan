@@ -1,0 +1,305 @@
+------------------------------------------------------------
+fib_builtin
+compiler
+fib(21)
+average speed = 17710500 rwr/sec
+average speed = 17710500 rwr/sec
+average speed = 17710500 rwr/sec
+fib(22)
+average speed = 19104333 rwr/sec
+average speed = 14328250 rwr/sec
+average speed = 19104333 rwr/sec
+fib(23)
+average speed = 15455833 rwr/sec
+average speed = 13247857 rwr/sec
+average speed = 15455833 rwr/sec
+fib(24)
+average speed = 16672111 rwr/sec
+average speed = 16672111 rwr/sec
+average speed = 16672111 rwr/sec
+fib(25)
+average speed = 17341785 rwr/sec
+average speed = 17341785 rwr/sec
+average speed = 18675769 rwr/sec
+fib(26)
+average speed = 18706428 rwr/sec
+average speed = 17856136 rwr/sec
+average speed = 17856136 rwr/sec
+fib(27)
+average speed = 18160600 rwr/sec
+average speed = 17178945 rwr/sec
+average speed = 18160600 rwr/sec
+fib(28)
+average speed = 17732017 rwr/sec
+average speed = 17431474 rwr/sec
+average speed = 17732017 rwr/sec
+interpreter
+fib(18)
+ average speed	38004 inf/sec
+fib(19)
+ average speed	38217 inf/sec
+fib(20)
+ average speed	38405 inf/sec
+fib(21)
+ average speed	37641 inf/sec
+fib(22)
+ average speed	37656 inf/sec
+fib(23)
+ average speed	34131 inf/sec
+fib(24)
+ average speed	38112 inf/sec
+fib(25)
+ average speed	38666 inf/sec
+fib(26)
+ average speed	38585 inf/sec
+------------------------------------------------------------
+nqueensAC
+compiler
+nqueens(8)
+average speed = 1797406 rwr/sec
+average speed = 1710435 rwr/sec
+average speed = 1656984 rwr/sec
+nqueens(9)
+average speed = 2017330 rwr/sec
+average speed = 1851621 rwr/sec
+average speed = 1892167 rwr/sec
+nqueens(10)
+average speed = 1335845 rwr/sec
+average speed = 1379644 rwr/sec
+average speed = 1383301 rwr/sec
+nqueens(11)
+average speed = 1394592 rwr/sec
+average speed = 1356950 rwr/sec
+average speed = 1398995 rwr/sec
+interpreter
+nqueens(4)
+ average speed	1626 inf/sec
+nqueens(5)
+ average speed	1355 inf/sec
+nqueens(6)
+ average speed	1654 inf/sec
+nqueens(7)
+ average speed	1350 inf/sec
+------------------------------------------------------------
+Bool3
+compiler
+q3
+average speed = 45461 rwr/sec
+average speed = 49250 rwr/sec
+average speed = 49250 rwr/sec
+q4
+average speed = 48619 rwr/sec
+average speed = 39269 rwr/sec
+average speed = 68066 rwr/sec
+q5
+average speed = 37101 rwr/sec
+average speed = 45604 rwr/sec
+average speed = 45604 rwr/sec
+q6
+average speed = 32404 rwr/sec
+average speed = 30356 rwr/sec
+average speed = 35449 rwr/sec
+q8
+average speed = 16403 rwr/sec
+average speed = 17396 rwr/sec
+average speed = 17422 rwr/sec
+interpreter
+q2
+ average speed	855 inf/sec
+q3
+ average speed	284 inf/sec
+q4
+ average speed	101 inf/sec
+q5
+ average speed	67 inf/sec
+------------------------------------------------------------
+compiler
+FastCompletion
+p1
+average speed = 821048 rwr/sec
+average speed = 896410 rwr/sec
+average speed = 859060 rwr/sec
+p2
+average speed = 837194 rwr/sec
+average speed = 886963 rwr/sec
+average speed = 890746 rwr/sec
+p3
+average speed = 813286 rwr/sec
+average speed = 944170 rwr/sec
+average speed = 820439 rwr/sec
+p4
+average speed = 874153 rwr/sec
+average speed = 873765 rwr/sec
+average speed = 846003 rwr/sec
+p5
+average speed = 922652 rwr/sec
+average speed = 876198 rwr/sec
+average speed = 919388 rwr/sec
+interpreter
+p1
+ average speed	1838 inf/sec
+p2
+ average speed	1862 inf/sec
+p3
+ average speed	1910 inf/sec
+p4
+ average speed	1958 inf/sec
+
+------------------------------------------------------------
+compiler
+MinelaComp
+primes(2)
+average speed = 581142 rwr/sec
+average speed = 813600 rwr/sec
+average speed = 581142 rwr/sec
+average speed = 581142 rwr/sec
+average speed = 452000 rwr/sec
+primes(3)
+average speed = 600508 rwr/sec
+average speed = 708600 rwr/sec
+average speed = 694705 rwr/sec
+average speed = 621578 rwr/sec
+average speed = 610862 rwr/sec
+primes(4)
+average speed = 596318 rwr/sec
+average speed = 614871 rwr/sec
+average speed = 640490 rwr/sec
+average speed = 643469 rwr/sec
+average speed = 628845 rwr/sec
+primes(5)
+average speed = 556124 rwr/sec
+average speed = 548914 rwr/sec
+average speed = 558877 rwr/sec
+average speed = 534195 rwr/sec
+average speed = 534195 rwr/sec
+primes(6)
+average speed = 574842 rwr/sec
+average speed = 560791 rwr/sec
+average speed = 575468 rwr/sec
+average speed = 561986 rwr/sec
+average speed = 550265 rwr/sec
+primes(7)
+average speed = 533561 rwr/sec
+average speed = 546038 rwr/sec
+average speed = 538744 rwr/sec
+average speed = 536140 rwr/sec
+average speed = 550783 rwr/sec
+primes(8)
+average speed = 541611 rwr/sec
+average speed = 527888 rwr/sec
+average speed = 541126 rwr/sec
+interpreter
+primes(2)
+ average speed	1752 inf/sec
+primes(3)
+ average speed	1841 inf/sec
+primes(4)
+ average speed	1946 inf/sec
+primes(5)
+ average speed	2005 inf/sec
+------------------------------------------------------------
+
+Set
+compiler
+powerSet(4)
+average speed = 35666 rwr/sec
+average speed = 21400 rwr/sec
+average speed = 17833 rwr/sec
+average speed = 107000 rwr/sec
+average speed = 53500 rwr/sec
+powerSet(5)
+average speed = 31875 rwr/sec
+average speed = 42500 rwr/sec
+average speed = 42500 rwr/sec
+average speed = 85000 rwr/sec
+average speed = 42500 rwr/sec
+powerSet(6)
+average speed = 53727 rwr/sec
+average speed = 59100 rwr/sec
+average speed = 53727 rwr/sec
+average speed = 53727 rwr/sec
+average speed = 53727 rwr/sec
+powerSet(7)
+average speed = 70684 rwr/sec
+average speed = 74611 rwr/sec
+average speed = 83937 rwr/sec
+average speed = 63952 rwr/sec
+average speed = 58391 rwr/sec
+powerSet(8)
+average speed = 62645 rwr/sec
+average speed = 57826 rwr/sec
+average speed = 55685 rwr/sec
+average speed = 61367 rwr/sec
+average speed = 62645 rwr/sec
+interpreter
+powerSet(4)
+ average speed	1507 inf/sec
+powerSet(5)
+ average speed	944 inf/sec
+powerSet(6)
+ average speed	484 inf/sec
+powerSet(7)
+ average speed	242 inf/sec
+powerSet(8)
+ average speed	101 inf/sec
+------------------------------------------------------------
+Nat10
+Nat10
+compiler
+fib(10)
+average speed = 168800 rwr/sec
+average speed = 281333 rwr/sec
+average speed = 168800 rwr/sec
+average speed = 168800 rwr/sec
+average speed = 168800 rwr/sec
+fib(11)
+average speed = 228833 rwr/sec
+average speed = 171625 rwr/sec
+average speed = 196142 rwr/sec
+average speed = 274600 rwr/sec
+average speed = 228833 rwr/sec
+fib(12)
+average speed = 186000 rwr/sec
+average speed = 318857 rwr/sec
+average speed = 279000 rwr/sec
+average speed = 186000 rwr/sec
+average speed = 139500 rwr/sec
+fib(13)
+average speed = 241266 rwr/sec
+average speed = 172333 rwr/sec
+average speed = 226187 rwr/sec
+average speed = 201055 rwr/sec
+average speed = 180950 rwr/sec
+fib(14)
+average speed = 225730 rwr/sec
+average speed = 266772 rwr/sec
+average speed = 225730 rwr/sec
+average speed = 217370 rwr/sec
+average speed = 209607 rwr/sec
+fib(15)
+average speed = 220976 rwr/sec
+average speed = 197958 rwr/sec
+average speed = 231756 rwr/sec
+average speed = 202170 rwr/sec
+average speed = 250052 rwr/sec
+fib(16)
+average speed = 226235 rwr/sec
+average speed = 226235 rwr/sec
+average speed = 199792 rwr/sec
+average speed = 236676 rwr/sec
+average speed = 240375 rwr/sec
+interpreter
+fib(10)
+ average speed	931 inf/sec
+fib(11)
+ average speed	590 inf/sec
+fib(12)
+ average speed	363 inf/sec
+fib(13)
+ average speed	221 inf/sec
+fib(14)
+ average speed	130 inf/sec
+fib(15)
+ average speed	77 inf/sec
+------------------------------------------------------------
+

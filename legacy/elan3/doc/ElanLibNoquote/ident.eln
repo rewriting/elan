@@ -1,0 +1,32 @@
+//
+//		(c)	INRIA-Lorraine & CRIN
+//			615, rue du Jardin Botanique, BP 101
+//		        54602 Villers-les-Nancy
+//			France
+//			email: elan@loria.fr
+//
+//	$Source: /CVS/aircube/elan3/doc/ElanLibNoquote/ident.eln,v $
+//	$Revision: 1.1 $
+//	$Date: 1997/03/25 16:46:59 $
+//	$Author: moreau $
+//
+
+module ident
+import global anyIdentifier;
+       local  bool;
+end
+sort ident;
+end
+operators
+ global
+
+   @ == @       : ( ident ident ) bool			code 14;
+   @ != @       : ( ident ident ) bool			code 15;
+
+   ideq(@,@)    : ( ident ident ) bool     	alias @ == @:;
+   idneq(@,@)   : ( ident ident ) bool     	alias @ != @:;
+
+end
+
+end
+

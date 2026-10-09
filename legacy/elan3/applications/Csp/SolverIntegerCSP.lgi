@@ -1,0 +1,18 @@
+LPL SolverIntegerCSP description 
+
+specification description
+
+	part Variables	of sort list[identifier]
+	import		sigSyntax
+
+	part Values	of sort domain 
+	import		GenericSignature[Variables,int]
+			IntegerSignature
+end
+	query		of sort list[formule]
+	result		of sort csp
+	import		SolvingStrategies[Variables,int,Values]
+
+	start with (Unary_And_Binary_Solved_Form) CreateCSP(query)
+
+end

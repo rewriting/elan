@@ -1,0 +1,26 @@
+module IO[X]
+
+        import global builtinIO[X] builtinIO[string];
+        end    
+
+        operators global
+        XX : X ;
+        write(@,@)     : (File X) X   pri 200 ;
+        read(@)        : (File)   X   pri 200 ;
+        writeln(@,@)   : (File X) X   pri 200 ; 
+        end
+
+        rules for X
+        x, x1 :X;
+        file  : builtinInt;
+	str   : string ;
+        global
+	  []	write([file],x)   => write_builtinIO(file,x) end
+	  []	read([file])      => read_builtinIO(file,XX) end
+          []    writeln([file],x) => x
+                        where x1:=()write_builtinIO(file,x)
+                        where str:=()write_builtinIO(file,"\n")
+          end
+        end
+end  
+ 

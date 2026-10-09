@@ -1,0 +1,545 @@
+
+//------------------- Confluence --------------------------------------------------------
+
+// [x +> [a +> b](x)](a)		end
+
+// [f(x) +> x](|f(a)|)		end
+
+// [a +> b]([a +> a](a))		end
+
+// [g(x,x) +> x](g(a,[a +> a](a)))		end
+
+// [x +> b](|#|)		end
+
+// [x +> g(x,x)](|a.b|)		end
+
+// [x +> g(x,|x.y|)](|a.b|)		end
+
+//------------------- alpha-conversion --------------------------------------------------------
+
+// [y +> (x +> y)](x)			end
+
+// [x +> (y +> (x +> z))](z)		end
+
+//------------------- Fire--------------------------------------------------------
+
+// [x +> x](b)		end
+
+// COMPILO core
+// [x +> f(x)](|a.b|)		end
+
+// [x +> f(x)](|#|)		end
+
+// [x +> g(x,x)](|a.b|)		end
+
+// [x +> |x.a|](|a.b|)		end
+
+// [x +> [<a:x>](a)](|a.b|)		end
+
+// [x +> f(x)](|a.b|)		end
+
+// [x +> f(x)](y)		end
+
+// [f(x) +> x](a)		end
+
+// [g(x,y) +> k(x,y,z)](g(a,b))		end
+
+// [g(x,y) +> k(x,y,z)](g(y,x))		end
+
+// [g(x,y) +> [x +> x](y)](g(a,b))		end
+
+// [g(y,x) +> x](a)		end
+
+// [g(x,x) +> x](g(a,b))		end
+
+// [x +> [x +> [x +> x](x)](x)](b)		end
+
+// [x +> [f(x) +> [f(x) +> x](x)](x)](f(f(a)))		end
+
+// [f(x) +> [f(x) +> x](x)](f(f(a)))		end
+
+//------------------- Distrib --------------------------------------------------------
+
+// [|#|](a)		end
+
+// [|x.y|](a)		end
+
+// [|(x +> b) . (x +> g(x,x))|](a)		end
+
+// [|(x +> b) . |#||](a)		end
+
+// |b . |#|| +> a 		end
+
+// |b . c| +> a 		end
+
+// a  +>  |b . c|		end
+
+//------------------- OpOnSet --------------------------------------------------------
+
+// f(|#|)		end
+
+// f(|b.c|)		end
+
+// f(|b|)		end
+
+// f(|b.g(|a.c|,b)|)		end
+
+// f(|b.g([x +> |a.x|](c),b)|)		end
+
+// f(|x.y|)		end
+
+// k(a,|x.y|,b)		end
+
+// k(a,|x.|#||,b)		end
+
+// k(a,|#|,b)		end
+
+//------------------- First--------------------------------------------------------
+
+// [FIRSTT(a:b:c)](a)		end
+
+// [FIRSTT(b:a:c)](a)		end
+
+// [FIRSTT(b:x:a)](a)		end
+
+// [x +> g([x](a),[x](b))](FIRSTT(a:b))		end
+
+// [x +> g([x](a),[x](b))](FIRSTT(a:c))		end
+
+//------------------- Congruence --------------------------------------------------------
+
+// [a](a) end
+
+// [f(x +> g(x,x))](f(a))		end
+
+//------------------- Batch, ... --------------------------------------------------------
+
+// [|a.b.c|](a)		end
+
+// |a.b.c| +> a		end
+
+// [x +> [f(x) +> [f(x) +> x](x)](x)](|#|)		end
+
+//---------------------------------------------------------------------------------------
+//------------------   Recursion    -----------------------------------------------------
+//---------------------------------------------------------------------------------------
+
+// [IDD](a)		end
+
+// [(a +> b) ; (b +> c)](a)		end
+
+//------------------- PHI --------------------------------------------------------
+
+// [PHI(a)](b)		end
+
+// [PHI(a)](f(a))		end
+
+// [PHI(a)](f(c))		end
+
+// [PHI(a)](g(a,c))		end
+
+// [PHI(a)](g(c,a))		end
+
+// [PHI(a)](k(a,c,b))		end
+
+// [PHI(a)](k(c,a,b))		end
+
+// [PHI(a+>c)](k(c,a,b))		end
+
+// [PHI(a+>c)](g(b,a))		end
+
+//------------------- PSI --------------------------------------------------------
+
+// [PSI(a)](b)		end
+
+// [PSI(|a.IDD|)](g(a,b))		end
+
+// [PSI(|(a+>c).IDD|)](g(a,b))		end
+
+// [PSI(a)](k(a,c,b))		end
+
+// [PSI(a+>c)](k(a,c,b))		end
+
+// [PSI(a)](k(a,a,a))		end
+
+// [PSI(a+>c)](k(a,a,a))		end
+
+// [PSI(|(a +> b) . IDD|)](f(a)) end
+
+// [PSI(a +> b)](f(a)) end
+
+//------------------- Recursion --------------------------------------------------------
+
+// [Theta](a) end
+
+// [Theta](f(x)) end
+
+// [Theta](a +> b) end
+
+// Theta end
+
+//------------------- SpreadDown --------------------------------------------------------
+
+// [SpreadDown(|(a +> b) . IDD|)](a) end
+
+// core
+// [SpreadDown(|(a +> b) . IDD|)](f(a)) end
+
+// [SpreadDown(|IDD . IDD|)](f(a)) end
+
+// [SpreadDown(IDD)](g(a,f(a))) end
+
+// [SpreadDown(|(a +> b) . IDD|)](g(a,f(a))) end
+
+// [SpreadDown(|(a +> b) . (b +> c)|)](f(a)) end
+
+// COMPILO --> |b()|	(INTERPRET --> |#|)
+// [SpreadDown(a +> b)](f(a)) end
+
+// [SpreadDown(IDD)](f(a)) end
+
+// [SpreadDown(IDD)](a) end
+
+// [SpreadDown(FIRSTT((a +> b) : IDD))](f(a)) end
+
+
+
+// [Oncebu(a +> b)](x) end
+
+// [Oncebu(a +> b)](a) end
+
+// [Oncebu(a +> b)](b) end
+
+// [Oncebu(a +> b)](f(a)) end
+
+// [Oncebu(a +> b)](g(a,f(a))) end
+
+// [Oncebu(a +> b)](g(b,a)) end
+
+// [Oncebu(a +> b)](g(b,f(a))) end
+
+// [Oncebu(|(a +> b) . (a +> c)|)](g(a,f(a))) end
+
+// [Oncebu(a +> b)](x) end
+
+// [Oncebu(|a +> b|)](a) end
+
+// [Oncebu(f(x) +> x)](f(a)) end
+
+// [Oncebu(|f(x) +> x|)](f(a)) end
+
+// [Oncebu(|(a +> b).(f(x) +> x)|)](g(a,f(a))) end
+
+// [Oncebu(|(f(a) +> b).(f(x) +> x)|)](g(a,f(a))) end
+
+// [Oncebu(|(g(x,f(x)) +> x)|)](g(a,f(a))) end
+
+// [Oncebu(|(a +> b).(g(x,f(x)) +> x)|)](g(a,f(a))) end
+
+// [Oncebu(|(g(x,f(x)) +> x).(a +> b)|)](g(a,f(a))) end
+
+// [Oncebu(|(a +> b).(g(x,f(x)) +> x)|)](g(b,f(a))) end
+
+// [Oncebu(f(x) +> c)](f(a)) end
+
+
+
+// [REPEATT(a +> b)](b) end
+
+// [REPEATT(a +> b)](a) end
+
+// [REPEATT(FIRSTT((a +> b):(b +> c)))](a) end
+
+// [REPEATT(FIRSTT((a +> b):(a +> c)))](a) end
+
+// [REPEATT(|(a +> b).(b +> c)|)](a) end
+
+// [REPEATT(|(a +> b).(a +> c)|)](a) end
+
+// [REPEATT(a +> b)](a) end
+
+// [REPEATT(f(x) +> c)](f(a)) end
+
+
+
+// [im(a +> b)](a) end
+
+// [im(FIRSTT(a +> b))](a) end
+
+// [im(FIRSTT((a +> b):IDD))](a) end
+
+// [im(FIRSTT((a +> b):(a +> c)))](a) end
+
+// [im(FIRSTT((a +> b):(b +> c)))](a) end
+
+// [im(FIRSTT((a +> b):(b +> c)))](f(a)) end
+
+// [im(FIRSTT((a +> b):(c +> c)))](a) end
+
+// [im(FIRSTT((a +> b):(b +> c)))](b) end
+
+// [im( f(b) +> b )](f(b)) end
+
+// [im(a +> b)](f(a)) end
+
+// [im(FIRSTT(a +> b))](f(a)) end
+
+// [im(FIRSTT((a +> b):(b +> c)))](f(a)) end
+
+// [im(FIRSTT( (a +> b) : (f(b) +> b) ))](f(a)) end
+
+// [im(FIRSTT( (c +> b) : (f(a) +> a) ))](f(a)) end
+
+// [im(FIRSTT( (a +> b) : (g(b,b) +> b) ))](g(a,a)) end
+
+// [im(FIRSTT( (a +> b) : (g(b,f(b)) +> c) ))](g(a,f(a))) end
+
+// [im(FIRSTT( (a +> b) : (g(x,f(x)) +> x) ))](g(a,f(a))) end
+
+// [im(FIRSTT( (a +> b) : (f(b) +> b) ))](f(a)) end
+
+// [im(FIRSTT( (a +> b) : (f(x) +> x) ))](f(a)) end
+
+// [im(FIRSTT( (a +> b) : (f(x) +> g(x,c)) ))](f(a)) end
+
+// [im(f(x) +> c)](f(a)) end
+
+// [im(FIRSTT(f(x) +> c))](f(a)) end
+
+// [im(FIRSTT( (a +> b) : (f(x) +> c) ))](f(a)) end
+
+// [im(FIRSTT( (a +> b) : (g(x,f(x)) +> c) ))](g(a,f(a))) end
+
+
+
+// [im(|a +> b|)](a) end
+
+
+// [im(| (a +> b) . (b +> c) |)](a) end
+
+// [im(| (a +> b) . (b +> c) |)](|a.b|) end
+
+// [im(| (a +> b) . (b +> c) . (b +> d) |)](a) end
+
+// [im(| (a +> b) . (b +> c) . (b +> d) |)](|a.b|) end
+
+// [im(| (a +> b) . (f(b) +> b) |)](f(a)) end
+
+// [im(| (c +> b) . (f(a) +> a) |)](f(a)) end
+
+// [im(| (a +> b) . (g(b,b) +> b) |)](g(a,a)) end
+
+// [im(| (a +> b) . (g(b,f(b)) +> b) |)](g(a,f(a))) end
+
+// [im(| (a +> b) . (g(x,f(x)) +> x) |)](g(a,f(a))) end
+
+// [im(| (a +> b) . (g(x,f(x)) +> c) |)](g(a,f(a))) end
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
+
+functional([g(x,y) +> (z +> z)](|a.b|)) 	end
+
+functional(f(a)) 	end
+
+no_doubletons(<x +> [|a.b|](x)>) 	end
+
+no_doubletons(<x +> [|a.b|](x)>) 	end
+
+no_doubletons(<|[a](x) . [b](x)|:b>) 	end
+
+no_doubletons(<|[a](x) . [b](x)|>) 	end
+
+no_doubletons(<(|[a](x) . [b](x)|:b):c>) 	end
+
+no_doubletons(<(|[a](x) . [b](x)|:[a](a)):c>) 	end
+
+no_doubletons(|[a](x) . [b](x)|:[a](a)) 	end
+
+no_doubletons(|[a](x) . [b](x)|) 	end
+
+
+no_doubletons(<|[PSI(y)](x).x|>) end
+
+no_doubletons(<|[(a+>b)]([PSI(y)](x))|>) end
+
+no_doubletons(<|x.[(a+>b)]([PSI(y)](x))|>) end
+
+no_redex([(a+>b)]([PSI(y)](x))) end
+
+no_doubletons(<|[PSI(y)](x).[(a+>b)]([PSI(y)](x))|>) end
+
+
+
+no_empty(f(a)) 	end
+
+no_empty([g(x,y) +> (z +> z)](|a.b|)) 	end
+
+no_empty(<f(a):b:f(|#|):c>) 	end
+
+
+no_redex(|[a](x) . [b](x)|:[a](a)) 	end
+
+no_redex(<(|#|:a):c>) 	end
+
+no_redex(x) 	end
+
+no_redex([x](a)) 	end
+
+no_redex([[x](a)](b)) 	end
+
+no_redex([|#|](a)) 	end
+
+no_redex(|#| +> a) 	end
+
+no_redex([f(x)]([x](a))) 	end
+
+no_redex([f(x)]([b](a))) 	end
+
+no_redex(x +> a) 	end
+
+no_redex(x +> [|#|](a)) 	end
+
+no_redex(x +> [||#|.b|](a)) 	end
+
+no_redex(|a.b|) 	end
+
+no_redex(|#|) 	end
+
+no_redex(|c.|#|.b|) 	end
+
+no_redex(<|#|:b>) 	end
+
+no_redex(<a:|#|:b>) 	end
+
+no_redex(<x:|#|:b>) 	end
+
+no_redex(<x:[|#|](a):b>) 	end
+
+no_redex([[Theta]((x+>(y+><([PHI(x)](y):[(a+>b)](y))>)))](a)) 	end 
+
+no_redex([[Theta]((x+>(y+><([PHI(x)](y):[(a+>b)](y))>)))](x)) 	end 
+
+//------------------------------------------------------------
+
+rename_subst(variables_of([g(x,y) +> (z +> z)](|a.b|)),0)	end
+
+graft(x->a,[x +> g(x,|x.y|)](|a.b|)) end
+
+alpha_conv(x.nil,[x +> g(x,|x.y|)](|a.b|)) end
+
+alpha_conv(x.y.nil,[g(x,y) +> g(x,|x.y|)](|a.b|)) end
+
+alpha_conv(x.y.nil,[g(x,y) +> (x +> y)](|a.b|)) end
+
+alpha_conv(x.y.nil,[g(x,y) +> (x +> x)](|a.b|)) end
+
+variables_of(rename_subst(variables_of([g(x,y) +> (z +> z)](|a.b|)),0))	end
+
+
+apply(y -> x, x +> y) end
+
+apply(x -> z, y +> (x +> z)) end
+
+w_subsume(x,y +> (x +> z)) end
+
+w_subsume(b,c) end
+
+w_subsume(b,y +> (x +> z)) end
+
+w_subsume(b,f(c)) end
+
+w_subsume(f(b),c) end
+
+w_subsume(b,f(c)) end
+
+w_subsume(f(b),f(c)) end
+
+w_subsume(f(b),g(a,c)) end
+
+w_subsume(g(a,c),f(b)) end
+
+w_subsume(b:x,a:c:x) end
+
+w_subsume(x,c:x) end
+
+s_subsume(f(x),f(c)) end
+
+s_subsume(g(x,y),g(y +> (x +> z),a)) end
+
+safe(g(y +> (x +> z),a)) end
+
+safe(g([y +> [y +> z](c)](b),a)) end
+
+list2set(x.y.z.x.y.x.z.y.z.nil) end
+
+linear(|x.x|) end
+
+linear(|x.y.a.x|) end
+
+linear(g(x,x)) end
+
+strict_linear(x +> |x.x|) end
+
+strict_linear(g(x,x) +> |x.x|) end
+
+strict_linear(g(x,x) +> g(|x.x|,x)) end
+
+strict_linear(g(x,x) +> g(|x.x|,[y +> [y +> z](c)](x))) end
+
+
+regular(x +> |x.x|) end
+
+regular(g(x,x) +> |x.y|) end
+
+regular(g(x,x) +> [x+>x](x) ) end
+
+regular(g(x,x) +> [x+>x](a) ) end
+
+regular(g(x,x) +> [x+>y](x) ) end
+
+regular(y+>(x+><([PHI(y)](x):[(f(x)+>c)](x))>)) end
+
+regular(x +> g([x+>[y+>b](x)](b),x))	end
+
+regular(x +> g([x+>[y+>b](x)](x),x))	end
+
+
+
+regular(y +> (x +> [FIRSTT((a +> b);y : IDD)](x))) end
+
+regular(y +> (x +> [FIRSTT(FIRSTT((a +> b):(a +> c));y : IDD)](x))) end
+
+strict_linear(y +> (x +> [FIRSTT((a +> b);y : IDD)](x))) end
+
+strict_linear(y +> (x +> [FIRSTT(FIRSTT((a +> b):(a +> c));y : IDD)](x))) end
+
+
+
+
+// [Oncebu(f(x) +> c)](f(a)) end
+
+     'Flat:term' :      
+|[
+
+[(y+>(x+><([PHI(y)](x):[(f(x)+>c)](x))>))]
+(
+[[(var(2)+>(var(3)+>[var(3)]([[var(2)](var(2))](var(3)))))]((var(2)+>(var(3)+>[var(3)]([[var(2)](var(2))](var(3))))))]((y+>(x+><([PHI(y)](x):[(f(x)+>c)](x))>)))
+)
+
+](f(a))|
+
+y+>(x+><([PHI(y)](x):[(f(x)+>c)](x))>)) end
+
+     'Set:term' :       |[[(y+>(x+><([PHI(y)](x):[(f(x)+>c)](x))>))]([|(var(4)+>[var(4)]([[(var(2)+>(var(3)+>[var(3)]([[var(2)](var(2))](var(3)))))]((var(2)+>(var(3)+>[var(3)]([[var(2)](var(2))](var(3))))))](var(4))))|]((y+>(x+><([PHI(y)](x):[(f(x)+>c)](x))>))))](f(a))|
+     'Set:term' :       |[[(y+>(x+><([PHI(y)](x):[(f(x)+>c)](x))>))](|[(var(4)+>[var(4)]([[(var(2)+>(var(3)+>[var(3)]([[var(2)](var(2))](var(3)))))]((var(2)+>(var(3)+>[var(3)]([[var(2)](var(2))](var(3))))))](var(4))))]((y+>(x+><([PHI(y)](x):[(f(x)+>c)](x))>)))|)](f(a))|
+     'Set:term' :       |[|[(y+>(x+><([PHI(y)](x):[(f(x)+>c)](x))>))]([(var(4)+>[var(4)]([[(var(2)+>(var(3)+>[var(3)]([[var(2)](var(2))](var(3)))))]((var(2)+>(var(3)+>[var(3)]([[var(2)](var(2))](var(3))))))](var(4))))]((y+>(x+><([PHI(y)](x):[(f(x)+>c)](x))>))))|](f(a))|
+     'Set:term' :       ||[[(y+>(x+><([PHI(y)](x):[(f(x)+>c)](x))>))]([(var(4)+>[var(4)]([[(var(2)+>(var(3)+>[var(3)]([[var(2)](var(2))](var(3)))))]((var(2)+>(var(3)+>[var(3)]([[var(2)](var(2))](var(3))))))](var(4))))]((y+>(x+><([PHI(y)](x):[(f(x)+>c)](x))>))))](f(a))||
+     'Flat:term' :      |[[(y+>(x+><([PHI(y)](x):[(f(x)+>c)](x))>))]([(var(4)+>[var(4)]([[(var(2)+>(var(3)+>[var(3)]([[var(2)](var(2))](var(3)))))]((var(2)+>(var(3)+>[var(3)]([[var(2)](var(2))](var(3))))))](var(4))))]((y+>(x+><([PHI(y)](x):[(f(x)+>c)](x))>))))](f(a))|

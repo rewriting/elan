@@ -1,0 +1,16 @@
+[] doesNotRestrictName(L,kw1) => false end
+[] doesNotRestrictName(L,kw2) => false end
+[] doesNotRestrictName(L,kr1) => false end
+[] doesNotRestrictName(L,kr2) => false end
+[] doesNotRestrictName(L,c1w0) => false end
+[] doesNotRestrictName(L,c1w1) => false end
+[] doesNotRestrictName(L,c1w2) => false end
+[] doesNotRestrictName(L,c1r0) => false end
+[] doesNotRestrictName(L,c1r1) => false end
+[] doesNotRestrictName(L,c1r2) => false end
+[] doesNotRestrictName(L,c2w0) => false end
+[] doesNotRestrictName(L,c2w1) => false end
+[] doesNotRestrictName(L,c2w2) => false end
+[] doesNotRestrictName(L,c2r0) => false end
+[] doesNotRestrictName(L,c2r1) => false end
+[] doesNotRestrictName(L,c2r2) => false end

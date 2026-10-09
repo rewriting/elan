@@ -1,0 +1,18 @@
+module fib_builtin
+// First import the integers
+import global builtinInt;
+end
+
+operators global
+  fib(@)  : (builtinInt) builtinInt ;
+end
+
+rules for builtinInt 
+  n : builtinInt ;
+global
+  [] fib(0) => 1 end
+  [] fib(1) => 1 end
+  [] fib(n) => fib(n - 1) + fib(n - 2) end
+          //if greater_builtinInt(n,1) end
+end
+end

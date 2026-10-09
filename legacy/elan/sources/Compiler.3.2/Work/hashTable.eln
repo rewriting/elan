@@ -1,0 +1,136 @@
+module hashTable[Key,Value]
+
+import 
+global
+  vector[set[entry[Key,Value]]];
+local
+  cmp[entry[Key,Value]]
+  cmp[Key]
+  builtinHashTerm[Key]
+  int
+//  builtinArray[entry[Key,Value]]
+  ;
+end
+
+sort hashTable[Key,Value] Key Value entry[Key,Value] set[entry[Key,Value]];
+end 
+
+operators
+global
+  new(@,@)         : (int Value) hashTable[Key,Value];
+
+  @.add(@,@)       : (hashTable[Key,Value] Key Value) hashTable[Key,Value];
+  @.get(@)         : (hashTable[Key,Value] Key) Value;
+  @.containsKey(@) : (hashTable[Key,Value] Key) bool;
+
+  @.size           : (hashTable[Key,Value]) int;
+  size(@)          : (hashTable[Key,Value]) int alias @.size:;
+
+  hashTerm(@)	   : (Key) int;
+
+local  
+  [@]              : (vector[set[entry[Key,Value]]]) hashTable[Key,Value];
+  [@,@]            : (Key Value) entry[Key,Value];
+  emptyKeyHashTable	   : Key;
+
+  [@]              : (entry[Key,Value]) set[entry[Key,Value]];
+  emptySetHashTable         : set[entry[Key,Value]];
+  @ UHT @            : (set[entry[Key,Value]] set[entry[Key,Value]]) set[entry[Key,Value]] (AC);
+  [@,@]            : (entry[Key,Value] set[entry[Key,Value]]) set[entry[Key,Value]];
+//  @ in @           : (entry[Key,Value] set[entry[Key,Value]]) bool;
+  extract(@,@)     : (Key set[entry[Key,Value]]) set[entry[Key,Value]];
+end
+
+rules for hashTable[Key,Value]
+  i         : int;
+  t         : vector[set[entry[Key,Value]]];
+  k1,k2     : Key;
+  v1,v2	    : Value;
+  hcode	    : int;
+  set1,set2 : set[entry[Key,Value]];
+  newSet    : set[entry[Key,Value]];
+global
+  [] new(i,v1) => [new(i,emptySetHashTable UHT [[emptyKeyHashTable,v1]])]
+  end
+
+  [] [t].add(k1,v1) => [t.set(hcode,newSet)]
+		   where hcode :=() builtinHashTerm(k1) % t.length
+		   where set1:=() t.get(hcode)
+		   where (set[entry[Key,Value]]) [[k2,v2], set2]:=() extract(k1,set1)
+		   choose
+			try if k1 == k2
+			    where newSet :=() [[k1,v1]] UHT set2
+			try where newSet :=() [[k1,v1]] UHT [[k2,v2]] UHT set2
+		   end
+  end
+end
+
+rules for int
+  k        : Key;
+  t        : vector[set[entry[Key,Value]]];
+global
+  [] hashTerm(k) => builtinHashTerm(k)				end
+  [] [t].size => t.length					end
+end
+
+rules for bool
+  k1,k2     : Key;
+  v	    : Value;
+  t	    : vector[set[entry[Key,Value]]];
+  hcode	    : int;
+  entry     : entry[Key,Value];
+  set1,set2 : set[entry[Key,Value]];
+global
+  [] [t].containsKey(k1) => true 
+		     where hcode:=() builtinHashTerm(k1) % t.length
+		     where set1:=() t.get(hcode)
+		     where (set[entry[Key,Value]]) [[k2,v], set2]:=() extract(k1,set1)
+		     if k1 == k2
+  end
+  [] [t].containsKey(k1) => false
+  end 
+
+//  [] entry in emptySetHashTable		=> false			end
+//  [] entry in [entry] UHT set1	=> true				end
+
+end
+
+rules for Value
+  b	    : bool;
+  k1,k2     : Key;
+  v	    : Value;
+  t	    : vector[set[entry[Key,Value]]];
+  hcode	    : int;
+  set1,set2 : set[entry[Key,Value]];
+global
+  [] [t].get(k1) => v 
+		     where hcode:=() builtinHashTerm(k1) % t.length
+		     where set1:=() t.get(hcode)
+		     where (set[entry[Key,Value]]) [[k2,v], set2]:=() extract(k1,set1)
+  end
+end
+
+rules for set[entry[Key,Value]]
+  set	: set[entry[Key,Value]];
+  k	: Key;
+  v	: Value;
+global
+  [] set UHT set => set end
+  [] extract(k, [[k,v]] UHT set)        => [[k,v] , set]         end
+  [] extract(k, [[emptyKeyHashTable,v]] UHT set) => [[emptyKeyHashTable,v] , set]   end
+end
+
+end
+				
+
+
+/*
+
+
+extract sv[9] = 
+	extract(,)(
+		.((kw1),(K1)),
+		U*(
+			[]([,](.(tau,(P11)),U*(emptySet,[]((P11))))),emptySet))
+
+*/

@@ -1,0 +1,55 @@
+module condac
+
+import global eq[term];
+end
+
+sort term;
+end
+
+operators global
+  F(@,@)	: (term term) term (AC);
+  G(@,@)	: (term term) term (AC);
+
+  f(@)		: (term) term ;
+  g(@,@)	: (term term) term ;
+  h(@)		: (term) term ;
+
+  a1    : term;
+  a2    : term;
+  a3    : term;
+  a4    : term;
+  b1    : term;
+  b2    : term;
+  b3    : term;
+  b4    : term;
+
+  q1    : term;
+  q2    : term;
+  q3    : term;
+  q4    : term;
+  q5    : term;
+  q6    : term;
+  q7    : term;
+  q8    : term;
+
+end
+
+
+rules for term
+	x,y,z,u,v : term;
+global
+
+[] q1                  => F(h(a1),F(h(a2),F(h(a2),h(a2)))) 	end
+[] F(x,x)              => x end
+
+[] q2                  => F(a1,F(a2,F(a3,F(a4,G(b1,G(b2,G(b3,b4))))))) end
+[] F(x,G(y,z))         => g(x,g(y,z)) if y==b2 end
+
+/*
+[] q3                  => F(f(G(a1,G(a2,G(a3,f(a4))))),F(b1,b2)) end
+[] F(f(G(f(x),y)),z)   => g(f(x),g(y,z)) end
+*/
+end
+
+end
+

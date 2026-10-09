@@ -1,0 +1,34 @@
+module iden
+
+import global int;
+
+rules for int
+ n:int;
+bodies
+  [a]	 n => -n  if n < 10 end
+  [b]    n => n+1 if n < 100 end
+end of rules
+
+/* 
+strategy foo dont care choose(a b) id end of strategy 
+
+strategy foo 
+  dont care choose(
+    dont care choose(a) , id)
+  id 
+end of strategy
+
+strategy foo 
+  dont care choose(
+    id , dont care choose(a) )
+  id 
+end of strategy
+
+strategy foo repeat id endrepeat end of strategy
+
+strategy foo while id endwhile end of strategy
+*/
+strategy foo iterate id enditerate end of strategy
+
+end of module
+

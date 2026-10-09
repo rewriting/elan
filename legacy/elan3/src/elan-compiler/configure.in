@@ -1,0 +1,145 @@
+AC_INIT(Makefile.in)
+AM_INIT_AUTOMAKE(elan-compiler,4.3f)
+AC_PREREQ(2.13)
+
+AC_ARG_WITH(jaterm, 
+   [  --with-jaterm            Specify location of jaterm library, default: \$prefix], 
+   JATERM=$withval, JATERM="$prefix")
+
+AC_PROG_CC
+AC_PROG_CXX
+AC_PROG_RANLIB
+AC_AIX
+
+AM_PROG_LEX
+AC_PROG_YACC
+AC_CHECK_LIB(y,yyerror,YACCLIB="-ly",YACCLIB="")
+AC_SUBST(YACCLIB)
+
+AC_JAVA_OPTIONS
+JAVAC=javac
+AC_CHECK_CLASSPATH
+AC_PROG_JAVAC
+AC_PROG_JAVA
+AC_CHECK_JUNIT
+
+AC_SUBST(CLASSPATH)
+
+AC_CHECK_PROG(JAVACC,javacc,javacc,true)
+
+
+dnl Default values
+CC_GCC=gcc
+CFLAGS_GCC="-O2"
+LFLAGS_GCC=""
+DEFS_GCC="\$(DEFS)"
+INCL_GCC=""
+
+CC_DBG=gcc
+CFLAGS_DBG="-g"
+LFLAGS_DBG="-g"
+DEFS_DBG="\$(DEFS) -DDEBUG"
+INCL_DBG=""
+
+CC_PROF=gcc
+CFLAGS_PROF="-pg"
+LFLAGS_PROF="-pg"
+DEFS_PROF="\$(DEFS)"
+INCL_PROF=""
+
+CC_NS=gcc
+CFLAGS_NS="-O2"
+LFLAGS_NS=""
+DEFS_NS="\$(DEFS) -DNO_SHARING"
+INCL_NS=""
+
+#AC_ARG_WITH(gc, [  --with-gc            Specify location of BDW GC library,
+# default: \$prefix], BDWGC=$withval, BDWGC="$prefix")
+#AC_SUBST(BDWGC)
+
+#AC_ARG_WITH(aterm, [  --with-aterm      Specify location of the ATerm library,
+# default: \$prefix], ATERMLIB=$withval, ATERMLIB="$prefix")
+#AC_SUBST(ATERMLIB)
+
+#AC_ARG_WITH(cpl, [  --with-cpl          Specify location of the Choice-Point library,
+# default: \$prefix], CPLLIB=$withval, CPLLIB="$prefix")
+#AC_SUBST(CPLLIB)
+
+AC_PACKAGE_REQUIRE(cpl, elan,
+   [  --with-cpl      Specify location of cpl package])
+AC_SUBST(CPL)
+
+AC_PACKAGE_REQUIRE(gc, elan,
+   [  --with-gc     Specify location of bdwgc package])
+AC_SUBST(GC-PATCHED)
+
+AC_PACKAGE_REQUIRE(aterm, baffle,
+   [  --with-aterm      Specify location of aterm package])
+AC_SUBST(ATERM)
+
+RUNTIME_LIB_BASE_GCC=libruntime-base-gcc.a
+RUNTIME_LIB_BASE_DBG=libruntime-base-dbg.a
+RUNTIME_LIB_BASE_PROF=libruntime-base-prof.a
+
+AC_SUBST(RUNTIME_LIB_BASE_GCC)
+AC_SUBST(RUNTIME_LIB_BASE_DBG)
+AC_SUBST(RUNTIME_LIB_BASE_PROF)
+
+RUNTIME_LIB_ATERM_GCC=libruntime-aterm-gcc.a
+RUNTIME_LIB_ATERM_DBG=libruntime-aterm-dbg.a
+RUNTIME_LIB_ATERM_PROF=libruntime-aterm-prof.a
+RUNTIME_LIB_ATERM_NS=libruntime-aterm-ns.a
+
+AC_SUBST(RUNTIME_LIB_ATERM_GCC)
+AC_SUBST(RUNTIME_LIB_ATERM_DBG)
+AC_SUBST(RUNTIME_LIB_ATERM_PROF)
+AC_SUBST(RUNTIME_LIB_ATERM_NS)
+
+
+AC_SUBST(CC_GCC)
+AC_SUBST(CC_DBG)
+AC_SUBST(CC_PROF)
+AC_SUBST(CC_NS)
+
+AC_SUBST(CFLAGS_GCC)
+AC_SUBST(CFLAGS_DBG)
+AC_SUBST(CFLAGS_PROF)
+AC_SUBST(CFLAGS_NS)
+
+AC_SUBST(DEFS_GCC)
+AC_SUBST(DEFS_DBG)
+AC_SUBST(DEFS_PROF)
+AC_SUBST(DEFS_NS)
+
+AC_SUBST(INCL_GCC)
+AC_SUBST(INCL_DBG)
+AC_SUBST(INCL_PROF)
+AC_SUBST(INCL_NS)
+
+AC_SUBST(LFLAGS_GCC)
+AC_SUBST(LFLAGS_DBG)
+AC_SUBST(LFLAGS_PROF)
+AC_SUBST(LFLAGS_NS)
+
+AC_SET_MAKE
+
+AC_OUTPUT( \
+          Makefile \
+          config/Makefile \
+          runtime/Makefile \
+          runtime/SmilesGasEl/Makefile \
+          runtime/SmilesGasEl/algo/Makefile \
+          runtime/SmilesGasEl/algo/huxu/Makefile \
+          runtime/SmilesGasEl/algo/usmiles/Makefile \
+          runtime/SmilesGasEl/parser/Makefile \
+          runtime/SmilesGasEl/datatypes/Makefile \
+          earley/Makefile \
+	  src/Makefile \
+	  src/rem/Makefile \
+	  src/rem/compiler/Makefile \
+	  src/rem/exception/Makefile \
+	  src/rem/parser/Makefile \
+	  doc/Makefile \
+	  scripts/Makefile \
+)
+

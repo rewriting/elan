@@ -1,0 +1,11 @@
+LPL i2str description
+
+   query of sort  	ident
+   result of sort 	Foo
+   import 		i2str identifier
+   start with 		()(ident2string(query),ident2string(query))
+
+end
+
+
+

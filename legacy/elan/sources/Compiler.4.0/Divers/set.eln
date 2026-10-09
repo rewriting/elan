@@ -1,0 +1,71 @@
+module set[X]
+
+import global bool int sequence[X]; end
+
+sort X set[X];  end
+
+operators global
+  emptyset_X	: set[X];
+  emptyset 	: set[X] alias emptyset_X:;
+  mkSet(@)	: (sequence[X]) set[X];
+  @ U @		: (set[X] set[X]) set[X] pri 100;
+  (@ U @)	: (set[X] set[X]) set[X] alias @ U @:;
+  @ I @		: (set[X] set[X]) set[X] pri 105;
+  (@ I @)	: (set[X] set[X]) set[X] alias @ I @:;
+  @ \ @		: (set[X] set[X]) set[X] pri 110;
+  (@ \ @)	: (set[X] set[X]) set[X] alias @ \ @:;
+  @ in @	: (X set[X]) bool;
+  card(@)	: (set[X]) int;
+end
+
+rules for set[X]
+  L, M : sequence[X];
+  E, F : X;
+  S, T : set[X];
+  b : bool;
+
+global
+  [] S U emptyset		=> S		end
+  [] mkSet(L) U mkSet(M)	=> mkSet(L , M)	end
+  [] emptyset I S		=> emptyset	end
+  [] mkSet(E) I S		=> T 
+	where b := () E in S
+	choose
+	  try where T:= () mkSet(E) 	if b
+	  try where T:= () emptyset 	if not(b)				
+        end
+     end
+  [] mkSet(E , L) I S		=> (mkSet(E) I S) U (mkSet(L) I S) end
+  [] emptyset \ S		=> emptyset	end
+  [] mkSet(E) \ S		=> T 
+	where b := () E in S
+	choose
+	  try where T := () emptyset 	if b
+	  try where T := () mkSet(E) 	if not(b)
+        end
+     end
+  [] mkSet(E , L) \ S		=> (mkSet(E) \ S) U (mkSet(L) \ S) end
+end
+
+rules for  bool
+  L, M : sequence[X];
+  E, F : X;
+  S, T : set[X];
+
+global
+  [] E in emptyset	=> false	end
+  [] E in mkSet(L)	=> E in L	end
+end
+
+rules for int
+  L : sequence[X];
+  E : X;
+  n,n1,n2 : int;
+  b : bool;
+
+global
+  [] card(emptyset)	=> 0 		end
+  [] card(mkSet(L))	=> size(L)	end
+end
+
+end

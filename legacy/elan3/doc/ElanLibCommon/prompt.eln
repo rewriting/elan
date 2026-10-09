@@ -1,0 +1,23 @@
+module prompt[X]
+
+import local io[string] io[X];
+end
+operators global 
+  read		: X;
+  print(@)	: (X) X;
+  printnl(@)	: (X) X;
+  prompt(@) 	: (string) X;
+end
+
+rules for X
+pr, pr1	: string;
+t, t1	: X;
+local
+  [] read => read(stdin)					end
+  [] print(t) => write(stdout,t)				end
+  [] printnl(t) => t1 	where t1:=()write(stdout,t) 
+			where pr:=()write(stdout,"\n")		end
+  [] prompt(pr) => read(stdin) where pr1:=()write(stdout,pr)    end
+end
+
+end

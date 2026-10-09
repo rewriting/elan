@@ -1,0 +1,251 @@
+JAVA PROFILE 1.0.1, created Fri Feb  4 16:56:22 2000
+
+Header for -Xhprof ASCII Output
+
+Copyright 1998 Sun Microsystems, Inc. 901 San Antonio Road, Palo Alto,
+California, 94303, U.S.A.  All Rights Reserved.
+
+WARNING!  This file format is under development, and is subject to
+change without notice.
+
+This file contains the following types of records:
+
+THREAD START
+THREAD END      mark the lifetime of Java threads
+
+TRACE           represents a Java stack trace.  Each trace consists
+                of a series of stack frames.  Other records refer to
+                TRACEs to identify (1) where object allocations have
+                taken place, (2) the frames in which GC roots were
+                found, and (3) frequently executed methods.
+
+HEAP DUMP       is a complete snapshot of all live objects in the Java
+                heap.  Following distinctions are made:
+
+                ROOT    root set as determined by GC
+                CLS     classes 
+                OBJ     instances
+                ARR     arrays
+
+SITES           is a sorted list of allocation sites.  This identifies
+                the most heavily allocated object types, and the TRACE
+                at which those allocations occurred.
+
+CPU SAMPLES     is a statistical profile of program execution.  The VM
+                periodically samples all running threads, and assigns
+                a quantum to active TRACEs in those threads.  Entries
+                in this record are TRACEs ranked by the percentage of
+                total quanta they consumed; top-ranked TRACEs are
+                typically hot spots in the program.
+
+CPU TIME	is a profile of program execution obtained by measuring
+                the time spent in individual methods (excluding the time
+                spent in callees), as well as by counting the number of
+                times each method is called. Entries in this record are
+                TRACEs ranked by the percentage of total CPU time. The
+                "count" field indicates the number of times each TRACE 
+                is invoked.
+
+MONITOR TIME    is a profile of monitor contention obtained by measuring
+		the time spent by a thread waiting to enter a monitor.
+		Entries in this record are TRACEs ranked by the percentage
+		of total monitor contention time and a brief description
+		of the monitor.  The "count" field indicates the number of 
+		times the monitor was contended at that TRACE.
+
+MONITOR DUMP	is a complete snapshot of all the monitors and threads in 
+		the System.
+
+HEAP DUMP, SITES, CPU SAMPLES|TIME and MONITOR DUMP|TIME records are generated 
+at program exit.  They can also be obtained during program execution by typing 
+Ctrl-\ (on Solaris) or by typing Ctrl-Break (on Win32).
+
+--------
+
+THREAD START (obj=8137190, id = 2, name="SIGQUIT handler", group="system")
+THREAD START (obj=815e8a0, id = 3, name="Reference Handler", group="system")
+THREAD START (obj=8188c50, id = 4, name="Finalizer", group="system")
+THREAD START (obj=821d9b8, id = 1, name="main", group="main")
+THREAD END (id = 1)
+THREAD START (obj=82ab7c8, id = 5, name="Thread-0", group="main")
+THREAD END (id = 5)
+TRACE 1:
+	<empty>
+TRACE 13:
+	REFParser.ALexem(REFParser.java:Compiled method)
+	REFParser.SymbolDeclaration(REFParser.java:Compiled method)
+	REFParser.GrammarDeclaration(REFParser.java:Compiled method)
+	REFParser.Start(REFParser.java:Compiled method)
+TRACE 31:
+	DDTree.addTerm(DDTree.java:Compiled method)
+	DDTree.build(DDTree.java:Compiled method)
+	DDTree.construction(DDTree.java:Compiled method)
+	RewriteRule.compileNoNamed(RewriteRule.java:Compiled method)
+TRACE 22:
+	RewriteRule.<clinit>(RewriteRule.java:Unknown line)
+	REFParser.RuleDeclaration(REFParser.java:Compiled method)
+	REFParser.Start(REFParser.java:Compiled method)
+	REM.main(REM.java:Compiled method)
+TRACE 7:
+	Tools.<clinit>(Tools.java:Unknown line)
+	REM.main(REM.java:Compiled method)
+TRACE 10:
+	REFParser.LexemModuleDeclaration(REFParser.java:Compiled method)
+	REFParser.Start(REFParser.java:Compiled method)
+	REM.main(REM.java:Compiled method)
+TRACE 29:
+	RewriteRule.compileNoNamed(RewriteRule.java:Compiled method)
+	REM.main(REM.java:Compiled method)
+TRACE 18:
+	REFParser.BuildElanTerm(REFParser.java:Compiled method)
+	REFParser.ElanTerms(REFParser.java:Compiled method)
+	REFParser.BuildElanTerm(REFParser.java:Compiled method)
+	REFParser.ElanTerms(REFParser.java:Compiled method)
+TRACE 25:
+	REFParser.RuleName(REFParser.java:Compiled method)
+	REFParser.RuleNames(REFParser.java:Compiled method)
+	REFParser.StrategyTerm(REFParser.java:Compiled method)
+	REFParser.StrategyBody(REFParser.java:Compiled method)
+TRACE 8:
+	REFParser.LexemIdentifierDeclaration(REFParser.java:Compiled method)
+	REFParser.Start(REFParser.java:Compiled method)
+	REM.main(REM.java:Compiled method)
+TRACE 11:
+	REFParser.LexemRuleNameDeclaration(REFParser.java:Compiled method)
+	REFParser.Start(REFParser.java:Compiled method)
+	REM.main(REM.java:Compiled method)
+TRACE 17:
+	Term.<init>(Term.java:Compiled method)
+	REFParser.BuildElanTerm(REFParser.java:Compiled method)
+	REFParser.ElanTerms(REFParser.java:Compiled method)
+	REFParser.BuildElanTerm(REFParser.java:Compiled method)
+TRACE 24:
+	Term.getPatternInfo(Term.java:Compiled method)
+	RewriteRule.isCompilable(RewriteRule.java:Compiled method)
+	REFParser.RuleDeclaration(REFParser.java:Compiled method)
+	REFParser.Start(REFParser.java:Compiled method)
+TRACE 16:
+	REFParser.BuildElanTerm(REFParser.java:Compiled method)
+	REFParser.ElanTerms(REFParser.java:Compiled method)
+	REFParser.BuildElanTerm(REFParser.java:Compiled method)
+	REFParser.unflattenedElanTerm(REFParser.java:Compiled method)
+TRACE 26:
+	REFParser.StrategyTerm(REFParser.java:Compiled method)
+	REFParser.StrategyBody(REFParser.java:Compiled method)
+	REFParser.StrategyDeclaration(REFParser.java:Compiled method)
+	REFParser.Start(REFParser.java:Compiled method)
+TRACE 34:
+	Tools.genMainFile(Tools.java:Compiled method)
+	REM.main(REM.java:Compiled method)
+TRACE 3:
+	java/lang/System.initProperties(System.java:Native method)
+	java/lang/System.initializeSystemClass(System.java:783)
+TRACE 6:
+	REFParser.<init>(REFParser.java:Compiled method)
+	REM.main(REM.java:Compiled method)
+TRACE 32:
+	BranchEvaluation.setDetType(BranchEvaluation.java:Compiled method)
+	BranchEvaluation.getDetType(BranchEvaluation.java:Compiled method)
+	RewriteRule.getDetTypeEvaluation(RewriteRule.java:Compiled method)
+	RewriteRule.allDetEvaluation(RewriteRule.java:Compiled method)
+TRACE 4:
+	java/lang/Compiler.initialize(Compiler.java:Native method)
+	java/lang/Compiler.<clinit>(Compiler.java:59)
+TRACE 9:
+	REFParser.LexemSortDeclaration(REFParser.java:Compiled method)
+	REFParser.Start(REFParser.java:Compiled method)
+	REM.main(REM.java:Compiled method)
+TRACE 15:
+	REFParser.RuleDeclaration(REFParser.java:Compiled method)
+	REFParser.Start(REFParser.java:Compiled method)
+	REM.main(REM.java:Compiled method)
+TRACE 33:
+	DDNode.addACSymbol(DDNode.java:Compiled method)
+	DDNode.addTerm(DDNode.java:Compiled method)
+	DDNode.addFreeSymbol(DDNode.java:Compiled method)
+	DDNode.addTerm(DDNode.java:Compiled method)
+TRACE 28:
+	REFParser.QueryDeclaration(REFParser.java:Compiled method)
+	REFParser.Start(REFParser.java:Compiled method)
+	REM.main(REM.java:Compiled method)
+TRACE 5:
+	REM.main(REM.java:Compiled method)
+TRACE 21:
+	REFParser.Wheres(REFParser.java:Compiled method)
+	REFParser.RuleDeclaration(REFParser.java:Compiled method)
+	REFParser.Start(REFParser.java:Compiled method)
+	REM.main(REM.java:Compiled method)
+TRACE 27:
+	REFParser.StrategyDeclaration(REFParser.java:Compiled method)
+	REFParser.Start(REFParser.java:Compiled method)
+	REM.main(REM.java:Compiled method)
+TRACE 12:
+	REFParser.LexemStrategyNameDeclaration(REFParser.java:Compiled method)
+	REFParser.Start(REFParser.java:Compiled method)
+	REM.main(REM.java:Compiled method)
+TRACE 2:
+	java/security/AccessController.getStackAccessControlContext(AccessController.java:Native method)
+	java/security/AccessController.getContext(AccessController.java:358)
+	java/lang/Thread.init(Thread.java:270)
+TRACE 14:
+	REFParser.SymbolDeclaration(REFParser.java:Compiled method)
+	REFParser.GrammarDeclaration(REFParser.java:Compiled method)
+	REFParser.Start(REFParser.java:Compiled method)
+	REM.main(REM.java:Compiled method)
+TRACE 30:
+	DDTree.build(DDTree.java:Compiled method)
+	DDTree.construction(DDTree.java:Compiled method)
+	RewriteRule.compileNoNamed(RewriteRule.java:Compiled method)
+	REM.main(REM.java:Compiled method)
+TRACE 23:
+	RewriteRule.variableNumbering(RewriteRule.java:Compiled method)
+	RewriteRule.<init>(RewriteRule.java:Compiled method)
+	REFParser.RuleDeclaration(REFParser.java:Compiled method)
+	REFParser.Start(REFParser.java:Compiled method)
+TRACE 20:
+	REFParser.LocalAffectation(REFParser.java:Compiled method)
+	REFParser.Wheres(REFParser.java:Compiled method)
+	REFParser.RuleDeclaration(REFParser.java:Compiled method)
+	REFParser.Start(REFParser.java:Compiled method)
+TRACE 19:
+	REFParser.Condition(REFParser.java:Compiled method)
+	REFParser.Wheres(REFParser.java:Compiled method)
+	REFParser.RuleDeclaration(REFParser.java:Compiled method)
+	REFParser.Start(REFParser.java:Compiled method)
+CPU TIME (ms) BEGIN (total = 0) Fri Feb  4 16:56:25 2000
+rank   self  accum   count trace method
+   1   nan%   nan%       0     1 <empty trace>
+   2   nan%   nan%       0    13 REFParser.ALexem
+   3   nan%   nan%       0    31 DDTree.addTerm
+   4   nan%   nan%       0    22 RewriteRule.<clinit>
+   5   nan%   nan%       0     7 Tools.<clinit>
+   6   nan%   nan%       0    10 REFParser.LexemModuleDeclaration
+   7   nan%   nan%       0    29 RewriteRule.compileNoNamed
+   8   nan%   nan%       0    18 REFParser.BuildElanTerm
+   9   nan%   nan%       0    25 REFParser.RuleName
+  10   nan%   nan%       0     8 REFParser.LexemIdentifierDeclaration
+  11   nan%   nan%       0    11 REFParser.LexemRuleNameDeclaration
+  12   nan%   nan%       0    17 Term.<init>
+  13   nan%   nan%       0    24 Term.getPatternInfo
+  14   nan%   nan%       0    16 REFParser.BuildElanTerm
+  15   nan%   nan%       0    26 REFParser.StrategyTerm
+  16   nan%   nan%       0    34 Tools.genMainFile
+  17   nan%   nan%       0     3 java/lang/System.initProperties
+  18   nan%   nan%       0     6 REFParser.<init>
+  19   nan%   nan%       0    32 BranchEvaluation.setDetType
+  20   nan%   nan%       0     4 java/lang/Compiler.initialize
+  21   nan%   nan%       0     9 REFParser.LexemSortDeclaration
+  22   nan%   nan%       0    15 REFParser.RuleDeclaration
+  23   nan%   nan%       0    33 DDNode.addACSymbol
+  24   nan%   nan%       0    28 REFParser.QueryDeclaration
+  25   nan%   nan%       0     5 REM.main
+  26   nan%   nan%       0    21 REFParser.Wheres
+  27   nan%   nan%       0    27 REFParser.StrategyDeclaration
+  28   nan%   nan%       0    12 REFParser.LexemStrategyNameDeclaration
+  29   nan%   nan%       0     2 java/security/AccessController.getStackAccessControlContext
+  30   nan%   nan%       0    14 REFParser.SymbolDeclaration
+  31   nan%   nan%       0    30 DDTree.build
+  32   nan%   nan%       0    23 RewriteRule.variableNumbering
+  33   nan%   nan%       0    20 REFParser.LocalAffectation
+  34   nan%   nan%       0    19 REFParser.Condition
+CPU TIME (ms) END

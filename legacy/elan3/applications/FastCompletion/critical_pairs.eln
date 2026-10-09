@@ -1,0 +1,189 @@
+module critical_pairs[vars,fss,syst]
+import	global 	syst int bool
+			ans_completion[Vars,Ops,Prec,System] 
+                eqSystem[fss,vars]
+		syntacticUnification[fss,vars]
+		EtermCommons[fss,vars] //just for list_variable
+		applySubstOn[fss,vars,term]
+		list[equation]
+		list[equationNR]
+		list[criticalPair]
+		list[int]
+		list[list[int]] 
+	 	substitution
+                Meta_apply[list[int]]
+		;
+end
+
+sort criticalPair
+     equationNR equation_set;
+end
+
+operators
+  global
+
+    getOrient     : equation_set;
+    @             : (equation) equation_set;
+    @ % @         : (equation equation_set) equation_set;
+    orient_all(@) : (list[equation]) equation_set;
+
+    eqNR(@,@)             : ( equation int) equationNR;
+
+    CP(@,@,@,@,@,@,@,@,@,@)      : ( term term substitution list[int]
+                              substitution substitution term term int int) criticalPair; 
+
+    list_of_equations     : list[equation];
+    list_of_equationsNR   : list[equationNR];
+    numbering(@,@)        : ( list[equation] int ) list[equationNR];
+
+    occs(@)               : ( term ) list[list[int]] ;
+
+    getCP                 : list[criticalPair];
+    computeAll(@)         : ( list[equationNR] ) list[criticalPair];
+    computeOneAll(@,@)    : ( equationNR list[equationNR] ) list[criticalPair];
+    computeOneOne(@,@,@)  : ( equationNR equationNR list[list[int]] ) list[criticalPair];
+
+    get_subst(@,@)       : ( list[variable] int ) substitution;
+    maxvar(@)		 : ( substitution ) int;
+    get_number(@)	 : ( variable ) int;
+    max(@,@)    	 : ( int int ) int;
+end
+
+
+//------------------------------------------------------------
+
+rules for list[list[int]] 
+	l	        : term;
+global
+  [] occs(l) =>  set_of(call "chooseOccurence":list[int], nvocc(l)) 
+  end
+end
+
+rules for list[equation]
+global
+  [] list_of_equations  => FOR EACH X:equation SUCH THAT X:=(listExtract)elem(syst): { X.} nil
+  end
+end
+
+rules for list[equationNR]
+	e	   : equation;
+	lr         : list[equation];
+        n          : int;
+global
+  [] list_of_equationsNR  => numbering(list_of_equations,1)
+  end
+  [] numbering(nil,n)  => nil
+  end
+  [] numbering(e.lr,n)  => eqNR(e,n).numbering(lr,n+1)
+  end
+end
+
+rules for list[criticalPair]
+	l,r,g,d,new1,new2,red1,red2 : term;
+	e,e1,e2		  : equationNR;
+	lr		  : list[equationNR];
+        li                : list[list[int]];
+	unif     	  : eqSystem;
+	omega		  : list[int];
+	sigma,ss1,ss2     : substitution;
+        vl1,vl2           : list[variable];
+        max,n,m           : int;
+global
+  [] getCP => computeAll(list_of_equationsNR)
+  end
+
+  [] computeAll(nil)  => nil
+  end
+  [] computeAll(e.lr)  => append( computeOneAll(e,lr), computeAll(lr) )
+  end
+
+  [] computeOneAll(eqNR(l = r,n), nil) => nil
+  end
+  [] computeOneAll(eqNR(l = r,n), eqNR(g = d,m) . lr) => append(
+           computeOneOne(eqNR(l = r,n), eqNR(g = d,m), occs(l)) , append(
+           computeOneOne(eqNR(g = d,m), eqNR(l = r,n), occs(g)) ,
+           computeOneAll(eqNR(l = r,n), lr)))
+  end 
+
+  [] computeOneOne(eqNR(g = d,n) , eqNR(l = r,m), omega.li)		=> 
+           CP(new1,new2,sigma,omega,ss1,ss2,red1,red2,n,m) . 
+           computeOneOne(eqNR(g = d,n) , eqNR(l = r,m), li)
+	where vl1 := ()list_variable(g)
+	where ss1 := ()get_subst(vl1,0)
+	where max := ()maxvar(ss1)
+	where vl2 := ()list_variable(l)
+	where ss2 := ()get_subst(vl2,max+1)
+	where new1 := ()apply(ss1,g)
+	where new2 := ()apply(ss2,l)
+	where unif:=(unifys) true & new1 at omega = new2
+	where sigma:=() system_to_subst(unif)
+// the critical pair
+	where red1:=()apply(sigma,apply(ss1,d))
+	where red2:=()new1[apply(sigma,apply(ss2,r))] at omega
+
+  end
+  // all the other cases (for completeness)
+  [] computeOneOne(e1, e2, omega.li)		=> 
+           computeOneOne(e1, e2, li)
+  end
+  [] computeOneOne(e1, e2, nil)		=>  nil
+  end
+
+
+end
+
+rules for substitution
+        n : int;
+        vn: variable;
+        vl: list[variable];
+global
+  [] get_subst(nil, n)    =>  identity
+  end
+  [] get_subst(vn.vl, n)     =>  vn -> var(n) o get_subst(vl,n+1)
+  end
+end
+
+rules for int
+        n,m : int;
+        vn,ovn: variable;
+        vl: list[variable];
+        subst1, subst2: substitution;
+global
+  [] get_number(var(n))  =>  n
+  end
+  [] get_number(vn)  =>  -1
+  end
+
+  [] maxvar(vn -> ovn)  => max(get_number(vn),get_number(ovn))
+  end
+  [] maxvar(subst1 o  subst2 )  => max(maxvar(subst1),maxvar(subst2))
+  end
+  [] maxvar(identity)  => -1
+  end
+
+  [] max(n,m)  => n if n>m
+  end
+  [] max(n,m)  => m if m>=n
+  end
+end
+
+
+//-------
+
+rules for equation_set
+	e,oe : equation;
+	es : list[equation];
+global
+  [] getOrient => orient_all(list_of_equations)
+  end
+
+  [] orient_all(e.nil) => oe
+            where oe := (s_orient_eq) orient(e)
+  end
+  [] orient_all(e.es) => oe %  orient_all(es) 
+            where oe := (s_orient_eq) orient(e)
+  end
+end
+
+
+end

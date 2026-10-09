@@ -1,0 +1,8 @@
+LPL pq8 description 
+
+query 		of sort List
+      result 	of sort List
+      import	pq8
+      start with (queens) queens
+
+end

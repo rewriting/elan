@@ -1,0 +1,34 @@
+module termV[Vars]
+
+import global term;
+       local Vars int identifier list[identifier] list[variable];
+end
+
+operators global 
+
+    FOR EACH SS:identifier SUCH THAT SS:=(listExtract) elem(Vars) :{
+      SS     : variable;
+    }
+
+end
+
+rules for list[variable]
+global
+  [] varlist_Vars => 
+  FOR EACH SS:identifier SUCH THAT SS:=(listExtract) elem(Vars) :{ SS.} nil
+  end
+end
+
+FOR EACH N:int SUCH THAT 
+	N:=() size_of_variable_list(FOR EACH SS:identifier 
+				    SUCH THAT SS:=(listExtract) elem(Vars) 
+					:{ SS.} nil ) 
+:{
+rules for int 
+global
+  [] varnum_Vars => N end
+end
+}
+
+end
+

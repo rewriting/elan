@@ -1,0 +1,15 @@
+#! /bin/csh -f
+itest hou exa       exa	 exa
+itest hou specPat   specPat  specPat	
+itest hou specPat1  specPat1 specPat1		
+itest hou specPat2  specPat2 specPat2	
+itest hou specPat3  specPat3 specPat3	
+itest hou specPat4  specPat4 specPat4	
+itest hou specPat5  specPat5 specPat5	
+itest phou specPat  specPat specPat
+itest phou specPat1 specPat1 specPat1p
+itest phou specPat2 specPat2  specPat2p
+itest phou specPat3 specPat3 specPat3p
+itest phou specPat4 specPat4 specPat4p
+itest phou specPat5 specPat5 specPat5p
+

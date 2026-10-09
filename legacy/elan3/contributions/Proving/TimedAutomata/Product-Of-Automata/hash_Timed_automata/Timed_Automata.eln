@@ -1,0 +1,612 @@
+module Timed_Automata[K,Q,S,LA]
+
+
+//---- IMPORTS  ----//
+
+
+import global
+  K  /* clocks list   */
+  Q  /* states list   */
+  S  /* labels list   */
+  LA /* automata list */ 
+  DBM[K,Q,S,LA]
+  eq[state] eq[label]
+  eq[list[state]]
+  occur[label,list[label]] 
+  list[list[state]] 
+  list[int]
+  pair[list[list[state]],bool] 
+  hashSet[can_sz] 
+  pair[trajectory,bool]
+  eq[pair[list[list[state]],bool]]
+  ;
+end // of import 
+
+
+//---- SORTS  ----//
+
+
+sort
+  lbl_list can_sz trajectory traj_elt
+  ;
+end // of sort
+
+
+//---- OPERATORS  ----//
+
+
+operators global
+
+  /*** statezone ***/
+
+  // statezone constructor for a single automaton
+  @ / @      : (state clockzone)       statezone ;
+
+  // statezone constructor for a product of automata
+  @ / @      : (list[state] clockzone) statezone ;
+
+  // the discrete transition function for a single automaton
+  TransitionOperator.@(@) : (label statezone)       statezone ;
+
+  // the discrete transition function for a product of automata
+  SynTransitionOperator(@,@)    : (label statezone)       statezone ;
+ 
+
+
+  /*** canonical statezone ***/
+
+  // can_sz constructor
+  @ / @       : (list[state] matrix[bound]) can_sz ;
+  can_form(@) : (statezone) can_sz ;
+
+
+
+  /*** label ***/
+
+  // extracts an element from a list of labels
+  extract(@)  : (lbl_list)   label ;
+
+  // returns the trigger of a transition
+  tr_label(@) : (transition) label ;
+
+
+  
+  /*** lbl_list ***/
+
+  // lbl_list is a list[label] that does not contain the value nil
+  @          : (label)          lbl_list ;
+  @.@        : (label lbl_list) lbl_list ;
+
+  // this function converts a list[label] to an lbl_list
+  convert(@) : (list[label])    lbl_list ;
+ 
+
+
+  /*** list[label] ***/
+
+  // returns all the possible triggers corresponding 
+  // to the states given in the first argument
+  possible_labels(@,@)    : (list[state] list[Automaton]) list[label] ;
+  possible_labelsBis(@,@) : (state list[transition])      list[label] ;
+
+  // returns the triggers that can effectively be used
+  // i.e. those that satisfy the synchronisation constraint
+  effective_labels(@,@)   : (list[label] list[label])     list[label] ;
+ 
+
+
+  /*** int ***/
+
+  // calculates an upper bound for
+  // the right hand sides of all the constraints
+  // (i.e. invariants and guards)
+  Max_Bnd            :                          int ;
+
+
+  // stores the vlaue returned by Max_Bnd
+  CMAX               :                          int ;
+
+
+  // count the number of automata that use a given label
+  // in at least one of there transitions
+  N_actions(@,@)     : (label list[Automaton])  int ; 
+  count_actions(@,@) : (label list[transition]) int ;
+
+  // counts the number of occurences of a label
+  // in a list of labels
+  N_occ(@,@)         : (label list[label])      int ;
+
+  // returns the value of the right hand side of a clause
+  r_side(@)          : (clause)                 int ;
+
+  // calculates the max of a list of integers
+  max_int(@)         : (list[int])              int ;
+
+
+
+  /*** list[int] ***/
+  // returns the list of all the integers used in a list of invariants
+  imk_list(@) :  (list[invariant])  list[int] ;
+
+  // returns the list of all the integers used in a list of transitions
+  tmk_list(@) :  (list[transition]) list[int] ;
+
+
+
+  /*** clockzone ***/
+
+  // returns the right hand side of a statezone (i.e. the constraint)
+  zn(@)        : (statezone)   clockzone ;
+  czn(@)       : (statezone)   clockzone ;
+
+  // returns the guard of a transition
+  tr_cond(@)   : (transition)  clockzone ;
+
+  // returns the invariant of a state
+  inv(@)       : (state)       clockzone ;
+
+  // returns the right hand side of an invariant
+  inv_zone(@)  : (invariant)   clockzone ;
+
+  // replaces any integer which is greater than CMAX
+  // by CMAX
+  bnd(@)       : (clockzone)   clockzone ;
+
+  // returns the intersection of the invariants of all the given states
+  inter_all(@) : (list[state]) clockzone ;
+
+
+
+  /*** state ***/
+
+  // returns the source state of a transition
+  tr_before(@) : (transition) state ;
+
+  // returns the result state of a transition
+  tr_after(@)  : (transition) state ;
+
+  // returns the left hand side of an invariant
+  inv_state(@) : (invariant)  state ;
+
+  // returns the left hand side of statezone
+  st(@)        : (statezone)  state ;
+
+
+
+  /*** list[state] ***/
+
+  // returns the left hand side of statezone
+  cst(@)       : (statezone)  list[state] ;
+
+
+
+  /*** traj_elt ***/
+  // eliminates nil
+  @           : (state)          traj_elt ;
+  @|@         : (state traj_elt) traj_elt ;
+  elim_nil(@) : (list[state])    traj_elt ;
+
+
+  /*** list[clock] ***/
+
+  // returns the set of clocks that have to be reset
+  // after a given transition
+  tr_zero(@)    : (transition)      list[clock] ;
+
+
+
+  /*** bool ***/
+
+  REACHED        :                                bool ;
+
+  // action(l,s,2) is true if there exists
+  // a transition of the 2nd automaton of LA
+  // where the source state is s and the trigger is l
+  // it uses the function exists(@,@,@)
+  action(@,@,@)  : (label state int)              bool ;
+  exists(@,@,@)  : (state label list[transition]) bool ;
+
+
+
+  /*** pair[list[list[state]],bool] ***/
+
+  // the main() function:
+  // it executes the synchronised product of the automata
+  // and verifies the reachability of a given statezone.
+  // it returns also the resulting trajectory.
+  lst_trans(@,@,@,@) : (hashSet[can_sz] statezone statezone list[list[state]]) pair[list[list[state]],bool] ;
+
+
+
+  /*** trajectory ***/
+
+  @            : (traj_elt)            trajectory ;
+  @ ---> @     : (trajectory traj_elt) trajectory ;
+  printable(@) : (list[list[state]])   trajectory ;
+
+
+
+  /*** pair[trajectory,bool] ***/
+
+  Unreachable_State : pair[trajectory,bool] ;
+  go(@,@) : (statezone statezone) pair[trajectory,bool] ;
+
+end // of operators
+
+
+//---- STRATEGIES OPERATORS  ----//
+
+
+stratop global
+  next_sz   : < statezone -> statezone >  bs ;
+  elements  : < label -> label > bs ;
+  Post      : < statezone -> statezone >  bs ;
+  TransTimeOperatorStar   : < pair[list[list[state]],bool] -> pair[list[list[state]],bool] > bs ;
+end // of stratop
+
+
+//---- RULES ----//
+
+
+rules for int
+  l, lbl : label ;
+  lst_A  : list[Automaton] ;
+  A      : Automaton ;
+  lst_T  : list[transition] ;
+  T      : transition ;
+  lst_L  : list[label] ;
+ global
+  [] N_actions(lbl,A.lst_A)     => min(1,count_actions(lbl,lst_trans(A))) + N_actions(lbl,lst_A) end
+  [] N_actions(lbl,nil)         => 0 end
+  [] count_actions(lbl,T.lst_T) => 1 + count_actions(lbl,lst_T)
+                                   if eq_label(lbl,tr_label(T))
+                                   end
+  [] count_actions(lbl,T.lst_T) => count_actions(lbl,lst_T) end
+  [] count_actions(lbl,nil)     => 0 end
+  [] N_occ(lbl,l.lst_L)         => 1 + N_occ(lbl,lst_L) 
+                                   if eq_label(lbl,l) 
+                                   end
+  [] N_occ(lbl,l.lst_L)         => N_occ(lbl,lst_L) end
+  [] N_occ(lbl,nil)             => 0 end
+end // of rules for int
+
+rules for label
+  s, t  : state ;
+  z     : clockzone ;
+  lbl   : label ;
+  lst_L : lbl_list ;
+  lc    : list[clock] ;
+ global
+  [] tr_label(s,lbl:z,lc,t) => lbl  end
+
+  [elem] extract(lbl)       => lbl  end
+  [elem] extract(lbl.lst_L) => lbl  end
+  [elem] extract(lbl.lst_L) => extract(lst_L) end
+end // of rules for label
+
+rules for clockzone
+  s, t  : state ;
+  cs    : list[state] ;
+  z, cz : clockzone ;
+  lbl   : label ;
+  lc    : list[clock] ;
+  x     : clock ;
+  c     : int ;
+  cl    : clause ;
+ global
+  [] tr_cond(s,lbl:z,lc,t)  =>  z  end
+  [] inv_zone(s:z)          =>  z  end
+  [] zn(s/z)                =>  z  end
+  [] czn(cs/z)              =>  z  end
+
+  [] inter_all(s.nil)       =>  inv(s) end
+  [] inter_all(s.cs)        =>  inter(inv(s),inter_all(cs)) end
+
+  [] bnd(true)     => true                    end
+  [] bnd(x<c^cz)   => x<min(c,CMAX)^bnd(cz)   end
+  [] bnd(x<=c^cz)  => x<=min(c,CMAX)^bnd(cz)  end
+  [] bnd(x>c^cz)   => x>min(c,CMAX)^bnd(cz)   end
+  [] bnd(x>=c^cz)  => x>=min(c,CMAX)^bnd(cz)  end
+  [] bnd(cl^cz)    => cl^bnd(cz)              end
+end // of rules for clockzone
+
+rules for list[clock]
+  s, t : state ;
+  z    : clockzone ;
+  lbl  : label ;
+  lc   : list[clock] ;
+ global
+  [] tr_zero(s,lbl:z,lc,t) => lc  end
+end // of rules for list[clock]
+
+rules for state
+  s, t : state ;
+  z    : clockzone ;
+  lbl  : label ;
+  lc   : list[clock] ;
+ global
+  []  tr_before(s,lbl:z,lc,t)  =>  s  end
+  []  tr_after (s,lbl:z,lc,t)  =>  t  end
+  []  inv_state(s:z)           =>  s  end
+  []  st(s/z)                  =>  s  end
+end // of rules for state
+
+rules for list[state]
+  cs : list[state] ; 
+  z  : clockzone ;
+ global
+  [] cst(cs/z) => cs end
+end // of rules for list[state]
+
+rules for list[label]
+  s          : state ;
+  lbl        : label ;
+  CS         : list[state] ;
+  lst_A      : list[Automaton] ;
+  A          : Automaton ;
+  lst_T      : list[transition] ;
+  T          : transition ;
+  Lb1, Lb2   : list[label] ;
+ global
+  [] possible_labels(s.CS,A.lst_A) => possible_labelsBis(s,lst_trans(A)) 
+                                     @ 
+                                      possible_labels(CS,lst_A) end
+  [] possible_labels(nil,nil)      => nil end
+  [] possible_labelsBis(s,T.lst_T) => lbl.possible_labelsBis(s,lst_T)
+                                      if eq_state(tr_before(T),s)
+                                      where lbl:=()tr_label(T)
+                                      end
+  [] possible_labelsBis(s,T.lst_T) => possible_labelsBis(s,lst_T) end
+  [] possible_labelsBis(s,nil)     => nil end
+  
+  [] effective_labels(lbl.Lb1,Lb2) => effective_labels(Lb1,lbl.Lb2)
+                                      if N_actions(lbl,LA) == N_occ(lbl,lbl.Lb1)
+                                      and not occurs(lbl,Lb2)
+                                      end
+  [] effective_labels(lbl.Lb1,Lb2) => effective_labels(Lb1,Lb2) end
+  [] effective_labels(nil,Lb2)     => Lb2 end
+end // of rules for list[label]
+
+rules for lbl_list
+  lbl   : label ;
+  lst_L : list[label] ;
+ global
+  [] convert(lbl.nil)   => lbl                end
+  [] convert(lbl.lst_L) => lbl.convert(lst_L) end
+end // of rules for lbl_list
+
+// Automata Transcription
+FOR EACH A : Automaton SUCH THAT A:=(listExtract) elem(LA):{
+rules for statezone
+  z : clockzone ;
+ global
+  FOR EACH tr       : transition ;
+           bef, aft : state ;
+           label    : label ;
+           cond     : clockzone ;
+           zero     : list[clock]
+  SUCH THAT tr   := (listExtract) elem(lst_trans(A))
+        AND bef  :=()tr_before(tr)
+        AND label:=()tr_label (tr)
+        AND cond :=()tr_cond  (tr)
+        AND zero :=()tr_zero  (tr)
+        AND aft  :=()tr_after (tr) :
+  {
+    []  TransitionOperator.label(bef/z) => aft / lproj(inter(cond,z),zero) end
+  }
+end // of rules for statezone
+
+rules for clockzone
+ global
+  FOR EACH invar : invariant; st : state; cz : clockzone
+  SUCH THAT invar:=(listExtract)elem(lst_inv(A))
+        AND st:=()inv_state(invar)  AND cz:=()inv_zone(invar) :
+  {
+    []  inv(st)  =>  cz  end
+  }
+end // of rules for clockzone
+}// End Of Automata Transcription
+
+rules for bool
+  l   : label ;
+  s   : state ;
+  i   : int ;
+  t   : transition ;
+  lt  : list[transition] ;
+  res        : bool ;
+ global
+  [] action(l,s,i)  => exists(s,l,lst_trans(i-th elem(LA)))  end 
+  [] exists(s,l,nil)  => false  end
+  [] exists(s,l,t.lt) => res
+                        choose try if eq_state(tr_before(t),s) 
+                                   and 
+                                      eq_label(tr_label(t),l)
+                                   where res:=()true
+                               try
+                                   where res:=()exists(s,l,lt)
+                        end  end
+end // of rules for bool
+
+// Transcription Of The Synchronised Product
+FOR EACH N : builtinInt SUCH THAT N:=()valueOf(size_of_Automaton_list(LA)):{
+rules for statezone
+  {s_I : state ;}_I=1...N
+  {ss_J : state ;}_J=1...N
+  Phi, nPhi       : clockzone ;
+  lbl             : label ;
+  sz              : statezone ;
+ global
+{
+  [ExecuteTransition_i] SynTransitionOperator(lbl,{s_j.}_j=1...(i-1) s_i.{s_j.}_j=(i+1)...N nil/Phi) =>
+         SynTransitionOperator(lbl,{s_j.}_j=1...(i-1) ss_i.{s_j.}_j=(i+1)...N nil/nPhi)
+                                      if action(lbl,s_i,i)
+                                      where sz:=()TransitionOperator.lbl(s_i/Phi)
+                                      where ss_i:=()st(sz)
+                                      where nPhi:=()zn(sz)
+                                      end
+  [JumpStep_i] SynTransitionOperator(lbl,sz) => SynTransitionOperator(lbl,sz) end
+}_i=1...N
+  [FinishSynTransition] SynTransitionOperator(lbl,sz) => sz end
+end // of rules for statezone
+} // End Of The Transcription Of The Synchronised Product
+
+rules for statezone
+  cs        : list[state] ;
+  Phi, nPhi : clockzone ;
+  nextsz    : statezone ;
+  lbl       : label ;
+ global
+  [TransPost] cs/Phi => nextsz
+                      where lbl:=(elements)extract(
+                                           convert(
+                                  effective_labels(
+                                   possible_labels(cs,LA)
+                                                   ,
+                                                   nil)))
+                      where nextsz:=(next_sz)SynTransitionOperator(lbl,cs/Phi)
+                      end
+  [TimePost] cs/Phi => cs/inter(time(Phi),nPhi)
+                   where nPhi:=()inter_all(cs) end
+end // of rules for statezone 
+
+rules for int
+  c : int ;
+  x : clock ;
+  FOR EACH N : builtinInt SUCH THAT N:=()valueOf(size_of_Automaton_list(LA)) :{
+  {l_i,}_i=1...N ilst : list[int] ;
+  }
+ global
+  [] r_side(x<c)   => c  end
+  [] r_side(x<=c)  => c  end
+  [] r_side(x>c)   => c  end
+  [] r_side(x>=c)  => c  end
+  
+  [] max_int(c.nil)  => c end
+  [] max_int(c.ilst) => max(c,max_int(ilst)) end
+
+  FOR EACH N : builtinInt SUCH THAT N:=()valueOf(size_of_Automaton_list(LA)) :{
+  [] Max_Bnd  => max_int(ilst)
+               { where l_i:=()append(imk_list(lst_inv(i-th elem(LA))),                              
+                              tmk_list(lst_trans(i-th elem(LA))))
+               }_i=1...N
+                 where ilst:=() {l_i @}_i=1...N nil
+              end
+  }
+  FOR EACH C : int SUCH THAT C:=()Max_Bnd :{
+  [] CMAX => C end }
+end // of rules for int
+
+rules for list[int]
+  s, ss, sc : state ;
+  c, c1, c2 : clause ; 
+  l_inv : list[invariant] ;
+  l_tr: list[transition] ;
+  lc : list[clock] ;
+  lbl : label ;
+ global
+  [] imk_list(s:true.l_inv)       => imk_list(l_inv) end
+  [] imk_list(s:c1^c2^true.l_inv) => append(r_side(c1).r_side(c2).nil,imk_list(l_inv)) end
+  [] imk_list(s:c^true.l_inv)     => r_side(c).imk_list(l_inv) end
+  [] imk_list(nil)                => nil end
+
+  [] tmk_list(ss,lbl:true,lc,sc.l_tr)       => tmk_list(l_tr) end
+  [] tmk_list(ss,lbl:c1^c2^true,lc,sc.l_tr) => append(r_side(c1).r_side(c2).nil ,tmk_list(l_tr)) end
+  [] tmk_list(ss,lbl:c^true,lc,sc.l_tr)     => r_side(c).tmk_list(l_tr) end
+  [] tmk_list(nil)                          => nil end
+end // of rules for list[int]
+
+rules for can_sz
+  cs : list[state] ;
+  cz, e_cz : clockzone ;
+  can_dbm, i_dbm, dbm : matrix[bound] ;
+ global
+  [] can_form(cs/cz) => cs/can_dbm
+                        where i_dbm:=()init_DBM(size(K)+1)
+                        where e_cz:=()elim(cz)
+                        where dbm:=()cons_DBM(bnd(e_cz),i_dbm)
+                        where can_dbm:=()Floyd(dbm,0)
+                        end
+end // of rules for can_sz
+
+rules for traj_elt
+  s : state ;
+  ls : list[state] ;
+ global
+  [] elim_nil(s.nil) => s end
+  [] elim_nil(s.ls)  => s|elim_nil(ls) end
+end
+
+rules for trajectory
+  lsz : list[state] ;
+  Lsz : list[list[state]] ;
+ global
+  [] printable(lsz.nil) => elim_nil(lsz) end
+  [] printable(lsz.Lsz) => printable(Lsz) ---> elim_nil(lsz) end
+end
+
+rules for pair[trajectory,bool]
+  res      : pair[list[list[state]],bool] ;
+  szs, szc : statezone ;
+  Traj     : trajectory ;
+  B        : bool ;
+ global
+  [] go(szs,szc) => [Traj,B]
+                    where res  :=(TransTimeOperatorStar)lst_trans(new(100),szs,szc,nil) 
+                    where Traj :=()printable(first(res))
+                    where B    :=()second(res)
+                    end
+  [] go(szs,szc) => Unreachable_State end
+end
+
+rules for pair[list[list[state]],bool]
+  szs, szc, sz1 : statezone ;
+  can_sz1 : can_sz ;
+  Hsz  : hashSet[can_sz] ;
+  traj : list[list[state]] ;
+  traj1 : pair[list[list[state]],bool] ;
+  v1, v2 : bool ;
+ global
+  [IfReached] lst_trans(Hsz,szs,szc,traj) => traj1 
+                                     where sz1:=(Post)szs
+                                     if cst(sz1) ==  cst(szc) 
+                                     and
+                                     not empty(inter(czn(sz1),czn(szc)))
+                                     where traj1:=()[cst(sz1).traj,REACHED] 
+                                     end
+  [IfNoCycle] lst_trans(Hsz,szs,szc,traj) => traj1 
+                                     where sz1:=(Post)szs
+                                     where can_sz1:=()can_form(sz1)
+                                     where v1:=()Hsz.contains(can_sz1)
+                                     where v2:=()empty(czn(sz1))
+                                     if not v1 and not v2
+                                     where traj1:=(TransTimeOperatorStar)lst_trans(Hsz.add(can_sz1),sz1,szc,cst(sz1).traj)
+                                     end
+
+
+end // of rules for pair[list[list[state]],bool]
+
+strategies for statezone
+ implicit
+ FOR EACH N : builtinInt SUCH THAT N:=()valueOf(size_of_Automaton_list(LA)) :{
+  [] next_sz => {first one(ExecuteTransition_I,JumpStep_I);}_I=1...N  FinishSynTransition end
+ }
+  [] Post => TimePost ; dk(TransPost)  end
+end // of strategies for statezone
+
+strategies for label
+ implicit
+  [] elements => repeat*(dk(elem)) end
+end // of strategies for label
+
+strategies for pair[list[list[state]],bool]
+ implicit
+  [] TransTimeOperatorStar => 
+                        first one(
+                                  dk(IfReached),
+                                  dk(IfNoCycle)
+                                 )
+                       
+  end
+end // of strategies for pair[list[list[state]],bool]
+
+end

@@ -1,0 +1,29 @@
+module addMatrice[X,add]
+
+import matrice[X];
+end
+
+operators
+global
+  @.add(@)	: (matrice[X] matrice[X]) matrice[X];
+local
+  @+@		: (X X) X alias add(@,@):;
+end
+
+rules for matrice[X]
+  i,j    : builtinInt;
+  A,B	 : matrice[X]
+  a,b    : X;
+global
+  [] A.add(B) =>  
+
+
+end
+
+
+end
+				
+
+
+
+

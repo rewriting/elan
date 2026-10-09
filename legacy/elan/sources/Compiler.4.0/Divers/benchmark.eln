@@ -1,0 +1,360 @@
+module benchmark
+
+import global eq[Nat];
+end
+
+sort Bool Nat SNat NatPair Tree;
+end
+
+operators global
+  true                : Bool;
+  false               : Bool;
+//  or ( @ , @ )        : (Bool Bool) Bool;
+//  and ( @ , @ )       : (Bool Bool) Bool;
+//  not ( @ )           : (Bool) Bool;
+
+  z                   : Nat; 
+  s ( @ )             : (Nat) Nat;
+  equal ( @ , @ )     : (Nat Nat) Bool;
+//  less ( @ , @ )      : (Nat Nat) Bool;
+ 
+  plus ( @ , @ )      : (Nat Nat) Nat;
+  mult ( @ , @ )      : (Nat Nat) Nat;
+  exp ( @ , @ )       : (Nat Nat) Nat;
+
+  succ17 ( @ )        : (Nat) Nat;
+  pred17 ( @ )        : (Nat) Nat;
+  plus17 ( @ , @ )    : (Nat Nat) Nat;
+  mult17 ( @ , @ )    : (Nat Nat) Nat;
+  exp17 ( @ , @ )     : (Nat Nat) Nat;
+
+  exz                 : SNat;
+  exs ( @ )           : (SNat) SNat;
+  explus ( @ , @ )    : (SNat SNat) SNat;
+  exmult ( @ , @ )    : (SNat SNat) SNat;
+  exexp ( @ , @ )     : (SNat SNat) SNat;
+
+  leaf(@)             : (Nat) Tree;
+  node(@,@,@,@)       : (Nat Nat Tree Tree) Tree;
+  buildtree(@,@)      : (Nat Nat) Tree;
+  calctree17(@)       : (Nat) Nat;
+  getmax(@)           : (Tree) Nat;
+  getval(@)           : (Tree) Nat;
+
+  eval ( @ )          : (SNat) Nat;
+  eval17 ( @ )        : (SNat) Nat;
+  evalsym17 ( @ )     : (SNat) Nat;
+  evalexp17 ( @ )     : (SNat) Nat;
+
+//  evalspoon(@,@,@)    : (Nat Nat SNat) Nat;
+//  evalmod(@,@)        : (Nat SNat) Nat; 
+
+  bench-evalsym17(@) : (SNat) Bool;
+  bench-evalexp17(@) : (SNat) Bool;
+  bench-evaltree17(@): (SNat) Bool;
+//  bench-evalspn17(@) : (SNat) Bool;
+
+  zero        : SNat;
+  one         : SNat;
+  two         : SNat;
+  three       : SNat;
+  four        : SNat;
+  five        : SNat;
+  six         : SNat;
+  seven       : SNat;
+  eight       : SNat;
+  nine        : SNat;
+  ten         : SNat;
+  eleven      : SNat;
+  twelve      : SNat;
+  thirteen    : SNat;
+  fourteen    : SNat;
+  fifteen     : SNat;
+  sixteen     : SNat;
+  seventeen   : SNat;
+  eighteen    : SNat;
+  nineteen    : SNat;
+  twenty      : SNat;
+  twentyone   : SNat;
+  twentytwo   : SNat;
+  twentythree : SNat;
+  twentyfour  : SNat;
+  twentyfive  : SNat;
+  twentysix   : SNat;
+  twentyseven : SNat;
+  twentyeight : SNat;
+  twentynine  : SNat;
+  thirty      : SNat;
+  thirtyone   : SNat;
+  thirtytwo   : SNat;
+  thirtythree : SNat;
+  thirtyfour  : SNat;
+  thirtyfive  : SNat; 
+/*
+  '0'  : Nat;
+  '1'  : Nat;
+  '2'  : Nat;
+  '3'  : Nat;
+  '4'  : Nat;
+  '5'  : Nat;
+  '6'  : Nat;
+  '7'  : Nat;
+  '8'  : Nat;
+  '9'  : Nat;
+  '10' : Nat;
+  '11' : Nat;
+  '12' : Nat;
+  '13' : Nat;
+  '14' : Nat;
+  '15' : Nat;
+  '16' : Nat;
+  '17' : Nat;
+*/
+  dec ( @ )        : (SNat) SNat;
+  expand ( @ )     : (SNat) SNat;
+  exone            : SNat;
+//  <@,@>            : (Nat Nat) NatPair;
+//  mod(@,@)         : (Nat Nat) Nat;
+//  mod(@,@,@,@)     : (Nat Nat Nat Nat) Nat;
+//  nat2spoon(@,@,@) : (Nat Nat Nat) Nat;
+//  newspoon(@,@,@,@) : (Nat Nat Nat NatPair*) NatPair;
+//  spoonexp(@,@,@,@) : (Nat Nat Nat Nat) Nat;
+
+//  nat2sym ( @ )    : (Nat) SNat;
+
+end
+
+rules for Bool
+  bool : Bool;
+  x, y, x1, y1 : Nat;
+  Xs, Ys, Zs : SNat;
+  
+  global
+/*
+    [] or(true, bool)   => true end
+    [] or(false, bool)  => bool end
+
+    [] and(true, bool)  => bool end
+    [] and(false, bool) => false end
+
+    [] not(false) => true end
+    [] not(true)  => false end
+*/
+    [] equal(x,x) => true end 
+    [] equal(x,y) => false end
+
+//    [] less(z, y) => true end
+//    [] less(s(x), s(y)) => less(x,y) end 
+//    [] less(x, y) => false end 
+
+    [] bench-evalsym17(Xs) => equal(eval17(Zs),evalsym17(Zs))
+       where Zs := ()exexp(two,Xs)
+    end
+
+    [] bench-evalexp17(Xs) => equal(eval17(Zs),evalexp17(Zs))
+       where Zs := ()exexp(two,Xs)
+    end
+
+    [] bench-evaltree17(Xs) => equal(calctree17(y),getval(buildtree(y,z)))
+       where y := ()eval(Xs)
+    end
+
+  end
+
+rules for Nat
+  x, y   : Nat;
+  xs, ys : SNat;
+  Xs, Ys, Zs : SNat;
+
+  global
+    [] plus(x,z) => x end
+    [] plus(x,s(y)) => s(plus(x,y)) end
+
+    [] mult(x,z) => z end
+    [] mult(x,s(y)) => plus(mult(x,y),x) end
+
+    [] exp(x,z) => s(z) end
+    [] exp(x,s(y)) => mult(x,exp(x,y)) end
+
+    [] succ17(s(s(s(s(s(s(s(s(s(s(s(s(s(s(s(s(z))))))))))))))))) => z end
+    [] succ17(x) => s(x) end
+
+    [] pred17(s(x)) => x end
+    [] pred17(z) => s(s(s(s(s(s(s(s(s(s(s(s(s(s(s(s(z)))))))))))))))) end
+
+    [] plus17(x,z) => x end
+    [] plus17(x,s(y)) => succ17(plus17(x,y)) end
+
+    [] mult17(x,z) => z end
+    [] mult17(x,s(y)) => plus17(x,mult17(x,y)) end
+
+    [] exp17(x,z) => succ17(z) end
+    [] exp17(x,s(y)) => mult17(x,exp17(x,y)) end
+
+    [] eval(exz) => z end
+    [] eval(exs(xs)) => s(eval(xs)) end
+    [] eval(explus(xs,ys)) => plus(eval(xs), eval(ys)) end
+    [] eval(exmult(xs,ys)) => mult(eval(xs), eval(ys)) end
+    [] eval(exexp(xs,ys)) => exp(eval(xs), eval(ys)) end
+
+    [] eval17(exz) => z end
+    [] eval17(exs(xs)) => succ17(eval17(xs)) end
+    [] eval17(explus(xs,ys)) => plus17(eval17(xs), eval17(ys)) end
+    [] eval17(exmult(xs,ys)) => mult17(eval17(xs), eval17(ys)) end
+    [] eval17(exexp(xs,ys)) => exp17(eval17(xs), eval(ys)) end
+/*
+    [] 0 => z end
+    [] 1 => s(0) end
+    [] 2 => s(1) end
+    [] 3 => s(2) end
+    [] 4 => s(3) end
+    [] 5 => s(4) end
+    [] 6 => s(5) end
+    [] 7 => s(6) end
+    [] 8 => s(7) end
+    [] 9 => s(8) end
+    [] 10 => s(9) end
+    [] 11 => s(10) end
+    [] 12 => s(11) end
+    [] 13 => s(12) end
+    [] 14 => s(13) end
+    [] 15 => s(14) end
+    [] 16 => s(15) end
+    [] 17 => s(16) end
+*/
+    [] evalsym17(exz) => z end
+    [] evalsym17(exs(Xs)) => succ17(evalsym17(Xs)) end
+    [] evalsym17(explus(Xs,Ys)) => plus17(evalsym17(Xs),evalsym17(Ys)) end
+    [] evalsym17(exmult(Xs,exz)) => z end
+    [] evalsym17(exmult(Xs,exs(Ys))) =>
+                evalsym17(explus(exmult(Xs,Ys),Xs)) end
+    [] evalsym17(exmult(Xs,explus(Ys,Zs))) =>
+                evalsym17(explus(exmult(Xs,Ys),exmult(Xs,Zs))) end
+    [] evalsym17(exmult(Xs,exmult(Ys,Zs))) =>
+                evalsym17(exmult(exmult(Xs,Ys),Zs)) end
+    [] evalsym17(exmult(Xs,exexp(Ys,Zs))) =>
+                evalsym17(exmult(Xs,dec(exexp(Ys,Zs)))) end
+    [] evalsym17(exexp(Xs,exz)) => succ17(z) end
+    [] evalsym17(exexp(Xs,exs(Ys))) =>
+                evalsym17(exmult(exexp(Xs,Ys),Xs)) end
+    [] evalsym17(exexp(Xs,explus(Ys,Zs))) =>
+                evalsym17(exmult(exexp(Xs,Ys),exexp(Xs,Zs))) end
+    [] evalsym17(exexp(Xs,exmult(Ys,Zs))) =>
+                evalsym17(exexp(exexp(Xs,Ys),Zs)) end
+    [] evalsym17(exexp(Xs,exexp(Ys,Zs))) =>
+                evalsym17(exexp(Xs,dec(exexp(Ys,Zs)))) end 
+
+    [] evalexp17(Xs) => eval17(expand(Xs)) end
+    [] eval17(exone) => s(z) end
+
+  end
+
+rules for SNat 
+  x   : Nat;
+  Xs, Ys, Zs : SNat;
+
+  global
+    [] one => exs(exz) end
+    [] two => exs(one) end
+    [] three => exs(two) end
+    [] four => exs(three) end  
+    [] five => exs(four) end  
+    [] six => exs(five) end  
+    [] seven => exs(six) end  
+    [] eight => exs(seven) end  
+    [] nine => exs(eight) end  
+    [] ten => exs(nine) end  
+    [] eleven => exs(ten) end  
+    [] twelve => exs(eleven)  end  
+    [] thirteen => exs(twelve) end  
+    [] fourteen => exs(thirteen) end  
+    [] fifteen => exs(fourteen) end  
+    [] sixteen => exs(fifteen) end  
+    [] seventeen => exs(sixteen) end  
+    [] eighteen => exs(seventeen) end  
+    [] nineteen => exs(eighteen) end  
+    [] twenty => exs(nineteen) end  
+    [] twentyone => exs(twenty) end  
+    [] twentytwo => exs(twentyone) end  
+    [] twentythree => exs(twentytwo) end  
+    [] twentyfour => exs(twentythree) end  
+    [] twentyfive => exs(twentyfour) end  
+    [] twentysix => exs(twentyfive) end  
+    [] twentyseven => exs(twentysix) end  
+    [] twentyeight => exs(twentyseven) end  
+    [] twentynine => exs(twentyeight) end          
+    [] thirty => exs(twentynine) end  
+    [] thirtyone => exs(thirty) end  
+    [] thirtytwo => exs(thirtyone) end  
+    [] thirtythree => exs(thirtytwo) end  
+    [] thirtyfour => exs(thirtythree) end  
+    [] thirtyfive => exs(thirtyfour) end 
+
+//    [] nat2sym(z) => exz end
+//    [] nat2sym(s(x)) => exs(nat2sym(x)) end
+
+    [] expand(exz) => exz end
+    [] expand(exone) => exone end
+    [] expand(exs(Xs)) => explus(exone,expand(Xs)) end
+    [] expand(explus(Xs,Ys)) => explus(expand(Xs),expand(Ys)) end
+    [] expand(exmult(Xs,exz)) => exz end
+    [] expand(exmult(Xs,exone)) => expand(Xs) end
+    [] expand(exmult(Xs,explus(Ys,Zs))) =>
+                expand(explus(exmult(Xs,Ys),exmult(Xs,Zs))) end
+    [] expand(exmult(Xs,Ys)) => expand(exmult(Xs,expand(Ys))) end
+    [] expand(exexp(Xs,exz)) => exone end
+    [] expand(exexp(Xs,exone)) => expand(Xs) end
+    [] expand(exexp(Xs,explus(Ys,Zs))) =>
+                expand(exmult(exexp(Xs,Ys),exexp(Xs,Zs))) end
+    [] expand(exexp(Xs,Ys)) => expand(exexp(Xs, expand(Ys))) end
+
+
+
+  end
+
+rules for Nat 
+  Val, Val2, Val3 : Nat;
+  Max, Max2   : Nat;
+  X, I, J : Nat;
+  Left, Right : Tree;
+
+  global
+
+  [] getval(leaf(Val)) => Val
+  end
+  [] getval(node(Val,Max,Left,Right)) => Val
+  end
+
+  [] getmax(leaf(Val)) => Val
+  end
+  [] getmax(node(Val,Max,Left,Right)) => Max
+  end
+
+  [] calctree17(X) => mult17(exp17(s(s(z)), pred17(X)),pred17(exp17(s(s(z)),X)))
+  end
+end
+
+rules for Tree
+  Val, Val2, Val3 : Nat;
+  Max, Max2   : Nat;
+  X, Y, I, J : Nat;
+  Left, Right : Tree;
+
+  global
+
+
+  [] buildtree(z, Val) => leaf(Val)
+  end
+
+  [] buildtree(s(X), Y) => node(Val, Max, Left, Right)
+	where Left :=() buildtree(X, Y)	
+	where Max2 :=() getmax(Left)
+  	where Right:=() buildtree(X, succ17(Max2))
+	where Val2 :=() getval(Left)
+	where Val3 :=() getval(Right)
+	where Val  :=() plus17(Val2, Val3)
+	where Max  :=() getmax(Right)
+  end
+end
+
+end

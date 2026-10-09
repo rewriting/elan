@@ -1,0 +1,32 @@
+module locb
+
+sort Foo; end
+operators global
+  a50	: Foo;
+  a51	: Foo;
+end
+
+stratop global
+    GG_locb	: <Foo->Foo>	builtin;
+    RR		: <Foo->Foo>	builtin;
+  local
+    LL_locb	: <Foo->Foo>	builtin;
+end
+
+rules for Foo
+x : Foo;
+global
+  [R]	x => a50		end
+local
+  [R]	x => a51		end
+end
+
+strategies for Foo
+implicit
+  [.] GG_locb => dk(R) end
+  [.] RR => dk(R) end
+  [.] LL_locb => dk(R) end
+end
+
+end
+

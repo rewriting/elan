@@ -1,0 +1,54 @@
+module DisjointCSPDefinition[Variables,Type,Values]
+
+import
+global
+	CSPDefinition[Variables,Type,Values]
+	tuple[3,csp,list[csp],list[csp]]
+	list[csp]
+	;
+end
+
+sort
+
+	cspdis;
+
+end
+
+operators
+global
+	CSPDis@			: (set:tuple[csp,list[csp],list[csp]])		cspdis;
+	CreateCSPDis(@)		: (csp)						cspdis;
+	GetCSP(@)		: (cspdis)					csp;
+end
+
+
+rules for cspdis
+
+	P	: csp;
+
+global
+
+[]	CreateCSPDis(P)
+	=>
+	CSPDis[P,nil,nil]
+end
+
+end
+
+
+rules for csp
+
+	P		: csp;
+	luCsp, lsCsp	: list[csp];
+
+global
+
+[]	GetCSP(CSPDis[P,luCsp,lsCsp])
+	=>
+	P
+end
+
+end
+
+
+end

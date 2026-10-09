@@ -1,0 +1,407 @@
+module compbasic2[vars,fss,prec]
+
+/* Basic Completion with Basic Simplification */
+/* version1 of sorting without using too much interclassment */
+
+/* vars : les variables, 
+   fss  : les operateurs,
+   prec : la precedence */
+
+
+import	
+	global  
+		strapply[extequation1]
+		cpbasic2[vars,fss,prec]
+	;
+       
+        local 
+		vars
+		fss
+		prec
+		list[extequation1]
+		pair[list[extequation1],list[extequation1]]
+		eq[list[extequation1]]
+	;
+end
+
+
+operators
+  global
+
+	/* BASIC SIMPLIFICATION EQ - LISTEQ (1) => EQ */
+
+	/* Basic simplification of an equation by a list of equations */
+	/* (in fact PQ) at all positions*/
+
+	/* parameter 1: an equation */
+	/* parameter 2: a list of equations (initially PQ) */
+	/* parameter 3: a list of equations (always PQ) */
+	/* parameter 4: a counter */
+	/* result: an equation */
+
+	basic_simplification_eq_listeq(@,@,@,@): (extequation1 
+		list[extequation1] list[extequation1] counter:int) extequation1;
+
+	/* BASIC SIMPLIFICATION EQ - EQ => EQ */
+
+	/* Basic Simplification of an equation by another */
+	/* equation at all positions */
+
+	/* parameter 1: an equation (of PQ) */
+	/* parameter 2: an equation */
+	/* parameter 3: a counter */
+	/* result : an equation */
+
+	basic_simplification_eq_eq(@,@,@): (extequation1 
+		extequation1 counter:int) extequation1;
+
+	/* BASIC SIMPLIFICATION LISTEQ (PQ) - EQ (2) => UQ,PQ */
+
+	/* Basic Simplification of a list of equations (in fact PQ) by an */
+	/* equation at all positions */
+
+	/* parameter 1: a list of equations (UQ) */
+	/* parameter 2: a list of equations (PQ) */
+	/* parameter 3: an equation */
+	/* parameter 4: a counter */
+	/* result : a pair of lists of equations [UQ,PQ] */
+
+	basic_simplification_listeq_eq(@,@,@,@) : (list[extequation1]
+	list[extequation1] extequation1 counter:int) pair[list[extequation1], 
+	list[extequation1]];
+
+	/* BASIC CRITICAL PAIR EQ - LISTEQ => UQ,PQ (3) */
+
+	/* Calculus of the basic critical pair between an equation and */
+	/* a list of equation (in fact this equation + PQ) at all positions */
+	/* parameter 1: an equation */
+	/* parameter 2: a list of equations */
+	/* parameter 3: a counter */
+	/* result: list[extequation1] = list of (ext)equation(1)s resulting */
+	/* of the calculus of critical pairs */
+
+	basic_critical_pair_eq_listeq(@,@,@)	: 
+	(extequation1 list[extequation1] counter:int) list[extequation1];
+
+	/* COMPLETION */
+
+	/* Completion of the list of extquation1 given as argument (UQ) */
+	/* The result is in PQ */
+	/* parameter 1: a list of equations (UQ) */
+	/* parameter 2: a list of equations (PQ) */
+	/* parameter 3: a counter */
+	/* result: a list of processed equations (PQ) */
+
+	completion(@,@,@): (list[extequation1] list[extequation1] counter:int) 
+	list[extequation1];
+
+	/* INTERMEDIARY FUNCTIONS */
+
+	/* maximal counter of a list of extequation1 */
+	maxcounter(@,@)	: (list[extequation1] int) int;
+	maxcounter1(@,@): (list[extequation1] int) int;
+
+	/* Given a list of extequation1s and a counter, the counters of */
+	/* each element of the list are changed from counter */
+	/* This was useful because the dedstrat stategie is a dk and */
+	/* all the equations have the same counter */
+
+	chgtcounter(@,@) : (list[extequation1] counter:int) list[extequation1];
+
+	/* sort of a list[extequation1] */ 
+	sortinter(@)	: (list[extequation1])	list[extequation1];
+
+	/* interclassment of two sorted list[extequation1] */
+	interclass(@,@)	: (list[extequation1] list[extequation1]) list[extequation1];
+end
+
+
+/* BASIC SIMPLIFICATION EQ - LISTEQ  (1) */
+
+rules for extequation1
+	counter				: int;
+	lhs, rhs 			: term;
+	eqeee	 			: equation;
+	e, ee, eee, eenorm, eefin	: extequation1;
+	l, lorig			: list[extequation1];
+global
+
+	[] basic_simplification_eq_listeq(e, nil, lorig, counter) => e
+	end 
+
+	[] basic_simplification_eq_listeq(e, ee.l, lorig, counter)=> 
+		basic_simplification_eq_listeq(e, l, lorig, counter)
+		where eenorm	:= ()normalize(ee)
+		where eefin	:= ()translate(eenorm,maxvar(e,0))
+		where eee	:= (bsimpstrat)basic_simplify(e,eefin,counter)
+		if eqextequation1(eee,e)
+	end
+
+	[] basic_simplification_eq_listeq(e, ee.l, lorig, counter)=> 
+		eee
+		where eenorm	:= ()normalize(ee)
+		where eefin	:= ()translate(eenorm,maxvar(e,0))
+		where eee	:= (bsimpstrat)basic_simplify(e,eefin,counter)
+		where eqeee	:= ()equation(eee)
+		if eq_term(lhs(eqeee), rhs(eqeee))
+	end
+
+	[] basic_simplification_eq_listeq(e, ee.l, lorig, counter)=> 
+		basic_simplification_eq_listeq(eee,lorig,lorig,counter+1)
+		where eenorm	:= ()normalize(ee)
+		where eefin	:= ()translate(eenorm,maxvar(e,0))
+		where eee	:= (bsimpstrat)basic_simplify(e,eefin,counter)
+	end
+end 
+
+
+/* BASIC SIMPLIFICATION EQ - EQ */
+
+rules for extequation1
+	e, ee		: extequation1;
+	counter		: int;
+global
+
+	[] basic_simplification_eq_eq(e, ee, counter)	=> 
+		basic_simplification_eq_listeq(e,ee.nil,ee.nil,counter)
+	end
+end
+
+
+/* BASIC SIMPLIFICATION LISTEQ - EQ (2) */
+
+rules for pair[list[extequation1],list[extequation1]]
+	counter, newcounter	: int;
+	lhs, rhs		: term;
+	eqeee			: equation;
+	e, ee, eee, eeee	: extequation1;
+	PQ, UQ, PQ1, UQ1	: list[extequation1];
+	p 			: pair[list[extequation1],list[extequation1]];
+global
+
+	[] basic_simplification_listeq_eq(UQ, nil, e, counter)	=> 
+		[UQ,nil]
+	end
+
+	[] basic_simplification_listeq_eq(UQ, ee.PQ, e, counter)	=> 
+		[first(p),ee.second(p)]
+		where eee 	:= ()basic_simplification_eq_eq(ee,e,counter)
+		if eqextequation1(eee,ee)
+		where p		:= 
+			()basic_simplification_listeq_eq(UQ,PQ,e,counter)
+	end
+
+	[] basic_simplification_listeq_eq(UQ, ee.PQ, e, counter)	=> 
+		[first(p),second(p)]
+		where eee 	:= ()basic_simplification_eq_eq(ee,e,counter)
+		where eqeee	:= ()equation(eee)
+		if eq_term(lhs(eqeee),rhs(eqeee))
+		where newcounter := ()counter(eee)
+		where p		:= 
+			()basic_simplification_listeq_eq(UQ,PQ,e,newcounter+1)
+	end
+
+	[] basic_simplification_listeq_eq(UQ, ee.PQ, e, counter)	=> 
+		[append(first(p),eee.nil),second(p)]
+		where eee 	:= ()basic_simplification_eq_eq(ee,e,counter)
+		where newcounter := ()counter(eee)
+		where p		:= 
+			()basic_simplification_listeq_eq(UQ,PQ,e,newcounter+1)
+	end
+end
+
+
+/* BASIC CRITICAL PAIR (3) */
+
+rules for list[extequation1]
+	counter, newcounter				: int;
+	e, ee, eenorm, eefin				: extequation1;
+	l, leqres, leqres0, leqres1, leqres2		: list[extequation1];
+global
+
+	[] basic_critical_pair_eq_listeq(e, nil, counter)	
+		=> nil
+	end
+
+	[] basic_critical_pair_eq_listeq(e, ee.l, counter)	
+		=> 
+		where eenorm	:= ()normalize(ee)
+		where eefin	:= ()translate(eenorm,maxvar(e,0))
+		switch 
+		case eqextequation1(e,ee)
+		/* first round, because of the algorithm */
+		then append(leqres1,leqres2) 
+			where leqres0 	:= ()setof(ded,deduce(e,eefin,counter))
+			where leqres1	:= ()chgtcounter(leqres0,counter)
+			where newcounter:= ()maxcounter(leqres1,counter)
+			where leqres2   := 
+			()basic_critical_pair_eq_listeq(e, l, newcounter)
+		otherwise
+			append(leqres1,leqres2) 
+			where leqres0 	:= ()setof(dedstrat,deduce(e,eefin,counter))
+			where leqres1	:= ()chgtcounter(leqres0,counter)
+			where newcounter:= ()maxcounter(leqres1,counter)
+			where leqres2   := 
+			()basic_critical_pair_eq_listeq(e, l, newcounter)
+		end
+	end
+end
+
+
+/* COMPLETION */
+
+rules for list[extequation1]
+	counter, newcounter1, newcounter2, newcounter3: int;
+	lhs, rhs 			: term;
+	eqeee				: equation;
+	e, ee, esimp			: extequation1;
+	PQ, UQ, UQ0, PQ0, UQ1, UQ2s, PQ2s : list[extequation1];
+	pUQPQ 			: pair[list[extequation1],list[extequation1]];
+global
+
+	[] completion(nil, PQ, counter)		=> PQ
+	end
+
+	[] completion(e.UQ, PQ, counter) 	=> 
+		where esimp 	:= 
+			()basic_simplification_eq_listeq(e, PQ, PQ,counter)
+		where eqeee	:= ()equation(esimp)
+		where lhs 	:= ()lhs(eqeee)	
+		where rhs 	:= ()rhs(eqeee)
+		where newcounter1:= ()maxcounter(esimp.nil,counter)
+		switch 
+		case $lhs == $rhs
+		then completion(UQ,PQ,newcounter1)
+		otherwise
+			completion(UQ2s,PQ2s,newcounter3)
+			where pUQPQ 	:= 
+			()basic_simplification_listeq_eq(UQ,PQ,esimp,newcounter1)
+			where UQ0 	:= ()first(pUQPQ)
+			where PQ0 	:= ()second(pUQPQ)
+			where newcounter2:=()maxcounter(UQ0,newcounter1)
+			where UQ1 	:= 
+			()basic_critical_pair_eq_listeq(esimp,esimp.PQ0,newcounter2)
+			where newcounter3:= ()maxcounter(UQ1,newcounter2)
+			where UQ2s 	:= ()sortinter(append(UQ0,UQ1))
+			where PQ2s 	:= ()sortinter(append(PQ0,esimp.nil))
+		end
+	end
+
+end
+
+
+/* INTERMEDIARY FUNCTIONS */
+
+
+/* chgtcounter */
+
+rules for list[extequation1]
+	num, counter 	: int;
+	eq 		: equation;
+	lp1, lp2 	: list[list[int]];
+	le		: list[extequation1];
+global
+
+	[] chgtcounter(nil,counter)			=> nil
+	end
+
+	[] chgtcounter(eq,num,lp1,lp2.le,counter)	=> 
+		eq,counter,lp1,lp2.chgtcounter(le,counter+1)
+	end
+end
+
+
+/* maxcounter */
+
+
+rules for int
+	ext	: extequation1;
+	lext	: list[extequation1];
+	counter : int;
+global
+	[] maxcounter1(nil,counter)		=> counter
+	end 
+
+	[] maxcounter1(ext.lext,counter)		=> 
+			maxcounter1(lext,counter(ext))
+			if counter(ext) >= counter
+	end
+
+	[] maxcounter1(ext.lext,counter)		=> 
+			maxcounter1(lext,counter)
+	end
+end
+
+
+rules for int
+	ext	: extequation1;
+	lext	: list[extequation1];
+	counter, counter1 : int;
+global
+	[] maxcounter(nil,counter)		=> counter
+	end 
+
+	[] maxcounter(ext.lext,counter)		=> 
+			where counter1 := ()maxcounter1(ext.lext,0)
+			switch 
+			case counter1 >= counter
+			then counter1+1
+			otherwise counter
+			end
+	end
+
+end
+
+
+rules for list[extequation1]
+	lext1, lext2	: list[extequation1];
+	ext1, ext2	: extequation1;
+global
+	[] interclass(nil, lext2)	=> lext2
+	end
+
+	[] interclass(lext1, nil)	=> lext1
+	end
+
+	[] interclass(ext1.nil,ext2.nil)	=> 
+			switch 
+			case size(ext1) <= size(ext2)
+			then ext1.ext2.nil
+			otherwise ext2.ext1.nil
+			end
+	end
+
+	[] interclass(ext1.lext1,ext2.lext2)	=> 
+			switch 
+			case size(ext1) <= size(ext2)
+			then ext1.interclass(lext1,ext2.lext2)
+			otherwise ext2.interclass(ext1.lext1,lext2)
+			end
+	end
+end
+
+
+rules for list[extequation1]
+	e : extequation1;
+	l, l2 : list[extequation1];
+global
+	[] sortinter(nil) => nil
+	end
+
+	[] sortinter(e.nil) => e.nil
+	end
+
+	[] sortinter(e.l) => l2
+		if not eq_list[extequation1](l, nil)
+		where l2 := () interclass(e.nil,sortinter(l))
+	end
+end
+
+end
+
+
+
+
+
+
+

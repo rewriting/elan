@@ -1,0 +1,24 @@
+module lis3[X]
+
+import global	tcstrat[Any,X] tcstrat[X,Any] strat[X] strat[Any] 
+		lis[X];
+end
+operators global
+  lis(@)	: (<X>) <X>;
+end
+
+strategies for X
+	s	: <X>;
+	x	: X;
+defined
+  [lis(s)] [x => (X)x]; lis(s); [(X)x => x]		end
+end
+
+end
+
+
+
+
+
+
+

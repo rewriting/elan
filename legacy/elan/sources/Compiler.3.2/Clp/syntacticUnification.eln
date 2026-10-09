@@ -1,0 +1,168 @@
+module syntacticUnification
+import 	global 	term eqSystem ;
+ 	local  	bool decompose
+		eq[Fsymbol] eq[variable] eq[term] eq[eqSystem]
+		occur[variable,term] occur[variable,eqSystem]
+	;
+end
+
+operators
+
+// no global operators 
+
+    local 
+
+    reverse(@): (eqSystem) eqSystem ;
+
+end
+
+
+stratop
+  global 
+
+    unfoldStrat : <eqSystem>		builtin;
+    
+    unify	: <eqSystem>		builtin;
+
+end
+
+rules for eqSystem
+	P,Q,R:eqSystem;
+	s,t:term;
+	x,y:variable;
+global
+
+
+  [] reverse(P & s=t) => s=t & reverse(P) end
+
+  [] reverse(s=t) => s=t end
+  [] reverse(true)  => true end
+  [] reverse(false)  => false end
+
+  [reverseRule] P => Q 
+                    where Q:= (unfoldStrat) reverse(P) 
+  end
+
+
+  [delete] 	Q & x=y	=> Q & true		
+			if eq_variable(x,y)
+  end
+  [delete] 	Q & (P & x=y)	=> Q & P		
+			if eq_variable(x,y)
+  end
+  [delete]      Q & (P & true)  => Q & P
+  end
+
+  [coalesce] 	true & x=y	=> 
+                 x=y & true
+			if neq_variable(x,y)
+  end
+  [coalesce] 	Q & x=y	=> 
+                 (apply(x->y,Q) & x=y) & true
+			if neq_variable(x,y)
+  end
+  [coalesce] 	true & (P & x=y)	=> 
+                 x=y & apply(x->y,P)
+			if neq_variable(x,y)
+  end
+  [coalesce] 	Q & (P & x=y)	=> 
+                 (apply(x->y,Q) & x=y) & apply(x->y,P)
+			if neq_variable(x,y)
+  end
+  [conflict]	Q & s=t	=> false
+			if not(isvar(s)) and not(isvar(t))
+                           and neq_Fsymbol(head(s),head(t))
+  end
+  [conflict]	Q & (P & s=t)	=> false
+			if not(isvar(s)) and not(isvar(t))
+                           and neq_Fsymbol(head(s),head(t))
+  end
+
+  [conflict]	Q & false	=> false
+  end
+  [conflict]	Q & (P & false)	=> false
+  end
+
+  [occCheck]	Q & x=s	=> false
+			if occurs x in s and not isvar(s)
+  end
+  [occCheck]	Q & (P & x=s)	=> false
+			if occurs x in s and not isvar(s)
+  end
+  [occCheck]	Q & s=x	=> false
+			if occurs x in s and not isvar(s)
+  end
+  [occCheck]	Q & (P & s=x)	=> false
+			if occurs x in s and not isvar(s)
+  end
+
+  [eliminate]	true & s=x	=> x=s & true
+			if not(occurs x in s) 
+  end
+  [eliminate]	Q & s=x	=> (apply(x->s,Q) & x=s) & true
+			if not(occurs x in s) 
+  end
+  [eliminate]	true & (P & s=x)	=> x=s & apply(x->s,P)
+			if not(occurs x in s) 
+  end
+  [eliminate]	Q & (P & s=x)	=> (apply(x->s,Q) & x=s) & apply(x->s,P)
+			if not(occurs x in s) 
+  end
+  [eliminate]	true & x=s	=> x=s & true
+			if not(occurs x in s) 
+  end
+  [eliminate]	Q & x=s	=> (apply(x->s,Q) & x=s) & true
+			if not(occurs x in s) 
+  end
+  [eliminate]	true & (P & x=s)	=> x=s & apply(x->s,P)
+			if not(occurs x in s) 
+  end
+  [eliminate]	Q & (P & x=s)	=> (apply(x->s,Q) & x=s) & apply(x->s,P)
+			if not(occurs x in s) 
+  end
+
+  [decompose] Q & s=t	=> Q & R 
+			if not(isvar(s)) and not(isvar(t))
+                        and eq_Fsymbol(head(s),head(t))
+                        where R:=() decompose s=t and add to true
+  end
+
+  [decompose] Q & (P & s=t)	=> Q & R
+			if not(isvar(s)) and not(isvar(t))
+                        and eq_Fsymbol(head(s),head(t))
+                        where R:=() decompose s=t and add to P 
+  end
+
+
+// initial and final transitions rules
+
+  [trueadd]	P 		=> true & P			end
+ 
+  [trueelim]   P & true        => P                            end
+
+  [truePass]   true            => true                         end
+
+  [falsePass]   false            => false                         end
+
+
+  end
+
+ 
+
+strategies for eqSystem
+implicit
+
+  [.] unfoldStrat => repeat*(dc one(unfold))
+  end
+
+
+  [.] unify => dc one(trueadd);
+  repeat*( dc one(delete, decompose, conflict, coalesce,
+              occCheck, eliminate) );
+  dc one(trueelim,falsePass) ;
+  dc one(reverseRule)
+  end
+
+end
+
+end

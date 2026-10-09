@@ -1,0 +1,59 @@
+// This file is generated automatically: do not edit it directly. 
+module atomP[Fss,Vars,Preds]
+        import  
+        global  termCommons[Fss,Vars]
+                atom[Fss,Vars]
+                ;
+        local   Preds int identifier
+                pair[identifier,int]
+                list[pair[identifier,int]]
+                ;
+        end   
+        operators 
+          global
+
+          FOR EACH SS:pair[identifier,int]; P:identifier;  N:int
+          SUCH THAT SS:=(listExtract) elem(Preds) AND P:=()first(SS) 
+                AND N:=()second(SS) ANDIF N==0 :{
+              P                 : atom;
+              P()               : atom          alias P:;
+          }
+
+          FOR EACH SS:pair[identifier,int]; P:identifier;  N:int
+          SUCH THAT SS:=(listExtract) elem(Preds) AND P:=()first(SS) 
+                AND N:=()second(SS) ANDIF N > 0 :{
+
+              P(@ {,@}~(N-1))    :({term}~N) atom;
+              P({,@}~N) : ({term}~N)atom                alias P(@{,@}~(N-1)):;
+              P({@,}~N) : ({term}~N)atom                alias P(@{,@}~(N-1)):;
+              P(,{@,}~N): ({term}~N)atom                alias P(@{,@}~(N-1)):;
+          }
+        end
+        FOR EACH SS:pair[identifier,int]; P:identifier;  N:int
+        SUCH THAT SS:=(listExtract) elem(Preds) AND P:=()first(SS) 
+                AND N:=()second(SS) ANDIF N > 0 :{
+
+          rules for term
+           t_1,...,t_N : term;
+                  global
+
+           {
+             [] I-th subterm(P(t_1,...,t_N))    => t_I
+             end
+            }_I=1...N
+
+          end
+        }
+
+        FOR EACH SS:pair[identifier,int]; P:identifier;  N:int
+        SUCH THAT SS:=(listExtract) elem(Preds) AND P:=()first(SS) 
+                AND N:=()second(SS) :{
+
+          rules for identifier
+           t_1,...,t_N : term;
+          global
+            [] head(P(t_1,...,t_N)) => P end
+          end
+        }
+end  
+

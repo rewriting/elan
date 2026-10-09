@@ -1,0 +1,14 @@
+LPL ClockZone description
+
+  specification description
+    part Clocks of sort list[identifier]
+        import identifier list[identifier]
+  end
+
+  query
+    of sort clockzone
+    result of sort clockzone
+    import ClockZone[Clocks]
+    start with ()query
+
+end

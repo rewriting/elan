@@ -1,0 +1,18 @@
+module qq
+
+op global
+  a	: Foo;
+  doit(@)	: (Foo) Foo;
+end
+
+rules for Foo
+f, x: Foo;
+bodies
+  [QQ]	doit(x) => f where f:=(id;id)x		end
+end
+
+strategy global ss for Foo
+  dk(QQ)
+end
+
+end

@@ -1,0 +1,74 @@
+/*
+ * Simple compilation command
+ */
+
+elanc -nosplit fib
+gmake -f fib.make
+gmake -f fib.make veryclean
+
+/*
+ * Separate compilation
+ */
+
+elanc -output fib fib
+gmake -f fib.make
+
+modify fib.eln
+
+elanc -output fib fib
+gmake -f fib.make
+
+/*
+ * Deterministic analysis: choicePoint optimisation
+ */
+
+elanc -q -nosplit -choicePointDebug ans p2
+grep CUT ans.core.c | wc -l
+1173
+grep setC ans.core.c | wc -l
+429
+grep fail ans.core.c | wc -l
+667
+[backStatistics]:0 saves,86172 fails,tsize==6460,ctsize==0
+rewrite_step = 417760
+1.820u 0.110s
+
+
+elanc -q -nosplit -choicePointDebug -optimiseChoicePoint ans p2
+grep CUT ans.core.c | wc -l
+81
+grep setC ans.core.c | wc -l
+60
+grep fail ans.core.c | wc -l
+247
+[backStatistics]:0 saves,59381 fails,tsize==4060,ctsize==0
+rewrite_step = 417760
+0.860u 0.150s
+
+p5 (sun)
+[backStatistics]:4792207 saves,844393 fails,tsize==249484,ctsize==4878
+rewrite_step = 3898207
+
+optimiseChoicePoint
+[backStatistics]:739124 saves,528976 fails,tsize==1574,ctsize==78
+rewrite_step = 3898207
+
+minela (sun)
+[backStatistics]:2108697 saves,1175200 fails,tsize==4340,ctsize==93
+rewrite_step = 881974
+
+optimiseChoicePoint
+[backStatistics]:1469907 saves,1175180 fails,tsize==3734,ctsize==33
+rewrite_step = 881974
+ 
+
+
+/*
+ * AC rewriting
+ */
+
+elanc -nosplit bool3
+elanc -nosplit propc
+
+
+

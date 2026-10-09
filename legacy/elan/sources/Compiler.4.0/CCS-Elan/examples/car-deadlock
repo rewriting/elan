@@ -1,0 +1,8 @@
+def Car = (OpenedDoor # UnlockedDoor)\Internal
+def ClosedDoorTest = unlocked.OpenedDoor + locked.ClosedDoor
+def OpenedDoor = close.ClosedDoor + 'opened.OpenedDoor
+def ClosedDoor = open.ClosedDoorTest + 'closed.ClosedDoor
+def UnlockedDoorTest = closed.LockedDoor + opened.'beep.UnlockedDoor
+def UnlockedDoor = key.UnlockedDoorTest + 'unlocked.UnlockedDoor
+def LockedDoor = key.UnlockedDoor + 'locked.LockedDoor
+def Internal = {opened,unlocked,closed,locked}

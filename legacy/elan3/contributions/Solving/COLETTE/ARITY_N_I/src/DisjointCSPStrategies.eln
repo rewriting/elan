@@ -1,0 +1,58 @@
+module DisjointCSPStrategies[Variables,Type,Values]
+
+import
+global
+	DisjointCSPRules[Variables,Type,Values]
+	;
+end
+
+stratop
+global
+	SolveDisjointCSP	: < csp -> csp >		bs;
+	SolveCSPDis		: < cspdis -> cspdis >		bs;
+end
+
+
+strategies for cspdis
+implicit
+
+[] SolveCSPDis =>
+first one (DecomposeCSPDis);
+repeat* (first one (SolveSubCSPDis));
+repeat* (first one (ComposeCSPDis))
+end
+
+end
+
+
+rules for csp
+
+	P, Q	: csp;
+	D1, D2	: cspdis;
+
+global 
+
+[SolveCSPDis]
+	P
+	=>
+	Q
+	where	D1 := ()CreateCSPDis(P)
+	where	D2 := (SolveCSPDis)D1
+	where	Q  := ()GetCSP(D2)
+end
+
+end
+
+
+strategies for csp
+implicit
+
+[] SolveDisjointCSP =>
+first one (SolveCSPDis);
+first one (GetSolutionCSP)
+end
+
+end
+
+
+end

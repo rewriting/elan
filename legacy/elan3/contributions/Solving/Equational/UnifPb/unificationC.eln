@@ -1,0 +1,81 @@
+module unificationC[Vars,Fss]
+
+import  global  termV[Vars] termF[Fss] unifPb ;
+        local   Fss int identifier bool pair[identifier,int]
+		list[pair[identifier,int]]
+                eq[variable] eq[term] eq[Fsymbol]
+		occur[variable,term] occur[variable,unifPb] ;
+end
+
+operators 
+
+  global
+
+  eq(@,@) : (term term) term ;
+
+end
+
+
+
+stratop global
+  unifyC	: <unifPb>		builtin;
+
+end
+
+rules for unifPb
+	P : unifPb;
+	s,t,s1,s2,t1,t2 : term;
+	x,y : variable;
+local
+
+  [delete] 	P /\ x=y	=> P
+			if eq_variable(x,y)
+  end
+  [coalesce] 	P /\ x=y	=> apply(x->y,P) /\ x=y 
+			if occurs x in P
+			and occurs y in P
+			and neq_variable(x,y)
+  end
+  [conflict]	P /\ s=t	=> false
+			if neq_Fsymbol(head(s),head(t))
+			   and not(isvar(s)) and not(isvar(t))
+  end
+  [occ_check]	P /\ x=s	=> false
+			if occurs x in s and not isvar(s)
+  end
+  [occ_check]	P /\ s=x	=> false
+			if occurs x in s and not isvar(s)
+  end
+  [eliminate]	P /\ x=s	=> apply(x->s,P) /\ x=s
+			if not(occurs x in s) 
+			and occurs x in P
+			and not isvar(s)
+  end
+  [eliminate]	P /\ s=x	=> apply(x->s,P) /\ x=s
+			if not(occurs x in s) 
+			and occurs x in P 
+			and not isvar(s)
+  end
+
+  [decomposeC]  P /\ eq(s1,s2)= eq(t1,t2) => P /\ s1=t1 /\ s2=t2  end
+  [decomposeC]  P /\ eq(s1,s2)= eq(t1,t2) => P /\ s1=t2 /\ s2=t1  end
+
+  [trueadd]     P               => true /\ P                    end
+  [trueelim]    true /\ P       => P                            end
+  [identity] 	P       	=> P                            end
+
+end
+
+strategies for unifPb
+implicit
+  [] unifyC =>
+  firstOne(trueadd) ;
+  repeat* (dc(
+      firstOne(delete), dk(decomposeC), firstOne(conflict), firstOne(coalesce), 
+      firstOne(occ_check), firstOne(eliminate))) ;
+  firstOne(trueelim, identity)
+  end
+
+end
+
+end

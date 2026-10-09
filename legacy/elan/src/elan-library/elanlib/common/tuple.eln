@@ -1,0 +1,19 @@
+// This file is generated automatically: do not edit it directly. 
+module tuple[N,T_1,...,T_N]
+        import global int;
+        end
+        sort {T_I }_I=1...N tuple[T_1,...,T_N];
+        end
+        operators global
+          [@ {,@}_I=2...N] : ({T_I}_I=1...N) tuple[T_1,...,T_N];
+          {
+            I-th(@) : (tuple[T_1,...,T_N]) T_I;
+          }_I=1...N
+        end
+        {rules for T_I
+           { x_J : T_J; }_J=1...N
+          global
+            [] I-th([ x_1 {, x_J}_J=2...N ]) => x_I     end
+          end
+        }_I=1...N
+end

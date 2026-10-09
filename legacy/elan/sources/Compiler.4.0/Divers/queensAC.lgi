@@ -1,0 +1,7 @@
+LPL queensAC description 
+
+query 		of sort list[int]
+      result 	of sort list[int]
+      import   queensAC list[int]
+      start with (queens) queens
+end

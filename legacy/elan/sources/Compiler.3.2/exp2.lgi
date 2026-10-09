@@ -1,0 +1,8 @@
+LPL exp2 description
+
+  query    of sort 		exp
+	   result of sort 	exp
+           import  		exp2
+	   start with		() query
+
+end

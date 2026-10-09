@@ -1,0 +1,23 @@
+#! /bin/csh -f
+#        LGI             SPC        INP        OUT
+
+if ($1 =~ *I*) then
+echo "Interpreter"
+itest    Unif2           simplesig  isimple1    isimple1
+itest    Unif2           simplesig  isimple4    isimple4
+if ($1 =~ *L*) then
+itest    Unif2           simplesig  isimple2    isimple2
+itest    Unif2           simplesig  isimple3    isimple3
+endif
+endif
+
+if ($1 =~ *I* && $1 =~ *A*) then
+echo "Aterm-Interpreter"
+itest    Unif2           simplesig  isimple1    isimple1
+itest    Unif2           simplesig  isimple4    isimple4
+if ($1 =~ *L*) then
+itest    Unif2           simplesig  isimple2    isimple2
+itest    Unif2           simplesig  isimple3    isimple3
+endif
+endif
+

@@ -1,0 +1,15 @@
+package
+identification
+         name=gc-patched
+      version=6.1
+     location=http://www.loria.fr/ELAN/Soft
+         info=http://www.hpl.hp.com/personal/Hans_Boehm/gc/
+  description='A garbage collector for C and C++.
+               This version has been patched to conform to the
+	       automake conventions' 
+     keywords= C, C++, Garbage Collector
+
+interface
+
+requires
+

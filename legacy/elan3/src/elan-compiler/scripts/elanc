@@ -1,0 +1,171 @@
+#!/bin/tcsh -f
+
+#  
+#    REM - Reduce ELAN Machine
+#
+#    Copyright (C) 2000-2001  LORIA (CNRS, INPL, INRIA, UHP, U-Nancy 2)
+#			     Nancy, France.
+#
+#    This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, write to the Free Software
+#    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
+#
+#    Pierre-Etienne Moreau	e-mail: Pierre-Etienne.Moreau@loria.fr
+#
+
+
+
+echo 
+
+########################################################
+#                                                      #
+# Modify the following values according to your system #
+#                                                      #
+########################################################
+set ARCH = `uname -m`
+set ELAN = "/local/protheo/pot/ELAN/elan3/mandrake-2.2.18/bin/elan"
+set JAVA = "java"
+
+########################################################
+#                                                      #
+# Do not modify                                        #
+#                                                      #
+########################################################
+set CLASSES    = "/local/protheo/pot/ELAN/elan3/mandrake-2.2.18/classes"
+set REMOPTION  = ""
+set ELANOPTION = "-b "
+set LGIFILE    = ""
+set LGIDIR     = ""
+set SPCFILE    = ""
+set SPCDIR     = ""
+set SPCNAME    = ""
+
+
+set verb
+if($#argv>0) then
+  @ j=1
+  foreach i ($argv)
+#    echo $i
+    switch ($i) 	
+      case -O:
+      case -O2:
+      case -fast:
+      case -aterm:
+      case -atermns:
+      case -nocode:
+      case -nosplit:
+      case -split:
+      case -lib:
+      case -choicePointDebug:
+      case -noOptimiseChoicePoint:
+      case -optimiseChoicePoint:
+      case -verbose:
+      case -debug:
+      case -coq:
+      case -proofterm:
+      case -color:
+      case -noColor:
+      case -withGoto:
+      case -oldVariableAffectation:
+      case -onlyC:
+      case -noC:
+        set REMOPTION = "${REMOPTION} $i"
+        breaksw
+      case -quiet:
+        set REMOPTION = "${REMOPTION} $i"
+	unset verb
+        breaksw
+      case -ba*:
+        set REMOPTION = "${REMOPTION} $i"
+        breaksw
+# option with argument
+      case -strategy:
+      case -output:
+	set remarg
+        set REMOPTION = "${REMOPTION} $i"
+        breaksw
+# option with argument
+      case --trace: 
+      case -t:
+      case --elanlib:
+      case --secondlib:
+      case -l:
+      case --output:
+        set elanarg
+        set ELANOPTION = "${ELANOPTION} $i"
+        breaksw
+      case -*:
+        set ELANOPTION = "${ELANOPTION} $i"
+        breaksw
+      default:
+	if($?remarg) then
+          unset remarg
+          set REMOPTION = "${REMOPTION} $i"
+        else
+  	  if($?elanarg) then
+            unset elanarg
+            set ELANOPTION = "${ELANOPTION} $i"
+          else
+            if($j < $#argv) then
+              set LGIFILE = `basename $i .lgi`
+              set LGIDIR  = `dirname $i`
+            else
+              if(${LGIFILE} != "") then
+                set SPCFILE = `basename $i .spc`
+                set SPCDIR  = `dirname $i`
+	        set SPCNAME = ${SPCDIR}/${SPCFILE}.spc 
+              else
+                set LGIFILE = `basename $i .lgi`
+                set LGIDIR  = `dirname $i`
+              endif
+            endif
+          endif
+        endif
+     endsw
+     @ j++
+  end
+
+  #echo "REMOPTION  = ${REMOPTION}"
+  #echo "ELANOPTION = ${ELANOPTION}"
+  #echo "LGIFILE    = ${LGIFILE}"
+  #echo "SPCFILE    = ${SPCFILE}"
+
+if($?verb) then
+  echo ${ELAN} --cexport ${LGIFILE}.ref ${ELANOPTION} ${LGIDIR}/${LGIFILE}.lgi ${SPCNAME}
+endif
+
+  ${ELAN} --cexport ${LGIFILE}.ref ${ELANOPTION} ${LGIDIR}/${LGIFILE}.lgi ${SPCNAME}
+
+#if($?verb) then
+#  echo ${JAVA} -jar ${CLASSES}/rem.jar ${LGIFILE}.ref ${REMOPTION}
+#endif
+#  ${JAVA} -jar ${CLASSES}/rem.jar ${LGIFILE}.ref ${REMOPTION}
+
+if($?verb) then
+  echo ${JAVA} -DPREFIX=/local/protheo/pot/ELAN/elan3/mandrake-2.2.18 -cp ${CLASSES} rem.REM ${LGIFILE}.ref ${REMOPTION}
+endif
+  ${JAVA} -DPREFIX=/local/protheo/pot/ELAN/elan3/mandrake-2.2.18 -cp ${CLASSES} rem.REM ${LGIFILE}.ref ${REMOPTION}
+
+
+else
+  echo "elanc [[elan options][compiler options]] file[.lgi] [file.[spc]]"
+  ${JAVA} -cp ${CLASSES} rem.REM
+
+#  echo "elanc [[elan options][-nosplit][-nocode][-quiet]] file[.lgi] [file.[spc]]"
+#  echo "  [-nosplit]                  to produce only 2 files"
+#  echo "  [-nocode]                   to erase generated files"
+#  echo "  [-choicePointDebug]         to print choicePoints statistics"
+#  echo "  [-noOptimiseChoicePoint]    to remove optimisation"
+#  echo "  [-quiet]"
+endif
+

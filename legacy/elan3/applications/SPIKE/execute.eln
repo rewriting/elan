@@ -1,0 +1,685 @@
+//--------------------------------------------------------------------------------
+////////  Executing part       ---------------------------------------------------
+//--------------------------------------------------------------------------------
+module execute[Vars,Ars,Sorts,Css,Fss,Axs,Es,Lm,Lss,Equiv,Status]
+
+import  
+	global	
+		definitions[Vars,Ars,Sorts,Css,Fss,Axs,Es,Lm,Lss,Equiv,Status]	
+		prove[Vars,Ars,Sorts,Css,Fss,Axs,Es,Lm,Lss,Equiv,Status]
+		//-------- Aritiess ---------------------------------------------
+		pair[int,int]
+		pair[ident,pair[int,int]]
+		list[pair[ident,pair[int,int]]]
+
+		//-------- General -----------------------------------------
+		Sorts 
+
+
+//--------------------------------------------------------------------------------------
+// Conditions in the rewrite rule - import modules for conditions (eq[type_cond]) ------
+//--------------------------------------------------------------------------------------
+  FOR EACH SSS:pair[list[pair[term,term]],list[pair[term,term]]]; 
+		LC:list[pair[term,term]];  R:list[pair[term,term]]
+  SUCH THAT SSS:=(listExtract) elem(Axs)
+	AND LC:=()first(SSS) 
+	ANDIF neq_list[pair[term,term]](LC,nil) 
+	AND R:=()second(SSS)
+	ANDIF neq_list[pair[term,term]](R,nil):{
+		//---------------------------------for each condition
+  		FOR EACH CC:pair[term,term]; 
+			Lcond:term;  Rcond:term;
+			Tcond:ident
+  		SUCH THAT CC:=(listExtract) elem(LC)
+			AND Lcond:=()first(CC) 
+			AND Rcond:=()second(CC) 
+			AND Tcond:=()head(Lcond) :{
+			//--------- GET type of condition ----- FROM constructors
+  			FOR EACH SS:pair[ident,pair[list[ident],ident]]; 
+				F:ident;  DC:pair[list[ident],ident]; 
+				D:list[ident]; C:ident
+  			SUCH THAT SS:=(listExtract) elem(Css)
+				AND F:=()first(SS) 
+				ANDIF eq_ident(Tcond,F)
+				AND DC:=()second(SS) 
+				AND D:=()first(DC)
+				AND C:=()second(DC) :{
+
+			eq[C]
+   			}
+			//--------- GET type of condition ----- FROM functions
+  			FOR EACH SS:pair[ident,pair[list[ident],ident]]; 
+				F:ident;  DC:pair[list[ident],ident]; 
+				D:list[ident]; C:ident
+  			SUCH THAT SS:=(listExtract) elem(Fss)
+				AND F:=()first(SS) 
+				ANDIF eq_ident(Tcond,F)
+				AND DC:=()second(SS) 
+				AND D:=()first(DC)
+				AND C:=()second(DC) :{
+
+			eq[C]
+   			}
+   		}
+
+   }
+
+;end  // END import
+
+sort
+
+	Rez	// generic sort
+
+	//--------- sorts declared in the SPEC --------------------------------
+	FOR EACH F:ident
+	SUCH THAT F:=(listExtract) elem(Sorts) :{
+
+		F 
+    	}
+;end // END sort
+
+operators
+  global   
+
+  //--- polymorphic operator --------------------------------
+  FOR EACH F:ident
+  SUCH THAT F:=(listExtract) elem(Sorts) :{
+
+		rez(@) : (F)	Rez; 
+  }
+
+  //------------------------------------------------------------------------
+  //--- operators with arity **0** ---------------- FROM constructors ------
+  //------------------------------------------------------------------------
+  FOR EACH SS:pair[ident,pair[list[ident],ident]]; 
+		F:ident;  DC:pair[list[ident],ident]; 
+		D:list[ident]; C:ident
+  SUCH THAT SS:=(listExtract) elem(Css)
+	AND F:=()first(SS) 
+	AND DC:=()second(SS) 
+	AND D:=()first(DC)
+	ANDIF size(D)==0 
+	AND C:=()second(DC):{
+
+	F : 
+
+   	FOR EACH T:ident
+   	SUCH THAT T:=(listExtract) elem(D) :{
+		T
+	}
+
+	C;
+   }  
+  //------------------------------------------------------------------------
+  //--- operators with arity **0** ---------------- FROM functions----------
+  //------------------------------------------------------------------------
+  FOR EACH SS:pair[ident,pair[list[ident],ident]]; 
+		F:ident;  DC:pair[list[ident],ident]; 
+		D:list[ident]; C:ident
+  SUCH THAT SS:=(listExtract) elem(Fss)
+	AND F:=()first(SS) 
+	AND DC:=()second(SS) 
+	AND D:=()first(DC)
+	ANDIF size(D)==0
+	AND C:=()second(DC) :{
+
+	F : 
+
+   	FOR EACH T:ident
+   	SUCH THAT T:=(listExtract) elem(D) :{
+		T
+	}
+
+	C;
+   }
+
+
+  //------------------------------------------------------------------------
+  // operators with arity >= **1** ---------------- FROM constructors ------
+  //------------------------------------------------------------------------
+  FOR EACH SS:pair[ident,pair[list[ident],ident]]; 
+		F:ident;  DC:pair[list[ident],ident]; 
+		D:list[ident]; C:ident; N:int
+  SUCH THAT SS:=(listExtract) elem(Css)
+	AND F:=()first(SS) 
+	AND DC:=()second(SS) 
+	AND D:=()first(DC)
+	AND C:=()second(DC)
+	AND N:=()size(D)
+	ANDIF N > 0 :{
+
+	// check if it is infix operator
+  	FOR EACH FA:pair[ident,pair[int,int]]; 
+		Fh:ident;  Fa:pair[int,int]; 
+		AL:int; AR:int
+  	SUCH THAT FA:=(listExtract) elem(Ars)
+		AND Fh:=()first(FA) 
+		AND Fa:=()second(FA) 
+		AND AL:=()first(Fa) 
+		ANDIF eq_int(AL,0)
+		AND AR:=()second(Fa)
+		ANDIF eq_ident(Fh,F) :{
+	
+	F(@ {,@}~(N-1)) : (
+
+
+   	FOR EACH T:ident
+   	SUCH THAT T:=(listExtract) elem(D) :{
+		T
+	}
+
+	)C;
+
+   	}
+   }
+
+  //------------------------------------------------------------------------
+  // operators with arity >= **1** ---------------- FROM functions ---------
+  //------------------------------------------------------------------------
+  FOR EACH SS:pair[ident,pair[list[ident],ident]]; 
+		F:ident;  DC:pair[list[ident],ident]; 
+		D:list[ident]; C:ident; N:int
+  SUCH THAT SS:=(listExtract) elem(Fss)
+	AND F:=()first(SS) 
+	AND DC:=()second(SS) 
+	AND D:=()first(DC)
+	AND C:=()second(DC)
+	AND N:=()size(D)
+	ANDIF N > 0 :{
+
+	// check if it is infix operator
+  	FOR EACH FA:pair[ident,pair[int,int]]; 
+		Fh:ident;  Fa:pair[int,int]; 
+		AL:int; AR:int
+  	SUCH THAT FA:=(listExtract) elem(Ars)
+		AND Fh:=()first(FA)
+		ANDIF eq_ident(Fh,F)  
+		AND Fa:=()second(FA) 
+		AND AL:=()first(Fa)
+		ANDIF eq_int(AL,0)
+		AND AR:=()second(Fa) :{
+	
+	F(@ {,@}~(N-1)) : (
+
+   	FOR EACH T:ident
+   	SUCH THAT T:=(listExtract) elem(D) :{
+		T
+	}
+
+	)C;
+   	}
+
+   }
+
+  //------------------------------------------------------------------------
+  ////// operators with arity >= **1** ---------------- FROM constructors ------
+  //------------------------------------------------------------------------
+  FOR EACH SS:pair[ident,pair[list[ident],ident]]; 
+		F:ident;  DC:pair[list[ident],ident]; 
+		D:list[ident]; C:ident; N:int
+  SUCH THAT SS:=(listExtract) elem(Css)
+	AND F:=()first(SS) 
+	AND DC:=()second(SS) 
+	AND D:=()first(DC)
+	AND C:=()second(DC)
+	AND N:=()size(D)
+	ANDIF N > 0 :{
+
+	// check if it is infix operator
+  	FOR EACH FA:pair[ident,pair[int,int]]; 
+		Fh:ident;  Fa:pair[int,int]; 
+		AL:int; AR:int
+  	SUCH THAT FA:=(listExtract) elem(Ars)
+		AND Fh:=()first(FA) 
+		ANDIF eq_ident(Fh,F) 
+		AND Fa:=()second(FA) 
+		AND AL:=()first(Fa)
+		ANDIF neq_int(AL,0)
+		AND AR:=()second(Fa) :{
+	
+	{@ }~AL F {@ }~AR : (
+
+   	FOR EACH T:ident
+   	SUCH THAT T:=(listExtract) elem(D) :{
+		T
+	}
+
+	)C;
+
+	({@ }~AL F {@ }~AR) : (
+
+   	FOR EACH T:ident
+   	SUCH THAT T:=(listExtract) elem(D) :{
+		T
+	}
+
+	)C alias {@ }~AL F {@ }~AR:;
+   
+   	}
+
+   }
+
+  //------------------------------------------------------------------------
+  //// operators with arity >= **1** ---------------- FROM functions ---------
+  //------------------------------------------------------------------------
+  FOR EACH SS:pair[ident,pair[list[ident],ident]]; 
+		F:ident;  DC:pair[list[ident],ident]; 
+		D:list[ident]; C:ident; N:int
+  SUCH THAT SS:=(listExtract) elem(Fss)
+	AND F:=()first(SS) 
+	AND DC:=()second(SS) 
+	AND D:=()first(DC)
+	AND C:=()second(DC)
+	AND N:=()size(D)
+	ANDIF N > 0 :{
+
+	// check if it is infix operator
+  	FOR EACH FA:pair[ident,pair[int,int]]; 
+		Fh:ident;  Fa:pair[int,int]; 
+		AL:int; AR:int
+  	SUCH THAT FA:=(listExtract) elem(Ars)
+		AND Fh:=()first(FA) 
+		ANDIF eq_ident(Fh,F) 
+		AND Fa:=()second(FA) 
+		AND AL:=()first(Fa)
+		ANDIF neq_int(AL,0)
+		AND AR:=()second(Fa) :{
+	
+	{@ }~AL F {@ }~AR : (
+
+   	FOR EACH T:ident
+   	SUCH THAT T:=(listExtract) elem(D) :{
+		T
+	}
+
+	)C;
+
+	({@ }~AL F {@ }~AR) : (
+
+   	FOR EACH T:ident
+   	SUCH THAT T:=(listExtract) elem(D) :{
+		T
+	}
+
+	)C alias {@ }~AL F {@ }~AR:;
+   
+   	}
+
+   }
+
+
+end 	//END operators
+
+
+//-------------------- Computational part -------------------------------------
+//--------------------------------------------------------------------------------------
+//----- One rule for each of the declared sorts ----------------------------------------
+//----- This way we do not depend on the type of the query -----------------------------
+//--------------------------------------------------------------------------------------
+FOR EACH F:ident
+SUCH THAT F:=(listExtract) elem(Sorts) :{
+
+rules for Rez  
+		P : F; 
+global
+	[mainRule_F]	rez(P) => 	rez(P)		end
+end
+    
+}
+
+//--------------------------------------------------------------------------------------
+//---- Generate the rules from the SPEC ------------------------------------------------
+//--------------------------------------------------------------------------------------
+// No conditions in the rewrite rule ---------------------------------------------------
+//--------------------------------------------------------------------------------------
+  FOR EACH SSS:pair[list[pair[term,term]],list[pair[term,term]]]; 
+		LC:list[pair[term,term]];  Rr:list[pair[term,term]]; 
+		R:pair[term,term];
+		LHS:term; RHS:term; T:ident;
+		LV:list[pair[variable,pair[ident,int]]]
+  SUCH THAT SSS:=(listExtract) elem(Axs)
+	AND LC:=()first(SSS) 
+	ANDIF eq_list[pair[term,term]](LC,nil)
+	AND Rr:=()second(SSS)
+	ANDIF neq_list[pair[term,term]](Rr,nil)
+	AND R:=()1-th elem(Rr)
+	AND LHS :=()first(R)
+	AND RHS :=()second(R)
+	AND T := ()head(LHS)
+	AND LV := ()varTerm(LHS) :{
+
+
+	// search the declaration for the head of LHS -> type of rule (CONSTRUCTORS)
+  	FOR EACH SS:pair[ident,pair[list[ident],ident]]; 
+		F:ident;  DC:pair[list[ident],ident]; 
+		D:list[ident]; C:ident
+  	SUCH THAT SS:=(listExtract) elem(Css)
+		AND F:=()first(SS)
+		ANDIF eq_ident(T,F) 
+		AND DC:=()second(SS) 
+		AND D:=()first(DC)
+		AND C:=()second(DC) :{
+
+	rules for C
+   	}
+	
+	// search the declaration for the head of LHS -> type of rule (FUNCTIONS)
+  	FOR EACH SS:pair[ident,pair[list[ident],ident]]; 
+		F:ident;  DC:pair[list[ident],ident]; 
+		D:list[ident]; C:ident
+  	SUCH THAT SS:=(listExtract) elem(Fss)
+		AND F:=()first(SS) 
+		ANDIF eq_ident(T,F)
+		AND DC:=()second(SS) 
+		AND D:=()first(DC)
+		AND C:=()second(DC) :{
+
+	rules for C 
+   	}
+	
+	// declaration of variables (according to the vars from the LHS)
+	// we do not care if there are errors (other vars in the RHS)
+  	FOR EACH S:pair[variable,pair[ident,int]]; 
+		V:variable;  PIDPO:pair[ident,int]; 
+		ID:ident; PO:int
+  	SUCH THAT S:=(listExtract) elem(LV)
+		AND V:=()first(S) 
+		AND PIDPO:=()second(S) 
+		AND ID:=()first(PIDPO)
+		AND PO:=()second(PIDPO) :{
+	
+		// search the proper type for the current variable(CONSTRUCTORS)
+  		FOR EACH SSs:pair[ident,pair[list[ident],ident]]; 
+			F:ident;  DC:pair[list[ident],ident]; 
+			D:list[ident]; C:ident;
+			Tv:ident
+  		SUCH THAT SSs:=(listExtract) elem(Css)
+			AND F:=()first(SSs) 
+			ANDIF eq_ident(ID,F)
+			AND DC:=()second(SSs) 
+			AND D:=()first(DC)
+			AND C:=()second(DC)
+			AND Tv:=()PO-th elem(D) :{
+		
+		V:Tv;
+   	
+   		}
+		// search the proper type for the current variable(FUNCTIONS)
+  		FOR EACH SSf:pair[ident,pair[list[ident],ident]]; 
+			F:ident;  DC:pair[list[ident],ident]; 
+			D:list[ident]; C:ident;
+			Tv:ident
+  		SUCH THAT SSf:=(listExtract) elem(Fss)
+			AND F:=()first(SSf) 
+			ANDIF eq_ident(ID,F)
+			AND DC:=()second(SSf) 
+			AND D:=()first(DC)
+			AND C:=()second(DC)
+			AND Tv:=()PO-th elem(D) :{
+		
+		V:Tv;
+   	
+   		}
+	}
+	global
+		[]  LHS => RHS  end
+	end	
+
+   }
+
+//--------------------------------------------------------------------------------------
+// Conditions in the rewrite rule ------------------------------------------------------
+//--------------------------------------------------------------------------------------
+  FOR EACH SSS:pair[list[pair[term,term]],list[pair[term,term]]]; 
+		LC:list[pair[term,term]];   Rr:list[pair[term,term]]; 
+	 	R:pair[term,term];
+		LHS:term; RHS:term; T:ident;
+		LV:list[pair[variable,pair[ident,int]]]
+  SUCH THAT SSS:=(listExtract) elem(Axs)
+	AND LC:=()first(SSS) 
+	ANDIF neq_list[pair[term,term]](LC,nil)
+	AND Rr:=()second(SSS)
+	ANDIF neq_list[pair[term,term]](Rr,nil)
+	AND R:=()1-th elem(Rr)
+	AND LHS :=()first(R)
+	AND RHS :=()second(R)
+	AND T := ()head(LHS)
+	AND LV := ()varTerm(LHS):{
+
+	// search the declaration for the head of LHS -> type of rule(CONSTRUCTORS)
+  	FOR EACH SS:pair[ident,pair[list[ident],ident]]; 
+		F:ident;  DC:pair[list[ident],ident]; 
+		D:list[ident]; C:ident
+  	SUCH THAT SS:=(listExtract) elem(Css)
+		AND F:=()first(SS) 
+		ANDIF eq_ident(T,F)
+		AND DC:=()second(SS) 
+		AND D:=()first(DC)
+		AND C:=()second(DC) :{
+
+	rules for C
+   	}
+	
+	// search the declaration for the head of LHS -> type of rule(FUNCTIONS)
+  	FOR EACH SS:pair[ident,pair[list[ident],ident]]; 
+		F:ident;  DC:pair[list[ident],ident]; 
+		D:list[ident]; C:ident
+  	SUCH THAT SS:=(listExtract) elem(Fss)
+		AND F:=()first(SS) 
+		ANDIF eq_ident(T,F)
+		AND DC:=()second(SS) 
+		AND D:=()first(DC)
+		AND C:=()second(DC) :{
+
+	rules for C
+   	}
+	
+	// declaration of variables
+  	FOR EACH S:pair[variable,pair[ident,int]]; 
+		V:variable;  PIDPO:pair[ident,int]; 
+		ID:ident; PO:int
+  	SUCH THAT S:=(listExtract) elem(LV)
+		AND V:=()first(S) 
+		AND PIDPO:=()second(S) 
+		AND ID:=()first(PIDPO)
+		AND PO:=()second(PIDPO) :{
+	
+		// search the proper type for the current variable(CONSTRUCTORS)
+  		FOR EACH SS:pair[ident,pair[list[ident],ident]]; 
+			F:ident;  DC:pair[list[ident],ident]; 
+			D:list[ident]; C:ident;
+			Tv:ident
+  		SUCH THAT SS:=(listExtract) elem(Css)
+			AND F:=()first(SS) 
+			ANDIF eq_ident(ID,F)
+			AND DC:=()second(SS) 
+			AND D:=()first(DC)
+			AND C:=()second(DC)
+			AND Tv:=()PO-th elem(D) :{
+		
+		V:Tv;
+   		}
+		// search the proper type for the current variable(FUNCTIONS)
+  		FOR EACH SS:pair[ident,pair[list[ident],ident]]; 
+			F:ident;  DC:pair[list[ident],ident]; 
+			D:list[ident]; C:ident;
+			Tv:ident
+  		SUCH THAT SS:=(listExtract) elem(Fss)
+			AND F:=()first(SS) 
+			ANDIF eq_ident(ID,F)
+			AND DC:=()second(SS) 
+			AND D:=()first(DC)
+			AND C:=()second(DC)
+			AND Tv:=()PO-th elem(D) :{
+		
+		V:Tv;
+   	
+   		}
+   	}
+
+	global
+		[]  LHS => RHS  
+
+		// the conditions -> an IF for each one 
+  		FOR EACH CC:pair[term,term]; 
+			Lcond:term;  Rcond:term;
+			Tcond:ident
+  		SUCH THAT CC:=(listExtract) elem(LC)
+			AND Lcond:=()first(CC) 
+			AND Rcond:=()second(CC) 
+			AND Tcond:=()head(Lcond) :{
+		
+			// Lcond == Rcond
+			// But safer like below
+
+			// type of condition(CONSTRUCTORS)
+  			FOR EACH SS:pair[ident,pair[list[ident],ident]]; 
+				F:ident;  DC:pair[list[ident],ident]; 
+				D:list[ident]; Cc:ident
+  			SUCH THAT SS:=(listExtract) elem(Css)
+				AND F:=()first(SS) 
+				ANDIF eq_ident(Tcond,F)
+				AND DC:=()second(SS) 
+				AND D:=()first(DC)
+				AND Cc:=()second(DC) :{
+
+			if eq_Cc(Lcond,Rcond)
+   			}
+			// type of condition(FUNCTIONS)
+  			FOR EACH SS:pair[ident,pair[list[ident],ident]]; 
+				F:ident;  DC:pair[list[ident],ident]; 
+				D:list[ident]; Cc:ident
+  			SUCH THAT SS:=(listExtract) elem(Fss)
+				AND F:=()first(SS) 
+				ANDIF eq_ident(Tcond,F)
+				AND DC:=()second(SS) 
+				AND D:=()first(DC)
+				AND Cc:=()second(DC) :{
+
+			if eq_Cc(Lcond,Rcond)
+   			}
+   
+   		}
+
+		end
+	end	
+
+   }
+
+/***************************************************************************************
+//--------------------------------------------------------------------------------------
+// No rewrite rule - only conditions (for the extensiion to the prover)
+//--------------------------------------------------------------------------------------
+  FOR EACH SSS:pair[list[pair[term,term]],list[pair[term,term]]]; 
+		LC:list[pair[term,term]];   Rr:list[pair[term,term]]; 
+		R:pair[term,term];
+		LHS:term; RHS:term; T:ident;
+		LV:list[pair[variable,pair[ident,int]]]
+  SUCH THAT SSS:=(listExtract) elem(Axs)
+	AND LC:=()first(SSS)
+	AND Rr:=()second(SSS)
+	ANDIF eq_list[pair[term,term]](Rr,nil)
+	AND R:=()1-th elem(Rr)
+	AND LHS :=()first(R)
+	AND RHS :=()second(R)
+	AND T := ()head(LHS)
+	AND LV := ()varTerm(LHS)  :{
+   }
+//--------------------------------------------------------------------------------------
+***************************************************************************************/
+
+
+//--------------------------------------------------------------------------------------
+// Rules for subsume
+//--------------------------------------------------------------------------------------
+rules for clause
+	
+// declaration of variables 
+FOR EACH S:ident
+SUCH THAT S:=(listExtract) elem(Vars) :{
+	
+//	S:term;	
+}
+	Np, Pp : equationS;
+global
+
+  FOR EACH SSS:pair[list[pair[term,term]],list[pair[term,term]]]; 
+		LC:list[pair[term,term]];   Rr:list[pair[term,term]]
+  SUCH THAT SSS:=(listExtract) elem(Axs)
+	AND LC:=()first(SSS) 
+	AND Rr:=()second(SSS) :{
+
+		[nla]  [
+
+ 
+  		FOR EACH CC:pair[term,term]; 
+			Lcond:term;  Rcond:term
+  		SUCH THAT CC:=(listExtract) elem(LC)
+			AND Lcond:=()first(CC) 
+			AND Rcond:=()second(CC) :{
+		
+			//Lcond = Rcond 
+			EmptyT :
+   			}
+  		FOR EACH S:pair[term,term]
+  		SUCH THAT S:=(listExtract) elem(LC):{
+		
+			EmptyT :
+   			}
+   		Np, 
+
+  		FOR EACH CC:pair[term,term]; 
+			Lcond:term;  Rcond:term
+  		SUCH THAT CC:=(listExtract) elem(Rr)
+			AND Lcond:=()first(CC) 
+			AND Rcond:=()second(CC) :{
+		
+			//Lcond = Rcond:
+			EmptyT :
+   			}
+	
+   		Pp] => EmptyC
+
+ 		end
+	}
+
+/*****
+  FOR EACH SSS:pair[list[pair[term,term]],list[pair[term,term]]]; 
+		LC:list[pair[term,term]];   Rr:list[pair[term,term]]
+  SUCH THAT SSS:=(listExtract) elem(Lm)
+	AND LC:=()first(SSS) 
+	AND Rr:=()second(SSS) :{
+
+		[nla]  [
+
+  		FOR EACH CC:pair[term,term]; 
+			Lcond:term;  Rcond:term
+  		SUCH THAT CC:=(listExtract) elem(LC)
+			AND Lcond:=()first(CC) 
+			AND Rcond:=()second(CC) :{
+		
+			Lcond = Rcond:
+   			}
+
+   		Np,
+
+  		FOR EACH CC:pair[term,term]; 
+			Lcond:term;  Rcond:term
+  		SUCH THAT CC:=(listExtract) elem(Rr)
+			AND Lcond:=()first(CC) 
+			AND Rcond:=()second(CC) :{
+		
+			Lcond = Rcond:
+   			}
+		
+   		Pp] => EmptyC
+
+		end
+
+	}
+*****/
+end	
+
+//--------------------------------------------------------------------------------------
+
+end

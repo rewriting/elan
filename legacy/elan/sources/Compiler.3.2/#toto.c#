@@ -1,0 +1,7240 @@
+# 1 "RuntimeSupport/term.c"
+# 1 "RuntimeSupport/term.h" 1
+
+
+# 1 "/usr/include/stdio.h" 1 3
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+# 1 "/usr/include/features.h" 1 3
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+ 
+
+
+
+ 
+
+
+
+
+
+
+
+ 
+# 138 "/usr/include/features.h" 3
+
+
+ 
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 196 "/usr/include/features.h" 3
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+ 
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+ 
+
+# 1 "/usr/include/sys/cdefs.h" 1 3
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+ 
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+# 71 "/usr/include/sys/cdefs.h" 3
+
+
+ 
+
+
+
+
+
+
+
+ 
+
+
+
+# 103 "/usr/include/sys/cdefs.h" 3
+
+
+
+ 
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+# 250 "/usr/include/features.h" 2 3
+
+
+ 
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+ 
+
+ 
+
+
+
+
+
+
+
+
+# 1 "/usr/include/gnu/stubs.h" 1 3
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 278 "/usr/include/features.h" 2 3
+
+
+
+
+# 27 "/usr/include/stdio.h" 2 3
+
+
+ 
+
+
+
+# 1 "/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/stddef.h" 1 3
+
+
+
+
+
+
+ 
+
+
+# 19 "/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/stddef.h" 3
+
+
+
+ 
+
+
+ 
+
+
+
+
+
+ 
+
+
+# 61 "/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/stddef.h" 3
+
+
+ 
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+ 
+
+ 
+
+# 131 "/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/stddef.h" 3
+
+
+ 
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+typedef unsigned int size_t;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+ 
+
+# 271 "/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/stddef.h" 3
+
+
+# 283 "/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/stddef.h" 3
+
+
+ 
+
+ 
+
+# 317 "/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/stddef.h" 3
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 33 "/usr/include/stdio.h" 2 3
+
+
+
+
+
+# 1 "/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/stdarg.h" 1 3
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+typedef void *__gnuc_va_list;
+
+
+
+ 
+
+# 116 "/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/stdarg.h" 3
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 202 "/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/stdarg.h" 3
+
+
+
+
+# 38 "/usr/include/stdio.h" 2 3
+
+
+# 1 "/usr/include/bits/types.h" 1 3
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+# 1 "/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/stddef.h" 1 3
+
+
+
+
+
+
+ 
+
+
+# 19 "/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/stddef.h" 3
+
+
+
+ 
+
+
+ 
+
+
+
+
+
+ 
+
+
+# 61 "/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/stddef.h" 3
+
+
+ 
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+ 
+
+ 
+
+# 131 "/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/stddef.h" 3
+
+
+ 
+
+ 
+
+
+# 188 "/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/stddef.h" 3
+
+
+
+
+
+ 
+
+
+
+
+ 
+
+# 271 "/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/stddef.h" 3
+
+
+# 283 "/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/stddef.h" 3
+
+
+ 
+
+ 
+
+# 317 "/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/stddef.h" 3
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 29 "/usr/include/bits/types.h" 2 3
+
+
+ 
+typedef unsigned char __u_char;
+typedef unsigned short __u_short;
+typedef unsigned int __u_int;
+typedef unsigned long __u_long;
+
+__extension__ typedef unsigned long long int __u_quad_t;
+__extension__ typedef long long int __quad_t;
+# 48 "/usr/include/bits/types.h" 3
+
+typedef signed char __int8_t;
+typedef unsigned char __uint8_t;
+typedef signed short int __int16_t;
+typedef unsigned short int __uint16_t;
+typedef signed int __int32_t;
+typedef unsigned int __uint32_t;
+
+__extension__ typedef signed long long int __int64_t;
+__extension__ typedef unsigned long long int __uint64_t;
+
+typedef __quad_t *__qaddr_t;
+
+typedef __u_quad_t __dev_t;		 
+typedef __u_int __uid_t;		 
+typedef __u_int __gid_t;		 
+typedef __u_long __ino_t;		 
+typedef __u_int __mode_t;		 
+typedef __u_int __nlink_t; 		 
+typedef long int __off_t;		 
+typedef __quad_t __loff_t;		 
+typedef int __pid_t;			 
+typedef int __ssize_t;			 
+typedef long int __rlim_t;		 
+typedef __quad_t __rlim64_t;		 
+typedef __u_int __id_t;			 
+
+typedef struct
+  {
+    int __val[2];
+  } __fsid_t;				 
+
+ 
+typedef int __daddr_t;			 
+typedef char *__caddr_t;
+typedef long int __time_t;
+typedef long int __swblk_t;		 
+
+typedef long int __clock_t;
+
+ 
+typedef unsigned long int __fd_mask;
+
+ 
+
+
+ 
+
+
+
+
+ 
+typedef struct
+  {
+     
+
+
+
+
+
+    __fd_mask __fds_bits[1024  / (8 * sizeof (__fd_mask)) ];
+
+
+  } __fd_set;
+
+
+typedef int __key_t;
+
+ 
+typedef unsigned short int __ipc_pid_t;
+
+
+ 
+
+ 
+typedef long int __blkcnt_t;
+typedef __quad_t __blkcnt64_t;
+
+ 
+typedef __u_long __fsblkcnt_t;
+typedef __u_quad_t __fsblkcnt64_t;
+
+ 
+typedef __u_long __fsfilcnt_t;
+typedef __u_quad_t __fsfilcnt64_t;
+
+ 
+typedef __u_long __ino64_t;
+
+ 
+typedef __loff_t __off64_t;
+
+ 
+typedef long int __t_scalar_t;
+typedef unsigned long int __t_uscalar_t;
+
+ 
+typedef int __intptr_t;
+
+
+ 
+
+
+
+
+
+# 40 "/usr/include/stdio.h" 2 3
+
+
+
+
+
+
+
+ 
+typedef struct _IO_FILE FILE;
+
+
+
+
+
+
+
+
+# 1 "/usr/include/libio.h" 1 3
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 1 "/usr/include/_G_config.h" 1 3
+ 
+
+
+
+
+
+ 
+
+
+
+
+
+
+# 1 "/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/stddef.h" 1 3
+
+
+
+
+
+
+ 
+
+
+# 19 "/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/stddef.h" 3
+
+
+
+ 
+
+
+ 
+
+
+
+
+
+ 
+
+
+# 61 "/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/stddef.h" 3
+
+
+ 
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+ 
+
+ 
+
+# 131 "/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/stddef.h" 3
+
+
+ 
+
+ 
+
+
+# 188 "/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/stddef.h" 3
+
+
+
+
+
+ 
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+typedef long int wchar_t;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+typedef unsigned int  wint_t;
+
+
+
+
+ 
+
+ 
+
+# 317 "/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/stddef.h" 3
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 14 "/usr/include/_G_config.h" 2 3
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+typedef int _G_int16_t __attribute__ ((__mode__ (__HI__)));
+typedef int _G_int32_t __attribute__ ((__mode__ (__SI__)));
+typedef unsigned int _G_uint16_t __attribute__ ((__mode__ (__HI__)));
+typedef unsigned int _G_uint32_t __attribute__ ((__mode__ (__SI__)));
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 30 "/usr/include/libio.h" 2 3
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+# 1 "/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/stdarg.h" 1 3
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+ 
+
+# 116 "/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/stdarg.h" 3
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 202 "/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/stdarg.h" 3
+
+
+
+
+# 48 "/usr/include/libio.h" 2 3
+
+
+
+
+
+
+
+# 67 "/usr/include/libio.h" 3
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 98 "/usr/include/libio.h" 3
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+struct _IO_jump_t;  struct _IO_FILE;
+
+ 
+
+
+
+
+
+
+
+typedef void _IO_lock_t;
+
+
+
+ 
+
+struct _IO_marker {
+  struct _IO_marker *_next;
+  struct _IO_FILE *_sbuf;
+   
+
+   
+  int _pos;
+# 186 "/usr/include/libio.h" 3
+
+};
+
+struct _IO_FILE {
+  int _flags;		 
+
+
+   
+   
+  char* _IO_read_ptr;	 
+  char* _IO_read_end;	 
+  char* _IO_read_base;	 
+  char* _IO_write_base;	 
+  char* _IO_write_ptr;	 
+  char* _IO_write_end;	 
+  char* _IO_buf_base;	 
+  char* _IO_buf_end;	 
+   
+  char *_IO_save_base;  
+  char *_IO_backup_base;   
+  char *_IO_save_end;  
+
+  struct _IO_marker *_markers;
+
+  struct _IO_FILE *_chain;
+
+  int _fileno;
+  int _blksize;
+  __off_t   _old_offset;  
+
+
+   
+  unsigned short _cur_column;
+  signed char _vtable_offset;
+  char _shortbuf[1];
+
+   
+
+  _IO_lock_t *_lock;
+
+
+
+
+
+
+
+
+  __off64_t   _offset;
+   
+  int _unused2[16];
+
+};
+
+
+typedef struct _IO_FILE _IO_FILE;
+
+
+struct _IO_FILE_plus;
+extern struct _IO_FILE_plus _IO_2_1_stdin_;
+extern struct _IO_FILE_plus _IO_2_1_stdout_;
+extern struct _IO_FILE_plus _IO_2_1_stderr_;
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+ 
+
+typedef __ssize_t __io_read_fn  (void *  __cookie, char *__buf,
+				       size_t __nbytes)  ;
+
+ 
+
+
+
+
+
+typedef __ssize_t __io_write_fn  (void *  __cookie, __const char *__buf,
+				      size_t __n)  ;
+
+ 
+
+
+
+
+
+typedef int __io_seek_fn  (void *  __cookie, __off_t   __pos, int __w)  ;
+
+ 
+typedef int __io_close_fn  (void *  __cookie)  ;
+
+
+# 311 "/usr/include/libio.h" 3
+
+
+
+
+
+
+
+extern int __underflow  (_IO_FILE *)    ;
+extern int __uflow  (_IO_FILE *)    ;
+extern int __overflow  (_IO_FILE *, int)    ;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+extern int _IO_getc  (_IO_FILE *__fp)    ;
+extern int _IO_putc  (int __c, _IO_FILE *__fp)    ;
+extern int _IO_feof  (_IO_FILE *__fp)    ;
+extern int _IO_ferror  (_IO_FILE *__fp)    ;
+
+extern int _IO_peekc_locked  (_IO_FILE *__fp)    ;
+
+ 
+
+
+
+extern void _IO_flockfile  (_IO_FILE *)    ;
+extern void _IO_funlockfile  (_IO_FILE *)    ;
+extern int _IO_ftrylockfile  (_IO_FILE *)    ;
+
+
+
+
+
+
+
+
+
+
+
+
+extern int _IO_vfscanf  (_IO_FILE *  , const char *  ,
+			     __gnuc_va_list , int *  )    ;
+extern int _IO_vfprintf  (_IO_FILE *  , const char *  ,
+			      __gnuc_va_list )    ;
+extern __ssize_t   _IO_padn  (_IO_FILE *, int, __ssize_t  )    ;
+extern size_t   _IO_sgetn  (_IO_FILE *, void *, size_t  )    ;
+
+extern __off64_t   _IO_seekoff  (_IO_FILE *, __off64_t  , int, int)    ;
+extern __off64_t   _IO_seekpos  (_IO_FILE *, __off64_t  , int)    ;
+
+extern void _IO_free_backup_area  (_IO_FILE *)    ;
+
+
+
+
+
+
+# 57 "/usr/include/stdio.h" 2 3
+
+
+ 
+
+typedef __off_t  fpos_t;
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+ 
+
+
+
+
+
+ 
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+ 
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+# 1 "/usr/include/bits/stdio_lim.h" 1 3
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 110 "/usr/include/stdio.h" 2 3
+
+
+
+ 
+extern FILE *stdin;		 
+extern FILE *stdout;		 
+extern FILE *stderr;		 
+ 
+
+
+
+
+
+ 
+extern int remove  (__const char *__filename)    ;
+ 
+extern int rename  (__const char *__old, __const char *__new)    ;
+
+
+ 
+
+extern FILE *tmpfile  (void)    ;
+
+
+
+
+
+
+
+
+
+
+ 
+extern char *tmpnam  (char *__s)    ;
+
+
+ 
+
+extern char *tmpnam_r  (char *__s)    ;
+
+
+
+
+ 
+
+
+
+
+
+
+extern char *tempnam  (__const char *__dir, __const char *__pfx)    ;
+
+
+
+ 
+extern int fclose  (FILE *__stream)    ;
+ 
+extern int fflush  (FILE *__stream)    ;
+
+
+ 
+extern int fflush_unlocked  (FILE *__stream)    ;
+
+
+
+
+
+
+
+
+
+ 
+extern FILE *fopen  (__const char *   __filename,
+			 __const char *   __modes)    ;
+ 
+extern FILE *freopen  (__const char *   __filename,
+			   __const char *   __modes,
+			   FILE *   __stream)    ;
+# 201 "/usr/include/stdio.h" 3
+
+
+
+
+
+
+
+
+
+
+ 
+extern FILE *fdopen  (int __fd, __const char *__modes)    ;
+
+
+# 227 "/usr/include/stdio.h" 3
+
+
+
+ 
+
+extern void setbuf  (FILE *   __stream, char *   __buf)    ;
+ 
+
+
+extern int setvbuf  (FILE *   __stream, char *   __buf,
+			 int __modes, size_t __n)    ;
+
+
+ 
+
+extern void setbuffer  (FILE *   __stream, char *   __buf,
+			    size_t __size)    ;
+
+ 
+extern void setlinebuf  (FILE *__stream)    ;
+
+
+
+ 
+extern int fprintf  (FILE *   __stream,
+			 __const char *   __format, ...)    ;
+ 
+extern int printf  (__const char *   __format, ...)    ;
+ 
+extern int sprintf  (char *   __s,
+			 __const char *   __format, ...)    ;
+
+ 
+extern int vfprintf  (FILE *   __s,
+			  __const char *   __format,
+			  __gnuc_va_list  __arg)    ;
+ 
+extern int vprintf  (__const char *   __format,
+			 __gnuc_va_list  __arg)    ;
+ 
+extern int vsprintf  (char *   __s,
+			  __const char *   __format,
+			  __gnuc_va_list  __arg)    ;
+
+
+ 
+extern int snprintf  (char *   __s, size_t __maxlen,
+			  __const char *   __format, ...)    
+     __attribute__ ((__format__ (__printf__, 3, 4)));
+
+extern int __vsnprintf  (char *   __s, size_t __maxlen,
+			     __const char *   __format,
+			     __gnuc_va_list  __arg)    
+     __attribute__ ((__format__ (__printf__, 3, 0)));
+extern int vsnprintf  (char *   __s, size_t __maxlen,
+			   __const char *   __format,
+			   __gnuc_va_list  __arg)    
+     __attribute__ ((__format__ (__printf__, 3, 0)));
+
+
+# 306 "/usr/include/stdio.h" 3
+
+
+
+ 
+extern int fscanf  (FILE *   __stream,
+			__const char *   __format, ...)    ;
+ 
+extern int scanf  (__const char *   __format, ...)    ;
+ 
+extern int sscanf  (__const char *   __s,
+			__const char *   __format, ...)    ;
+
+# 334 "/usr/include/stdio.h" 3
+
+
+
+ 
+extern int fgetc  (FILE *__stream)    ;
+extern int getc  (FILE *__stream)    ;
+
+ 
+extern int getchar  (void)    ;
+
+ 
+
+
+
+
+ 
+extern int getc_unlocked  (FILE *__stream)    ;
+extern int getchar_unlocked  (void)    ;
+
+
+
+ 
+extern int fgetc_unlocked  (FILE *__stream)    ;
+
+
+
+ 
+extern int fputc  (int __c, FILE *__stream)    ;
+extern int putc  (int __c, FILE *__stream)    ;
+
+ 
+extern int putchar  (int __c)    ;
+
+ 
+
+
+
+
+ 
+extern int fputc_unlocked  (int __c, FILE *__stream)    ;
+
+
+
+ 
+extern int putc_unlocked  (int __c, FILE *__stream)    ;
+extern int putchar_unlocked  (int __c)    ;
+
+
+
+
+ 
+extern int getw  (FILE *__stream)    ;
+
+ 
+extern int putw  (int __w, FILE *__stream)    ;
+
+
+
+ 
+extern char *fgets  (char *   __s, int __n,
+			 FILE *   __stream)    ;
+
+
+
+
+
+
+
+ 
+
+extern char *gets  (char *__s)    ;
+
+
+# 424 "/usr/include/stdio.h" 3
+
+
+
+ 
+extern int fputs  (__const char *   __s,
+		       FILE *   __stream)    ;
+
+
+
+
+
+
+
+ 
+extern int puts  (__const char *__s)    ;
+
+
+ 
+extern int ungetc  (int __c, FILE *__stream)    ;
+
+
+ 
+extern size_t fread  (void *   __ptr, size_t __size,
+			  size_t __n, FILE *   __stream)    ;
+ 
+extern size_t fwrite  (__const void *   __ptr, size_t __size,
+			   size_t __n, FILE *   __s)    ;
+
+
+ 
+extern size_t fread_unlocked  (void *   __ptr, size_t __size,
+				   size_t __n, FILE *   __stream)    ;
+extern size_t fwrite_unlocked  (__const void *   __ptr,
+				    size_t __size, size_t __n,
+				    FILE *   __stream)    ;
+
+
+
+ 
+extern int fseek  (FILE *__stream, long int __off, int __whence)    ;
+ 
+extern long int ftell  (FILE *__stream)    ;
+ 
+extern void rewind  (FILE *__stream)    ;
+
+ 
+
+
+
+
+ 
+
+
+typedef __off_t off_t;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+extern int fgetpos  (FILE *   __stream,
+			 fpos_t *   __pos)    ;
+ 
+extern int fsetpos  (FILE *__stream, __const fpos_t *__pos)    ;
+# 523 "/usr/include/stdio.h" 3
+
+
+# 533 "/usr/include/stdio.h" 3
+
+
+ 
+extern void clearerr  (FILE *__stream)    ;
+ 
+extern int feof  (FILE *__stream)    ;
+ 
+extern int ferror  (FILE *__stream)    ;
+
+
+ 
+extern void clearerr_unlocked  (FILE *__stream)    ;
+extern int feof_unlocked  (FILE *__stream)    ;
+extern int ferror_unlocked  (FILE *__stream)    ;
+
+
+
+ 
+extern void perror  (__const char *__s)    ;
+
+ 
+
+
+extern int sys_nerr;
+extern __const char *__const sys_errlist[];
+
+
+
+
+
+
+
+
+ 
+extern int fileno  (FILE *__stream)    ;
+
+
+
+ 
+extern int fileno_unlocked  (FILE *__stream)    ;
+
+
+
+
+
+ 
+extern FILE *popen  (__const char *__command, __const char *__modes)    ;
+
+ 
+extern int pclose  (FILE *__stream)    ;
+
+
+
+
+ 
+extern char *ctermid  (char *__s)    ;
+
+
+
+
+
+
+
+
+
+# 607 "/usr/include/stdio.h" 3
+
+
+
+
+ 
+
+ 
+extern void flockfile  (FILE *__stream)    ;
+
+ 
+
+extern int ftrylockfile  (FILE *__stream)    ;
+
+ 
+extern void funlockfile  (FILE *__stream)    ;
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+# 1 "/usr/include/bits/stdio.h" 1 3
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+extern __inline  int
+vprintf (__const char *   __fmt, __gnuc_va_list  __arg)  
+{
+  return vfprintf (stdout , __fmt, __arg);
+}
+
+ 
+extern __inline  int
+getchar (void)  
+{
+  return _IO_getc (stdin );
+}
+
+
+
+ 
+extern __inline  int
+getc_unlocked (FILE *__fp)  
+{
+  return (( __fp )->_IO_read_ptr >= ( __fp )->_IO_read_end ? __uflow ( __fp ) : *(unsigned char *) ( __fp )->_IO_read_ptr++) ;
+}
+
+ 
+extern __inline  int
+getchar_unlocked (void)  
+{
+  return (( stdin  )->_IO_read_ptr >= ( stdin  )->_IO_read_end ? __uflow ( stdin  ) : *(unsigned char *) ( stdin  )->_IO_read_ptr++) ;
+}
+
+
+
+ 
+extern __inline  int
+putchar (int __c)  
+{
+  return _IO_putc (__c, stdout );
+}
+
+
+
+ 
+extern __inline  int
+fputc_unlocked (int __c, FILE *__stream)  
+{
+  return (((  __stream )->_IO_write_ptr >= (  __stream )->_IO_write_end) ? __overflow (  __stream , (unsigned char) ( __c )) : (unsigned char) (*(  __stream )->_IO_write_ptr++ = ( __c ))) ;
+}
+
+
+
+
+ 
+extern __inline  int
+putc_unlocked (int __c, FILE *__stream)  
+{
+  return (((  __stream )->_IO_write_ptr >= (  __stream )->_IO_write_end) ? __overflow (  __stream , (unsigned char) ( __c )) : (unsigned char) (*(  __stream )->_IO_write_ptr++ = ( __c ))) ;
+}
+
+ 
+extern __inline  int
+putchar_unlocked (int __c)  
+{
+  return (((  stdout  )->_IO_write_ptr >= (  stdout  )->_IO_write_end) ? __overflow (  stdout  , (unsigned char) ( __c )) : (unsigned char) (*(  stdout  )->_IO_write_ptr++ = ( __c ))) ;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+extern __inline  int
+feof_unlocked (FILE *__stream)  
+{
+  return ((( __stream )->_flags & 0x10 ) != 0) ;
+}
+
+ 
+extern __inline  int
+ferror_unlocked (FILE *__stream)  
+{
+  return ((( __stream )->_flags & 0x20 ) != 0) ;
+}
+
+
+
+
+
+
+ 
+
+# 149 "/usr/include/bits/stdio.h" 3
+
+
+# 165 "/usr/include/bits/stdio.h" 3
+
+
+ 
+
+# 635 "/usr/include/stdio.h" 2 3
+
+
+
+ 
+
+
+
+
+# 3 "RuntimeSupport/term.h" 2
+
+# 1 "/usr/include/stdlib.h" 1 3
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+# 1 "/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/stddef.h" 1 3
+
+
+
+
+
+
+ 
+
+
+# 19 "/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/stddef.h" 3
+
+
+
+ 
+
+
+ 
+
+
+
+
+
+ 
+
+
+# 61 "/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/stddef.h" 3
+
+
+ 
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+ 
+
+ 
+
+# 131 "/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/stddef.h" 3
+
+
+ 
+
+ 
+
+
+# 188 "/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/stddef.h" 3
+
+
+
+
+
+ 
+
+
+
+
+ 
+
+
+# 269 "/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/stddef.h" 3
+
+
+
+
+# 283 "/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/stddef.h" 3
+
+
+ 
+
+ 
+
+# 317 "/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/stddef.h" 3
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 33 "/usr/include/stdlib.h" 2 3
+
+
+ 
+
+
+
+
+ 
+typedef struct
+  {
+    int quot;			 
+    int rem;			 
+  } div_t;
+
+ 
+
+typedef struct
+  {
+    long int quot;		 
+    long int rem;		 
+  } ldiv_t;
+
+
+
+# 65 "/usr/include/stdlib.h" 3
+
+
+
+ 
+
+
+
+ 
+
+
+
+
+
+ 
+
+extern size_t __ctype_get_mb_cur_max  (void)    ;
+
+
+ 
+extern double atof  (__const char *__nptr)    ;
+ 
+extern int atoi  (__const char *__nptr)    ;
+ 
+extern long int atol  (__const char *__nptr)    ;
+
+
+ 
+__extension__ extern long long int atoll  (__const char *__nptr)    ;
+
+
+ 
+extern double strtod  (__const char *   __nptr,
+			   char **   __endptr)    ;
+
+
+
+
+
+
+
+
+
+
+ 
+extern long int strtol  (__const char *   __nptr,
+			     char **   __endptr, int __base)    ;
+ 
+extern unsigned long int strtoul  (__const char *   __nptr,
+				       char **   __endptr,
+				       int __base)    ;
+
+
+ 
+__extension__
+extern long long int strtoq  (__const char *   __nptr,
+				  char **   __endptr, int __base)    ;
+ 
+__extension__
+extern unsigned long long int strtouq  (__const char *   __nptr,
+					    char **   __endptr,
+					    int __base)    ;
+
+
+
+ 
+
+ 
+__extension__
+extern long long int strtoll  (__const char *   __nptr,
+				   char **   __endptr, int __base)    ;
+ 
+__extension__
+extern unsigned long long int strtoull  (__const char *   __nptr,
+					     char **   __endptr,
+					     int __base)    ;
+
+
+
+# 190 "/usr/include/stdlib.h" 3
+
+
+
+ 
+
+
+extern double __strtod_internal  (__const char *   __nptr,
+				      char **   __endptr,
+				      int __group)    ;
+extern float __strtof_internal  (__const char *   __nptr,
+				     char **   __endptr, int __group)    ;
+extern long double  __strtold_internal  (__const char *
+						  __nptr,
+						char **   __endptr,
+						int __group)    ;
+
+extern long int __strtol_internal  (__const char *   __nptr,
+					char **   __endptr,
+					int __base, int __group)    ;
+
+
+
+extern unsigned long int __strtoul_internal  (__const char *
+						    __nptr,
+						  char **   __endptr,
+						  int __base, int __group)    ;
+
+
+
+
+__extension__
+extern long long int __strtoll_internal  (__const char *   __nptr,
+					      char **   __endptr,
+					      int __base, int __group)    ;
+
+
+
+__extension__
+extern unsigned long long int __strtoull_internal  (__const char *
+							  __nptr,
+							char **
+							  __endptr,
+							int __base,
+							int __group)    ;
+
+
+
+
+
+
+ 
+
+extern __inline double
+strtod (__const char *   __nptr, char **   __endptr)  
+{
+  return __strtod_internal (__nptr, __endptr, 0);
+}
+extern __inline long int
+strtol (__const char *   __nptr, char **   __endptr,
+	int __base)  
+{
+  return __strtol_internal (__nptr, __endptr, __base, 0);
+}
+extern __inline unsigned long int
+strtoul (__const char *   __nptr, char **   __endptr,
+	 int __base)  
+{
+  return __strtoul_internal (__nptr, __endptr, __base, 0);
+}
+
+# 271 "/usr/include/stdlib.h" 3
+
+
+
+__extension__ extern __inline long long int
+strtoq (__const char *   __nptr, char **   __endptr,
+	int __base)  
+{
+  return __strtoll_internal (__nptr, __endptr, __base, 0);
+}
+__extension__ extern __inline unsigned long long int
+strtouq (__const char *   __nptr, char **   __endptr,
+	 int __base)  
+{
+  return __strtoull_internal (__nptr, __endptr, __base, 0);
+}
+
+
+
+__extension__ extern __inline long long int
+strtoll (__const char *   __nptr, char **   __endptr,
+	 int __base)  
+{
+  return __strtoll_internal (__nptr, __endptr, __base, 0);
+}
+__extension__ extern __inline unsigned long long int
+strtoull (__const char *   __nptr, char **   __endptr,
+	  int __base)  
+{
+  return __strtoull_internal (__nptr, __endptr, __base, 0);
+}
+
+
+extern __inline double
+atof (__const char *__nptr)  
+{
+  return strtod (__nptr, (char **) ((void *)0) );
+}
+extern __inline int
+atoi (__const char *__nptr)  
+{
+  return (int) strtol (__nptr, (char **) ((void *)0) , 10);
+}
+extern __inline long int
+atol (__const char *__nptr)  
+{
+  return strtol (__nptr, (char **) ((void *)0) , 10);
+}
+
+
+__extension__ extern __inline long long int
+atoll (__const char *__nptr)  
+{
+  return strtoll (__nptr, (char **) ((void *)0) , 10);
+}
+
+
+
+
+
+ 
+
+
+extern char *l64a  (long int __n)    ;
+
+ 
+extern long int a64l  (__const char *__s)    ;
+
+
+# 1 "/usr/include/sys/types.h" 1 3
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+typedef __u_char u_char;
+typedef __u_short u_short;
+typedef __u_int u_int;
+typedef __u_long u_long;
+typedef __quad_t quad_t;
+typedef __u_quad_t u_quad_t;
+typedef __fsid_t fsid_t;
+
+
+typedef __loff_t loff_t;
+
+
+
+typedef __ino_t ino_t;
+
+
+
+
+
+
+
+
+
+
+
+typedef __dev_t dev_t;
+
+
+
+
+typedef __gid_t gid_t;
+
+
+
+
+typedef __mode_t mode_t;
+
+
+
+
+typedef __nlink_t nlink_t;
+
+
+
+
+typedef __uid_t uid_t;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+typedef __pid_t pid_t;
+
+
+
+
+typedef __id_t id_t;
+
+
+
+typedef __ssize_t ssize_t;
+
+
+
+
+typedef __daddr_t daddr_t;
+typedef __caddr_t caddr_t;
+
+
+
+typedef __key_t key_t;
+
+
+
+
+
+
+# 1 "/usr/include/time.h" 1 3
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 51 "/usr/include/time.h" 3
+
+
+
+# 62 "/usr/include/time.h" 3
+
+
+
+
+
+
+
+
+ 
+typedef __time_t time_t;
+
+
+
+
+
+# 89 "/usr/include/time.h" 3
+
+
+
+
+# 279 "/usr/include/time.h" 3
+
+
+
+# 122 "/usr/include/sys/types.h" 2 3
+
+
+
+# 1 "/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/stddef.h" 1 3
+
+
+
+
+
+
+ 
+
+
+# 19 "/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/stddef.h" 3
+
+
+
+ 
+
+
+ 
+
+
+
+
+
+ 
+
+
+# 61 "/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/stddef.h" 3
+
+
+ 
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+ 
+
+ 
+
+# 131 "/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/stddef.h" 3
+
+
+ 
+
+ 
+
+
+# 188 "/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/stddef.h" 3
+
+
+
+
+
+ 
+
+
+
+
+ 
+
+# 271 "/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/stddef.h" 3
+
+
+# 283 "/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/stddef.h" 3
+
+
+ 
+
+ 
+
+# 317 "/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/stddef.h" 3
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 125 "/usr/include/sys/types.h" 2 3
+
+
+
+ 
+typedef unsigned long int ulong;
+typedef unsigned short int ushort;
+typedef unsigned int uint;
+
+
+ 
+
+# 159 "/usr/include/sys/types.h" 3
+
+
+ 
+
+
+
+
+
+
+
+typedef int int8_t __attribute__ ((__mode__ (  __QI__ ))) ;
+typedef int int16_t __attribute__ ((__mode__ (  __HI__ ))) ;
+typedef int int32_t __attribute__ ((__mode__ (  __SI__ ))) ;
+typedef int int64_t __attribute__ ((__mode__ (  __DI__ ))) ;
+
+
+typedef unsigned int u_int8_t __attribute__ ((__mode__ (  __QI__ ))) ;
+typedef unsigned int u_int16_t __attribute__ ((__mode__ (  __HI__ ))) ;
+typedef unsigned int u_int32_t __attribute__ ((__mode__ (  __SI__ ))) ;
+typedef unsigned int u_int64_t __attribute__ ((__mode__ (  __DI__ ))) ;
+
+typedef int register_t __attribute__ ((__mode__ (__word__)));
+
+
+ 
+
+
+
+
+
+
+ 
+# 1 "/usr/include/endian.h" 1 3
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+ 
+# 1 "/usr/include/bits/endian.h" 1 3
+ 
+
+
+
+
+
+
+# 35 "/usr/include/endian.h" 2 3
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 191 "/usr/include/sys/types.h" 2 3
+
+
+ 
+# 1 "/usr/include/sys/select.h" 1 3
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+ 
+
+
+ 
+# 1 "/usr/include/bits/select.h" 1 3
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 36 "/usr/include/bits/select.h" 3
+
+
+
+
+
+
+
+
+
+
+
+
+# 56 "/usr/include/bits/select.h" 3
+
+# 72 "/usr/include/bits/select.h" 3
+
+# 31 "/usr/include/sys/select.h" 2 3
+
+
+ 
+# 1 "/usr/include/bits/sigset.h" 1 3
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+typedef int __sig_atomic_t;
+
+ 
+
+
+typedef struct
+  {
+    unsigned long int __val[(1024 / (8 * sizeof (unsigned long int))) ];
+  } __sigset_t;
+
+
+
+
+ 
+
+
+
+
+
+# 125 "/usr/include/bits/sigset.h" 3
+
+# 34 "/usr/include/sys/select.h" 2 3
+
+
+ 
+
+# 1 "/usr/include/time.h" 1 3
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 51 "/usr/include/time.h" 3
+
+
+
+# 62 "/usr/include/time.h" 3
+
+
+
+# 73 "/usr/include/time.h" 3
+
+
+
+
+
+
+
+
+ 
+
+struct timespec
+  {
+    long int tv_sec;		 
+    long int tv_nsec;		 
+  };
+
+
+
+
+
+# 279 "/usr/include/time.h" 3
+
+
+
+# 38 "/usr/include/sys/select.h" 2 3
+
+
+ 
+
+ 
+
+
+
+struct timeval;
+
+typedef __fd_mask fd_mask;
+
+ 
+typedef __fd_set fd_set;
+
+ 
+
+
+
+ 
+
+
+
+
+ 
+
+
+
+
+
+
+ 
+
+
+
+
+extern int __select  (int __nfds, __fd_set *__readfds,
+			  __fd_set *__writefds, __fd_set *__exceptfds,
+			  struct timeval *__timeout)    ;
+extern int select  (int __nfds, __fd_set *__readfds,
+			__fd_set *__writefds, __fd_set *__exceptfds,
+			struct timeval *__timeout)    ;
+
+# 91 "/usr/include/sys/select.h" 3
+
+
+ 
+
+
+# 194 "/usr/include/sys/types.h" 2 3
+
+
+ 
+# 1 "/usr/include/sys/sysmacros.h" 1 3
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+# 47 "/usr/include/sys/sysmacros.h" 3
+
+
+
+# 197 "/usr/include/sys/types.h" 2 3
+
+
+
+
+ 
+
+typedef __blkcnt_t blkcnt_t;	  
+typedef __fsblkcnt_t fsblkcnt_t;  
+typedef __fsfilcnt_t fsfilcnt_t;  
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+# 339 "/usr/include/stdlib.h" 2 3
+
+
+ 
+
+
+
+ 
+extern int32_t random  (void)    ;
+
+ 
+extern void srandom  (unsigned int __seed)    ;
+
+ 
+
+
+
+extern void *  initstate  (unsigned int __seed, void *  __statebuf,
+			       size_t __statelen)    ;
+
+ 
+
+extern void *  setstate  (void *  __statebuf)    ;
+
+
+
+ 
+
+
+
+struct random_data
+  {
+    int32_t *fptr;		 
+    int32_t *rptr;		 
+    int32_t *state;		 
+    int rand_type;		 
+    int rand_deg;		 
+    int rand_sep;		 
+    int32_t *end_ptr;		 
+  };
+
+extern int random_r  (struct random_data *   __buf,
+			  int32_t *   __result)    ;
+
+extern int srandom_r  (unsigned int __seed, struct random_data *__buf)    ;
+
+extern int initstate_r  (unsigned int __seed,
+			     void *    __statebuf,
+			     size_t __statelen,
+			     struct random_data *   __buf)    ;
+
+extern int setstate_r  (void *    __statebuf,
+			    struct random_data *   __buf)    ;
+
+
+
+
+ 
+extern int rand  (void)    ;
+ 
+extern void srand  (unsigned int __seed)    ;
+
+
+ 
+extern int rand_r  (unsigned int *__seed)    ;
+
+
+
+
+ 
+
+ 
+extern double drand48  (void)    ;
+extern double erand48  (unsigned short int __xsubi[3])    ;
+
+ 
+extern long int lrand48  (void)    ;
+extern long int nrand48  (unsigned short int __xsubi[3])    ;
+
+ 
+extern long int mrand48  (void)    ;
+extern long int jrand48  (unsigned short int __xsubi[3])    ;
+
+ 
+extern void srand48  (long int __seedval)    ;
+extern unsigned short int *seed48  (unsigned short int __seed16v[3])    ;
+extern void lcong48  (unsigned short int __param[7])    ;
+
+ 
+struct drand48_data
+  {
+    unsigned short int x[3];	 
+    unsigned short int a[3];	 
+    unsigned short int c;	 
+    unsigned short int old_x[3];  
+    int init;			 
+  };
+
+
+ 
+extern int drand48_r  (struct drand48_data *   __buffer,
+			   double *   __result)    ;
+extern int erand48_r  (unsigned short int __xsubi[3],
+			   struct drand48_data *   __buffer,
+			   double *   __result)    ;
+
+ 
+extern int lrand48_r  (struct drand48_data *   __buffer,
+			   long int *   __result)    ;
+extern int nrand48_r  (unsigned short int __xsubi[3],
+			   struct drand48_data *   __buffer,
+			   long int *   __result)    ;
+
+ 
+extern int mrand48_r  (struct drand48_data *   __buffer,
+			   long int *   __result)    ;
+extern int jrand48_r  (unsigned short int __xsubi[3],
+			   struct drand48_data *   __buffer,
+			   long int *   __result)    ;
+
+ 
+extern int srand48_r  (long int __seedval, struct drand48_data *__buffer)    ;
+
+extern int seed48_r  (unsigned short int __seed16v[3],
+			  struct drand48_data *__buffer)    ;
+
+extern int lcong48_r  (unsigned short int __param[7],
+			   struct drand48_data *__buffer)    ;
+
+
+
+
+
+
+
+ 
+extern void *  malloc  (size_t __size)    ;
+ 
+extern void *  calloc  (size_t __nmemb, size_t __size)    ;
+
+
+
+ 
+
+extern void *  realloc  (void *  __ptr, size_t __size)    ;
+ 
+extern void free  (void *  __ptr)    ;
+
+
+ 
+extern void cfree  (void *  __ptr)    ;
+
+
+
+# 1 "/usr/include/alloca.h" 1 3
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 1 "/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/stddef.h" 1 3
+
+
+
+
+
+
+ 
+
+
+# 19 "/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/stddef.h" 3
+
+
+
+ 
+
+
+ 
+
+
+
+
+
+ 
+
+
+# 61 "/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/stddef.h" 3
+
+
+ 
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+ 
+
+ 
+
+# 131 "/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/stddef.h" 3
+
+
+ 
+
+ 
+
+
+# 188 "/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/stddef.h" 3
+
+
+
+
+
+ 
+
+
+
+
+ 
+
+# 271 "/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/stddef.h" 3
+
+
+# 283 "/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/stddef.h" 3
+
+
+ 
+
+ 
+
+# 317 "/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/stddef.h" 3
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 25 "/usr/include/alloca.h" 2 3
+
+
+ 
+
+ 
+
+
+ 
+extern void *  alloca  (size_t __size)    ;
+
+
+
+
+
+ 
+
+
+# 492 "/usr/include/stdlib.h" 2 3
+
+
+
+
+ 
+extern void *  valloc  (size_t __size)    ;
+
+
+
+ 
+extern void abort  (void)     __attribute__ ((__noreturn__));
+
+
+ 
+extern int atexit  (void (*__func) (void))    ;
+
+
+ 
+
+extern int __on_exit  (void (*__func) (int __status, void *  __arg),
+			   void *  __arg)    ;
+extern int on_exit  (void (*__func) (int __status, void *  __arg),
+			 void *  __arg)    ;
+
+
+ 
+
+
+extern void exit  (int __status)     __attribute__ ((__noreturn__));
+
+
+
+
+
+
+
+
+ 
+extern char *getenv  (__const char *__name)    ;
+
+ 
+
+extern char *__secure_getenv  (__const char *__name)    ;
+
+
+ 
+ 
+
+extern int putenv  (char *__string)    ;
+
+
+
+ 
+
+extern int setenv  (__const char *__name, __const char *__value,
+			int __replace)    ;
+
+ 
+extern void unsetenv  (__const char *__name)    ;
+
+
+
+ 
+
+
+extern int clearenv  (void)    ;
+
+
+
+
+ 
+
+
+
+extern char *mktemp  (char *__template)    ;
+
+ 
+
+
+
+
+extern int mkstemp  (char *__template)    ;
+
+
+
+ 
+extern int system  (__const char *__command)    ;
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+extern char *realpath  (__const char *   __name,
+			    char *   __resolved)    ;
+
+
+
+ 
+
+
+typedef int (*__compar_fn_t)  (__const void * , __const void * )  ;
+
+
+
+
+
+
+ 
+
+extern void *  bsearch  (__const void *  __key, __const void *  __base,
+			       size_t __nmemb, size_t __size,
+			       __compar_fn_t __compar)  ;
+
+ 
+
+extern void qsort  (void *  __base, size_t __nmemb, size_t __size,
+			  __compar_fn_t __compar)  ;
+
+
+ 
+extern int abs  (int __x)     __attribute__ ((__const__));
+extern long int labs  (long int __x)     __attribute__ ((__const__));
+
+
+
+
+
+
+ 
+
+ 
+extern div_t div  (int __numer, int __denom)     __attribute__ ((__const__));
+extern ldiv_t ldiv  (long int __numer, long int __denom)    
+     __attribute__ ((__const__));
+
+
+
+
+
+
+
+
+ 
+
+
+ 
+
+
+extern char *ecvt  (double __value, int __ndigit, int *   __decpt,
+			int *   __sign)    ;
+
+ 
+
+
+extern char *fcvt  (double __value, int __ndigit, int *   __decpt,
+			int *   __sign)    ;
+
+ 
+
+
+extern char *gcvt  (double __value, int __ndigit, char *__buf)    ;
+
+ 
+extern char *qecvt  (long double  __value, int __ndigit,
+			 int *   __decpt, int *   __sign)    ;
+extern char *qfcvt  (long double  __value, int __ndigit,
+			 int *   __decpt, int *   __sign)    ;
+extern char *qgcvt  (long double  __value, int __ndigit, char *__buf)    ;
+
+
+
+ 
+
+extern int ecvt_r  (double __value, int __ndigit, int *   __decpt,
+			int *   __sign, char *   __buf,
+			size_t __len)    ;
+extern int fcvt_r  (double __value, int __ndigit, int *   __decpt,
+			int *   __sign, char *   __buf,
+			size_t __len)    ;
+
+extern int qecvt_r  (long double  __value, int __ndigit,
+			 int *   __decpt, int *   __sign,
+			 char *   __buf, size_t __len)    ;
+extern int qfcvt_r  (long double  __value, int __ndigit,
+			 int *   __decpt, int *   __sign,
+			 char *   __buf, size_t __len)    ;
+
+
+
+
+ 
+
+extern int mblen  (__const char *__s, size_t __n)    ;
+ 
+
+extern int mbtowc  (wchar_t *   __pwc,
+			__const char *   __s, size_t __n)    ;
+ 
+
+extern int wctomb  (char *__s, wchar_t __wchar)    ;
+
+
+ 
+extern size_t mbstowcs  (wchar_t *    __pwcs,
+			     __const char *   __s, size_t __n)    ;
+ 
+extern size_t wcstombs  (char *   __s,
+			     __const wchar_t *   __pwcs, size_t __n)    ;
+
+
+
+ 
+
+
+
+extern int rpmatch  (__const char *__response)    ;
+
+
+
+# 732 "/usr/include/stdlib.h" 3
+
+
+
+# 756 "/usr/include/stdlib.h" 3
+
+
+# 766 "/usr/include/stdlib.h" 3
+
+
+
+
+
+ 
+
+
+# 4 "RuntimeSupport/term.h" 2
+
+# 1 "RuntimeSupport/tools.h" 1
+
+
+
+# 1 "/usr/include/string.h" 1 3
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+ 
+
+ 
+
+
+# 1 "/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/stddef.h" 1 3
+
+
+
+
+
+
+ 
+
+
+# 19 "/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/stddef.h" 3
+
+
+
+ 
+
+
+ 
+
+
+
+
+
+ 
+
+
+# 61 "/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/stddef.h" 3
+
+
+ 
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+ 
+
+ 
+
+# 131 "/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/stddef.h" 3
+
+
+ 
+
+ 
+
+
+# 188 "/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/stddef.h" 3
+
+
+
+
+
+ 
+
+
+
+
+ 
+
+# 271 "/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/stddef.h" 3
+
+
+# 283 "/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/stddef.h" 3
+
+
+ 
+
+ 
+
+# 317 "/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/stddef.h" 3
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 33 "/usr/include/string.h" 2 3
+
+
+
+ 
+extern void *  memcpy  (void *    __dest,
+			    __const void *    __src, size_t __n)    ;
+ 
+
+extern void *  memmove  (void *  __dest, __const void *  __src,
+			     size_t __n)    ;
+
+ 
+
+
+
+extern void *  memccpy  (void *  __dest, __const void *  __src,
+			     int __c, size_t __n)    ;
+
+
+
+ 
+extern void *  memset  (void *  __s, int __c, size_t __n)    ;
+
+ 
+extern int memcmp  (__const void *  __s1, __const void *  __s2,
+			size_t __n)    ;
+
+ 
+extern void *  memchr  (__const void *  __s, int __c, size_t __n)    ;
+
+
+
+
+
+
+
+
+ 
+extern char *strcpy  (char *   __dest,
+			  __const char *   __src)    ;
+ 
+extern char *strncpy  (char *   __dest,
+			   __const char *   __src, size_t __n)    ;
+
+ 
+extern char *strcat  (char *   __dest,
+			  __const char *   __src)    ;
+ 
+extern char *strncat  (char *   __dest,
+			   __const char *   __src, size_t __n)    ;
+
+ 
+extern int strcmp  (__const char *__s1, __const char *__s2)    ;
+ 
+extern int strncmp  (__const char *__s1, __const char *__s2, size_t __n)    ;
+
+ 
+extern int strcoll  (__const char *__s1, __const char *__s2)    ;
+ 
+extern size_t strxfrm  (char *   __dest,
+			    __const char *   __src, size_t __n)    ;
+
+# 107 "/usr/include/string.h" 3
+
+
+
+ 
+extern char *__strdup  (__const char *__s)    ;
+extern char *strdup  (__const char *__s)    ;
+
+
+ 
+
+
+
+
+
+
+# 143 "/usr/include/string.h" 3
+
+
+ 
+extern char *strchr  (__const char *__s, int __c)    ;
+ 
+extern char *strrchr  (__const char *__s, int __c)    ;
+
+
+
+
+
+
+
+ 
+
+extern size_t strcspn  (__const char *__s, __const char *__reject)    ;
+ 
+
+extern size_t strspn  (__const char *__s, __const char *__accept)    ;
+ 
+extern char *strpbrk  (__const char *__s, __const char *__accept)    ;
+ 
+extern char *strstr  (__const char *__haystack, __const char *__needle)    ;
+
+
+
+
+
+
+
+
+
+ 
+extern char *strtok  (char *   __s,
+			  __const char *   __delim)    ;
+
+ 
+
+extern char *__strtok_r  (char *   __s,
+			      __const char *   __delim,
+			      char **   __save_ptr)    ;
+
+extern char *strtok_r  (char *   __s,
+			    __const char *   __delim,
+			    char **   __save_ptr)    ;
+
+
+# 203 "/usr/include/string.h" 3
+
+
+
+ 
+extern size_t strlen  (__const char *__s)    ;
+
+
+
+
+
+
+
+
+ 
+extern char *strerror  (int __errnum)    ;
+
+ 
+
+extern char *__strerror_r  (int __errnum, char *__buf, size_t __buflen)    ;
+extern char *strerror_r  (int __errnum, char *__buf, size_t __buflen)    ;
+
+
+ 
+
+extern void __bzero  (void *  __s, size_t __n)    ;
+
+
+ 
+extern void bcopy  (__const void *  __src, void *  __dest, size_t __n)    ;
+
+ 
+extern void bzero  (void *  __s, size_t __n)    ;
+
+ 
+extern int bcmp  (__const void *  __s1, __const void *  __s2, size_t __n)    ;
+
+ 
+extern char *index  (__const char *__s, int __c)    ;
+
+ 
+extern char *rindex  (__const char *__s, int __c)    ;
+
+ 
+
+extern int __ffs  (int __i)     __attribute__ ((const));
+extern int ffs  (int __i)     __attribute__ ((const));
+
+ 
+
+
+
+
+
+
+
+
+
+ 
+extern int __strcasecmp  (__const char *__s1, __const char *__s2)    ;
+extern int strcasecmp  (__const char *__s1, __const char *__s2)    ;
+
+ 
+extern int strncasecmp  (__const char *__s1, __const char *__s2,
+			     size_t __n)    ;
+
+
+# 277 "/usr/include/string.h" 3
+
+
+
+ 
+
+extern char *strsep  (char **   __stringp,
+			  __const char *   __delim)    ;
+
+
+# 319 "/usr/include/string.h" 3
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+# 1 "/usr/include/bits/string.h" 1 3
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+ 
+
+# 876 "/usr/include/bits/string.h" 3
+
+# 343 "/usr/include/string.h" 2 3
+
+
+ 
+# 1 "/usr/include/bits/string2.h" 1 3
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+# 73 "/usr/include/bits/string2.h" 3
+
+# 88 "/usr/include/bits/string2.h" 3
+
+
+ 
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 180 "/usr/include/bits/string2.h" 3
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+ 
+
+# 367 "/usr/include/bits/string2.h" 3
+
+
+
+ 
+
+extern void *  __rawmemchr (const void *  __s, int __c);
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+extern __inline  char *__strcpy_small (char *, __uint16_t, __uint16_t,
+				      __uint32_t, __uint32_t, size_t);
+extern __inline  char *
+__strcpy_small (char *__dest,
+		__uint16_t __src0_2, __uint16_t __src4_2,
+		__uint32_t __src0_4, __uint32_t __src4_4,
+		size_t __srclen)
+{
+  union {
+    __uint32_t __ui;
+    __uint16_t __usi;
+    unsigned char __uc;
+  } *__u = (void *) __dest;
+  switch ((unsigned int) __srclen)
+    {
+    case 1:
+      __u->__uc = '\0';
+      break;
+    case 2:
+      __u->__usi = __src0_2;
+      break;
+    case 3:
+      __u->__usi = __src0_2;
+      __u = __extension__ ((void *) __u + 2);
+      __u->__uc = '\0';
+      break;
+    case 4:
+      __u->__ui = __src0_4;
+      break;
+    case 5:
+      __u->__ui = __src0_4;
+      __u = __extension__ ((void *) __u + 4);
+      __u->__uc = '\0';
+      break;
+    case 6:
+      __u->__ui = __src0_4;
+      __u = __extension__ ((void *) __u + 4);
+      __u->__usi = __src4_2;
+      break;
+    case 7:
+      __u->__ui = __src0_4;
+      __u = __extension__ ((void *) __u + 4);
+      __u->__usi = __src4_2;
+      __u = __extension__ ((void *) __u + 2);
+      __u->__uc = '\0';
+      break;
+    case 8:
+      __u->__ui = __src0_4;
+      __u = __extension__ ((void *) __u + 4);
+      __u->__ui = __src4_4;
+      break;
+    }
+  return __dest;
+}
+# 531 "/usr/include/bits/string2.h" 3
+
+
+
+
+ 
+# 697 "/usr/include/bits/string2.h" 3
+
+
+
+ 
+
+# 712 "/usr/include/bits/string2.h" 3
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+# 733 "/usr/include/bits/string2.h" 3
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+# 766 "/usr/include/bits/string2.h" 3
+
+
+# 793 "/usr/include/bits/string2.h" 3
+
+
+# 815 "/usr/include/bits/string2.h" 3
+
+
+# 840 "/usr/include/bits/string2.h" 3
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+# 872 "/usr/include/bits/string2.h" 3
+
+extern __inline  size_t __strcspn_c1 (__const char *__s, char __reject);
+extern __inline  size_t
+__strcspn_c1 (__const char *__s, char __reject)
+{
+  register size_t __result = 0;
+  while (__s[__result] != '\0' && __s[__result] != __reject)
+    ++__result;
+  return __result;
+}
+
+extern __inline  size_t __strcspn_c2 (__const char *__s, char __reject1,
+				     char __reject2);
+extern __inline  size_t
+__strcspn_c2 (__const char *__s, char __reject1, char __reject2)
+{
+  register size_t __result = 0;
+  while (__s[__result] != '\0' && __s[__result] != __reject1
+	 && __s[__result] != __reject2)
+    ++__result;
+  return __result;
+}
+
+extern __inline  size_t __strcspn_c3 (__const char *__s, char __reject1,
+				     char __reject2, char __reject3);
+extern __inline  size_t
+__strcspn_c3 (__const char *__s, char __reject1, char __reject2,
+	      char __reject3)
+{
+  register size_t __result = 0;
+  while (__s[__result] != '\0' && __s[__result] != __reject1
+	 && __s[__result] != __reject2 && __s[__result] != __reject3)
+    ++__result;
+  return __result;
+}
+
+
+
+ 
+
+
+
+# 927 "/usr/include/bits/string2.h" 3
+
+extern __inline  size_t __strspn_c1 (__const char *__s, char __accept);
+extern __inline  size_t
+__strspn_c1 (__const char *__s, char __accept)
+{
+  register size_t __result = 0;
+   
+  while (__s[__result] == __accept)
+    ++__result;
+  return __result;
+}
+
+extern __inline  size_t __strspn_c2 (__const char *__s, char __accept1,
+				    char __accept2);
+extern __inline  size_t
+__strspn_c2 (__const char *__s, char __accept1, char __accept2)
+{
+  register size_t __result = 0;
+   
+  while (__s[__result] == __accept1 || __s[__result] == __accept2)
+    ++__result;
+  return __result;
+}
+
+extern __inline  size_t __strspn_c3 (__const char *__s, char __accept1,
+				    char __accept2, char __accept3);
+extern __inline  size_t
+__strspn_c3 (__const char *__s, char __accept1, char __accept2, char __accept3)
+{
+  register size_t __result = 0;
+   
+  while (__s[__result] == __accept1 || __s[__result] == __accept2
+	 || __s[__result] == __accept3)
+    ++__result;
+  return __result;
+}
+
+
+
+ 
+
+
+# 982 "/usr/include/bits/string2.h" 3
+
+extern __inline  char *__strpbrk_c2 (__const char *__s, char __accept1,
+				     char __accept2);
+extern __inline  char *
+__strpbrk_c2 (__const char *__s, char __accept1, char __accept2)
+{
+   
+  while (*__s != '\0' && *__s != __accept1 && *__s != __accept2)
+    ++__s;
+  return *__s == '\0' ? ((void *)0)  : (char *) (size_t) __s;
+}
+
+extern __inline  char *__strpbrk_c3 (__const char *__s, char __accept1,
+				     char __accept2, char __accept3);
+extern __inline  char *
+__strpbrk_c3 (__const char *__s, char __accept1, char __accept2,
+	      char __accept3)
+{
+   
+  while (*__s != '\0' && *__s != __accept1 && *__s != __accept2
+	 && *__s != __accept3)
+    ++__s;
+  return *__s == '\0' ? ((void *)0)  : (char *) (size_t) __s;
+}
+
+
+
+ 
+
+
+# 1020 "/usr/include/bits/string2.h" 3
+
+
+
+# 1032 "/usr/include/bits/string2.h" 3
+
+
+
+
+
+
+
+
+
+
+
+
+extern __inline  char *__strtok_r_1c (char *__s, char __sep, char **__nextp);
+extern __inline  char *
+__strtok_r_1c (char *__s, char __sep, char **__nextp)
+{
+  char *__result;
+  if (__s == ((void *)0) )
+    __s = *__nextp;
+  while (*__s == __sep)
+    ++__s;
+  if (*__s == '\0')
+    __result = ((void *)0) ;
+  else
+    {
+      __result = __s;
+      while (*__s != '\0' && *__s != __sep)
+	++__s;
+      if (*__s == '\0')
+	*__nextp = __s;
+      else
+	{
+	  *__s = '\0';
+	  *__nextp = __s + 1;
+	}
+    }
+  return __result;
+}
+
+
+
+
+
+
+
+
+
+# 1093 "/usr/include/bits/string2.h" 3
+
+extern __inline  char *__strsep_1c (char **__s, char __reject);
+extern __inline  char *
+__strsep_1c (char **__s, char __reject)
+{
+  register char *__retval = *__s;
+  if (__retval == ((void *)0) )
+    return *__s = ((void *)0) ;
+  if (*__retval == __reject)
+    *(*__s)++ = '\0';
+  else
+    if ((*__s = (__extension__ (__builtin_constant_p (  __reject ) && (  __reject ) == '\0'	? (char *) __rawmemchr ( __retval ,   __reject )	: strchr ( __retval ,   __reject ))) ) != ((void *)0) )
+      *(*__s)++ = '\0';
+    else
+      *__s = ((void *)0) ;
+  return __retval;
+}
+
+extern __inline  char *__strsep_2c (char **__s, char __reject1, char __reject2);
+extern __inline  char *
+__strsep_2c (char **__s, char __reject1, char __reject2)
+{
+  register char *__retval = *__s;
+  if (__retval == ((void *)0) )
+    return *__s = ((void *)0) ;
+  if (*__retval == __reject1 || *__retval == __reject2)
+    *(*__s)++ = '\0';
+  else
+    {
+      register char *__cp = __retval;
+      while (*__cp != '\0' && *__cp != __reject1 && *__cp != __reject2)
+	++__cp;
+      if (*__cp != '\0')
+	{
+	  *__s = __cp;
+	  *(*__s)++ = '\0';
+	}
+      else
+	*__s = ((void *)0) ;
+    }
+  return __retval;
+}
+
+extern __inline  char *__strsep_3c (char **__s, char __reject1, char __reject2,
+				   char __reject3);
+extern __inline  char *
+__strsep_3c (char **__s, char __reject1, char __reject2, char __reject3)
+{
+  register char *__retval = *__s;
+  if (__retval == ((void *)0) )
+    return *__s = ((void *)0) ;
+  if (*__retval == __reject1 || *__retval == __reject2
+      || *__retval == __reject3)
+    *(*__s)++ = '\0';
+  else
+    {
+      register char *__cp = __retval;
+      while (*__cp != '\0' && *__cp != __reject1 && *__cp != __reject2
+	     && *__cp != __reject3)
+	++__cp;
+      if (*__cp != '\0')
+	{
+	  *__s = __cp;
+	  *(*__s)++ = '\0';
+	}
+      else
+	*__s = ((void *)0) ;
+    }
+  return __retval;
+}
+
+extern __inline  char *__strsep_g (char **__s, __const char *__reject);
+extern __inline  char *
+__strsep_g (char **__s, __const char *__reject)
+{
+  register char *__retval = *__s;
+  if (__retval == ((void *)0) )
+    return ((void *)0) ;
+  if ((*__s = __extension__	({ char __a0, __a1, __a2;	(__builtin_constant_p (  __reject ) && ((size_t)(const void *)((   __reject  ) + 1) - (size_t)(const void *)(   __reject  ) == 1) 	? ((__a0 = ((__const char  *) (  __reject ))[0], __a0 == '\0')	? ((void *)0) 	: ((__a1 = ((__const char *) (  __reject ))[1], __a1 == '\0')	? (__extension__ (__builtin_constant_p (  __a0 ) && (  __a0 ) == '\0'	? (char *) __rawmemchr (  __retval  ,   __a0 )	: strchr (  __retval  ,   __a0 ))) 	: ((__a2 = ((__const char *) (  __reject ))[2], __a2 == '\0')	? __strpbrk_c2 ( __retval , __a0, __a1)	: (((__const char *) (  __reject ))[3] == '\0'	? __strpbrk_c3 ( __retval , __a0, __a1, __a2)	: strpbrk ( __retval ,   __reject )))))	: strpbrk ( __retval ,   __reject )); }) ) != ((void *)0) )
+    *(*__s)++ = '\0';
+  return __retval;
+}
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+# 1202 "/usr/include/bits/string2.h" 3
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 346 "/usr/include/string.h" 2 3
+
+
+
+
+ 
+
+
+# 4 "RuntimeSupport/tools.h" 2
+
+
+# 1 "/usr/include/assert.h" 1 3
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+# 32 "/usr/include/assert.h" 3
+
+
+
+
+
+ 
+
+
+
+
+# 56 "/usr/include/assert.h" 3
+
+
+ 
+
+ 
+extern void __assert_fail  (__const char *__assertion,
+				__const char *__file,
+				unsigned int __line,
+				__const char *__function)    
+     __attribute__ ((__noreturn__));
+
+ 
+extern void __assert_perror_fail  (int __errnum,
+				       __const char *__file,
+				       unsigned int __line,
+				       __const char *__function)    
+     __attribute__ ((__noreturn__));
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 6 "RuntimeSupport/tools.h" 2
+
+
+# 1 "/users/protheo/moreau/ELAN/elan/sources/gc_src/gc.h" 1
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+# 1 "/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/stddef.h" 1 3
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+ 
+
+ 
+
+
+
+
+ 
+
+
+ 
+
+
+
+
+
+ 
+
+
+# 61 "/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/stddef.h" 3
+
+
+ 
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+ 
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+typedef int ptrdiff_t;
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+ 
+
+ 
+
+
+# 188 "/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/stddef.h" 3
+
+
+
+
+
+ 
+
+
+
+
+ 
+
+
+# 269 "/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/stddef.h" 3
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+ 
+
+# 317 "/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/stddef.h" 3
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+# 33 "/users/protheo/moreau/ELAN/elan/sources/gc_src/gc.h" 2
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    typedef void * GC_PTR;
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+typedef unsigned long GC_word;
+typedef long GC_signed_word;
+
+ 
+
+extern  GC_word GC_gc_no; 
+			 
+			
+
+ 
+
+extern  GC_PTR (*GC_oom_fn)  (size_t bytes_requested)  ;
+			 
+			 
+			 
+			 
+			 
+			 
+			 
+
+extern  int GC_find_leak;
+			 
+			 
+			 
+			 
+
+extern  int GC_quiet;	 
+			 
+			 
+			 
+
+extern  int GC_finalize_on_demand;
+			 
+			 
+			 
+			 
+			 
+
+extern  int GC_java_finalization;
+			 
+			 
+			 
+			 
+			 
+
+extern  int GC_dont_gc;	 
+			 
+
+extern  int GC_dont_expand;
+			 
+			 
+
+extern  int GC_use_entire_heap;
+		 
+		 
+		 
+		 
+		 
+		 
+		 
+		 
+		 
+
+extern  int GC_full_freq;     
+			     
+			     
+			     
+			     
+			     
+			     
+			     
+			     
+			
+extern  GC_word GC_non_gc_bytes;
+			 
+			 
+
+extern  GC_word GC_free_space_divisor;
+			 
+			 
+			 
+			 
+			 
+			 
+			 
+			 
+			 
+			 
+			 
+
+extern  GC_word GC_max_retries;
+			 
+			 
+			 
+			
+
+extern  char *GC_stackbottom;	 
+				 
+				 
+				 
+				 
+				 
+				 
+				 
+				 
+				 
+				 
+				
+ 
+ 
+
+
+
+
+
+
+
+
+
+
+extern  GC_PTR GC_malloc  (size_t size_in_bytes)  ;
+extern  GC_PTR GC_malloc_atomic  (size_t size_in_bytes)  ;
+extern  GC_PTR GC_malloc_uncollectable  (size_t size_in_bytes)  ;
+extern  GC_PTR GC_malloc_stubborn  (size_t size_in_bytes)  ;
+
+ 
+ 
+extern  GC_PTR GC_malloc_atomic_uncollectable  (size_t size_in_bytes)  ;
+
+ 
+ 
+ 
+ 
+ 
+ 
+extern  void GC_free  (GC_PTR object_addr)  ;
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+extern  void GC_change_stubborn  (GC_PTR)  ;
+extern  void GC_end_stubborn_change  (GC_PTR)  ;
+
+ 
+ 
+ 
+ 
+extern  GC_PTR GC_base  (GC_PTR displaced_pointer)  ;
+
+ 
+ 
+ 
+extern  size_t GC_size  (GC_PTR object_addr)  ;
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+extern  GC_PTR GC_realloc
+	 (GC_PTR old_object, size_t new_size_in_bytes)  ;
+				   
+ 
+ 
+extern  int GC_expand_hp  (size_t number_of_bytes)  ;
+
+ 
+ 
+ 
+extern  void GC_set_max_heap_size  (GC_word n)  ;
+
+ 
+ 
+ 
+ 
+ 
+extern  void GC_exclude_static_roots  (GC_PTR start, GC_PTR finish)  ;
+
+ 
+extern  void GC_clear_roots  (void)  ;
+
+ 
+extern  void GC_add_roots  (char * low_address,
+				   char * high_address_plus_1)  ;
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+extern  void GC_register_displacement  (GC_word n)  ;
+
+ 
+ 
+extern  void GC_debug_register_displacement  (GC_word n)  ;
+
+ 
+extern  void GC_gcollect  (void)  ;
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+typedef int (* GC_stop_func)  (void)  ;
+extern  int GC_try_to_collect  (GC_stop_func stop_func)  ;
+
+ 
+ 
+ 
+extern  size_t GC_get_heap_size  (void)  ;
+
+ 
+extern  size_t GC_get_free_bytes  (void)  ;
+
+ 
+extern  size_t GC_get_bytes_since_gc  (void)  ;
+
+ 
+ 
+ 
+ 
+ 
+ 
+extern  void GC_enable_incremental  (void)  ;
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+extern  int GC_collect_a_little  (void)  ;
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+extern  GC_PTR GC_malloc_ignore_off_page  (size_t lb)  ;
+extern  GC_PTR GC_malloc_atomic_ignore_off_page  (size_t lb)  ;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+ 
+extern  GC_PTR GC_debug_malloc
+	 (size_t size_in_bytes, const  char * s, int i )  ;
+extern  GC_PTR GC_debug_malloc_atomic
+	 (size_t size_in_bytes, const  char * s, int i )  ;
+extern  GC_PTR GC_debug_malloc_uncollectable
+	 (size_t size_in_bytes, const  char * s, int i )  ;
+extern  GC_PTR GC_debug_malloc_stubborn
+	 (size_t size_in_bytes, const  char * s, int i )  ;
+extern  void GC_debug_free  (GC_PTR object_addr)  ;
+extern  GC_PTR GC_debug_realloc
+	 (GC_PTR old_object, size_t new_size_in_bytes,
+  		  const  char * s, int i )  ;
+  			 	 
+extern  void GC_debug_change_stubborn  (GC_PTR)  ;
+extern  void GC_debug_end_stubborn_change  (GC_PTR)  ;
+# 417 "/users/protheo/moreau/ELAN/elan/sources/gc_src/gc.h"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+ 
+ 
+ 
+
+
+
+
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+typedef void (*GC_finalization_proc)
+  	 (GC_PTR obj, GC_PTR client_data)  ;
+
+extern  void GC_register_finalizer
+    	 (GC_PTR obj, GC_finalization_proc fn, GC_PTR cd,
+		  GC_finalization_proc *ofn, GC_PTR *ocd)  ;
+extern  void GC_debug_register_finalizer
+    	 (GC_PTR obj, GC_finalization_proc fn, GC_PTR cd,
+		  GC_finalization_proc *ofn, GC_PTR *ocd)  ;
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	  
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+
+ 
+ 
+ 
+ 
+ 
+ 
+extern  void GC_register_finalizer_ignore_self
+	 (GC_PTR obj, GC_finalization_proc fn, GC_PTR cd,
+		  GC_finalization_proc *ofn, GC_PTR *ocd)  ;
+extern  void GC_debug_register_finalizer_ignore_self
+	 (GC_PTR obj, GC_finalization_proc fn, GC_PTR cd,
+		  GC_finalization_proc *ofn, GC_PTR *ocd)  ;
+
+ 
+ 
+extern  void GC_register_finalizer_no_order
+	 (GC_PTR obj, GC_finalization_proc fn, GC_PTR cd,
+		  GC_finalization_proc *ofn, GC_PTR *ocd)  ;
+extern  void GC_debug_register_finalizer_no_order
+	 (GC_PTR obj, GC_finalization_proc fn, GC_PTR cd,
+		  GC_finalization_proc *ofn, GC_PTR *ocd)  ;
+
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+extern  int GC_register_disappearing_link  (GC_PTR *  )  ;
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	
+extern  int GC_general_register_disappearing_link
+	 (GC_PTR *  , GC_PTR obj)  ;
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+extern  int GC_unregister_disappearing_link  (GC_PTR *  )  ;
+	 
+	 
+	 
+
+ 
+ 
+extern  GC_PTR GC_make_closure  (GC_finalization_proc fn, GC_PTR data)  ;
+extern  void GC_debug_invoke_finalizer  (GC_PTR obj, GC_PTR data)  ;
+
+ 
+extern  int GC_should_invoke_finalizers  (void)  ;
+
+extern  int GC_invoke_finalizers  (void)  ;
+	 
+	 
+	 
+	 
+	 
+	 
+
+ 
+ 
+typedef void (*GC_warn_proc)  (char *msg, GC_word arg)  ;
+extern  GC_warn_proc GC_set_warn_proc  (GC_warn_proc p)  ;
+     
+	
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+
+
+
+
+
+
+
+
+typedef GC_PTR (*GC_fn_type)  (GC_PTR client_data)  ;
+extern  GC_PTR GC_call_with_alloc_lock
+        	 (GC_fn_type fn, GC_PTR client_data)  ;
+
+ 
+ 
+ 
+ 
+ 
+extern  GC_PTR GC_same_obj  (GC_PTR p, GC_PTR q)  ;
+
+ 
+ 
+ 
+ 
+extern  GC_PTR GC_pre_incr  (GC_PTR *p, size_t how_much)  ;
+extern  GC_PTR GC_post_incr  (GC_PTR *p, size_t how_much)  ;
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+extern  GC_PTR GC_is_visible  (GC_PTR p)  ;
+
+ 
+ 
+ 
+ 
+ 
+extern  GC_PTR GC_is_valid_displacement  (GC_PTR	p)  ;
+
+ 
+ 
+# 665 "/users/protheo/moreau/ELAN/elan/sources/gc_src/gc.h"
+
+
+
+
+
+
+
+
+
+ 
+# 683 "/users/protheo/moreau/ELAN/elan/sources/gc_src/gc.h"
+
+
+
+
+ 
+extern  void (*GC_same_obj_print_proc)  (GC_PTR p, GC_PTR q)  ;
+
+extern  void (*GC_is_valid_displacement_print_proc)
+	 (GC_PTR p)  ;
+
+extern  void (*GC_is_visible_print_proc)
+	 (GC_PTR p)  ;
+
+
+
+
+
+# 736 "/users/protheo/moreau/ELAN/elan/sources/gc_src/gc.h"
+
+
+
+# 756 "/users/protheo/moreau/ELAN/elan/sources/gc_src/gc.h"
+
+
+# 771 "/users/protheo/moreau/ELAN/elan/sources/gc_src/gc.h"
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 8 "RuntimeSupport/tools.h" 2
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+extern int allocatedBug;
+
+
+
+
+
+
+
+
+# 53 "RuntimeSupport/tools.h"
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+ 
+
+extern void MsgErreur();
+extern void indent(int deep);
+extern void init_alloc();
+extern char* Valloc();
+extern char *allocator(int n);
+extern char *intern_alloc(int size);
+extern void intern_free(long *p);
+extern void print_space_usage();
+
+extern unsigned long cptMalloc;
+extern unsigned long cptAMalloc;
+extern unsigned long cptTermAlloc;
+extern unsigned long cptTermacAlloc;
+extern unsigned long cptCmpEqual;
+extern unsigned long cptCmpTotal;
+extern void globalStatistics();
+
+
+
+
+
+
+
+extern char *intern_alloc2(int size, int mode);
+
+
+# 5 "RuntimeSupport/term.h" 2
+
+# 1 "RuntimeSupport/builtin.h" 1
+
+
+# 1 "RuntimeSupport/term.h" 1
+# 385 "RuntimeSupport/term.h"
+
+
+
+# 3 "RuntimeSupport/builtin.h" 2
+
+
+
+ 
+ 
+ 
+
+   
+
+
+
+
+ 
+ 
+ 
+
+
+extern struct term *con_0,*con_1;
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+ 
+
+
+
+
+ 
+
+
+
+ 
+ 
+ 
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+ 
+ 
+
+
+
+
+
+
+
+
+ 
+ 
+ 
+
+
+
+
+
+
+
+ 
+ 
+ 
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+ 
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+# 6 "RuntimeSupport/term.h" 2
+
+# 1 "/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/stdarg.h" 1 3
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+void va_end (__gnuc_va_list);		 
+
+
+ 
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 168 "/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/include/stdarg.h" 3
+
+
+ 
+
+
+
+
+ 
+
+ 
+
+ 
+
+typedef __gnuc_va_list va_list;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 7 "RuntimeSupport/term.h" 2
+
+
+ 
+
+
+ 
+
+
+extern struct fsym fsymtab[];
+
+typedef struct fsym {
+  int arity;
+  char *name;
+  int semantic;
+  int modulo;
+  int defstrat;                           
+  struct term* (*semact)(struct term *);  
+} fsym;
+
+
+
+
+
+
+
+
+
+
+
+extern void fsym_init(int code, int a, char *n,
+		      int sem, int dstrat,
+		      struct term* (*semacttion)(struct term *));
+
+ 
+
+
+# 54 "RuntimeSupport/term.h"
+
+struct term {
+  unsigned int symb;
+  unsigned int hcode;
+  struct term *(sub[2]);
+};
+
+
+
+
+
+
+
+
+
+struct  term1  { unsigned int symb; unsigned int hcode; struct term *(sub[ 1 ]);} ;
+struct  term2  { unsigned int symb; unsigned int hcode; struct term *(sub[ 2 ]);} ;
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+ 
+ 
+ 
+
+
+
+
+
+
+
+
+
+ 
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+extern struct term *term_build(int nbArg, int code, ...);
+extern void term_alloc(struct term **ptr_dest,
+		       int size_sname,
+		       unsigned int funsym);
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+extern void term_copyTopSymbol(struct term *t,struct term *subterm);
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+struct termac {
+  unsigned int symb;
+  unsigned int hcode;
+  unsigned int sizeinfo;  
+  struct term **subterm;  
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+typedef int multiplicityType;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+extern void termac_alloc(struct termac **ptr_dest,
+                         int size,
+                         unsigned int funsym);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+extern void termac_resize(struct termac *t,int size);
+extern void termac_copyTopSymbol(struct termac *tac,struct termac *subterm);
+extern void termac_copyTopSymbolExcept(struct termac *tac,int i,struct termac *subterm);
+
+ 
+ 
+
+
+
+
+
+
+
+ 
+ 
+ 
+ 
+
+ 
+ 
+extern int isMonoColor(struct term *t);
+extern void setMonoColor(struct term *t);
+
+
+
+
+
+extern struct termac *intern_term_add_onf_term(int isAC,
+			 		       struct termac *tac,
+                                               unsigned int fsym,
+					       struct term *subterm,
+                                               int color);
+# 272 "RuntimeSupport/term.h"
+
+
+
+ 
+
+
+extern void term_print(FILE *fich,struct term *t);
+extern void internal_term_printnl(FILE *fich,struct term *t, int mode);
+
+
+
+
+
+
+
+
+extern void term_printREF(FILE *fich,struct term *t);
+extern void term_printREFln(FILE *fich,struct term *t);
+
+extern struct term* normalise(struct term *res);
+extern struct term* specialApply(struct term *res);
+extern void term_flatten(struct term *t);
+extern struct term *term_unflatten(struct term *t);
+extern void term_onf(struct term *t);
+extern int term_cmp(struct term *t, struct term *t2);
+extern long term_notDestructEqual(struct term *t1,struct term *t2);
+extern struct term *term_replace(struct term *t1,struct term *t2,struct term *t3);
+extern struct term *term_rec_replace(struct term *t1,struct term *t2,struct term *t3);
+extern int term_occur(struct term *t1,struct term *t2);
+extern  struct term *term_removeTopSymbol(struct term *t);
+
+extern struct term *term_metaApply(struct term *t);
+
+
+# 314 "RuntimeSupport/term.h"
+
+
+
+
+ 
+
+
+
+
+
+ 
+
+
+extern int yyparse();
+
+typedef struct listTerm {
+  struct term *term;
+  struct listTerm *next;
+  struct listTerm *last;
+} listTerm;
+
+extern listTerm *listTermCreate(struct term *term);
+extern listTerm *addTermListTerm(listTerm *list , struct term *term);
+
+extern struct term *asfNull();
+extern struct term *asfCons(struct term *t1,struct term *t2);
+extern struct term *asfHead(struct term *t);
+extern struct term *asfTail(struct term *t);
+extern struct term *asfPrefix(struct term *t);
+extern struct term *asfLast(struct term *t);
+extern struct term *asfNotEmptyList(struct term *t);
+extern struct term *asfIsSingleElement(struct term *t);
+
+ 
+
+
+
+struct termac *CC_GC_encode(struct termac *tac);
+struct termac *CC_GC_decode(struct termac *tac);
+
+ 
+
+
+extern struct term *term_newArray(int n, struct term *t);
+extern struct term *term_getArray(struct term *array, int n);
+extern struct term *term_setArray(struct term *array, int n, struct term *t);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 1 "RuntimeSupport/term.c" 2
+
+
+
+# 1 "/users/protheo/moreau/ELAN/elan/sources/clib/Back.h" 1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+ 
+extern int stack_ptr;
+
+ 
+extern void choice_init(long *bp);
+extern void backTrackInit();
+extern void backClean();
+extern int _setChoicePoint ();
+extern void _fail ();
+extern void setBackAction();
+extern void backStatistics();
+extern char * _asCutMark ();
+extern void cCutMark();
+extern char * cCut();
+extern void _asCut ();
+
+ 
+
+
+
+
+ 
+
+
+
+
+ 
+union ip {
+  long i;
+  char *p;
+};
+
+
+
+
+
+
+
+
+
+
+
+
+# 4 "RuntimeSupport/term.c" 2
+
+
+# 1 "/users/protheo/moreau/ELAN/elan/sources/clib/choice.h" 1
+
+
+
+# 1 "/usr/include/setjmp.h" 1 3
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+ 
+
+# 1 "/usr/include/bits/setjmp.h" 1 3
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+typedef int __jmp_buf[6];
+
+
+ 
+
+
+
+# 30 "/usr/include/setjmp.h" 2 3
+
+# 1 "/usr/include/bits/sigset.h" 1 3
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 33 "/usr/include/bits/sigset.h" 3
+
+
+
+ 
+
+
+
+
+
+# 125 "/usr/include/bits/sigset.h" 3
+
+# 31 "/usr/include/setjmp.h" 2 3
+
+
+ 
+typedef struct __jmp_buf_tag	 
+  {
+     
+
+
+    __jmp_buf __jmpbuf;		 
+    int __mask_was_saved;	 
+    __sigset_t __saved_mask;	 
+  } jmp_buf[1];
+
+
+ 
+
+
+extern int __sigsetjmp  (jmp_buf __env, int __savemask)    ;
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+ 
+
+extern void longjmp  (jmp_buf __env, int __val)    
+     __attribute__ ((__noreturn__));
+
+ 
+
+
+extern void _longjmp  (jmp_buf __env, int __val)    
+     __attribute__ ((__noreturn__));
+
+
+
+
+ 
+
+
+typedef jmp_buf sigjmp_buf;
+
+ 
+
+
+
+ 
+
+
+
+extern void siglongjmp  (sigjmp_buf __env, int __val)    
+     __attribute__ ((__noreturn__));
+
+
+ 
+
+
+# 4 "/users/protheo/moreau/ELAN/elan/sources/clib/choice.h" 2
+
+
+
+
+
+
+
+
+
+
+
+
+extern int _setChoicePoint();
+extern void globalFail();
+
+extern void cCutMark(char *ra);
+extern char *cCut();
+
+extern void choice_init(long *bp);
+extern char *get_sp(long bp);
+extern void longjmperror();
+
+extern void backTrackInit();
+extern void backTSizes();
+
+typedef struct Pile {
+  char *data;
+  long size;
+  int _backCTraili ;
+} Pile;
+
+extern int stack_ptr;
+extern jmp_buf stack[];
+extern Pile tab_pile[];
+
+extern char _backTrail [];
+extern char * _backTraili ;
+
+extern union ip backCTrail[];
+extern long _backCTraili ;
+ 
+
+
+
+
+
+
+
+ 
+
+ 
+ 
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+  
+
+# 6 "RuntimeSupport/term.c" 2
+
+
+
+static void print_f_prefix(FILE *fich,struct term *t);
+static struct termac *merge_sorted_term(struct termac *tac1,
+                                        struct termac *tac2);
+static struct termac *termac_insert_bubble(struct termac *tac, int pos);
+
+static int termac_lookup(struct term *subterm,
+                         struct termac *tac,
+                         int low, int high, int *indice);
+
+void term_alloc(struct term **ptr_dest, int size_sname, unsigned int funsym) {
+  struct term *dest;
+  *ptr_dest=(struct term*) GC_malloc(  size_sname  )  ;
+  dest=*ptr_dest;
+  {
+    ( dest )->symb = ( funsym );
+    if(! (((long)(  dest  ))& ((unsigned long)7) ) ) {
+      ( ( ((unsigned int)(  dest  )) ) =
+        ( ( ((unsigned int)(  dest  )) ) & ((~ 0x0ffff000  ) | (((unsigned int)   funsym   ) <<  12  ))))  ;} } ;
+
+
+
+
+
+
+
+
+}
+
+struct term *term_build(int nbArg, int code, ...) {
+  va_list    argv;
+  struct term *res;
+  int i;
+  ( argv  = ((__gnuc_va_list) __builtin_next_arg (  code ))) ;
+  {
+    ( res )=(struct term*) GC_malloc(  sizeof(struct term1)+( nbArg -1)*sizeof(struct term*)  )  ;
+    {
+      (  res  )->symb = (  code  );
+      if(! (((long)(   res   ))& ((unsigned long)7) ) ) {
+        ( ( ((unsigned int)(   res   )) ) = ( ( ((unsigned int)(   res   )) ) & ((~ 0x0ffff000  ) | (((unsigned int)    code    ) <<  12  ))))  ;
+      }
+    } ;
+
+    if(((fsymtab[   code   ].arity)  == -1) ) {printf("TERM_ALLOC AC\n");}
+  } ;
+  
+  for(i=0 ; i<nbArg ; i++) {
+    {
+      (( res )->sub[ i ]=( (struct term *) ( argv  = (__gnuc_va_list) ((char *) ( argv ) + (((sizeof (   struct term *  ) + sizeof (int) - 1) / sizeof (int)) * sizeof (int)) ),	*((  struct term *  *) (void *) ((char *) ( argv ) - (((sizeof (   struct term *  ) + sizeof (int) - 1) / sizeof (int)) * sizeof (int)) )))  ));
+      
+      ( ( ((unsigned int)(  res  )) ) = ( ( ((unsigned int)(  res  )) ) & ((~ 0x0ffff000  ) | (((unsigned int)  (((((((long)(    res    ))& ((unsigned long)7) ) ?((unsigned int)   res   ):((((    res    ) &  0x0ffff000  ) >>  12  ) )) + ((((long)(    (struct term *) ( argv  = (__gnuc_va_list) ((char *) ( argv ) + (((sizeof (   struct term *  ) + sizeof (int) - 1) / sizeof (int)) * sizeof (int)) ),	*((  struct term *  *) (void *) ((char *) ( argv ) - (((sizeof (   struct term *  ) + sizeof (int) - 1) / sizeof (int)) * sizeof (int)) )))     ))& ((unsigned long)7) ) ?((unsigned int)   (struct term *) ( argv  = (__gnuc_va_list) ((char *) ( argv ) + (((sizeof (   struct term *  ) + sizeof (int) - 1) / sizeof (int)) * sizeof (int)) ),	*((  struct term *  *) (void *) ((char *) ( argv ) - (((sizeof (   struct term *  ) + sizeof (int) - 1) / sizeof (int)) * sizeof (int)) )))    ):((((    (struct term *) ( argv  = (__gnuc_va_list) ((char *) ( argv ) + (((sizeof (   struct term *  ) + sizeof (int) - 1) / sizeof (int)) * sizeof (int)) ),	*((  struct term *  *) (void *) ((char *) ( argv ) - (((sizeof (   struct term *  ) + sizeof (int) - 1) / sizeof (int)) * sizeof (int)) )))     ) &  0x0ffff000  ) >>  12  ) )) )) % 65599 )   ) <<  12  ))))  ;
+    } ;
+  }
+  ((void)0) ;
+  
+ return res;
+}
+

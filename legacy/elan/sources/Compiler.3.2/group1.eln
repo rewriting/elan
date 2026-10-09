@@ -1,0 +1,24 @@
+module group1
+
+import global  anyIdentifier;
+end
+
+sort term;
+end
+
+operators
+  global
+    a      : term;
+    b      : term;
+    f(@)    : (term) term;
+
+    @ : (ident) term;
+end
+
+rules for term
+    x    : term;
+  global
+  [] f(x) => x end
+end
+
+end

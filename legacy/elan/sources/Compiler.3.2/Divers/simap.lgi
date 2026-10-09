@@ -1,0 +1,12 @@
+LPL simap description 
+
+      query 	of sort Foo
+      result 	of sort Foo
+      import  	simap
+//      start with 	(eval)[id]go
+//      start with 	[cons(id,id)]go
+//      start with 	[map(id)]go
+      start with 	[map(dk(R1,R2))]go
+//      start with 	()go
+
+end

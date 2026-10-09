@@ -1,0 +1,16 @@
+module rwRules[Fss,Vars]
+import	termCommons[Fss,Vars]
+	pair[term,term] list[pair[term,term]];
+end
+
+operators 
+global
+  @ -> @	: ( term term ) pair[term,term]		alias [@,@]:;
+  ;		: list[pair[term,term]]		alias nil:;
+  @ @		: (pair[term,term] list[pair[term,term]]) list[pair[term,term]]
+						alias cons(@,@):;
+end
+
+end
+
+

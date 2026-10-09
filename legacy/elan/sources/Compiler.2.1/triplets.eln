@@ -1,0 +1,381 @@
+module triplets
+ import global reduce int bool;
+        local  list[prop]
+               pair[set_formula,set_formula]
+               occur[prop,list[prop]]
+               replace[prop,set_formula]
+               occur[formula,set_formula]
+               pair[prop,prop]
+               list[pair[prop,prop]];
+end
+
+//***************************************************************************
+
+sort set_formula;
+end
+
+//***************************************************************************
+
+operators
+ global
+ nil : set_formula;
+ @                 :(formula) set_formula;
+ @ /\ @            :(set_formula set_formula) set_formula (AC);
+ (@ /\ @)          :(set_formula set_formula) set_formula alias @ /\ @:;
+ elt(@)            :(set_formula) formula;
+ length(@)         :(set_formula) int;
+ v(@)              :(formula) prop;
+ v(@)              :(int) prop ;
+ abst(@)           :(formula) set_formula;
+ short_abst(@)     :(formula) set_formula;
+ replace_var(@,@,@):(set_formula list[prop] int) set_formula;
+ list_var(@)       :(set_formula) list[prop];
+ setof(@)          :(list[prop]) list[prop];
+ filter(@)         :(set_formula) set_formula;
+ instantiate(@,@,@):(prop prop set_formula) set_formula;
+ create_pair(@)    :(set_formula) pair[set_formula,set_formula];
+ z_sat(@)          :(pair[set_formula,set_formula]) set_formula;
+ simple_rule(@,@)  :(formula set_formula) set_formula;
+ transit(@)        :(set_formula) set_formula;
+ transitivity(@)   :(set_formula) set_formula;
+ z_saturate(@)     :(pair[set_formula,set_formula]) set_formula;
+ contradict(@)     :(set_formula) bool;
+ @ > @             :(set_formula set_formula) bool; 
+ int(@,@)          :(set_formula set_formula) set_formula;
+ vars(@)           :(set_formula) list[prop];
+ elim_not(@)       :(list[prop]) list[prop];
+ elim_assign(@,@)  :(list[prop] set_formula) list[prop];
+ one_sat(@,@,@)    :(list[prop] set_formula set_formula) set_formula;
+ two_sat(@,@,@)    :(list[pair[prop,prop]] set_formula set_formula) set_formula;
+ one_saturate(@)   :(pair[set_formula,set_formula]) set_formula;
+ two_saturate(@)   :(pair[set_formula,set_formula]) set_formula;
+ pairs(@,@)        :(prop list[prop]) list[pair[prop,prop]];
+ pairs_l(@)        :(list[prop]) list[pair[prop,prop]];
+ end
+
+//***************************************************************************
+
+rules for bool
+ p,q : prop;
+ f : formula;
+ sigma,sigma1 : set_formula;
+ 
+ global
+ [] contradict(p:=q /\ sigma)           => occurs(p:=not(q),sigma) 
+                                        or occurs(q:=not(p),sigma) 
+                                        or contradict(sigma)         end
+ [] contradict(p:=not(q) /\ sigma)      => occurs(p:=q,sigma) 
+                                        or occurs (q:=p,sigma)
+                                        or contradict(sigma)         end 
+ [] contradict(p:=TRUE /\ sigma)        => occurs(p:=FALSE,sigma) 
+                                        or contradict(sigma)         end
+ [] contradict(p:=FALSE /\ sigma)       => occurs(p:=TRUE,sigma) 
+                                        or contradict(sigma)         end 
+ [] contradict(f)                       =>  false                    end
+ [] f/\sigma1 > sigma                   => not occurs(f,sigma)
+                                           or sigma1 > sigma         end
+ [] f > sigma                           => not occurs(f,sigma)       end
+
+end
+
+
+//***************************************************************************
+
+rules for prop
+ f : formula;
+ p : prop;
+ 
+ global
+ [] v(p)                               => p                         end
+ [] v(not(f))                          => not(v(f))                 end
+end
+
+//***************************************************************************
+
+rules for pair[set_formula,set_formula]
+ s : set_formula;
+ p : prop;
+
+ global
+ [] create_pair(s/\p:=TRUE)           => [s,p:=TRUE]                end
+ [] create_pair(s/\p:=FALSE)          => [s,p:=FALSE]               end
+ [] create_pair(nil)                  => [nil,nil]                  end
+end
+
+//***************************************************************************
+rules for set_formula
+ s,s1,s2,sigma,sigma1,new_eq : set_formula;
+ paire : pair[set_formula,set_formula];
+ f,f1,f2 : formula;
+ p,q,r : prop;
+ l : list[prop] ;
+ lp : list[pair[prop,prop]];
+ pp : pair[prop,prop];
+ n : int ;
+
+ global
+ [] s /\ nil                  => s                          end
+ [] abst(p)                   => nil                        end
+ [] abst(not(p))              => nil                        end
+ [] abst(f1 and f2)           => v(f1 and f2) := v(f1) and v(f2)
+                                 /\ abst(f1) /\ abst(f2)    end
+ [] abst(f1 equiv f2)         => v(f1 equiv f2) := v(f1) equiv v(f2)
+                                 /\ abst(f1) /\ abst(f2)    end
+ [] abst(not(f))              => abst(f)                    end
+ [] short_abst(f)             => filter(replace_var(s,setof(list_var(s)),1))
+                                where s:=() instantiate(v(f),FALSE,abst(f))
+                                                            end
+ [] replace_var(s,p.l,n)      => replace(p,v(n),replace_var(s,l,n+1))
+                                                            end 
+ [] replace_var(s,nil,n)      => s                          end
+ [] replace_var(nil,nil,n)    => nil                        end
+ [] filter(f/\s)              => filter(s)
+                                 if occurs(f,s)             end
+ [] filter(f/\s)              => f /\ filter(s)             end
+ [] filter(f)                 => f /\ nil                   end
+ [] filter(nil)               => nil                        end
+ [] instantiate(v(f),FALSE,s) => s /\ v(f):=FALSE           end
+ [] instantiate(not(v(f)),FALSE,s)=> s /\ v(f):=TRUE        end
+ [] instantiate(p,FALSE,nil)  => nil                        end
+ [] z_sat([f/\s,sigma])       => z_sat(
+                                 [f,transitivity(filter(z_sat([s,sigma])))]
+                                      )
+                                                            end
+ [] z_sat([f,sigma])          => sigma/\simple_rule(f,sigma)end
+ [] z_sat([nil,sigma])        => sigma                      end
+ [] simple_rule(p := q and r,sigma) => sigma /\ new_eq 
+                       choose try if occurs(p:=not(q),sigma) 
+                                  or occurs(q:=not(p),sigma)
+                                  where new_eq:=()q:=TRUE/\r:=FALSE
+                              try if occurs(p:=not(r),sigma) 
+                                  or occurs(r:=not(p),sigma)
+                                  where new_eq :=()q:=FALSE/\r:=TRUE
+                              try if occurs(q:=r,sigma) 
+                                  or occurs(r:=q,sigma)
+                                  where new_eq:=()p:=r
+                              try if occurs(q:=not(r),sigma) 
+                                  or occurs(r:=not(q),sigma)
+                                  where new_eq:=()p:=FALSE
+                              try if occurs(p:=TRUE,sigma) 
+                                  or occurs(not(p):=FALSE,sigma)
+                                  where new_eq:=()q:=TRUE/\r:=TRUE
+                              try if occurs(q:=TRUE,sigma) 
+                                  or occurs(not(q):=FALSE,sigma)
+                                  where new_eq:=()p:=r
+                              try if occurs(q:=FALSE,sigma) 
+                                  or occurs(not(q):=TRUE,sigma)
+                                  where new_eq:=()p:=FALSE
+                              try if occurs(r:=TRUE,sigma) 
+                                  or occurs(not(r):=FALSE,sigma)
+                                  where new_eq:=()p:=q
+                              try if occurs(r:=FALSE,sigma) 
+                                  or occurs(not(r):=TRUE,sigma)
+                                  where new_eq:=()p:=FALSE
+                              try where new_eq:=()nil
+                                                           end 
+                                                           end
+ [] simple_rule(p := q equiv r,sigma) => sigma /\ new_eq 
+                       choose try if occurs(p:=q,sigma) 
+                                  or occurs(q:=p,sigma) 
+                                  where new_eq:=()r:=TRUE
+                              try if occurs(p:=not(q),sigma) 
+                                  or occurs(q:=not(p),sigma)
+                                  where new_eq :=()r:=FALSE
+                              try if occurs(p:=r,sigma) 
+                                  or occurs(r:=p,sigma)
+                                  where new_eq :=()q:=TRUE
+                              try if occurs(p:=not(r),sigma) 
+                                  or occurs(r:=not(p),sigma)
+                                  where new_eq :=()q:=FALSE
+                              try if occurs(q:=r,sigma) 
+                                  or occurs(r:=q,sigma)
+                                  where new_eq :=()p:=TRUE
+                              try if occurs(q:=not(r),sigma) 
+                                  or occurs(r:=not(q),sigma)
+                                  where new_eq :=()p:=FALSE
+                              try if occurs(p:=TRUE,sigma) 
+                                  or occurs(not(p):=FALSE,sigma)
+                                  where new_eq :=()q:=r
+                              try if occurs(p:=FALSE,sigma) 
+                                  or occurs(not(p):=TRUE,sigma)
+                                  where new_eq :=()q:=not(r)
+                              try if occurs(q:=TRUE,sigma) 
+                                  or occurs(not(q):=FALSE,sigma)
+                                  where new_eq :=()p:=r
+                              try if occurs(q:=FALSE,sigma) 
+                                  or occurs(not(q):=TRUE,sigma)
+                                  where new_eq :=()p:=not(r)
+                              try if occurs(r:=TRUE,sigma) 
+                                  or occurs(not(r):=FALSE,sigma)
+                                  where new_eq :=()p:=q
+                              try if occurs(r:=FALSE,sigma) 
+                                  or occurs(not(r):=TRUE,sigma)
+                                  where new_eq :=()p:=not(q)
+                              try where new_eq:=()nil
+                                                           end
+                                                           end
+ 
+ [] transit(p:=q /\ sigma)      => transit(sigma) /\ p:=TRUE
+                                if occurs(q:=TRUE,sigma)   end
+ [] transit(p:=q /\ sigma)      => transit(sigma) /\ p:=FALSE
+                                if occurs(q:=FALSE,sigma)  end
+ [] transit(p:=not(q) /\ sigma) => transit(sigma) /\ p:=TRUE
+                                if occurs(q:=FALSE,sigma)  end
+ [] transit(p:=not(q) /\ sigma) => transit(sigma) /\ p:=FALSE
+                                if occurs(q:=TRUE,sigma)   end
+ 
+ [] transit(p:=q /\ sigma)      => transit(sigma) /\ q:=TRUE
+                                if occurs(p:=TRUE,sigma)   end
+ [] transit(p:=q /\ sigma)      => transit(sigma) /\ q:=FALSE
+                                if occurs(p:=FALSE,sigma)  end
+ [] transit(p:=not(q) /\ sigma) => transit(sigma) /\ q:=TRUE
+                                if occurs(p:=FALSE,sigma)  end
+ [] transit(p:=not(q) /\ sigma) => transit(sigma) /\ q:=FALSE
+                                if occurs(p:=TRUE,sigma)   end
+ 
+
+
+ [] transit(p:=q /\ sigma)      => transit(sigma) /\ p:=q  end     
+ [] transit(p:=not(q) /\ sigma) => transit(sigma) /\ p:=not(q) 
+                                                           end
+ [] transit(f)                  => f                       end
+ 
+ [] transitivity(sigma)         => transitivity(sigma1)
+                                where sigma1:=()transit(sigma)
+                                if sigma1 > sigma          end
+ [] transitivity(sigma)         => sigma                   end
+ 
+ [] z_saturate([s,sigma])       => z_saturate([s,sigma1])
+                                   if not contradict(sigma)
+                                   where sigma1:=()filter(
+                                   transitivity(z_sat([s,sigma]))
+                                                         )
+                                   if sigma1 > sigma 
+                                                           end
+ [] z_saturate([s,sigma])       => sigma                   end
+ [] int(f/\s1,s2)               => f/\int(s1,s2) 
+                                if occurs(f,s2)            end
+ [] int(f/\s1,s2)               => int(s1,s2)              end
+ [] int(f,s2)                   => f if occurs(f,s2)       end
+ [] int(f,s2)                   => nil                     end 
+ [] int(nil,s2)                 => nil                     end
+ 
+ [] one_sat(p.l,s,sigma)        => one_sat(l,s,int(
+                                            z_saturate([s,sigma/\p:=TRUE])
+                                            ,
+                                            z_saturate([s,sigma/\p:=FALSE]))
+                                           )               end
+ [] one_sat(nil,s,sigma)        => sigma                   end
+ 
+ [] one_saturate([s,sigma])    => one_saturate([s,sigma1])
+                                  if not contradict(sigma)
+                                  where sigma1:=()filter(transitivity(
+                                  one_sat(elim_assign(setof(elim_not
+                                  (vars(s))),sigma),s,sigma)))
+                                  if sigma1 > sigma
+                                                           end
+ [] one_saturate([s,sigma])    => sigma                    end
+ [] two_sat(pp.lp,s,sigma)     => two_sat(lp,s,int(
+                                               int(
+                                  z_saturate([s,sigma/\first(pp):=TRUE/\second(pp):=TRUE])
+                                  ,
+                                  z_saturate([s,sigma/\first(pp):=FALSE/\second(pp):=FALSE])
+                                                  )
+                                                  ,
+                                               int(
+                                  z_saturate([s,sigma/\first(pp):=TRUE/\second(pp):=FALSE])
+                                  ,
+                                  z_saturate([s,sigma/\first(pp):=FALSE/\second(pp):=TRUE])
+                                                  )
+                                                  )
+                                          )                end
+ [] two_saturate([s,sigma])    => two_saturate([s,sigma1])
+                                  if not contradict(sigma)
+                                  where sigma1:=()filter(transitivity(
+                                  two_sat(pairs_l(elim_assign(setof(elim_not
+                                  (vars(s))),sigma)),s,sigma)))
+                                  if sigma1 > sigma
+                                                           end
+ [] two_saturate([s,sigma])    => sigma                    end
+end
+
+//***************************************************************************
+
+rules for list[prop]
+ s: set_formula ;
+ f,f1,f2: formula ;
+ l: list[prop] ;
+ p,p1,p2: prop ;
+
+ global
+ [] list_var(f /\ s)         => list_var(f) @ list_var(s)   end
+ [] list_var(f1 and f2)      => list_var(f1) @ list_var(f2) end
+ [] list_var(f1 equiv f2)    => list_var(f1) @ list_var(f2) end
+ [] list_var(p := f)         => p.list_var(f)               end
+ [] list_var(not(f))         => list_var(f)                 end
+ [] list_var(not(v(f)))      => v(f).nil                    end
+ [] list_var(v(f))           => v(f).nil                    end 
+ [] list_var(p)              => nil                         end
+ [] list_var(nil)            => nil                         end
+ 
+ [] setof(p.l)               => p.setof(l) 
+                                if not occurs(p,l)          end 
+ [] setof(p.l)               => setof(l)                    end
+ [] setof(nil)               => nil                         end
+ 
+ [] vars(p:=TRUE)            => nil                         end
+ [] vars(p:=FALSE)           => nil                         end
+ [] vars(f /\ s)             => vars(f) @ vars(s)           end
+ [] vars(p := f)             => p.vars(f)                   end 
+ [] vars(f1 and f2)          => vars(f1) @ vars(f2)         end
+ [] vars(f1 equiv f2)        => vars(f1) @ vars(f2)         end
+ [] vars(not(f))             => vars(f)                     end
+ [] vars(not(p))             => p.nil                       end
+ [] vars(p)                  => p.nil                       end 
+ [] vars(nil)                => nil                         end
+ [] elim_not(not(p).l)       => p.elim_not(l)               end
+ [] elim_not(p.l)            => p.elim_not(l)               end
+ [] elim_not(not(p).nil)     => p.nil                       end
+ [] elim_not(p.nil)          => p.nil                       end
+ [] elim_not(nil)            => nil                         end
+ [] elim_assign(p.l,s)       => elim_assign(l,s)
+                                if occurs(p:=TRUE,s) 
+                                or occurs(p:=FALSE,s)       end
+ [] elim_assign(p.l,s)       => p.elim_assign(l,s)          end
+ [] elim_assign(nil,s)       => nil                         end
+                                                     
+end
+
+//***************************************************************************
+
+rules for list[pair[prop,prop]]
+ p,p1,p2 : prop;
+ l,l1,l2 : list[prop];
+
+ global
+
+ [] pairs_l(p.l)              => pairs(p,l) @ pairs_l(l)   end
+ [] pairs_l(p.nil)            => nil                       end
+ [] pairs(p1,p2.l)            => [p1,p2].pairs(p1,l)       end
+ [] pairs(p,nil)              => nil                       end 
+ [] pairs_l(nil)              => nil                       end
+    
+end
+
+//***************************************************************************
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

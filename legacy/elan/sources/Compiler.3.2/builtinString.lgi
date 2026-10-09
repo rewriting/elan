@@ -1,0 +1,7 @@
+LPL builtinString description
+  query of sort builtinString // builtinInt 
+  result of sort builtinString // builtinInt 
+  import builtinString
+  start with ()query 
+
+end

@@ -1,0 +1,22 @@
+module Int
+
+import global int ;
+end
+
+sort foo;
+end
+
+operators global
+ @	: (int) foo;
+ -@	: (int) foo;
+ f(@)	: (foo) foo;
+end
+
+rules for foo
+	x : int;
+global
+  [] f(-5) => -5	end
+  [] f(x)  => -x	end
+end
+
+end

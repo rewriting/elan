@@ -1,0 +1,8 @@
+LPL getc description 
+
+  query 	of sort 	int
+         	result of sort  int
+	 	modules	string  getc
+        	start with 	(kkkk)query
+
+end

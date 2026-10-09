@@ -1,0 +1,21 @@
+module strref
+
+import global refstring2string ref2string[Foo]; end
+
+sort Foo; end
+
+operators global
+  a		: Foo;
+  b 		: Foo;
+  f(@,@)	: (Foo Foo) Foo;
+  g(@)		: (Foo) Foo;
+  foo(@)	: (string) Foo;
+end
+
+rules for Foo
+t	: string;
+global
+  []	foo(t) => refstring2term(t)		end
+end
+
+end

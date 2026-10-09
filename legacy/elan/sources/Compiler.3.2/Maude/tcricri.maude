@@ -1,0 +1,51 @@
+obj TEST is 
+
+***  protecting BOOL .
+***  protecting MACHINE-INT .
+  sort Var Term EqSystem .
+
+***  op t : MachineInt -> Term .
+***  op v : MachineInt -> Var .
+
+  ops v0 v1 v2 : -> Var .
+  ops t0 t1 t2 : -> Term .
+
+  op i : Var -> Term .
+
+  op feqF   : Term Term -> EqSystem .
+  op feqE   : Term Term -> EqSystem .
+  op feqV   : Var  Var  -> EqSystem .
+  op feqEUF : Term Term -> EqSystem .
+  op _+_   : EqSystem EqSystem -> EqSystem [assoc comm] .
+
+***  op inf   : Term Term -> Bool .
+
+
+vars X Y : Var .
+vars U V : Term .
+*** vars I J : MachineInt .
+var  P   : EqSystem .
+
+***  eq inf(t(I),t(J)) = I < J .
+
+
+  eq P + feqF(i(X),U) + feqE(i(Y),V) + feqV(X,Y)
+      =
+     P + feqF(i(X),U) + feqE(i(Y),V) + feqV(X,Y) + feqEUF(U,V) .
+***      if inf(U,V) == true .
+endo
+
+red inf(t(0), t(1)) .
+
+red  eqE(i(v(2)),t(2)) +
+     eqF(i(v(0)),t(0)) +
+     eqE(i(v(1)),t(1)) +
+     eqV(v(0),v(1)) .
+
+
+red  feqE(i(v2),t2) +
+     feqF(i(v0),t0) +
+     feqE(i(v1),t1) +
+     feqV(v0,v1) .
+
+

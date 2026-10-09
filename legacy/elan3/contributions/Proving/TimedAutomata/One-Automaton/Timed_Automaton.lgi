@@ -1,0 +1,27 @@
+LPL Timed_Automaton description
+
+  specification description
+    part Clocks of sort list[identifier]
+        import identifier list[identifier]
+    part States of sort list[identifier]
+        import identifier list[identifier]
+    part Labels of sort list[identifier]
+        import identifier list[identifier]
+    part Invariant of sort list[invariant]
+        import Terms[Clocks,States,Labels]
+    part Transitions of sort list[transition]
+        import Terms[Clocks,States,Labels]
+  end
+
+  query of sort pair[list[statezone],bool]
+  result of sort pair[list[statezone],bool]
+  import Timed_Automaton[Clocks,States,Labels,Invariant,Transitions]
+  start with (TransTimeOperatorStar)query
+
+end
+
+/* examples of queries:
+
+ Transitions_List(nil,s0/true,s2/true) end
+ Transitions_List(nil,s0/true,s1/X>5^true) end
+*/

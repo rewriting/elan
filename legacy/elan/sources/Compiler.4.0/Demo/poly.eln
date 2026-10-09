@@ -1,0 +1,253 @@
+module poly
+
+import global 
+  int 
+  eq[variable] 
+;
+end
+
+sort variable coeff exp;
+end
+
+operators
+global
+  X : variable;
+  Y : variable;
+  Z : variable;
+
+  @		: ( int )		coeff	pri 1000;
+  @		: ( coeff )		exp	pri 1000;
+  @		: ( variable )		exp	pri 1000;
+  (@)		: ( exp )		exp	pri 1000;
+
+  @ + @ 	: ( exp exp )		exp (AC) assocRight pri 10 ;
+  @ * @ 	: ( exp exp )		exp (AC) assocRight pri 20 ;
+
+  @ ^ @ 	: ( exp exp )		exp  assocRight pri 30;
+  @ / @ 	: ( exp exp )		exp ;
+  cos(@)	: ( exp )		exp ;
+  sin(@)	: ( exp )		exp ;
+  exp(@)	: ( exp )		exp ;
+  expn(@,@)	: ( exp int )		exp ;
+
+  dsimplify(@) 	: (exp)		exp;
+  simp(@) 	: (exp)			exp alias dsimplify(@):;
+
+  deriv(@,@) 	: (exp variable)	exp;
+  derivn(@,@,@)	: (exp variable int)	exp;
+local
+
+  simp_plus(@) 	: (exp)			exp;
+  simp_mult(@) 	: (exp)			exp;
+  (@ +int @) 	: ( int int )		int pri 500 alias (@+@):;
+end
+
+stratop global
+  s_simp_plus1		: <exp>	bs;
+  s_simp_mult1		: <exp>	bs;
+
+end
+
+/*
+ * General rules
+ */
+rules for exp
+  e,e1,e2,e3	: exp;
+  c		: coeff;
+  x		: variable;
+  n		: int;
+global
+  [] 0 + 0 => 0				end
+  [] 1 * 1 => 1				end
+
+  [] expn(e,1)	    => exp(e)		end
+  [] expn(e,n)	    => expn(exp(e),n-1)	end
+
+
+  [plusAdd0]  e     => e + 0		end
+  [plusElim0] e + 0 => e		end
+  [multAdd1]  e     => e * 1		end
+  [multElim1] e * 1 => e		end
+
+  [] simp_plus(e1+e2) => e3 where e3:=(s_simp_plus1) e1+e2		end
+  [] simp_plus(e1) => e1						end
+  [] simp_mult(e1*e2) => e3 where e3:=(s_simp_mult1) e1*e2		end
+  [] simp_mult(e1) => e1						end
+
+  [] dsimplify(e1 + e2) => simp_plus(dsimplify(e1) + dsimplify(e2))	end
+  [] dsimplify(e1 * e2) => simp_mult(dsimplify(e1) * dsimplify(e2))	end
+  [] dsimplify(e1 ^ e2) => dsimplify(e1) ^ dsimplify(e2)		end
+  [] dsimplify(e1 / e2) => dsimplify(e1) / dsimplify(e2)		end
+  [] dsimplify( (e1) ) => dsimplify(e1)					end
+  [] dsimplify(e1) => e1						end
+end
+
+/*
+ * Simplification rules for +
+ * Constant elimination
+ */
+
+rules for exp
+  n,n1,n2	: int;
+  e,e1,e2	: exp;
+  x,y		: variable;
+  E1,E2,E3,e3	: exp;
+global
+  [r_simp_plus1]  e1 + n1+n2	=> e1 + n 
+		  if n1!=0 and n2!=0
+		  where n:=() n1+n2
+  end
+
+//  [r_simp_plus2] e1 + x+x	=> e1 + 2*x				end
+  [r_simp_plus2] e1 + e2+e2	=> e1 + 2*e2				end
+/*
+  [r_simp_plus2] e1 + e2 + n2*e2	=> e1 + n*e2
+				where n:=() n2+1
+  end
+  [r_simp_plus2] e1 + n1*e2 + n2*e2	=> e1 + n*e2
+				where n:=() n1+n2
+  end
+*/
+
+  [r_simp_plus2] E1 + E2*E3	=> e1 + n*e2
+				where (exp) e1 + e2 + n2*e2:=() E1+E2*E3
+				where n:=() n2+1
+  end
+  [r_simp_plus2] E1 + E2*E3	=> e1 + n*e2
+				where (exp) e1 + n1*e2 + n2*e2:=() E1+E2*E3
+				where n:=() n1+n2
+  end
+
+  [r_simp_plus3] e1 + cos(e2)^2 + sin(e2)^2 => e1 + 1			end
+end
+
+/*
+ * Simplification rules for *
+ * Factorisation
+ */
+
+rules for exp
+  n,n1,n2	: int;
+  e,e1,e2	: exp;
+  x,y		: variable;
+global
+  [r_simp_mult1]  e1 * e2*0	=> 0					end
+  [r_simp_mult1]  e1 * n1*n2	=> e1 * n 
+		  if n1!=1 and n2!=1
+		  where n:=() n1*n2	
+  end
+
+//  [r_simp_mult2] e1 * x*x	=> e1 * x^2				end
+  [r_simp_mult2] e1 * e2*e2	=> e1 * e2^2				end
+  [r_simp_mult2] e1 * e2*e2^n2	=> e1 * e2^(n2 +int 1)			end
+  [r_simp_mult2] e1 * e2^n1*e2^n2	=> e1 * e2^(n1 +int n2)		end
+
+end
+
+
+
+
+//
+// Internal no named rules
+//
+rules for exp
+  c		: coeff;
+  x,y		: variable;
+  n		: int;
+  e,e1,e2	: exp;
+global
+
+  [] deriv(x,x) 	=> 1					end
+  [] deriv(y,x) 	=> 0    if $x != $y			end
+  [] deriv(n,x)   	=> 0					end
+  [] deriv(e1+e2,x)  	=> deriv(e1,x) + deriv(e2,x)		end
+  [] deriv(e1*e2,x)  	=> e1*deriv(e2,x) + deriv(e1,x)*e2	end
+  [] deriv(e1^n,x)  	=> n*deriv(e1,x)^(n-1)			end
+  [] deriv(exp(e1),x)  	=> deriv(e1,x)*exp(e1)			end
+
+  [] derivn(e1,x,1)  	=> deriv(e1,x)				end
+  [] derivn(e1,x,n)  	=> derivn(deriv(e1,x),x,n-1)		end
+
+end
+
+strategies for exp
+implicit
+  [.] s_simp_plus1 => plusAdd0 ; 
+		 repeat*(dc one(r_simp_plus1,
+				r_simp_plus2,
+				r_simp_plus3
+				)) ; 
+		 dc one(plusElim0, id)
+  end
+
+  [.] s_simp_mult1 => multAdd1 ; 
+		 repeat*(dc one(r_simp_mult1,
+				r_simp_mult2)) ; 
+		 dc one(multElim1,id)
+  end
+
+end
+
+
+end
+
+
+
+/*
+
+simp(
+X+0+(X+(X*1+0))
+)
+end
+
+simp(
+cos(1)*cos(1)+sin(1)*sin(1)
+)
+end
+
+simp(
+deriv(3*X*X+7*X+1 , X)
+)
+end
+
+simp(
+deriv(4*X*X*X + 3*X*X + 2*X + 1 , X)
+)
+end
+
+simp(
+cos(X)^2 + sin(X)^2
+)
+end
+
+simp(
+cos(X)* (1 + cos(X)^2 + sin(X)^2)
+)
+end
+
+
+
+
+
+deriv(1 + 1*X + 2*X*X + 3*X*X*X + 4*X*X*X*X
+	+ 5*X*X*X*X*X,  X)
+end
+
+
+deriv(1 + 1*X + 2*X*X + 3*X*X*X + 4*X*X*X*X
+	+ 5*X*X*X*X*X+ 6*X*X*X*X*X*X,  X)
+end
+
+simp(deriv(
+	1 + 1*X + 2*X*X + 3*X*X*X + 4*X*X*X*X
+	+ 5*X*X*X*X*X + 6*X*X*X*X*X*X
+	+ 7*X*X*X*X*X*X*X + 8*X*X*X*X*X*X*X*X
+	,X))
+end
+
+  simp(derivn(expn(X,3),X,3))
+
+  simp(derivn(expn(X,5),X,5))
+
+
+*/

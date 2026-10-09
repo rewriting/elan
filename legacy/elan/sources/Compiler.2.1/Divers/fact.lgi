@@ -1,0 +1,17 @@
+LPL fact description 
+
+query 		of sort int//list[int]//int //
+      result 	of sort int//list[int]//int //
+      import   fact
+//      start with (factorial) query
+//      start with (strat) query
+//      start with (factorial) 3 
+      start with (strat) 3 
+
+end
+
+// 1 end
+
+// 5.nil end
+
+// 3.nil end

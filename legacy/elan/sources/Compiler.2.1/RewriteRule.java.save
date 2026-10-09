@@ -1,0 +1,1024 @@
+import java.util.*;
+
+public class RewriteRule {
+  private Term leftside;  // membre gauche
+  //private Term rightside; // membre droit
+  // Old switch
+  private RightHandSide rightside; // membre droit
+  private BranchEvaluation branch; // local evaluations
+
+  private Lexem name;
+  private Lexem sort;
+
+  // table : symbole de tete <--> vecteur de regles
+  //    ou : nom de regle    <--> vecteur de regles 
+  private static Hashtable htable = new Hashtable(40);
+
+  /**
+   * to know if local evaluations are deterministic 
+   */
+  private DetType detTypeEvaluation;
+  static private int clear=0;
+  static private int start=1;
+  static private int done=2;
+  private int detTypeState=clear;
+
+    /**
+     * numero du matchState associe a la regle
+     */
+  public int matchStateNumber=-1;
+  
+  
+  public RewriteRule(Lexem ruleName, Lexem ruleSort, 
+		     Term lhs, RightHandSide rhs, BranchEvaluation localEvaluations) {
+    name = ruleName;
+    sort = ruleSort;
+    leftside = lhs;
+    if(!isNamed()) {
+      leftside.clearConstructor();
+    }
+    rightside = rhs;
+    branch=localEvaluations;
+    variableNumbering();
+  }
+
+  public Term getLeftside() {
+    return leftside;
+  }
+
+  private BranchEvaluation getBranch() {
+    return branch;
+  }
+
+  /**
+   * retourne les regles associees a un symbole de tete
+   */
+  public static Vector getTable(Object key) {
+    return (Vector) htable.get(key);
+  }
+
+  public static Hashtable getHashtable() {
+    return htable;
+  }
+
+  public boolean isNamed() {
+    return name!=null;
+  }
+
+  public boolean isCompilable() throws CompileError,ACPatternNotCompiled {
+    if(leftside.containsAC()) {
+      Term lhsACPattern = leftside.getFirstACPattern();
+      int nbACSubterms  = leftside.getNbACSubterms();
+
+      if(Flags.debug) {
+        System.out.println("\nrule = " + this);
+	if(!leftside.isAC()) {
+	  System.out.println("\nleftside  = " + leftside);
+	}
+	System.out.println("\nlhsACPattern = " + lhsACPattern);
+	System.out.println("\nnbACSubterms = " + nbACSubterms);
+      }
+
+      PatternInfo patternInfo     = lhsACPattern.getPatternInfo(getBranch());
+      int nbSingleACVariable      = patternInfo.getNbSingleACVariable();
+      int nbMultiACVariable       = patternInfo.getNbMultiACVariable();
+      int nbSingleACSubterm       = patternInfo.getNbSingleACSubterm();
+      int nbMultiACSubterm        = patternInfo.getNbMultiACSubterm();
+      boolean constrainedVariable = patternInfo.getConstrainedVariable();
+      if(Flags.debug) {
+	System.out.println(patternInfo);
+      }
+      /*
+       * un seul niveau est compile
+       * F(x,G(y,z))
+       */
+      for(int i=0 ; i<lhsACPattern.arity() ; i++) {
+	if(lhsACPattern.getSubterm(i).containsAC()) {
+	  Term subACTerm = lhsACPattern.getSubterm(i).getFirstACPattern();
+	  if(subACTerm.isDio()) {
+	    if(subACTerm.arity()>2) {
+	      throw new CompileError("Second level contains more than 2 variables");
+	    }
+	    if(Flags.debug) {
+	      System.out.println("Deux niveaux de symboles AC");
+	      System.out.println("*** leftside = " + leftside);
+	    }
+	  } else { 
+	    /*
+	     * On ne peut pas compiler un sous-terme non-dio
+	     */
+	      throw new CompileError("Second level contains a non variable term");
+	  }
+	}
+      }      
+
+      /*
+       * cas d'une regle nommee ou d'un sous-pattern AC
+       */
+      if(isNamed() || !leftside.isAC()) {
+	/*
+	 * On peut compiler
+	 * F(x,y)
+	 * F(x^n)
+	 * F(x,y^n)
+         * F(t^n)
+	 * F(t1,...,tn)
+	 * F(x,t1,...,tn)
+	 */	
+	if(!(
+	     (lhsACPattern.arity()==2 && nbSingleACVariable==2 && nbMultiACVariable==0) ||
+	     (lhsACPattern.arity()==1 && nbSingleACVariable==0 && nbMultiACVariable==1) ||
+	     (lhsACPattern.arity()==2 && nbSingleACVariable==1 && nbMultiACVariable==1) ||
+             (lhsACPattern.arity()==1 && nbSingleACVariable==0 && nbMultiACVariable==0 && nbMultiACSubterm==1) ||
+	     (lhsACPattern.arity()>=2 && nbSingleACVariable==0 && nbMultiACVariable==0) ||
+	     (lhsACPattern.arity()>=2 && nbSingleACVariable==1 && nbMultiACVariable==0)
+	     )) {
+	  throw new CompileError("too many variables in the first level");
+	}
+      } else {
+	/*
+	 * cas d'une regle non nommee et d'un symbole AC en tete
+	 */
+	if(!constrainedVariable) {
+	  /*
+	   * si toutes les variables sont libres on peut compiler
+	   * F(x,y)
+	   * F(x,y^n)
+	   * F(x,t1,...,tn)
+	   */
+	  if(!(
+	       (lhsACPattern.arity()==2 && nbSingleACVariable==2 && nbMultiACVariable==0) ||
+	       (lhsACPattern.arity()==2 && nbSingleACVariable==1 && nbMultiACVariable==1) ||
+	       (lhsACPattern.arity()>=2 && nbSingleACVariable==1 && nbMultiACVariable==0) 
+	       )) {
+	    throw new ACPatternNotCompiled();
+	  }
+	} else {
+	  /*
+	   * si une variable est liee aux conditions on peut compiler
+	   * F(x,y,z) ne sert a rien !!! a remplacer par F(x,y)
+	   * F(x,y^n)
+	   * F(x,y,t1,...,tn)
+	   */
+	  if(!(
+	       //	       (lhsACPattern.arity()==3 && nbSingleACVariable==3 && nbMultiACVariable==0) ||
+	       // F(x,y)
+	       (lhsACPattern.arity()==2 && nbSingleACVariable==2 && nbMultiACVariable==0) ||
+	       (lhsACPattern.arity()==2 && nbSingleACVariable==1 && nbMultiACVariable==1) ||
+	       //(lhsACPattern.arity()>=2 && nbSingleACVariable==1 && nbMultiACVariable==0) ||
+	       (lhsACPattern.arity()>=3 && nbSingleACVariable==2 && nbMultiACVariable==0) 
+	       )) {
+	    throw new ACPatternNotCompiled();
+	  }
+	}
+      }
+      
+      /*
+      // term without single AC variable 
+      // Cas f(x,x) et f(t1,...,tn)
+      if(!isNamed() && nbSingleACVariable==0) {
+	throw new CompileError();
+      }
+
+      if(nbMultiACVariable>1) {
+	throw new CompileError();
+      } else if(nbMultiACVariable==1) {
+	
+      }
+      
+      // Cas f(x,y)
+      if(nbSingleACVariable==leftside.arity()) {
+	if(!isNamed() && constrainedVariable) {
+	  if(nbSingleACVariable>3) {
+	    throw new CompileError();
+	  }
+	} else {
+	  if(nbSingleACVariable>2) {
+	    throw new CompileError();
+	  }
+	}
+      }
+
+      // Cas f(x,t1,...,tn)
+      if(leftside.arity()>2) {
+	if(constrainedVariable) {
+	  if(nbSingleACVariable!=2 || nbMultiACVariable>0) {
+	    throw new CompileError();
+	  }
+	} else {
+	  if(nbSingleACVariable!=1 || nbMultiACVariable>0) {
+	    throw new CompileError();
+	  }
+	}
+      }
+      */
+    } else {
+
+    }
+
+    return true;
+  }
+
+
+  public String toString() {
+    String s;
+    s = "[";
+    if(name!=null) {
+      s+=name;
+    }
+    s+= "] " + leftside + " => " + rightside ;
+    s+= getBranch();
+    return s;
+  }
+
+  /**
+   * Ajoute une regle au systeme
+   */
+  public static void addElement(RewriteRule rule) {
+    Vector vector;
+    Object key;
+    if(rule.isNamed()) {
+      key = rule.name;
+    } else {
+      key = rule.leftside.getSymbol();
+    }
+    vector = (Vector)htable.get(key);
+    if(vector==null) {
+      vector = new Vector();
+      htable.put(key,vector);
+    }
+    vector.addElement(rule);
+  }
+
+  public static void dump() {
+    Enumeration e = htable.keys();
+    while(e.hasMoreElements()) {
+      Object key = e.nextElement();
+      Vector vector = (Vector)htable.get(key);
+      for(int i = 0 ; i < vector.size() ; i++) {
+	System.out.println( vector.elementAt(i) );
+      }
+    }
+  }
+
+
+  public boolean hasACPattern() {
+    return leftside.containsAC();
+  }
+
+  public boolean hasACDioPattern() {
+    return leftside.containsACDio();
+  }
+
+  /**
+   * identifiant de la regle : code du symbole de tete
+   */
+  public String getName() {
+    return leftside.getSymbolCode();
+  }
+
+  public void flatten() {
+    leftside.flatten();
+    rightside.flatten();
+  }
+
+  public void orderedNormalForm() {
+    leftside.orderedNormalForm();
+    rightside.orderedNormalForm();
+  }
+
+  public DetType getTopLevelDetType(StrategyChooseRule sterm) {
+    DetType detType;
+    if(sterm==null) {
+      detType = DetType.detType;
+    } else {
+      detType = sterm.getDetType();
+    }
+
+    if(hasACPattern()) {
+      PatternInfo patternInfo = leftside.getPatternInfo(getBranch());
+      if(patternInfo.getConstrainedVariable()) {
+	detType=detType.and(DetType.multiDetType);
+      }
+    } 
+    return detType;
+  }
+
+  public DetType getDetTypeEvaluation() {
+    DetType detType;
+    if(rightside instanceof RhsTerm) {
+      detType = getBranch().getDetType();
+    } else {
+      detType = rightside.getDetTypeEvaluation();
+    }
+    return detType;
+  }
+
+  public boolean allDetEvaluation() {
+    return getDetTypeEvaluation().isExactlyDet();
+  }
+
+  public boolean allSemiDetEvaluation() {
+    return getDetTypeEvaluation().isSemiDet();
+  }
+
+
+  /**
+   * Compilation du filtrage d'un systeme de regles nommees
+   * apparaissant dans une strategie
+   */
+  public static void compileNamed(OutputCode s, int deep,
+				  StrategyChooseRule sterm, Vector rules,
+				  int strategyLab, 
+				  OutputCode matchSubtermCode) {
+    DDTree tree = new DDTree(sterm);
+
+    // Construction de l'arbre
+    boolean isFunctionTree=false;
+    tree.construction(rules,isFunctionTree);
+    /*
+     * Creation du prefix
+     */
+    String prefix = sterm.getName();
+    matchSubtermCode.write( tree.genMatchSubtermDeclaration(deep,prefix));
+    // Filtrage des sous-termes
+    tree.genMatchSubterm(matchSubtermCode,deep,prefix);
+    tree.genVariableExtract(matchSubtermCode,deep,prefix);
+    tree.genPatternListConstruction(matchSubtermCode,deep,prefix);
+    /*
+     * A ameliorer...
+     */
+    tree.rgenPatternListDeclaration(Tools.patternListDeclaration,deep,prefix);
+    tree.rgenPatternListInit(Tools.patternListInit,deep,prefix);
+    tree.rgenPatternListDelete(Tools.patternListDelete,deep,prefix);
+
+    tree.genStrategyManyToOneMatching(s,deep,prefix,rules,sterm,strategyLab);
+  }
+
+
+  /**
+   * Compilation d'un systeme de regles non nommees
+   * commencant par le meme symbole de tete
+   */
+
+  public static void compileNoNamed(OutputCode file, Vector rules) {
+    int deep=0;
+    Symbol headSymbol = ((RewriteRule)rules.elementAt(0)).leftside.getSymbol();
+    DDTree tree = new DDTree(headSymbol);
+
+    // Construction de l'arbre
+    boolean isFunctionTree=true;
+    tree.construction(rules,isFunctionTree);
+
+    /*
+     * Creation du prefix
+     */
+    String prefix;
+    if(headSymbol.isAC()) {
+      prefix = "";
+    } else {
+      prefix = "_" + headSymbol.getSymbolCode();
+    }
+    file.write( tree.genMatchSubtermDeclaration(deep,prefix) );
+
+    // Entete de la fonction
+    // Numerote les variables du membre gauche
+    headSymbol.genFunctionHeader(file,deep,tree,rules.size(),
+				 "fun_" + headSymbol.getSymbolCode(),true);
+    
+    StrategyChooseRule sterm=null;
+    int strategyLab=-1;
+    tree.genManyToOneMatching(file,deep+1,prefix,rules,sterm,strategyLab);
+
+    boolean ACPattern=false;
+    boolean allRuleDetEvaluation=true;
+    for(int i = 0 ; i<rules.size() ; i++) {
+      RewriteRule rule = (RewriteRule)rules.elementAt(i);
+      ACPattern = ACPattern || rule.hasACPattern();
+      allRuleDetEvaluation = allRuleDetEvaluation && rule.allDetEvaluation();
+    }
+
+    file.write("match_fail:\n");
+    headSymbol.genMatchFail(file,deep+1);
+
+    if(Flags.debug) {
+      file.write(deep+1,"tab_rewrite_step[0][" + headSymbol.getSymbolCode() + "]++;\n");
+    }
+
+    Tools.indent(file,deep+1); file.write("goto end_no_rewrite;\n");
+
+    file.write("end:\n");
+    file.write(deep+1,"rewrite_step++;\n");
+    if(Flags.debug) {
+      file.write(deep+1,"tab_rewrite_step[1][" + headSymbol.getSymbolCode() + "]++;\n");
+    }
+    file.write("end_no_rewrite:\n");
+    Tools.indent(file,deep+1); file.write("if(trace>=1) {\n");
+    Tools.indent(file,deep+2); file.write("doindent(indentlevel);\n");
+    Tools.indent(file,deep+2); file.write("printf(\"rewrite[%u] \",rewrite_step);\n");
+    Tools.indent(file,deep+2); file.write("term_printnl(stdout,res);\n");
+    Tools.indent(file,deep+1); file.write("}\n");
+    if(rules.size()>32) {
+      file.write(deep+1,"bitSet_delete(mask);\n");
+    } else {
+      file.write(deep+1,"bitSet32_stack_delete(mask32);\n");
+    }
+
+    if(ACPattern) {
+      Tools.indent(file,deep+1); file.write("if(ACPattern && ms!=NULL)\n");
+        // Tools.indent(file,deep+2); file.write("MS_delete(ms[" + matchStateNumber +"]);\n");
+    }
+
+    /*
+     * set a CUTCLOSE if a rule has an AC Pattern and is applied with
+     * a one strategy
+     */
+    //final boolean isSemiDetApply = true;
+    //if(isSemiDetApply && ACPattern) { // && !allRuleDetEvaluation) {
+    //file.write(deep+1,"if(ACPattern)\n");
+    //file.write(deep+2,"CUTCLOSE(); /* AC matching */\n");
+    //}
+
+    Tools.indent(file,deep+1); file.write("subindent();\n");
+    Tools.indent(file,deep+1); file.write("restoreGlobalIndent();\n");
+    file.write(deep+1,"return res;\n");
+    file.write(deep+1,"fail:\n");
+    file.write(deep+1,"// printf(\"fail\\n\");\n");
+    file.write(deep+1,"fail();\n");
+    // Fin de la fonction
+    file.write(deep,"}\n");
+
+    // Filtrage des sous-termes
+    tree.genMatchSubterm(file,deep,prefix);
+    tree.genVariableExtract(file,deep,prefix);
+    tree.genPatternListConstruction(file,deep,prefix);
+    
+    /*
+     * A ameliorer...
+     */
+    tree.rgenPatternListDeclaration(Tools.patternListDeclaration,deep,prefix);
+    tree.rgenPatternListInit(Tools.patternListInit,deep,prefix);
+    tree.rgenPatternListDelete(Tools.patternListDelete,deep,prefix);
+  }
+
+  public void variableNumbering() {
+    // Recherche du partage
+    // right wrt. left
+    rightside.searchVariableShareFullNumbering(leftside);
+    if(rightside instanceof RhsTerm) {
+      //branch.searchVariableShare(leftside,rightside);
+      // branch wrt. left
+      getBranch().searchVariableShareFullNumbering(leftside);
+      // branch wrt. branch
+      getBranch().selfSearchVariableShare();
+      // right wrt. branch
+      getBranch().reverseSearchVariableShare(rightside);
+    }
+    leftside.setFullNumbering();
+
+    // marquage des variables dio
+    leftside.markDioVariable();
+
+    /*
+     * Reservation des variables
+     * Toutes les variables sont supposees etre libres
+     */
+    AllocVariable.init();
+    /*
+     * C'est subtil ici :
+     * 1) numerotation des variables non utilissees a droite et
+     *    apparaissant sous un symbol AC a gauche 
+     * 2) numerotation du membre droit et des variables apparaissant
+     *    sous un symbole AC du membre gauche 
+     * 3) numerotation des LocalEvaluations
+     * ATTENTION : la numerotation du membre droit libere les noeuds
+     *             intermediaires c'est pourquoi il faut numeroter 
+     *             les LocalEvaluation apres le membre droit
+     * Sinon : une variable d'une LocalEvaluation peut etre liberee et
+     *         utilisee pour numeroter une variable AC du lhs
+     */
+    int substIndex=leftside.leftsideACVariableAffectation(0);
+    //rightside.rightsideVariableAffectation();  
+    if(rightside instanceof RhsTerm) {
+      substIndex=getBranch().variableAffectation(substIndex);
+    }
+    rightside.rightsideVariableAffectation();  
+
+    // Liberation des variables
+    leftside.leftsideACVariableLiberation();
+    if(rightside instanceof RhsTerm) {
+      getBranch().variableLiberation();
+    }
+    rightside.rightsideVariableLiberation();
+
+  }
+
+  /*
+   * raz des flags des membres gauches :
+   *  - lhs
+   *  - local assignements
+   */
+  public void variableClear() {
+    boolean full=true;
+    leftside.leftsideVariableClear(full);
+    if(rightside instanceof RhsTerm) {
+      getBranch().variableClear(full);
+    }
+  }
+
+
+  private int getMaxVariableNumber() {
+    int max=0;
+    int maxLeftside = leftside.getMaxVariableNumber(max);
+    int maxRightside = rightside.getMaxVariableNumber(max);
+    max=(maxLeftside>maxRightside)?maxLeftside:maxRightside;
+    max = getBranch().getMaxVariableNumber(max);
+    return max;
+  }
+  
+  public void genDeclaration(OutputCode s,int deep) {
+
+    //System.out.println("*** genDeclaration: " + this);
+
+    int max = 0;
+    int maxLeftside = leftside.getMaxUsedVariable(max);
+    int maxRightside = rightside.getMaxUsedVariable(max);
+    max=(maxLeftside>maxRightside)?maxLeftside:maxRightside;
+    max = getBranch().getMaxUsedVariable(max);
+    //System.out.println("max = " + max);
+    Tools.genDeclaration(s,deep,max);
+
+    int maxSubstIndex = leftside.getMaxSubstIndex(0);
+    maxSubstIndex = getBranch().getMaxSubstIndex(maxSubstIndex);
+    maxSubstIndex++;
+    s.write(deep,"struct term *substitution[" + maxSubstIndex + "];\n");
+    
+  }
+
+
+  /**
+   * Application of a syntactic rule (without AC)
+   */
+  public void genApplication(OutputCode s,int deep, int number, 
+			     StrategyChooseRule sterm, int strategyLab,
+			     boolean isFirst,boolean isLast,
+			     boolean ACPattern) {
+
+    // rule is applied under nonamed/one/dc/dk ?
+    boolean isOneApply=false;
+    boolean isDcApply=false;
+    boolean isDkApply=false;
+    if(sterm==null || sterm.isOne()) {
+      isOneApply=true;
+    } else if(sterm.isDc()) {
+      isDcApply=true;
+    } else if(sterm.isDk()) {
+      isDkApply=true;
+    } else {
+      throw new InternalError("unknown StrategyChooseRule type");
+    }
+    
+    /*
+    System.out.println("genApplication : " + this);
+    System.out.println("One=" + isOneApply +
+		       " Dc=" + isDcApply +
+		       " Dk=" + isDkApply);
+		       */
+
+    /*
+     * recherche du partage et numerotation des variables
+     */
+    genDeclaration(s,deep);
+    if(isDcApply) {
+      Tools.indent(s,deep); s.write("int *wasr;\n");
+    }
+    s.write(deep,"/* lhs: " + leftside +" */\n");
+    /*
+     * marquage des variables utilisees plusieurs fois dans le rhs
+     */
+    //s.write( leftside.genSetShared(deep) );
+
+    /*
+     * backtracking management
+     */
+
+    s.write(deep,"/* allDetEvaluation: " + getDetTypeEvaluation() + " */\n");
+
+    /*
+     * we set a CUTOPEN if the top level is semiDeterministic
+     * (i.e. 0 or 1 result) and if local evaluations do not
+     * forget any choice point
+     */
+    if(Flags.optimiseChoicePoint) {
+      //if( getTopLevelDetType(sterm).isExactlyDet() && !allDetEvaluation() ) {
+	/* A ETUDIER ... */
+      if( getTopLevelDetType(sterm).isSemiDet() && !allDetEvaluation() ) {
+	s.write(deep,"CUTOPEN(); /* Wheres */\n");
+      }
+    } else {
+      if( getTopLevelDetType(sterm).isSemiDet() ) {
+	s.write(deep,"CUTOPEN(); /* Wheres */\n");
+      }
+    }
+
+    if(isDcApply) {
+      s.write(deep,"wasr=(int*) allocStable(sizeof(int));\n"); 
+      s.write(deep,"*wasr=0;\n");
+    }
+
+    /*
+     * we set a choicePoint if the top level returns more then one result
+     * (i.e. if there is an AC operator)
+     * or if local evaluations may fail
+     * and if it is not the last rule
+     */
+    //    if( (!getTopLevelDetType(sterm).isExactlyDet() || !allDetEvaluation())
+    
+    if( Flags.optimiseChoicePoint==false // && (isFirst || !isLast)
+	||
+	(!getTopLevelDetType(sterm).isSemiDet() || !allDetEvaluation()
+	 && (isFirst || !isLast)) ) {
+      if( isDcApply ) {
+	s.write(deep,"if(setChoicePoint()) {\n");
+	s.write(deep+1,"/* local evaluations failed */\n");
+	s.write(deep+1,"if(*wasr!=0) {\n");	s.write(deep+2,"/* If the rule succeed one then re-generate a fail */\n");
+	Tools.genFail(s,deep+2);
+	s.write(deep+1,"}\n");
+	s.write(deep+1,"/* Else, try next rule */\n");
+	s.write(deep+1,"goto myend" + number + ";\n");
+	s.write(deep,"}\n");
+      } else {
+	s.write(deep,"if(setChoicePoint()) {\n");
+	s.write(deep+1,"/* local evaluations failed, try next rule */\n");
+	s.write(deep+1,"goto myend" + number + ";\n");
+	s.write(deep,"}\n");
+      }
+    }
+
+    // local evaluations
+    if(rightside instanceof RhsTerm) {
+      getBranch().genCode(s,deep,this,number,sterm,isFirst,isLast);
+    }
+    rightside.genCode(s,deep,this,number,sterm,isFirst,isLast);
+
+    /*
+     * Pour bien compter le nombre de regles appliquees dans les strategies
+     */
+    if(sterm!=null) {
+      s.write(deep,"rewrite_step++;\n");
+    }
+
+    //if(isDcApply && !isLast) {
+    if(isDcApply) {
+      // pour compiler le Choice      s.write(deep,"/* The rule succeed once */\n");
+      s.write(deep,"*wasr=1;\n");
+    }
+    if(Flags.optimiseChoicePoint) {
+      //if( getTopLevelDetType(sterm).isExactlyDet() && !allDetEvaluation() ) {
+      if( getTopLevelDetType(sterm).isSemiDet() && !allDetEvaluation() ) {
+	s.write(deep,"CUTCLOSE(); /* Wheres */\n");
+      }
+    } else {
+      if( getTopLevelDetType(sterm).isSemiDet() ) {
+	s.write(deep,"CUTCLOSE(); /* Wheres */\n");
+      }
+    }
+
+    /*
+     * set a CUTCLOSE if a rule has an AC Pattern and is applied with
+     * a one strategy
+     */
+    if(getTopLevelDetType(sterm).isSemiDet() && ACPattern) {
+      //s.write(deep+1,"if(ACPattern)\n");
+      //s.write(deep+2,"CUTCLOSE(); /* AC matching */\n");
+    }
+
+    if(strategyLab>=0) {
+      s.write(deep,"goto stratLab" + strategyLab + ";\n");
+    } else {
+      s.write(deep,"goto end;\n");
+    }
+  }
+
+  /**
+   * Application of an AC rule (only 1 AC variable)
+   */
+  public void genACApplication(OutputCode s,int deep,
+			       int number, int cbgNumber, 
+			       boolean hasACnet,
+			       StrategyChooseRule sterm, 
+			       int strategyLab,
+			       boolean isFirst, boolean isLast,
+			       String prefix,
+			       boolean allRuleDetEvaluation) {
+    int nbVar=leftside.nbVariable();
+    int nbACVar=leftside.nbVariableUnderACSymbol();
+
+    // rule is applied under nonamed/one/dc/dk ?
+    boolean isOneApply=false;
+    boolean isDcApply=false;
+    boolean isDkApply=false;
+    if(sterm==null || sterm.isOne()) {
+      isOneApply=true;
+    } else if(sterm.isDc()) {
+      isDcApply=true;
+    } else if(sterm.isDk()) {
+      isDkApply=true;
+    } else {
+      throw new InternalError("unknown StrategyChooseRule type");
+    }
+    boolean isSemiDetApply=false;
+    if(sterm==null || sterm.isSemiDet()) {
+      isSemiDetApply=true;
+    }
+// [pem: Dec 23 98]
+    if( Flags.optimiseChoicePoint &&
+        isSemiDetApply && allRuleDetEvaluation) {
+    } else {
+    if(isDcApply) {
+      s.write(deep,"int *wasr=(int*) allocStable(sizeof(int));\n"); 
+      s.write(deep,"if(debugMode) {\n");
+      s.write(deep+1,"printf(\"try pattern: [" + name + "] " +
+	      leftside + "\\n\");\n");
+      s.write(deep+1,"term_printnl(stdout,v0);\n");
+      s.write(deep,"}\n");
+
+      s.write(deep,"*wasr=0;\n");
+      s.write(deep,"if(setChoicePoint()) {\n");
+      s.write(deep+1,"/* AC matching failed */\n");
+      s.write(deep+1,"if(*wasr!=0) {\n");
+      s.write(deep+2,"/* If the rule succeed one then re-generate a fail */\n");
+      Tools.genFail(s,deep+2); 
+      s.write(deep+1,"}\n");
+
+      s.write(deep+1,"/* Else, try next rule */\n");
+      s.write(deep+1,"goto myend" + number + ";\n");
+      s.write(deep,"}\n");
+    } else {
+      s.write(deep,"if(setChoicePoint()) {\n");
+      s.write(deep+1,"/* AC matching failed, try next rule */\n");
+      s.write(deep+1,"goto myend" + number + ";\n");
+      s.write(deep,"}\n");
+    }
+    }
+    
+    /*
+     * Recherche d'une solution DU match_state 
+     * Il n'y a qu'un seul pattern AC par regle
+     */
+    
+    /*
+      if(cbgNumber>=0) { 
+	String varName = leftside.getFirstACPattern().genCore();
+	s.write(deep,"indice = MS_reinit(ms," + varName + "," + cbgNumber + ");\n");
+      s.write(deep,"if(indice>=0) {\n");
+      s.write(deep+1,"if(ACPattern && ms!=NULL) {\n");
+      if( isSemiDetApply && allRuleDetEvaluation) {
+	s.write(deep+2,"indice = MS_solve(ms,mode);\n");
+      } else {
+	s.write(deep+2,"start" + number + ":;\n");
+	s.write(deep+2,"indice = MS_solve(ms,mode);\n");
+	if(Flags.debug) {
+	  s.write(deep+2,"// printf(\"\\nsetChoicePoint\\n\");\n");
+	}
+	Tools.genComment(s,deep+2,"choicePoint AC matching");
+	s.write(deep+2,"if(indice>=0 && setChoicePoint()) {\n");
+	if(Flags.debug) {
+	  s.write(deep+3,"// printf(\"on revient d'un fail\\n\");\n");
+	}
+	s.write(deep+3,"goto start" + number + ";\n");
+	s.write(deep+2,"}\n");
+      }
+      s.write(deep+1,"} else {\n");
+      s.write(deep+2,"indice = 0;\n");
+      s.write(deep+1,"}\n");
+      s.write(deep,"} else {\n");
+      Tools.genFail(s,deep+1);
+      s.write(deep,"}\n");
+    }
+    */
+
+    Term lhsACPattern = leftside.getFirstACPattern();
+    if(cbgNumber>=0) {
+      String varName = lhsACPattern.genCore();
+      
+      if(isSemiDetApply && allRuleDetEvaluation) {
+	s.write(deep,"if(ACPattern && MS_reinit(ms[" + matchStateNumber +"]," + varName + "," + cbgNumber + ")>0 && MS_solve_rule(ms[" + matchStateNumber +"])>=0) {\n");
+	s.write(deep+1,"// do nothing \n");
+	s.write(deep,"} else {\n");
+          // [pem: Dec 23 98]
+        if(Flags.optimiseChoicePoint) {
+          s.write(deep+1,"goto myend" + number + ";\n");
+        } else {
+          Tools.genFail(s,deep+1);
+        }
+        s.write(deep,"}\n");
+      } else {
+	s.write(deep,"if(ACPattern && MS_reinit(ms[" + matchStateNumber +"]," + varName + "," + cbgNumber + ")>0) {\n");
+	s.write(deep+1,"while(1) {\n");
+	s.write(deep+2,"if(MS_solve_rule(ms[" + matchStateNumber +"])<0) {\n");
+	// PEM: mydend
+	Tools.genFail(s,deep+3);
+	//s.write(deep+3,"goto myend" + number + ";\n");
+	s.write(deep+2,"}\n");
+	if(Flags.debug) {
+	  s.write(deep+2,"// printf(\"setChoicePoint\\n\");\n");
+	}
+	Tools.genComment(s,deep+2,"choicePoint AC matching");
+	s.write(deep+2,"if(!setChoicePoint()) {\n");
+	s.write(deep+3,"break;\n");
+	s.write(deep+2,"}\n");
+	if(Flags.debug) {
+	  s.write(deep+2,"// printf(\"on revient d'un fail\\n\");\n");
+	}
+	s.write(deep+1,"}\n");
+	s.write(deep,"} else {\n");
+	// PEM: mydend
+	Tools.genFail(s,deep+1);
+	//s.write(deep+1,"goto myend" + number + ";\n");
+	s.write(deep,"}\n");
+      }
+    }
+
+
+    // cbgNumber : Numero de la regle dans le CBG
+    if(hasACnet && !leftside.isDio()) {
+      //s.write(deep,"if(indice>=0 && ms->no_rule==" + cbgNumber + ") {\n");
+      s.write(deep,"if(1) {\n");
+    } else {
+      s.write(deep,"if(1) {\n");
+    }
+
+    s.write(deep+1,"int nb_variable=" + nbVar + ";\n");
+    s.write(deep+1,"int nb_variable_ac=" + nbACVar + ";\n");
+    /*
+     * Ne marche pas parce qu'il faut prendre en compte les variables des 
+     * matching conditons AC
+     * la declaration est faite dans genDeclaration()
+     * s.write(deep+1,"struct term *substitution[" + nbVar + "];\n");
+     */
+    s.write(deep+1,"int i;\n");
+
+    /**
+     * numerotation des variables de la substitution
+     */    
+    genDeclaration(s,deep+1);
+    s.write(deep+1,"/* lhs: " + leftside +" */\n");
+    if(Flags.debug) {
+      int max = 0;
+      int maxLeftside = leftside.getMaxUsedVariable(max);
+      int maxRightside = rightside.getMaxUsedVariable(max);
+      max=(maxLeftside>maxRightside)?maxLeftside:maxRightside;
+      max = getBranch().getMaxUsedVariable(max);
+      s.write(deep+1,"{\n");
+      s.write(deep+2,"int i;\n");
+      s.write(deep+2,"for(i=0;i<=" + max + ";i++) sv[i]=NULL;\n");
+      s.write(deep+1,"}\n");
+    }
+      
+    /*
+     * 08/07/1998 : je pense que cela ne sert a rien    
+     if(isDcApply) {
+     s.write(deep+1,"int *wasr;\n");
+     }
+    */
+
+
+    /**
+     * le variables AC sont stockee de 0 a m (avec la restriction m=0)
+     * dans l'ordre d'apparition
+     * et les variables non AC de m+1 a n
+     */
+    if(hasACnet && !lhsACPattern.isDio()) {
+      String name = prefix; // + "_" + leftside.getFirstACPattern().getSymbolCode();
+      String varName = lhsACPattern.genCore();
+      s.write(deep+1,"/* To protect the term */\n");
+      if(!lhsACPattern.isBuiltinSort()) {
+	s.write(deep+1,"setShared(" + varName + ");\n");
+      }
+      if(lhsACPattern.usedContextInRhs()) {
+	s.write(deep+1,"substitution_build(" + varName +
+		",ms[" + matchStateNumber +"],nb_variable,substitution,nb_variable_ac,variable_extract" + name +
+		"," + cbgNumber + ");\n");
+      } else {
+	s.write(deep+1,"substitution_build_without_context(" + varName +
+		",ms[" + matchStateNumber +"],nb_variable,substitution,nb_variable_ac,variable_extract" + name +
+		"," + cbgNumber + ");\n");
+      }
+    } else {
+      String varName = lhsACPattern.genCore();
+      //      s.write(deep+1,"for(i=0 ; i<nb_variable ; i++) {\n");
+      s.write(deep+1,"for(i=0 ; i<sizeof(substitution)/sizeof(struct term*) ; i++) {\n");
+      s.write(deep+2,"substitution[i]=" + varName + ";\n");
+      s.write(deep+1,"}\n");
+    }
+
+    /*
+     * Decoupage eventuel des dioVariables
+     */
+    leftside.genDioMatching(s,deep+1,number, isSemiDetApply && allRuleDetEvaluation);
+
+    /*
+     * backtracking management
+     */ 
+    s.write(deep+1,"/* allDetEvaluation: " + getDetTypeEvaluation() + " */\n");
+
+    /*
+     * we set a choicePoint if the top level returns more then one result
+     * (i.e. if there is an AC operator)
+     * or if local evaluations may fail
+     * and if it is not the last rule
+     */
+    /*
+     * CA NE SERT A RIEN ICI !!!
+    if( (!Flags.optimiseChoicePoint && (isFirst || !isLast))
+	||
+	(!getTopLevelDetType(sterm).isSemiDet() || !allDetEvaluation())
+	&& (isFirst || !isLast)) {
+      s.write(deep+1,"if(setChoicePoint()) {\n");
+      Tools.genComment(s,deep+2,"local evaluations failed, try another match");
+      //s.write(deep+1,"goto myend" + number + ";\n");
+      Tools.genFail(s,deep+2);
+      s.write(deep+1,"}\n");
+    }
+    */
+    // local evaluations
+    if(rightside instanceof RhsTerm) {
+      getBranch().genCode(s,deep+1,this,number,sterm,isFirst,isLast);
+    }
+
+    rightside.genCode(s,deep+1,this,number,sterm,isFirst,isLast);
+
+    /* 
+     * Pour bien compter le nombre de regles appliquees dans les strategies
+     */
+    if(sterm!=null) {
+      s.write(deep,"rewrite_step++;\n");
+    }
+
+    if(isDcApply) {
+      // pour compiler le Choice
+      s.write(deep+1,"/* The rule succeed once */\n");
+      s.write(deep+1,"*wasr=1;\n");
+    }
+
+
+    /*
+     * set a CUTCLOSE if a rule has an AC Pattern and is applied with
+     * a one strategy
+     */
+    if(isSemiDetApply) {
+      s.write(deep+1,"if(ACPattern)\n");
+      s.write(deep+2,"CUTCLOSE(); /* AC matching */\n");
+    }
+
+    if(strategyLab>=0) {
+      s.write(deep+1,"goto stratLab" + strategyLab + ";\n");
+    } else {
+      s.write(deep+1,"goto end;\n");
+    }
+    s.write(deep,"} else {\n");
+      // [pem: Dec 23 98]
+    if( Flags.optimiseChoicePoint &&
+        isSemiDetApply && allRuleDetEvaluation) {
+      s.write(deep+1,"goto myend" + number + ";\n");
+    } else {
+      Tools.genFail(s,deep+1);
+    }
+    s.write(deep,"}\n");
+  }
+
+  // *** Peter
+  public static Vector getAllRulesF1F2(int f1, int f2) {
+    Vector subrules = new Vector();
+    System.out.print("(");
+    Enumeration eRule  = RewriteRule.getHashtable().keys();
+    int symb1, symb2;
+    while(eRule.hasMoreElements()) {
+      Object key = eRule.nextElement();
+      Vector vector = RewriteRule.getTable(key);
+      Term lhs;
+      //**RewriteRule rule = (RewriteRule) vector.firstElement();
+      //System.out.print("size="+vector.size());
+      for(int i=0; i<vector.size(); i++) {
+	RewriteRule rule = (RewriteRule)vector.elementAt(i);
+	//System.out.println("At "+i+"::");
+	if(rule.isNamed()) {
+	  lhs = rule.leftside;
+	  //System.out.println("[1] "+lhs.getSymbol().getCode()+"=="+f1);
+	  if (lhs.getSymbol().getCode() == f1) {
+	    //System.out.println("[2] "+lhs.getSubterm(0).getSymbol().getCode()+"=="+f2);
+	    if (lhs.getSubterm(0).getSymbol().getCode() == f2) {
+	      System.out.print(":");
+	      StrategyRuleName rterm = new StrategyRuleName(rule.name);
+	      subrules.addElement(rterm);
+	    }
+	  }
+	}
+      }
+    }
+    System.out.print(")");
+    return subrules;
+  }
+}
+

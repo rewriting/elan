@@ -1,0 +1,65 @@
+module definitions[Fss]
+import 	global
+		int bool cmp[Prop] cmp[Pred]
+ 	;local 
+		Fss 
+		identifier 
+		pair[identifier,int]
+		list[int] list[identifier] list[pair[identifier,int]] 
+;end
+
+sort
+	PropSymbolNP
+	Prop
+	Pred
+	Seq
+;end
+
+operators
+  global      
+
+FOR EACH SpS:pair[identifier,int]; F:identifier;  N:int
+SUCH THAT SpS:=(listExtract) elem(Fss) AND F:=()first(SpS) 
+	AND N:=()second(SpS) ANDIF eq_int(N,0) :{	
+	
+		F : PropSymbolNP;
+    }
+
+	TRUE : PropSymbolNP;
+	FALSE : PropSymbolNP;
+
+//Sub-types
+	@		: (PropSymbolNP) 	Prop		pri 200;
+
+	@		: (Prop) 	Pred		pri 120;
+
+//Sequent
+	@ |- @		: (Pred Pred) Seq		pri 140;
+	@ ':'':' @	: (Seq Seq) Seq			pri 130 (AC);
+
+//logical (Predence)
+
+	@ <=> @		: (Pred Pred) Pred      assocRight        pri 150 (AC);
+	(@ <=> @)	: (Pred Pred) Pred              pri 150 alias @ <=> @:;
+
+	@ |=> @		: (Pred Pred) Pred      assocRight        pri 151;
+	(@ |=> @)	: (Pred Pred) Pred              pri 151 alias @ |=> @:;
+
+        @ 'or' @         : (Pred Pred) Pred	assocLeft	pri 161 (AC);
+	(@ 'or' @)	: (Pred Pred) Pred		pri 161 alias @ 'or' @:;
+
+        @ '&''&' @         : (Pred Pred) Pred	assocLeft	pri 162 (AC);
+	(@ '&''&' @)	: (Pred Pred) Pred		pri 162 alias @ '&''&' @:;
+
+	^@		: (Pred)  Pred				pri 163;
+	^(@)		: (Pred)  Pred			pri 163 alias ^@:;
+
+//constants
+	$ : Seq;
+	Hvide: PropSymbolNP;
+
+end
+
+//--------------------------------------------------------------------------------------
+
+end

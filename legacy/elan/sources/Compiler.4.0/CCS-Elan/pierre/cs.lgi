@@ -1,0 +1,9 @@
+LPL cs description
+
+  query    of sort b
+  result   of sort b
+  import   cs
+  start with () query
+
+end
+

@@ -1,0 +1,10 @@
+LPL bug2  description
+
+query of sort  bool
+result of sort bool
+	  
+          import bug2
+          start with () go
+
+end
+

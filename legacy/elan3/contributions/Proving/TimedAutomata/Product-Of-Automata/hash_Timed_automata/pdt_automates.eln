@@ -1,0 +1,814 @@
+module pdt_automates[K,Q,S,Aut1,Aut2,Aut3,Aut4]
+
+import global
+  K Q S Aut1 Aut2 Aut3 Aut4
+  Automaton[K,Q,S] 
+  eq[state] eq[label] eq[comp_state] eq[clockzone]
+  list[comp_state]
+  occur[label,list[label]] 
+  occur[state,list[state]]
+  list[statezone] 
+  list[int]
+  pair[list[statezone],bool] 
+  list[movement]
+  pair[list[movement],bool]
+  mytuple[list[state],list[state],list[state],list[state]] ;
+end
+
+sort
+  comp_state movement;
+end
+
+operators
+ global
+  ETAT_SOURCE_ERRONE : pair[list[statezone],bool] ;
+  REACHED : bool ;
+  CYCLE   : bool ;
+  EMPTY_STATE   : bool ;
+  CMAX    : int  ;
+  (@,@,@,@) : (state state state state) comp_state ;
+  @ -> @  : (label comp_state) movement ;
+  @ / @   : (comp_state clockzone) statezone ;
+  @ / @  :  ( state clockzone ) statezone ;
+  inv( @ )  :  ( state ) clockzone ;
+
+  trans . @ ( @ )  :  ( label statezone ) statezone ;
+  FOR EACH label : identifier SUCH THAT label:=(listExtract)elem(S):
+  { trans_label( @ )  :  ( statezone ) statezone ; }
+
+  valid(@,@,@)    :  ( state label Automaton ) bool ;
+  valid(@,@)      :  ( comp_state label ) bool ;
+  exists(@,@,@)   :  ( state label list[transition] ) bool ;
+
+  lst_comp(@,@,@,@):  (list[state] list[state] list[state] list[state]) list[comp_state] ;
+  lst1_comp(@,@,@,@) :  (state list[state] list[state] list[state]) list[comp_state] ;
+  lst2_comp(@,@,@,@) :  (state state list[state] list[state]) list[comp_state] ;
+  lst3_comp(@,@,@,@) :  (state state state list[state]) list[comp_state] ;
+
+  pdt_states(@,@,@,@):  (Automaton Automaton Automaton Automaton) list[comp_state] ;
+  globalPdtState : list[comp_state] ;
+  valid_states(@,@,@,@,@):  (Automaton Automaton Automaton Automaton label) list[comp_state] ;
+  lbl_states(@,@) : (list[comp_state] label) list[comp_state] ;
+
+  FOR EACH label : identifier SUCH THAT label:=(listExtract)elem(S):
+  { domain_label : mytuple[list[state],list[state],list[state],list[state]] ; }
+
+  dom(@,@) : (label list[transition]) list[state] ;
+  @ app @ : (comp_state mytuple[list[state],list[state],list[state],list[state]]) bool ;
+  occ(@,@) : (state list[state]) bool ;
+
+  label(@,@) : (comp_state comp_state) label ;
+  add_labels(@) : (list[statezone]) list[movement] ;
+
+  s(@) : (comp_state) state ;
+  t(@) : (comp_state) state ;
+  u(@) : (comp_state) state ;
+  v(@) : (comp_state) state ;
+  cst(@) : (statezone) comp_state ;
+  czn(@) : (statezone) clockzone ;
+
+  setoflbl(@) : (list[label]) list[label] ;
+  labels(@,@,@,@) : (Automaton Automaton Automaton Automaton) list[label] ;
+
+  ltrans( @ ) :  ( statezone ) statezone ;
+  lst_trans(@,@,@) :  ( list[statezone] statezone statezone ) pair[list[statezone],bool] ;
+
+  cmp_zones(@,@) : (statezone statezone) bool ;
+  @ in @          :  ( statezone list[statezone] ) bool ;
+  go(@,@) : (statezone statezone) pair[list[movement],bool] ;
+
+  r_side(@)        :  (clause) int ;
+  imk_list(@)      :  (list[invariant]) list[int] ;
+  tmk_list(@)      :  (list[transition]) list[int] ;
+  max_int(@)       :  (list[int]) int ;
+  bnd(@)           :  (clockzone) clockzone ;
+
+  next_sz_aux(@,@,@) : (comp_state label clockzone) statezone ;
+
+  next_sz(@,@,@,@,@,@,@,@,@,@) : (clockzone label state state state state bool bool bool bool) statezone ;
+
+
+ local
+  //  un petit hack pour tirer au sort une étiquette
+  '-''-''-'  :  label ;
+
+  st(@)  :  ( statezone ) state ;
+  zn(@)  :  ( statezone ) clockzone ;
+
+  tr_before( @ )  :  ( transition ) state ;
+  tr_label( @ )   :  ( transition ) label ;
+  tr_cond( @ )    :  ( transition ) clockzone ;
+  tr_zero( @ )    :  ( transition ) list[clock] ;
+  tr_after( @ )   :  ( transition ) state ;
+
+  inv_state( @ )  :  ( invariant ) state ;
+  inv_zone( @ )   :  ( invariant ) clockzone ;
+
+end
+
+stratop
+ global
+  trytrans : < label -> label >  bs ;
+  try_lbl  : < label -> label >  bs ;
+  lst_tranz: < statezone -> statezone >  bs ;
+  tranz    : < statezone -> statezone >  bs ;
+  explore  : < pair[list[statezone],bool] -> pair[list[statezone],bool] > bs ;
+
+  dt_pdt   : < statezone -> statezone >  bs ;
+  FOR EACH label : identifier SUCH THAT label:=(listExtract)elem(S):
+  { dt_pdt_aux_label : < statezone -> statezone >  bs ; }
+
+end
+
+//----  RÈGLES  ----//
+
+////  GÉNÉRIQUES
+
+rules for int
+  c : int ;
+  x : clock ;
+  l1, l2, l3, ilst : list[int] ;
+ global
+  [] r_side(x<c)   => c  end
+  [] r_side(x<=c)  => c  end
+  [] r_side(x>c)   => c  end
+  [] r_side(x>=c)  => c  end
+  
+  [] max_int(c.nil)  => c end
+  [] max_int(c.ilst) => max(c,max_int(ilst)) end
+
+  [] CMAX  => max_int(ilst)
+              where l1:=()imk_list(lst_inv(Aut1)) @ tmk_list(lst_trans(Aut1))
+              where l2:=()imk_list(lst_inv(Aut2)) @ tmk_list(lst_trans(Aut2)) 
+              where l3:=()imk_list(lst_inv(Aut3)) @ tmk_list(lst_trans(Aut3))
+              where ilst:=() l1 @ l2 @ l3
+              end
+end
+
+rules for list[int]
+  s, ss, sc : state ;
+  c, c1, c2 : clause ; 
+  l_inv : list[invariant] ;
+  l_tr: list[transition] ;
+  lc : list[clock] ;
+  lbl : label ;
+  
+ global
+  [] imk_list(s:true.l_inv)       => imk_list(l_inv)           end
+  [] imk_list(s:c1^c2^true.l_inv) => append(r_side(c1).r_side(c2).nil , imk_list(l_inv)) end
+  [] imk_list(s:c^true.l_inv)     => r_side(c).imk_list(l_inv) end
+  [] imk_list(nil)                => nil                       end
+
+  [] tmk_list(ss,lbl:true,lc,sc.l_tr)       => tmk_list(l_tr)       end
+  [] tmk_list(ss,lbl:c1^c2^true,lc,sc.l_tr) => append(r_side(c1).r_side(c2).nil , tmk_list(l_tr))  end
+  [] tmk_list(ss,lbl:c^true,lc,sc.l_tr) => r_side(c).tmk_list(l_tr) end
+  [] tmk_list(nil)                          => nil                  end
+end
+
+rules for list[comp_state]
+  A1, A2, A3, A4 : Automaton ;
+  s, t, u, v : state ;
+  cs : comp_state ;
+  l : label ; 
+  ls, lt, lu, lv : list[state] ;
+  lcs : list[comp_state] ;
+ global
+  [] lst_comp(s.ls,lt,lu,lv)  =>   lst1_comp(s,lt,lu,lv) @ lst_comp(ls,lt,lu,lv)  end
+  [] lst1_comp(s,t.lt,lu,lv)  =>   lst2_comp(s,t,lu,lv) @ lst1_comp(s,lt,lu,lv)   end
+  [] lst2_comp(s,t,u.lu,lv)   =>   lst3_comp(s,t,u,lv) @ lst2_comp(s,t,lu,lv)       end
+  [] lst3_comp(s,t,u,v.lv)    =>   (s,t,u,v).lst3_comp(s,t,u,lv)                  end
+  [] lst3_comp(s,t,u,nil)  =>   nil                                      end
+  [] lst2_comp(s,t,nil,lv) =>   nil                                      end
+  [] lst1_comp(s,nil,lu,lv)=>   nil                                      end
+  [] lst_comp(nil,lt,lu,lv)=>   nil                                      end
+  [] pdt_states(A1,A2,A3,A4) => lst_comp(lst_states(A1),lst_states(A2),lst_states(A3),lst_states(A4)) end
+
+  FOR EACH LCS : list[comp_state] SUCH THAT 
+      LCS :=() pdt_states(Aut1,Aut2,Aut3,Aut4) :{
+      [] globalPdtState => LCS end
+  } 
+
+  FOR EACH label : identifier SUCH THAT label:=(listExtract)elem(S): {
+  [] valid_states(A1,A2,A3,A4,label) => lbl_states(globalPdtState,label) end
+  [] lbl_states(cs.lcs,label) => cs.lbl_states(lcs,label)
+                                 if cs app domain_label end
+  [] lbl_states(cs.lcs,label) => lbl_states(lcs,label) end
+  [] lbl_states(nil,label) => nil end
+  }
+end 
+
+rules for mytuple[list[state],list[state],list[state],list[state]]
+  l : label ;
+ global
+
+  FOR EACH label:identifier ; 
+           LA1: list[transition] ;
+           LA2: list[transition] ;
+           LA3: list[transition] ;
+           LA4: list[transition] 
+  SUCH THAT
+           LA1 :=() lst_trans(Aut1)
+       AND LA2 :=() lst_trans(Aut2)
+       AND LA3 :=() lst_trans(Aut3)
+       AND LA4 :=() lst_trans(Aut4)
+       AND label:=(listExtract)elem(S): {
+  [] domain_label =>
+     [dom(label,LA1), dom(label,LA2), dom(label,LA3), dom(label,LA4)]
+  end }
+end
+
+rules for list[state]
+  l : label ;
+  lt : list[transition] ;
+  t : transition ;
+ global
+  [] dom(l,t.lt) => tr_before(t).dom(l,lt) 
+                    if eq_label(l,tr_label(t)) end
+  [] dom(l,t.lt) => dom(l,lt) end
+  [] dom(l,nil) => nil end
+end
+
+rules for statezone
+  lbl       : label ;
+  s, t, u, v   : state ;
+  z, z1     : clockzone ;
+  sz, r     : statezone ;
+ global
+
+  FOR EACH label : identifier SUCH THAT label:=(listExtract)elem(S): 
+  { [trans_pdt] sz    => r where r :=(dt_pdt)trans_label(sz) end }
+
+  [time] (s,t,u,v)/z  =>  (s,t,u,v) / z1
+        where z1 := () inter(inv(s), inter(inv(t), inter(inv(u), inter(inv(v),time(z))))) end
+  []  ltrans(sz)  =>  r  where r := (lst_tranz) sz  end
+end
+
+rules for pair[list[statezone],bool]
+  szs, szc, sz1 : statezone ;
+  lsz  : list[statezone] ;
+  lsz1 : pair[list[statezone],bool] ;
+  v1, v2 : bool ;
+ global
+  [trans1] lst_trans(lsz,szs,szc) => lsz1 
+                                     where sz1:=(lst_tranz)szs
+                                     if cst(sz1) ==  cst(szc) and not empty(inter(czn(sz1),czn(szc)))
+                                     where lsz1:=()[sz1.lsz,REACHED] 
+                                     end
+
+  [trans2] lst_trans(lsz,szs,szc) => lsz1 
+                                     where sz1:=(lst_tranz)szs
+                                     where v1:=()sz1 in lsz
+                                     where v2:=()empty(czn(sz1))
+                                     if not v1 and not v2
+                                     where lsz1:=(explore)lst_trans(sz1.lsz,sz1,szc)
+                                     end
+
+  [trans3] lst_trans(lsz,szs,szc) => lsz1
+                                     where sz1:=(lst_tranz)szs
+                                     where v1:=()sz1 in lsz
+                                     where v2:=()empty(czn(sz1))
+                                     if v1 and not v2
+                                     where lsz1:=()[sz1.lsz,CYCLE] 
+                                     end
+
+  [trans4] lst_trans(lsz,szs,szc) => ETAT_SOURCE_ERRONE end
+
+end
+
+rules for clockzone
+  s, t : state ;
+  cs : comp_state ;
+  z, cz : clockzone ;
+  n,  c : int ;
+  lbl  : label ;
+  lc   : list[clock] ;
+  x : clock ;
+  cl : clause ;
+ global
+  []  tr_cond(s,lbl:z,lc,t)  =>  z  end
+  []  inv_zone(s:z)          =>  z  end
+
+  []  zn(s / z)  =>  z  end
+  []  czn(cs/z)  =>  z  end
+
+  [] bnd(true)     => true                    end
+  [] bnd(x<c^cz)   => x<min(c,CMAX)^bnd(cz)   end
+  [] bnd(x<=c^cz)  => x<=min(c,CMAX)^bnd(cz)  end
+  [] bnd(x>c^cz)   => x>min(c,CMAX)^bnd(cz)   end
+  [] bnd(x>=c^cz)  => x>=min(c,CMAX)^bnd(cz)  end
+  [] bnd(cl^cz)    => cl^bnd(cz)              end
+
+end
+
+rules for state
+  s, t, u, v : state ;
+  z    : clockzone ;
+  n    : int ;
+  lbl  : label ;
+  lc   : list[clock] ;
+ global
+  []  tr_before(s,lbl:z,lc,t)  =>  s  end
+  []  tr_after (s,lbl:z,lc,t)  =>  t  end
+  []  inv_state(s:z)           =>  s  end
+
+  []  st(s / z)  =>  s  end
+  []  s((s,t,u,v)) =>  s  end
+  []  t((s,t,u,v)) =>  t  end
+  []  u((s,t,u,v)) =>  u  end
+  []  v((s,t,u,v)) =>  v  end
+
+end
+
+rules for label
+  s, t : state ;
+  z    : clockzone ;
+  n    : int ;
+  lbl  : label ;
+  lc   : list[clock] ;
+  cs1, cs2 : comp_state ;
+  sz : statezone ;
+ global
+  []  tr_label(s,lbl:z,lc,t)  =>  lbl  end
+
+  FOR EACH label : identifier SUCH THAT label:=(listExtract)elem(S):
+  {
+    [trylabel] lbl  =>  label  end
+  }
+  FOR EACH lbl : identifier SUCH THAT lbl:=(listExtract)elem(S):
+  {
+    [trylbl] label(cs1,cs2)  =>  lbl
+                                 where sz:=(dt_pdt)trans_lbl(cs1/true)
+                                 if cst(sz)==cs2 
+                                 end
+  }
+
+end
+
+rules for list[label]
+  A1, A2, A3, A4 : Automaton ;
+  l : label ;
+  ll : list[label] ;
+ global
+  [] setoflbl(l.ll)      => l.setoflbl(ll) 
+                         if not occurs(l,ll)              end
+  [] setoflbl(l.ll)      => setoflbl(ll)                  end
+  [] setoflbl(nil)       => nil                           end
+  [] labels(A1,A2,A3,A4) => setoflbl(lst_labels(A1)@lst_labels(A2)@lst_labels(A3)@lst_labels(A4)) end
+end
+
+rules for comp_state
+  cs : comp_state ;
+  cz : clockzone ;
+ global
+  [] cst(cs/cz) => cs end
+end
+
+
+rules for list[clock]
+  s, t : state ;
+  z    : clockzone ;
+  n    : int ;
+  lbl  : label ;
+  lc   : list[clock] ;
+ global
+  []  tr_zero(s,lbl:z,lc,t)  =>  lc  end
+end
+
+////  SPÉCIFIQUES À L'AUTOMATE Aut1
+
+rules for statezone
+  z : clockzone ;
+ global
+  FOR EACH tr       : transition ;
+           bef, aft : state ;
+           label    : label ;
+           cond     : clockzone ;
+           zero     : list[clock]
+  SUCH THAT tr := (listExtract) elem(lst_trans(Aut1))
+        AND bef  :=()tr_before(tr)
+        AND label:=()tr_label (tr)
+        AND cond :=()tr_cond  (tr)
+        AND zero :=()tr_zero  (tr)
+        AND aft  :=()tr_after (tr) :
+  {
+    []  trans.label(bef/z) => aft / lproj(inter(cond,z),zero) end
+  }
+end
+
+rules for clockzone
+ global
+  FOR EACH invar : invariant; st : state; cz : clockzone
+  SUCH THAT invar:=(listExtract)elem(lst_inv(Aut1))
+        AND st:=()inv_state(invar)  AND cz:=()inv_zone(invar) :
+  {
+    []  inv(st)  =>  cz  end
+  }
+end
+
+////  SPÉCIFIQUES À L'AUTOMATE Aut2
+
+rules for statezone
+  z : clockzone ;
+ global
+  FOR EACH tr       : transition ;
+           bef, aft : state ;
+           label    : label ;
+           cond     : clockzone ;
+           zero     : list[clock]
+  SUCH THAT tr := (listExtract) elem(lst_trans(Aut2))
+        AND bef  :=()tr_before(tr)
+        AND label:=()tr_label (tr)
+        AND cond :=()tr_cond  (tr)
+        AND zero :=()tr_zero  (tr)
+        AND aft  :=()tr_after (tr) :
+  {
+    []  trans.label(bef/z) => aft / lproj(inter(cond,z),zero) end
+  }
+end
+
+rules for clockzone
+ global
+  FOR EACH invar : invariant; st : state; cz : clockzone
+  SUCH THAT invar:=(listExtract)elem(lst_inv(Aut2))
+        AND st:=()inv_state(invar)  AND cz:=()inv_zone(invar) :
+  {
+    []  inv(st)  =>  cz  end
+  }
+end
+
+////  SPÉCIFIQUES À L'AUTOMATE Aut3
+
+rules for statezone
+  z : clockzone ;
+ global
+  FOR EACH tr       : transition ;
+           bef, aft : state ;
+           label    : label ;
+           cond     : clockzone ;
+           zero     : list[clock]
+  SUCH THAT tr := (listExtract) elem(lst_trans(Aut3))
+        AND bef  :=()tr_before(tr)
+        AND label:=()tr_label (tr)
+        AND cond :=()tr_cond  (tr)
+        AND zero :=()tr_zero  (tr)
+        AND aft  :=()tr_after (tr) :
+  {
+    []  trans.label(bef/z) => aft / lproj(inter(cond,z),zero) end
+  }
+end
+
+rules for clockzone
+ global
+  FOR EACH invar : invariant; st : state; cz : clockzone
+  SUCH THAT invar:=(listExtract)elem(lst_inv(Aut3))
+        AND st:=()inv_state(invar)  AND cz:=()inv_zone(invar) :
+  {
+    []  inv(st)  =>  cz  end
+  }
+end
+
+////  SPÉCIFIQUES À L'AUTOMATE Aut4
+
+rules for statezone
+  z : clockzone ;
+ global
+  FOR EACH tr       : transition ;
+           bef, aft : state ;
+           label    : label ;
+           cond     : clockzone ;
+           zero     : list[clock]
+  SUCH THAT tr := (listExtract) elem(lst_trans(Aut4))
+        AND bef  :=()tr_before(tr)
+        AND label:=()tr_label (tr)
+        AND cond :=()tr_cond  (tr)
+        AND zero :=()tr_zero  (tr)
+        AND aft  :=()tr_after (tr) :
+  {
+    []  trans.label(bef/z) => aft / lproj(inter(cond,z),zero) end
+  }
+end
+
+rules for clockzone
+ global
+  FOR EACH invar : invariant; st : state; cz : clockzone
+  SUCH THAT invar:=(listExtract)elem(lst_inv(Aut4))
+        AND st:=()inv_state(invar)  AND cz:=()inv_zone(invar) :
+  {
+    []  inv(st)  =>  cz  end
+  }
+end
+
+
+////  SPÉCIFIQUES À  Aut1 X Aut2 X Aut3 X Aut4
+
+rules for bool
+  A : Automaton ;
+  D : mytuple[list[state],list[state],list[state],list[state]] ;
+  ls : list[state] ;
+  s, t, u, v : state ;
+  l : label ;
+  t : transition ;
+  lt : list[transition] ;
+  res, v1, v2, v3, v4 : bool ;
+ global
+  [] valid(s,l,A)     => exists(s,l,lst_trans(A)) end
+  [] exists(s,l,nil)  => false                    end
+  [] exists(s,l,t.lt) => res
+                        choose try if eq_state(tr_before(t),s) and eq_label(tr_label(t),l)
+                                   where res:=()true
+                               try
+                                   where res:=()exists(s,l,lt)
+                        end  end
+  [] valid((s,t,u,v),l) => v1 or v2 or v3 or v4
+                         where v1:=()valid(s,l,Aut1)
+                         where v2:=()valid(t,l,Aut2)
+                         where v3:=()valid(u,l,Aut3)
+                         where v4:=()valid(v,l,Aut4)
+                         end
+  [] (s,t,u,v) app D => occ(s,first(D)) and occ(t,second(D)) and occ(u,third(D)) and occ(v,fourth(D)) end
+  [] occ(s,nil) => true end
+  [] occ(s,ls) => occurs(s,ls) end
+  
+  [] second(ETAT_SOURCE_ERRONE) => EMPTY_STATE end
+end
+
+rules for bool
+  sA, sB, s, $ss1, $ss2 : comp_state ;
+  zA, zB, z, cz1, cz2 : clockzone ;
+  sz, sz1, sz2  : statezone ;
+  lsz : list[statezone] ;
+  res : bool ;
+ global
+  [] cmp_zones($ss1/cz1,$ss2/cz2) =>  $ss1==$ss2 and cmp_DBMs([bnd(cz1),bnd(cz2)]) end
+
+  [] sz in nil      => false  end
+  [] sz in sz1.lsz  => res
+                       choose try if cmp_zones(sz,sz1) 
+                                  where res:=()true
+                              try 
+                                  where res:=()sz in lsz
+                       end  end
+end
+
+
+
+rules for pair[list[movement],bool]
+  lst : pair[list[statezone],bool] ;
+  lm : list[movement] ;
+  res : bool ; 
+  szs, szc : statezone ;
+ global
+  [] go(szs,szc) => [lm,res]
+                    where lst:=(explore)lst_trans(szs.nil,szs,szc)
+                    where lm:=()add_labels(first(lst))
+                    where res:=()second(lst)
+                    end
+end
+
+rules for list[movement]
+  sz0, sz1, sz2 : statezone ;
+  cs : comp_state ;
+  l : label ;
+  lsz : list[statezone] ;
+ global
+  [] add_labels(first(ETAT_SOURCE_ERRONE)) => nil end
+  [] add_labels(sz1.sz0.nil) => l->cs.nil 
+                                where l:=(try_lbl)label(cst(sz0),cst(sz1))
+                                where cs:=()cst(sz1)
+                                end
+  [] add_labels(sz1.sz2.lsz) => add_labels(sz2.lsz) @ l->cs.nil
+                                where l:=(try_lbl)label(cst(sz2),cst(sz1))
+                                where cs:=()cst(sz1)
+                                end
+end
+
+
+rules for statezone
+  z, zz  : clockzone ;
+  sz, sz1, sz2, sz3 : statezone ;
+  ss, tt, uu, vv,
+  s, t, u, v, s1, s2, s3, s4 : state ;
+  cz, cz1, cz2, cz3 : clockzone ;
+  v1, v2, v3, v4 : bool ;
+  lb : label ; 
+  css : comp_state ;
+ global
+
+  FOR EACH lbl : identifier SUCH THAT lbl := (listExtract) elem(S):{ 
+   FOR EACH cs : comp_state SUCH THAT 
+    cs := (listExtract) elem(valid_states(Aut1,Aut2,Aut3,Aut4,lbl)):{
+    [DT_pdt_lbl] trans_lbl(cs/z) => next_sz_aux(cs,lbl,z) end
+   }}
+
+
+   [] next_sz_aux(css,lb,z) => sz
+                                where s:=()s(css)
+                                where t:=()t(css)
+                                where u:=()u(css)
+                                where v:=()v(css)
+                                where v1:=()valid(s,lb,Aut1)
+                                where v2:=()valid(t,lb,Aut2)
+                                where v3:=()valid(u,lb,Aut3)
+                                where v4:=()valid(v,lb,Aut4)
+                                where sz:=()next_sz(z,lb,s,t,u,v,v1,v2,v3,v4) 
+    end  
+
+
+    [] next_sz(zz,lb,s1,s2,s3,s4,true,true,true,true) => (ss,tt,uu,vv)/cz
+                                            where sz :=()trans.lb(s1/zz)
+                                            where cz1:=()zn(sz) 
+                                            where sz1:=()trans.lb(s2/cz1)
+                                            where cz2:=()zn(sz1)
+                                            where sz2:=()trans.lb(s3/cz2)
+                                            where cz3:=()zn(sz2)
+                                            where sz3:=()trans.lb(s4/cz3)
+                                            where ss :=()st(sz)
+                                            where tt :=()st(sz1) 
+                                            where uu :=()st(sz2)
+                                            where vv :=()st(sz3)
+                                            where cz :=()zn(sz3)
+                                            end
+
+    [] next_sz(zz,lb,s1,s2,s3,s4,true,true,true,false) => (ss,tt,uu,vv)/cz
+                                            where sz :=()trans.lb(s1/zz)
+                                            where cz1:=()zn(sz) 
+                                            where sz1:=()trans.lb(s2/cz1)
+                                            where cz2:=()zn(sz1)
+                                            where sz2:=()trans.lb(s3/cz2)
+                                            where ss :=()st(sz)
+                                            where tt :=()st(sz1) 
+                                            where uu :=()st(sz2)
+                                            where vv :=()s4
+                                            where cz :=()zn(sz2)
+                                            end
+
+    [] next_sz(zz,lb,s1,s2,s3,s4,true,true,false,true) => (ss,tt,uu,vv)/cz
+                                            where sz :=()trans.lb(s1/zz)
+                                            where cz1:=()zn(sz)
+                                            where sz1:=()trans.lb(s2/cz1)
+                                            where cz2:=()zn(sz1)
+                                            where sz2:=()trans.lb(s4/cz2)
+                                            where ss :=()st(sz)
+                                            where tt :=()st(sz1)
+                                            where uu :=()s3
+                                            where vv :=()st(sz2)
+                                            where cz :=()zn(sz2)
+                                            end
+
+    [] next_sz(zz,lb,s1,s2,s3,s4,true,false,true,true) => (ss,tt,uu,vv)/cz
+                                            where sz :=()trans.lb(s1/zz)
+                                            where cz1:=()zn(sz)
+                                            where sz1:=()trans.lb(s3/cz1)
+                                            where cz2:=()zn(sz1)
+                                            where sz2:=()trans.lb(s4/cz2)
+                                            where ss :=()st(sz)
+                                            where tt :=()s2
+                                            where uu :=()st(sz1)
+                                            where vv :=()st(sz2)
+                                            where cz :=()zn(sz2)
+                                            end
+
+    [] next_sz(zz,lb,s1,s2,s3,s4,false,true,true,true) => (ss,tt,uu,vv)/cz
+                                            where sz :=()trans.lb(s2/zz)
+                                            where cz1:=()zn(sz)
+                                            where sz1:=()trans.lb(s3/cz1)
+                                            where cz2:=()zn(sz1)
+                                            where sz2:=()trans.lb(s4/cz2)
+                                            where ss :=()s1
+                                            where tt :=()st(sz)
+                                            where uu :=()st(sz1)
+                                            where vv :=()st(sz2)
+                                            where cz :=()zn(sz2)
+                                            end
+
+    [] next_sz(zz,lb,s1,s2,s3,s4,true,true,false,false) => (ss,tt,uu,vv)/cz
+                                            where sz:=()trans.lb(s1/zz)
+                                            where cz1:=()zn(sz)
+                                            where sz1:=()trans.lb(s2/cz1)
+                                            where ss:=()st(sz)
+                                            where tt:=()st(sz1)
+                                            where uu:=()s3
+                                            where vv:=()s4
+                                            where cz:=()zn(sz1)
+                                            end
+
+    [] next_sz(zz,lb,s1,s2,s3,s4,true,false,true,false) => (ss,tt,uu,vv)/cz
+                                            where sz:=()trans.lb(s1/zz)
+                                            where cz1:=()zn(sz)
+                                            where sz1:=()trans.lb(s3/cz1)
+                                            where ss:=()st(sz)
+                                            where tt:=()s2
+                                            where uu:=()st(sz1)
+                                            where vv:=()s4
+                                            where cz:=()zn(sz1)
+                                            end
+
+    [] next_sz(zz,lb,s1,s2,s3,s4,true,false,false,true) => (ss,tt,uu,vv)/cz
+                                            where sz:=()trans.lb(s1/zz)
+                                            where cz1:=()zn(sz)
+                                            where sz1:=()trans.lb(s4/cz1)
+                                            where ss:=()st(sz)
+                                            where tt:=()s2
+                                            where uu:=()s3
+                                            where vv:=()st(sz1)
+                                            where cz:=()zn(sz1)    
+                                            end
+           
+    [] next_sz(zz,lb,s1,s2,s3,s4,false,true,true,false) => (ss,tt,uu,vv)/cz
+                                            where sz:=()trans.lb(s2/zz)
+                                            where cz1:=()zn(sz)
+                                            where sz1:=()trans.lb(s3/cz1)
+                                            where ss:=()s1
+                                            where tt:=()st(sz)
+                                            where uu:=()st(sz1)
+                                            where vv:=()s4
+                                            where cz:=()zn(sz1)  
+                                            end
+
+    [] next_sz(zz,lb,s1,s2,s3,s4,false,true,false,true) => (ss,tt,uu,vv)/cz
+                                            where sz:=()trans.lb(s2/zz)
+                                            where cz1:=()zn(sz)
+                                            where sz1:=()trans.lb(s4/cz1)
+                                            where ss:=()s1
+                                            where tt:=()st(sz)
+                                            where uu:=()s3
+                                            where vv:=()st(sz1)
+                                            where cz:=()zn(sz1)  
+                                            end
+
+    [] next_sz(zz,lb,s1,s2,s3,s4,false,false,true,true) => (ss,tt,uu,vv)/cz
+                                            where sz:=()trans.lb(s3/zz)
+                                            where cz1:=()zn(sz)
+                                            where sz1:=()trans.lb(s4/cz1)
+                                            where ss:=()s1
+                                            where tt:=()s2
+                                            where uu:=()st(sz)
+                                            where vv:=()st(sz1)
+                                            where cz:=()zn(sz1)
+                                            end
+
+    [] next_sz(zz,lb,s1,s2,s3,s4,true,false,false,false) => (ss,tt,uu,vv)/cz
+                                            where sz:=()trans.lb(s1/zz)
+                                            where ss:=()st(sz)
+                                            where tt:=()s2
+                                            where uu:=()s3
+                                            where vv:=()s4
+                                            where cz:=()zn(sz) 
+                                            end
+
+    [] next_sz(zz,lb,s1,s2,s3,s4,false,true,false,false) => (ss,tt,uu,vv)/cz
+                                            where sz:=()trans.lb(s2/zz)
+                                            where ss:=()s1
+                                            where tt:=()st(sz)
+                                            where uu:=()s3
+                                            where vv:=()s4
+                                            where cz:=()zn(sz)  
+                                            end
+             
+    [] next_sz(zz,lb,s1,s2,s3,s4,false,false,true,false) => (ss,tt,uu,vv)/cz
+                                            where sz:=()trans.lb(s3/zz)
+                                            where ss:=()s1
+                                            where tt:=()s2
+                                            where uu:=()st(sz)
+                                            where vv:=()s4
+                                            where cz:=()zn(sz)
+                                            end
+     
+    [] next_sz(zz,lb,s1,s2,s3,s4,false,false,false,true) => (ss,tt,uu,vv)/cz
+                                            where sz:=()trans.lb(s4/zz)
+                                            where ss:=()s1
+                                            where tt:=()s2
+                                            where uu:=()s3
+                                            where vv:=()st(sz)
+                                            where cz:=()zn(sz)               
+                                            end 
+
+end
+
+//---  STRATÉGIES  ---//
+
+strategies for label
+ implicit
+  []  trytrans  =>  dk(trylabel)  end
+  []  try_lbl   =>  first one(trylbl) end
+end
+
+strategies for statezone
+ implicit
+  []  lst_tranz => time ; dk(trans_pdt)  end
+  []  tranz  =>  trans_pdt ; time  end
+
+  []  dt_pdt  => dk(
+      FOR EACH label : identifier SUCH THAT label:=(listExtract)elem(S):
+      { dt_pdt_aux_label, } fail)  end
+
+  FOR EACH label : identifier SUCH THAT label:=(listExtract)elem(S):
+  { [] dt_pdt_aux_label => dk(DT_pdt_label) end }
+end
+
+strategies for pair[list[statezone],bool]
+ implicit
+  [] explore => repeat*(first one(dk(trans1),dk(trans2),dk(trans3),trans4)) end
+end
+
+end

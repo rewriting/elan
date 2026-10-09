@@ -1,0 +1,10 @@
+LPL testArray  description
+
+query of sort  Term
+result of sort Term
+	  
+import testArray
+start with () go
+
+end
+

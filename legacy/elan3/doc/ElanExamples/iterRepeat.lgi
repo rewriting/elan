@@ -1,0 +1,8 @@
+LPL iterRepeat description 
+
+query 		of sort int
+      result 	of sort int
+      import    iterRepeat
+      start with (allRepP) query
+
+end

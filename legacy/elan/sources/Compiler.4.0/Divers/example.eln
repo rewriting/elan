@@ -1,0 +1,30 @@
+module example
+
+import global builtinInt ;
+end
+
+sort T U ;
+end
+
+operators global
+
+ a: T ;
+ b: T ;
+ c: U ;
+ d: U ;
+
+// zero:builtinInt ;
+
+ i(@) : (T) T ;
+ f(@,@)  : (T T) T ;
+
+ g(@,@,@) : (U U U) T ;
+
+ h(@) : (builtinInt) T ;
+
+ @ + @: (T T) T ;
+
+
+end
+
+end

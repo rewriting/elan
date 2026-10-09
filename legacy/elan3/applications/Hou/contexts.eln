@@ -1,0 +1,90 @@
+module contexts[btypes]
+import
+  global 	int bool types[btypes];
+end
+sort context texcontext;
+end
+operators
+  global    
+    //--------- contexts -------------------------------//
+    nocontext	: context;				// error or unknown
+    nil		: context;				// nil
+    @.@		: (type context) context;		// cons
+    cvar(@)	: (int) context;			// context variable 
+    //--------------------------------------------------//
+    @-th elem(@): (int context) type;			// k-th
+    known(@)	: (context) bool;			// not known
+    size(@)	: (context) int;			// length
+    //------------ TEX ---------------------------------//
+    tex(@)	: (context) texcontext;
+    \nocontext	: texcontext;				
+    \nilc	: texcontext;			
+    \concc<@><@>: (textype texcontext) texcontext;	
+    \cvar<@>	: (int) texcontext;
+    @		: (textype) texcontext;			
+end
+
+rules for texcontext
+
+	tt	: type;
+	cc	: context;
+	i	: int;
+local
+  []	tex(nocontext)	=> \nocontext
+  end
+  []	tex(nil)	=> \nilc
+  end
+  []	tex(tt.nil)	=> tex(tt)
+  end
+  []	tex(tt.cc) => \concc<tex(tt)><tex(cc)>
+  end
+  []	tex(cvar(i))	=> \cvar<i>
+  end
+end
+
+rules for bool
+
+	cc	: context;
+local
+  []	known(nocontext)	=> false		
+  end
+  []	known(cc)		=> true			
+  end // dirty
+end
+
+rules for type
+	e	: type;
+	l	: context;
+	n	: int;
+local
+  [] 1-th elem(e.l)		=> e					
+  end
+  [] n-th elem(e.l)		=> (n-1)-th elem(l)			
+  end
+end
+
+rules for int
+	tt	: type;
+	cc	: context;
+local
+  []	size(nil)	=> 0						
+  end
+  []	size(tt.cc)	=> 1+size(cc)					
+  end
+end
+
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,13 @@
+LPL test_bool description
+
+  query of sort test
+
+  result of sort test
+
+  import
+    bool
+    test[bool]
+
+  start with ()query
+
+end

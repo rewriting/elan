@@ -1,0 +1,49 @@
+module hello
+
+import global string prompt[string];
+end
+operators global
+  hello	: string;
+  what	: string;
+end
+
+rules for string
+s	: string;
+global
+  [] hello => print("\nHello world\n") 	end
+  [] what => read			end
+end
+
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

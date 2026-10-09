@@ -1,0 +1,188 @@
+LPL lt description
+
+query		of sort  	lterm
+		result of sort 	lterm
+		import 		lt
+		start with 	[repeat]
+/*
+  ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))	
+    la la one  )
+*/
+/*
+( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+ ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+  ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+   ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+    ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+     ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+      ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))	
+	la la one  			
+	)))))))
+*/
+
+/*
+( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+ ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+  ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+   ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+    ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+     ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+      ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))	
+( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+ ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+  ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+   ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+    ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+     ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+      ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))	
+	la la one  			
+	))))))))))))))
+*/
+
+( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+ ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+  ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+   ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+    ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+     ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+      ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))	
+( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+ ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+  ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+   ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+    ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+     ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+      ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))	
+( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+ ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+  ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+   ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+    ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+     ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+      ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))	
+	la la one  			
+	)))))))))))))))))))))
+/*
+( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+ ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+  ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+   ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+    ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+     ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+      ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))	
+( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+ ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+  ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+   ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+    ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+     ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+      ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))	
+( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+ ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+  ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+   ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+    ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+     ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+      ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))	
+( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+ ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+  ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+   ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+    ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+     ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+      ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))	
+	la la one  			
+	))))))))))))))))))))))))))))
+*/
+
+//		start with 	[repeat(lis(dc(beta, eta)))]query
+//		start with 	[los(dc(beta, eta))]query
+//		start with 	[beta]query
+//		start with 	()query
+
+/*
+zero = la la one
+add  = la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+
+one  = 
+(  la la la (succ(one) ((succ(succ(one)) succ(one)) one))  la la one   ) end
+two  = 
+(  la la la (succ(one) ((succ(succ(one)) succ(one)) one))  la la (succ(one) one)  ) end
+three = 
+  (  la la la (succ(one) ((succ(succ(one)) succ(one)) one))  la la (succ(one) (succ(one) one)) ) end
+
+four = 
+	(  la la la (succ(one) ((succ(succ(one)) succ(one)) one))		
+	 ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))		
+	   ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))		
+	     la la one  				
+	   )
+	 )
+	) end
+
+
+seven =
+( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+ ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+  ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+   ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+    ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+     ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+      ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))	
+	la la one  			
+	)))))))
+	end
+
+14 = 
+( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+ ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+  ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+   ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+    ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+     ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+      ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))	
+( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+ ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+  ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+   ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+    ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+     ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+      ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))	
+	la la one  
+	)))))))))))))) end
+
+28 =
+( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+ ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+  ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+   ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+    ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+     ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+      ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))	
+( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+ ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+  ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+   ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+    ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+     ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+      ( la la la (succ(one) ((succ(succ(one)) succ(one)) one)
+( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+ ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+  ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+   ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+    ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+     ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+      ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))	
+( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+ ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+  ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+   ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+    ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+     ( la la la (succ(one) ((succ(succ(one)) succ(one)) one))
+      ( la la la (succ(one) ((succ(succ(one)) succ(one)) one)
+	la la one  			
+	)))))))))))))))))))))))))))))) end
+
+*/
+
+end

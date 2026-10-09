@@ -1,0 +1,8 @@
+LPL poly1 description
+
+  query    of sort 		poly
+	   result of sort 	poly
+           import  		poly1
+           start with 		()query
+
+end

@@ -1,0 +1,8 @@
+LPL Fail description
+
+query		of sort  	Foo
+		result of sort 	Foo
+		import 		Fail
+		start with 	(fo)query
+
+end

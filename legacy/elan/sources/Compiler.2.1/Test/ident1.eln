@@ -1,0 +1,29 @@
+module ident1
+
+import identifier;
+end
+
+sort term;
+end
+
+operators global
+ a    : identifier;
+ b    : identifier;
+
+ f(@) : (identifier) identifier;
+ t1   : term;
+ t2   : term;
+ t3   : term;
+ t4   : term;
+end
+
+rules for identifier
+  x : identifier;
+global
+  [] f(a) => t1 end
+  [] f(b) => t2 end
+  [] f(BB) => t3 end
+  [] f($x) => $x end
+end
+
+end

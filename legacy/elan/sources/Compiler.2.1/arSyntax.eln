@@ -1,0 +1,24 @@
+module arSyntax
+
+import 
+	global	
+		int
+		ident   
+		pair[int,int] 
+		pair[ident,pair[int,int]] 
+		list[pair[ident,pair[int,int]]];
+end
+operators
+ global
+
+  @ ':' @ : ( ident pair[int,int] ) pair[ident,pair[int,int]]	alias [@,@]:;
+
+  @ '#' @ : ( int int ) pair[int,int]					alias [@,@]:;
+
+  Epsilon : list[pair[ident,pair[int,int]]]			alias nil:;
+  @  @	  : ( pair[ident,pair[int,int]] list[pair[ident,pair[int,int]]] ) 
+			  list[pair[ident,pair[int,int]]]	alias cons(@,@):;
+
+end
+
+end

@@ -1,0 +1,13 @@
+------------------------------------------------------------
+Set
+compiler
+powerSet(4)
+20 runs : moyenne = 29603 rwr/sec
+powerSet(5)
+20 runs : moyenne = 46977 rwr/sec
+powerSet(6)
+20 runs : moyenne = 65490 rwr/sec
+powerSet(7)
+20 runs : moyenne = 73416 rwr/sec
+powerSet(8)
+20 runs : moyenne = 59814 rwr/sec

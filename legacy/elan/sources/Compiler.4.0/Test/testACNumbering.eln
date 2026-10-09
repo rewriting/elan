@@ -1,0 +1,73 @@
+module testACNumbering
+
+//import global int;
+//end
+
+sort term eq equation;
+end
+
+operators global
+ a      : term;
+ b      : term;
+ c      : term;
+ d      : term;
+ e      : term;
+ f      : term;
+
+ s(@) : (term) term;
+
+ F(@,@) : (term term) term (AC);
+ g(@) : (term) term;
+ g1(@) : (term) term;
+ g2(@) : (term) term;
+ g3(@) : (term) term;
+ h(@,@) : (term term) term;
+end
+
+/*
+stratop global
+  s0    : <term>        builtin;
+  s1    : <term>        builtin;
+end
+*/
+
+
+rules for term
+  x,y,z : term;
+global
+//  [] g(F(a,x)) => h(a,x) end
+//  [] g(F(b,x)) => h(b,x) end
+
+  [] F(g2(g3(x)), y) => a end
+
+//  [] g(F(F(x,y),z)) => a end
+//  [] g(F(x,y)) => a end
+
+
+/*
+  [] h(a,f(a,x)) => h(a,x) end
+  [] h(a,f(b,x)) => h(b,x) end
+
+  [] h(f(a,x),b) => h(a,x) end
+  [] h(f(b,x),b) => h(b,x) end
+*/
+
+//  [] F(d,x) => x end
+//  [] F(e,x) => x end
+
+end
+
+
+
+
+
+/*
+strategies for term
+implicit
+  [.] s0 => one(r0, r1, r2)
+  end
+
+end
+*/
+
+end

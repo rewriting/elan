@@ -1,0 +1,9 @@
+LPL cs2 description
+
+  query    of sort equation
+  result   of sort equation
+  import   identifier cs2
+  start with () query
+
+end
+

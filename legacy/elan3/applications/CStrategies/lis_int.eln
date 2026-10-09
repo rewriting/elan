@@ -1,0 +1,30 @@
+module lis_int
+
+import global 	strat[integ] any[integ] integ
+                strat[tree[integ]] any[tree[integ]]
+                tree[integ]
+                lis[integ];
+end
+
+operators global
+  swap	: <integ>;
+end
+
+strategies for integ
+ y	: integ;
+defined
+  [swap] y => y+1 if y < 10				end
+end
+
+end
+
+
+
+
+
+
+
+
+
+
+

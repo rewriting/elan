@@ -1,0 +1,31 @@
+module verySimpleModule
+
+	// first introduce the sort ``foo''
+sort foo;
+
+	// then constant operators that are exported
+op global
+    a : foo;
+    b : foo;
+    c : foo;
+endop
+
+	// Then the rewrite rules
+rules for foo
+bodies
+	// The name of the next rule is ``r1''
+  [r1]	a  	=> b	end
+  [r2]	b  	=> c	end
+end of rules
+
+	// and now we describe the way we want to apply the rules:
+	// i.e. apply the rules ``r1'' and ``r2'' (in any order) until 
+	// none is no more applicable.
+
+strategy simpleStrategy
+repeat
+ dont care choose(r1 r2)
+endrepeat
+end of strategy
+
+end of module

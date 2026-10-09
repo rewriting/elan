@@ -1,0 +1,76 @@
+module preprocessing[Vars,Ops,Types,Rwrules,Labels]
+import 	local	rwrule[Vars,Ops,Types,Labels] Rwrules 
+		list[rwrule]
+		msTermCommons[Vars,Ops,Types]
+
+//		myEqSystemAC[Vars,Ops,Types]
+//		mySyntacticUnificationAC[Vars,Ops,Types]
+		myEqSystem[Vars,Ops,Types]
+		mySyntacticUnification[Vars,Ops,Types]
+
+		msApplySubstOn[term,Vars,Ops,Types]
+		eq[bool]
+		replace[term,term]
+		list[int]
+	;
+end
+
+operators
+  global
+    	pprwrules 	: list[rwrule];
+  local
+    	pplrule(@) 	: (list[rwrule]) list[rwrule];
+    	pprule(@)	: (rwrule) rwrule;
+    	pprule(@)	: (rulebodies) rulebodies;
+    	transform(@)	: (rulebodies) rulebodies;
+end
+
+rules for list[rwrule]
+
+	rw 	: rwrule;
+	lrw 	: list[rwrule];
+
+global
+  [] pplrule(nil) => nil
+  end
+  [] pplrule(rw.lrw) => pprule(rw).pplrule(lrw)
+  end
+
+// Preparation de la liste lors du chargement
+//  FOR EACH l:list[rwrule] SUCH THAT l:=() pplrule(Rwrules)
+//	:{ [] pprwrules => lrw where lrw:=()l end } 
+
+
+//  [] pprwrules => pplrule(Rwrules)
+  [] pprwrules => Rwrules
+  end
+end
+
+
+rules for rwrule
+	rb 	: rulebodies;
+	l	: label;
+global
+  [] pprule([] rb ) => [] pprule(rb)
+  end
+  [] pprule([l] rb ) => [l] pprule(rb)
+  end
+end
+
+rules for rulebodies
+
+	rb,rb2 	: rulebodies;
+	v	: variable;
+	wp	: term;
+global
+  [] transform(rb) => rb
+  end
+  [] pprule(rb if true) => rb
+  end
+  [] pprule(rb where v:=wp) => transform( pprule(rb) where v:=wp )
+  end
+  [] pprule(rb) => rb
+  end
+end
+
+end

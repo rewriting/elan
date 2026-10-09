@@ -1,0 +1,8 @@
+LPL fromto description 
+
+  query 	of sort int
+         	result of sort int
+	 	import	string  fromto
+        	start with ()query
+
+end

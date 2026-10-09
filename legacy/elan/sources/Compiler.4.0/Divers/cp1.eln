@@ -1,0 +1,44 @@
+module cp1
+
+sort Foo; end
+
+operators global
+  do(@)	: (Foo) Foo;
+  a	: Foo;
+  b	: Foo;
+  c	: Foo;
+  d	: Foo;
+  e	: Foo;
+  f	: Foo;
+  g	: Foo;
+end
+
+rules for Foo
+x, y 	: Foo;
+global
+  [R]	a => b		end
+  [R]	a => c		end
+  [R1]	a => d		end
+  [R1]	a => e		end
+  [R2]	a => f		end
+
+  [DO]	do(a) => y where y:=(dk(do1,do2))a end
+  [DO]	do(b) => y where y:=(dc(do1,do2))a end
+  [DO]	do(c) => y where y:=(dc one(do1,do2))a end
+end
+
+stratop global
+  do	: <Foo>	builtin;
+  do1	: <Foo>	builtin;
+  do2	: <Foo>	builtin;
+end
+
+strategies for Foo
+implicit
+  [.] do => dk(DO) end
+  [.] do1 => dk(R,R1) end
+  [.] do2 => dk(R1,R2) end
+end
+
+end
+

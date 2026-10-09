@@ -1,0 +1,50 @@
+/*  									 */
+/* Strategy			 Results: 				 */
+/*  									 */
+/* GenerateTestFirstToLastOne	 CSP[nil,X1=1.X2=2.X3=3.nil,nil,nil,nil] */
+/*  									 */
+/* GenerateTestFirstToLastAll	 CSP[nil,X1=1.X2=2.X3=3.nil,nil,nil,nil] */
+/*     				 CSP[nil,X1=1.X2=2.X3=4.nil,nil,nil,nil] */
+/*     				 CSP[nil,X1=1.X2=3.X3=4.nil,nil,nil,nil] */
+/*     				 CSP[nil,X1=2.X2=3.X3=4.nil,nil,nil,nil] */
+/*  									 */
+/* GenerateTestLastToFirstOne	 CSP[nil,X1=2.X2=3.X3=4.nil,nil,nil,nil] */
+/*  									 */
+/* GenerateTestLastToFirstAll	 CSP[nil,X1=2.X2=3.X3=4.nil,nil,nil,nil] */
+/*				 CSP[nil,X1=1.X2=3.X3=4.nil,nil,nil,nil] */
+/*				 CSP[nil,X1=1.X2=2.X3=4.nil,nil,nil,nil] */
+/*				 CSP[nil,X1=1.X2=2.X3=3.nil,nil,nil,nil] */
+/*  									 */
+/* BacktrackingFirstToLastOne 	 CSP[nil,X1=1.X2=2.X3=3.nil,nil,nil,nil] */
+/*  									 */
+/* BacktrackingFirstToLastAll 	 CSP[nil,X1=1.X2=2.X3=3.nil,nil,nil,nil] */
+/*  				 CSP[nil,X1=1.X2=2.X3=4.nil,nil,nil,nil] */
+/*  				 CSP[nil,X1=1.X2=3.X3=4.nil,nil,nil,nil] */
+/*  				 CSP[nil,X1=2.X2=3.X3=4.nil,nil,nil,nil] */
+/*  									 */
+/* BacktrackingLastToFirstOne 	 CSP[nil,X1=2.X2=3.X3=4.nil,nil,nil,nil] */
+/*  									 */
+/* BacktrackingLastToFirstAll 	 CSP[nil,X1=2.X2=3.X3=4.nil,nil,nil,nil] */
+/*  				 CSP[nil,X1=1.X2=3.X3=4.nil,nil,nil,nil] */
+/*  				 CSP[nil,X1=1.X2=2.X3=4.nil,nil,nil,nil] */
+/*  				 CSP[nil,X1=1.X2=2.X3=3.nil,nil,nil,nil] */
+/*  									 */
+/* FCFirstToLastOne              CSP[nil,X1=1.X2=2.X3=3.nil,nil,nil,nil] */
+/*  									 */
+/* FCFirstToLastAll              CSP[nil,X1=1.X2=2.X3=3.nil,nil,nil,nil] */
+/*  				 CSP[nil,X1=1.X2=2.X3=4.nil,nil,nil,nil] */
+/*  				 CSP[nil,X1=1.X2=3.X3=4.nil,nil,nil,nil] */
+/*  				 CSP[nil,X1=2.X2=3.X3=4.nil,nil,nil,nil] */
+/*  									 */
+/* FCLastToFirstOne              CSP[nil,X1=2.X2=3.X3=4.nil,nil,nil,nil] */
+/*  									 */
+/* FCLastToFirstAll              CSP[nil,X1=2.X2=3.X3=4.nil,nil,nil,nil] */
+/*  				 CSP[nil,X1=1.X2=3.X3=4.nil,nil,nil,nil] */
+/*  				 CSP[nil,X1=1.X2=2.X3=4.nil,nil,nil,nil] */
+/*  				 CSP[nil,X1=1.X2=2.X3=3.nil,nil,nil,nil] */
+/*  									 */
+
+X3<=?4 &
+X2<?X3 &
+X1<?X2
+end

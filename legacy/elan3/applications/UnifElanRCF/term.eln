@@ -1,0 +1,73 @@
+module term
+/*
+   This module defines notions common to all first-order terms.
+   Terms built w.r.t. some concrete signatures are then defined by
+   modules 'termV' for variables and 'termF' for terms built on
+   functional symbols, both parametrized by the corresponding
+   signatures.  This choice (which is not unique) allows in particular
+   an easy description of terms built on constructors and defined
+   operators.
+*/
+import global	eq[term] substitution;
+       local	int bool identifier list[int] list[variable]; 
+       end
+
+sort variable term; end 
+
+operators
+
+  global
+
+  var(@)       		: ( int ) variable;
+  @            		: ( variable ) term		pri 1000;
+
+  head(@)		: ( term ) identifier;
+  @-th subterm(@) 	: ( int term ) term;
+  isvar(@)              : ( term ) bool;
+  nvocc(@)              : ( term ) list[int];
+
+  @ at @                : ( term list[int] ) term;
+  @[@] at @             : ( term term list[int] ) term;
+
+  rename_subst(@,@)     : ( list[variable] int ) substitution;
+
+end
+
+rules for term
+ t,s:term;  i:int;  l:list[int];
+global 
+  [] t at nil   	=> t				end
+  [] t at i.l		=> i-th subterm(t) at l		end
+  [] t[s] at nil        => s				end
+end
+
+rules for bool
+ v:variable; t:term;
+global
+  [] isvar(v)   => true					end
+  [] isvar(t)   => false				end
+end
+
+rules for substitution
+ i:int; vn:variable; vl:list[variable];
+global
+  [] rename_subst(nil,i)     => identity			    end
+  [] rename_subst(vn.vl , i) => vn->var(i) o rename_subst(vl , i+1) end
+end
+
+rules for list[int]
+ t:term;
+global
+  [topOccRule]  nvocc(t)          => nil	if not isvar(t)	    end
+end
+
+rules for identifier
+ x:variable;
+global
+  [] head(x)	=> var			end
+end
+
+
+end
+
+

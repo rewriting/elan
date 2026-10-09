@@ -1,0 +1,25 @@
+module apply[X,Y]
+
+import global tcstrat[X,Y] tcstrat[list[X],list[Y]]
+  	      X Y list[X] list[Y];
+end
+stratop global
+  apply 	: <list[X] -> list[Y]>;
+  apply(@) 	: (<X->Y>) <list[X] -> list[Y]>;
+end
+
+rules for X->Y
+x  	: X; 
+n	: int;
+global
+  [tr(n)] x => true 					end
+  [trr(n)] x => false 					end
+end
+
+strategies for list[X] -> list[Y]
+s 	: <X->Y>; 
+implicit
+  [.] apply(s) => dc(nil,s.apply(s))  end
+end
+
+end

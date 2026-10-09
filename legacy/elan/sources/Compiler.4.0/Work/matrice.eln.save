@@ -1,0 +1,69 @@
+module matrice[X]
+
+import builtinArray[X] builtinArray[builtinArray[X]];
+end
+
+sort matrice[X] X;
+end 
+
+operators
+global
+  new(@,@)   : (builtinInt builtinInt) matrice[X];
+  @.get(@,@) : (matrice[X] builtinInt builtinInt) X;
+  @[@,@]     : (matrice[X] builtinInt builtinInt) X alias @.get(@,@):;
+  @[@,@]<-@  : (matrice[X] builtinInt builtinInt X) matrice[X];
+  [@]        : (builtinArray[builtinArray[X]]) matrice[X];
+local
+  newCol(@,@,@) : (builtinArray[builtinArray[X]]
+                   builtinInt builtinInt) builtinArray[builtinArray[X]];
+
+end
+
+rules for matrice[X]
+  i,j    : builtinInt;
+  col,col2    : builtinArray[X];
+  m      : builtinArray[builtinArray[X]];
+  x      : X;
+
+global
+  // create an array of columns
+  [] new(i,j) => [newCol(new(i),i,j)]
+  end	      
+
+  [] [m][i,j]<-x => [m[i] <- col2]
+               where col  :=() m[i]
+	       where col2 :=() col[j]<-x
+  end
+end
+
+rules for builtinArray[builtinArray[X]]
+  i,j    : builtinInt;
+  tabcol : builtinArray[builtinArray[X]];
+global
+  // build a col=array[j]
+  // fill tabcol[i]=col
+  [] newCol(tabcol,i,j) => newCol(tabcol[i-1]<-new(j),i-1,j) if i>1
+  end
+
+  [] newCol(tabcol,1,j) => tabcol[0]<-new(j) 
+  end
+end
+
+rules for X
+  i,j : builtinInt;
+  m   : matrice[X];
+  t   : builtinArray[builtinArray[X]];
+global
+  [] [t].get(i,j) => t[i][j]
+//            where (matrice[X]) [t] :=() m
+  end
+end
+
+
+
+end
+				
+
+
+
+

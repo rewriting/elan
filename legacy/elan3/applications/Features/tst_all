@@ -1,0 +1,100 @@
+#! /bin/csh -f
+
+if ($1 =~ *I*) then
+itest   sel no sel sel
+itest   w        no      w               w
+itest   ww       no      ww              ww
+itest   wpattern no      wpattern       wpattern
+itest   quick    no      quick           quick
+
+## trop de switch
+#itest   f        no      f       f
+#itest   ff       no      ff      ff
+
+itest   new_meta      no      new_meta      new_meta
+## c'est programme est tellement bizaroid qu'il faut le laisser apart
+##itest     termCommonstest termCommonstest termCommontest termCommontest
+## cf. ../Scharff
+itest moi_meme non moi_meme moi_meme
+itest hello2 qqq hello2 hello2
+itest prtest qqq prtest prtest
+itest Fail   qqq Fail Fail
+itest adjlist qqq adjlist adjlist
+itest ac2     qqq ac2     ac2
+itest ac3     qqq ac3     ac3
+# nouveau switch
+itest trq no trq trq
+itest trw no trw trw
+itest tre no tre tre
+itest tra no tra tra
+itest trs no trs trs
+itest trd no trd trd 
+itest trz no trz trz
+itest trx no trx trx
+itest trc no trc trc 
+itest arbe no arbe arbe
+itest arbee no arbee arbee
+itest pointv no pointv pointv
+#normalisation
+itest m no m m
+itest lambda no lambda lambda
+itest sieve  no sieve  sieve
+itest refstr  no refstr refstr
+itest strref  no strref strref
+itest m_apply1 no m_apply1 m_apply1
+itest m_apply2 no m_apply2 m_apply2
+itest m_apply_all1 no m_apply_all1 m_apply_all1
+itest m_apply_all2 no m_apply_all2 m_apply_all2
+itest m_apply_all3 no m_apply_all3 m_apply_all3
+itest m_apply_all4 no m_apply_all4 m_apply_all4
+itest m_apply_all5 no m_apply_all5 m_apply_all5
+itest m_apply_all6 no m_apply_all6 m_apply_all6
+
+if ($1 =~ *L*) then
+itest m no 90 90
+itest norm no norm norm
+endif
+endif
+
+if ($1 =~ *A*) then
+aitest   sel no sel sel
+aitest   w       no      w               w
+aitest   ww      no      ww              ww
+aitest   quick   no      quick           quick
+aitest   f       no      f       f
+aitest   ff      no      ff      ff
+###aitest     termCommonstest termCommonstest termCommontest termCommontest
+aitest moi_meme non moi_meme moi_meme
+aitest hello2 qqq hello2 hello2
+aitest prtest qqq prtest prtest
+aitest Fail   qqq Fail Fail
+aitest adjlist qqq adjlist adjlist
+aitest ac2     qqq ac2     ac2
+aitest ac3     qqq ac3     ac3
+aitest trq no trq trq
+aitest trw no trw trw
+aitest tre no tre tre
+aitest tra no tra tra
+aitest trs no trs trs
+aitest trd no trd trd 
+aitest trz no trz trz
+aitest trx no trx trx
+aitest trc no trc trc 
+#normalisation
+aitest m no m m
+if ($1 =~ *L*) then
+aitest m no 90 90
+aitest norm no norm norm
+endif
+endif
+
+if ($1 =~ *C*) then
+ctest toi_meme non toi_meme toi_meme
+ctest hello  qqq hello  chello
+ctest hello2 qqq hello2 chello2
+ctest prtest qqq prtest cprtest
+ctest Fail   qqq Fail   cFail
+#ctest m no cm cm  # ca plante (a cause de int ? )
+ctest norm no cnorm cnorm
+ctest mc no 90 c90
+endif

@@ -1,0 +1,32 @@
+/*Box*/
+
+#locs 5
+#trans 6
+#clocks B
+#sync middle gpick gput dpick dput
+
+loc: 0
+     prop: BMov
+     invar: B<=134
+     trans:  B>=133 and B<=134 => bmov; B:=0; goto 1
+
+loc: 1
+     prop: BInspect
+     invar: B<=21
+     trans: TRUE => gpick; ; goto 2
+            TRUE => middle; ; goto 1
+
+loc: 2
+     prop: BonG
+     invar: TRUE
+     trans: TRUE => gput; ; goto 3
+
+loc: 3
+     prop: BonS
+     invar: TRUE
+     trans: TRUE => dpick; ; goto 4
+
+loc: 4
+     prop: BonD
+     invar: TRUE
+     trans: TRUE=> dput; B:=0; goto 0

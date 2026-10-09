@@ -1,0 +1,42 @@
+module group
+
+import global  eq[term];
+end
+
+sort term;
+end
+
+operators
+  global
+    (+ @ @) : (term term) term (AC); 
+    (- @)   : (term) term;
+    O      : term;
+    x0      : term;
+    x1      : term;
+    x2      : term;
+    x3      : term;
+end
+
+stratop global
+  simplify_in : <term -> term> bs;
+//  simplify_out : <term -> term> bs;
+end
+
+rules for term
+    s,t,u,v,x,y    : term;
+  global
+        [neutral] (+ O s) => s end
+//      [invert] (+ (- s) s) => O end
+        [Opp_Null] (- O) => O end
+        [Opp_Opp] (- (- s)) => s end
+        [Opp_Plus] (+ (- t) (- s)) => (- (+ s t)) end
+	[invert] (+ x (+ (- x) y)) => y end 
+end
+
+strategies for term
+implicit
+[] simplify_in => normin(neutral,invert,Opp_Null,Opp_Opp,Opp_Plus)    end
+//[] simplify_out => normout(neutral_l,invert_l,Opp_Null,Opp_Opp,Opp_Plus)    end
+
+end
+end

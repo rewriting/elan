@@ -1,0 +1,9 @@
+// This file is generated automatically: do not edit it directly. 
+module any[X]
+        sort Any;
+        end
+            operators global
+              (X)@           : (X) Any;
+            end   
+end  
+ 

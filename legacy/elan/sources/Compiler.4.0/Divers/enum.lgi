@@ -1,0 +1,8 @@
+ LPL enum description
+  query    of sort int
+  result   of sort int
+  import   enum
+//  start with (enumStrat) enum(1,3)
+  start with (enumStrat) query
+
+end

@@ -1,0 +1,40 @@
+
+\let\CF=\rm
+% Remember to use the lgrind style
+
+\File{boolean.eln},{17:23},{Jun 21 1996}
+\L{\LB{\K{module}_\V{boolean}}}
+\L{\LB{}\Tab{8}{\C{}\1\1_ This module defines two constants refered by the first }}
+\CE{}\L{\LB{}\Tab{8}{\C{}\1\1_ and second entries of the table of symbols}}
+\CE{}\L{\LB{}}
+\L{\LB{\K{op}}}
+\L{\LB{\K{global}}}
+\L{\LB{__\V{true}}\Tab{16}{:_\V{boolean}}\Tab{48}{\V{code}_1;}}
+\L{\LB{__\V{false}}\Tab{16}{:_\V{boolean}}\Tab{48}{\V{code}_2;}}
+\L{\LB{}\Tab{8}{\C{}\1\1_ The alias declaration is used in order to identify the parenthesised  }}
+\CE{}\L{\LB{}\Tab{8}{\C{}\1\1_ and unparenthesised versions of the operators}}
+\CE{}\L{\LB{__@_\V{and}_@}\Tab{16}{:_(_\V{boolean}_\V{boolean}_)_\V{boolean}}\Tab{48}{\V{assocLeft}_\V{pri}_100;}}
+\L{\LB{__@_\V{or}_@}\Tab{16}{:_(_\V{boolean}_\V{boolean}_)_\V{boolean}}\Tab{48}{\V{assocLeft}_\V{pri}_100;}}
+\L{\LB{__(@_\V{and}_@)}\Tab{16}{:_(_\V{boolean}_\V{boolean}_)_\V{boolean}}\Tab{48}{\K{alias}_@_\V{and}_@:;}}
+\L{\LB{__(@_\V{or}_@)}\Tab{16}{:_(_\V{boolean}_\V{boolean}_)_\V{boolean}}\Tab{48}{\K{alias}_@_\V{or}__@:;}}
+\L{\LB{__\V{not}(@)}\Tab{16}{:_(_\V{boolean}_)_\V{boolean}}\Tab{48}{\V{pri}_200;}}
+\L{\LB{__\V{not}_@}\Tab{16}{:_(_\V{boolean}_)_\V{boolean}}\Tab{48}{\V{pri}_200}\Tab{64}{\K{alias}_\V{not}(@):;}}
+\L{\LB{\K{endop}}}
+\L{\LB{}\Tab{8}{\C{}\1\1_ The operators {`}{`}and\'\' and {`}{`}or\'\' are not declared to be AC}}
+\CE{}\L{\LB{}\Tab{8}{\C{}\1\1_ for efficiency reasons (?[ck: Aug 10 95]) }}
+\CE{}\L{\LB{\K{rules}_\K{for}_\V{boolean}}}
+\L{\LB{\K{declare}_\V{x}:\V{boolean};}}
+\L{\LB{\K{bodies}}}
+\L{\LB{_[\,]___\V{true}_\V{and}_\V{x}_}\Tab{24}{=\>_\V{x}}\Tab{40}{\K{end}}}
+\L{\LB{_[\,]___\V{x}_\V{and}_\V{true}_}\Tab{24}{=\>_\V{x}}\Tab{40}{\K{end}}}
+\L{\LB{_[\,]___\V{false}_\V{and}_\V{x}_}\Tab{24}{=\>_\V{false}}\Tab{40}{\K{end}}}
+\L{\LB{_[\,]___\V{x}_\V{and}_\V{false}_}\Tab{24}{=\>_\V{false}}\Tab{40}{\K{end}}}
+\L{\LB{_[\,]___\V{true}_\V{or}_\V{x}_}\Tab{24}{=\>_\V{true}}\Tab{40}{\K{end}}}
+\L{\LB{_[\,]___\V{x}_\V{or}_\V{true}_}\Tab{24}{=\>_\V{true}}\Tab{40}{\K{end}}}
+\L{\LB{_[\,]___\V{false}_\V{or}_\V{x}_}\Tab{24}{=\>_\V{x}}\Tab{40}{\K{end}_}}
+\L{\LB{_[\,]___\V{x}_\V{or}_\V{false}_}\Tab{24}{=\>_\V{x}}\Tab{40}{\K{end}_}}
+\L{\LB{_[\,]___\V{not}_\V{true}__}\Tab{24}{=\>_\V{false}}\Tab{40}{\K{end}}}
+\L{\LB{_[\,]___\V{not}_\V{false}__}\Tab{24}{=\>_\V{true}}\Tab{40}{\K{end}}}
+\L{\LB{\K{end}_\K{of}_\K{rules}}}
+\L{\LB{}}
+\L{\LB{\K{end}_\K{of}_\K{module}}}

@@ -1,0 +1,713 @@
+module terms[mvars,btypes,bvars]
+import
+  global 	int bool 
+		types[btypes] contexts[btypes]
+		ivars[btypes] vars[mvars,btypes] list[obj_Bvars]
+			      vars[bvars,btypes] list[obj_Mvars]
+		//---
+  	 	replace[lterm,lterm] 
+		list[wtterm] pair[list[obj_Bvars],list[obj_Bvars]]
+		eq[term] eq[subst] eq[tsubst] eq[wtsubst] eq[tterm] eq[wtterm]
+		eq[obj_Bvars] eq[type] eq[context]
+		occur[obj_Mvars,list[obj_Mvars]] 
+		occur[obj_Bvars,list[obj_Bvars]]
+		occur[tterm,wtterm];
+sort state lterm dBterm term subst ttype stype tterm tsubst wtterm wtsubst;
+op
+  global    
+    //---------- lambda term ---------------------------// simple lambda terms
+    (@ @) 	: (lterm lterm) lterm pri 800;		// application
+    (la @.@) 	: (obj_Bvars lterm) lterm pri 900;	// lambda abstraction 
+    @		: (obj_Mvars) lterm;			// meta variable
+    @		: (obj_Bvars) lterm;			// bound variable
+    //--------- de Bruijn lambda term ------------------// de Bruijn
+    (@ @) 	: (dBterm dBterm) dBterm;		// application
+    (la @.@) 	: (type dBterm) dBterm pri 980;		// abstraction
+    @ 		: (int) dBterm pri 1000;		// bound variable
+    @ 		: (obj_Mvars) dBterm pri 1000;		// Mvars	
+    //---------- typed sigma lambda terms --------------//
+    (@ @) 	: (term term) term pri 800;		// application
+    (la @.@) 	: (type term) term pri 900;		// lambda abstraction 
+    @[@]	: (term subst) term pri 850;		// application of 
+    #@		: (int) term pri 1000;			// index of bvar
+    @		: (obj_Mvars) term pri 1000;		// meta-variable
+    //--------- typed sigma lambda substitutions -------//
+    id		: subst;				// identity
+    ^		: subst;				// shift up
+    @ o @	: (subst subst) subst assocLeft pri 800;// composition
+    @.@		: (term subst) subst  pri 900;		// shifting
+    (@)		: (subst) subst;			// de-()
+    //--------- well typed  sigma lambda terms ---------//
+    @ |- @	: (context type) ttype;
+    @ |> @	: (context context) stype;
+    //--------------------------------------------------//
+    (@ @) 	: (wtterm wtterm) tterm pri 800;	// application
+    (la @.@)	: (type wtterm) tterm pri 900;		// lambda abstraction 
+    @[@]	: (wtterm wtsubst) tterm pri 850;	// application of 
+    #@ 		: (int) tterm pri 1000;			// index of bvar
+    @ 		: (obj_Mvars) tterm pri 1000;		// meta-variable
+    dummy	: tterm;				// dummy for eta
+    //----------//
+    @':'@	: (tterm ttype) wtterm;			// well typed term
+    //--------- well typed  sigma lambda substitutions -//
+    id 		:  tsubst;				// identity
+    ^ 		:  tsubst;				// shift up
+    @ o @	: (wtsubst wtsubst) tsubst assocLeft pri 800;// composition
+    @.@		: (wtterm wtsubst) tsubst pri 900;	
+    (@)		: (wtsubst) wtsubst;			// de-()
+   //----------//
+    @':'@	: (tsubst stype) wtsubst;		// well typed subst
+    //---------- transformations -----------------------//
+    ltodB(@)	: (lterm) dBterm;			// lambda to dB notati
+    tr(@,@)	: (lterm list[obj_Bvars]) dBterm;		// traslate to de Bruin
+    dBtol(@)	: (dBterm) lterm;			// translate to lambda
+    rt(@,@,@)	: (dBterm list[obj_Bvars] int) lterm;	// traslate to de Bruin
+    F(@)	: (dBterm) term;			// dB to typed sigma t
+    FF(@,@)	: (dBterm int) term;			// dB to typed sigma t
+    Q(@)	: (term) dBterm;			// to dB
+    QQ(@,@)	: (term int) dBterm;			// to dB
+    fill(@)	: (term) wtterm;			// si la to wtterm
+    fill(@)	: (subst) wtsubst;			// li la to wtsubst
+    fill(@,@)	: (term int) wtterm;			// si la to wtterm
+    fill(@,@)	: (subst int) wtsubst;			// li la to wtsubst
+    remove(@)	: (wtterm) term;			// si la to wtterm
+    remove(@)	: (wtsubst) subst;			// li la to wtsubst
+    removect(@)	: (wtterm) tterm;			// si la to tterm
+    removect(@)	: (wtsubst) tsubst;			// li la to tsubst
+    //---------- auxi ----------------------------------//
+    to(@,@)		: (subst int) subst;		// iteration
+    collect_fbvars(@,@): (lterm pair[list[obj_Bvars],list[obj_Bvars]]) 
+			      pair[list[obj_Bvars],list[obj_Bvars]];
+    make_context(@) 	: (list[obj_Bvars]) context;
+    replace(@,@,@)	: (wtterm context type) wtterm;
+    replace_c(@,@)	: (wtterm context) wtterm;
+    replace_c(@,@)	: (wtsubst context) wtsubst;
+    type(@)		: (wtterm) type;
+    context(@)		: (wtterm) context;
+    context2(@)		: (wtsubst) context;
+    //--------------------------------------------------//
+    [@,@,@,@,@]		: (wtterm wtsubst list[wtterm] context type) state; 
+    shift(@,@)		: (type state) state;
+    shift(@,@,@)	: (type context list[wtterm]) list[wtterm];
+    tostate(@)		: (wtterm) state;
+    fromstate(@)	: (state) wtterm;
+    fromstaten(@)	: (state) wtterm;
+    lnf @		: (state) state;
+    red @		: (state) state;
+    exp(@)		: (wtsubst) int;
+    exp(@)		: (subst) int;
+    size(@)		: (wtsubst) int;
+    scnd(@)		: (tsubst) wtsubst;
+    if_comp(@)		: (tsubst) bool;
+    norm(@)		: (wtterm) wtterm;
+    norm(@)		: (wtsubst) wtsubst;
+    normalize(@)	: (wtterm) wtterm;
+    normalize(@)	: (wtsubst) wtsubst;
+    meta(@)		: (obj_Mvars) bool;
+  local
+    pos @ in @	: ( obj_Bvars list[obj_Bvars] ) int;	// possition in list
+    pos(@,@)	: ( obj_Bvars list[obj_Bvars] ) int 	alias pos @ in @:;
+    poss(@,@,@)	: ( obj_Bvars list[obj_Bvars] int) int;   
+endop
+
+rules for bool
+declare n	: int;
+	ww 	: obj_Mvars;
+bodies
+  [] 	meta(V_Mvars(n)) => true
+  end // else
+  [] 	meta(ww) => false
+  end
+end of rules
+
+rules for tterm
+declare
+	aa	: tterm;
+	cc	: context;
+	tt	: type;
+bodies
+  []	removect(aa:cc|-tt) => aa
+  end
+end of rules
+
+rules for tsubst
+declare
+	ss	: tsubst;
+	cc,c1	: context;
+bodies
+  []	removect(ss:cc|>c1) => ss
+  end
+end of rules
+
+//------------------------------ normalization of wtterms
+rules for wtterm
+declare
+	aa, bb, a1, a2, b1, b2	: term;
+	aaa, bbb		: tterm;
+	ss, s1, s2		: subst;
+	sss, ttt		: tsubst;
+	tt, t1, t2, $t_3, $t_4	: type;
+	$tt_0, $tt_1, $t_1	: type;
+	cc, c1, c2, c3, c4 	: context;
+	$c_1, $c_2, $c_3 	 	: context;
+	n, k, fvar		: int;
+	mm			: obj_Mvars;
+	$aaaa,bbbb, ccc,
+	aaa1, bbb1, bbb2	: wtterm;
+bodies
+  //--- explicit normalization
+  []	normalize($aaaa)	=> normalize(bbbb) if bbbb != $aaaa
+				where bbbb:=()norm( $aaaa )
+  end
+  []	normalize($aaaa)	=> $aaaa	// dirty
+  end
+  [] 	norm((aaa:c1|-t1->t2 bbb:$c_1|-$t_3):$c_3|-$t_4) => ccc 
+	where ccc:=(normal2)(norm(aaa:c1|-t1->t2) norm(bbb:c1|-t1)):c1|-t2
+	if t1 == $t_3 // compilo
+	if t2 == $t_4 // compilo
+	if c1 == $c_1 // compilo
+	if c1 == $c_3 //compilo
+  end
+  []	norm((la tt.aaa:$tt_0.c1|-t1):$c_1|-$tt_1->$t_1) => ccc 
+		where ccc:=(normal2)(la tt.norm(aaa:tt.c1|-t1)):c1|-tt->t1
+	if tt == $tt_0		// compilo
+	if tt == $tt_1		// compilo
+	if c1 == $c_1		// compilo
+	if t1 == $t_1		// compilo
+  end
+  []	norm(aaa:c1|-t1[sss:c2|>$c_1] :$c_2|-$t_1 ) => ccc 
+	where ccc:=(normal2)norm(aaa:c1|-t1)[norm(sss:c2|>c1)]:c2|-t1 
+	if c1 == $c_1		// compilo	
+	if c2 == $c_2		// compilo	
+	if t1 == $t_1		// compilo	
+  end
+  []	norm($aaaa) => $aaaa
+  end
+  //------------ reduction rules for well typed terms --------------------//
+  [r2beta] 
+	((la tt.aaa:t1.cc|-t2):cc|-t1->t2 bbb:$cc|-t1):cc|-t2	=>
+		aaa:t1.cc|-t2[bbb:cc|-t1.id:cc|>cc:cc|>t1.cc]:cc|-t2
+	if cc == $cc	// compilo
+  end
+  [r2eta]
+	(la tt.(aaa:tt.c1|-t2->t1 #1:tt.c1|-t2):tt.c1|-t1):c1|-tt->t1 => bbb1
+		if not occurs dummy in bbb1
+		where bbb1:=()normalize(aaa:tt.c1|-t2->t1
+			[dummy:c1|-tt.id:c1|>c1 :c1|>tt.c1] :c1|-t2->t1)
+  end
+  [r2app] 
+	(aaa:c1|-t1->t2 bbb:c1|-t1):c1|-t2[sss:cc|>c1]:cc|-t2 =>
+		(aaa:c1|-t1->t2 [sss:cc|>c1]:cc|-t1->t2 
+		 bbb:c1|-t1[sss:cc|>c1]:cc|-t1):cc|-t2
+  end
+  [r2varcons]
+	#1:tt.c1|-tt[aaa:cc|-tt. sss:cc|>c1 : cc|>tt.c1] : cc|-tt	=>
+		aaa : cc|-tt
+  end
+  [r2varcons1]
+        #k:tt.c1|-t2[aaa:cc|-tt. sss:cc|>c1 : cc|>tt.c1] : cc|-t2        =>
+        	#k-1:c1|-t2[sss:cc|>c1] : cc|-t2
+	if k > 1
+  end
+  [r2abs] 
+	(la tt.aaa:t1.cc|-t2):cc|-t1->t2[sss:c1|>cc]:c1|-t1->t2	=> 
+	  (la tt.aaa:t1.cc|-t2
+             [#1:t1.c1|-t1.ttt :t1.c1|>cc : t1.c1|>t1.cc]
+	       :t1.c1|-t2):c1|-t1->t2
+		where ttt:=()sss:c1|>cc o ^:t1.c1|>c1
+  end
+  [r2id]	
+	aaa:cc|-tt[id:cc|>cc]:cc|-tt	=>
+		aaa:cc|-tt
+  end
+  [r2clos] 
+	aaa:cc|-tt[sss:c1|>cc]:c1|-tt[ttt:c2|>c1]:c2|-tt	=>
+		aaa:cc|-tt[sss:c1|>cc o ttt:c2|>c1 : c2|>cc] : c2|-tt
+  end
+end of rules
+//--------------------------------------- normalization of wtsubst
+rules for wtsubst
+declare
+	aa, bb, a1, a2, b1, b2	: term;
+	aaa, bbb		: tterm;
+	ss, s1, s2, s3		: subst;
+	sss, ttt, qqq, uuu, sss1, sss2, sss3	: tsubst;
+	uu, $uss, utt		: wtsubst;
+	tt, t1, t2		: type;
+	cc, c1, c2, c3, c4  	: context;
+	n, fvar			: int;
+bodies
+  //-------------------------------------- explicit normalization
+  []	normalize($uss)	=> normalize(utt) if $uss != utt
+			   where utt:=()norm($uss)	// dirty
+  end // else
+  []	normalize($uss)	=> $uss	// dirty
+  end
+  [] 	norm(sss:c1|>c2 o ttt:c3|>c1 :c3|>c2)	=> 
+	uu where uu:=(normal2)norm(sss:c1|>c2) o norm(ttt:c3|>c1):c3|>c2 
+  end
+  []	norm(aaa:c1|-t1.sss:c1|>c2 :c1|>t1.c2)=> 
+	uu where uu:=(normal2)norm(aaa:c1|-t1).norm(sss:c1|>c2):c1|>t1.c2
+  end // else
+  []	norm($uss) => $uss			// dirty
+  end
+  //------------ reduction rules for well typed substitution----------------//
+  [r2idl] 
+	id:c2|>c2 o sss:c1|>c2 : c1|>c2 => sss:c1|>c2			
+  end
+  [r2shiftcons]
+	^:tt.c2|>c2 o aaa:c1|-tt.sss:c1|>c2:c1|>tt.c2 : c1|>c2 => sss:c1|>c2
+  end
+  [r2assenv]
+	sss1:c2|>c1  o sss2:c3|>c2 :c3|>c1 o sss3:c4|>c3 :c4|>c1 =>
+		sss1:c2|>c1 o sss:c4|>c2 :c4|>c1
+		where sss:=()sss2:c3|>c2 o sss3:c4|>c3
+  end
+  [r2mapenv]
+	aaa:c1|-tt.sss:c1|>c3 :c1|>tt.c3 o ttt:c2|>c1 : c2|>tt.c3  =>	
+	   aaa:c1|-tt[ttt:c2|>c1]:c2|-tt.qqq :c2|>c3  
+          :c2|>tt.c3 where qqq:=()sss:c1|>c3 o ttt:c2|>c1		
+  end
+  [r2idr]
+	sss:c1|>c2 o id:c1|>c1:c1|>c2 =>
+	  sss:c1|>c2							
+  end
+  [r2varshift]
+	#1:tt.cc|-tt.^:tt.cc|>cc :tt.cc|>tt.cc	=>
+	  id:tt.cc|>tt.cc	
+  end	
+  [r2scons]
+       #1:tt.c2|-tt[sss:c1|>tt.c2]:c1|-tt.
+		qqq // ^:tt.c2|>c2 o sss:c1|>tt.c2 
+                :c1|>c2   :c1|>tt.c2	
+	=> sss:c1|>tt.c2
+	if if_comp(qqq) and uu == sss:c1|>tt.c2
+	where uu:=()scnd(qqq)
+  end
+  []	scnd(^:tt.c2|>c2 o sss:c1|>tt.c2)	=> sss:c1|>tt.c2
+  end
+end of rules
+//---------------------------------------- auxi functions
+rules for bool
+declare
+    ss		: wtsubst;
+    sss		: tsubst;
+    cc,c1	: context;
+bodies
+  [] if_comp(^:cc|>c1 o ss)	=> true			end
+  [] if_comp(sss)		=> false		end //dirty
+end of rules
+
+rules for int
+declare
+	aa			: tterm;
+	sss, ttt		: wtsubst;
+	cc, c1, c2, c3, c4	: context;
+	s1, s2			: subst;
+	tt, t1			: type;
+bodies
+  []	size(aa:c1|-t1.sss:c2|>c3) => 1+size(sss)	end
+  []	size(id:c2|>c3)	=> 0				end
+  []	size(^:c2|>c3)	=> 0				end
+  []	size(sss o ttt :c2|>c3)	=> 0			end
+
+  []	exp(aa:c1|-t1.sss :c2|>c3) => exp(sss)		end
+  []	exp(id:c2|>c3)	=> 0				end
+  []	exp(^:c2|>c3)	=> 1				end
+  []	exp(^:c1|>c2 o ttt :c3|>c4) => 1+exp(ttt)	end
+
+  []	exp(id) => 0					end
+  []	exp(^) => 1					end
+  []	exp(^ o s2) => 1+exp(s2)			end
+  []	exp(s1) => -9999				end // dirty
+
+end of rules
+
+rules for wtterm
+declare
+	aa, bb, a1, a2, b1, b2	: term;
+	aaa, bbb		: tterm;
+	ss, s1, s2		: subst;
+	$sss, ttt		: tsubst;
+	tt, t1, t2	, tn	: type;
+	cc, c1, c2, c3 	, cn	: context;
+	n, k, fvar		: int;
+	mm			: obj_Mvars;
+	$aaaa,bbbb, ccc,
+	aaa1, bbb1, bbb2	: wtterm;
+	S			: list[wtterm];
+	AAA			: state;
+bodies
+  []	fromstaten(AAA) => normalize(fromstate(AAA))
+  end
+  []	fromstate([aaa:c1|-t1,id:c1|>c1,nil,c1,t1]) => aaa:c1|-t1
+  end
+  []	fromstate([aaa:c1|-t1,$sss:c2|>c1,S,cn,tn]) => 
+		fromstate([aaa:c1|-t1[$sss:c2|>c1]:c2|-t1,id:c2|>c2,S,cn,tn])
+		if $sss != id
+  end
+  []	fromstate([aaa:c1|-t1->t2,id:c1|>c1,bbb:c1|-t1.S,cn,tn]) =>
+	fromstate([(aaa:c1|-t1->t2 bbb:c1|-t1):c1|-t2,id:c1|>c1,S,cn,tn])
+  end
+  []	replace(aaa:c1|-t1,cc,tt)	=> aaa:cc|-tt
+  end
+  []	replace_c(aaa:c1|-t1,cc)	=> aaa:cc|-t1
+  end
+  [] 	fill(aa)		=> fill(aa,1) 
+  end
+  [] 	fill(#n, fvar)		=> #n:cvar(fvar)|-tvar(fvar+1)		
+  end
+  []	fill(mm, fvar)		=> mm:cvar(fvar)|-tvar(fvar+1)		
+  end
+  []	fill((aa bb), fvar)	=>
+		(fill(aa,4*fvar) fill(bb,4*fvar+2)):cvar(fvar)|-tvar(fvar+1)
+  end
+  []	fill((la tt.aa), fvar)	=>
+		(la tt.fill(aa,4*fvar)):cvar(fvar)|-tvar(fvar+1)		
+  end
+  []	fill(aa[ss],fvar)	=>
+		fill(aa,4*fvar)[fill(ss,4*fvar+2)]:cvar(fvar)|-tvar(fvar+1) 
+  end
+end of rules
+
+rules for list[wtterm]
+declare
+	n			: int;
+	c1, c2, c3, c4, c5, cn	: context;
+	t1, t2, t3, t4, t5, tn	: type;
+	S			: list[wtterm];
+	aaa, bbb		: tterm;
+	sss, ttt, uuu		: tsubst;
+	ww			: obj_Mvars;
+	bt			: obj_btypes;
+bodies
+  []	shift(t5, cn, nil)	=> #1:t5.cn|-t5.nil
+  end
+  []	shift(t5, cn, aaa:c1|-t1.S) => aaa:c1|-t1[^:t5.c1|>c1] :t5.c1|-t1.
+				shift(t5, cn, S)
+  end
+end of rules
+
+rules for state
+declare
+	n			: int;
+	c1, c2, c3, c4, c5, cn	: context;
+	t1, t2, t3, t4, t5, tn	: type;
+	S			: list[wtterm];
+	aaa, bbb		: tterm;
+	sss, ttt, uuu		: tsubst;
+	$ssss, tttt		: wtsubst;
+	ww			: obj_Mvars;
+	bt			: obj_btypes;
+	AAA, BBB		: state;
+bodies
+  []	red AAA => BBB where BBB:=(redform)AAA
+  end
+
+  []	lnf [aaa:c2|-t2,sss:c3|>c4,S,c1,bt] =>
+	  [aaa:c2|-t2,sss:c3|>c4,S,c1,bt]
+  end		
+  []	lnf [#n:c2|-t2,id:c2|>c2,S,c1,t1->t3] =>
+	  shift(t1,[#n:c2|-t2,id:c2|>c2,S,c1,t3])
+  end
+  []	lnf [ww:c2|-t2,sss:c3|>c2,S,c1,t1->tn] =>
+	  shift(t1,[ww:c2|-t2,sss:c3|>c2,S,c1,tn])
+  end 
+  []	lnf [(la t4.aaa:c5|-t5):c2|-t2,sss:c3|>c2,nil,c1,t1->tn] =>
+	    [(la t4.aaa:c5|-t5):c2|-t2,sss:c3|>c2,nil,c1,t1->tn]
+  end
+  []	shift(t5,[aaa:c1|-t1,sss:c2|>c1,S,cn,tn]) =>
+	    red tostate((la t5.fromstate(
+	    [aaa:c1|-t1,sss:c2|>c1 o ^:t5.c2|>c2 :t5.c2|>c1, shift(t5,cn,S),
+	      t5.cn, tn])):cn|-t5->tn)
+  end
+
+  []	tostate(#n:c1|-t1) => [#n:c1|-t1,id:c1|>c1,nil,c1,t1]
+  end
+  []	tostate(ww:c1|-t1) => [ww:c1|-t1,id:c1|>c1,nil,c1,t1]
+  end
+  []	tostate((bbb:c1|-t1->t2 aaa:c1|-t1):c1|-t2) =>
+		[bbb:c1|-t1->t2,id:c1|>c1,aaa:c1|-t1.nil,c1,t2]
+  end
+  []	tostate((la t1.aaa:t1.c1|-t2):c1|-t1->t2) =>
+		[(la t1.aaa:t1.c1|-t2):c1|-t1->t2,id:c1|>c1,nil,c1,t1->t2]
+  end
+  []	tostate(aaa:c1|-t1[sss:c2|>c1]:c2|-t1) =>
+		[aaa:c1|-t1,sss:c2|>c1,nil,c2,t1]
+  end
+  //--------------- transitions -------------------------------------//
+  [rd]	[#n:c1|-t1,^:t2.c1|>c1,S,cn,tn] => [#n+1:t2.c1|-t1,id:t2.c1|>t2.c1,S,cn,tn] 
+  end
+  [re]	[#1:t2.c3|-t2,aaa:c2|-t2 [sss:c1|>c2] :c1|-t2 .ttt:c1|>c3 :c1|>t2.c3, S,cn,tn] =>
+		[aaa:c2|-t2, sss:c1|>c2, S,cn,tn]
+  end
+  [rf]	[#n:t1.c2|-t2,aaa:c1|-t1.sss:c1|>c2 :c1|>t1.c2, S,cn,tn] =>
+		[#n-1:c2|-t2, sss:c1|>c2, S,cn,tn]
+		if n > 1
+  end
+  [rff]	[#1:t1.c2|-t2,aaa:c1|-t1.sss:c1|>c2 :c1|>t1.c2, S,cn,tn] =>
+		[aaa:c1|-t1, id:c1|>c1, S, cn, tn]
+  end
+  [rg]	[#n:c1|-t1, sss:c2|>c1 o ttt:c3|>c2 :c3|>c1, S,cn,tn] =>
+		[#n:c1|-t1[sss:c2|>c1]:c2|-t1,ttt:c3|>c2, S,cn,tn]
+  end
+  [rh]	[(bbb:c1|-t1->t2 aaa:c1|-t1):c1|-t2, sss:c2|>c1, S,cn,tn] =>
+		[bbb:c1|-t1->t2, sss:c2|>c1, aaa:c1|-t1[sss:c2|>c1]:c2|-t1.S,cn,tn]
+  end
+  [ri]	[(la t1.aaa:t1.c1|-t2):c1|-t1->t2, sss:c2|>c1, 
+				bbb:c2|-t1.S,cn,tn] =>
+		[aaa:t1.c1|-t2, bbb:c2|-t1 .sss:c2|>c1 :c2|>t1.c1, S,cn,tn]
+  end
+  [rj]	[aaa:c1|-t1[id:c1|>c1]:c1|-t1, sss:c2|>c1, S,cn,tn] =>
+		[aaa:c1|-t1, sss:c2|>c1, S,cn,tn]
+  end
+  [rk]	[#n:c1|-t1[^:t2.c1|>c1]:t2.c1|-t1, sss:c2|>t2.c1, S,cn,tn] =>
+		[#n+1:t2.c1|-t1, sss:c2|>t2.c1, S,cn,tn]
+  end
+  [rl]	[#1:t1.c1|-t1[aaa:c2|-t1.sss:c2|>c1 :c2|>t1.c1] :c2|-t1, ttt:c3|>c2, S,cn,tn] =>
+		[aaa:c2|-t1, ttt:c3|>c2, S,cn,tn]
+  end
+  [rm]	[#n:t1.c1|-t2[aaa:c2|-t1.sss:c2|>c1 :c2|>t1.c1] :c2|-t2, ttt:c3|>c2, S,cn,tn] =>
+		[#n-1:c1|-t2, sss:c2|>c1, S,cn,tn]
+	if n > 1
+  end
+  [rn]	[aaa:c1|-t1[sss:c2|>c1 o ttt:c3|>c2 :c3|>c1]:c3|-t1, uuu:c4|>c3, S, 
+			cn,tn] =>
+		[aaa:c1|-t1[sss:c2|>c1]:c2|-t1, 
+			ttt:c3|>c2 o uuu:c4|>c3 :c4|>c2, S,cn,tn]
+  end
+  [ro]	[aaa:c1|-t1[sss:c2|>c1]:c2|-t1, ttt:c3|>c2, S,cn,tn] =>
+		[aaa:c1|-t1,sss:c2|>c1 o ttt:c3|>c2 :c3|>c1, S,cn,tn]
+  end
+  [rz]	[aaa:c1|-t1, $ssss, S, cn, tn] => [aaa:c1|-t1,tttt, S,cn,tn]
+		if $ssss != tttt
+		where tttt:=()normalize($ssss)
+  end
+end of rules
+
+rules for lterm
+declare	db	: dBterm;
+	mm	: obj_Mvars;
+	ww	: obj_Bvars;
+	vs	: list[obj_Bvars];
+	j, i	: int;
+	tt	: type;
+	f, g	: dBterm;
+	aaa	: wtterm;
+	bvrs	: list[obj_Bvars];
+bodies
+  [] dBtol(db)		=> rt(db,nil,0)					end
+  [] rt(mm,vs,i)        => mm               				end
+  [] rt(j,vs,i)         => j-th elem(vs) if j <= size(vs)     		end
+  [] rt(j,vs,i)         => V_Bvars(j) if j > size(vs)     			end
+  [] rt((f g),vs,i)     => (rt(f,vs,i) rt(g,vs,i))                      end
+  [] rt((la tt.f),vs,i) => (la V_Bvars(i+1).rt(f,V_Bvars(i+1).vs,i+1))        end
+end of rules
+
+rules for dBterm
+declare 
+  a, b, a1, a2	: dBterm;
+  ff, gg		: lterm;
+  i, j, n, m, m1: int; 
+  ww 		: obj_Mvars;
+  vv		: obj_Bvars;
+  vs		: list[obj_Bvars];
+  tt		: type;
+bodies
+  [] tr(ww,vs)		=> ww						end
+  [] tr(vv,vs)		=> j if occurs vv in vs where j:=()pos(vv,vs)	end
+  [] tr((ff gg),vs)	=> (tr(ff,vs) tr(gg,vs))			end
+  [] tr((la vv.ff),vs)	=> (la typeof(vv).tr(ff,vv.vs)) 		end
+end of rules
+
+rules for dBterm
+declare	a, b	: term;
+	$i, j, k	: int;
+	tt	: type;
+	ww	: obj_Mvars;
+	ss	: subst;
+	aa	: lterm;
+bodies
+  []	ltodB(aa)	=> tr(aa,second(collect_fbvars(aa,[nil,nil])))
+  end
+  []	Q(a)		=> QQ(a,0)					end
+  []	QQ((a b), $i)	=> (QQ(a,$i) QQ(b,$i))				end
+  []    QQ((la tt.a),$i)	=> (la tt.QQ(a,$i+1))				end
+  [] 	QQ(#k,$i)	=> k		 					end
+
+  [] 	QQ(#k[ss],$i)	=> k+j 
+		if j >= 0
+		where j:=()exp(ss)
+  end
+  []	QQ(ww,0) => ww		
+  end
+  []	QQ(ww[ss],$i) => ww
+		if $i == j
+		where j:=()exp(ss)		
+  end
+end of rules
+
+
+rules for wtsubst
+declare
+	aa, bb, a1, a2, b1, b2	: term;
+	aaa, bbb		: tterm;
+	ss, s1, s2, s3		: subst;
+	sss, ttt, qqq, uuu, sss1, sss2, sss3	: tsubst;
+	uu, $uss, utt		: wtsubst;
+	tt, t1, t2		: type;
+	cc, c1, c2, c3, c4  	: context;
+	n, fvar			: int;
+bodies
+  []    replace_c(sss:c1|>c2,cc)        => sss:cc|>c2
+  end
+  []	fill(ss)	=> fill(ss,1)		
+  end
+  []	fill(id, fvar)	=> id:cvar(fvar)|>cvar(fvar+1)			
+  end
+  []	fill(^, fvar)	=> ^:cvar(fvar)|>cvar(fvar+1)			
+  end
+  []	fill(s1 o s2, fvar)	=> 
+	   fill(s1,4*fvar) o fill(s2,4*fvar+2):cvar(fvar)|>cvar(fvar+1)	
+  end
+  []	fill(aa.ss, fvar)	=>
+ 	   fill(aa,4*fvar).fill(ss,4*fvar+2):cvar(fvar)|>cvar(fvar+1)	
+  end
+end of rules
+
+rules for type
+declare
+	aa		: tterm;
+	cc		: context;
+	tt		: type;
+bodies
+ []	type(aa:cc|-tt)	=> tt			end
+end of rules
+
+rules for context
+declare
+	ww		: obj_Bvars;
+	wws		: list[obj_Bvars];
+	ss		: tsubst;
+	aa		: tterm;
+	tt1		: type;
+	cc1, cc2	: context;
+bodies
+  []	context(aa:cc1|-tt1)	=> cc1			end
+  []	context2(ss:cc1|>cc2)	=> cc2			end
+  []	make_context(nil)	=> nil			end
+  [] 	make_context(ww.wws)	=> typeof(ww).make_context(wws)	end
+end of rules
+
+rules for pair[list[obj_Bvars],list[obj_Bvars]]
+declare	bvars, fvars	: list[obj_Bvars];
+	aa, bb		: lterm;
+	ww		: obj_Bvars;
+	mm		: obj_Mvars;
+	pr		: pair[list[obj_Bvars],list[obj_Bvars]];
+bodies
+  [] 	collect_fbvars((aa bb),pr) =>
+	  collect_fbvars(aa,collect_fbvars(bb,pr))
+  end
+  []  	collect_fbvars((la ww.aa),[bvars,fvars]) =>
+	  collect_fbvars(aa,[ww.bvars,fvars])
+  end
+  []	collect_fbvars(ww,[bvars,fvars]) => [bvars,ww.fvars] 
+		if not occurs ww in bvars and not occurs ww in fvars
+  end  // else
+  []	collect_fbvars(ww,[bvars,fvars]) => [bvars,fvars] // dirty
+  end
+  []	collect_fbvars(mm,[bvars,fvars]) => [bvars,fvars]
+  end
+end of rules
+
+rules for term
+declare	
+    a, b		: dBterm;
+    aa, bb, cc 		: term;
+    ss, tt		: subst;
+    n, i, j, k		: int;
+    cc1, cc2, cc3	: context;
+    uu, vv, tt1		: type;
+    mm, ww		: obj_Mvars;
+    aaa, bbb		: wtterm;
+    sss			: wtsubst;
+    vs			: list[obj_Bvars];
+bodies
+  []	F(a)		=> FF(a,0)					end
+  []	FF((a b), i)	=> (FF(a,i) FF(b,i))				end
+  []    FF((la uu.a),i)	=> (la uu.FF(a,i+1))				end
+  [] 	FF(k,i)	=> #k 						end
+  []	FF(ww,i) => ww[to(^,i)]						end
+  []	remove((aaa bbb):cc1|-tt1)	=> (remove(aaa) remove(bbb))
+  end
+  []	remove((la tt1.aaa):cc1|-vv)	=> (la tt1.remove(aaa))
+  end
+  []	remove(aaa[sss]:cc1|-tt1)	=> remove(aaa)[remove(sss)]
+  end
+  []	remove(#n:cc1|-tt1)		=> #n
+  end
+  []	remove(mm:cc1|-tt1)		=> mm
+  end
+end of rules
+
+rules for subst
+declare
+    aa, bb, cc 		: term;
+    ss, tt, xx		: subst;
+    n			: int;
+    uu, vv		: type;
+    aaa			: wtterm;
+    sss1, sss2		: wtsubst;
+    cc1, cc2		: context;
+bodies
+  []	(ss)		=> ss					
+  end // de-()
+  [] 	to(ss,0)		=> id				
+  end
+  []	to(ss,1)		=> ss				
+  end
+  []	to(ss,n)		=> ss o to(ss,n-1)		
+  end
+  [] 	remove(id:cc1|>cc2)	=> id
+  end
+  [] 	remove(^:cc1|>cc2)	=> ^
+  end
+  [] 	remove(sss1 o sss2:cc1|>cc2)	=> remove(sss1) o remove(sss2)
+  end
+  [] 	remove(aaa.sss1:cc1|>cc2)	=> remove(aaa).remove(sss1)
+  end
+end of rules
+
+rules for int
+declare $ee, $ff, e, f : obj_Bvars;
+	l : list[obj_Bvars];
+        i : int;
+bodies
+  [] size(nil)	=> 0 						end
+  [] size(e.l)	=> 1+size(l)					end
+  [] pos(e,l) 		=> poss(e,l,1)				end
+  [] poss($ee,nil,i)	=> 0					end
+  [] poss($ee,$ff.l,i) 	=> i if $ee == $ff 			end
+  [] poss($ee,$ff.l,i) 	=> poss($ee,l,i+1) if $ee != $ff	end
+end of rules
+
+strategy redform
+  repeat
+    dont care choose( rd re rf rff rg rh ri rj rk rl rm rn ro rz)
+   endrepeat
+end of strategy
+
+strategy normal2
+  repeat
+    dont care choose(
+ 	//r2db 
+	r2beta r2eta r2app 
+        r2varcons r2varcons1 r2id r2abs r2clos 
+        r2idl r2assenv
+	r2shiftcons r2mapenv r2idr 
+        r2varshift r2scons )
+  endrepeat
+end of strategy
+
+end of module

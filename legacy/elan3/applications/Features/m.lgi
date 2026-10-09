@@ -1,0 +1,8 @@
+LPL m description
+
+query		of sort  	lterm
+		result of sort 	lterm
+		import	 	m
+		start with 	(ss)query
+
+end

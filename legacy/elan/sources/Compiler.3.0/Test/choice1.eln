@@ -1,0 +1,61 @@
+module choice1
+
+import global int;
+end
+
+sort term eq equation;
+end
+
+operators global
+ a      : term;
+ b      : term;
+ c      : term;
+ d      : term;
+ e      : term;
+ f      : term;
+
+ s(@) : (term) term;
+
+ f(@,@) : (term term) term;
+ g(@,@) : (term term) term;
+end
+
+
+stratop global
+  s0    : <term>        builtin;
+  s1    : <term>        builtin;
+end
+
+
+
+rules for term
+  x,y,z : term;
+global
+  [] f(x,a) => f(x,y) where y:=() x end
+
+  [r0] x => y where y:=(dk(r1)) x end
+
+  [r1] a => b end
+  [r1] a => c end
+  [r1] a => d end
+  [r1] a => e end
+
+  [r2] e => e end
+
+  //[go] x => y where y:=( repeat*(dc(s0)) ; dc(r2))   x end
+  [go] x => y where y:=( iterate*(dc(s0)) ; dc(r2))   x end
+end
+
+
+strategies for term
+implicit
+  [.] s0 => dk(r0)
+  end
+  [.] s1 => dc( go )
+  end
+
+end
+
+
+
+end

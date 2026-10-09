@@ -1,0 +1,6 @@
+rules for constraint
+        s_1, s_2, t_1, t_2 : term;
+   	local
+     	  [decompose] P & f(s_1,s_2)=f(t_1,t_2) => P & s_1=t_1 & s_2=t_2 end
+     	  [decompose] P & g(s_1)=g(t_1) => P & s_1=t_1 end
+   end

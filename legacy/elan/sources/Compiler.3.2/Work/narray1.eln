@@ -1,0 +1,44 @@
+module narray1[N,X]
+       // N : number of dimensions
+       // X : sort of the elements
+
+
+import int
+       builtinArray[X] 
+       ;
+end
+
+sort narray[N,X] X;
+end 
+
+FOR EACH dim:int SUCH THAT dim:=()N ANDIF dim==1 {
+
+operators
+global
+  new(@,@)      : (builtinInt X) narray[N,X];
+  @[@]          : (narray[N,X] builtinInt) X;
+  @[@]<-@       : (narray[N,X] builtinInt X) narray[N,X];
+
+local
+  @             : (builtinArray[X]) narray[N,X];
+end
+
+rules for narray[N,X]
+  i      : builtinInt;
+  x      : X;
+  t      : builtinArray[X];
+  empty  : builtinArray[X];
+global
+  // create an array of columns
+  [] new(i,x) => empty where empty :=() new(i,x)	end	      
+  [] t[i]<-x => t.set(i,x)				end
+end
+} // end case 1
+
+
+end
+				
+
+
+
+

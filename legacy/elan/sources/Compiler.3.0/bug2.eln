@@ -1,0 +1,42 @@
+module bug2
+
+import global bool;
+end
+sort poly;
+end
+operators global
+
+  go : poly;
+  a : poly;
+  b : poly;
+
+  @ + @ 	: ( poly poly ) poly  assocRight pri 1 (AC);
+  @ * @		: ( poly poly) poly  assocRight pri 2 (AC);
+
+end
+
+stratop global
+  simplify	: <poly>	bs;
+end
+
+rules for poly
+  P            : poly;
+  absX1, absX2 : poly;
+  p1,p2,p3,p4  : poly;
+global
+
+  [] go => a*b + a*b + a*b + a*b + a*b 
+         + a*b + a*b + a*b + a*b + a*b end
+
+  [expand] P + absX1*absX2	=> P if false
+  end
+
+end
+
+strategies for poly
+implicit
+  [] simplify => normalise( first one(expand) )
+  end
+end
+
+end

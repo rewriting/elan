@@ -1,0 +1,24 @@
+module fibm
+        // First import the integers
+import global int;
+end
+
+        // And now all the operators of interest to build simple
+        // monomials and polynomials
+
+operators global
+ fib(@)  : (int) int ;
+ max(@ @): (int int) int (AC);
+end
+
+rules for int 
+        n,m  : int ;
+global
+    [] fib(0) => 1 end
+    [] fib(1) => 1 end
+    [] fib(n) => fib(n - 1) + fib(n - 2) if n > 1 end
+    [] max(0 n) => n end
+
+end
+end
+

@@ -1,0 +1,7 @@
+LPL dcfail2 description
+
+	query	of sort term
+	result	of sort term
+	import	dcfail
+	start with () g(b)
+end

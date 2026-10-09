@@ -1,0 +1,15 @@
+module position
+import global int;
+end
+
+sort position;
+end
+
+operators global
+	epsilon		: position;
+	@ . @		: (position int) position;
+end
+
+
+end
+

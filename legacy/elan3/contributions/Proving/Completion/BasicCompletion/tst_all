@@ -1,0 +1,10 @@
+#! /bin/csh -f
+#        LGI             SPC        INP         OUT
+
+if ($1 =~ *I*) then
+echo "Interpreter"
+itest    completion      KNZ86      completion  KNZ86
+itest    completion      Zeh89      completion  Zeh89
+itest    completion      curry      completion  curry
+itest    completion      expoclos   completion  expoclos
+endif

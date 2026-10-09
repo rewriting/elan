@@ -1,0 +1,20 @@
+LPL unification description
+
+  specification description
+
+    part Vars	of sort list[identifier]
+	 	import sigSyntax
+    part Ops	of sort list[pair[identifier,int]]
+	 	import sigSyntax
+  end
+
+  query 	of sort eqSystem
+         	result of sort eqSystem
+	 	import termV[Vars]
+                       termF[Ops]
+                       syntacticUnification
+
+         	start with (unify) query 
+
+end
+

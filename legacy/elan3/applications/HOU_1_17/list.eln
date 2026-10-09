@@ -1,0 +1,81 @@
+//
+//		(c)	INRIA-Lorraine & CRIN
+//			615, rue du Jardin Botanique, BP 101
+//		        54602 Villers-les-Nancy
+//			France
+//			email: elan@loria.fr
+//
+//	$Source: /CVS/aircube/elan3/applications/HOU_1_17/list.eln,v $
+//	$Revision: 1.1 $
+//	$Date: 1997/03/04 13:16:33 $
+//	$Author: borovan $
+//
+
+module list[X]
+import int listCommons;
+sort X list[X];
+op
+  global
+
+    nil_X	: list[X];
+    cons(@,@)	: ( X list[X] ) list[X];
+
+	// alias version of the previous operators
+    nil		: list[X]			alias nil_X:;
+//###    @ @		: ( X list[X] ) list[X]		alias cons(@,@):;
+    @ , @	: ( X list[X] ) list[X]		alias cons(@,@):;
+    @ . @	: ( X list[X] ) list[X]		alias cons(@,@):;
+
+    append(@,@)	: ( list[X] list[X] ) list[X];
+    @ '@' @	: ( list[X] list[X] ) list[X]	alias append(@,@):;
+
+    elem(@)	: ( list[X] ) X;		// with listExtract str.
+
+    @-th elem(@): ( int list[X] ) X;		/* n-th element of list */
+
+    size(@)	: ( list[X] ) int;
+    size_of_X_list(@) : ( list[X] ) int		alias size(@):;
+
+    ccat(@*@)	: ( int list[X] ) list[X];	// concat n-times  
+    ccat(@,@)	: ( int list[X] ) list[X]	alias ccat(@*@):;
+
+endop
+
+rules for list[X]
+declare	e 	: X;
+	l,l1,l2	: list[X];
+bodies
+  [] 		append(nil,l)		=> l			end
+  [] 		append(e.l1 , l2)	=> e . append(l1,l2)	end
+end of rules
+
+
+rules for X
+declare e,ee : X;
+        l    : list[X];
+        n, n1: int;
+bodies
+  [extractrule1] elem(e.l)	=> e					end
+  [extractrule2] elem(e.l)	=> elem(l)				end
+  [] 		1-th elem(e.l)	=> e					end
+  [] 		n-th elem(e.l)	=> n1-th elem(l) where n1:=()n-1	end
+end of rules
+
+rules for list[X]
+declare n : int;
+        l : list[X];
+bodies
+  [] 		ccat(0,l)	=> nil				end
+  [] 		ccat(n,l)	=> l @ ccat(n-1,l) if n>0	end
+end of rules
+
+rules for int
+declare e : X;
+        l : list[X];
+bodies
+  [] 		size(nil)	=> 0				end
+  [] 		size(e.l)	=> 1+size(l)			end
+end of rules
+
+end of module
+	

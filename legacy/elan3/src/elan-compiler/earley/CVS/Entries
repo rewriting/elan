@@ -1,0 +1,25 @@
+/RTCommons.h/1.1.1.1/Thu Nov 29 08:28:44 2001//
+/codes.h/1.1.1.1/Thu Nov 29 08:28:44 2001//
+/command.h/1.1.1.1/Thu Nov 29 08:28:44 2001//
+/commondefs.cc/1.1.1.1/Thu Nov 29 08:28:44 2001//
+/commondefs.h/1.1.1.1/Thu Nov 29 08:28:44 2001//
+/earley.cc/1.2/Fri Dec  7 09:43:34 2001//
+/esemact.cc/1.2/Fri Dec  7 09:43:34 2001//
+/files.c/1.1.1.1/Thu Nov 29 08:28:44 2001//
+/grammar.cc/1.2/Fri Dec  7 09:43:34 2001//
+/ichstream.cc/1.2/Fri Dec  7 09:43:34 2001//
+/lbuffer.cc/1.2/Fri Dec  7 09:43:34 2001//
+/lstream.cc/1.2/Fri Dec  7 09:43:34 2001//
+/lstream.h/1.1.1.1/Thu Nov 29 08:28:44 2001//
+/mallo.cc/1.2/Fri Dec  7 09:43:34 2001//
+/mallo.h/1.1.1.1/Thu Nov 29 08:28:44 2001//
+/misc.cc/1.2/Fri Dec  7 09:43:34 2001//
+/mitab.h/1.1.1.1/Thu Nov 29 08:28:44 2001//
+/ochstream.cc/1.2/Fri Dec  7 09:43:34 2001//
+/runtimeInit.cc/1.2/Fri Dec  7 09:43:34 2001//
+/runtimeInit.h/1.1.1.1/Thu Nov 29 08:28:44 2001//
+/stringtab.cc/1.2/Fri Dec  7 09:43:34 2001//
+/stringtab.h/1.1.1.1/Thu Nov 29 08:28:44 2001//
+/termdefs.h/1.1.1.1/Thu Nov 29 08:28:44 2001//
+/Makefile.am/1.2/Thu Mar  4 16:40:08 2004//
+D

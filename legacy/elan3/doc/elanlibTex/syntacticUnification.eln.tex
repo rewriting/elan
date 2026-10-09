@@ -1,0 +1,154 @@
+
+\let\CF=\rm
+% Remember to use the lgrind style
+
+\File{syntacticUnification.eln},{17:23},{Jun 21 1996}
+\L{\LB{\C{}\1\1}}
+}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{16}{(c)}\Tab{24}{INRIA-Lorraine \& CRIN}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{24}{615, rue du Jardin Botanique, BP 101}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{16}{        54602 Villers-les-Nancy}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{24}{France}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{24}{email: elan@loria.fr}}
+\CE{}\L{\LB{\C{}\1\1}}
+}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{8}{\$Source: /CVS/aircube/elan3/doc/elanlibTex/syntacticUnification.eln.tex,v $}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{8}{\$Revision: 1.2 $}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{8}{\$Date: 1996/08/05 20:24:18 $}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{8}{\$Author: ckirchne $}}
+\CE{}\L{\LB{\C{}\1\1}}
+}}
+\CE{}\L{\LB{}}
+\L{\LB{\K{module}_\V{syntacticUnification}[\V{Vars},\V{Fss}]}}
+\L{\LB{\K{import}_}\Tab{8}{\K{global}_}\Tab{16}{\V{term}_\V{termV}[\V{Vars}]_\V{termF}[\V{Fss}];}}
+\L{\LB{_}\Tab{8}{\K{local}__}\Tab{16}{\V{Fss}_\V{int}_\V{identifier}_\V{bool}_\V{pair}[\V{identifier},\V{int}]}}
+\L{\LB{}\Tab{16}{\V{list}[\V{pair}[\V{identifier},\V{int}]]_\V{eq}[\V{variable}]_\V{eq}[\V{term}]}}
+\L{\LB{}\Tab{16}{\V{eqSystem}_\V{occur}[\V{variable},\V{term}]_\V{occur}[\V{variable},\V{eqSystem}];}}
+\L{\LB{\K{op}}}
+\L{\LB{__\K{global}}}
+\L{\LB{____@_=_@}\Tab{16}{:_(\V{term}_\V{term})_\V{equation}_}\Tab{48}{\K{alias}_@=@:;}}
+\L{\LB{____@_}\Tab{16}{:_(_\V{equation}_)_\V{eqSystem}}\Tab{48}{\K{alias}_@:;}}
+\L{\LB{__\K{local}}}
+\L{\LB{____\V{mergingClash}(@,@,@)}\Tab{24}{:_(_\V{eqSystem}_\V{variable}_\V{term}_)_\V{bool};}}
+\L{\LB{}}
+\L{\LB{\K{endop}}}
+\L{\LB{}}
+\L{\LB{\K{rules}_\K{for}_\V{eqSystem}}}
+\L{\LB{\K{declare}}\Tab{8}{\V{P},\V{Q},\V{R}:\V{eqSystem};_\V{s},\V{t}:\V{term};_\V{x},\V{y}:\V{variable};}}
+\L{\LB{\K{bodies}}}
+\L{\LB{}}
+\L{\LB{__[\V{delete}]_}\Tab{16}{\V{P}_\&_\V{x}=\V{y}}\Tab{24}{=\>_\V{P}}\Tab{40}{}}
+\L{\LB{}\Tab{24}{\K{if}_\V{x}==\V{y}}\Tab{48}{}}
+\L{\LB{__\K{end}}}
+\L{\LB{__[\V{coalesce}]_}\Tab{16}{\V{P}_\&_\V{x}=\V{y}}\Tab{24}{=\>_\V{x}=\V{y}_\&_\V{apply}(\V{x}\-\!\>\V{y},\V{P})}}
+\L{\LB{}\Tab{24}{\K{if}_\V{x}!=\V{y}}}
+\L{\LB{__\K{end}}}
+\L{\LB{__[\V{conflict}]}\Tab{16}{\V{P}_\&_\V{s}=\V{t}}\Tab{24}{=\>_\V{false}}}
+\L{\LB{}\Tab{24}{\K{if}_\V{idneq}(\V{head}(\V{s}),\V{head}(\V{t}))_}}
+\L{\LB{}\Tab{24}{___\V{and}_\V{not}(\V{isvar}(\V{s}))_\V{and}_\V{not}(\V{isvar}(\V{t}))}}
+\L{\LB{__\K{end}}}
+\L{\LB{__[\V{occCheck1}]}\Tab{16}{\V{P}_\&_\V{x}=\V{s}}\Tab{24}{=\>_\V{false}}}
+\L{\LB{}\Tab{24}{\K{if}_\V{occurs}_\V{x}_\V{in}_\V{s}_\V{and}_\V{not}_\V{isvar}(\V{s})}}
+\L{\LB{__\K{end}}}
+\L{\LB{__[\V{occCheck2}]}\Tab{16}{\V{P}_\&_\V{s}=\V{x}}\Tab{24}{=\>_\V{false}}}
+\L{\LB{}\Tab{24}{\K{if}_\V{occurs}_\V{x}_\V{in}_\V{s}_\V{and}_\V{not}_\V{isvar}(\V{s})}}
+\L{\LB{__\K{end}}}
+\L{\LB{__[\V{eliminate1}]}\Tab{16}{\V{P}_\&_\V{x}=\V{s}}\Tab{24}{=\>_\V{x}=\V{s}_\&_\V{apply}(\V{x}\-\!\>\V{s},\V{P})}}
+\L{\LB{}\Tab{24}{\K{if}_\V{not}(\V{occurs}_\V{x}_\V{in}_\V{s})_}}
+\L{\LB{__\K{end}}}
+\L{\LB{__[\V{eliminate2}]}\Tab{16}{\V{P}_\&_\V{s}=\V{x}}\Tab{24}{=\>_\V{x}=\V{s}_\&_\V{apply}(\V{x}\-\!\>\V{s},\V{P})}}
+\L{\LB{}\Tab{24}{\K{if}_\V{not}(\V{occurs}_\V{x}_\V{in}_\V{s})_}}
+\L{\LB{__\K{end}}}
+\L{\LB{__[\V{matchClash}]}\Tab{16}{\V{P}_\&_\V{s}=\V{x}}\Tab{24}{=\>_\V{false}}}
+\L{\LB{}\Tab{24}{\K{if}_\V{not}_\V{isvar}(\V{s})_}}
+\L{\LB{__\K{end}}}
+\L{\LB{__[\V{mergeClash}]_}\Tab{16}{\V{P}_\&_\V{x}=\V{s}_=\>_\V{false}}}
+\L{\LB{}\Tab{24}{\K{if}_\V{mergingClash}(\V{P},\V{x},\V{s})}}
+\L{\LB{__\K{end}}}
+\L{\LB{__[\V{mergePass1}]_}\Tab{16}{\V{P}_\&_\V{x}=\V{s}_=\>_\V{x}=\V{s}_\&_\V{P}}}
+\L{\LB{__\K{end}}}
+\L{\LB{__[\V{mergePass2}]_}\Tab{16}{\V{P}_\&_\V{x}=\V{s}_=\>_\V{x}=\V{s}_\&_\V{P}}}
+\L{\LB{}\Tab{24}{\K{if}_\V{not}(\V{occurs}_\V{x}_\V{in}_\V{P})_\C{}\1\1_ and not mergingClash(P,x,s)}}
+\CE{}\L{\LB{__\K{end}}}
+\L{\LB{__[\V{mergePass3}]_}\Tab{16}{\V{P}_\&_\V{x}=\V{s}_=\>_\V{P}}}
+\L{\LB{}\Tab{24}{\K{if}_\V{occurs}_\V{x}_\V{in}_\V{P}_\C{}\1\1_ and  not mergingClash(P,x,s)}}
+\CE{}\L{\LB{__\K{end}}}
+\L{\LB{}}
+\L{\LB{}}
+\L{\LB{\K{FOR}_\K{EACH}_\V{SS}:\V{pair}[\V{identifier},\V{int}];_\V{F}:\V{identifier};__\V{N}:\V{int}}}
+\L{\LB{\K{SUCH}_\K{THAT}_\V{SS}:=(\V{listExtract})_\V{elem}(\V{Fss})_\K{AND}_\V{F}:=()\V{first}(\V{SS})_}}
+\L{\LB{}\Tab{8}{\K{AND}_\V{N}:=()\V{second}(\V{SS})_:\{}}
+\L{\LB{___\K{rule}_\V{decompose}}}
+\L{\LB{___\K{declare}_\V{s\_1},.\,.\,.,\V{s\_N}:\V{term};_\V{t\_1},.\,.\,.,\V{t\_N}:\V{term};}}
+\L{\LB{___\K{body}}}
+\L{\LB{_____\V{P}_\&_\V{F}(\V{s\_1},.\,.\,.,\V{s\_N})=\V{F}(\V{t\_1},.\,.\,.,\V{t\_N})}\Tab{40}{=\>_\V{P}_\{_\&_\V{s\_I}=\V{t\_I}_\}\V{\_I}=1.\,.\,.N}}
+\L{\LB{___\K{end}}}
+\L{\LB{__\}}}
+\L{\LB{}}
+\L{\LB{\C{}\1\1_  [unfold]}\Tab{16}{ P \& (Q \& R)}\Tab{40}{=\> (P \& Q) \& R}\Tab{64}{end}}
+\CE{}\L{\LB{}}
+\L{\LB{}}
+\L{\LB{\C{}\1\1_ initial and final transitions rules}}
+\CE{}\L{\LB{}}
+\L{\LB{__[\V{trueelim}]}\Tab{16}{\V{P}_\&_\V{true}}\Tab{32}{=\>_\V{P}}\Tab{64}{\K{end}}}
+\L{\LB{__[\V{truepass}]}\Tab{16}{\V{P}_\&_\V{true}}\Tab{32}{=\>_\V{true}_\&_\V{P}}\Tab{64}{\K{end}}}
+\L{\LB{__[\V{trueadd}]}\Tab{16}{\V{P}_}\Tab{32}{=\>_\V{true}_\&_\V{P}}\Tab{64}{\K{end}}}
+\L{\LB{__[\V{falsepropag}]}\Tab{16}{\V{false}}\Tab{32}{=\>_\V{false}}\Tab{64}{\K{end}}}
+\L{\LB{__[\V{truepropag}]}\Tab{16}{\V{true}}\Tab{32}{=\>_\V{true}}\Tab{64}{\K{end}}}
+\L{\LB{}}
+\L{\LB{\K{end}_\K{of}_\K{rules}}}
+\L{\LB{}}
+\L{\LB{\K{rules}_\K{for}_\V{bool}}}
+\L{\LB{\K{declare}_\V{P},\V{Q}:\V{eqSystem};_\V{s},\V{t}:\V{term};_\V{x},\V{y}:\V{variable};}}
+\L{\LB{\K{bodies}}}
+\L{\LB{__[\,]_\V{mergingClash}(\V{true},\V{x},\V{s})_=\>_\V{false}}\Tab{64}{\K{end}}}
+\L{\LB{__[\,]_\V{mergingClash}(\V{P}_\&_\V{Q},\V{x},\V{s})_=\>_\V{mergingClash}(\V{P},\V{x},\V{s})_}}
+\L{\LB{}\Tab{32}{\V{or}_\V{mergingClash}(\V{Q},\V{x},\V{s})_}\Tab{64}{\K{end}}}
+\L{\LB{__[\,]_\V{mergingClash}(\V{x}=\V{s},\V{y},\V{t})_=\>_\V{x}==\V{y}_\V{and}_\V{s}!=\V{t}}\Tab{64}{\K{end}}}
+\L{\LB{\K{end}_\K{of}_\K{rules}}}
+\L{\LB{}}
+\L{\LB{\K{strategy}_\V{unify}_}}
+\L{\LB{__\K{dont}_\K{care}_\K{choose}(\V{trueadd})}}
+\L{\LB{__\K{repeat}}}
+\L{\LB{____\K{dont}_\K{care}_\K{choose}(}}
+\L{\LB{______}\Tab{8}{\V{unfold}_\V{delete}_\V{decompose}_\V{conflict}_\V{coalesce}_\V{occCheck1}_\V{occCheck2}_}}
+\L{\LB{}\Tab{8}{\V{eliminate1}_\V{eliminate2}}}
+\L{\LB{____)}}
+\L{\LB{__\K{endrepeat}}}
+\L{\LB{__\K{dont}_\K{care}_\K{choose}(\V{trueelim}_\V{truepropag}_\V{falsepropag})}}
+\L{\LB{\K{end}_\K{of}_\K{strategy}}}
+\L{\LB{}}
+\L{\LB{\K{strategy}_\V{unifys}}}
+\L{\LB{__\K{repeat}}}
+\L{\LB{____\K{dont}_\K{care}_\K{choose}(}}
+\L{\LB{______}\Tab{8}{\V{unfold}_\V{delete}_\V{decompose}_\V{conflict}_\V{coalesce}_\V{occCheck1}_\V{occCheck2}_}}
+\L{\LB{}\Tab{8}{\V{eliminate1}_\V{eliminate2}}}
+\L{\LB{____)}}
+\L{\LB{__\K{endrepeat}}}
+\L{\LB{__\K{dont}_\K{care}_\K{choose}(\V{truepass}_\V{truepropag})}}
+\L{\LB{\K{end}_\K{of}_\K{strategy}}}
+\L{\LB{}}
+\L{\LB{\K{strategy}_\V{match}_}}
+\L{\LB{__\K{dont}_\K{care}_\K{choose}(\V{trueadd})}}
+\L{\LB{__\K{repeat}}}
+\L{\LB{____\K{dont}_\K{care}_\K{choose}(\V{unfold}_\V{delete}_\V{decompose}_\V{conflict}_\V{matchClash}_\V{mergePass1})}}
+\L{\LB{__\K{endrepeat}}}
+\L{\LB{__\K{dont}_\K{care}_\K{choose}(\V{truepass}_\V{truepropag}_\V{falsepropag})}}
+\L{\LB{__\K{repeat}}}
+\L{\LB{____\K{dont}_\K{care}_\K{choose}(\V{unfold}_\V{mergeClash}_\V{mergePass2}_\V{mergePass3})}}
+\L{\LB{__\K{endrepeat}}}
+\L{\LB{__\K{dont}_\K{care}_\K{choose}(\V{trueelim}_\V{truepropag}_\V{falsepropag})}}
+\L{\LB{\K{end}_\K{of}_\K{strategy}}}
+\L{\LB{}}
+\L{\LB{\K{strategy}_\V{matchs}}}
+\L{\LB{__\K{repeat}}}
+\L{\LB{____\K{dont}_\K{care}_\K{choose}(\V{unfold}_\V{delete}_\V{decompose}_\V{conflict}_\V{matchClash}_\V{mergePass1})}}
+\L{\LB{__\K{endrepeat}}}
+\L{\LB{__\K{dont}_\K{care}_\K{choose}(\V{truepass}_\V{truepropag})}}
+\L{\LB{__\K{repeat}}}
+\L{\LB{____\K{dont}_\K{care}_\K{choose}(\V{unfold}_\V{mergeClash}_\V{mergePass2}_\V{mergePass3})}}
+\L{\LB{__\K{endrepeat}}}
+\L{\LB{__\K{dont}_\K{care}_\K{choose}(\V{truepass}_\V{truepropag})}}
+\L{\LB{\K{end}_\K{of}_\K{strategy}}}
+\L{\LB{}}
+\L{\LB{\K{end}_\K{of}_\K{module}}}

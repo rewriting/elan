@@ -1,0 +1,93 @@
+#! /bin/csh -f
+
+if ($1 =~ *I*) then
+itest map  no map map
+itest bup  no bup bup
+itest loop no loop loop
+itest apply no apply apply
+itest lterm lterm lterm lterm
+itest depth depth depth depth
+itest lis lis lis lis
+itest lis1 lis1 lis1 lis1
+itest lis2 lis2 lis2 lis2
+itest lis3 lis3 lis3 lis3
+itest lis4 lis4 lis4 lis4
+itest filter filter filter filter
+itest filt filt filt filt
+itest church1 church church1 church1
+itest church2 church church2 church2
+itest church3 church church3 church3
+itest church4 church church4 church4
+itest church5 church church5 church5
+itest church6 church church6 church6
+itest church7 church church7 church7
+itest church8 church church8 church8
+itest church9 church church9 church9
+#itest church10 church church10 church10
+
+itest redmap redmap redmap redmap
+itest simplify simplify simplify simplify
+itest repsimplify repsimplify repsimplify repsimplify
+
+itest traversal traversal traversal traversal
+itest lambda lambda lambda lambda
+if ($1 =~ *P*) then
+ echo "Partial evaluator "
+ pitest map  no map map
+ pitest bup  no bup bup
+ pitest apply no apply apply
+ pitest ll no la7 la7
+ pitest loop no loop loop
+ pitest lterm lterm lterm lterm
+ pitest depth depth depth depth
+ pitest lis lis lis lis
+ pitest lis1 lis1 lis1 lis1
+ pitest lis2 lis2 lis2 lis2
+ pitest lis3 lis3 lis3 lis3
+ pitest lis4 lis4 lis4 lis4
+ pitest filter filter filter filter
+ pitest filt filt filt filt
+ pitest traversal traversal traversal traversal
+ pitest lambda lambda lambda lambda
+endif
+
+if ($1 =~ *p*) then
+ echo "Partial evaluator "
+ pevaltest map  no map map
+ pevaltest bup  no bup bup
+ pevaltest apply no apply apply
+ pevaltest ll no la7 la7
+ pevaltest loop no loop loop
+ pevaltest lterm lterm lterm lterm
+ pevaltest depth depth depth depth
+ pevaltest lis lis lis lis
+ pevaltest lis1 lis1 lis1 lis1
+ pevaltest lis2 lis2 lis2 lis2
+ pevaltest lis3 lis3 lis3 lis3
+ pevaltest lis4 lis4 lis4 lis4
+ pevaltest filter filter filter filter
+ pevaltest filt filt filt filt
+ pevaltest traversal traversal traversal traversal
+ pevaltest lambda lambda lambda lambda
+endif
+
+if ($1 =~ *A*) then
+aitest map  no map map
+aitest bup  no bup bup
+aitest loop no loop loop
+aitest apply no apply apply
+aitest lterm lterm lterm lterm
+aitest depth depth depth depth
+aitest lis lis lis lis
+aitest lis1 lis1 lis1 lis1
+aitest lis2 lis2 lis2 lis2
+aitest lis3 lis3 lis3 lis3
+aitest lis4 lis4 lis4 lis4
+aitest filter filter filter filter
+aitest filt filt filt filt
+aitest lambda lambda lambda lambda
+endif
+
+endif
+
+

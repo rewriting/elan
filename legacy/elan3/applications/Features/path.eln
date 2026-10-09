@@ -1,0 +1,36 @@
+module path
+
+/* Definition of the sort path */
+/* A path is characterized by a vertex, right extermity of the path, its length and */
+/* the labels of the first and last edges of 'the path */
+
+import	
+	global
+		bool
+		int
+		label
+	;
+end
+
+sort path;
+end
+
+operators
+  global
+	/* Constructor of the sort edge */
+	/* The path is to vertex vertexout ( ? ->* vertexout) */
+	/* Constraint is equal to true if there a C edge in the path, false otherwise */
+	/* it is equal to 0 */
+	/* labelin is the label of the first edge of the path */
+	/* labelout is the label of the last edge of the path */
+
+	pathempty	: path;
+
+	[@, @, @, @] : (vertexout:int constraint:bool labelin:label labelout:label) path;
+
+end
+
+end
+
+
+

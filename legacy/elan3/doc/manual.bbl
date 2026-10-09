@@ -1,0 +1,351 @@
+\newcommand{\etalchar}[1]{$^{#1}$}
+\begin{thebibliography}{BKK{\etalchar{+}}98b}
+
+\bibitem[BC98]{BorovanskyCastro-WRLA98}
+P.~Borovansk\'{y} and C.~Castro.
+\newblock {Cooperation of Constraint Solvers: Using the New Process Control
+  Facilities of {\sf ELAN}}.
+\newblock In C.~Kirchner and H.~Kirchner, editors, {\em {P}roc. {S}econd
+  {I}ntl. {W}orkshop on {R}ewriting {L}ogic and its {A}pplications}, Electronic
+  Notes in Theoretical Computer Science. Elsevier, September 1998.
+
+\bibitem[BCD{\etalchar{+}}98]{elanlibManual-98}
+P.~Borovansk\'y, H.~Cirstea, H.~Dubois, C.~Kirchner, H.~Kirchner, P.-E. Moreau,
+  C.~Ringeissen, and M.~Vittek.
+\newblock {\em User Manual of the {{\sf ELAN}} Standard Library}.
+\newblock LORIA, Nancy (France), first edition, December 1998.
+
+\bibitem[BJMR98]{BorovanskyJMR-WRLA98}
+P.~Borovansk\'{y}, S.~Jamoussi, P.-E. Moreau, and C.~Ringeissen.
+\newblock {Handling {\sf ELAN} Rewrite Programs via an Exchange Format}.
+\newblock In C.~Kirchner and H.~Kirchner, editors, {\em {P}roc. {S}econd
+  {I}ntl. {W}orkshop on {R}ewriting {L}ogic and its {A}pplications}, Electronic
+  Notes in Theoretical Computer Science, Pont-{\`a}-Mousson (France), September
+  1998. Elsevier.
+
+\bibitem[BK97]{BorovanK-ASF+SDF97}
+P.~Borovansk\'y and H.~Kirchner.
+\newblock {Strategies of ELAN: meta-interpretation and partial evaluation}.
+\newblock In {\em Proceedings of International Workshop on Theory and Practice
+  of Algebraic Specifications ASF+SDF 97}, Workshops in Computing, Amsterdam,
+  September 1997. Springer-Verlag.
+
+\bibitem[BKK96a]{Strategies-RwLg1996}
+P.~Borovansk\'y, C.~Kirchner, and H.~Kirchner.
+\newblock {Controlling Rewriting by Rewriting}.
+\newblock In J.~Meseguer, editor, {\em {P}roc. {F}irst {I}ntl. {W}orkshop on
+  {R}ewriting {L}ogic and its {A}pplications}, volume~4 of {\em Electronic
+  Notes in Theoretical Computer Science}, Asilomar (California), September
+  1996. Elsevier.
+
+\bibitem[BKK{\etalchar{+}}96b]{Elan-RwLg1996}
+P.~Borovansk\'y, C.~Kirchner, H.~Kirchner, P.-E. Moreau, and M.~Vittek.
+\newblock {{\sf ELAN}: A logical framework based on computational systems}.
+\newblock In J.~Meseguer, editor, {\em {P}roc. {F}irst {I}ntl. {W}orkshop on
+  {R}ewriting {L}ogic and its {A}pplications}, volume~4 of {\em Electronic
+  Notes in Theoretical Computer Science}, Asilomar (California), September
+  1996. Elsevier.
+
+\bibitem[BKK97]{Elan-ASF+SDF97}
+P.~Borovansk\'y, C.~Kirchner, and H.~Kirchner.
+\newblock {Rewriting as a Unified Specification Tool for Logic and Control:The
+  {\sf ELAN} Language}.
+\newblock In {\em Proceedings of International Workshop on Theory and Practice
+  of Algebraic Specifications ASF+SDF 97}, Workshops in Computing, Amsterdam,
+  September 1997. Springer-Verlag.
+
+\bibitem[BKK98a]{BKK-Fuji-98}
+P.~Borovansk\'y, C.~Kirchner, and H.~Kirchner.
+\newblock {A functional view of rewriting and strategies for a semantics of
+  {\sf ELAN}}.
+\newblock In M.~Sato and Y.~Toyama, editors, {\em The Third Fuji International
+  Symposium on Functional and Logic Programming}, pages 143--167, Kyoto, April
+  1998. World Scientific.
+
+\bibitem[BKK{\etalchar{+}}98b]{BorovanskyKKMR-WRLA98}
+P.~Borovansk\'y, C.~Kirchner, H.~Kirchner, P.-E. Moreau, and C.~Ringeissen.
+\newblock {An Overview of {\sf ELAN}}.
+\newblock In C.~Kirchner and H.~Kirchner, editors, {\em {P}roc. {S}econd
+  {I}ntl. {W}orkshop on {R}ewriting {L}ogic and its {A}pplications}, Electronic
+  Notes in Theoretical Computer Science, Pont-{\`a}-Mousson (France), September
+  1998. Elsevier.
+
+\bibitem[Bor95]{Borovansky-95}
+P.~Borovansk\'y.
+\newblock Implementation of higher-order unification based on calculus of
+  explicit substitutions.
+\newblock In {\em Proceedings of SOFSEM'95}, Lecture Notes in Computer Science,
+  pages 363--368. Springer-Verlag, 1995.
+
+\bibitem[Bor98a]{BoroThese}
+P.~Borovansk\'{y}.
+\newblock {\em {L}e contr\^{o}le de la r\'{e}\'{e}criture\,: \'{e}tude et
+  implantation d'un formalisme de strat\'{e}gies}.
+\newblock {T}h\`ese de {D}octorat d'{U}niversit\'e, {U}niversit{\'e} {H}enri
+  {P}oincar{\'e} - {N}ancy~1, octobre 1998.
+
+\bibitem[Bor98b]{Borovansky-WRLA98}
+P.~Borovansk\'{y}.
+\newblock {The Control of Rewriting: Study and Implementation of a Strategy
+  Formalism}.
+\newblock In C.~Kirchner and H.~Kirchner, editors, {\em {P}roc. {S}econd
+  {I}ntl. {W}orkshop on {R}ewriting {L}ogic and its {A}pplications}, Electronic
+  Notes in Theoretical Computer Science, Pont-{\`a}-Mousson (France), September
+  1998. Elsevier.
+
+\bibitem[Cas96a]{Castro-ICTAI96}
+C.~Castro.
+\newblock {Binary CSP Solving as an Inference Process}.
+\newblock In {\em Proceedings of the Eighth International Conference on Tools
+  in Artificial Intelligence, ICTAI'96, Toulouse, France}, pages 462--463,
+  November 1996.
+
+\bibitem[Cas96b]{Castro-RwLg1996}
+C.~Castro.
+\newblock Solving {B}inary {CSP} using {C}omputational {S}ystems.
+\newblock In J.~Meseguer, editor, {\em {P}roc. {F}irst {I}ntl. {W}orkshop on
+  {R}ewriting {L}ogic and its {A}pplications}, volume~4 of {\em Electronic
+  Notes in Theoretical Computer Science}, Asilomar (California), September
+  1996. Elsevier.
+
+\bibitem[Cas97a]{castro-esslli-1997}
+C.~Castro.
+\newblock {Constraint Manipulation using Rewrite Rules and Strategies}.
+\newblock In A.~Drewery, G.-J.~M. Kruijff, and R.~Zuber, editors, {\em
+  Proceedings of 2nd ESSLLI Student Session, 9th European Summer School in
+  Logic, Language and Information, ESSLLI'97}, pages 45--56, Aix-en-Provence
+  (France), August 1997.
+
+\bibitem[Cas97b]{Castro-ESSLLI97}
+C.~Castro.
+\newblock {Constraint Manipulation using Rewrite Rules and Strategies}.
+\newblock In A.~Drewery, G.-J.~M. Kruijff, and R.~Zuber, editors, {\em {\em
+  Proceedings of the Second ESSLLI Student Session, 9th European Summer School
+  in Logic, Language and Information, ESSLLI'97}}, pages 45--56,
+  Aix-en-Provence, France, August 1997.
+
+\bibitem[Cas98a]{Castro-FI98}
+C.~Castro.
+\newblock {Building Constraint Satisfaction Problem Solvers Using Rewrite Rules
+  and Strategies}.
+\newblock {\em Fundamenta Informaticae}, 34(3):263--293, September 1998.
+
+\bibitem[Cas98b]{castro:aisc:1998}
+C.~Castro.
+\newblock {{\sf COLETTE}, Prototyping CSP Solvers Using a Rule-Based Language}.
+\newblock In {\em Proceedings of The Fourth International Conference on
+  Artificial Intelligence and Symbolic Computation, Theory, Implementations and
+  Applications, AISC'98}, volume 1476 of {\em Lecture Notes in Artificial
+  Intelligence}, Plattsburgh, NY, USA, September 1998.
+
+\bibitem[Cas98c]{castro:phd:1998}
+C.~Castro.
+\newblock {\em {Une approche d\'eductive de la r\'esolution de probl\`emes de
+  satisfaction de contraintes}}.
+\newblock Th\`ese de doctorat d'universit\'e, Universit\'e Henri Poincar\'e --
+  Nancy 1, 1998.
+\newblock Also available as Technical Report 98-T-315, LORIA, Nancy (France).
+
+\bibitem[Cir99]{Cirstea-Proto-99}
+H.~Cirstea.
+\newblock Specifying authentication protocols using {{\sf ELAN}}.
+\newblock In {\em Workshop on Modelling and Verification}, Besancon, France,
+  December 1999.
+
+\bibitem[CK97]{CirsteaKirchner97web}
+H.~Cirstea and C.~Kirchner.
+\newblock {Theorem proving Using Computational Systems: The case of the B
+  Predicate Prover}.
+\newblock Available at {\tt http://www.loria.fr/
+  $\sim$cirstea/Papers/TheoremProver.ps}, 1997.
+
+\bibitem[CK98]{castrokirchner:rta-war:1998}
+C.~Castro and C.~Kirchner.
+\newblock {Constraint Rewriting}.
+\newblock In {\em Proceedings of The Workshop on Applications of Rewriting, 9th
+  International Conference on Rewriting Techniques and Applications, RTA'98,
+  Tsukuba, Japan}, March 1998.
+
+\bibitem[CK99a]{CirsteaKirchner-LivreFroCoS99}
+H.~Cirstea and C.~Kirchner.
+\newblock Combining higher-order and first-order computation using
+  $\rho$-calculus: Towards a semantics of {{\sf ELAN}}.
+\newblock In D.~Gabbay and M.~de~Rijke, editors, {\em Frontiers of Combining
+  Systems 2}, Research Studies, ISBN 0863802524, pages 95--120. Wiley, 1999.
+
+\bibitem[CK99b]{CirsteaKirchnerINRIA99}
+H.~Cirstea and C.~Kirchner.
+\newblock An introduction to the rewriting calculus.
+\newblock Research Report RR-3818, INRIA, December 1999.
+
+\bibitem[DK98]{dubois98b}
+H.~Dubois and H.~Kirchner.
+\newblock Actions and plans in {{\sf ELAN}}.
+\newblock In {\em {Proceedings of the Workshop on Strategies in Automated
+  Deduction - CADE-15, Lindau, Germany}}, pages 35--45, 1998.
+
+\bibitem[DK99]{DuboisKirchner-Ercim99}
+H.~Dubois and H.~Kirchner.
+\newblock Rule based programming with constraints and strategies.
+\newblock Technical Report 99-R-084, LORIA, Nancy, France, November 1999.
+\newblock ERCIM workshop on Constraints, Paphos (Cyprus).
+
+\bibitem[Ear70]{Earley}
+J.~Earley.
+\newblock An efficient context-free parsing algorithm.
+\newblock {\em Communications of the ACM}, 13(2):94--102, 1970.
+
+\bibitem[Eke95]{Eker-AcMatch-95}
+S.~Eker.
+\newblock Associative-commutative matching via bipartite graph matching.
+\newblock {\em Computer Journal}, 38(5):381--399, 1995.
+
+\bibitem[Gen98a]{genet-these}
+T.~Genet.
+\newblock {\em {Contraintes d'ordre et automates d'arbres pour les preuves de
+  terminaison}}.
+\newblock {Th\`ese de Doctorat d'Universit\'e}, Universit\'e Henri Poincar\'e
+  -- Nancy 1, 1998.
+
+\bibitem[Gen98b]{genet-rta98}
+T.~Genet.
+\newblock {Decidable Approximations of Sets of Descendants and Sets of Normal
+  Forms}.
+\newblock In {\em Proceedings 9th Conference on Rewriting Techniques and
+  Applications, Tsukuba (Japan)}, volume 1379 of {\em Lecture Notes in Computer
+  Science}, pages 151--165. Springer-Verlag, 1998.
+
+\bibitem[GG97]{genetgnaedig-caap97}
+T.~Genet and I.~Gnaedig.
+\newblock {Termination Proofs using gpo Ordering Constraints}.
+\newblock In M.~Bidoit and M.~Dauchet, editors, {\em Proceedings 22nd
+  International Colloquium on Trees in Algebra and Programming, {Lille
+  (France)}}, volume 1214 of {\em Lecture Notes in Computer Science}, pages
+  249--260. Springer-Verlag, 1997.
+
+\bibitem[GKK{\etalchar{+}}87]{obj3-88}
+J.~A. Goguen, C.~Kirchner, H.~Kirchner, A.~M{\'e}grelis, J.~Meseguer, and
+  T.~Winkler.
+\newblock An introduction to {OBJ}-3.
+\newblock In J.-P. Jouannaud and S.~Kaplan, editors, {\em Proceedings 1st
+  International Workshop on Conditional Term Rewriting Systems, Orsay
+  (France)}, volume 308 of {\em Lecture Notes in Computer Science}, pages
+  258--263. Springer-Verlag, July 1987.
+\newblock Also as internal report CRIN: 88-R-001.
+
+\bibitem[HHKR89]{HeeringHendriksKlintRekers89}
+J.~Heering, P.~Hendriks, P.~Klint, and J.~Rekers.
+\newblock The syntax definition formalisme {SDF} - reference manual.
+\newblock {\em ACM SIGPLAN Notices}, 24(11):43--75, 1989.
+
+\bibitem[Kir97]{Kirchner-JFPLC99}
+H.~Kirchner.
+\newblock {{\sf ELAN}} (tutoriel invit\'e).
+\newblock In F.~Fages, editor, {\em {JFPLC'99} Journ\'ees Francophones de
+  Programmation Logique et programmation par Contraintes}, pages 241--248.
+  Hermes Science Publications, 1997.
+\newblock Report LORIA 99-R-129.
+
+\bibitem[KKV95]{KirchnerKV-MIT95}
+C.~Kirchner, H.~Kirchner, and M.~Vittek.
+\newblock {Designing Constraint Logic Programming Languages using Computational
+  Systems}.
+\newblock In P.~Van~Hentenryck and V.~Saraswat, editors, {\em Principles and
+  Practice of Constraint Programming. The Newport Papers.}, pages 131--158. MIT
+  press, 1995.
+
+\bibitem[KM95]{KirchnerM-RTA95}
+H.~Kirchner and P.-E. Moreau.
+\newblock Prototyping completion with constraints using computational systems.
+\newblock In J.~Hsiang, editor, {\em Proceedings 6th Conference on Rewriting
+  Techniques and Applications, Kaiserslautern (Germany)}, volume 914 of {\em
+  Lecture Notes in Computer Science}, pages 438--443. Springer-Verlag, 1995.
+
+\bibitem[KM96]{Reflection-RwLg1996}
+H.~Kirchner and P.-E. Moreau.
+\newblock A reflective extension of {ELAN}.
+\newblock In J.~Meseguer, editor, {\em {P}roc. {F}irst {I}ntl. {W}orkshop on
+  {R}ewriting {L}ogic and its {A}pplications}, volume~4 of {\em Electronic
+  Notes in Theoretical Computer Science}, Asilomar (California), September
+  1996. Elsevier.
+
+\bibitem[KM98]{KirchnerM-98}
+H.~Kirchner and P.-E. Moreau.
+\newblock {Non-deterministic Computations in {ELAN}}, 1998.
+\newblock Submitted.
+
+\bibitem[KR98]{KirchnerR-FI98}
+C.~Kirchner and C.~Ringeissen.
+\newblock {Rule-Based Constraint Programming}.
+\newblock {\em Fundamenta Informaticae}, 34(3):225--262, September 1998.
+
+\bibitem[Mes92]{MeseguerTCS92}
+J.~Meseguer.
+\newblock Conditional rewriting logic as a unified model of concurrency.
+\newblock {\em Theoretical Computer Science}, 96(1):73--155, 1992.
+
+\bibitem[MK97]{MoreauK-ASF+SDF97}
+P.-E. Moreau and H.~Kirchner.
+\newblock {Compilation Techniques for Associative-Commutative Normalisation}.
+\newblock In {\em Proceedings of International Workshop on Theory and Practice
+  of Algebraic Specifications ASF+SDF 97}, Workshops in Computing, Amsterdam,
+  September 1997. Springer-Verlag.
+
+\bibitem[MK98]{MoreauK-PLILP+ALP98}
+P.~Moreau and H.~Kirchner.
+\newblock A compiler for rewrite programs in associative-commutative theories.
+\newblock In C.~Palamidessi, H.~Glaser, and K.~Meinke, editors, {\em Principles
+  of Declarative Programming}, number 1490 in Lecture Notes in Computer
+  Science, pages 230--249. Springer-Verlag, September 1998.
+
+\bibitem[Mor98]{Moreau-JICSLPW98}
+P.-E. Moreau.
+\newblock A choice-point library for backtrack programming.
+\newblock JICSLP'98 Post-Conference Workshop on Implementation Technologies for
+  Programming Languages based on Logic, June 1998.
+
+\bibitem[Mor99]{MoreauThese99}
+P.-E. Moreau.
+\newblock {\em {Compilation de r\`egles de r\'e\'ecriture et de strat\'egies
+  non-deterministes}}.
+\newblock {T}h\`ese de {D}octorat d'{U}niversit\'e, {U}niversit{\'e} {H}enri
+  {P}oincar{\'e} -- {N}ancy~1, France, June 1999.
+\newblock also TR LORIA 98-T-326.
+
+\bibitem[Ngu]{ACCoqELAN}
+Q.-H. Nguyen.
+\newblock {\elan} for {AC} rewriting in {\coq}.
+\newblock \url{http://www.loria.fr/~nguyenqh/coqelan/ACrew.html}.
+
+\bibitem[Rin97]{Ringeissen-RTA97}
+C.~Ringeissen.
+\newblock {Prototyping Combination of Unification Algorithms with the ELAN
+  Rule-Based Programming Language}.
+\newblock In {\em Proceedings 8th Conference on Rewriting Techniques and
+  Applications, Sitges (Spain)}, volume 1232 of {\em Lecture Notes in Computer
+  Science}, pages 323--326. Springer-Verlag, 1997.
+
+\bibitem[Vir96]{Viry-RwLg1996}
+P.~Viry.
+\newblock {Input/Output for ELAN}.
+\newblock In J.~Meseguer, editor, {\em {P}roc. {F}irst {I}ntl. {W}orkshop on
+  {R}ewriting {L}ogic and its {A}pplications}, volume~4 of {\em Electronic
+  Notes in Theoretical Computer Science}, Asilomar (California), September
+  1996. Elsevier.
+
+\bibitem[Vit94]{VittekThese}
+M.~Vittek.
+\newblock {\em {ELAN}: Un cadre logique pour le prototypage de langages de
+  programmation avec contraintes}.
+\newblock {T}h\`ese de {D}octorat d'{U}niversit\'e, {U}niversit{\'e} {H}enri
+  {P}oincar{\'e} - {N}ancy~1, octobre 1994.
+
+\bibitem[Vit96]{Vittek-RTA96}
+M.~Vittek.
+\newblock {A Compiler for Nondeterministic Term Rewriting Systems}.
+\newblock In H.~Ganzinger, editor, {\em Proceedings 7th Conference on Rewriting
+  Techniques and Applications, New Brunswick (New Jersey, USA)}, volume 1103 of
+  {\em Lecture Notes in Computer Science}, pages 154--168. Springer-Verlag,
+  July 1996.
+
+\end{thebibliography}

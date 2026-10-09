@@ -1,0 +1,7 @@
+LPL fib description
+  query    of sort int
+  result   of sort int
+  import   fib
+  start with () query
+
+end

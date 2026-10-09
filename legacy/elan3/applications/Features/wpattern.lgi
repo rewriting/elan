@@ -1,0 +1,7 @@
+LPL wpattern description
+  query    of sort term
+  result   of sort term
+  import   wpattern
+//  start with () go
+  start with (s0) go
+end

@@ -1,0 +1,74 @@
+module map99[X]
+
+import global 
+  strat[X] strat[list[X]] 
+  X list[X];
+
+op global
+  map(@) 	: (<X>) <list[X]>;
+end
+
+rules for X
+ x	: X; 
+    	n	: int;
+bodies
+  [ass(n)] x => n 				end
+  [add1] x => x+1 				end
+end
+
+rules for list[X]
+ 
+	as, bs        : list[X];
+	a, b        : X;
+        s	    : <X>; ss	    : <list[X]>;
+	h : X;		
+	t, t1 : list[X];	
+bodies
+  [MAPQQQ] 
+	[map(s)] t	 => 
+	t1 where t1:=(DCQQQ)[dc(nil,cons(s,map(s)))]t
+  end
+/*
+  [FSYMQQQ1]
+	[nil]nil => nil
+  end
+  [FSYMQQQ2]
+	[cons(s,map(s))]cons(a,as) => cons(b,bs)
+		where b:= [s]a	
+		where bs:=(MAPQQQ)[map(s)]as	
+  end
+*/
+  [DCQQQ1] 
+	[dc(nil,cons(s,map(s)))]nil => nil
+  end
+  [DCQQQ2]
+	[dc(nil,cons(s,map(s)))]cons(a,as) => cons(b,bs) 
+		where b:= [s]a	
+		where bs:=(MAPQQQ)[map(s)]as	
+  end
+end 
+//-----------------------------------------------------
+strategy DCQQQ for list[X]
+   dc(
+     dk(DCQQQ1) , dont know choose(DCQQQ2)
+   )
+   dc(FIN_list_X_)
+end
+/*
+strategy FSYMQQQ1 for list[X]
+   dk(FSYMQQQ1)
+end
+
+strategy FSYMQQQ2 for list[X]
+   dk(FSYMQQQ2)
+end
+*/
+strategy MAPQQQ for list[X]
+   dk(MAPQQQ)
+end
+
+end
+
+
+
+

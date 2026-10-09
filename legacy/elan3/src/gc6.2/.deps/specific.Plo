@@ -1,0 +1,1 @@
+specific.lo specific.o: specific.c

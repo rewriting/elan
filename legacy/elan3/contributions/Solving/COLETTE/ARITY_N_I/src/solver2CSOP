@@ -1,0 +1,19 @@
+#!/bin/csh -f
+
+unset noclobber
+
+#
+# ELAN library
+#
+set ELAN=$ELANLIB/..
+
+#
+# COLETTE sources
+#
+set SOURCE=$COLETTE/ARITY_N_I/src
+
+
+tee -a Solver2Input | /users/protheo/borovan/elan/bin/alpha/elan --no_more -b --secondlib $SOURCE solver2CSOP.lgi $SOURCE/../spc/JobShop.spc | tee -a Solver2Output
+
+#tee -a Solver2Input | $ELAN/bin/`uname -m`/elan --no_more -b --secondlib $SOURCE solver2CSOP.lgi $SOURCE/../spc/JobShop.spc | tee -a Solver2Output
+

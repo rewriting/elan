@@ -1,0 +1,462 @@
+module nsg
+import   
+ global
+    
+    bool int list[int] list[message] list[AgentId] cmp[AgentId]; 
+end
+
+   
+       /*********************************/ 
+      /*********************************/
+
+
+sort
+  message network   intruder state SWC AgentId TypMes Key Nonces  listActeur listNonce liste    Acteur ;  
+end
+
+
+   
+       /*********************************/ 
+      /*********************************/
+
+
+operators
+ global
+   a : AgentId;
+   b : AgentId; 
+   c : AgentId;
+   e : AgentId;
+   d : AgentId; 
+   ii  : AgentId;
+  
+   SLEEP : SWC;
+   WAIT : SWC;
+   COMMIT :SWC;
+
+   MNA : TypMes;
+   MNNA : TypMes;
+   MN : TypMes;
+
+   @  : (AgentId) Key;
+
+   @*@*@*@*@*@*@ : (AgentId AgentId Key TypMes  Nonces  Nonces  AgentId) message;
+ 
+
+   @ : (AgentId) liste ;
+   @ - @ :( liste liste)liste (AC);
+  
+   @  : (Nonces) listNonce  ;    
+   @ | @ : ( listNonce listNonce) listNonce (AC);
+
+   @  : (message) network;
+   @ & @  : (network  network) network (AC);
+
+   @ + @ + @  : ( AgentId SWC Nonces ) Acteur  ; 
+
+   @ # @ # @ # @ : ( AgentId listNonce listNonce  network ) intruder; 
+
+   @ : (Acteur) listActeur;
+   @ || @ : ( listActeur  listActeur ) listActeur (AC);
+
+   @ <> @ <> @ <> @<> @ : (  listActeur listActeur  intruder network int ) state;
+
+
+   ATTACK: state;
+   ERROR: state;
+
+   nle : liste ;
+   nl : listNonce;
+   nil :AgentId;
+   nill :network;
+   nnl  : listActeur;
+
+   N(@,@) :(AgentId AgentId) Nonces ;
+   Add(@) :(AgentId) AgentId ;
+
+   delElem(@,@) : (Nonces listNonce) listNonce ;
+   existe(@,@): ( Nonces listNonce) bool; 
+   elemI(@) :(liste) AgentId; 
+   elemIN(@) :(listNonce) Nonces ;
+   elemIr(@) :(listActeur) Acteur ;
+
+end
+
+   
+       /*********************************/ 
+      /*********************************/
+
+      
+  
+stratop
+ global
+   com  :< state -> state> bs;
+   extElem : <AgentId -> AgentId>  bs; 
+   extElement : < Nonces -> Nonces >  bs;
+   extractEl : < Acteur -> Acteur >  bs;
+end
+
+ 
+       /*********************************/ 
+      /*********************************/
+
+
+rules for state
+	
+         x,y,z,w,v,t,k,r : AgentId;
+         n1,n2,n3,n4 : AgentId;
+	
+         resp,init : Nonces;
+
+         I  : intruder;
+         A  : Acteur;
+         B  : Acteur;
+         E  : listActeur;
+         D  : listActeur;
+         C  : intruder;
+         a,m  : message;
+         l,l1,ln  : listNonce;
+         ls,ll,lr : network; 
+         etat : TypMes;
+         etag :SWC;
+         cmp : int;
+         l4, l5 : list[AgentId] ;
+         st : SWC;
+         
+//--------------------------------------------------------------------
+        
+      
+
+global
+
+
+//--------------------------------------------------------------------
+
+// a+SLEEP+a <> b+SLEEP+b <> iii <> nill 	end
+// a+SLEEP+N(a,a) ||  e+SLEEP+N(e,e) ||nnl   <> b+SLEEP+N(b,b) || d+SLEEP+N(d,d)  || nnl <>ii # nl # nl #nill <> nill<>0 end
+
+// a+SLEEP+N(a,a)|| nnl  <> b+SLEEP+N(b,b) ||nnl <> ii # nl # nl #nill <> nill<>0 end
+
+//elan ns1 > ! titi
+//tail -f titi
+
+//--------------------------------------------------------------------
+
+
+
+[rulescomai]
+x+SLEEP+resp ||E <> D <> I <> ls<>cmp => 
+x+WAIT+N(x,ii) || E <> D <> I <> x*ii*ii*MNA*N(x,ii)*N(x,ii)*Add(x) & ls<>cmp+1 
+end
+
+
+
+[rulescomaa]
+x+SLEEP+resp ||E <> D <> I <> ls<>cmp => 
+x+WAIT+N(x,y) || E <> D <> I <> x*y*y*MNA*N(x,y)*N(x,y)*Add(x) & ls<>cmp+1 
+
+                 where (Acteur)y+st+init :=(extractEl) elemIr(D)
+
+end    
+
+
+
+[rulescomb]
+E <> y+SLEEP+init || D <> I <> x*y*y*MNA*N(n1,n3)*N(n2,n4)*Add(z) & ls<>cmp => 
+E <> y+WAIT+N(y,n1) || D <> I <> y*n1*n1*MNNA*N(n1,n3)*N(y,n1)*Add(y) & ls<>cmp+1
+                 if y!= n1
+end    
+
+
+
+[rulescoma]
+x+WAIT+N(x,v) || E <>  D <> I <> y*x*x*MNNA*N(x,v)*N(n2,n4)*Add(z) & ls<>cmp =>
+x+COMMIT+N(x,v) || E <> D <> I <> x*v*v*MN*N(n2,n4)*N(n2,n4)*Add(x) & ls<>cmp+1 
+end
+
+
+
+[rulescomb] 
+E <> y+WAIT+N(y,x) ||  D <> I <> z*y*y*MN*N(y,x)*N(n2,n4)*Add(v) & ls <> cmp => 
+E <> y+COMMIT+N(y,x) || D <> I <> ls <> cmp+1
+			if z==x  // it really comes from x
+end
+
+
+
+// le message recu ne conntient pas les infos attendus donc erreur
+	
+
+[rulescoma]
+x+WAIT+resp ||E <> D  <> I <> y*x*x*MNA*N(n1,n3)*N(n2,n4)*Add(w) & ls<>cmp => 
+ERROR
+end   	// due to MNA
+
+
+[rulescoma]
+x+WAIT+N(x,w) || E <>D <> I <> y*x*x*MN*N(n1,n3)*N(n2,n4)*Add(z) & ls<>cmp => 
+ERROR	   
+		if x!=n1 or w!=n3
+end   	// due to the nonce
+
+
+[rulescomb]
+E <> y+WAIT+N(y,w) || D <> I <> z*y*y*MN*N(n1,n3)*N(n2,n4)*Add(x) & ls<>cmp =>  
+ERROR	
+				if y!=n1 or w!=n3
+end 
+
+
+// attaque
+
+[rulescomAT]
+E <> y+WAIT+N(y,x) ||  D <> ii#l#ln#ll <> z*y*y*MN*N(y,x)*N(n2,n4)*Add(w) & ls<>cmp => 
+ATTACK                  if z == ii 
+			if x != z
+                        if  existe(N(y,x) , ln)
+                      //  if  existe(N(a,b) ,N(e,d)| N(c,c)|N(a,b)) 
+ end
+
+/*
+[rulescomAT]
+x+WAIT+N(x,y) ||E <> D <> ii#l#ln#ll <> z*y*y*MN*N(y)*N(n2,n4)*Add(x) & ls<>cmp => 
+ATTACK                  if z == ii 
+			if  resp!= z
+                        if  existe(N(resp) , ln)
+                        if  existe(N(x) , ln)  
+end 
+*/
+
+//--------------------------------------------------------------
+
+
+// regles pour l'intrus 
+
+
+//  reception de messages pour l'intrus
+
+[rulescomi1]
+E <> D <> w#l#ln#ll <> z*x*w*MN*N(n1,n3)*N(n2,n4)*Add(v) & ls<>cmp =>
+E <> D <> w#N(n1,n3)|l#ln # ll <> ls <>cmp+1 
+			if w!=z	
+end
+
+[rulescomi1]
+E <> D <> w#l#ln#ll <> z*x*w*MNA*N(n1,n3)*N(n2,n4)*Add(v) & ls<>cmp =>
+E <> D <> w# N(n1,n3)|l#ln # ll <> ls<>cmp+1  
+			if w!=z	
+end
+
+
+[rulescomi1]
+E <> D <> w#l#ln#ll <> z*y*w*MNNA*N(n1,n3)*N(n2,n4)*Add(x) & ls<>cmp =>
+E <> D <> w# N(n1,n3)|N(n2,n4)|l#ln#ll <> ls<>cmp+1  
+			if w!=z 
+end
+
+//--------------------------------------------------------------
+
+[rulescomi2] 
+E <> D <> w# l #ln# ll <> z*x*y*etat*N(n1,n3)*N(n2,n4)*Add(v) & ls<>cmp =>
+E <> D <> w# l #ln # z*x*y*etat*N(n1,n3)*N(n2,n4)*Add(v) & ll <> ls<>cmp+1  
+				if w!=z 
+				if w!=y		end
+
+//--------------------------------------------------------------
+
+// envoi de message mem.
+
+[rulescomi31]
+E <> D <> w# l#ln # x*y*z*etat*N(n1,n3)*N(n2,n4)*Add(v) &ll <> ls<>cmp =>
+E <> D <> w# l#ln # ll <> w*t*z*etat*N(n1,n3)*N(n2,n4)*Add(v) & ls<>cmp+1 
+                                where t :=  (extElem) elemI(a-b-d-e)
+end
+
+
+//--------------------------------------------------------------
+
+
+//generation de message en utilisant les nonces qu'il connait
+
+[rulescomi41]
+E <> D <> w # l # ln # ll <> ls<>cmp =>
+E <> D <> w # l1 # resp|ln # ll <> w*y*y*MNA*resp*resp*Add(w) & ls<>cmp+1 
+                                where(Nonces) resp := (extElement) elemIN(l)
+                                where l1 := () delElem(resp,l)
+                                where y :=  (extElem) elemI(a-b-e-d)   end  
+
+[rulescomi43]
+E <> D <> w # l#ln # ll <> ls<>cmp =>
+E <> D <> w # l1#resp|init|ln # ll <> w*y*y*MNNA*resp*init*Add(w) & ls<>cmp+1 
+                                where(Nonces) resp := (extElement) elemIN(l)
+                                where(Nonces) init := (extElement) elemIN(l)
+                                where l1 := () delElem(resp,delElem(init,l))
+                                where y :=  (extElem) elemI(a-b-e-d)  end
+
+[rulescomi42]
+E <> D <> w # l # ln # ll <> ls<>cmp =>
+E <> D <> w # l1 # resp|ln # ll <> w*y*y*MN*resp*resp*Add(w) & ls<>cmp+1 
+                                where(Nonces) resp := (extElement) elemIN(l)
+                                where l1 := () delElem(resp,l)
+                                where y :=  (extElem) elemI(a-b-e-d)   end  
+
+end
+
+
+//--------------------------------------------------------------
+
+rules for listNonce
+
+         m ,b : Nonces;
+         l : listNonce; 
+
+global
+
+[] m | m | l => m | l		 end  
+[] delElem(m,nl) => nl end
+[] delElem(m,m|l) => l   end
+[] delElem(m,b|l)=>b| delElem(m,l) end 
+
+end
+
+//--------------------------------------------------------------
+
+rules for bool
+ 
+     ar, x : Nonces;
+     l,ll : listNonce ;
+     res : bool ;
+  global
+   
+    [] existe(ar,nl) => false    end
+    
+    [] existe(ar,ar|l) => true   end
+
+    [] existe(ar,x|ll)=> res  
+                        where res :=()existe(ar,ll) end
+
+ end
+
+//--------------------------------------------------------------
+
+rules for AgentId
+
+        m : AgentId;
+	l : liste; 
+
+global
+
+[extRuleliste] elemI(m - l) => m 		 end    
+
+end
+
+//--------------------------------------------------------------
+
+
+
+rules for Nonces
+
+        m : Nonces;
+	l : listNonce; 
+
+global
+
+[extRule] elemIN(m | l) => m 		 end    
+
+end
+
+//--------------------------------------------------------------
+
+rules for Acteur
+
+        mn : Acteur;
+	lk : listActeur; 
+
+global
+
+[extRules] elemIr(mn || lk) => mn 		 end    
+
+end
+
+//--------------------------------------------------------------
+
+rules for network
+
+         resp,init : Nonces;
+
+         x,y,z,w,v : AgentId;
+	 ll : network; 
+
+global
+
+
+ 
+[] z*x*y*MN*resp*init*Add(v) & z*x*y*MN*resp*init*Add(v) & ll => z*x*y*MN*resp*init* Add(v) & ll      end    
+ 
+[] z*x*y*MNA*resp*init*Add(v) & z*x*y*MN*resp*init*Add(v) & ll => z*x*y*MN*resp*init* Add(v) & ll     end    
+ 
+[] z*x*y*MNNA*resp*init*Add(v) & z*x*y*MN*resp*init*Add(v )& ll => z*x*y*MN*resp*init* Add(v) & ll   end    
+ 
+end
+
+
+       /*********************************/ 
+      /*********************************/
+
+
+strategies for AgentId
+implicit 
+   
+    []extElem => dk(extRuleliste) end
+end
+
+//--------------------------------------------------------------
+
+strategies for Nonces
+implicit 
+   
+    []extElement => dk(extRule) end
+end
+
+//--------------------------------------------------------------
+
+
+strategies for Acteur
+implicit 
+   
+    []extractEl => dk(extRules) end
+end
+
+//--------------------------------------------------------------
+
+strategies for state 
+implicit 
+   
+    []com => 
+		repeat*(
+		        dk(
+                           //dk(rulescomai,rulescomaa),  // AllSend -> Intr
+ 
+                           rulescomaa,  // AllSend -> AllRec
+
+                           rulescomai,  // AllSend -> Intr
+
+                         
+
+                           rulescomAT,   
+                           rulescomi1, 
+                           rulescomi2,
+                           rulescomi31,
+                           rulescoma,   // Net -> Send -> Net
+                           rulescomb,   // Net -> Rec -> Net
+
+                           rulescomi41,
+                           rulescomi42,
+                           rulescomi43
+)
+		) end
+end
+
+//--------------------------------------------------------------
+
+end
+

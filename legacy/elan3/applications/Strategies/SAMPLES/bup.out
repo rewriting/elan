@@ -1,0 +1,11 @@
+ node(empty,5,leaf(5)) end
+
+ node(empty,5,leaf(9)) end
+
+ node(empty,10,leaf(5)) end
+
+ node(empty,10,leaf(9)) end
+
+ end end
+end
+

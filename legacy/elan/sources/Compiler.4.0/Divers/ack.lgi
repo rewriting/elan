@@ -1,0 +1,8 @@
+LPL ack description
+
+  query 	of sort builtinInt
+         	result of sort builtinInt
+	 	import ack
+         	start with () query
+end
+

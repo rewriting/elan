@@ -1,0 +1,26 @@
+module folders[X,Y]
+
+import global symbol[2,Y,X,Y] symbol[2,X,Y,Y];
+
+op global
+  foldl(@,@)	: ( Y Symbol[Y,X,Y] ) <list[X]->Y>;
+  foldr(@,@)	: ( Y Symbol[X,Y,Y] ) <list[X]->Y>;
+end
+
+strategies for <list[X] -> Y>
+	fl	: Symbol[Y,X,Y];
+	fr	: Symbol[X,Y,Y];
+	a	: X;
+	b	: Y;
+	r	: list[X];
+bodies
+  []	[foldl(b,fl)] nil => b					end
+  []	[foldl(b,fl)] a.r => y where y:=[foldl(fl(b,a),fl)]r	end
+
+  []	[foldr(b,fr)] nil => b					end
+  []	[foldr(b,fr)] a.r => fr(a,y) 
+				where y:=[foldr(b,fr)] r end	end
+
+end
+
+end

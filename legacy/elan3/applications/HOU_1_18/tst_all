@@ -1,0 +1,37 @@
+# !/bin/csh -f
+
+if ($1 =~ *I*) then
+itest hou exa exa exa       
+itest	phou specPat  specPat specPat	
+if ($1 =~ *L*) then
+itest hou specPat specPat specPat	
+itest hou specPat1  specPat1 specPat1	
+itest hou specPat2  specPat2 specPat2
+itest hou specPat3  specPat3 specPat3
+itest	hou specPat4  specPat4 specPat4
+itest	hou specPat5  specPat5 specPat5
+itest	phou specPat1 specPat1 specPat1p
+itest	phou specPat2 specPat2 specPat2p
+itest	phou specPat3 specPat3 specPat3p		
+itest	phou specPat4 specPat4 specPat4p
+itest	phou specPat5 specPat5 specPat5p
+endif
+endif
+
+if ($1 =~ *I* && $1 =~ *A*) then
+aitest hou exa exa exa       
+aitest	phou specPat  specPat specPat	
+if ($1 =~ *L*) then
+aitest hou specPat specPat specPat	
+aitest hou specPat1  specPat1 specPat1	
+aitest hou specPat2  specPat2 specPat2
+aitest hou specPat3  specPat3 specPat3
+aitest	hou specPat4  specPat4 specPat4
+aitest	hou specPat5  specPat5 specPat5
+aitest	phou specPat1 specPat1 specPat1p
+aitest	phou specPat2 specPat2 specPat2p
+aitest	phou specPat3 specPat3 specPat3p		
+aitest	phou specPat4 specPat4 specPat4p
+aitest	phou specPat5 specPat5 specPat5p
+endif
+endif

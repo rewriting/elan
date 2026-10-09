@@ -1,0 +1,65 @@
+module arbe
+
+import global int; end
+sort Tree; end
+
+operators global
+  @		: (int) Tree;
+  Leaf(@)	: (int) Tree;
+  Node(@,@,@)	: (Tree int Tree) Tree;
+end
+
+stratop global
+ all1	: <Tree->Tree> builtin;
+ all2	: <Tree->Tree> builtin;
+ all3	: <Tree->Tree> builtin;
+ all4	: <Tree->Tree> builtin;
+ all5	: <Tree->Tree> builtin;
+ all6	: <Tree->Tree> builtin;
+ all7	: <Tree->Tree> builtin;
+ all8	: <Tree->Tree> builtin;
+ all9	: <Tree->Tree> builtin;
+ all	: <Tree->Tree> builtin;
+ allL	: <Tree->Tree> builtin;
+ allR	: <Tree->Tree> builtin;
+end
+
+rules for Tree
+l, r	: Tree;
+n : int;
+global
+  [Left]    Node(l,n,r) => l		end
+  [Right]   Node(l,n,r) => r		end
+  [N_value]   Node(l,n,r) => n		end
+  [L_value]   Leaf(n) => n		end
+end
+
+
+strategies for Tree
+implicit
+  // all elements in pre-order
+  [.]  all1 => repeat*(dk(Left, L_value, N_value, Right))	end
+
+// left branch
+    [.]  all2 => iterate*(Left); dk(N_value, L_value) end
+
+// leafs
+    [.]  all3 => iterate*(dk(Left,Right)); L_value end
+
+// internal nodes
+    [.]  all4 => iterate*(dk(Left,Right)); N_value end
+    [.]  all5 => iterate+(dk(Left,Right)); N_value end
+
+
+  [.]  all6 => iterate*(dk(Left, Right, N_value))	end
+  [.]  all7 => iterate*(Left);N_value	end
+  [.]  all8 => iterate+(Left);N_value	end
+//  [.]  all9 => dk(N_value , dk(Left;all) ,dk( Right;all)) end
+  [.]  all => dk(all1,all2,all3,all4,all5,all6,all7,all8,all9) end
+  [.]  all9 => dk(N_value, L_value , allL, allR) end
+ 
+ [.]  allL => Left ; all end
+ [.]  allR => Right ; all end
+end
+
+end

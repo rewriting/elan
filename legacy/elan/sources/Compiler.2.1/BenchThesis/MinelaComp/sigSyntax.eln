@@ -1,0 +1,28 @@
+module sigSyntax
+
+	// This module describes a possible syntax for the user specification
+
+import 
+	global	anyIdentifier anyInteger;
+	local	identifier list[identifier] pair[identifier,int] 
+		list[pair[identifier,int]];
+end
+
+operators 
+ global
+
+  @	  : ( ident ) identifier			alias @:;
+
+  @ ':' @ : ( identifier int ) pair[identifier,int]	alias [@,@]:;
+
+  Epsilon : list[identifier]		      		alias nil:;
+  @  @	  : ( identifier list[identifier] ) list[identifier]   
+							alias cons(@,@):;
+
+  Epsilon : list[pair[identifier,int]]			alias nil:;
+  @  @	  : ( pair[identifier,int] list[pair[identifier,int]] ) 
+			  list[pair[identifier,int]]	alias cons(@,@):;
+
+end
+
+end

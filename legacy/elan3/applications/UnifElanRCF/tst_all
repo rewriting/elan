@@ -1,0 +1,5 @@
+#! /bin/csh -f
+#        LGI             SPC        INP        OUT
+echo "Interpreter"
+itest    Unif           simplesig   unif1      unif1
+itest    Unif           simplesig   unif2      unif2

@@ -1,0 +1,8 @@
+LPL nqueensAC description 
+
+query 		of sort list[builtinInt]
+      result 	of sort list[builtinInt]
+      import   nqueensAC builtinInt list[builtinInt]
+      start with (queens) query
+
+end

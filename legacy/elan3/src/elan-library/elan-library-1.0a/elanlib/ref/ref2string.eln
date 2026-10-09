@@ -1,0 +1,50 @@
+// This file is generated automatically: do not edit it directly. 
+  module ref2string[X]
+          import global string REF 
+                  divers2string//[X]
+                  refstring2string;
+          local   io[X]; 
+          end
+          sort X; end
+              operators global
+                refstring2term(@)     : (string) X    code -168; // in meta.c
+                term2refstring(@)     : (X) string    code -167; // in meta.c
+
+                //-------------------- this work w.r.t. ThisProgram
+                term2string(@)        : (X) string    code -169; // prettyprinter
+                //-------------------- general prettyprinter
+                term2string(@,@)      : (X Program) string;      // prettyprinter
+                term2string(@,@)      : (X string) string;       // prettyprinter
+                //-------------------- general parser
+                string2term(@':'@,@)  : (string Sort Program) X; // parser
+                string2term(@':'@,@)  : (string string string) X;// parser    
+              end   
+          rules for string
+          t       : X;
+          P       : Program;
+          fname   : string;
+          global
+            []    term2string(t,P) => refstring2string(
+                                  term2refstring(t),P)                    end
+            []    term2string(t,fname) => refstring2string(
+                                  term2refstring(t),fname)                end
+          end
+
+          rules for X
+          P               : Program;
+          sorte           : Sort;
+          fname           : string;
+          s, sorte        : string;
+          global
+            []    string2term(s:sorte,P) => 
+                          refstring2term(string2refstring(s:sorte,P))
+            end
+            []    string2term(s:sorte, fname) => 
+                          refstring2term(string2refstring(s:sorte,
+                                  fname))
+            end
+          end
+
+  end  
+   
+

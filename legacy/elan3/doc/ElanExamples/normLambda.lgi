@@ -1,0 +1,7 @@
+LPL normLambda description
+
+query		of sort  	lterm
+		result of sort 	lterm
+		import 		normLambda
+		start with 	(betaEta)query
+end

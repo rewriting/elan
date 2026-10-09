@@ -1,0 +1,41 @@
+module rewriting[Fss,Vars,rwrules]
+import 	global	rwrules
+		termCommons[Fss,Vars]
+		eqSystem[Fss,Vars]
+		applySubstOn[Fss,Vars,term]
+		substitution
+		pair[term,term]
+		list[pair[term,term]]
+	;
+	local	syntacticUnification[Fss,Vars]
+		bool	
+	;
+end
+
+stratop global
+  s_rewrite	: <term>	builtin;
+end
+
+rules for term
+	match	: eqSystem;
+	s,l,r 	: term;
+	theta 	: substitution;
+	omega   : list[int];
+        rwr   	: pair[term,term];
+local
+  [rewrite] s 	=> s[theta(r)] at omega
+     		where rwr:= (listExtract) elem(rwrules)
+     		where r := () second(rwr)
+     		where l := () first(rwr)
+     		where omega := (chooseOccurence) nvocc(s)
+     		where match := (matchs) true & l = s at omega
+		where theta := () system_to_subst(match)
+  end
+end
+
+strategies for term
+implicit
+  [.] s_rewrite => repeat*(dc(rewrite))		end
+end
+
+end

@@ -1,0 +1,4 @@
+
+elanc Timed_Automata.lgi train.spc 
+gmake --file Timed_Automata.make
+a.out <input

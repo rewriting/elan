@@ -1,0 +1,3 @@
+(nil|0|((X=jane&Y=john)&true))
+(nil|0|((X=john&Y=beer)&true))
+(nil|0|((X=jane&Y=beer)&true))

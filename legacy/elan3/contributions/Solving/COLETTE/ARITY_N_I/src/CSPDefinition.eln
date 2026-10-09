@@ -1,0 +1,491 @@
+module CSPDefinition[Variables,Type,Values]
+
+import
+global	IntegerDomain
+	ConstraintManipulation[Variables,Type]
+	Values
+	occur[var,constraint] occur[var,list[constraint]]
+	replace[term,term]
+	eq[csp]
+	tuple[5,list[constraint],list[constraint],list[constraint],list[constraint],list[constraint]]
+	tuple[3,list[constraint],list[constraint],list[var]]
+	list[csp]
+	eq[domain] 
+	;
+end
+
+sort
+
+	csp;
+
+end
+
+operators
+global	
+
+// Membership Constraints
+
+@ in? @		: (var		domain)			constraint;
+
+// Equality Constraints
+
+@ = @		: (var		term)			constraint;
+
+// CSP
+
+CSP@		: (set:tuple[list[constraint],list[constraint],list[constraint],list[constraint],list[constraint]])	csp;
+Unsatisfiable	:					csp;
+
+EvaluateFunction(@,@)		: (term list[constraint])			Type;
+CreateCSP(@)			: (constraint)			csp;
+CreateSetOfConstraints(@) 	: (list[constraint])       	tuple[list[constraint],list[constraint]];
+GetLMC(@)			: (csp)							list[constraint];
+GetLEC(@)			: (csp)							list[constraint];
+GetEC(@)			: (csp)							list[constraint];
+GetDC(@)			: (csp)							list[constraint];
+GetSTORE(@)			: (csp)							list[constraint];
+GetMaximumDomain(@,@,@)		: (list[constraint] list[constraint] int)		list[constraint];
+GetMinimumDomain(@,@,@)		: (list[constraint] list[constraint] int)		list[constraint];
+GetMaximumDegree(@,@,@,@)	: (list[constraint] list[constraint] list[constraint] int) list[constraint];
+
+MaxOfTerm(@,@,@,@)		: (term list[constraint] list[constraint] int) int;
+MinOfTerm(@,@,@,@)		: (term list[constraint] list[constraint] int) int;
+CreateEqualityConstraints(@)	: (list[constraint])			list[constraint];
+ReviseDxWRTc(@,@,@)		: (list[constraint] list[constraint] constraint)	tuple[list[constraint],list[constraint],list[var]];
+GetConstraintsOnVar(@,@,@,@)	: (list[var] list[constraint] list[constraint] list[constraint])			tuple[list[constraint],list[constraint]];
+GetDegreeOfConstraint(@,@)	: (var list[constraint])				int;
+ShiftConstraint(@,@)		: (list[constraint] constraint)			list[constraint];
+SortList(@,@)			: (list[constraint] list[constraint])			list[constraint];
+AllMembershipConstraints	:							list[constraint];
+
+local
+	CreateSetOfMembershipConstraints(@,@): (list[constraint] list[constraint])	list[constraint];
+	GetSetOfConstraints(@,@,@,@)	: (list[constraint] list[constraint] list[constraint] list[constraint])
+					  tuple[list[constraint],list[constraint],list[constraint]];
+/* Cannot be compiled
+
+	WriteCSPInHTML(@,@,@)		: (string constraint csp)				csp;
+	WriteCSPInASCII(@,@,@)		: (string constraint csp)				csp;
+
+*/
+
+end
+
+
+rules for csp
+
+	n					: int;
+	c, c1					: constraint;
+	l, l1, l2, l3, l4, l5, lmc, lec, EC, DC, store	: list[constraint];
+	s1, s2, s3, s4, s5, s6, s7, title	: string;
+	S					: csp;
+
+global 
+
+[]	CreateCSP(c)
+	=>
+	CSP[lmc,lec,EC,DC,store]
+	where	l   := ()CreateListOfCanonicalConstraints(c,nil)
+	where	lmc := ()CreateSetOfMembershipConstraints(AllMembershipConstraints,l)
+	where	lec := ()nil
+	where	(tuple[list[constraint],list[constraint]]) [EC,DC] := ()CreateSetOfConstraints(l)
+	where	store := ()nil
+end
+
+[GetSolutionCSP]
+
+	CSP[lmc,lec,EC,DC,store]
+	=>
+	CSP[l1,l2,EC,DC,store]
+	where	l1 := ()SortList(lmc,AllMembershipConstraints)
+	where	l2 := ()SortList(lec,AllMembershipConstraints)
+end
+
+/* I/O cannot be compiled
+
+[]	WriteCSPInHTML(title,c,CSP[lmc,lec,EC,DC,store])
+	=>
+	CSP[lmc,lec,EC,DC,store]
+	where	s1	:= ()write(stdout,"\n<HR>")
+	where	s2	:= ()write(stdout,"\n"+"<STRONG>Applying "+title+" on:</STRONG> ")
+	where	c1	:= ()write(stdout,c)
+	where	s3	:= ()write(stdout,"\n<BR><STRONG>LMC:</STRONG>")
+	where	l1	:= ()write(stdout,lmc)
+	where	s4	:= ()write(stdout,"\n<BR><STRONG>LEC&nbsp;:</STRONG>")
+	where	l2	:= ()write(stdout,lec)
+	where	s5	:= ()write(stdout,"\n<BR><STRONG>EC&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:</STRONG>")
+	where	l3	:= ()write(stdout,EC)
+	where	s6	:= ()write(stdout,"\n<BR><STRONG>DC&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:</STRONG>")
+	where	l4	:= ()write(stdout,DC)
+	where	s7	:= ()write(stdout,"\n<BR><STRONG>STORE&nbsp;:</STRONG>")
+	where	l5	:= ()write(stdout,store)
+//	where	n	:= ()getc(stdin)
+end
+
+[]	WriteCSPInASCII(title,c,CSP[lmc,lec,EC,DC,store])
+	=>
+	CSP[lmc,lec,EC,DC,store]
+	where	s1	:= ()write(stdout,"\n")
+	where	s2	:= ()write(stdout,"\n"+"Solution "+title+":")
+	where	c1	:= ()write(stdout,c)
+	where	s3	:= ()write(stdout,"\nLMC:")
+	where	l1	:= ()write(stdout,lmc)
+	where	s4	:= ()write(stdout,"\nLEC:")
+	where	l2	:= ()write(stdout,lec)
+	where	s5	:= ()write(stdout,"\nEC:")
+	where	l3	:= ()write(stdout,EC)
+	where	s6	:= ()write(stdout,"\nDC:")
+	where	l4	:= ()write(stdout,DC)
+	where	s7	:= ()write(stdout,"\nSTORE:")
+	where	l5	:= ()write(stdout,store)
+//	where	n	:= ()getc(stdin)
+end
+*/
+
+end
+
+
+rules for list[constraint]
+
+	x, x2			: var;
+	v			: Type;
+	n, m			: int;
+	D, D2			: domain;
+	c, c1, c2		: constraint;
+	lmc, lec, EC, DC, store	: list[constraint];
+	l, l1, l2, lf		: list[constraint];
+	L			: tuple[list[constraint],list[constraint],list[constraint]];
+
+global 
+
+[]	CreateSetOfMembershipConstraints(x in? D.lmc,l)
+	=>
+	lf
+	choose
+	try
+		if occurs x in l
+		where lf:=() x in? D.CreateSetOfMembershipConstraints(lmc,l)
+	try
+		where lf:=() CreateSetOfMembershipConstraints(lmc,l)
+	end
+end
+
+[]	CreateSetOfMembershipConstraints(nil,l)
+	=>
+	nil
+end
+
+[]	AllMembershipConstraints
+	=>
+	FOR EACH x:identifier
+	SUCH THAT x:=(listExtract)elem(Variables):
+
+	{x in? Values}
+
+	nil
+end
+
+[]	CreateEqualityConstraints(x in? D.lmc)
+	=>
+	x = MinOfDomain(D).CreateEqualityConstraints(lmc)
+end
+
+[]	CreateEqualityConstraints(nil)
+	=>
+	nil
+end
+
+[]	GetLMC(CSP[lmc,lec,EC,DC,store])
+	=>
+	lmc
+end
+
+[]	GetLEC(CSP[lmc,lec,EC,DC,store])
+	=>
+	lec
+end
+
+[]	GetEC(CSP[lmc,lec,EC,DC,store])
+	=>
+	EC
+end
+
+[]	GetDC(CSP[lmc,lec,EC,DC,store])
+	=>
+	DC
+end
+
+[]	GetSTORE(CSP[lmc,lec,EC,DC,store])
+	=>
+	store
+end
+
+[]	GetVarInHead(x,c.l1,l2)
+	=>
+	lf
+	choose
+	try
+		if not(occurs x in c)
+		where lf:=()GetVarInHead(x,l1,c.l2)
+	try
+		where lf:=()append(c.l1,l2)
+	end
+end
+
+[]	GetVarInHead(x,nil,l2)
+	=>
+	nil
+end
+
+[]	GetMaximumDomain(c1.x2 in? D2.l1,l2,n)
+	=>
+	lf
+	where	m := ()GetCard(D2)
+	choose
+	try
+		if m > n
+		where lf:=()GetMaximumDomain(x2 in? D2.l1,c1.l2,m)
+	try
+		where lf:=()GetMaximumDomain(c1.l1,x2 in? D2.l2,n)
+	end
+end
+
+[]	GetMaximumDomain(c.nil,l2,n)
+	=>
+	c.l2
+end
+
+[]	GetMinimumDomain(c1.x2 in? D2.l1,l2,n)
+	=>
+	lf
+	where	m := ()GetCard(D2)
+	choose
+	try
+		if m < n
+		where lf:=()GetMinimumDomain(x2 in? D2.l1,c1.l2,m)
+	try
+		where lf:=()GetMinimumDomain(c1.l1,x2 in? D2.l2,n)
+	end
+end
+
+[]	GetMinimumDomain(c.nil,l2,n)
+	=>
+	c.l2
+end
+
+[]	GetMaximumDegree(c1.x2 in? D2.l1,EC,l2,n)
+	=>
+	lf
+	where	m := ()GetDegreeOfConstraint(x2,EC)
+	choose
+	try
+		if m > n
+		where lf:=()GetMaximumDegree(x2 in? D2.l1,EC,c1.l2,m)
+	try
+		where lf:=()GetMaximumDegree(c1.l1,EC,x2 in? D2.l2,n)
+	end
+end
+
+[]	GetMaximumDegree(c.nil,EC,l2,n)
+	=>
+	c.l2
+end
+
+[]	ShiftConstraint(c.l,c1)
+	=>
+	c.ShiftConstraint(l,c1)
+end
+
+[]	ShiftConstraint(nil,c1)
+	=>
+	c1.nil
+end
+
+[]	SortList(l,x in? D.lmc)
+	=>
+	lf
+	choose
+	try
+		if occurs x in l
+		where	(list[constraint]) c.l1 := ()GetVarInHead(x,l,nil)
+		where   lf:=()c.SortList(l1,lmc)
+	try
+		where   lf:=()SortList(l,lmc)
+	end
+end
+
+[]	SortList(l,nil)
+	=>
+	nil
+end
+
+end
+
+
+rules for tuple[list[constraint],list[constraint]]
+
+	x		: var;
+	lv		: list[var];
+	c		: constraint;
+	l, l1, l2	: list[constraint];
+	tf		: tuple[list[constraint],list[constraint]];
+	l3		: tuple[list[constraint],list[constraint],list[constraint]];
+
+global 
+
+[]	CreateSetOfConstraints(l)
+	=>
+	[append(1-th(l3),2-th(l3)),3-th(l3)]
+	where	l3 := ()GetSetOfConstraints(l,nil,nil,nil)
+end
+
+[]	GetConstraintsOnVar(x.lv,c.l,l1,l2)
+	=>
+	tf
+	choose
+	try
+		if occurs x in c
+		where tf :=() GetConstraintsOnVar(x.lv,l,c.l1,l2)
+	try
+		where tf :=() GetConstraintsOnVar(x.lv,l,l1,c.l2)
+	end
+end
+
+[]	GetConstraintsOnVar(x.lv,nil,l1,l2)
+	=>
+	GetConstraintsOnVar(lv,l2,l1,nil)
+end
+
+[]	GetConstraintsOnVar(nil,l,l1,l2)
+	=>
+	[l1,append(l,l2)]
+end
+
+end
+
+
+rules for tuple[list[constraint],list[constraint],list[constraint]]
+
+	n		: int;
+	c, c1, c2	: constraint;
+	l, l1, l2, l3	: list[constraint];
+	tf		: tuple[list[constraint],list[constraint],list[constraint]];
+
+global
+
+[]	GetSetOfConstraints(c1 V c2.l,l1,l2,l3)
+	=>
+	GetSetOfConstraints(l,l1,l2,c1 V c2.l3)
+end
+
+[]	GetSetOfConstraints(c.l,l1,l2,l3)
+	=>
+	tf
+	where	n   := ()ArityOfConstraint(c)
+	choose
+	try
+		if n >= 2
+		where tf := () GetSetOfConstraints(l,l1,c.l2,l3)
+	try
+		if n == 1
+		where tf := () GetSetOfConstraints(l,c.l1,l2,l3)
+	try
+		if n == 0
+		choose
+		try
+			if EvaluateGroundConstraint(c)
+			where tf:=() GetSetOfConstraints(l,l1,l2,l3)
+		try
+			where tf:=() [false.nil,nil,nil]
+		end
+	end
+end
+[]	GetSetOfConstraints(nil,l1,l2,l3)
+	=>
+	[l1,l2,l3]
+end
+
+end
+
+
+rules for int
+
+	x	: var;
+	c	: constraint;
+	C	: list[constraint];
+	intf	: int;
+
+global 
+
+[]	GetDegreeOfConstraint(x,c.C)
+	=>
+	intf
+	choose
+	try
+		if not(occurs x in c)
+		where intf :=() GetDegreeOfConstraint(x,C)
+	try
+		where intf :=() 1+GetDegreeOfConstraint(x,C)
+	end
+end
+
+[]	GetDegreeOfConstraint(x,nil)
+	=>
+	0
+end
+
+end
+
+
+rules for bool
+
+	x	: var;
+	D	: domain;
+	b	: bool;
+	lmc	: list[constraint];
+
+global
+
+[]	CardinalityEqualsOne(x in? D.lmc)
+	=>
+	b
+	choose
+	try
+		if GetCard(D) > 1
+		where b:=() false
+	try
+		where b:=() CardinalityEqualsOne(lmc)
+	end
+end
+
+[]	CardinalityEqualsOne(nil)
+	=>
+	true
+end
+
+end
+
+
+rules for Type
+
+	x	: var;
+	v	: Type;
+	f	: term;
+	lec	: list[constraint];
+
+global
+
+[]	EvaluateFunction(f,x=v.lec)
+	=>
+	EvaluateFunction(replace(x,v,f),lec)
+end
+
+[]	EvaluateFunction(f,nil)
+	=>
+	EvaluateGroundTerm(f,0)
+end
+
+end
+
+
+end

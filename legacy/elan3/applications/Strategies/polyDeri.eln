@@ -1,0 +1,39 @@
+module polyDer[Vars]
+
+import global Vars identifier list[identifier] eq[variable] 
+	strat[variable] strat[polynomial];
+sort variable polynomial ;
+
+op global
+  FOR EACH Id:identifier SUCH THAT Id:=(listExtract) elem(Vars) :
+   { Id : variable; }
+//  X : variable;
+  one  : polynomial;
+  zero : polynomial;
+  @	: 	( variable )   	polynomial		;
+  @ + @ : 	( polynomial polynomial ) polynomial;
+  derive(@)	: (variable) <polynomial>;
+end
+
+rules global for polynomial
+p1, p2, p1p, p2p : polynomial; x, y : variable;
+bodies
+  [deriveVar1(x)]    x	 	=> one			end
+  [deriveVar2(x)]    y   	=> y	if x != y	end
+  [deriveOne]        one 	=> zero			end
+  [deriveZero]       zero 	=> zero			end
+  [deriveSum(x)]     p1 + p2 	=> p1p + p2p 	
+					where p1p := [derive(x)]p1
+					where p2p := [derive(x)]p2 
+					end
+end
+
+strategies for <polynomial>
+x : variable;
+bodies
+  []  derive(x) ==> dc (deriveVar1(x) , deriveVar2(x) ,
+			deriveOne ,  deriveZero , 
+			deriveSum(x) )			end
+end
+
+end

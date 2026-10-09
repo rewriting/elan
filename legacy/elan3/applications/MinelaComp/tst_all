@@ -1,0 +1,39 @@
+#! /bin/csh -f
+#        LGI             SPC        INP        OUT
+
+if ($1 =~ *I*) then
+echo "Interpreter"
+itest    rewriting       append     iappend    iappend
+itest    rewriting       congruence icong      icong
+itest    rewriting       or         ior        ior
+itest    rewriting       peano      ipeano     ipeano
+if ($1 =~ *L*) then
+itest    rewriting       primes     iprimes4   iprimes4
+itest    rewriting       sample     isample    isample
+endif
+endif
+
+if ($1 =~ *I* && $1 =~ *A*) then
+echo "Interpreter"
+aitest    rewriting       append     iappend    iappend
+aitest    rewriting       congruence icong      icong
+aitest    rewriting       or         ior        ior
+aitest    rewriting       peano      ipeano     ipeano
+if ($1 =~ *L*) then
+aitest    rewriting       primes     iprimes4   iprimes4
+aitest    rewriting       sample     isample    isample
+endif
+endif
+
+if ($1 =~ *C*) then
+echo "Compiler"
+ctest    rewriting       append     cappend    cappend
+ctest    rewriting       congruence ccong      ccong
+ctest    rewriting       or         cor        cor
+ctest    rewriting       peano      cpeano     cpeano
+if ($1 =~ *L*) then
+ctest    rewriting       primes     cprimes4   cprimes4
+ctest    rewriting       primes     cprimes8   cprimes8
+ctest    rewriting       sample     csample    csample
+endif
+endif

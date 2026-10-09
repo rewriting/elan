@@ -1,0 +1,24 @@
+module elimPred
+
+import 
+
+   global term eqSystem ;
+end
+
+
+operators
+
+   global 
+
+
+   elim(@,@) : (term term) eqSystem ;
+
+
+   (@ | @) : (eqSystem eqSystem) eqSystem ;
+
+
+end 
+
+
+end
+

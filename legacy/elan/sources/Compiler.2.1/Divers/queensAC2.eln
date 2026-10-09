@@ -1,0 +1,95 @@
+module queensAC2
+import 
+  bool int list[int];
+end
+
+sort set pair;
+end
+
+operators
+ global
+    queens	: list[int];
+  local
+    ok(@,@,@)	: ( int int list[int] ) bool;
+    @ U @       : (set set) set (AC);
+    (@)         : (int) set ;
+    empty       : set ;
+    Positions   : set ;
+    [@,@]       : (int set) pair;
+
+end
+
+stratop 
+  global
+	queens	: <list[int]>	builtin;
+  local
+	extractPos : <pair>	builtin;
+end
+
+rules for set 
+global 
+  [] Positions =>  (0) U (1) U (2) U (3) U (4) U (5) U (6) U (7) U empty end
+end
+
+rules for pair
+  S: set ;
+  x,i: int ;
+global 
+  [extractrule] [x,(i) U S] => [i,S] end
+end
+
+
+rules for list[int]
+        p1,p2,p3,p4,p5,p6,p7,p8 : int;
+        s1,s2,s3,s4,s5,s6,s7,s8 : set;
+	pp1,pp2,pp3,pp4,pp5,pp6,pp7,pp8 : list[int];
+local
+   [queensrule] queens	=> p8.pp7
+			where (pair) [p1,s1]:=(extractPos) [0,Positions]
+			where (pair) [p2,s2]:=(extractPos) [p1,s1]
+			where pp1:=() p1.nil
+			if ok(1,p2,pp1)
+			where (pair) [p3,s3]:=(extractPos) [p2,s2]
+			where pp2:=() p2.pp1
+			if ok(1,p3,pp2)
+			where (pair) [p4,s4]:=(extractPos) [p3,s3]
+			where pp3:=() p3.pp2
+			if ok(1,p4,pp3)
+			where (pair) [p5,s5]:=(extractPos) [p4,s4]
+			where pp4:=() p4.pp3
+			if ok(1,p5,pp4)
+			where (pair) [p6,s6]:=(extractPos) [p5,s5]
+			where pp5:=() p5.pp4
+			if ok(1,p6,pp5)
+			where (pair) [p7,s7]:=(extractPos) [p6,s6]
+			where 	pp6:=() p6.pp5
+			if ok(1,p7,pp6)
+			where (pair) [p8,s8]:=(extractPos) [p7,s7]
+			where pp7:=() p7.pp6
+			if ok(1,p8,pp7)
+  end
+end
+
+rules for bool
+          p,d,diff : int;
+	l : list[int];
+global
+  [] ok(diff,d,nil)	=> true				end
+  [] ok(diff,d,p.l)	=> false	if d == p  	end
+  [] ok(diff,d,p.l)	=> false        if d-p == diff  end
+  [] ok(diff,d,p.l)	=> false        if p-d == diff  end
+  [] ok(diff,d,p.l)	=> ok(diff+1,d,l)		end
+end
+
+
+strategies for pair
+implicit
+  [] extractPos => dk(extractrule) end
+end
+
+strategies for list[int]
+implicit
+  [] queens => dk(queensrule) end
+end
+
+end			

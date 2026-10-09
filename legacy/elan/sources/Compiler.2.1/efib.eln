@@ -1,0 +1,124 @@
+module efib
+
+import global bool builtinInt;
+end
+
+sort Object Space Fib Compute eInt;
+end
+
+operators global
+ @ : (builtinInt) eInt;
+ @ U @ : (Space Space) Space (AC);
+ empty : Space;
+ @  : (Object) Space;
+
+ Fib[farg=@,val=@] : (builtinInt eInt) Fib;
+ Compute[question=@,answer=@] : (builtinInt eInt) Compute;
+ @ : (Fib) Object;
+ @ : (Compute) Object;
+
+ UNDEF : eInt;
+
+ occursFib(@,@) : (Space builtinInt) bool;
+
+ go(@) : (builtinInt) eInt;
+ result(@,@) : (Space builtinInt) eInt;
+end
+
+stratop global
+  loop : <Space> bs;
+end
+
+rules for Space
+ O : Object;
+ S : Space;
+ n,n1,n2 : builtinInt;
+ v1,v2: builtinInt;
+global
+ [init1]
+    S U Fib[farg=0,val=UNDEF]
+ => S U Fib[farg=0,val=1]
+ end
+
+ [init2]
+    S U Fib[farg=1,val=UNDEF]
+ => S U Fib[farg=1,val=1]
+ end
+
+ [rec1]
+    S U Fib[farg=n,val=UNDEF]
+ => S U Fib[farg=n,val=UNDEF] U Fib[farg=n-1,val=UNDEF]
+    if n > 2
+    if not(occursFib(S,n-1))
+ end
+
+ [rec2]
+    S U Fib[farg=n,val=UNDEF]
+ => S U Fib[farg=n,val=UNDEF] U Fib[farg=n-2,val=UNDEF]
+    if n > 3
+    if not(occursFib(S,n-2))
+ end
+
+ [compute]
+    S U Fib[farg=n1,val=v1] U Fib[farg=n2,val=v2] U Fib[farg=n,val=UNDEF]
+ => S U Fib[farg=n1,val=v1] U Fib[farg=n2,val=v2] U Fib[farg=n,val=v1+v2 % 1000000]
+    if n1 == n2 + 1
+    if n == n1 + 1
+ end
+
+end
+
+rules for bool
+ S : Space;
+ n : builtinInt;
+ v : eInt;
+global
+ [] occursFib(S U Fib[farg=n,val=v],n) => true  end
+ [] occursFib(S,n)                     => false end
+end
+
+rules for eInt
+ S : Space;
+ n : builtinInt;
+ v : eInt;
+global
+ [] go(n) => result(S,n)
+    where S:=(loop) empty U Fib[farg=0,val=1]
+                          U Fib[farg=1,val=1]
+                          U Fib[farg=n,val=UNDEF]
+ end
+ 
+ [] result(S U Fib[farg=n,val=v],n) => v
+ end
+end
+
+strategies for Space
+implicit
+  [] loop => repeat*(first one(rec1,rec2, compute)) end
+end
+
+end
+
+/*
+Linux
+*****
+
+go(50)
+result =  11011074
+rewrite_step = 3721
+total time    = 0.630 sec
+average speed = 5906 rwr/sec
+
+go(100)
+result =  35084101
+rewrite_step = 14946
+total time    = 9.310 sec
+average speed = 1605 rwr/sec
+
+go(200)
+result =  83233826
+rewrite_step = 59896
+total time    = 139.570 sec
+average speed = 429 rwr/sec
+
+*/

@@ -1,0 +1,176 @@
+Java Compiler
+------------------------------------------------------------
+  Java Compilation test of bimatch : no.spc
+  Java Compilation test of bimatch : no.spc  -optimiseChoicePoint
+  Java Compilation test of bimatch : no.spc  -color
+  Java Compilation test of bimatch : no.spc  -color -optimiseChoicePoint
+------------------------------------------------------------
+  Java Compilation test of bool3 : no.spc
+  Java Compilation test of bool3 : no.spc  -optimiseChoicePoint
+  Java Compilation test of bool3 : no.spc  -color
+  Java Compilation test of bool3 : no.spc  -color -optimiseChoicePoint
+------------------------------------------------------------
+  Java Compilation test of choice1 : no.spc
+  Java Compilation test of choice1 : no.spc  -optimiseChoicePoint
+  Java Compilation test of choice1 : no.spc  -color
+  Java Compilation test of choice1 : no.spc  -color -optimiseChoicePoint
+------------------------------------------------------------
+  Java Compilation test of choice2 : no.spc
+  Java Compilation test of choice2 : no.spc  -optimiseChoicePoint
+  Java Compilation test of choice2 : no.spc  -color
+  Java Compilation test of choice2 : no.spc  -color -optimiseChoicePoint
+------------------------------------------------------------
+  Java Compilation test of condac1 : no.spc
+  Java Compilation test of condac1 : no.spc  -optimiseChoicePoint
+  Java Compilation test of condac1 : no.spc  -color
+  Java Compilation test of condac1 : no.spc  -color -optimiseChoicePoint
+------------------------------------------------------------
+  Java Compilation test of condac2 : no.spc
+  Java Compilation test of condac2 : no.spc  -optimiseChoicePoint
+  Java Compilation test of condac2 : no.spc  -color
+  Java Compilation test of condac2 : no.spc  -color -optimiseChoicePoint
+------------------------------------------------------------
+  Java Compilation test of cons1 : no.spc
+  Java Compilation test of cons1 : no.spc  -optimiseChoicePoint
+  Java Compilation test of cons1 : no.spc  -color
+  Java Compilation test of cons1 : no.spc  -color -optimiseChoicePoint
+------------------------------------------------------------
+  Java Compilation test of dcfail1 : no.spc
+  Java Compilation test of dcfail1 : no.spc  -optimiseChoicePoint
+  Java Compilation test of dcfail1 : no.spc  -color
+  Java Compilation test of dcfail1 : no.spc  -color -optimiseChoicePoint
+------------------------------------------------------------
+  Java Compilation test of dcfail2 : no.spc
+  Java Compilation test of dcfail2 : no.spc  -optimiseChoicePoint
+  Java Compilation test of dcfail2 : no.spc  -color
+  Java Compilation test of dcfail2 : no.spc  -color -optimiseChoicePoint
+------------------------------------------------------------
+  Java Compilation test of dcfail3 : no.spc
+  Java Compilation test of dcfail3 : no.spc  -optimiseChoicePoint
+  Java Compilation test of dcfail3 : no.spc  -color
+  Java Compilation test of dcfail3 : no.spc  -color -optimiseChoicePoint
+------------------------------------------------------------
+  Java Compilation test of enum : no.spc
+  Java Compilation test of enum : no.spc  -optimiseChoicePoint
+  Java Compilation test of enum : no.spc  -color
+  Java Compilation test of enum : no.spc  -color -optimiseChoicePoint
+------------------------------------------------------------
+  Java Compilation test of enum2 : no.spc
+  Java Compilation test of enum2 : no.spc  -optimiseChoicePoint
+  Java Compilation test of enum2 : no.spc  -color
+  Java Compilation test of enum2 : no.spc  -color -optimiseChoicePoint
+------------------------------------------------------------
+  Java Compilation test of ident1 : no.spc
+  Java Compilation test of ident1 : no.spc  -optimiseChoicePoint
+  Java Compilation test of ident1 : no.spc  -color
+  Java Compilation test of ident1 : no.spc  -color -optimiseChoicePoint
+------------------------------------------------------------
+  Java Compilation test of manySortedSet1 : no.spc
+  Java Compilation test of manySortedSet1 : no.spc  -optimiseChoicePoint
+  Java Compilation test of manySortedSet1 : no.spc  -color
+  Java Compilation test of manySortedSet1 : no.spc  -color -optimiseChoicePoint
+------------------------------------------------------------
+  Java Compilation test of manySortedSet2 : no.spc
+  Java Compilation test of manySortedSet2 : no.spc  -optimiseChoicePoint
+  Java Compilation test of manySortedSet2 : no.spc  -color
+  Java Compilation test of manySortedSet2 : no.spc  -color -optimiseChoicePoint
+------------------------------------------------------------
+  Java Compilation test of manySortedSet3 : no.spc
+  Java Compilation test of manySortedSet3 : no.spc  -optimiseChoicePoint
+  Java Compilation test of manySortedSet3 : no.spc  -color
+  Java Compilation test of manySortedSet3 : no.spc  -color -optimiseChoicePoint
+------------------------------------------------------------
+  Java Compilation test of match11 : no.spc
+  Java Compilation test of match11 : no.spc  -optimiseChoicePoint
+  Java Compilation test of match11 : no.spc  -color
+  Java Compilation test of match11 : no.spc  -color -optimiseChoicePoint
+------------------------------------------------------------
+  Java Compilation test of match12 : no.spc
+  Java Compilation test of match12 : no.spc  -optimiseChoicePoint
+  Java Compilation test of match12 : no.spc  -color
+  Java Compilation test of match12 : no.spc  -color -optimiseChoicePoint
+------------------------------------------------------------
+  Java Compilation test of match13 : no.spc
+  Java Compilation test of match13 : no.spc  -optimiseChoicePoint
+  Java Compilation test of match13 : no.spc  -color
+  Java Compilation test of match13 : no.spc  -color -optimiseChoicePoint
+------------------------------------------------------------
+  Java Compilation test of match14 : no.spc
+  Java Compilation test of match14 : no.spc  -optimiseChoicePoint
+  Java Compilation test of match14 : no.spc  -color
+  Java Compilation test of match14 : no.spc  -color -optimiseChoicePoint
+------------------------------------------------------------
+  Java Compilation test of match2 : no.spc
+  Java Compilation test of match2 : no.spc  -optimiseChoicePoint
+  Java Compilation test of match2 : no.spc  -color
+  Java Compilation test of match2 : no.spc  -color -optimiseChoicePoint
+------------------------------------------------------------
+  Java Compilation test of match3 : no.spc
+  Java Compilation test of match3 : no.spc  -optimiseChoicePoint
+  Java Compilation test of match3 : no.spc  -color
+  Java Compilation test of match3 : no.spc  -color -optimiseChoicePoint
+------------------------------------------------------------
+  Java Compilation test of match4 : no.spc
+  Java Compilation test of match4 : no.spc  -optimiseChoicePoint
+  Java Compilation test of match4 : no.spc  -color
+  Java Compilation test of match4 : no.spc  -color -optimiseChoicePoint
+------------------------------------------------------------
+  Java Compilation test of propc1 : no.spc
+  Java Compilation test of propc1 : no.spc  -optimiseChoicePoint
+  Java Compilation test of propc1 : no.spc  -color
+  Java Compilation test of propc1 : no.spc  -color -optimiseChoicePoint
+------------------------------------------------------------
+  Java Compilation test of propc2 : no.spc
+  Java Compilation test of propc2 : no.spc  -optimiseChoicePoint
+  Java Compilation test of propc2 : no.spc  -color
+  Java Compilation test of propc2 : no.spc  -color -optimiseChoicePoint
+------------------------------------------------------------
+  Java Compilation test of rep : no.spc
+  Java Compilation test of rep : no.spc  -optimiseChoicePoint
+  Java Compilation test of rep : no.spc  -color
+  Java Compilation test of rep : no.spc  -color -optimiseChoicePoint
+------------------------------------------------------------
+  Java Compilation test of testACNumbering : no.spc
+  Java Compilation test of testACNumbering : no.spc  -optimiseChoicePoint
+  Java Compilation test of testACNumbering : no.spc  -color
+  Java Compilation test of testACNumbering : no.spc  -color -optimiseChoicePoint
+------------------------------------------------------------
+  Java Compilation test of testSubstitution : no.spc
+  Java Compilation test of testSubstitution : no.spc  -optimiseChoicePoint
+  Java Compilation test of testSubstitution : no.spc  -color
+  Java Compilation test of testSubstitution : no.spc  -color -optimiseChoicePoint
+------------------------------------------------------------
+  Java Compilation test of wpattern : no.spc
+  Java Compilation test of wpattern : no.spc  -optimiseChoicePoint
+  Java Compilation test of wpattern : no.spc  -color
+  Java Compilation test of wpattern : no.spc  -color -optimiseChoicePoint
+------------------------------------------------------------
+  Java Compilation test of wpatternAC1 : no.spc
+  Java Compilation test of wpatternAC1 : no.spc  -optimiseChoicePoint
+  Java Compilation test of wpatternAC1 : no.spc  -color
+  Java Compilation test of wpatternAC1 : no.spc  -color -optimiseChoicePoint
+------------------------------------------------------------
+  Java Compilation test of wpatternAC2 : no.spc
+  Java Compilation test of wpatternAC2 : no.spc  -optimiseChoicePoint
+  Java Compilation test of wpatternAC2 : no.spc  -color
+  Java Compilation test of wpatternAC2 : no.spc  -color -optimiseChoicePoint
+------------------------------------------------------------
+  Java Compilation test of wpatternAC3 : no.spc
+  Java Compilation test of wpatternAC3 : no.spc  -optimiseChoicePoint
+  Java Compilation test of wpatternAC3 : no.spc  -color
+  Java Compilation test of wpatternAC3 : no.spc  -color -optimiseChoicePoint
+------------------------------------------------------------
+  Java Compilation test of wpatternAC4 : no.spc
+  Java Compilation test of wpatternAC4 : no.spc  -optimiseChoicePoint
+  Java Compilation test of wpatternAC4 : no.spc  -color
+  Java Compilation test of wpatternAC4 : no.spc  -color -optimiseChoicePoint
+------------------------------------------------------------
+  Java Compilation test of wpatternAC5 : no.spc
+  Java Compilation test of wpatternAC5 : no.spc  -optimiseChoicePoint
+  Java Compilation test of wpatternAC5 : no.spc  -color
+  Java Compilation test of wpatternAC5 : no.spc  -color -optimiseChoicePoint
+------------------------------------------------------------
+  Java Compilation test of wpatternAC6 : no.spc
+  Java Compilation test of wpatternAC6 : no.spc  -optimiseChoicePoint
+  Java Compilation test of wpatternAC6 : no.spc  -color
+  Java Compilation test of wpatternAC6 : no.spc  -color -optimiseChoicePoint

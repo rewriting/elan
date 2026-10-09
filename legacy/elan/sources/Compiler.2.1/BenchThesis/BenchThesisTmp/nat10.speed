@@ -1,0 +1,59 @@
+------------------------------------------------------------
+Nat10
+compiler
+fib(10)
+average speed = 168800 rwr/sec
+average speed = 281333 rwr/sec
+average speed = 168800 rwr/sec
+average speed = 168800 rwr/sec
+average speed = 168800 rwr/sec
+fib(11)
+average speed = 228833 rwr/sec
+average speed = 171625 rwr/sec
+average speed = 196142 rwr/sec
+average speed = 274600 rwr/sec
+average speed = 228833 rwr/sec
+fib(12)
+average speed = 186000 rwr/sec
+average speed = 318857 rwr/sec
+average speed = 279000 rwr/sec
+average speed = 186000 rwr/sec
+average speed = 139500 rwr/sec
+fib(13)
+average speed = 241266 rwr/sec
+average speed = 172333 rwr/sec
+average speed = 226187 rwr/sec
+average speed = 201055 rwr/sec
+average speed = 180950 rwr/sec
+fib(14)
+average speed = 225730 rwr/sec
+average speed = 266772 rwr/sec
+average speed = 225730 rwr/sec
+average speed = 217370 rwr/sec
+average speed = 209607 rwr/sec
+fib(15)
+average speed = 220976 rwr/sec
+average speed = 197958 rwr/sec
+average speed = 231756 rwr/sec
+average speed = 202170 rwr/sec
+average speed = 250052 rwr/sec
+fib(16)
+average speed = 226235 rwr/sec
+average speed = 226235 rwr/sec
+average speed = 199792 rwr/sec
+average speed = 236676 rwr/sec
+average speed = 240375 rwr/sec
+interpreter
+fib(10)
+ average speed	917 inf/sec
+fib(11)
+ average speed	581 inf/sec
+fib(12)
+ average speed	366 inf/sec
+fib(13)
+ average speed	222 inf/sec
+fib(14)
+ average speed	129 inf/sec
+fib(15)
+ average speed	75 inf/sec
+------------------------------------------------------------

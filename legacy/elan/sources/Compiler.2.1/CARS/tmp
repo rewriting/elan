@@ -1,0 +1,35 @@
+global rule base:set[pair[symbole,set[lm_symbole]]]/prod_rules[Vars,Ops,Faits,Rules] [1/1/fsym=415/vars=4]
+[(Aerodynamic), VAR(0).nil+U VAR(1)]U[(Body_Shape), VAR(0).nil-U VAR(2)]U VAR(3)
+=>
+[(Aerodynamic), VAR(0).nil+U VAR(1)]U[(Body_Shape), VAR(0).nil+U VAR(2)]U VAR(3)
+
+
+global rule base:set[pair[symbole,set[lm_symbole]]]/prod_rules[Vars,Ops,Faits,Rules] [2/2/fsym=415/vars=4]
+[(Color_Choices), VAR(0).nil+U VAR(1)]U[(Look), VAR(0).nil-U VAR(2)]U VAR(3)
+=>
+[(Color_Choices), VAR(0).nil+U VAR(1)]U[(Look), VAR(0).nil+U VAR(2)]U VAR(3)
+
+
+global rule base:set[pair[symbole,set[lm_symbole]]]/prod_rules[Vars,Ops,Faits,Rules] [3/3/fsym=415/vars=4]
+[(Most_Beautiful),(Cadillac). VAR(0).nil+U VAR(1)]U[(Look), VAR(0).nil-U VAR(2)]U VAR(3)
+=>
+[(Most_Beautiful),(Cadillac). VAR(0).nil+U VAR(1)]U[(Look), VAR(0).nil+U VAR(2)]U VAR(3)
+
+
+global rule base:set[pair[symbole,set[lm_symbole]]]/prod_rules[Vars,Ops,Faits,Rules] [4/4/fsym=415/vars=5]
+[(Price_Less_Than_7000), VAR(0).nil+U VAR(1)]U[(Low_Cost), VAR(0).nil-U VAR(2)]U[(Most_Beautiful),(Corvette). VAR(0).nil-U VAR(3)]U VAR(4)
+=>
+[(Price_Less_Than_7000), VAR(0).nil+U VAR(1)]U[(Low_Cost), VAR(0).nil+U VAR(2)]U[(Most_Beautiful),(Corvette). VAR(0).nil+U VAR(3)]U VAR(4)
+
+
+global rule base:set[pair[symbole,set[lm_symbole]]]/prod_rules[Vars,Ops,Faits,Rules] [5/5/fsym=415/vars=5]
+[(Spacious), VAR(0).nil+U VAR(1)]U[(Extra_Opt), VAR(0).nil+U VAR(2)]U[(Comfortable), VAR(0).nil-U VAR(3)]U VAR(4)
+=>
+[(Spacious), VAR(0).nil+U VAR(1)]U[(Extra_Opt), VAR(0).nil+U VAR(2)]U[(Comfortable), VAR(0).nil+U VAR(3)]U VAR(4)
+
+
+global rule base:set[pair[symbole,set[lm_symbole]]]/prod_rules[Vars,Ops,Faits,Rules] [6/6/fsym=415/vars=6]
+[(Look), VAR(0).nil+U VAR(1)]U[(Most_Beautiful),(Cadillac). VAR(0).nil+U VAR(2)]U[(Aerodynamic), VAR(0).nil-U VAR(3)]U[(Price_Less_Than_7000), VAR(0).nil-U VAR(4)]U VAR(5)
+=>
+[(Look), VAR(0).nil+U VAR(1)]U[(Most_Beautiful),(Cadillac). VAR(0).nil+U VAR(2)]U[(Aerodynamic), VAR(0).nil+U VAR(3)]U[(Price_Less_Than_7000), VAR(0).nil+U VAR(4)]U VAR(5)
+

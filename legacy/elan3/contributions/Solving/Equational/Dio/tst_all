@@ -1,0 +1,9 @@
+#! /bin/csh
+#        LGI         SPC        INP        OUT
+
+if ($1 =~ *I*) then
+echo "Interpreter"
+itest    forten      dioCoefs   ex1       ex1
+itest    fortenTheseAjili dioCoefs ex1    ex2
+endif
+

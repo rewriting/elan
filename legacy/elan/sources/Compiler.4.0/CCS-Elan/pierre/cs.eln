@@ -1,0 +1,21 @@
+module cs
+
+
+sort a b;
+end
+
+operators 
+global
+  A: a;
+  B: a;
+  f(@,@): (a a) b;
+  C: b;
+end
+
+rules for b
+ x,y:a;
+global
+  [] f(x,y) => C  where (a) x := () y end
+end
+
+end

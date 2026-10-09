@@ -1,0 +1,39 @@
+module re
+
+import global eq[Foo] prompt[Foo]
+		strat[Foo];
+end
+operators global
+  a	: Foo;
+  b	: Foo;
+  c	: Foo;
+  d 	: Foo;
+  doit(@)	: (Foo) Foo;
+  d(@)	: (Foo) Foo;
+  add(@):(Foo) Foo;
+  p(@,@): (Foo Foo) Foo;
+  @ + @ : (Foo Foo) Foo  (AC);
+end
+
+stratop
+  global
+   ss		: <Foo>		builtin;
+end
+
+rules for Foo
+ r,t,y, z, x, u , f, g: Foo;
+global
+  []	add(a)	=> b							end
+  []	add(b)  => c 							end
+  []	add(c)  => a							end
+local
+  [QQ]	doit(x) => x
+		where y:=()printnl(d(c)) end
+end
+
+strategies for Foo
+implicit
+  [.] ss => dk(QQ) end
+end
+
+end

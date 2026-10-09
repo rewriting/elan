@@ -1,0 +1,38 @@
+module purify
+import 	global 	term varabst ;
+ 	local  	int identifier bool
+		list[int] ;
+end
+
+
+operators
+
+  global
+    alienocc(@,@)	: ( term int) list[int] 		;
+    theory(@)   : (term) int ;
+    pure(@,@)   : ( term int) bool ;
+end
+
+
+   rules for list[int]
+   // declare 
+   t:term ; Th:int ;
+
+   global 
+
+   [topOcc] alienocc(t, Th) => nil if (not isvar(t)) and theory(t) != Th end
+   end
+
+
+   rules for bool
+   // declare 
+   x:variable ; Th: int ;
+
+   global 
+
+      [] pure(x,Th) => true end 
+
+   end
+
+end
+

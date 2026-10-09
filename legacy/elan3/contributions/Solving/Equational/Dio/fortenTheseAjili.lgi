@@ -1,0 +1,19 @@
+LPL fortenTheseAjili description
+
+  specification description
+
+    part A	of sort list[int]
+	 	import int list[int]
+    part B	of sort list[int]
+	 	import int list[int]
+  end
+
+  query 	of sort pair[list[int],list[int]]
+  result        of sort pair[list[int],list[int]]
+
+	 	import fortenTheseAjili[A,B]
+
+         	start with (contejStrat) dio 
+
+end
+

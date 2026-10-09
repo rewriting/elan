@@ -1,0 +1,49 @@
+module test
+
+import
+  local
+    bool
+    eq[bool]
+  ;
+end
+
+
+sort
+  test
+;
+end
+
+
+operators
+  global
+    test_case(@,@) : (bool bool) test;
+
+    pass : test;
+    go : test;
+    fail(@,@) : (bool bool) test;
+end
+
+
+rules for test
+    x, y : bool;
+    r : test;
+    b : bool;
+  global
+
+    [] go => test_case(true, true)
+    end
+
+    [] test_case(x,y) => r
+      where b := ()eq_bool(x,y)
+      choose
+        try
+          if b
+          where r :=()pass
+        try
+          if not b
+          where r :=()fail(x,y)
+      end
+    end
+end
+
+end

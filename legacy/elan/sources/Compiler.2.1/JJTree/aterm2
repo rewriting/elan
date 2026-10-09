@@ -1,0 +1,2 @@
+prod([sort("Exp"),lit("+"),sort("Exp")],
+      sort("Exp"),attrs([atr("left")])) ;

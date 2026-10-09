@@ -1,0 +1,28 @@
+LPL all_operations description 
+ 
+  specification description
+
+    part Vars		of sort list[identifier]
+			import sigSyntax
+    part Ops		of sort list[pair[identifier,int]]
+	 		import sigSyntax
+    part R1 	 	of sort list[rwrule]
+			import variable[Vars] ECterm[Vars] Cterm[Ops]
+			rwrule[Ops, Vars] list[rwrule]
+    part R2	 	of sort list[rwrule]
+			import variable[Vars] ECterm[Vars] Cterm[Ops]
+			rwrule[Ops, Vars] list[rwrule]	
+    part Automata 	of sort list[automaton]
+			import automaton[Ops] list[automaton]
+
+  end
+
+  query 	of sort automaton /* pair[bool, automaton] */
+         	result of sort automaton  /* pair[bool, automaton] */
+	 	import R1 R2 Automata variable[Vars] ECterm[Vars] Cterm[Ops] 
+		match[Ops, Vars]
+		termination[Ops, Vars, R1, R2] automaton[Ops]
+		rwrule[Ops, Vars] list[rwrule] nf_automaton[Ops, Vars]
+		tools[Ops] rewriting[Ops, Vars] references[Ops, Automata]
+         	start with () query
+end

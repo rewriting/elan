@@ -1,0 +1,8 @@
+LPL nsg description 
+ query of sort state
+   result of sort state
+   import nsg
+   start with 
+
+   (com) a+SLEEP+N(a,a)|| nnl  <> b+SLEEP+N(b,b) ||nnl <> ii # nl # nl #nill <> nill<>0 
+end

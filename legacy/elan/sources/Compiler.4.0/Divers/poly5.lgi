@@ -1,0 +1,13 @@
+LPL poly5 description
+
+  specification description
+    part Vars   of sort list[identifier]
+                import identifier list[identifier]
+  end
+
+  query    of sort              poly
+           result of sort       poly
+           import               poly4[Vars]
+           start with           (simplify) deriv(1 + 1*X + 2*X*X + 3*X*X*X, X)
+
+end

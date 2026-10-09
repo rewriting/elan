@@ -1,0 +1,42 @@
+// This file is generated automatically: do not edit it directly. 
+module Any
+
+import global int list[Any] any[int];
+end
+
+sort Any Functor;
+end
+
+operators global
+  functor(@)    : (Any) Functor;
+  explode(@)    : (Any) list[Any];
+  implode(@,@)  : (Functor list[Any]) Any;
+ local
+  //*** EXPLIMPL for int
+  @             : (int) Functor;
+end
+
+//*** EXPLIMPL for int
+rules for list[Any]
+ n:int; a:Any;
+global
+  []    explode((int)n) => nil          end
+end
+
+rules for Functor
+ n:int;
+global
+  []    functor((int)n) => n            end
+end
+
+rules for Any
+ n:int;
+global
+  []    implode(n,nil) => (int)n        end
+end
+//*** EXPLIMPL for int
+
+end
+  
+  
+  

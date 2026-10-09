@@ -1,0 +1,7 @@
+LPL peano description
+  query 	of sort term
+         	result of sort term
+	 	import peano
+         	start with () start
+end
+

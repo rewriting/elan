@@ -1,0 +1,10 @@
+LPL lis description
+
+query		of sort  	Any
+		result of sort 	Any
+		import 	lis_int
+//		start with 	(eval)query
+		start with 	[lis(swap)]query
+
+end
+

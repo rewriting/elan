@@ -1,0 +1,5 @@
+[s(s(s(s(s(o))))),proofnil;(r1(x->s(s(s(o)))o y->s(o)))[[(r1(x->s(s(s(o)))o y->o))[[(r2(x->s(s(s(o))))).nil]].nil]]] end
+
+ end end
+end
+

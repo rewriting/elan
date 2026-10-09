@@ -1,0 +1,27 @@
+module booleg
+
+import local bool;
+end
+sort booleg;
+end
+operators global
+  @		: (bool) booleg			pri 1000;
+
+  @ and @	: ( booleg booleg ) booleg	assocLeft pri 100;
+  @ or @	: ( booleg booleg ) booleg	assocLeft pri 100;
+  not(@)	: ( booleg ) booleg		pri 200;
+  @ == @	: ( booleg booleg ) booleg	assocLeft pri 200;
+  @ != @	: ( booleg booleg ) booleg	assocLeft pri 200;
+end
+
+rules for booleg
+ a,b,c:bool;
+local
+  []  a and b => c 	where c:=()a and b			end
+  []  a or b => c 	where c:=()a or b			end
+  []  not(a) => c 	where c:=()not(a)			end
+  []  a==b => c 	where c:=()a==b				end
+  []  a!=b => c 	where c:=()a!=b				end
+end
+
+end

@@ -1,0 +1,4 @@
+loop2(stdout,15) end
+floop("prtest.tst",15) end
+rloop("prtest.tst") end
+

@@ -1,0 +1,37 @@
+module peano
+
+sort term;
+end
+
+operators
+global
+  o : term;
+  s(@)		: (term) term;
+  plus(@,@)	: (term term) term;
+  fib(@)	: (term) term;
+  normalize(@)	: (term) term;
+  start		: term;
+end
+
+rules for term
+	x,y : term;
+global 
+  [] normalize(plus(o,x))	=> x			            end
+  [] normalize(plus(s(x),y))	=> normalize(plus(x,s(y)))	            end   
+  [] normalize(fib(o))		=> s(o)		            end
+  [] normalize(fib(s(o)))	=> s(o)			            end 
+  [] normalize(fib(s(s(x))))	=> normalize(plus(normalize(fib(x)),
+                                                 normalize(fib(s(x)))))	   
+   end
+  [] start => normalize(fib(
+	
+	s(s(s(s(s(s(s(s(s(s(
+
+		o
+		))))))))))
+		)) 
+		end
+
+end
+
+end

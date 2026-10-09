@@ -1,0 +1,28 @@
+module append[X]
+
+import global list[X] strat[X] 
+		tclist[int,list[int],rewapp[int]];
+
+op global
+  apend(@,@)	: (list[X] list[X]) list[X];
+  rew(@,@,@)  	: (X list[X] list[X]) list[X];  
+end
+
+rules for list[X]
+ x, y, z	: list[X];
+bodies
+  []	apend(x,y) => z
+		where z:=[tc_list(y,app(int,list[int],list[int]))]x	end
+end
+
+rules for list[X]
+ a	: X;
+	r, l	: list[X];
+bodies
+  [] rew(a,r,l) => append(l,a.nil)	end
+end
+
+end
+
+
+	

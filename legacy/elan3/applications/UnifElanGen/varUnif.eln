@@ -1,0 +1,35 @@
+module varUnif[Vars]
+import 	global 	term ;
+ 	local  	Vars int anyIdentifier list[identifier] varabst ;
+end
+
+operators
+
+global
+
+    FOR EACH SS:identifier SUCH THAT SS:=(listExtract) elem(Vars) :{
+      SS     : variable ;
+      SS . @ : (int) variable ;
+    }
+
+end
+
+
+    FOR EACH SS:identifier SUCH THAT SS:=(listExtract) elem(Vars) :{
+
+      rules for int 
+      // declare 
+             i,n: int ; 
+      
+      global 
+
+      [] maxv(SS,xnew.n) => n end 
+      [] maxv(SS,var(n)) => n end
+      [] maxv(SS . i,xnew.n) => n end
+      [] maxv(SS . i,var(n)) => n end
+      
+      end
+    }
+
+end
+

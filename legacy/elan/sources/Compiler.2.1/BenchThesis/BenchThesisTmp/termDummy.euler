@@ -1,0 +1,218 @@
+------------------------------------------------------------
+fib_builtin
+compiler
+fib(21)
+50 runs : moyenne = 4674285 rwr/sec
+fib(22)
+50 runs : moyenne = 4709846 rwr/sec
+fib(23)
+50 runs : moyenne = 4708937 rwr/sec
+fib(24)
+50 runs : moyenne = 4737841 rwr/sec
+fib(25)
+50 runs : moyenne = 4755925 rwr/sec
+fib(26)
+50 runs : moyenne = 4758470 rwr/sec
+fib(27)
+50 runs : moyenne = 4761196 rwr/sec
+fib(28)
+50 runs : moyenne = 4677404 rwr/sec
+------------------------------------------------------------
+nqueensAC
+compiler
+nqueens(7)
+50 runs : moyenne = 496537 rwr/sec
+nqueens(8)
+50 runs : moyenne = 581142 rwr/sec
+nqueens(9)
+50 runs : moyenne = 558924 rwr/sec
+nqueens(10)
+20 runs : moyenne = 638061 rwr/sec
+nqueens(11)
+20 runs : moyenne = 671519 rwr/sec
+------------------------------------------------------------
+Bool3
+compiler
+q3
+50 runs : moyenne = 22906 rwr/sec
+q4
+50 runs : moyenne = 21056 rwr/sec
+q5
+50 runs : moyenne = 18656 rwr/sec
+q6
+50 runs : moyenne = 15538 rwr/sec
+q8
+50 runs : moyenne = 9760 rwr/sec
+------------------------------------------------------------
+compiler
+FastCompletion
+p1
+50 runs : moyenne = 0 rwr/sec
+p2
+50 runs : moyenne = 0 rwr/sec
+p3
+50 runs : moyenne = 0 rwr/sec
+p4
+50 runs : moyenne = 0 rwr/sec
+p5
+50 runs : moyenne = 0 rwr/sec
+------------------------------------------------------------
+compiler
+MinelaComp
+primes(2)
+50 runs : moyenne = 0 rwr/sec
+primes(3)
+50 runs : moyenne = 0 rwr/sec
+primes(4)
+50 runs : moyenne = 0 rwr/sec
+primes(5)
+50 runs : moyenne = 0 rwr/sec
+primes(6)
+50 runs : moyenne = 0 rwr/sec
+primes(7)
+50 runs : moyenne = 0 rwr/sec
+primes(8)
+50 runs : moyenne = 0 rwr/sec
+------------------------------------------------------------
+Set
+compiler
+powerSet(4)
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+powerSet(5)
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+powerSet(6)
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 

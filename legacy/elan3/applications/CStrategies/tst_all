@@ -1,0 +1,32 @@
+#! /bin/csh -f
+
+if ($1 =~ *C*) then
+ctest map map map map         	--0423370M
+ctest bup bup bup bup		--0423370M
+ctest loop loop loop loop	--0423370M
+cctest apply apply apply apply	--0423370M
+if ($1 =~ *L*) then
+ctest map1 map1 map1 map1	--0423370M
+ctest map2 map2 map2 map2	--0423370M	
+ctest map3 map3 map3 map3	--0423370M
+#ctest nim nim nim nim        	--0423370M     -- problem with compiled meta
+#ctest robot robot robot robot 	--0423370M     -- problem with compiled meta
+
+#ctest depth depth depth depth	--0423370M
+#ctest lis lis lis lis		--0423370M
+#ctest lis1 lis1 lis1 lis1	--0423370M
+#ctest lis2 lis2 lis2 lis2	--0423370M
+#ctest lis3 lis3 lis3 lis3	--0423370M
+#ctest filter filter filter filter	--0423370M
+#ctest lterm lterm lterm lterm		--0423370M
+
+#ctest fopc fopc fopc fopc       --0423370M   -- (AC) symbols
+endif
+endif
+
+rm -f *.c *.o a.out
+
+
+
+
+

@@ -1,0 +1,4 @@
+
+result = .(a,nil)
+
+rewrite_step = 1

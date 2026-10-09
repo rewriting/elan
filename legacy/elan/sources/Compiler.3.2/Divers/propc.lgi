@@ -1,0 +1,12 @@
+LPL propc description
+
+  query 	of sort Prop
+         	result of sort Prop
+	 	import propc
+//         	start with () query
+//         	start with () q1
+         	start with () q2
+//         	start with () q3
+//         	start with () and(a3,a3)
+end
+

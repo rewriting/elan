@@ -1,0 +1,15 @@
+#!/bin/csh
+#  interpreter test
+#  usage:
+#    i-itest lgi_file spc_file input_file output_file my_flags
+#  !!! all files are without extensions !!!
+#
+echo "  i-test of "$1 ":" $2.spc "<-" $3.inp
+
+set d = `date`
+set tstfile = "/tmp/elan.test.$HOST.$d[4]"
+/bin/rm -f $tstfile
+set ELAN = $ELANLIB/../bin/`uname -m`/elan
+$ELAN -b $5 $1.lgi $2.spc < SAMPLES/$3.inp > $tstfile
+diff SAMPLES/$4.out  $tstfile
+/bin/rm -f $tstfile

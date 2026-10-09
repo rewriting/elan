@@ -1,0 +1,16 @@
+# usage: transform inputfile term
+
+
+grep -v '^ *prop ' $1 | grep -v "^$" - | sed 's/^ *set/,set/g' - | sed 's/^ *def/,def/g' - | sed 1s/","/"("/1 - | sed -e s/"#"/"|"/g - | sed -e 's/\\ *$//g' - >$1.tmp 
+# take all lines with no Formula in it.
+# then place a , in front of each definition
+# finally replace in the first line the , through a ( 
+# and remove linebreaks \ out of definitions 
+
+echo ";" $2 ") end" >>$1.tmp
+# next, the term is appended
+
+sed -e s/"'"/!/g $1.tmp | sed -e s/{/[/g - | sed -e s/}/]/g - >$1.in 
+rm $1.tmp
+# and finally the {} brackets are transformed to [] and the result is
+# is written to filename.in

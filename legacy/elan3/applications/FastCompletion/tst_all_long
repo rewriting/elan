@@ -1,0 +1,35 @@
+#! /bin/csh
+#        LGI             SPC        INP        OUT
+echo "Interpreter"
+itest    ans_completion  KNZ86      sat        iKNZ86
+itest    ans_completion  Zeh89      sat        iZeh89
+itest    ans_completion  curry      sat        icurry
+itest    ans_completion  exa79      sat        iexa79
+itest    ans_completion  exa80      sat        iexa80
+itest    ans_completion  exa85      sat        iexa85
+itest    ans_completion  expf       sat        iexpf
+itest    ans_completion  expoclos   sat        iexpoclos
+itest    ans_completion  furtin     sat        ifurtin
+itest    ans_completion  gdiv       sat        igdiv
+itest    ans_completion  group      sat        igroup
+itest    ans_completion  p2         sat        ip2
+itest    ans_completion  sample     sat        isample
+itest    ans_completion  taussky    sat        itaussky
+
+echo "Compiler"
+ctest    ans_completion  KNZ86      sat        cKNZ86
+ctest    ans_completion  Zeh89      sat        cZeh89
+ctest    ans_completion  curry      sat        ccurry
+ctest    ans_completion  exa79      sat        cexa79
+ctest    ans_completion  exa80      sat        cexa80
+ctest    ans_completion  exa85      sat        cexa85
+ctest    ans_completion  expf       sat        cexpf
+ctest    ans_completion  expoclos   sat        cexpoclos
+ctest    ans_completion  furtin     sat        cfurtin
+ctest    ans_completion  gdiv       sat        cgdiv
+ctest    ans_completion  group      sat        cgroup
+ctest    ans_completion  p2         sat        cp2
+ctest    ans_completion  p5         sat        cp5
+ctest    ans_completion  sample     sat        csample
+ctest    ans_completion  taussky    sat        ctaussky
+

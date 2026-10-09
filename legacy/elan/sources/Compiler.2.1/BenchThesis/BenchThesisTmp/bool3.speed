@@ -1,0 +1,33 @@
+------------------------------------------------------------
+Bool3
+compiler
+q3
+average speed = 45461 rwr/sec
+average speed = 49250 rwr/sec
+average speed = 49250 rwr/sec
+q4
+average speed = 48619 rwr/sec
+average speed = 39269 rwr/sec
+average speed = 68066 rwr/sec
+q5
+average speed = 37101 rwr/sec
+average speed = 45604 rwr/sec
+average speed = 45604 rwr/sec
+q6
+average speed = 32404 rwr/sec
+average speed = 30356 rwr/sec
+average speed = 35449 rwr/sec
+q8
+average speed = 16403 rwr/sec
+average speed = 17396 rwr/sec
+average speed = 17422 rwr/sec
+interpreter
+q2
+ average speed	804 inf/sec
+q3
+ average speed	266 inf/sec
+q4
+ average speed	93 inf/sec
+q5
+ average speed	64 inf/sec
+------------------------------------------------------------

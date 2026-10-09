@@ -1,0 +1,25 @@
+module meta[Y]
+
+import global int strat[Y];
+end
+
+operators global
+   TRY @		: (<Y>) <Y>;
+   repeat @		: (<Y>) <Y>;
+   repeat-@ @		: (int <Y>) <Y>;
+   while @		: (<Y>) <Y>;
+   dcwhile @		: (<Y>) <Y>;
+end
+
+strategies for Y
+ n : int; s : <Y>;
+defined
+  [repeat s]   case(s;repeat s,id)		end
+  [repeat-0 s]   id				end
+  [repeat-n s]   s; repeat-n-1 s		end
+  [while s]   dk(id, s;while s)		end
+  [dcwhile s]   dc(s;dcwhile s, id)		end
+  [TRY s]   case(s,id)			end
+end
+
+end

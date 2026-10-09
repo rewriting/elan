@@ -1,0 +1,17 @@
+// This file is generated automatically: do not edit it directly. 
+module identifier
+        import
+        global  ident
+                eq[identifier]
+                ;
+        end
+        sort identifier;
+        end
+        operators
+         global
+
+           @        : ( ident ) identifier pri 0;
+
+        end
+end  
+

@@ -1,0 +1,9 @@
+LPL bugAC description
+
+	query	of sort term
+	result	of sort term
+	import	bugAC
+//	start with () query
+	start with () go
+
+end

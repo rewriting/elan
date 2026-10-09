@@ -1,0 +1,316 @@
+module nf_automaton[Fss, Vars]
+import local Fss Vars 
+		symbol[Fss] eq[symbol]
+		pair[identifier, int] list[pair[identifier, int]]
+		variable[Vars] ECterm[Vars] Cterm[Fss] eq[Cterm]
+		rwrule[Fss, Vars] list[rwrule]
+		automaton[Fss] tools[Fss]
+		state state_set list[state]
+		configuration[Fss]
+		transition[Fss] list[transition] 
+		occur[transition, list[transition]] 
+		list[int] list[list[int]]
+		permut;
+end
+
+/*
+
+    Computation of the tree automaton recognising irreducible terms wrt trs R
+    -------------------------------------------------------------------------
+
+* Global:
+
+"build_nf": build the automaton recognising irreducible terms w.r.t. a list
+of rewrite rules.
+
+*/
+
+
+sort dif_list;
+end
+
+operators global
+	build_nf(@)			: (list[rwrule]) automaton;
+   local
+	build_nf_automaton(@)		: (list[rwrule]) automaton;
+	build_nf_aut(@, @, @, @)	: (list[state] state_set list[transition] state) automaton;
+			
+	empty			: dif_list;
+	@			: (Cterm) dif_list;
+	@ . @			: (dif_list dif_list) dif_list (AC);
+	dif(@,@,@)		: (state dif_list Cterm) state;
+	add(@, @)		: (Cterm dif_list) dif_list;
+	@ is_in @		: (Cterm dif_list) bool;
+	size_dif_list(@)	: (dif_list) int;
+
+	dif_list_symbol(@, @)	: (symbol dif_list) dif_list;
+	one_permutation(@, @, @, @, @): (symbol int state dif_list list[int]) 
+				transition;
+	every_permutation(@,@,@,@): (symbol int state dif_list) list[transition];
+	every_permutation(@,@,@,@,@): (symbol int state dif_list list[list[int]]) list[transition];
+	multi_dif(@, @, @)	: (dif_list list[int] int) dif_list;
+	
+	add(@, @)				: (transition list[transition]) list[transition];
+	states(@)		: (list[transition]) list[state];
+end
+
+
+stratop global 
+  build_nf_strat : <automaton> builtin;
+  trs_nf_strat : <automaton> builtin;
+end
+
+
+rules for automaton
+          res: automaton;
+	rs: list[rwrule];
+global 	
+  []  build_nf(rs) => res
+	where res:= (trs_nf_strat) build_nf_automaton(rs)
+  end
+end
+
+rules for list[transition]
+          trans: transition;
+	l: list[transition];
+global
+[] add(trans, l) => trans.l if not(occurs(trans, l))		end
+[] add(trans, l) => l	if occurs(trans, l)			end
+end
+
+
+rules for bool
+          s,t: Cterm;
+	dl: dif_list;
+global
+[]	s is_in empty => false					end
+[]	s is_in s.dl => true					end
+[]	s is_in t.dl => s is_in dl	if neq_Cterm(s,t)	end
+end
+
+
+rules for int
+          s: Cterm;
+	dl: dif_list;
+global
+[]	size_dif_list(empty) => 0	end
+[]	size_dif_list(s) => 1		end
+[]	size_dif_list(s.dl) => 1 + size_dif_list(dl) end
+end
+
+rules for dif_list
+          a_symbol: symbol;
+	a_term: Cterm;
+	l, dl, res: dif_list;
+
+global
+
+[] add(a_term, l) => a_term.l if not(a_term is_in l)	end
+[] add(a_term, l) => l if a_term is_in l 		end
+
+[] dif_list_symbol(a_symbol, empty) => empty			end
+[] dif_list_symbol(a_symbol, a_term.dl) => 
+	dif_list_symbol(a_symbol, dl)
+		if neq_symbol(head_of(a_term), a_symbol)			end
+[] dif_list_symbol(a_symbol, a_term.dl) => 
+	a_term.dif_list_symbol(a_symbol, dl)
+		if eq_symbol(head_of(a_term), a_symbol)			end
+end
+
+
+rules for list[state]
+global
+  []	states(nil) => nil
+  end
+end
+
+
+FOR EACH SS:pair[identifier,int]; F:identifier; N:int
+SUCH THAT SS:=(listExtract) elem(Fss) AND F :=()first(SS) AND N:=()second(SS):{
+rules for list[state]
+          q: state;
+	l: list[transition];
+	q_1,..., q_N: state;
+global
+  [] states(F(q_1, ..., q_N)->q . l) => {q_I .}_I=1...N states(l)
+  end
+end
+}
+
+rules for automaton
+          a_term, lhs, rhs: Cterm;
+	rs: list[rwrule];
+	res, res1, res2: automaton;
+	Q: state_set;
+	R, new_R: list[transition];
+	a_variable: variable;
+	q, qf: state;
+	new_l,l: list[state];
+	dl: dif_list;
+
+global
+[trs_nf_r1]	build_nf_automaton(lhs->rhs . nil) => simplify(res)	
+
+		where res:= (build_nf_strat) build_nf_aut(dif(q|0, empty, lhs) . nil, nil, nil, dif(q|0, empty, lhs))
+end
+
+
+[trs_nf_r2]	build_nf_automaton(lhs->rhs . rs) => simplify(res1 inter res2)
+		where res1:= (build_nf_strat) build_nf_aut(dif(q|0, empty, lhs) . nil, nil, nil, dif(q|0, empty, lhs))
+		where res2:= (trs_nf_strat) build_nf_automaton(rs)
+
+end
+
+	
+
+[build_nf_r1]	build_nf_aut(dif(q, a_variable .dl, a_term) . l, Q, R, qf) => build_nf_aut(l, Q, R, qf)	end
+
+[build_nf_r2]   build_nf_aut(q . l, Q, R, qf) => build_nf_aut(l, Q, R, qf) 
+
+			if q in Q								end
+
+
+FOR EACH SS:pair[identifier,int]; F:identifier; N:int
+SUCH THAT SS:=(listExtract) elem(Fss) AND F :=()first(SS) AND N:=()second(SS) ANDIF N==0:{
+
+rules for automaton 
+global
+  [build_nf_F]
+	build_nf_aut(dif(q, dl, a_term) . l, Q, R, qf)
+	=>
+
+	build_nf_aut(dif(q, dl, a_term) . l, Q, new_R, qf)
+
+	if (neq_Cterm(a_term, F) and not(F is_in dl))
+	where new_R:= () add( F ->dif(q ,dl, a_term), R)
+	
+  end
+end
+}
+
+FOR EACH SS:pair[identifier,int]; F:identifier; N:int
+SUCH THAT SS:=(listExtract) elem(Fss) AND F :=()first(SS) AND N:=()second(SS) ANDIF N==0:{
+
+rules for automaton 
+global
+  [build_nf_F]
+	build_nf_aut(dif(q, dl, a_term) . l, Q, R, qf)
+	=>
+
+	build_nf_aut(dif(q, dl, a_term) . l, Q, R, qf)
+
+	if (eq_Cterm(a_term, F) or F is_in dl)
+  end
+end
+}
+
+FOR EACH SS:pair[identifier,int]; F:identifier; N:int
+SUCH THAT SS:=(listExtract) elem(Fss) AND F :=()first(SS) AND N:=()second(SS) ANDIF N>0:{
+
+rules for automaton 
+          s_1, ..., s_N: Cterm;
+	res_1, ..., res_N: dif_list;
+	dl_for_symbol: dif_list;
+global
+  [build_nf_F]
+	build_nf_aut(dif(q, dl, a_term) . l, Q, R, qf)
+	=>
+
+	build_nf_aut(new_l, Q, new_R, qf)
+
+	where dl_for_symbol:= () dif_list_symbol(F, add(a_term,dl))
+	where new_R:= () append(every_permutation(F, N, dif(q, dl, a_term), dl_for_symbol), R)
+	where new_l:= () dif(q, dl, a_term) . append(states(new_R), l)
+
+  end
+end
+}
+
+[build_nf_r4]   build_nf_aut(q . l, Q, R, qf) => build_nf_aut(l, add(q,Q), R, qf) 				end
+
+
+[build_nf_r5]	build_nf_aut(nil, Q, R, qf) => (nil, Q, qf.nil, R)						end
+end
+
+
+rules for list[transition]
+          one_permut: list[int];
+	a_symbol: symbol;
+	q: state;
+	dl: dif_list;
+	permuts: list[list[int]];
+	one_permut: list[int];
+	arite: int;
+	k: int;
+global
+[]	every_permutation(a_symbol, arite, q, dl) 
+	=> 
+
+	every_permutation(a_symbol, arite, q, dl, permuts)
+
+	where k:= () size_dif_list(dl)
+	where permuts:= () p(arite, k)
+end
+
+
+[] 	every_permutation(a_symbol, arite, q, dl, nil) => nil		end
+
+
+[] 	every_permutation(a_symbol, arite, q, dl, one_permut.permuts) => 
+	
+	one_permutation(a_symbol, arite, q, dl, one_permut). 
+		every_permutation(a_symbol, arite, q, dl, permuts) 
+end
+end
+
+
+FOR EACH SS:pair[identifier,int]; F:identifier; N:int
+SUCH THAT SS:=(listExtract) elem(Fss) AND F :=()first(SS) AND N:=()second(SS) ANDIF N>0:{
+
+rules for transition
+          q: state;
+	dl1, dl2: dif_list;
+	a_term: Cterm;
+	one_permut: list[int];
+global
+  [] one_permutation(F, N, dif(q, dl1, a_term), dl2, one_permut) =>
+	
+	F({dif(q, multi_dif(dl2, one_permut, I), a_term), }_I=1...N) -> dif(q, dl1, a_term)
+  end
+end
+}
+
+
+rules for dif_list
+          i, j: int;
+	dl: dif_list;
+	one_permut: list[int];
+	s: Cterm;
+global
+[]	multi_dif(empty, nil, i) => empty		end
+[] 	multi_dif(s.dl, i.one_permut, i) => 
+		add(i-th subterm of s, multi_dif(dl, one_permut, i)) end
+[]	multi_dif(s.dl, i.one_permut, j) => multi_dif(dl, one_permut, j)
+		if i != j		end
+end
+
+
+
+strategies for automaton
+implicit
+  [.] build_nf_strat => 
+	repeat*(dc one(
+		dc one(build_nf_r1 , build_nf_r2) ,
+		FOR EACH SS:pair[identifier,int]; F:identifier
+		SUCH THAT SS:=(listExtract) elem(Fss) AND F :=()first(SS) :{
+		dc one(build_nf_F) ; }
+		dc one(build_nf_r4) ,
+		dc one(build_nf_r5)))
+  end
+
+  [.] trs_nf_strat => 
+	repeat*(dc one(trs_nf_r1 , trs_nf_r2))
+  end
+end
+
+end

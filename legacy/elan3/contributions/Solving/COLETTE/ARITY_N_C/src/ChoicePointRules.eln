@@ -1,0 +1,55 @@
+module ChoicePointRules[Variables,Type,Values]
+
+import
+global	IntegerCSP[Variables,Values]
+	;
+end
+
+rules for csp
+
+	n			: int;
+	c1, c2			: constraint;
+	lmc, lec, EC, DC, store	: list[constraint];
+	newEC, newDC		: list[constraint];
+
+global 
+
+[PostElementaryDisjunct]
+        CSP[lmc,lec,EC,c1 V c2.DC,store]
+        =>
+        CSP[lmc,lec,newEC,newDC,store]
+	where	n := ()ArityOfConstraint(c1)
+	choose
+	try
+	        if	n != 1000
+		where	newEC := ()c1.EC
+		where	newDC := ()DC
+	try
+		if	n == 1000
+		where	newEC := ()EC
+		where	newDC := ()c1.DC
+	end
+end
+
+[PostElementaryDisjunct]
+        CSP[lmc,lec,EC,c1 V c2.DC,store]
+        =>
+        CSP[lmc,lec,newEC,newDC,store]
+	where	n := ()ArityOfConstraint(c2)
+	choose
+	try
+	        if	n != 1000
+		where	newEC := ()c2.EC
+		where	newDC := ()DC
+	try
+		if	n == 1000
+		where	newEC := ()EC
+		where	newDC := ()c2.DC
+	end
+end
+
+end
+
+
+end
+

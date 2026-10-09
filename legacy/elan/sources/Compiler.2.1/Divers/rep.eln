@@ -1,0 +1,23 @@
+module rep
+
+import global replace[Foo,Foo]; end
+
+sort Foo; end
+
+operators global
+  a     : Foo;
+  b     : Foo;
+  c     : Foo;
+  f(@,@): (Foo Foo) Foo;
+  g(@)  : (Foo) Foo;
+end
+
+rules for Foo
+x, y : Foo;
+global
+  []    g(f(a,a)) => a                                     end
+  []    f(a,x) => y
+	 where y:=() replace b by a in x      end
+end
+
+end

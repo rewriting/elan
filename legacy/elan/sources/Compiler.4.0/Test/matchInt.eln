@@ -1,0 +1,37 @@
+module bug
+
+import bool int;
+end
+
+sort term ;
+end
+
+operators global
+ a      : term;
+ b      : term;
+ c      : term;
+ d      : term;
+ go	: term;
+
+ @	: (int) term;
+ nil	: term;
+// Avec ou sans AC cela ne marche pas
+ f(@,@)	: (term term) term (AC);
+ g(@,@)	: (term term) term;
+ h(@,@)	: (term term) term;
+
+end
+
+
+
+rules for term
+	x : term;
+global 
+
+[]	go =>	f(1,-4) end
+[]	f(x,-4) => x	end
+
+end
+
+
+end

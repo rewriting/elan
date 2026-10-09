@@ -1,0 +1,98 @@
+// This file is generated automatically: do not edit it directly. 
+module int
+        import global builtinInt bool; 
+        end
+        sort int; 
+        end
+            operators 
+            global
+              @             : (builtinInt) int pri 1000;
+              [@]           : (builtinInt) int pri 1000 alias @:;
+
+              @ + @         : (int int) int assocLeft       pri 500;
+              @ - @         : (int int) int assocLeft       pri 600;
+              @ * @         : (int int) int assocLeft       pri 700;
+              @ % @         : (int int) int assocLeft       pri 800;
+              @ & @         : (int int) int assocLeft       pri 800;
+              @ / @         : (int int) int assocLeft       pri 800;
+              @ | @         : (int int) int assocLeft       pri 800;
+              - @           : (int) int                     pri 900;
+
+              (@ + @)       : (int int) int       pri 500 alias @ + @:;
+              (@ - @)       : (int int) int       pri 600 alias @ - @:;
+              (@ * @)       : (int int) int       pri 700 alias @ * @:;
+              (@ / @)       : (int int) int       pri 800 alias @ / @:;
+              (@ % @)       : (int int) int       pri 800 alias @ % @:;
+              (@ & @)       : (int int) int       pri 800 alias @ & @:;
+              (@ | @)       : (int int) int       pri 800 alias @ | @:;
+              (- @)         : (int) int           pri 900 alias - @:;
+
+              plus(@,@)     : (int int) int       pri 500 alias @ + @:;
+              minus(@,@)    : (int int) int       pri 600 alias @ - @:;
+              time(@,@)     : (int int) int       pri 700 alias @ * @:;
+              div(@,@)      : (int int) int       pri 800 alias @ / @:;
+              mod(@,@)      : (int int) int       pri 800 alias @ % @:;
+              and(@,@)      : (int int) int       pri 800 alias @ & @:;
+              or(@,@)       : (int int) int       pri 800 alias @ | @:;
+              umin(@)       : (int) int           pri 900 alias - @:;
+
+              @ == @        : (int int) bool        pri 300;
+              @ != @        : (int int) bool        pri 300;
+              @ > @         : (int int) bool        pri 300;
+              @ >= @        : (int int) bool        pri 300;
+              @ <= @        : (int int) bool        pri 300;
+              @ < @         : (int int) bool        pri 300;
+
+              eq_int(@,@)           : (int int) bool      pri 300 alias @ == @:;
+              neq_int(@,@)          : (int int) bool      pri 300 alias @ != @:;
+              less_int(@,@)         : (int int) bool      pri 300 alias @ < @:;
+              lesseq_int(@,@)       : (int int) bool      pri 300 alias @ <=@:;
+              greater_int(@,@)      : (int int) bool      pri 300 alias @ > @:;
+              greatereq_int(@,@)    : (int int) bool      pri 300 alias @ >=@:;
+
+              btoi(@)       : (bool) int          pri 900;
+              btoi_int(@)   : (bool) int          pri 900 alias btoi(@):;
+              itob(@)       : (int) bool          pri 900;
+              itob_int(@)   : (int) bool          pri 900 alias itob(@):;
+              valueOf(@)    : (int) builtinInt    pri 900;   
+//            local
+//              [@]   : (builtinInt) int              pri 1000 alias @:;
+              @           : (builtinInt) int pri 1000 alias [@]:;
+            end    
+        rules for int
+         a,b,c : builtinInt;
+         d : bool;
+        global
+          [] [a]+[b]   => [c] where c:=()a+b    end
+          [] [a]-[b]   => [c] where c:=()a-b    end
+          [] [a]*[b]   => [c] where c:=()a*b    end
+          [] [a]%[b]   => [c] where c:=()a%b    end
+          [] [a]&[b]   => [c] where c:=()a&b    end
+          [] [a]|[b]   => [c] where c:=()a|b    end
+          [] [a]/[b]   => [c] where c:=()a/b    end
+          [] -[a]      => [c] where c:=()-a     end
+          [] btoi_int(d)   => [c] where c:=()btoi_builtinInt(d) end
+        end
+
+        rules for bool
+                 a,b: builtinInt;
+                 c : bool;
+        global
+
+          [] [a]==[b]  => eq_builtinInt(a,b)            end
+          [] [a]!=[b]  => neq_builtinInt(a,b)           end
+          [] [a]<=[b]  => lesseq_builtinInt(a,b)        end
+          [] [a]<[b]   => less_builtinInt(a,b)          end
+          [] [a]>=[b]  => greatereq_builtinInt(a,b)     end
+          [] [a]>[b]   => greater_builtinInt(a,b)       end
+          [] itob_int([a]) => itob_builtinInt(a)        end
+
+        end
+
+
+        rules for builtinInt
+         a : builtinInt;
+        global
+          [] valueOf([a]) => a end
+        end
+end

@@ -1,0 +1,17 @@
+// This file is generated automatically: do not edit it directly. 
+module occur[X,Y]
+        // The parameters X and Y must be non built-in
+        import bool;
+        end
+        sort X Y;
+        end
+        operators
+          global // check if the first term occurs in the second one
+            occurs @ in @       : ( X Y ) bool  code 17;
+                 // Parenthesised version
+            occurs(@,@)         : ( X Y ) bool  alias occurs @ in @ :;
+        end
+
+end  
+ 
+

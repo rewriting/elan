@@ -1,0 +1,26 @@
+module poly1
+
+import global int;
+end
+sort variable poly;
+end
+operators global
+  X		: variable;
+  @		: ( variable ) poly;
+  @		: ( int ) poly;
+  @ + @ 	: ( poly poly ) poly  assocRight pri 1;
+  @ * @		: ( poly  poly) poly  assocRight pri 2;
+  deriv(@) 	: ( poly) poly;
+end
+
+rules for poly
+p1, p2 : poly; 
+n : int;
+global
+  []  deriv(X) 	=> 1					end
+  []  deriv(n)   	=> 0				end
+  []  deriv(p1+p2)  	=> deriv(p1)+deriv(p2) 		end
+  []  deriv(p1*p2)  	=> deriv(p1)*p2 + p1*deriv(p2)	end
+end
+
+end

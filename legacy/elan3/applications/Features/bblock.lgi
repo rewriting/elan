@@ -1,0 +1,10 @@
+LPL bblock description
+
+   query of sort  	string 
+   result of sort 	int
+   import		bblock
+//   start with		()floop("bb.out",100)
+   start with		()floop("bb",100)
+
+end
+

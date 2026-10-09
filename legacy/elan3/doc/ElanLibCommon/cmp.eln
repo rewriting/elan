@@ -1,0 +1,43 @@
+//
+//		(c)	INRIA-Lorraine & CRIN
+//			615, rue du Jardin Botanique, BP 101
+//		        54602 Villers-les-Nancy
+//			France
+//			email: elan@loria.fr
+//
+//	$Source: /CVS/aircube/elan3/doc/ElanLibCommon/cmp.eln,v $
+//	$Revision: 1.1 $
+//	$Date: 1997/03/25 16:46:45 $
+//	$Author: moreau $
+//
+
+module cmp[X]
+
+	// Note that in the current implementation, X can NOT be 
+	// a built-in
+import bool;
+end
+sort X;
+end
+operators
+  global
+
+	// In Elan, one can only test equality of objects, never their
+	// identity (i.e. to be the same internal object)
+    @ == @		: ( X X ) bool		code 18;
+    @ != @		: ( X X ) bool		code 19;
+    @ <  @		: ( X X ) bool		code 30;
+    @ <= @		: ( X X ) bool		code 31;
+    @ >  @		: ( X X ) bool		code 32;
+    @ >= @		: ( X X ) bool		code 33;
+
+    eq(@,@)		: ( X X ) bool		alias @ == @:;
+    neq(@,@)		: ( X X ) bool		alias @ != @:;
+    less(@,@)		: ( X X ) bool		alias @ <  @:;
+    lesseq(@,@)		: ( X X ) bool		alias @ <= @:;
+    greater(@,@)	: ( X X ) bool		alias @ > @:;
+    greatereq(@,@)	: ( X X ) bool		alias @ >= @:;
+
+end
+
+end

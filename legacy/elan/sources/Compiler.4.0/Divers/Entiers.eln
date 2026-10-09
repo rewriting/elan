@@ -1,0 +1,45 @@
+module Entiers
+
+import
+global  builtinInt
+        ;
+end
+
+sort
+term;
+end
+
+operators
+global
+        @               : (builtinInt)         term;
+        @ + @         : (term term)  term (AC);
+        ExpandTerm(@)   : (term)        term;
+        (@)             : (term)        term;
+end
+
+rules for term
+
+        t,t1,t2 :term;
+
+global
+
+[] ExpandTerm(t1 + t2) => t1+t2	end
+end
+
+
+end
+
+
+/*
+enter query term finished by the key word 'end':
+2(+)(3)(*)-4 end
+
+[] start with term :
+    ExpandTerm(2(+)(3)(*)umin(4))
+
+[] result term:
+    2(+)3(*)"(null)"
+
+
+ExpandTerm(2 + -4)
+*/

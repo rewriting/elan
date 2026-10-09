@@ -1,0 +1,37 @@
+module cc
+
+import global int;
+/*
+import global eq[Foo]; //int;
+sort Foo;
+op global
+  a : Foo;
+  b : Foo;
+  c : Foo;
+  s(@)	: (Foo) Foo;
+endop
+
+rules for Foo
+declare x:Foo;
+bodies
+  []	a => b			end
+  []	b => c			end
+  [R]   x => s(x) if x != c		end
+end of rules
+
+strategy ss 
+  dont know choose(R)
+end of strategy
+*/
+rules for int
+declare x:int;
+bodies
+  []	x => 1			end
+//  []	1 => 2			end
+  [R]   x => x+1 if x < 2   	end
+end of rules
+strategy ss 
+  dont know choose(R)
+end of strategy
+
+end of module

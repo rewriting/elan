@@ -1,0 +1,9 @@
+LPL nhorse description 
+
+query 		of sort list
+      result 	of sort list
+      import    nhorse
+      start with (horse_strat) query
+//      start with (horse_strat) horse(60)
+
+end

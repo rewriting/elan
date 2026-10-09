@@ -1,0 +1,13 @@
+------------------------------------------------------------
+Bool3
+compiler
+q3
+20 runs : moyenne = 57355 rwr/sec
+q4
+20 runs : moyenne = 50373 rwr/sec
+q5
+20 runs : moyenne = 43133 rwr/sec
+q6
+20 runs : moyenne = 32567 rwr/sec
+q8
+20 runs : moyenne = 17184 rwr/sec

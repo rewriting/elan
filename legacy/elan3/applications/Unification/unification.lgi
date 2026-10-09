@@ -1,0 +1,19 @@
+LPL unification description
+
+  specification description
+
+    part Vars	of sort list[identifier]
+	 	import sigSyntax
+    part Ops	of sort list[pair[identifier,int]]
+	 	import sigSyntax
+  end
+
+  query 	of sort constraint
+         	result of sort constraint
+	 	import unification[Vars,Ops]
+			constraint[Ops,Vars]
+			termCommons[Ops,Vars]
+         	start with (unify) query 
+//         	start with (matchs) query 
+end
+

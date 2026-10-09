@@ -1,0 +1,21 @@
+#! /bin/csh -f
+
+if ($1 =~ *I*) then
+itest nim  non nim nim
+itest robot non robot robot
+itest tictactoe non tictactoe tictactoe
+if ($1 =~ *L*) then
+  itest Robot non Robot Robot
+  itest Nim non Nim Nim
+endif
+endif
+
+if ($1 =~ *I* && $1 =~ *A*) then
+aitest nim  non nim nim
+aitest robot non robot robot
+aitest tictactoe non tictactoe tictactoe
+if ($1 =~ *L*) then
+  aitest Robot non Robot Robot
+  aitest Nim non Nim Nim
+endif
+endif

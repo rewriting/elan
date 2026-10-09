@@ -1,0 +1,165 @@
+ 1 end
+
+ 2 end
+
+ 3 end
+
+ 4 end
+
+ 5 end
+
+ 6 end
+
+ 7 end
+
+ 4 end
+
+ 2 end
+
+ 1 end
+
+ 1 end
+
+ 3 end
+
+ 5 end
+
+ 7 end
+
+ 4 end
+
+ 2 end
+
+ 6 end
+
+ 2 end
+
+ 6 end
+
+ Node(Node(Leaf(1),2,Leaf(3)),4,Node(Leaf(5),6,Leaf(7))) end
+
+ Node(Leaf(1),2,Leaf(3)) end
+
+ Leaf(1) end
+
+ Leaf(3) end
+
+ 2 end
+
+ Node(Leaf(5),6,Leaf(7)) end
+
+ Leaf(5) end
+
+ Leaf(7) end
+
+ 6 end
+
+ 4 end
+
+ 4 end
+
+ 2 end
+
+ 2 end
+
+ 4 end
+
+ 1 end
+
+ 2 end
+
+ 3 end
+
+ 2 end
+
+ 1 end
+
+ 1 end
+
+ 3 end
+
+ 2 end
+
+ Node(Leaf(1),2,Leaf(3)) end
+
+ Leaf(1) end
+
+ Leaf(3) end
+
+ 2 end
+
+ 2 end
+
+ 2 end
+
+ 1 end
+
+ 1 end
+
+ 1 end
+
+ Leaf(1) end
+
+ 1 end
+
+ 3 end
+
+ 3 end
+
+ 3 end
+
+ Leaf(3) end
+
+ 3 end
+
+ 5 end
+
+ 6 end
+
+ 7 end
+
+ 6 end
+
+ 5 end
+
+ 5 end
+
+ 7 end
+
+ 6 end
+
+ Node(Leaf(5),6,Leaf(7)) end
+
+ Leaf(5) end
+
+ Leaf(7) end
+
+ 6 end
+
+ 6 end
+
+ 6 end
+
+ 5 end
+
+ 5 end
+
+ 5 end
+
+ Leaf(5) end
+
+ 5 end
+
+ 7 end
+
+ 7 end
+
+ 7 end
+
+ Leaf(7) end
+
+ 7 end
+
+ end end
+end
+

@@ -1,0 +1,2286 @@
+#include "/users/protheo/ringeiss/Elan/Test/lpo.h"
+extern struct term *query;
+
+/* Constantes d'execution */
+unsigned long rewrite_step=0;
+int global_indentlevel=0;
+int debugMode=0;
+int quietMode=0;
+
+/* Table des symboles */
+int fsymtabSize = 439;
+fsym fsymtab[439];
+/* Declaration des pattern_list */
+
+/* Constantes */
+struct term *con_391;
+struct term *con_390;
+struct term *con_389;
+struct term *con_382;
+struct term *con_381;
+struct term *con_380;
+struct term *con_369;
+struct term *con_368;
+struct term *con_367;
+struct term *con_312;
+struct term *con_305;
+struct term *con_298;
+struct term *con_297;
+struct term *con_290;
+struct term *con_289;
+struct term *con_282;
+struct term *con_281;
+struct term *con_274;
+struct term *con_273;
+struct term *con_266;
+struct term *con_263;
+struct term *con_256;
+struct term *con_254;
+struct term *con_247;
+struct term *con_237;
+struct term *con_230;
+struct term *con_1;
+struct term *con_0;
+struct term *con_225;
+struct term *con_218;
+struct term *con_416;
+struct term *con_415;
+struct term *con_414;
+struct term *con_403;
+struct term *con_396;
+
+/* Redirection de built-ins */
+
+/* tableau de pointeurs de fonctions qui retournent */
+/* un pointeur sur un term */
+#ifdef __cplusplus
+typedef struct term* (*funTabType)(...);
+#else
+typedef struct term* (*funTabType)();
+#endif
+
+funTabType funTab[] = {
+NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+NULL, NULL, NULL, (funTabType) &fun_201, (funTabType) &fun_202, 
+(funTabType) &fun_203, (funTabType) &fun_204, (funTabType) &fun_205, 
+(funTabType) &fun_206, (funTabType) &fun_207, (funTabType) &fun_208, 
+(funTabType) &fun_209, (funTabType) &fun_210, (funTabType) &fun_211, 
+(funTabType) &fun_212, (funTabType) &fun_213, (funTabType) &fun_214, 
+(funTabType) &fun_215, (funTabType) &fun_216, (funTabType) &fun_217, 
+NULL, NULL, (funTabType) &fun_220, NULL, (funTabType) &fun_222, 
+(funTabType) &fun_223, (funTabType) &fun_224, NULL, NULL, 
+(funTabType) &fun_227, (funTabType) &fun_228, (funTabType) &fun_229, 
+NULL, NULL, (funTabType) &fun_232, NULL, (funTabType) &fun_234, 
+(funTabType) &fun_235, (funTabType) &fun_236, NULL, 
+(funTabType) &fun_238, NULL, (funTabType) &fun_240, 
+(funTabType) &fun_241, (funTabType) &fun_242, NULL, 
+(funTabType) &fun_244, (funTabType) &fun_245, (funTabType) &fun_246, 
+NULL, NULL, (funTabType) &fun_249, NULL, (funTabType) &fun_251, 
+(funTabType) &fun_252, (funTabType) &fun_253, NULL, 
+(funTabType) &fun_255, NULL, NULL, (funTabType) &fun_258, NULL, 
+(funTabType) &fun_260, (funTabType) &fun_261, (funTabType) &fun_262, 
+NULL, (funTabType) &fun_264, (funTabType) &fun_265, NULL, NULL, 
+(funTabType) &fun_268, NULL, (funTabType) &fun_270, 
+(funTabType) &fun_271, (funTabType) &fun_272, NULL, NULL, NULL, 
+(funTabType) &fun_276, NULL, (funTabType) &fun_278, 
+(funTabType) &fun_279, (funTabType) &fun_280, NULL, NULL, NULL, 
+(funTabType) &fun_284, NULL, (funTabType) &fun_286, 
+(funTabType) &fun_287, (funTabType) &fun_288, NULL, NULL, NULL, 
+(funTabType) &fun_292, NULL, (funTabType) &fun_294, 
+(funTabType) &fun_295, (funTabType) &fun_296, NULL, NULL, NULL, NULL, 
+NULL, (funTabType) &fun_302, (funTabType) &fun_303, 
+(funTabType) &fun_304, NULL, NULL, (funTabType) &fun_307, NULL, 
+(funTabType) &fun_309, (funTabType) &fun_310, (funTabType) &fun_311, 
+NULL, (funTabType) &fun_313, (funTabType) &fun_314, 
+(funTabType) &fun_315, (funTabType) &fun_316, (funTabType) &fun_317, 
+(funTabType) &fun_318, (funTabType) &fun_319, (funTabType) &fun_320, 
+(funTabType) &fun_321, (funTabType) &fun_322, (funTabType) &fun_323, 
+(funTabType) &fun_324, (funTabType) &fun_325, (funTabType) &fun_326, 
+(funTabType) &fun_327, (funTabType) &fun_328, (funTabType) &fun_329, 
+(funTabType) &fun_330, (funTabType) &fun_331, (funTabType) &fun_332, 
+(funTabType) &fun_333, (funTabType) &fun_334, (funTabType) &fun_335, 
+(funTabType) &fun_336, (funTabType) &fun_337, (funTabType) &fun_338, 
+(funTabType) &fun_339, (funTabType) &fun_340, (funTabType) &fun_341, 
+(funTabType) &fun_342, NULL, NULL, (funTabType) &fun_345, 
+(funTabType) &fun_346, (funTabType) &fun_347, NULL, NULL, NULL, 
+(funTabType) &fun_351, (funTabType) &fun_352, (funTabType) &fun_353, 
+(funTabType) &fun_354, (funTabType) &fun_355, (funTabType) &fun_356, 
+(funTabType) &fun_357, (funTabType) &fun_358, (funTabType) &fun_359, 
+(funTabType) &fun_360, (funTabType) &fun_361, (funTabType) &fun_362, 
+(funTabType) &fun_363, (funTabType) &fun_364, (funTabType) &fun_365, 
+(funTabType) &fun_366, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+NULL, (funTabType) &fun_375, (funTabType) &fun_376, NULL, NULL, 
+(funTabType) &fun_379, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+(funTabType) &fun_387, (funTabType) &fun_388, NULL, NULL, NULL, NULL, 
+(funTabType) &fun_393, (funTabType) &fun_394, (funTabType) &fun_395, 
+NULL, NULL, (funTabType) &fun_398, NULL, (funTabType) &fun_400, 
+(funTabType) &fun_401, (funTabType) &fun_402, NULL, 
+(funTabType) &fun_404, (funTabType) &fun_405, (funTabType) &fun_406, 
+(funTabType) &fun_407, (funTabType) &fun_408, (funTabType) &fun_409, 
+(funTabType) &fun_410, (funTabType) &fun_411, (funTabType) &fun_412, 
+(funTabType) &fun_413, NULL, NULL, NULL, (funTabType) &fun_417, 
+(funTabType) &fun_418, (funTabType) &fun_419, (funTabType) &fun_420, 
+(funTabType) &fun_421, (funTabType) &fun_422, (funTabType) &fun_423, 
+(funTabType) &fun_424, (funTabType) &fun_425, (funTabType) &fun_426, 
+(funTabType) &fun_427, (funTabType) &fun_428, (funTabType) &fun_429, 
+(funTabType) &fun_430, (funTabType) &fun_431, (funTabType) &fun_432, 
+(funTabType) &fun_433, (funTabType) &fun_434, (funTabType) &fun_435, 
+(funTabType) &fun_436, (funTabType) &fun_437, (funTabType) &fun_438, NULL};
+
+/* tableau de pointeurs de fonctions qui retournent */
+/* un pointeur sur un term */
+funTabType strTab[] = {
+NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+NULL, (funTabType) &str_34, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+NULL, NULL, NULL, NULL, NULL, NULL, (funTabType) &str_70, NULL, NULL, 
+NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+(funTabType) &str_84, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+NULL, NULL, NULL, (funTabType) &str_228, NULL, NULL, NULL, NULL, 
+NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+(funTabType) &str_288, NULL, NULL, NULL, NULL, NULL, 
+(funTabType) &str_294, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+NULL, NULL, (funTabType) &str_326, NULL, NULL, NULL, NULL, NULL, 
+NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+NULL, NULL, NULL, NULL, NULL, (funTabType) &str_348, NULL, NULL, 
+NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+NULL, NULL, NULL, NULL, NULL, NULL, NULL, (funTabType) &str_380, 
+NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+NULL, NULL, NULL, NULL, NULL, NULL, (funTabType) &str_420, NULL, 
+NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+NULL, NULL, (funTabType) &str_446, NULL, NULL, NULL, NULL, NULL, 
+NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+(funTabType) &str_472, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+(funTabType) &str_480, NULL};
+
+/* Initialisation des patterns AC */
+TERM *EkerTerm[100];
+static void EkerTermInit() {
+  TERM_LIST *vlist[100];
+  AC_LIST *acvlist[100];
+  struct term *sv[100];
+}
+
+/* Query */
+static struct term *main_query() {
+  struct term *res;
+  /* TERME DE DEPART */
+  printf("No ground term is defined\n");
+  printf("Do not use -noInput in this case\n");
+  exit(0);
+  return res;
+}
+
+/* Procedure principale */
+#ifndef CSETCHP
+long *bp_main;
+#endif
+struct rusage before_self,after_self;
+long diff_sec,diff_usec;
+double total_time;
+int main(int argc,char **argv) {
+#ifdef CSETCHP
+  char bp;
+#else
+  long bp;
+#endif
+  struct term *res;
+  int i,j;
+  int queryMode=2;  /* 0:noInput  1:REFInput  2:Elan form */
+  int ResultMode=2; /* 0:noOutput 1:REFOutput 2:Elan form 3:internalOutput*/
+#ifdef CSETCHP
+  choice_init(&bp);
+#else
+  bp_main=&bp;
+#endif
+  GC_free_space_divisor=2;
+  for(i=1 ; i<argc && *argv[i]=='-' ; i++) {
+    if(!strcmp(argv[i],"-noInput")) {
+      queryMode=0;
+    }
+    if(!strcmp(argv[i],"-REFInput")) {
+      queryMode=1;
+    }
+    if(!strcmp(argv[i],"-noOutput")) {
+      ResultMode=0;
+    }
+    if(!strcmp(argv[i],"-REFOutput")) {
+      ResultMode=1;
+    }
+    if(!strcmp(argv[i],"-internalOutput")) {
+      ResultMode=3;
+    }
+    if(!strcmp(argv[i],"-debug")) {
+      debugMode=1;
+    }
+    if(!strcmp(argv[i],"-quiet")) {
+      quietMode=1;
+    }
+  }
+  init_alloc();
+  for(i=0 ; i<fsymtabSize ; i++) {
+    fsym_init(i,0,"nullString",0,0,NULL);
+  }
+  fsym_init(code_391,0,"VchooseOccurence",0,0, NULL);
+  fsym_init(code_390,0,"NLVchooseOccurence",0,0, NULL);
+  fsym_init(code_389,0,"chooseOccurence",0,0, NULL);
+  fsym_init(code_388,0,"varnum_vars",0,0, NULL);
+  fsym_init(code_387,0,"varlist_vars",0,0, NULL);
+  fsym_init(code_386,2,"-",0,0, NULL);
+  fsym_init(code_385,1,"var-",0,0, NULL);
+  fsym_init(code_384,1,"v-",0,0, NULL);
+  fsym_init(code_383,1,"x.",0,0, NULL);
+  fsym_init(code_382,0,"z",0,0, NULL);
+  fsym_init(code_381,0,"y",0,0, NULL);
+  fsym_init(code_380,0,"x",0,0, NULL);
+  fsym_init(code_379,2,"freshTerm(,)",0,0, NULL);
+  fsym_init(code_378,5,"makeTerm(,,,,)",0,0, NULL);
+  fsym_init(code_377,4,"makeTerm(,,,)",0,0, NULL);
+  fsym_init(code_376,3,"makeTerm(,,)",0,0, NULL);
+  fsym_init(code_375,2,"makeTerm(,)",0,0, NULL);
+  fsym_init(code_374,1,"Ii()",0,0, NULL);
+  fsym_init(code_373,1,"Hh()",0,0, NULL);
+  fsym_init(code_372,2,"Gg(,)",0,0, NULL);
+  fsym_init(code_371,2,"Ff(,)",0,0, NULL);
+  fsym_init(code_370,2,"(Jj)",0,0, NULL);
+  fsym_init(code_79,1,"-",0,0, NULL);
+  fsym_init(code_369,0,"n_2",0,0, NULL);
+  fsym_init(code_368,0,"n_1",0,0, NULL);
+  fsym_init(code_367,0,"n_0",0,0, NULL);
+  fsym_init(code_366,2,"Strict_at(,)",0,0, NULL);
+  fsym_init(code_365,2,"Var_at(,)",0,0, NULL);
+  fsym_init(code_364,1,"term_to_variable()",0,0, NULL);
+  fsym_init(code_363,1,"list_subterm()",0,0, NULL);
+  fsym_init(code_362,2,"getTermsVar(,)",0,0, NULL);
+  fsym_init(code_361,2,"getTermsPair(,)",0,0, NULL);
+  fsym_init(code_360,2,"getTerms(,)",0,0, NULL);
+  fsym_init(code_68,1,"",0,0, NULL);
+  fsym_init(code_67,1,"",0,0, NULL);
+  fsym_init(code_359,2,"getTermsAll(,)",0,0, NULL);
+  fsym_init(code_358,2,"get_list_variables(,)",0,0, NULL);
+  fsym_init(code_357,1,"var_lin()",0,0, NULL);
+  fsym_init(code_356,1,"variables_ofLT()",0,0, NULL);
+  fsym_init(code_355,1,"variables_of()",0,0, NULL);
+  fsym_init(code_354,2,"rename_subst(,)",0,0, NULL);
+  fsym_init(code_353,3,"([]at)",0,0, NULL);
+  fsym_init(code_352,2,"at",0,0, NULL);
+  fsym_init(code_351,1,"arity()",0,0, NULL);
+  fsym_init(code_350,2,"vocc(,)",0,0, NULL);
+  fsym_init(code_349,2,"nlvocc(,)",0,0, NULL);
+  fsym_init(code_348,1,"nvocc()",0,0, NULL);
+  fsym_init(code_347,1,"isvar()",0,0, NULL);
+  fsym_init(code_346,2,"-thsubterm()",0,0, NULL);
+  fsym_init(code_345,1,"head()",0,0, NULL);
+  fsym_init(code_344,1,"",0,0, NULL);
+  fsym_init(code_343,1,"var()",0,0, NULL);
+  fsym_init(code_342,1,"firstList()",0,0, NULL);
+  fsym_init(code_341,1,"lastElem()",0,0, NULL);
+  fsym_init(code_340,1,"reverse()",0,0, NULL);
+  fsym_init(code_339,2,"elim_one(,)",0,0, NULL);
+  fsym_init(code_338,2,"elim(,)",0,0, NULL);
+  fsym_init(code_337,2,"member(,)",0,0, NULL);
+  fsym_init(code_336,1,"singletons()",0,0, NULL);
+  fsym_init(code_335,1,"is_lin()",0,0, NULL);
+  fsym_init(code_334,1,"unicate()",0,0, NULL);
+  fsym_init(code_333,2,"restList(,)",0,0, NULL);
+  fsym_init(code_332,1,"firstList()",0,0, NULL);
+  fsym_init(code_331,1,"lastElem()",0,0, NULL);
+  fsym_init(code_330,1,"reverse()",0,0, NULL);
+  fsym_init(code_33,2,"greatereq_list[ident](,)",33,0, NULL);
+  fsym_init(code_32,2,"greater_list[ident](,)",32,0, NULL);
+  fsym_init(code_31,2,"lesseq_list[ident](,)",31,0, NULL);
+  fsym_init(code_30,2,"less_list[ident](,)",30,0, NULL);
+  fsym_init(code_329,2,"elim_one(,)",0,0, NULL);
+  fsym_init(code_328,2,"elim(,)",0,0, NULL);
+  fsym_init(code_327,2,"member(,)",0,0, NULL);
+  fsym_init(code_326,1,"singletons()",0,0, NULL);
+  fsym_init(code_325,1,"is_lin()",0,0, NULL);
+  fsym_init(code_324,1,"unicate()",0,0, NULL);
+  fsym_init(code_323,2,"restList(,)",0,0, NULL);
+  fsym_init(code_322,1,"firstList()",0,0, NULL);
+  fsym_init(code_321,1,"lastElem()",0,0, NULL);
+  fsym_init(code_320,1,"reverse()",0,0, NULL);
+  fsym_init(code_29,2,"or(,)",29,0, NULL);
+  fsym_init(code_28,2,"and(,)",28,0, NULL);
+  fsym_init(code_27,2,"mod(,)",27,0, NULL);
+  fsym_init(code_26,1,"itob_builtinInt()",26,0, NULL);
+  fsym_init(code_25,1,"btoi_builtinInt()",25,0, NULL);
+  fsym_init(code_24,1,"(not())",24,0, NULL);
+  fsym_init(code_22,2,"(or)",22,0, NULL);
+  fsym_init(code_21,2,"(and)",21,0, NULL);
+  fsym_init(code_20,1,"umin_builtinInt()",20,0, NULL);
+  fsym_init(code_319,2,"elim_one(,)",0,0, NULL);
+  fsym_init(code_318,2,"elim(,)",0,0, NULL);
+  fsym_init(code_317,2,"member(,)",0,0, NULL);
+  fsym_init(code_316,1,"singletons()",0,0, NULL);
+  fsym_init(code_315,1,"is_lin()",0,0, NULL);
+  fsym_init(code_314,1,"unicate()",0,0, NULL);
+  fsym_init(code_313,2,"restList(,)",0,0, NULL);
+  fsym_init(code_312,0,"listExtract",0,0, NULL);
+  fsym_init(code_311,2,"ccat(,)",0,0, NULL);
+  fsym_init(code_310,1,"size_of_list[int]_list()",0,0, NULL);
+  fsym_init(code_19,2,"neq_list[ident](,)",19,0, NULL);
+  fsym_init(code_18,2,"eq_list[ident](,)",18,0, NULL);
+  fsym_init(code_15,2,"neq_ident(,)",15,0, NULL);
+  fsym_init(code_14,2,"eq_ident(,)",14,0, NULL);
+  fsym_init(code_13,2,"greatereq_builtinInt(,)",13,0, NULL);
+  fsym_init(code_12,2,"greater_builtinInt(,)",12,0, NULL);
+  fsym_init(code_11,2,"lesseq_builtinInt(,)",11,0, NULL);
+  fsym_init(code_10,2,"less_builtinInt(,)",10,0, NULL);
+  fsym_init(code_309,2,"-thelem()",0,0, NULL);
+  fsym_init(code_308,1,"elem()",0,0, NULL);
+  fsym_init(code_307,2,"@",0,0, NULL);
+  fsym_init(code_306,2,".",0,0, NULL);
+  fsym_init(code_305,0,"nil",0,0, NULL);
+  fsym_init(code_304,1,"ispair()",0,0, NULL);
+  fsym_init(code_303,1,"2-th()",0,0, NULL);
+  fsym_init(code_302,1,"1-th()",0,0, NULL);
+  fsym_init(code_301,2,"[,]",0,0, NULL);
+  fsym_init(code_300,2,"o",0,0, NULL);
+  fsym_init(code_299,2,"->",0,0, NULL);
+  fsym_init(code_298,0,"identity",0,0, NULL);
+  fsym_init(code_297,0,"listExtract",0,0, NULL);
+  fsym_init(code_296,2,"ccat(,)",0,0, NULL);
+  fsym_init(code_295,1,"size_of_pair[term,term]_list()",0,0, NULL);
+  fsym_init(code_294,2,"-thelem()",0,0, NULL);
+  fsym_init(code_293,1,"elem()",0,0, NULL);
+  fsym_init(code_292,2,"@",0,0, NULL);
+  fsym_init(code_291,2,".",0,0, NULL);
+  fsym_init(code_290,0,"nil",0,0, NULL);
+  fsym_init(code_289,0,"listExtract",0,0, NULL);
+  fsym_init(code_288,2,"ccat(,)",0,0, NULL);
+  fsym_init(code_287,1,"size_of_term_list()",0,0, NULL);
+  fsym_init(code_286,2,"-thelem()",0,0, NULL);
+  fsym_init(code_285,1,"elem()",0,0, NULL);
+  fsym_init(code_284,2,"@",0,0, NULL);
+  fsym_init(code_283,2,".",0,0, NULL);
+  fsym_init(code_282,0,"nil",0,0, NULL);
+  fsym_init(code_281,0,"listExtract",0,0, NULL);
+  fsym_init(code_280,2,"ccat(,)",0,0, NULL);
+  fsym_init(code_279,1,"size_of_variable_list()",0,0, NULL);
+  fsym_init(code_278,2,"-thelem()",0,0, NULL);
+  fsym_init(code_277,1,"elem()",0,0, NULL);
+  fsym_init(code_276,2,"@",0,0, NULL);
+  fsym_init(code_275,2,".",0,0, NULL);
+  fsym_init(code_274,0,"nil",0,0, NULL);
+  fsym_init(code_273,0,"listExtract",0,0, NULL);
+  fsym_init(code_272,2,"ccat(,)",0,0, NULL);
+  fsym_init(code_271,1,"size_of_int_list()",0,0, NULL);
+  fsym_init(code_270,2,"-thelem()",0,0, NULL);
+  fsym_init(code_269,1,"elem()",0,0, NULL);
+  fsym_init(code_268,2,"@",0,0, NULL);
+  fsym_init(code_267,2,".",0,0, NULL);
+  fsym_init(code_266,0,"nil",0,0, NULL);
+  fsym_init(code_265,0,"equiv",0,0, NULL);
+  fsym_init(code_264,0,"less",0,0, NULL);
+  fsym_init(code_263,0,"listExtract",0,0, NULL);
+  fsym_init(code_262,2,"ccat(,)",0,0, NULL);
+  fsym_init(code_261,1,"size_of_list[ident]_list()",0,0, NULL);
+  fsym_init(code_260,2,"-thelem()",0,0, NULL);
+  fsym_init(code_259,1,"elem()",0,0, NULL);
+  fsym_init(code_258,2,"@",0,0, NULL);
+  fsym_init(code_257,2,"#",0,0, NULL);
+  fsym_init(code_256,0,"",0,0, NULL);
+  fsym_init(code_255,0,"ars",0,0, NULL);
+  fsym_init(code_254,0,"listExtract",0,0, NULL);
+  fsym_init(code_253,2,"ccat(,)",0,0, NULL);
+  fsym_init(code_252,1,"size_of_pair[ident,pair[int,int]]_list()",0,0, NULL);
+  fsym_init(code_251,2,"-thelem()",0,0, NULL);
+  fsym_init(code_250,1,"elem()",0,0, NULL);
+  fsym_init(code_249,2,"@",0,0, NULL);
+  fsym_init(code_248,2,"",0,0, NULL);
+  fsym_init(code_247,0,"",0,0, NULL);
+  fsym_init(code_246,1,"ispair()",0,0, NULL);
+  fsym_init(code_245,1,"2-th()",0,0, NULL);
+  fsym_init(code_244,1,"1-th()",0,0, NULL);
+  fsym_init(code_243,2,":",0,0, NULL);
+  fsym_init(code_242,1,"ispair()",0,0, NULL);
+  fsym_init(code_241,1,"2-th()",0,0, NULL);
+  fsym_init(code_240,1,"1-th()",0,0, NULL);
+  fsym_init(code_239,2,"#",0,0, NULL);
+  fsym_init(code_238,0,"vars",0,0, NULL);
+  fsym_init(code_237,0,"listExtract",0,0, NULL);
+  fsym_init(code_9,2,"neq_builtinInt(,)",9,0, NULL);
+  fsym_init(code_236,2,"ccat(,)",0,0, NULL);
+  fsym_init(code_8,2,"eq_builtinInt(,)",8,0, NULL);
+  fsym_init(code_235,1,"size_of_pair[ident,int]_list()",0,0, NULL);
+  fsym_init(code_234,2,"-thelem()",0,0, NULL);
+  fsym_init(code_233,1,"elem()",0,0, NULL);
+  fsym_init(code_6,2,"div(,)",6,0, NULL);
+  fsym_init(code_232,2,"@",0,0, NULL);
+  fsym_init(code_5,2,"time(,)",5,0, NULL);
+  fsym_init(code_231,2,"",0,0, NULL);
+  fsym_init(code_4,2,"minus(,)",4,0, NULL);
+  fsym_init(code_230,0,"",0,0, NULL);
+  fsym_init(code_3,2,"plus(,)",3,0, NULL);
+  fsym_init(code_1,0,"true",0,0, NULL);
+  fsym_init(code_0,0,"false",0,0, NULL);
+  fsym_init(code_229,1,"ispair()",0,0, NULL);
+  fsym_init(code_228,1,"2-th()",0,0, NULL);
+  fsym_init(code_227,1,"1-th()",0,0, NULL);
+  fsym_init(code_226,2,":",0,0, NULL);
+  fsym_init(code_225,0,"listExtract",0,0, NULL);
+  fsym_init(code_224,2,"ccat(,)",0,0, NULL);
+  fsym_init(code_223,1,"size_of_ident_list()",0,0, NULL);
+  fsym_init(code_222,2,"-thelem()",0,0, NULL);
+  fsym_init(code_221,1,"elem()",0,0, NULL);
+  fsym_init(code_220,2,"@",0,0, NULL);
+  fsym_init(code_438,3,"equiv_mpo(,,)",0,0, NULL);
+  fsym_init(code_437,2,"equiv_mpo(,)",0,0, NULL);
+  fsym_init(code_436,2,"mpo3(,)",0,0, NULL);
+  fsym_init(code_435,2,"mpo2(,)",0,0, NULL);
+  fsym_init(code_434,2,"mpo1(,)",0,0, NULL);
+  fsym_init(code_433,2,"mpo(,)",0,0, NULL);
+  fsym_init(code_432,2,"mpo(,)",0,0, NULL);
+  fsym_init(code_431,3,"multiset2(,,)",0,0, NULL);
+  fsym_init(code_430,3,"multiset(,,)",0,0, NULL);
+  fsym_init(code_219,2,"",0,0, NULL);
+  fsym_init(code_218,0,"",0,0, NULL);
+  fsym_init(code_217,1,"valueOf()",0,0, NULL);
+  fsym_init(code_216,1,"itob_int()",0,0, NULL);
+  fsym_init(code_215,1,"btoi_int()",0,0, NULL);
+  fsym_init(code_214,2,"less_int(,)",0,0, NULL);
+  fsym_init(code_213,2,"lesseq_int(,)",0,0, NULL);
+  fsym_init(code_212,2,"greatereq_int(,)",0,0, NULL);
+  fsym_init(code_211,2,"greater_int(,)",0,0, NULL);
+  fsym_init(code_210,2,"neq_int(,)",0,0, NULL);
+  fsym_init(code_429,2,">mult",0,0, NULL);
+  fsym_init(code_428,2,">mpo",0,0, NULL);
+  fsym_init(code_427,3,"equiv_lpo(,,)",0,0, NULL);
+  fsym_init(code_426,2,"equiv_lpo(,)",0,0, NULL);
+  fsym_init(code_425,2,"lpo3(,)",0,0, NULL);
+  fsym_init(code_424,2,"lpo2(,)",0,0, NULL);
+  fsym_init(code_423,2,"lpo1(,)",0,0, NULL);
+  fsym_init(code_422,2,"lpo(,)",0,0, NULL);
+  fsym_init(code_421,2,"lpo(,)",0,0, NULL);
+  fsym_init(code_420,2,">lex",0,0, NULL);
+  fsym_init(code_209,2,"eq_int(,)",0,0, NULL);
+  fsym_init(code_208,1,"umin()",0,0, NULL);
+  fsym_init(code_207,2,"or(,)",0,0, NULL);
+  fsym_init(code_206,2,"div(,)",0,0, NULL);
+  fsym_init(code_205,2,"and(,)",0,0, NULL);
+  fsym_init(code_204,2,"mod(,)",0,0, NULL);
+  fsym_init(code_203,2,"time(,)",0,0, NULL);
+  fsym_init(code_202,2,"minus(,)",0,0, NULL);
+  fsym_init(code_201,2,"plus(,)",0,0, NULL);
+  fsym_init(code_200,1,"[]",0,0, NULL);
+  fsym_init(code_419,2,">lpo",0,0, NULL);
+  fsym_init(code_418,2,"==sig",0,0, NULL);
+  fsym_init(code_417,2,">sig",0,0, NULL);
+  fsym_init(code_416,0,"RPO",0,0, NULL);
+  fsym_init(code_415,0,"MPO",0,0, NULL);
+  fsym_init(code_414,0,"LPO",0,0, NULL);
+  fsym_init(code_413,1,"firstList()",0,0, NULL);
+  fsym_init(code_412,1,"lastElem()",0,0, NULL);
+  fsym_init(code_411,1,"reverse()",0,0, NULL);
+  fsym_init(code_410,2,"elim_one(,)",0,0, NULL);
+  fsym_init(code_409,2,"elim(,)",0,0, NULL);
+  fsym_init(code_408,2,"member(,)",0,0, NULL);
+  fsym_init(code_407,1,"singletons()",0,0, NULL);
+  fsym_init(code_406,1,"is_lin()",0,0, NULL);
+  fsym_init(code_405,1,"unicate()",0,0, NULL);
+  fsym_init(code_404,2,"restList(,)",0,0, NULL);
+  fsym_init(code_403,0,"listExtract",0,0, NULL);
+  fsym_init(code_402,2,"ccat(,)",0,0, NULL);
+  fsym_init(code_401,1,"size_of_pair[ident,ident]_list()",0,0, NULL);
+  fsym_init(code_400,2,"-thelem()",0,0, NULL);
+  fsym_init(code_399,1,"elem()",0,0, NULL);
+  fsym_init(code_398,2,"@",0,0, NULL);
+  fsym_init(code_397,2,".",0,0, NULL);
+  fsym_init(code_396,0,"nil",0,0, NULL);
+  fsym_init(code_395,1,"ispair()",0,0, NULL);
+  fsym_init(code_394,1,"2-th()",0,0, NULL);
+  fsym_init(code_393,1,"1-th()",0,0, NULL);
+  fsym_init(code_392,2,"[,]",0,0, NULL);
+  
+/* Initialisation des constantes */
+  TERM_CONST_ALLOC(con_391, code_391);
+  TERM_CONST_ALLOC(con_390, code_390);
+  TERM_CONST_ALLOC(con_389, code_389);
+  TERM_CONST_ALLOC(con_382, code_382);
+  TERM_CONST_ALLOC(con_381, code_381);
+  TERM_CONST_ALLOC(con_380, code_380);
+  TERM_CONST_ALLOC(con_369, code_369);
+  TERM_CONST_ALLOC(con_368, code_368);
+  TERM_CONST_ALLOC(con_367, code_367);
+  TERM_CONST_ALLOC(con_312, code_312);
+  TERM_CONST_ALLOC(con_305, code_305);
+  TERM_CONST_ALLOC(con_298, code_298);
+  TERM_CONST_ALLOC(con_297, code_297);
+  TERM_CONST_ALLOC(con_290, code_290);
+  TERM_CONST_ALLOC(con_289, code_289);
+  TERM_CONST_ALLOC(con_282, code_282);
+  TERM_CONST_ALLOC(con_281, code_281);
+  TERM_CONST_ALLOC(con_274, code_274);
+  TERM_CONST_ALLOC(con_273, code_273);
+  TERM_CONST_ALLOC(con_266, code_266);
+  TERM_CONST_ALLOC(con_263, code_263);
+  TERM_CONST_ALLOC(con_256, code_256);
+  TERM_CONST_ALLOC(con_254, code_254);
+  TERM_CONST_ALLOC(con_247, code_247);
+  TERM_CONST_ALLOC(con_237, code_237);
+  TERM_CONST_ALLOC(con_230, code_230);
+  TERM_CONST_ALLOC(con_1, code_1);
+  TERM_CONST_ALLOC(con_0, code_0);
+  TERM_CONST_ALLOC(con_225, code_225);
+  TERM_CONST_ALLOC(con_218, code_218);
+  TERM_CONST_ALLOC(con_416, code_416);
+  TERM_CONST_ALLOC(con_415, code_415);
+  TERM_CONST_ALLOC(con_414, code_414);
+  TERM_CONST_ALLOC(con_403, code_403);
+  TERM_CONST_ALLOC(con_396, code_396);
+  /* Initialisation des pattern_list */
+  if(queryMode==1) {
+    yyparse();
+  }
+  EkerTermInit();
+  initTabRef();
+
+  getrusage(RUSAGE_SELF, &before_self);
+  backTrackInit();
+  if (!setChoicePoint()) {
+    /* Input */
+    switch(queryMode) {
+      case 0:
+        res=main_query();
+        break;
+      case 1:
+        res = normalise(query);
+        break;
+      case 2: {
+      char s1[100], s2[100], *sort, *strat;
+      prefixParser(s1,s2);
+      sort=(strlen(s2)==0)?s1:s2;
+      strat=(strlen(s2)!=0)?s1:s2;
+      res = normalise(EarleyParser(sort));
+      if(strlen(strat) > 0) {
+        int i,strIndex;
+        strcat(strat,":");
+        strcat(strat,sort);
+        for(i=0, strIndex=0 ; strIndex==0 && i<tabStrategySize ; i++) {
+          if(!strncmp(strat,tabStrategyStr[i],strlen(strat))) {
+            strIndex = tabStrategyIndex[i];
+          }
+        }
+        if(strIndex==0) {
+          printf("Strategy '%s' not found\n",strat);
+          exit(1);
+        }
+        res = strTab[strIndex](res);
+      } else if (strlen(sort)==0 && earleyQueryStrategy!=0) {
+        res = strTab[earleyQueryStrategy](res);
+      }
+      break; }
+    }
+    /* Output */
+    switch(ResultMode) {
+      case 0:
+        break;
+      case 1:
+        term_printREFln(stdout,res);
+        break;
+      case 2:
+        printf("\nresult = ");
+        termOut(stdout,term_unflatten(res));
+        printf("\n");
+        break;
+      case 3:
+        printf("\nresult = ");
+        term_printnl(stdout,res);
+        break;
+    }
+    if(ResultMode!=1) {
+      backStatistics();
+      globalStatistics();
+    }
+    fail();
+  }
+end:
+  getrusage(RUSAGE_SELF, &after_self);
+destruction:
+  FREE(fsymtab[code_391].name);
+  FREE(fsymtab[code_390].name);
+  FREE(fsymtab[code_389].name);
+  FREE(fsymtab[code_388].name);
+  FREE(fsymtab[code_387].name);
+  FREE(fsymtab[code_386].name);
+  FREE(fsymtab[code_385].name);
+  FREE(fsymtab[code_384].name);
+  FREE(fsymtab[code_383].name);
+  FREE(fsymtab[code_382].name);
+  FREE(fsymtab[code_381].name);
+  FREE(fsymtab[code_380].name);
+  FREE(fsymtab[code_379].name);
+  FREE(fsymtab[code_378].name);
+  FREE(fsymtab[code_377].name);
+  FREE(fsymtab[code_376].name);
+  FREE(fsymtab[code_375].name);
+  FREE(fsymtab[code_374].name);
+  FREE(fsymtab[code_373].name);
+  FREE(fsymtab[code_372].name);
+  FREE(fsymtab[code_371].name);
+  FREE(fsymtab[code_370].name);
+  FREE(fsymtab[code_79].name);
+  FREE(fsymtab[code_369].name);
+  FREE(fsymtab[code_368].name);
+  FREE(fsymtab[code_367].name);
+  FREE(fsymtab[code_366].name);
+  FREE(fsymtab[code_365].name);
+  FREE(fsymtab[code_364].name);
+  FREE(fsymtab[code_363].name);
+  FREE(fsymtab[code_362].name);
+  FREE(fsymtab[code_361].name);
+  FREE(fsymtab[code_360].name);
+  FREE(fsymtab[code_68].name);
+  FREE(fsymtab[code_67].name);
+  FREE(fsymtab[code_359].name);
+  FREE(fsymtab[code_358].name);
+  FREE(fsymtab[code_357].name);
+  FREE(fsymtab[code_356].name);
+  FREE(fsymtab[code_355].name);
+  FREE(fsymtab[code_354].name);
+  FREE(fsymtab[code_353].name);
+  FREE(fsymtab[code_352].name);
+  FREE(fsymtab[code_351].name);
+  FREE(fsymtab[code_350].name);
+  FREE(fsymtab[code_349].name);
+  FREE(fsymtab[code_348].name);
+  FREE(fsymtab[code_347].name);
+  FREE(fsymtab[code_346].name);
+  FREE(fsymtab[code_345].name);
+  FREE(fsymtab[code_344].name);
+  FREE(fsymtab[code_343].name);
+  FREE(fsymtab[code_342].name);
+  FREE(fsymtab[code_341].name);
+  FREE(fsymtab[code_340].name);
+  FREE(fsymtab[code_339].name);
+  FREE(fsymtab[code_338].name);
+  FREE(fsymtab[code_337].name);
+  FREE(fsymtab[code_336].name);
+  FREE(fsymtab[code_335].name);
+  FREE(fsymtab[code_334].name);
+  FREE(fsymtab[code_333].name);
+  FREE(fsymtab[code_332].name);
+  FREE(fsymtab[code_331].name);
+  FREE(fsymtab[code_330].name);
+  FREE(fsymtab[code_33].name);
+  FREE(fsymtab[code_32].name);
+  FREE(fsymtab[code_31].name);
+  FREE(fsymtab[code_30].name);
+  FREE(fsymtab[code_329].name);
+  FREE(fsymtab[code_328].name);
+  FREE(fsymtab[code_327].name);
+  FREE(fsymtab[code_326].name);
+  FREE(fsymtab[code_325].name);
+  FREE(fsymtab[code_324].name);
+  FREE(fsymtab[code_323].name);
+  FREE(fsymtab[code_322].name);
+  FREE(fsymtab[code_321].name);
+  FREE(fsymtab[code_320].name);
+  FREE(fsymtab[code_29].name);
+  FREE(fsymtab[code_28].name);
+  FREE(fsymtab[code_27].name);
+  FREE(fsymtab[code_26].name);
+  FREE(fsymtab[code_25].name);
+  FREE(fsymtab[code_24].name);
+  FREE(fsymtab[code_22].name);
+  FREE(fsymtab[code_21].name);
+  FREE(fsymtab[code_20].name);
+  FREE(fsymtab[code_319].name);
+  FREE(fsymtab[code_318].name);
+  FREE(fsymtab[code_317].name);
+  FREE(fsymtab[code_316].name);
+  FREE(fsymtab[code_315].name);
+  FREE(fsymtab[code_314].name);
+  FREE(fsymtab[code_313].name);
+  FREE(fsymtab[code_312].name);
+  FREE(fsymtab[code_311].name);
+  FREE(fsymtab[code_310].name);
+  FREE(fsymtab[code_19].name);
+  FREE(fsymtab[code_18].name);
+  FREE(fsymtab[code_15].name);
+  FREE(fsymtab[code_14].name);
+  FREE(fsymtab[code_13].name);
+  FREE(fsymtab[code_12].name);
+  FREE(fsymtab[code_11].name);
+  FREE(fsymtab[code_10].name);
+  FREE(fsymtab[code_309].name);
+  FREE(fsymtab[code_308].name);
+  FREE(fsymtab[code_307].name);
+  FREE(fsymtab[code_306].name);
+  FREE(fsymtab[code_305].name);
+  FREE(fsymtab[code_304].name);
+  FREE(fsymtab[code_303].name);
+  FREE(fsymtab[code_302].name);
+  FREE(fsymtab[code_301].name);
+  FREE(fsymtab[code_300].name);
+  FREE(fsymtab[code_299].name);
+  FREE(fsymtab[code_298].name);
+  FREE(fsymtab[code_297].name);
+  FREE(fsymtab[code_296].name);
+  FREE(fsymtab[code_295].name);
+  FREE(fsymtab[code_294].name);
+  FREE(fsymtab[code_293].name);
+  FREE(fsymtab[code_292].name);
+  FREE(fsymtab[code_291].name);
+  FREE(fsymtab[code_290].name);
+  FREE(fsymtab[code_289].name);
+  FREE(fsymtab[code_288].name);
+  FREE(fsymtab[code_287].name);
+  FREE(fsymtab[code_286].name);
+  FREE(fsymtab[code_285].name);
+  FREE(fsymtab[code_284].name);
+  FREE(fsymtab[code_283].name);
+  FREE(fsymtab[code_282].name);
+  FREE(fsymtab[code_281].name);
+  FREE(fsymtab[code_280].name);
+  FREE(fsymtab[code_279].name);
+  FREE(fsymtab[code_278].name);
+  FREE(fsymtab[code_277].name);
+  FREE(fsymtab[code_276].name);
+  FREE(fsymtab[code_275].name);
+  FREE(fsymtab[code_274].name);
+  FREE(fsymtab[code_273].name);
+  FREE(fsymtab[code_272].name);
+  FREE(fsymtab[code_271].name);
+  FREE(fsymtab[code_270].name);
+  FREE(fsymtab[code_269].name);
+  FREE(fsymtab[code_268].name);
+  FREE(fsymtab[code_267].name);
+  FREE(fsymtab[code_266].name);
+  FREE(fsymtab[code_265].name);
+  FREE(fsymtab[code_264].name);
+  FREE(fsymtab[code_263].name);
+  FREE(fsymtab[code_262].name);
+  FREE(fsymtab[code_261].name);
+  FREE(fsymtab[code_260].name);
+  FREE(fsymtab[code_259].name);
+  FREE(fsymtab[code_258].name);
+  FREE(fsymtab[code_257].name);
+  FREE(fsymtab[code_256].name);
+  FREE(fsymtab[code_255].name);
+  FREE(fsymtab[code_254].name);
+  FREE(fsymtab[code_253].name);
+  FREE(fsymtab[code_252].name);
+  FREE(fsymtab[code_251].name);
+  FREE(fsymtab[code_250].name);
+  FREE(fsymtab[code_249].name);
+  FREE(fsymtab[code_248].name);
+  FREE(fsymtab[code_247].name);
+  FREE(fsymtab[code_246].name);
+  FREE(fsymtab[code_245].name);
+  FREE(fsymtab[code_244].name);
+  FREE(fsymtab[code_243].name);
+  FREE(fsymtab[code_242].name);
+  FREE(fsymtab[code_241].name);
+  FREE(fsymtab[code_240].name);
+  FREE(fsymtab[code_239].name);
+  FREE(fsymtab[code_238].name);
+  FREE(fsymtab[code_237].name);
+  FREE(fsymtab[code_9].name);
+  FREE(fsymtab[code_236].name);
+  FREE(fsymtab[code_8].name);
+  FREE(fsymtab[code_235].name);
+  FREE(fsymtab[code_234].name);
+  FREE(fsymtab[code_233].name);
+  FREE(fsymtab[code_6].name);
+  FREE(fsymtab[code_232].name);
+  FREE(fsymtab[code_5].name);
+  FREE(fsymtab[code_231].name);
+  FREE(fsymtab[code_4].name);
+  FREE(fsymtab[code_230].name);
+  FREE(fsymtab[code_3].name);
+  FREE(fsymtab[code_1].name);
+  FREE(fsymtab[code_0].name);
+  FREE(fsymtab[code_229].name);
+  FREE(fsymtab[code_228].name);
+  FREE(fsymtab[code_227].name);
+  FREE(fsymtab[code_226].name);
+  FREE(fsymtab[code_225].name);
+  FREE(fsymtab[code_224].name);
+  FREE(fsymtab[code_223].name);
+  FREE(fsymtab[code_222].name);
+  FREE(fsymtab[code_221].name);
+  FREE(fsymtab[code_220].name);
+  FREE(fsymtab[code_438].name);
+  FREE(fsymtab[code_437].name);
+  FREE(fsymtab[code_436].name);
+  FREE(fsymtab[code_435].name);
+  FREE(fsymtab[code_434].name);
+  FREE(fsymtab[code_433].name);
+  FREE(fsymtab[code_432].name);
+  FREE(fsymtab[code_431].name);
+  FREE(fsymtab[code_430].name);
+  FREE(fsymtab[code_219].name);
+  FREE(fsymtab[code_218].name);
+  FREE(fsymtab[code_217].name);
+  FREE(fsymtab[code_216].name);
+  FREE(fsymtab[code_215].name);
+  FREE(fsymtab[code_214].name);
+  FREE(fsymtab[code_213].name);
+  FREE(fsymtab[code_212].name);
+  FREE(fsymtab[code_211].name);
+  FREE(fsymtab[code_210].name);
+  FREE(fsymtab[code_429].name);
+  FREE(fsymtab[code_428].name);
+  FREE(fsymtab[code_427].name);
+  FREE(fsymtab[code_426].name);
+  FREE(fsymtab[code_425].name);
+  FREE(fsymtab[code_424].name);
+  FREE(fsymtab[code_423].name);
+  FREE(fsymtab[code_422].name);
+  FREE(fsymtab[code_421].name);
+  FREE(fsymtab[code_420].name);
+  FREE(fsymtab[code_209].name);
+  FREE(fsymtab[code_208].name);
+  FREE(fsymtab[code_207].name);
+  FREE(fsymtab[code_206].name);
+  FREE(fsymtab[code_205].name);
+  FREE(fsymtab[code_204].name);
+  FREE(fsymtab[code_203].name);
+  FREE(fsymtab[code_202].name);
+  FREE(fsymtab[code_201].name);
+  FREE(fsymtab[code_200].name);
+  FREE(fsymtab[code_419].name);
+  FREE(fsymtab[code_418].name);
+  FREE(fsymtab[code_417].name);
+  FREE(fsymtab[code_416].name);
+  FREE(fsymtab[code_415].name);
+  FREE(fsymtab[code_414].name);
+  FREE(fsymtab[code_413].name);
+  FREE(fsymtab[code_412].name);
+  FREE(fsymtab[code_411].name);
+  FREE(fsymtab[code_410].name);
+  FREE(fsymtab[code_409].name);
+  FREE(fsymtab[code_408].name);
+  FREE(fsymtab[code_407].name);
+  FREE(fsymtab[code_406].name);
+  FREE(fsymtab[code_405].name);
+  FREE(fsymtab[code_404].name);
+  FREE(fsymtab[code_403].name);
+  FREE(fsymtab[code_402].name);
+  FREE(fsymtab[code_401].name);
+  FREE(fsymtab[code_400].name);
+  FREE(fsymtab[code_399].name);
+  FREE(fsymtab[code_398].name);
+  FREE(fsymtab[code_397].name);
+  FREE(fsymtab[code_396].name);
+  FREE(fsymtab[code_395].name);
+  FREE(fsymtab[code_394].name);
+  FREE(fsymtab[code_393].name);
+  FREE(fsymtab[code_392].name);
+  TERM_FREE(con_391);
+  TERM_FREE(con_390);
+  TERM_FREE(con_389);
+  TERM_FREE(con_382);
+  TERM_FREE(con_381);
+  TERM_FREE(con_380);
+  TERM_FREE(con_369);
+  TERM_FREE(con_368);
+  TERM_FREE(con_367);
+  TERM_FREE(con_312);
+  TERM_FREE(con_305);
+  TERM_FREE(con_298);
+  TERM_FREE(con_297);
+  TERM_FREE(con_290);
+  TERM_FREE(con_289);
+  TERM_FREE(con_282);
+  TERM_FREE(con_281);
+  TERM_FREE(con_274);
+  TERM_FREE(con_273);
+  TERM_FREE(con_266);
+  TERM_FREE(con_263);
+  TERM_FREE(con_256);
+  TERM_FREE(con_254);
+  TERM_FREE(con_247);
+  TERM_FREE(con_237);
+  TERM_FREE(con_230);
+  TERM_FREE(con_1);
+  TERM_FREE(con_0);
+  TERM_FREE(con_225);
+  TERM_FREE(con_218);
+  TERM_FREE(con_416);
+  TERM_FREE(con_415);
+  TERM_FREE(con_414);
+  TERM_FREE(con_403);
+  TERM_FREE(con_396);
+  /* Destruction des pattern_list */
+#ifdef DEBUG
+  backStatistics();
+#endif
+  if(ResultMode!=1) {
+    printf("\nrewrite_step = %u\n",rewrite_step);
+    diff_sec  = after_self.ru_utime.tv_sec  - before_self.ru_utime.tv_sec;
+    diff_usec = after_self.ru_utime.tv_usec - before_self.ru_utime.tv_usec;
+    total_time= (double)diff_sec + (((double)diff_usec)/1000000.0);
+    if(!quietMode) {
+      printf("total time    = %.3f sec\n",total_time);
+      if(diff_sec > 0) {
+        printf("average speed = %d rwr/sec\n",(long)(((double)rewrite_step)/total_time));
+      } else if(diff_usec > 0) {
+        printf("average speed = %d rwr/sec\n",(long)(((double)1000000*rewrite_step)/((double)diff_usec)));
+      }
+    }
+  }
+  exit(0);
+}
+#include "ac_tools.c"
+int gram[] = {
+1,32768,243,6,5,2,91,1,32,2,44,1,318,2,93,
+1,32768,250,6,4,0,419,2,40,1,134,2,41,
+1,32768,251,6,7,1,331,2,45,0,220,0,419,2,40,1,134,2,41,
+1,32768,414,8,1,0,235,
+1,32768,415,8,1,0,236,
+1,32768,416,8,1,0,241,
+1,32768,221,32,4,0,419,2,40,1,160,2,41,
+1,32768,222,32,7,1,331,2,45,0,220,0,419,2,40,1,160,2,41,
+1,0,227,32,4,0,552,2,40,1,230,2,41,
+1,32768,227,32,6,3,1,2,45,0,220,2,40,1,230,2,41,
+1,0,244,32,4,0,552,2,40,1,6,2,41,
+1,32768,244,32,6,3,1,2,45,0,220,2,40,1,6,2,41,
+1,32768,345,32,4,0,402,2,40,1,440,2,41,
+1,0,393,32,4,0,552,2,40,1,431,2,41,
+1,32768,393,32,6,3,1,2,45,0,220,2,40,1,431,2,41,
+1,0,394,32,4,0,636,2,40,1,431,2,41,
+1,32768,394,32,6,3,2,2,45,0,220,2,40,1,431,2,41,
+1,32768,412,32,4,0,823,2,40,1,160,2,41,
+1,32768,293,36,4,0,419,2,40,1,164,2,41,
+1,32768,294,36,7,1,331,2,45,0,220,0,419,2,40,1,164,2,41,
+1,32768,301,36,5,2,91,1,440,2,44,1,440,2,93,
+1,49152,263,49,1,0,1175,
+1,4596,3,58,3,1,58,2,43,1,58,
+1,4696,4,58,3,1,58,2,45,1,58,
+1,4796,5,58,3,1,58,2,42,1,58,
+1,4896,6,58,3,1,58,2,47,1,58,
+1,4896,27,58,3,1,58,2,37,1,58,
+1,4896,28,58,3,1,58,2,38,1,58,
+1,4896,29,58,3,1,58,2,124,1,58,
+1,900,20,58,2,2,45,1,58,
+1,4596,3,58,5,2,40,1,58,2,43,1,58,2,41,
+1,4696,4,58,5,2,40,1,58,2,45,1,58,2,41,
+1,4796,5,58,5,2,40,1,58,2,42,1,58,2,41,
+1,4896,6,58,5,2,40,1,58,2,47,1,58,2,41,
+1,4896,27,58,5,2,40,1,58,2,37,1,58,2,41,
+1,4896,28,58,5,2,40,1,58,2,38,1,58,2,41,
+1,4896,29,58,5,2,40,1,58,2,124,1,58,2,41,
+1,900,20,58,4,2,40,2,45,1,58,2,41,
+1,32768,3,58,6,0,452,2,40,1,58,2,44,1,58,2,41,
+1,32768,4,58,6,0,556,2,40,1,58,2,44,1,58,2,41,
+1,32768,5,58,6,0,642,2,40,1,58,2,44,1,58,2,41,
+1,32768,6,58,6,0,323,2,40,1,58,2,44,1,58,2,41,
+1,32768,27,58,6,0,320,2,40,1,58,2,44,1,58,2,41,
+1,32768,28,58,6,0,518,2,40,1,58,2,44,1,58,2,41,
+1,32768,29,58,6,0,225,2,40,1,58,2,44,1,58,2,41,
+1,0,20,58,4,0,441,2,40,1,58,2,41,
+1,32768,20,58,4,0,1594,2,40,1,58,2,41,
+1,900,25,58,4,0,430,2,40,1,428,2,41,
+1,33668,25,58,4,0,1583,2,40,1,428,2,41,
+1,33668,217,58,4,0,722,2,40,1,331,2,41,
+1,0,282,68,1,0,1069,
+1,32768,282,68,1,0,534,
+1,0,283,68,6,0,435,2,40,1,440,2,44,1,68,2,41,
+1,0,283,68,2,1,440,1,68,
+1,0,283,68,3,1,440,2,44,1,68,
+1,32868,283,68,3,1,440,2,46,1,68,
+1,0,284,68,6,0,632,2,40,1,68,2,44,1,68,2,41,
+1,40960,284,68,3,1,68,2,64,1,68,
+1,0,288,68,6,0,833,2,40,1,331,2,42,1,68,2,41,
+1,32768,288,68,6,0,833,2,40,1,331,2,44,1,68,2,41,
+1,32768,323,68,6,0,1280,2,40,1,440,2,44,1,68,2,41,
+1,32768,324,68,4,0,956,2,40,1,68,2,41,
+1,32768,326,68,4,0,1094,2,40,1,68,2,41,
+1,32768,328,68,6,0,423,2,40,1,440,2,44,1,68,2,41,
+1,32768,329,68,6,0,840,2,40,1,440,2,44,1,68,2,41,
+1,32768,330,68,4,0,764,2,40,1,68,2,41,
+1,32768,332,68,4,0,964,2,40,1,68,2,41,
+1,32768,356,68,4,0,1421,2,40,1,440,2,41,
+1,32768,359,68,6,0,1124,2,40,1,32,2,44,1,440,2,41,
+1,32868,360,68,6,0,1265,2,40,1,32,2,44,1,440,2,41,
+1,32768,361,68,6,0,1239,2,40,1,32,2,44,1,164,2,41,
+1,32768,363,68,4,0,1309,2,40,1,440,2,41,
+1,32768,375,68,6,0,822,2,40,1,32,2,44,1,68,2,41,
+1,32768,376,68,8,0,822,2,40,1,32,2,44,1,68,2,44,1,68,2,41,
+1,32768,377,68,10,0,822,2,40,1,32,2,44,1,68,2,44,1,68,2,44,1,68,2,41,
+1,32768,378,68,12,0,822,2,40,1,32,2,44,1,68,2,44,1,68,2,44,1,68,2,44,1,68,2,41,
+1,32768,313,87,6,0,1280,2,40,1,459,2,44,1,87,2,41,
+1,32768,314,87,4,0,956,2,40,1,87,2,41,
+1,32768,316,87,4,0,1094,2,40,1,87,2,41,
+1,32768,318,87,6,0,423,2,40,1,459,2,44,1,87,2,41,
+1,32768,319,87,6,0,840,2,40,1,459,2,44,1,87,2,41,
+1,32768,320,87,4,0,764,2,40,1,87,2,41,
+1,32768,322,87,4,0,964,2,40,1,87,2,41,
+1,49152,289,109,1,0,1175,
+1,0,247,134,11,0,846,2,91,0,532,2,44,0,1061,2,91,0,753,2,44,0,753,2,93,2,93,
+1,32768,247,134,1,0,534,
+1,0,248,134,6,0,435,2,40,1,6,2,44,1,134,2,41,
+1,0,248,134,2,1,6,1,134,
+1,0,248,134,3,1,6,2,44,1,134,
+1,32868,248,134,3,1,6,2,46,1,134,
+1,0,249,134,6,0,632,2,40,1,134,2,44,1,134,2,41,
+1,40960,249,134,3,1,134,2,64,1,134,
+1,0,253,134,6,0,833,2,40,1,331,2,42,1,134,2,41,
+1,32768,253,134,6,0,833,2,40,1,331,2,44,1,134,2,41,
+1,32768,255,134,1,0,326,
+1,0,230,147,6,0,846,2,91,0,532,2,44,0,753,2,93,
+1,32768,230,147,1,0,534,
+1,0,231,147,6,0,435,2,40,1,230,2,44,1,147,2,41,
+1,0,231,147,2,1,230,1,147,
+1,0,231,147,3,1,230,2,44,1,147,
+1,32868,231,147,3,1,230,2,46,1,147,
+1,0,232,147,6,0,632,2,40,1,147,2,44,1,147,2,41,
+1,40960,232,147,3,1,147,2,64,1,147,
+1,0,236,147,6,0,833,2,40,1,331,2,42,1,147,2,41,
+1,32768,236,147,6,0,833,2,40,1,331,2,44,1,147,2,41,
+1,0,218,160,1,0,950,
+1,0,218,160,1,0,534,
+1,0,219,160,6,0,435,2,40,1,32,2,44,1,160,2,41,
+1,0,219,160,2,1,32,1,160,
+1,0,219,160,3,1,32,2,44,1,160,
+1,100,219,160,3,1,32,2,46,1,160,
+1,0,220,160,6,0,632,2,40,1,160,2,44,1,160,2,41,
+1,40960,220,160,3,1,160,2,64,1,160,
+1,0,224,160,6,0,833,2,40,1,331,2,42,1,160,2,41,
+1,32768,224,160,6,0,833,2,40,1,331,2,44,1,160,2,41,
+1,32768,238,160,1,0,655,
+1,32768,259,160,4,0,419,2,40,1,288,2,41,
+1,32768,260,160,7,1,331,2,45,0,220,0,419,2,40,1,288,2,41,
+1,32768,218,160,0,
+1,32768,219,160,2,1,32,1,160,
+1,32768,404,160,6,0,1280,2,40,1,32,2,44,1,160,2,41,
+1,32768,405,160,4,0,956,2,40,1,160,2,41,
+1,32768,407,160,4,0,1094,2,40,1,160,2,41,
+1,32768,409,160,6,0,423,2,40,1,32,2,44,1,160,2,41,
+1,32768,410,160,6,0,840,2,40,1,32,2,44,1,160,2,41,
+1,32768,411,160,4,0,764,2,40,1,160,2,41,
+1,32768,413,160,4,0,964,2,40,1,160,2,41,
+1,0,290,164,6,0,846,2,91,0,440,2,44,0,440,2,93,
+1,32768,290,164,1,0,534,
+1,0,291,164,6,0,435,2,40,1,36,2,44,1,164,2,41,
+1,0,291,164,2,1,36,1,164,
+1,0,291,164,3,1,36,2,44,1,164,
+1,32868,291,164,3,1,36,2,46,1,164,
+1,0,292,164,6,0,632,2,40,1,164,2,44,1,164,2,41,
+1,40960,292,164,3,1,164,2,64,1,164,
+1,0,296,164,6,0,833,2,40,1,331,2,42,1,164,2,41,
+1,32768,296,164,6,0,833,2,40,1,331,2,44,1,164,2,41,
+1,49152,403,169,1,0,1175,
+1,32768,226,230,5,2,91,1,32,2,44,1,331,2,93,
+1,32768,233,230,4,0,419,2,40,1,147,2,41,
+1,32768,234,230,7,1,331,2,45,0,220,0,419,2,40,1,147,2,41,
+1,49152,254,241,1,0,1175,
+1,49152,237,267,1,0,1175,
+1,0,256,288,4,0,862,2,91,0,532,2,93,
+1,0,256,288,1,0,534,
+1,0,257,288,6,0,435,2,40,1,160,2,44,1,288,2,41,
+1,0,257,288,2,1,160,1,288,
+1,0,257,288,3,1,160,2,44,1,288,
+1,100,257,288,3,1,160,2,46,1,288,
+1,0,258,288,6,0,632,2,40,1,288,2,44,1,288,2,41,
+1,40960,258,288,3,1,288,2,64,1,288,
+1,0,262,288,6,0,833,2,40,1,331,2,42,1,288,2,41,
+1,32768,262,288,6,0,833,2,40,1,331,2,44,1,288,2,41,
+1,32768,256,288,0,
+1,32768,257,288,3,1,160,2,35,1,288,
+1,32768,264,288,1,0,650,
+1,32768,265,288,1,0,765,
+1,49152,225,293,1,0,1175,
+1,49152,297,301,1,0,1175,
+1,32768,239,318,5,2,91,1,331,2,44,1,331,2,93,
+1,0,245,318,4,0,636,2,40,1,6,2,41,
+1,32768,245,318,6,3,2,2,45,0,220,2,40,1,6,2,41,
+1,33768,200,331,1,1,58,
+1,4596,201,331,3,1,331,2,43,1,331,
+1,4696,202,331,3,1,331,2,45,1,331,
+1,4796,203,331,3,1,331,2,42,1,331,
+1,4896,204,331,3,1,331,2,37,1,331,
+1,4896,205,331,3,1,331,2,38,1,331,
+1,4896,206,331,3,1,331,2,47,1,331,
+1,4896,207,331,3,1,331,2,124,1,331,
+1,900,208,331,2,2,45,1,331,
+1,500,201,331,5,2,40,1,331,2,43,1,331,2,41,
+1,600,202,331,5,2,40,1,331,2,45,1,331,2,41,
+1,700,203,331,5,2,40,1,331,2,42,1,331,2,41,
+1,800,206,331,5,2,40,1,331,2,47,1,331,2,41,
+1,800,204,331,5,2,40,1,331,2,37,1,331,2,41,
+1,800,205,331,5,2,40,1,331,2,38,1,331,2,41,
+1,800,207,331,5,2,40,1,331,2,124,1,331,2,41,
+1,900,208,331,4,2,40,2,45,1,331,2,41,
+1,33268,201,331,6,0,452,2,40,1,331,2,44,1,331,2,41,
+1,33368,202,331,6,0,556,2,40,1,331,2,44,1,331,2,41,
+1,33468,203,331,6,0,642,2,40,1,331,2,44,1,331,2,41,
+1,33568,206,331,6,0,323,2,40,1,331,2,44,1,331,2,41,
+1,33568,204,331,6,0,320,2,40,1,331,2,44,1,331,2,41,
+1,33568,205,331,6,0,518,2,40,1,331,2,44,1,331,2,41,
+1,33568,207,331,6,0,225,2,40,1,331,2,44,1,331,2,41,
+1,33668,208,331,4,0,441,2,40,1,331,2,41,
+1,900,215,331,4,0,430,2,40,1,428,2,41,
+1,33668,215,331,4,0,856,2,40,1,428,2,41,
+1,0,223,331,4,0,443,2,40,1,160,2,41,
+1,32768,223,331,4,0,1917,2,40,1,160,2,41,
+1,0,228,331,4,0,636,2,40,1,230,2,41,
+1,32768,228,331,6,3,2,2,45,0,220,2,40,1,230,2,41,
+1,0,235,331,4,0,443,2,40,1,147,2,41,
+1,32768,235,331,11,0,1274,2,91,0,532,2,44,0,753,2,93,2,95,0,1077,2,40,1,147,2,41,
+1,0,240,331,4,0,552,2,40,1,318,2,41,
+1,32768,240,331,6,3,1,2,45,0,220,2,40,1,318,2,41,
+1,0,241,331,4,0,636,2,40,1,318,2,41,
+1,32768,241,331,6,3,2,2,45,0,220,2,40,1,318,2,41,
+1,0,252,331,4,0,443,2,40,1,134,2,41,
+1,32768,252,331,16,0,1274,2,91,0,532,2,44,0,1061,2,91,0,753,2,44,0,753,2,93,2,93,2,95,0,1077,2,40,1,134,2,41,
+1,0,261,331,4,0,443,2,40,1,288,2,41,
+1,32768,261,331,9,0,1290,2,91,0,532,2,93,2,95,0,1077,2,40,1,288,2,41,
+1,32768,269,331,4,0,419,2,40,1,459,2,41,
+1,32768,270,331,7,1,331,2,45,0,220,0,419,2,40,1,459,2,41,
+1,0,271,331,4,0,443,2,40,1,459,2,41,
+1,32768,271,331,4,0,1716,2,40,1,459,2,41,
+1,0,279,331,4,0,443,2,40,1,466,2,41,
+1,32768,279,331,4,0,2223,2,40,1,466,2,41,
+1,0,287,331,4,0,443,2,40,1,68,2,41,
+1,32768,287,331,4,0,1825,2,40,1,68,2,41,
+1,0,295,331,4,0,443,2,40,1,164,2,41,
+1,32768,295,331,11,0,1274,2,91,0,440,2,44,0,440,2,93,2,95,0,1077,2,40,1,164,2,41,
+1,32768,351,331,4,0,553,2,40,1,32,2,41,
+1,32768,388,331,1,0,1204,
+1,0,401,331,4,0,443,2,40,1,348,2,41,
+1,32768,401,331,11,0,1274,2,91,0,532,2,44,0,532,2,93,2,95,0,1077,2,40,1,348,2,41,
+1,32768,277,338,4,0,419,2,40,1,466,2,41,
+1,32768,278,338,7,1,331,2,45,0,220,0,419,2,40,1,466,2,41,
+1,32768,341,338,4,0,823,2,40,1,466,2,41,
+1,32768,343,338,4,0,329,2,40,1,331,2,41,
+1,32768,364,338,4,0,1695,2,40,1,440,2,41,
+1,32768,380,338,1,0,120,
+1,32768,381,338,1,0,121,
+1,32768,382,338,1,0,122,
+1,32768,383,338,3,0,120,2,46,1,331,
+1,32768,384,338,3,0,118,2,45,1,32,
+1,32768,385,338,3,0,329,2,45,1,338,
+1,32768,386,338,3,1,338,2,45,1,331,
+1,32768,298,341,1,0,874,
+1,32768,299,341,4,1,338,2,45,2,62,1,440,
+1,36864,300,341,3,1,341,0,111,1,341,
+1,32768,354,341,6,0,1288,2,40,1,466,2,44,1,331,2,41,
+1,0,396,348,6,0,846,2,91,0,532,2,44,0,532,2,93,
+1,32768,396,348,1,0,534,
+1,0,397,348,6,0,435,2,40,1,431,2,44,1,348,2,41,
+1,0,397,348,2,1,431,1,348,
+1,0,397,348,3,1,431,2,44,1,348,
+1,32868,397,348,3,1,431,2,46,1,348,
+1,0,398,348,6,0,632,2,40,1,348,2,44,1,348,2,41,
+1,40960,398,348,3,1,348,2,64,1,348,
+1,0,402,348,6,0,833,2,40,1,331,2,42,1,348,2,41,
+1,32768,402,348,6,0,833,2,40,1,331,2,44,1,348,2,41,
+1,49152,389,358,1,0,1560,
+1,49152,390,358,1,0,1800,
+1,49152,391,358,1,0,1646,
+1,49152,273,391,1,0,1175,
+1,49152,281,405,1,0,1175,
+1,32768,1,428,1,0,448,
+1,32768,0,428,1,0,734,
+1,4196,21,428,3,1,428,0,518,1,428,
+1,4196,22,428,3,1,428,0,225,1,428,
+1,36964,21,428,5,2,40,1,428,0,518,1,428,2,41,
+1,36964,22,428,5,2,40,1,428,0,225,1,428,2,41,
+1,200,24,428,4,0,337,2,40,1,428,2,41,
+1,200,24,428,2,0,337,1,428,
+1,200,24,428,4,2,40,0,337,1,428,2,41,
+1,32968,24,428,6,2,40,0,337,2,40,1,428,2,41,2,41,
+1,4296,8,428,4,1,428,2,61,2,61,1,428,
+1,4296,9,428,4,1,428,2,33,2,61,1,428,
+1,4296,10,428,3,1,428,2,60,1,428,
+1,4296,11,428,4,1,428,2,60,2,61,1,428,
+1,4296,12,428,3,1,428,2,62,1,428,
+1,4296,13,428,4,1,428,2,62,2,61,1,428,
+1,37064,8,428,6,0,737,2,40,1,428,2,44,1,428,2,41,
+1,37064,9,428,6,0,847,2,40,1,428,2,44,1,428,2,41,
+1,37064,10,428,6,0,962,2,40,1,428,2,44,1,428,2,41,
+1,37064,11,428,6,0,1176,2,40,1,428,2,44,1,428,2,41,
+1,37064,12,428,6,0,1269,2,40,1,428,2,44,1,428,2,41,
+1,37064,13,428,6,0,1483,2,40,1,428,2,44,1,428,2,41,
+1,0,14,428,4,1,32,2,61,2,61,1,32,
+1,0,15,428,4,1,32,2,33,2,61,1,32,
+1,32768,14,428,6,0,841,2,40,1,32,2,44,1,32,2,41,
+1,32768,15,428,6,0,951,2,40,1,32,2,44,1,32,2,41,
+1,300,8,428,4,1,58,2,61,2,61,1,58,
+1,300,9,428,4,1,58,2,33,2,61,1,58,
+1,300,10,428,3,1,58,2,60,1,58,
+1,300,11,428,4,1,58,2,60,2,61,1,58,
+1,300,12,428,3,1,58,2,62,1,58,
+1,300,13,428,4,1,58,2,62,2,61,1,58,
+1,300,8,428,6,0,1367,2,40,1,58,2,44,1,58,2,41,
+1,300,9,428,6,0,1477,2,40,1,58,2,44,1,58,2,41,
+1,300,10,428,6,0,1592,2,40,1,58,2,44,1,58,2,41,
+1,300,11,428,6,0,1806,2,40,1,58,2,44,1,58,2,41,
+1,300,12,428,6,0,1899,2,40,1,58,2,44,1,58,2,41,
+1,300,13,428,6,0,2113,2,40,1,58,2,44,1,58,2,41,
+1,900,26,428,4,0,1063,2,40,1,58,2,41,
+1,33668,26,428,4,0,1794,2,40,1,58,2,41,
+1,300,209,428,4,1,331,2,61,2,61,1,331,
+1,300,210,428,4,1,331,2,33,2,61,1,331,
+1,300,211,428,3,1,331,2,62,1,331,
+1,300,212,428,4,1,331,2,62,2,61,1,331,
+1,300,213,428,4,1,331,2,60,2,61,1,331,
+1,300,214,428,3,1,331,2,60,1,331,
+1,33068,209,428,6,0,640,2,40,1,331,2,44,1,331,2,41,
+1,33068,210,428,6,0,961,2,40,1,331,2,44,1,331,2,41,
+1,33068,214,428,6,0,865,2,40,1,331,2,44,1,331,2,41,
+1,33068,213,428,6,0,1079,2,40,1,331,2,44,1,331,2,41,
+1,33068,211,428,6,0,1172,2,40,1,331,2,44,1,331,2,41,
+1,33068,212,428,6,0,1386,2,40,1,331,2,44,1,331,2,41,
+1,900,216,428,4,0,1063,2,40,1,331,2,41,
+1,33668,216,428,4,0,1067,2,40,1,331,2,41,
+1,32768,229,428,4,0,648,2,40,1,230,2,41,
+1,32768,242,428,4,0,648,2,40,1,318,2,41,
+1,32768,246,428,4,0,648,2,40,1,6,2,41,
+1,0,18,428,4,1,440,2,61,2,61,1,440,
+1,0,19,428,4,1,440,2,33,2,61,1,440,
+1,0,18,428,6,0,1171,2,40,1,440,2,44,1,440,2,41,
+1,0,19,428,6,0,1070,2,40,1,440,2,44,1,440,2,41,
+1,0,18,428,4,1,338,2,61,2,61,1,338,
+1,0,19,428,4,1,338,2,33,2,61,1,338,
+1,0,18,428,6,0,1147,2,40,1,338,2,44,1,338,2,41,
+1,0,19,428,6,0,1257,2,40,1,338,2,44,1,338,2,41,
+1,32768,304,428,4,0,648,2,40,1,36,2,41,
+1,32768,315,428,4,0,638,2,40,1,87,2,41,
+1,32768,317,428,6,0,843,2,40,1,459,2,44,1,87,2,41,
+1,32768,325,428,4,0,638,2,40,1,68,2,41,
+1,32768,327,428,6,0,843,2,40,1,440,2,44,1,68,2,41,
+1,32768,335,428,4,0,638,2,40,1,466,2,41,
+1,32768,337,428,6,0,843,2,40,1,338,2,44,1,466,2,41,
+1,32768,347,428,4,0,549,2,40,1,440,2,41,
+1,32768,362,428,6,0,1140,2,40,1,338,2,44,1,440,2,41,
+1,32768,365,428,6,0,605,2,40,1,331,2,44,1,440,2,41,
+1,32768,366,428,6,0,941,2,40,1,331,2,44,1,440,2,41,
+1,32768,395,428,4,0,648,2,40,1,431,2,41,
+1,0,18,428,4,1,160,2,61,2,61,1,160,
+1,0,19,428,4,1,160,2,33,2,61,1,160,
+1,32768,18,428,9,0,1597,2,91,0,532,2,93,2,40,1,160,2,44,1,160,2,41,
+1,32768,19,428,9,0,863,2,91,0,532,2,93,2,40,1,160,2,44,1,160,2,41,
+1,32768,406,428,4,0,638,2,40,1,160,2,41,
+1,32768,408,428,6,0,843,2,40,1,32,2,44,1,160,2,41,
+1,0,417,428,6,0,878,2,40,1,32,2,44,1,32,2,41,
+1,0,418,428,6,0,748,2,40,1,32,2,44,1,32,2,41,
+1,32768,417,428,4,1,32,2,62,0,745,1,32,
+1,32768,418,428,5,1,32,2,61,2,61,0,745,1,32,
+1,0,419,428,6,0,542,2,40,1,440,2,44,1,440,2,41,
+1,0,419,428,6,0,675,2,40,1,440,2,44,1,440,2,41,
+1,32768,419,428,4,1,440,2,62,0,542,1,440,
+1,0,420,428,6,0,673,2,40,1,68,2,44,1,68,2,41,
+1,32768,420,428,4,1,68,2,62,0,1173,1,68,
+1,32768,421,428,6,0,542,2,40,1,68,2,44,1,440,2,41,
+1,32768,422,428,6,0,542,2,40,1,440,2,44,1,68,2,41,
+1,32768,423,428,6,0,380,2,40,1,440,2,44,1,440,2,41,
+1,32768,424,428,6,0,381,2,40,1,440,2,44,1,440,2,41,
+1,32768,425,428,6,0,382,2,40,1,440,2,44,1,440,2,41,
+1,32768,426,428,6,0,980,2,40,1,440,2,44,1,440,2,41,
+1,32768,427,428,8,0,980,2,40,1,68,2,44,1,68,2,44,1,68,2,41,
+1,0,428,428,6,0,332,2,40,1,440,2,44,1,440,2,41,
+1,0,428,428,6,0,676,2,40,1,440,2,44,1,440,2,41,
+1,32768,428,428,4,1,440,2,62,0,332,1,440,
+1,0,429,428,6,0,794,2,40,1,68,2,44,1,68,2,41,
+1,32768,429,428,4,1,68,2,62,0,450,1,68,
+1,32768,430,428,8,0,887,2,40,1,68,2,44,1,68,2,44,1,68,2,41,
+1,32768,431,428,8,0,937,2,40,1,68,2,44,1,68,2,44,1,68,2,41,
+1,32768,432,428,6,0,332,2,40,1,68,2,44,1,440,2,41,
+1,32768,433,428,6,0,332,2,40,1,440,2,44,1,68,2,41,
+1,32768,434,428,6,0,592,2,40,1,440,2,44,1,440,2,41,
+1,32768,435,428,6,0,593,2,40,1,440,2,44,1,440,2,41,
+1,32768,436,428,6,0,383,2,40,1,440,2,44,1,440,2,41,
+1,32768,437,428,6,0,981,2,40,1,440,2,44,1,440,2,41,
+1,32768,438,428,8,0,981,2,40,1,68,2,44,1,68,2,44,1,68,2,41,
+1,32768,392,431,5,2,91,1,32,2,44,1,32,2,93,
+1,32768,399,431,4,0,419,2,40,1,348,2,41,
+1,32768,400,431,7,1,331,2,45,0,220,0,419,2,40,1,348,2,41,
+1,32768,285,440,4,0,419,2,40,1,68,2,41,
+1,32768,286,440,7,1,331,2,45,0,220,0,419,2,40,1,68,2,41,
+1,0,302,440,4,0,552,2,40,1,36,2,41,
+1,32768,302,440,6,3,1,2,45,0,220,2,40,1,36,2,41,
+1,0,303,440,4,0,636,2,40,1,36,2,41,
+1,32768,303,440,6,3,2,2,45,0,220,2,40,1,36,2,41,
+1,32768,331,440,4,0,823,2,40,1,68,2,41,
+1,33768,344,440,1,1,338,
+1,32768,346,440,7,1,331,2,45,0,220,0,770,2,40,1,440,2,41,
+1,32768,352,440,3,1,440,0,635,1,459,
+1,0,353,440,6,1,440,2,91,1,440,2,93,0,635,1,459,
+1,32768,353,440,8,2,40,1,440,2,91,1,440,2,93,0,635,1,459,2,41,
+1,0,367,440,3,0,253,2,40,2,41,
+1,32768,367,440,1,0,253,
+1,0,368,440,3,0,254,2,40,2,41,
+1,32768,368,440,1,0,254,
+1,0,369,440,3,0,255,2,40,2,41,
+1,32768,369,440,1,0,255,
+1,100,370,440,3,1,440,0,180,1,440,
+1,32768,370,440,5,2,40,1,440,0,180,1,440,2,41,
+1,0,371,440,7,0,172,2,40,2,44,1,440,2,44,1,440,2,41,
+1,0,371,440,7,0,172,2,40,1,440,2,44,1,440,2,44,2,41,
+1,0,371,440,8,0,172,2,40,2,44,1,440,2,44,1,440,2,44,2,41,
+1,32768,371,440,6,0,172,2,40,1,440,2,44,1,440,2,41,
+1,0,372,440,7,0,174,2,40,2,44,1,440,2,44,1,440,2,41,
+1,0,372,440,7,0,174,2,40,1,440,2,44,1,440,2,44,2,41,
+1,0,372,440,8,0,174,2,40,2,44,1,440,2,44,1,440,2,44,2,41,
+1,32768,372,440,6,0,174,2,40,1,440,2,44,1,440,2,41,
+1,0,373,440,5,0,176,2,40,2,44,1,440,2,41,
+1,0,373,440,5,0,176,2,40,1,440,2,44,2,41,
+1,0,373,440,6,0,176,2,40,2,44,1,440,2,44,2,41,
+1,32768,373,440,4,0,176,2,40,1,440,2,41,
+1,0,374,440,5,0,178,2,40,2,44,1,440,2,41,
+1,0,374,440,5,0,178,2,40,1,440,2,44,2,41,
+1,0,374,440,6,0,178,2,40,2,44,1,440,2,44,2,41,
+1,32768,374,440,4,0,178,2,40,1,440,2,41,
+1,32768,379,440,6,0,944,2,40,1,331,2,44,1,440,2,41,
+1,0,266,459,1,0,749,
+1,32768,266,459,1,0,534,
+1,0,267,459,6,0,435,2,40,1,331,2,44,1,459,2,41,
+1,0,267,459,2,1,331,1,459,
+1,0,267,459,3,1,331,2,44,1,459,
+1,32868,267,459,3,1,331,2,46,1,459,
+1,0,268,459,6,0,632,2,40,1,459,2,44,1,459,2,41,
+1,40960,268,459,3,1,459,2,64,1,459,
+1,0,272,459,6,0,833,2,40,1,331,2,42,1,459,2,41,
+1,32768,272,459,6,0,833,2,40,1,331,2,44,1,459,2,41,
+1,32768,321,459,4,0,823,2,40,1,87,2,41,
+1,32768,348,459,4,0,537,2,40,1,440,2,41,
+1,32768,349,459,6,0,645,2,40,1,440,2,44,1,466,2,41,
+1,32768,350,459,6,0,427,2,40,1,338,2,44,1,440,2,41,
+1,0,274,466,1,0,1256,
+1,32768,274,466,1,0,534,
+1,0,275,466,6,0,435,2,40,1,338,2,44,1,466,2,41,
+1,0,275,466,2,1,338,1,466,
+1,0,275,466,3,1,338,2,44,1,466,
+1,32868,275,466,3,1,338,2,46,1,466,
+1,0,276,466,6,0,632,2,40,1,466,2,44,1,466,2,41,
+1,40960,276,466,3,1,466,2,64,1,466,
+1,0,280,466,6,0,833,2,40,1,331,2,42,1,466,2,41,
+1,32768,280,466,6,0,833,2,40,1,331,2,44,1,466,2,41,
+1,32768,333,466,6,0,1280,2,40,1,338,2,44,1,466,2,41,
+1,32768,334,466,4,0,956,2,40,1,466,2,41,
+1,32768,336,466,4,0,1094,2,40,1,466,2,41,
+1,32768,338,466,6,0,423,2,40,1,338,2,44,1,466,2,41,
+1,32768,339,466,6,0,840,2,40,1,338,2,44,1,466,2,41,
+1,32768,340,466,4,0,764,2,40,1,466,2,41,
+1,32768,342,466,4,0,964,2,40,1,466,2,41,
+1,32768,355,466,4,0,1261,2,40,1,440,2,41,
+1,32768,357,466,4,0,747,2,40,1,440,2,41,
+1,32768,358,466,6,0,1907,2,40,1,331,2,44,1,331,2,41,
+1,32768,387,466,1,0,1312,
+1,0,243,6,3,1,32,2,58,1,318,
+1,0,305,87,4,0,862,2,91,0,753,2,93,
+1,32768,305,87,1,0,534,
+1,0,306,87,6,0,435,2,40,1,459,2,44,1,87,2,41,
+1,0,306,87,2,1,459,1,87,
+1,0,306,87,3,1,459,2,44,1,87,
+1,32868,306,87,3,1,459,2,46,1,87,
+1,0,307,87,6,0,632,2,40,1,87,2,44,1,87,2,41,
+1,40960,307,87,3,1,87,2,64,1,87,
+1,0,311,87,6,0,833,2,40,1,331,2,42,1,87,2,41,
+1,32768,311,87,6,0,833,2,40,1,331,2,44,1,87,2,41,
+1,0,247,134,0,
+1,0,248,134,2,1,6,1,134,
+1,0,230,147,0,
+1,0,231,147,2,1,230,1,147,
+1,0,218,160,0,
+1,0,219,160,2,1,32,1,160,
+1,0,226,230,3,1,32,2,58,1,331,
+1,0,239,318,3,1,331,2,35,1,331,
+1,1000,200,331,3,2,91,1,58,2,93,
+1,0,310,331,4,0,443,2,40,1,87,2,41,
+1,32768,310,331,9,0,1290,2,91,0,753,2,93,2,95,0,1077,2,40,1,87,2,41,
+1,49152,312,358,1,0,1175,
+1,0,18,428,4,1,440,2,61,2,61,1,440,
+1,0,19,428,4,1,440,2,33,2,61,1,440,
+1,0,30,428,3,1,440,2,60,1,440,
+1,0,31,428,4,1,440,2,60,2,61,1,440,
+1,0,32,428,3,1,440,2,62,1,440,
+1,0,33,428,4,1,440,2,62,2,61,1,440,
+1,0,18,428,6,0,1171,2,40,1,440,2,44,1,440,2,41,
+1,0,19,428,6,0,1070,2,40,1,440,2,44,1,440,2,41,
+1,0,30,428,6,0,974,2,40,1,440,2,44,1,440,2,41,
+1,0,31,428,6,0,1399,2,40,1,440,2,44,1,440,2,41,
+1,0,32,428,6,0,1281,2,40,1,440,2,44,1,440,2,41,
+1,0,33,428,6,0,1495,2,40,1,440,2,44,1,440,2,41,
+1,0,18,428,4,1,338,2,61,2,61,1,338,
+1,0,19,428,4,1,338,2,33,2,61,1,338,
+1,0,30,428,3,1,338,2,60,1,338,
+1,0,31,428,4,1,338,2,60,2,61,1,338,
+1,0,32,428,3,1,338,2,62,1,338,
+1,0,33,428,4,1,338,2,62,2,61,1,338,
+1,0,18,428,6,0,1147,2,40,1,338,2,44,1,338,2,41,
+1,0,19,428,6,0,1257,2,40,1,338,2,44,1,338,2,41,
+1,0,30,428,6,0,1372,2,40,1,338,2,44,1,338,2,41,
+1,0,31,428,6,0,1586,2,40,1,338,2,44,1,338,2,41,
+1,0,32,428,6,0,1679,2,40,1,338,2,44,1,338,2,41,
+1,0,33,428,6,0,1893,2,40,1,338,2,44,1,338,2,41,
+1,0,18,428,4,1,160,2,61,2,61,1,160,
+1,0,19,428,4,1,160,2,33,2,61,1,160,
+1,0,30,428,3,1,160,2,60,1,160,
+1,0,31,428,4,1,160,2,60,2,61,1,160,
+1,0,32,428,3,1,160,2,62,1,160,
+1,0,33,428,4,1,160,2,62,2,61,1,160,
+1,0,18,428,9,0,1597,2,91,0,532,2,93,2,40,1,160,2,44,1,160,2,41,
+1,0,19,428,9,0,863,2,91,0,532,2,93,2,40,1,160,2,44,1,160,2,41,
+1,32768,30,428,9,0,978,2,91,0,532,2,93,2,40,1,160,2,44,1,160,2,41,
+1,32768,31,428,9,0,1192,2,91,0,532,2,93,2,40,1,160,2,44,1,160,2,41,
+1,32768,32,428,9,0,1285,2,91,0,532,2,93,2,40,1,160,2,44,1,160,2,41,
+1,32768,33,428,9,0,1499,2,91,0,532,2,93,2,40,1,160,2,44,1,160,2,41,
+1,32768,308,459,4,0,419,2,40,1,87,2,41,
+1,32768,309,459,7,1,331,2,45,0,220,0,419,2,40,1,87,2,41,
+1,36768,68,32,1,1,220,
+1,36768,67,58,1,1,19,
+1,36768,79,58,2,2,45,1,19,
+0};
+int pos = 6992;
+int earleyQuerySort = 428;
+int earleyQueryStrategy = 0;
+char *tabIdentStr[] = {
+"less_int",
+"th",
+"getTerms",
+"neq_list",
+"NLVtopOccRule",
+"nil_list",
+"part",
+"pt",
+"dont",
+"variables_of",
+"cons",
+"get_list_variables",
+"then",
+"neq_builtinInt",
+"btoi",
+"ispair",
+"module",
+"assocRight",
+"nlvocc",
+"anyInteger",
+"Vars",
+"time",
+"repeat",
+"eq_int",
+"END",
+"size_of_variable",
+"implicit",
+"eq",
+"arSyntax",
+"of",
+"dkconcur",
+"btoi_int",
+"AND",
+"neq_variable",
+"nil_variable",
+"is",
+"greater_builtinInt",
+"choose",
+"extractrule2",
+"bool",
+"extractrule1",
+"inline",
+"vocc",
+"self",
+"bs",
+"greatereq_variable",
+"elim",
+"oocc",
+"public",
+"is_lin",
+"second",
+"at",
+"Strict",
+"greater_variable",
+"append",
+"dk",
+"id",
+"dcconcur",
+"neq_bool",
+"ee",
+"nil_pair",
+"member",
+"firstOne",
+"elem",
+"eq_ident",
+"if",
+"elim_one",
+"fail",
+"code",
+"dc",
+"global",
+"call",
+"topOccRule",
+"care",
+"variable",
+"getTermsPair",
+"handline",
+"case",
+"ccat",
+"head",
+"dkcall",
+"dccall",
+"Jj",
+"lastElem",
+"makeTerm",
+"c",
+"b",
+"a",
+"Var_at",
+"Ii",
+"Hh",
+"Gg",
+"greatereq_builtinInt",
+"VchooseOccurence",
+"Ff",
+"mpo3",
+"lpo3",
+"lpo2",
+"lpo1",
+"Y",
+"X",
+"mpo2",
+"variables_ofLT",
+"mpo1",
+"SS",
+"varnum_vars",
+"ofLT",
+"N",
+"L",
+"J",
+"n1",
+"I",
+"l2",
+"RL",
+"l1",
+"G",
+"LP",
+"F",
+"VinOccRule",
+"supmult",
+"lt_2",
+"lt_1",
+"lesseq_list",
+"A",
+"AR",
+"IF",
+"description",
+"AL",
+"stratop",
+"sigSyntax",
+"ANDIF",
+"lesseq_term",
+"size_of_term_list",
+"try",
+"operators",
+"query",
+"xst",
+"subst",
+"AC",
+"size_of_int",
+"lesseq_bool",
+"listExtract",
+"varlist",
+"lex",
+"greater_int",
+"subterm",
+"eq_term",
+"otherwise",
+"greatereq_int",
+"termCommons",
+"equiv_mpo",
+"start",
+"equiv_lpo",
+"minus",
+"rules",
+"spart",
+"arity",
+"first",
+"eq_list",
+"umin_builtinInt",
+"less_builtinInt",
+"z",
+"y",
+"lin",
+"equiv",
+"x",
+"reverse",
+"private",
+"term_to",
+"not",
+"less_list",
+"lesseq_builtinInt",
+"normalize",
+"mpo",
+"size_of_ident",
+"pri",
+"specification",
+"less_term",
+"oneconcur",
+"isvar",
+"NLVchooseOccurence",
+"less_variable",
+"normalise",
+"lpo",
+"v",
+"ordre",
+"u",
+"lesseq_variable",
+"t",
+"s",
+"builtin",
+"btoi_builtinInt",
+"p",
+"o",
+"n",
+"int",
+"var",
+"size_of",
+"iterate",
+"for",
+"ars",
+"itob_builtinInt",
+"neq",
+"div",
+"one",
+"ordre_lpo",
+"eq_builtinInt",
+"mod",
+"firstList",
+"less_bool",
+"where",
+"neq_int",
+"greatereq",
+"nvocc",
+"nil",
+"ident",
+"cmp",
+"l",
+"k",
+"i",
+"nil_int",
+"eqsig",
+"var_lin",
+"f",
+"greater",
+"e",
+"eq_variable",
+"sig",
+"d",
+"get",
+"NEXT",
+"getTermsVar",
+"ordre_sig",
+"unicate",
+"end",
+"anyIdentifier",
+"variables",
+"neq_ident",
+"nil_ident",
+"NLVinOccRule",
+"local",
+"alias",
+"eq_bool",
+"chooseOccurence",
+"false",
+"Equiv",
+"Epsilon",
+"SUCH",
+"Lss",
+"THAT",
+"Lpt",
+"freshTerm",
+"Strict_at",
+"and",
+"substitution",
+"check",
+"Var",
+"getTermsAll",
+"valueOf",
+"META",
+"Ars",
+"declare",
+"multiset2",
+"assocLeft",
+"Alist",
+"Ordre",
+"defined",
+"size_of_variable_list",
+"VtopOccRule",
+"EACH",
+"dcOne",
+"varlist_vars",
+"singletons",
+"t_2",
+"t_1",
+"list_subterm",
+"hardAlias",
+"inOccRule",
+"lessSyntax",
+"strategies",
+"n_2",
+"definedAs",
+"n_1",
+"n_0",
+"size_of_list",
+"lesseq_int",
+"supmpo",
+"list",
+"suplpo",
+"export",
+"suplex",
+"result",
+"neq_term",
+"size_of_int_list",
+"multiset",
+"rename_subst",
+"RPO",
+"size_of_term",
+"greater_list",
+"strategy",
+"greater_term",
+"sort",
+"restList",
+"greatereq_list",
+"plus",
+"mult",
+"greatereq_term",
+"get_list",
+"nil_term",
+"import",
+"itob_int",
+"varnum",
+"fv",
+"itob",
+"pair",
+"MPO",
+"LPO",
+"supsig",
+"queryend",
+"LPL",
+"FOR",
+"vl",
+"identity",
+"size_of_pair",
+"true",
+"know",
+"with",
+"size_of_ident_list",
+"size",
+"umin",
+"term",
+"greatereq_bool",
+"switch",
+"source",
+"builtinInt",
+"vars",
+"lesseq",
+"rename",
+"vn",
+"less",
+"to",
+"lv",
+"term_to_variable",
+"or",
+"lt",
+"ls",
+"greater_bool",
+"explicit",
+""};
+int tabIdentIndex[] = {
+865,
+220,
+1265,
+863,
+1264,
+862,
+439,
+861,
+437,
+1261,
+435,
+1907,
+431,
+1477,
+430,
+648,
+646,
+1047,
+645,
+1046,
+1045,
+642,
+641,
+640,
+215,
+1684,
+859,
+214,
+858,
+213,
+857,
+856,
+211,
+1257,
+1256,
+853,
+1899,
+852,
+1253,
+428,
+1252,
+850,
+427,
+426,
+424,
+1893,
+423,
+420,
+639,
+638,
+636,
+635,
+633,
+1679,
+632,
+207,
+205,
+849,
+847,
+202,
+846,
+843,
+842,
+419,
+841,
+418,
+840,
+412,
+411,
+199,
+625,
+623,
+1024,
+622,
+838,
+1239,
+835,
+834,
+833,
+402,
+619,
+611,
+180,
+823,
+822,
+99,
+98,
+97,
+605,
+178,
+176,
+174,
+2113,
+1646,
+172,
+383,
+382,
+381,
+380,
+89,
+88,
+593,
+1421,
+592,
+166,
+1204,
+373,
+78,
+76,
+74,
+159,
+73,
+158,
+580,
+157,
+71,
+156,
+70,
+1197,
+794,
+369,
+368,
+1192,
+65,
+147,
+143,
+1188,
+141,
+781,
+1181,
+354,
+1399,
+1825,
+351,
+991,
+566,
+562,
+561,
+132,
+1177,
+1176,
+1175,
+773,
+1173,
+1172,
+770,
+1171,
+986,
+1386,
+1383,
+981,
+558,
+980,
+556,
+555,
+554,
+553,
+552,
+1597,
+1594,
+1592,
+122,
+121,
+1167,
+765,
+120,
+764,
+763,
+762,
+337,
+978,
+1806,
+977,
+332,
+1378,
+331,
+1377,
+974,
+972,
+549,
+1800,
+1372,
+970,
+542,
+118,
+540,
+117,
+1586,
+116,
+115,
+759,
+1583,
+112,
+111,
+110,
+753,
+329,
+751,
+750,
+327,
+326,
+1794,
+324,
+323,
+322,
+966,
+1367,
+320,
+964,
+962,
+539,
+961,
+960,
+537,
+534,
+532,
+531,
+108,
+107,
+105,
+749,
+748,
+747,
+102,
+746,
+101,
+1147,
+745,
+100,
+742,
+319,
+1140,
+958,
+956,
+311,
+1355,
+953,
+951,
+950,
+1351,
+523,
+522,
+737,
+1560,
+734,
+733,
+730,
+307,
+306,
+305,
+304,
+944,
+941,
+518,
+1341,
+510,
+297,
+1124,
+722,
+295,
+294,
+720,
+937,
+932,
+509,
+508,
+719,
+2223,
+1110,
+273,
+489,
+1312,
+1094,
+261,
+260,
+1309,
+905,
+900,
+1086,
+1083,
+255,
+899,
+254,
+253,
+1290,
+1079,
+676,
+1077,
+675,
+674,
+673,
+671,
+1070,
+1716,
+887,
+1288,
+241,
+1286,
+1285,
+883,
+1281,
+456,
+1280,
+1499,
+452,
+450,
+1495,
+1492,
+1069,
+667,
+1067,
+665,
+1064,
+1063,
+1061,
+236,
+235,
+878,
+877,
+232,
+231,
+1703,
+874,
+1274,
+448,
+447,
+444,
+1917,
+443,
+441,
+440,
+1483,
+658,
+657,
+1058,
+655,
+653,
+1054,
+228,
+650,
+227,
+226,
+1695,
+225,
+224,
+223,
+1269,
+866,
+0};
+int tabIdentSize = 348;
+char *tabSortStr[] = {
+"bool",
+"ident",
+"list[list[int]]",
+"<pair[ident,pair[int,int]]->pair[ident,pair[int,int]]>",
+"<pair[ident,ident]->pair[ident,ident]>",
+"list[pair[ident,ident]]",
+"<ident->ident>",
+"list[pair[term,term]]",
+"string",
+"list[ident]",
+"builtinInt",
+"substitution",
+"<pair[ident,int]->pair[ident,int]>",
+"pair[int,int]",
+"list[pair[ident,pair[int,int]]]",
+"<int->int>",
+"term",
+"<term->term>",
+"list[list[ident]]",
+"pair[ident,int]",
+"variable",
+"list[variable]",
+"<list[ident]->list[ident]>",
+"int",
+"intern int",
+"pair[ident,ident]",
+"<list[int]->list[int]>",
+"<pair[term,term]->pair[term,term]>",
+"Ordre",
+"pair[ident,pair[int,int]]",
+"list[term]",
+"<variable->variable>",
+"intern string",
+"intern ident",
+"list[int]",
+"list[pair[ident,int]]",
+"pair[term,term]",
+""};
+int tabSortIndex[] = {
+428,
+32,
+87,
+241,
+169,
+348,
+293,
+164,
+163,
+160,
+58,
+341,
+267,
+318,
+134,
+391,
+440,
+109,
+288,
+230,
+338,
+466,
+49,
+331,
+19,
+431,
+358,
+301,
+8,
+6,
+68,
+405,
+351,
+220,
+459,
+147,
+36,
+0};
+int tabSortSize = 37;
+char *tabStrategyStr[] = {
+"listExtract:pair[ident,int]/list[pair[ident,int]]",
+"listExtract:pair[term,term]/list[pair[term,term]]",
+"VchooseOccurence:list[int]/termCommons[vars,ars]",
+"listExtract:int/list[int]",
+"NLVchooseOccurence:list[int]/termCommons[vars,ars]",
+"chooseOccurence:list[int]/termCommons[vars,ars]",
+"listExtract:variable/list[variable]",
+"listExtract:list[ident]/list[list[ident]]",
+"listExtract:list[int]/list[list[int]]",
+"listExtract:pair[ident,pair[int,int]]/list[pair[ident,pair[int,int]]]",
+"listExtract:ident/list[ident]",
+"listExtract:term/list[term]",
+"listExtract:pair[ident,ident]/list[pair[ident,ident]]",
+""};
+int tabStrategyIndex[] = {
+446,
+480,
+380,
+70,
+34,
+294,
+84,
+228,
+326,
+420,
+472,
+288,
+348,
+0};
+int tabStrategySize = 13;

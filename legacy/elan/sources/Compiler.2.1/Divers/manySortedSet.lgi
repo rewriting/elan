@@ -1,0 +1,20 @@
+LPL manySortedSet description
+
+  query 	of sort bool
+         	result of sort bool
+//  query 	of sort Set
+//         	result of sort Set
+
+
+	 	import manySortedSet
+//         	start with () query
+//		start with () u
+//		start with () ^(-(u, v), -(u, w)) 
+//         	start with () z
+//         	start with () q1
+         	start with () q2
+//         	start with () q3
+//         	start with ()  U(U(v, w), x)
+
+end
+

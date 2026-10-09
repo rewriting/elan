@@ -1,0 +1,6 @@
+LPL wpatternAC4 description
+  query    of sort term
+  result   of sort term
+  import   wpatternAC4
+  start with (s0) go
+end

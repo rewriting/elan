@@ -1,0 +1,18 @@
+LPL m_apply_all6 description 
+
+	query           of sort Term
+        result          of sort string
+        import          m_apply_all3
+        start with 	()refterm2string(query,spec2ref("nqueens",""))
+
+/*
+FSYM(FSYM(INT(2).nil,200).FSYM(FSYM(INT(4).nil,200).FSYM(FSYM(INT(1).nil,200).FSYM(FSYM(INT(3).nil,200).FSYM(nil,219).nil,220).nil,220).nil,220).nil,220)
+
+FSYM(FSYM(INT(3).nil,200).FSYM(FSYM(INT(1).nil,200).FSYM(FSYM(INT(4).nil,200).FSYM(FSYM(INT(2).nil,200).FSYM(nil,219).nil,220).nil,220).nil,220).nil,220).FSYM(FSYM(INT(2).nil,200).FSYM(FSYM(INT(4).nil,200).FSYM(FSYM(INT(1).nil,200).FSYM(FSYM(INT(3).nil,200).FSYM(nil,219).nil,220).nil,220).nil,220).nil,220).FSYM(FSYM(INT(3).nil,200).FSYM(FSYM(INT(1).nil,200).FSYM(FSYM(INT(4).nil,200).FSYM(FSYM(INT(2).nil,200).FSYM(nil,219).nil,220).nil,220).nil,220).nil,220).FSYM(FSYM(INT(4).nil,200).FSYM(INT(4).nil,200).nil,222).nil
+
+
+FSYM(FSYM(FSYM(FSYM(FSYM(FSYM(INT(2).nil,200).nil,354).FSYM(nil,222).nil,223).FSYM(INT(200).nil,200).nil,357).FSYM(FSYM(FSYM(FSYM(FSYM(FSYM(FSYM(INT(4).nil,200).nil,354).FSYM(nil,222).nil,223).FSYM(INT(200).nil,200).nil,357).FSYM(FSYM(FSYM(FSYM(FSYM(FSYM(FSYM(INT(1).nil,200).nil,354).FSYM(nil,222).nil,223).FSYM(INT(200).nil,200).nil,357).FSYM(FSYM(FSYM(FSYM(FSYM(FSYM(FSYM(INT(3).nil,200).nil,354).FSYM(nil,222).nil,223).FSYM(INT(200).nil,200).nil,357).FSYM(FSYM(FSYM(nil,222).FSYM(INT(219).nil,200).nil,357).FSYM(nil,222).nil,223).nil,223).FSYM(INT(220).nil,200).nil,357).FSYM(nil,222).nil,223).nil,223).FSYM(INT(220).nil,200).nil,357).FSYM(nil,222).nil,223).nil,223).FSYM(INT(220).nil,200).nil,357).FSYM(nil,222).nil,223).nil,223).FSYM(INT(220).nil,200).nil,357)
+
+*/
+end
+

@@ -1,0 +1,9 @@
+LPL con description 
+
+        query           of sort Foo
+        result          of sort Foo
+        import          con
+        start with 	(ALL)query
+
+end
+

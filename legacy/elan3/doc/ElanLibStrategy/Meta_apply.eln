@@ -1,0 +1,82 @@
+module Meta_apply[X]
+
+//###
+//#####  ONLY FOR INTERPRETER 
+//###
+
+import global int list[X] Meta_strat;
+end
+// Meta_interpreter of Marian's strategies
+operators global
+    meta_apply(@,@)	: (Strategy X) X		code 129;
+    	// semantics of meta_apply is the following:
+    	// where y:=(META)meta_apply(s,t) could be replaced by where y:=(s)t 
+    meta_apply(@,@,@)	: (Strategy X int) X		code 130;
+        // semantics of meta_apply(s,t,n) is that it gives n-th elan solution
+        // of an application of 's' on term 't', if it exists.
+        // Otherwise, it fails.
+    //------------------
+    set_of(@,@)		: (Strategy X) list[X];         // all solutions
+    set_of(@,@,@)	: (Strategy X int) list[X];     // from n-th solution
+    set_of(@,@,@,@)	: (Strategy X int int) list[X]; // m sols from n-th
+end
+
+// Elan implementation of set_of is very naive and 'not very optimal', 
+// but it is clear.
+// The alternative low-level solution ('real' implementation in C++) needs
+// to build-in sorts list[X], which is (at this moment) a dirty hack
+// with no precedents.
+
+
+rules for list[X]
+ s	: Strategy;
+	t, res	: X;
+	n, m	: int;
+local
+  [] 	set_of(s,t) 	=> set_of(s,t,0,9999)				end
+  [] 	set_of(s,t,n) 	=> set_of(s,t,n,9999)				end
+
+  []	set_of(s,t,n,0) => nil						end
+  []	set_of(s,t,n,m) => res.set_of(s,t,n+1,m-1)
+				where res:=(META)meta_apply(s,t,n)		end
+  []	set_of(s,t,n,m) => nil						end
+end
+
+/* alternative
+rules for list[X]
+ s	: Strategy;
+	t, res	: X;
+	n, m	: int;
+	resl	: list[X];
+local
+  [] 	set_of(s,t) 	=> resl where resl:=(set)set_of(s,t,0,9999)	end
+  [] 	set_of(s,t,n) 	=> resl where resl:=(set)set_of(s,t,n,9999)	end
+
+  [s1]	set_of(s,t,n,0) => nil						end
+  [s2]	set_of(s,t,n,m) => res.resl
+			   if m > 0
+			   where res:=(META)meta_apply(s,t,n)
+			   where resl :=(set)set_of(s,t,n+1,m-1)	end
+  [s3]	set_of(s,t,n,m) => nil						end
+end
+
+strategies
+local
+ [set]		dk(s1 || s2 || s3)		end
+end
+*/
+
+strategies for X  	// this is a strategy which interprets only terms of the form
+local
+  [META]
+  builtin(2)		// meta_apply(s,t) or meta_apply(s,t,n)
+  end
+end
+
+end
+
+
+
+
+
+

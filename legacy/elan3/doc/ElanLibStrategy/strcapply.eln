@@ -1,0 +1,18 @@
+module strcapply[X] 
+
+import global strat[X] Meta_capply[X];
+end
+opearators global
+  setof(@,@)	: (<X> X) list[X];
+  eval		: Label;
+end
+
+rules for list[X]
+	s	: <X>;
+	t	: X;
+	lst	: list[X];
+local
+  []	setof(s,t) =>  set_of(eval,[s]t)		end
+end
+
+end

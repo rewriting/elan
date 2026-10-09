@@ -1,0 +1,88 @@
+// This file is generated automatically: do not edit it directly. 
+  module strat[X]
+  //--- Use this module, if you want to work with type-preserving strategies
+  //--- over the type X, e.g. X->X
+          import global 
+              eq[X] strsig[X,X] bool; // user_strategy[X];
+          end
+
+          sort 
+            StrList[X,X] <X->X>;
+          end
+
+           stratop 
+            global
+              id          : <X>                   code -186;      // identity strategy
+              if @ then @ orelse @ fi     //  !!!! should be less than DELTA_PRIOR
+                          : (<X> <X> <X>) <X>     code -187;      // orelse strategy
+              @           : (X) <X>       pri 2000; // strategy coercion
+              return @    : (X) <X>;      // returns argument as a result of application
+              eval_ONE    : <X> bs;
+              eval_DC     : <X> bs;
+              eval_DK     : <X> bs;
+              eval_TONE   : <X> bs;
+              eval        : <X> bs;
+          end
+
+          strategies for X //<X->X>
+           a, b, l, r     : X;
+           S, S1, S2      : <X->X>;               
+           SS             : StrList[X,X];
+          explicit
+            [DK]  [dk(SS)]a => b where b:=(eval_DK)((SS))a                end
+            [DK1] ((S1,SS))a => b where b:=[S1]a                          end
+            [DK2] ((S1,SS))a => b where b:=(eval_DK)((SS))a               end
+
+            [DC]  [dc(SS)]a => b where b:=(eval_DC)((SS))a                end
+            [DC1] ((S1,SS))a => b where b:=[S1]a                          end
+            [DC2] ((S1,SS))a => b where b:=(eval_DC)((SS))a               end
+
+            [ONE]  [one(SS)]a => b where b:=(eval_ONE)((SS))a             end
+            [ONE1] ((S1,SS))a => b where b:=[S1]a                         end
+            [ONE2] ((S1,SS))a => b where b:=(eval_ONE)((SS))a             end
+
+            [IF1] [if true then S1 else S2 fi]a => b      where b :=[S1]a end
+            [IF2] [if false then S1 else S2 fi]a => b     where b :=[S2]a end
+
+
+            [IFO1]  [if S then S1 orelse S2 fi]a =>[S1]b where b:=[S]a end
+            [IFO2]  [if S then S1 orelse S2 fi]a =>[S2]a  end
+            [IFO3]  [S1]a => b where b:=[S1]a                     end
+            [DSTR]  [return a]b => a                              end
+            [ID]    [id]a => a                                    end
+            [CONST] [a]b  => b    if eq_X(a,b)                    end // shitty compiler
+            // the following rules are added because of `missing rule warning'
+            [FSYM]        [S]b => b if false                              end
+            [LAB]         [S]b => b if false                              end
+            [DSTR]        [S]b => b if false                              end
+            [CONCAT]      [S]b => b if false                              end
+
+	    [TONE]  [tone(S)]a => b where b:=(eval_TONE)[S]a              end
+	    [TONE1] [S]a       => b where b:=[S]a			  end
+
+          implicit        // evaluation ELAN-strategy of the interpreter
+            [.]   eval_ONE => dc one(dk(ONE1) , dk(ONE2) )                end
+            [.]   eval_DC   => dc(dk(DC1) , dk(DC2) )                     end
+            [.]   eval_DK   => dk(DK1 , DK2)                              end
+            [.]   eval_TONE => tone(TONE1)				  end
+
+            [.]   eval => first(
+                          dk(FSYM)                                        ,
+                          dk(DSTR)                                        ,
+                          dk(DK)                                          ,
+                          dk(DC)                                          ,
+                          dk(ONE)                                         ,
+                          dk(TONE)                                        ,
+                          dk(LAB)                                         ,
+                          dc(ID)                                          ,
+                          dc(CONST)                                       ,
+                          dk(CONCAT)                                      ,
+                          dk(IF1) , dk(IF2)                               ,
+                          dc( dk(IFO1) , dk(IFO2) ); dk(IFO3)     //      ,  dk(user_strategy)
+                  ) 
+            end
+          end
+             
+  end  
+   
+

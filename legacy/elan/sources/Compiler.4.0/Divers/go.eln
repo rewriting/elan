@@ -1,0 +1,112 @@
+module go
+
+import global 
+	int bool 
+	pair[int,int] 
+	pair[listac[pair[int,int]],listac[pair[int,int]]] 
+	listac[pair[int,int]]
+	eq[pair[int,int]]
+// eq[int]
+;end
+
+operators  
+
+ local    
+    ok(@,@)   : ( pair[int,int]  listac[pair[int,int]] ) bool;
+end
+
+stratop global
+  jouer :  <pair[listac[pair[int,int]],listac[pair[int,int]]]  
+		-> pair[listac[pair[int,int]],listac[pair[int,int]]] >     bs;
+end
+
+rules for bool
+        x,y,u,v,w,z :int;
+        d,p : pair[int,int];
+       l1,l2 : listac[pair[int,int]];
+ global
+// le second argument de ok doit etre une paire! (comme marque' plus haut)
+ [] ok(d, nil)    => true       end                                                 
+ 
+// POur la regles suivante, il faut que ce soit un listac[pair[int,int]] en 2ieme argument
+// --> verifies tous tes profiles d'operateurs pour que ce soit bien type'
+
+   [] ok([x,y],[u,v].l1)    => ( (x!=u or y!=v) and ok([x,y],l1))  end
+end
+
+rules for pair[listac[pair[int,int]],listac[pair[int,int]]]
+        x,y,x1,x2,x3,x4     :       int;
+        l1,l2   :       listac[pair[int,int]];
+        p       :       pair[int,int];
+
+local
+	[B_hb4_hb5] [[x,y].[x1,y].[x2,y].[x3,y].l1,l2]         =>      [[x,y].[x1,y].[x2,y].[x3,y].[x4,y].l1,l2]
+							where x4:=() x + 4
+							if (ok([x4,y],l1) and ok([x4,y],l2)
+                                                        and x1==(x+1) and x2==(x+2) and x3==(x+3))
+                                                        end
+
+	[B_hn4_hn4_b1] [l1,[x,y].[x1,y].[x2,y].[x3,y].l2]   =>      [[x4,y].l1,[x,y].[x1,y].[x2,y].[x3,y].l2]
+							where x4:= () x+4
+							if (ok([x4,y],l1) and ok([x4,y],l2)
+                                                          and x1==x+1 and x2==x+2 and x3==x+3)
+                                                           end
+    
+
+	[B_hb3_hb4] [[x,y].[x1,y].[x2,y].l1,l2]      =>      [[x,y].[x1,y].[x2,y].[x3,y].l1,l2]
+						    where x3:=()x+3
+						    if (ok([x3,y],l1) and ok([x3,y],l2)
+						    and x1==x+1 and x2==x+2)
+                                                    end
+
+	[B_hn3_hn3_b1] [l1,[x,y].[x1,y].[x2,y].l2]   =>      [[x3,y].l1,[x,y].[x1,y].[x2,y].l2]
+ 						   where x3:=() x+3
+                                                    if (ok([x3,y],l1) and ok([x3,y],l2)
+                                                    and x1==x+1 and x2==x+2)
+                                                     end
+
+
+
+	[B_hb2_hb3] [[x,y].[x1,y].l1,l2]      =>      [[x,y].[x1,y].[x2,y].l1,l2]
+						   where x2:= () x+2 
+                                                    if (ok([x2,y],l1) and ok([x2,y],l2)
+                                                    and x1==x+1 ) 
+                                          	   end
+
+
+	[B_hn2_hn2_b1] [l1,[x,y].[x1,y].l2]   =>      [[x2,y].l1,[x,y].[x1,y].l2]
+  						where x2:=() x+2
+                                        	if (ok([x2,y],l1) and ok([x2,y],l2)
+                                                and x1==x+1)
+                                          	end
+
+
+	[B_hb1_hb2] [[x,y].l1,l2]      =>      [[x,y].[x1,y].l1,l2]
+  					where x1:=() x+1
+                                     	if (ok([x1,y],l1) and ok([x1,y],l2))
+                             		end
+
+
+
+	[B_hn1_hn1_b1] [l1,[x,y].l2]   =>      [[x1,y].l1,[x,y].l2]
+                                     where x1:= () x+1 
+				     if (ok([x1,y],l1) and ok([x1,y],l2))    end
+
+	[B_rien_b1] [nil,nil]   =>      [[x,y].nil,nil]
+                              where x:= () 10
+                              where y:= () 10 
+			 end
+                               
+
+
+end
+
+strategies for pair[listac[pair[int,int]],listac[pair[int,int]]] 
+
+implicit
+  [] jouer => first one(B_hb4_hb5  ,  B_hn4_hn4_b1 , B_hb3_hb4 , B_hn3_hn3_b1 , 
+		B_hb2_hb3 , B_hn2_hn2_b1 , B_hb1_hb2 , B_hn1_hn1_b1 , B_rien_b1)  end
+end
+
+
+end

@@ -1,0 +1,11 @@
+module ndLayout
+
+import global nd;
+end
+
+operators
+global
+  (f @ @) : (term term) term alias f(@,@):;
+end
+
+end

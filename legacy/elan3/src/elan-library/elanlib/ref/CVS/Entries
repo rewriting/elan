@@ -1,0 +1,20 @@
+/Makefile.am/1.1.1.1/Thu Nov 29 08:28:47 2001//
+/Meta_Apply.eln/1.1.1.1/Thu Nov 29 08:28:47 2001//
+/REF.eln/1.1.1.1/Thu Nov 29 08:28:47 2001//
+/divers2string.eln/1.1.1.1/Thu Nov 29 08:28:47 2001//
+/ref2string.eln/1.1.1.1/Thu Nov 29 08:28:47 2001//
+/ref2term.eln/1.1.1.1/Thu Nov 29 08:28:47 2001//
+/ref_idents.eln/1.1.1.1/Thu Nov 29 08:28:47 2001//
+/ref_modules.eln/1.1.1.1/Thu Nov 29 08:28:47 2001//
+/ref_read.eln/1.1.1.1/Thu Nov 29 08:28:47 2001//
+/ref_rules.eln/1.1.1.1/Thu Nov 29 08:28:47 2001//
+/ref_sorts.eln/1.1.1.1/Thu Nov 29 08:28:47 2001//
+/ref_strategies.eln/1.1.1.1/Thu Nov 29 08:28:47 2001//
+/ref_tables.eln/1.1.1.1/Thu Nov 29 08:28:47 2001//
+/ref_terms.eln/1.1.1.1/Thu Nov 29 08:28:47 2001//
+/ref_unify.eln/1.1.1.1/Thu Nov 29 08:28:47 2001//
+/ref_unify_builtin.eln/1.1.1.1/Thu Nov 29 08:28:47 2001//
+/ref_write.eln/1.1.1.1/Thu Nov 29 08:28:47 2001//
+/refstring2string.eln/1.1.1.1/Thu Nov 29 08:28:47 2001//
+/string2refterm.eln/1.1.1.1/Thu Nov 29 08:28:47 2001//
+D

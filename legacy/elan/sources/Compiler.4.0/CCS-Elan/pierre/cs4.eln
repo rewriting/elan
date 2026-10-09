@@ -1,0 +1,34 @@
+module cs4
+
+import global 
+identifier eq[identifier];
+end
+
+sort lfrt bfrt myid res;
+end
+
+operators 
+global
+  a: lfrt;
+  b: lfrt;
+  c: lfrt;
+  d: lfrt;
+  e: lfrt;
+  A: bfrt;
+  B: bfrt;
+  C: bfrt;
+  D: bfrt;
+  E: bfrt;
+  @@ : (lfrt identifier) myid;
+  test @ : (myid) res;
+  big : res;
+  little : res;
+end
+
+rules for res
+  x: myid;
+global
+  [] test $x => little end
+end
+
+end

@@ -1,0 +1,9 @@
+LPL condac1 description
+
+  query 	of sort term
+         	result of sort term
+	 	import condac
+         	start with () q1
+
+end
+

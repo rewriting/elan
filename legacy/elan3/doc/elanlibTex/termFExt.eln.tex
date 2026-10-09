@@ -1,0 +1,49 @@
+
+\let\CF=\rm
+% Remember to use the lgrind style
+
+\File{termFExt.eln},{17:23},{Jun 21 1996}
+\L{\LB{\C{}\1\1}}
+}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{16}{(c)}\Tab{24}{INRIA-Lorraine \& CRIN}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{24}{615, rue du Jardin Botanique, BP 101}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{16}{        54602 Villers-les-Nancy}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{24}{France}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{24}{email: elan@loria.fr}}
+\CE{}\L{\LB{\C{}\1\1}}
+}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{8}{\$Source: /CVS/aircube/elan3/doc/elanlibTex/termFExt.eln.tex,v $}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{8}{\$Revision: 1.2 $}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{8}{\$Date: 1996/08/05 20:24:21 $}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{8}{\$Author: ckirchne $}}
+\CE{}\L{\LB{\C{}\1\1}}
+}}
+\CE{}\L{\LB{}}
+\L{\LB{\C{}\1\*}}
+\L{\LB{}\Tab{8}{This module allows using quotes \".\,.\,.\" in order to write operators}}
+\L{\LB{}\Tab{8}{in situation where non quoting would induce parsing errors.}}
+\L{\LB{\*\1\CE{}}}
+\L{\LB{\K{module}_\V{termFExt}[\V{Fss}]}}
+\L{\LB{\K{import}_\K{global}_}\Tab{16}{\V{term};}}
+\L{\LB{_______\K{local}_}\Tab{16}{\V{int}_\V{anyIdentifier}_\V{bool}_\V{Fss}_\V{pair}[\V{identifier},\V{int}]_}}
+\L{\LB{}\Tab{16}{\V{list}[\V{pair}[\V{identifier},\V{int}]]_\V{termF}[\V{Fss}];}}
+\L{\LB{\K{op}}}
+\L{\LB{__\K{global}}}
+\L{\LB{}}
+\L{\LB{__\K{FOR}_\K{EACH}_\V{SS}:\V{pair}[\V{identifier},\V{int}];_\V{F}:\V{identifier};__\V{N}:\V{int}}}
+\L{\LB{__\K{SUCH}_\K{THAT}_\V{SS}:=(\V{listExtract})_\V{elem}(\V{Fss})_\K{AND}_\V{F}:=()\V{first}(\V{SS})_}}
+\L{\LB{}\Tab{8}{\K{AND}_\V{N}:=()\V{second}(\V{SS})_\K{ANDIF}_\V{N}==0_:\{}}
+\L{\LB{______\V{F}}\Tab{8}{:_\V{term}}\Tab{48}{\K{alias}_\"\V{F}\":;}}
+\L{\LB{____\}}}
+\L{\LB{}}
+\L{\LB{\K{FOR}_\K{EACH}_\V{SS}:\V{pair}[\V{identifier},\V{int}];_\V{F}:\V{identifier};__\V{N}:\V{int}}}
+\L{\LB{\K{SUCH}_\K{THAT}_\V{SS}:=(\V{listExtract})_\V{elem}(\V{Fss})_\K{AND}_\V{F}:=()\V{first}(\V{SS})_}}
+\L{\LB{}\Tab{8}{\K{AND}_\V{N}:=()\V{second}(\V{SS})_\K{ANDIF}_\V{N}_\>_0_:\{}}
+\L{\LB{}}
+\L{\LB{_____\V{F}_(@_\{,@\}\~(\V{N}\-1))}\Tab{24}{:(\{\V{term}\}\~\V{N})_\V{term}}\Tab{48}{\K{alias}_\"\V{F}\"(@\{,@\}\~(\V{N}\-1)):;}}
+\L{\LB{}}
+\L{\LB{____\}}}
+\L{\LB{}}
+\L{\LB{\K{endop}}}
+\L{\LB{}}
+\L{\LB{\K{end}_\K{of}_\K{module}}}

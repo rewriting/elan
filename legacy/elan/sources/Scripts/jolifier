@@ -1,0 +1,18 @@
+s/ Identifiers/Identifiers\
+/g
+s/ Modules/Modules\
+/g
+s/ Sorts/Sorts\
+/g
+s/ Modules/Modules\
+/g
+s/ RuleNames/RuleNames\
+/g
+s/ StrategyNames/StrategyNames\
+/g
+s/ GrammarForSort/GrammarForSort\
+/g
+s/"\./"\.\
+/g
+s/.nil:nil./.nil:nil.\
+/g

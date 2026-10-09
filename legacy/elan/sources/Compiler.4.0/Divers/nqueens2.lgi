@@ -1,0 +1,10 @@
+LPL nqueens2 description 
+
+query 		of sort list
+      result 	of sort list
+      import   	nqueens2
+//      start with 	(queens_strat) queens(12)
+      start with 	(queens_strat) queens(8)
+//      start with 	(queens_strat) query
+
+end

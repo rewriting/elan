@@ -1,0 +1,11 @@
+LPL w description
+
+   query of sort  	Foo
+   result of sort 	Foo
+   import 		w
+   start with 		(ss)doit(query)
+
+end
+
+
+

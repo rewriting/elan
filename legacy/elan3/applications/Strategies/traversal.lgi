@@ -1,0 +1,27 @@
+LPL traversal description
+  
+query		of sort   	Term
+		result of sort  Term
+		import  	traversal[Term]
+//		start with 	[pd_all(swap)]query
+//		start with 	[pd_one(swap)]query
+//		start with 	[bu(first(swap,id))]query
+//		start with 	[inner(swap)]query
+		start with 	[outer(swap)]query
+
+end
+
+
+
+
+
+
+
+
+
+
+//    f(g(a),f(b,g(a)))          
+//    f(g(a),f(a,g(a)))          
+
+
+

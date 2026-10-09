@@ -1,0 +1,17 @@
+#!/bin/csh -f
+
+unset noclobber
+
+#
+# ELAN library
+#
+set ELAN=$ELANLIB/..
+
+#
+# COLETTE sources
+#
+set SOURCE=$COLETTE/ARITY_N_I/src
+
+
+tee -a SolverInput | $ELAN/bin/`uname -m`/elan -b --secondlib $SOURCE solverCSPDisII.lgi $SOURCE/../spc/IntegerSpecification.spc | tee -a SolverOutput
+

@@ -1,0 +1,115 @@
+module Unif2[Vars,Fss]
+import 	global 	term varabst varUnif[Vars] termUnif[Fss]
+                ExtCall[eqSystem] ;
+
+ 	local  	int identifier bool pair[identifier,int]
+		list[int] list[identifier] list[pair[identifier,int]] 
+
+                eq[variable] eq[term] eq[eqSystem]
+		eqSystem   
+                occur[variable,term] occur[variable,eqSystem] ;
+end
+
+
+operators
+
+global
+
+        @ newline       : ( eqSystem ) eqSystem ;
+	@ '\10'     	: ( eqSystem ) eqSystem alias @ newline: ;
+
+        @ newline @ newline: (term term) equation ;
+        @ '\10' @ '\10' :(term term) equation alias @ newline @ newline : ;
+
+  	@ @		  :(eqSystem eqSystem ) eqSystem assocLeft ;
+
+        convert(@)      : (eqSystem) eqSystem ;
+
+	@               : (variable) term alias @: ;
+	@ 		: ( equation ) eqSystem alias @:; 
+        @ |--> @	: (term term ) equation alias @ = @:;
+        IDENTITY	: eqSystem ;
+        
+        x ':' @           : (int) variable alias var(@): ; 
+
+        @ == @        : (term variable) term ;
+
+local
+
+        back (@) : (eqSystem) eqSystem ;
+
+end
+
+
+
+
+stratop global 
+
+strataddnl : < eqSystem >  builtin ;
+unify: < eqSystem > builtin ;
+
+end
+
+
+
+///// transformation des multi-equations en forme resolue -- propre a unif
+
+rules for eqSystem 
+// declare 
+P,Q: eqSystem; $v: variable ; s,t: term ;
+
+global
+  [] back(P s == $v = t) => back(P s = t) & $v = t  end 
+  [] back(s == $v = t) => back(s = t) & $v = t  end 
+  [] back(P $v=t) => back(P) & $v=t end 
+  [] back($v=t) => $v=t end 
+  [] back(IDENTITY) => true end 
+  [nettoie] P => Q where Q:= () back(P) end  
+end
+
+
+
+
+rules for eqSystem
+// declare 
+	t1,t2 : term;
+	P,Q : eqSystem;
+global
+  [addnewline]   P => P newline end
+  []             convert(P & t1 = t2) => convert(P) t1 newline t2 newline end
+  []             convert(t1 = t2) => t1 newline t2 newline end
+  [conversion]	 P => Q where Q := (strataddnl) convert(P) end
+
+  [solve]       P => Q 
+                 where Q := [DKcall("unifelan")] P end
+
+  [solve1]       P => Q 
+                 where Q := [DCcall("unifelan")] P end
+  
+
+end
+
+
+
+strategies for eqSystem 
+
+
+  implicit
+
+    [.] strataddnl => 
+    dont care choose(addnewline)
+    end
+    
+    [.] unify =>
+    dont care choose(conversion) ;
+     dont know choose(solve) ;
+//    dont know choose(solve1) ;
+    dont care choose(nettoie) 
+    end
+
+
+
+end
+
+
+end

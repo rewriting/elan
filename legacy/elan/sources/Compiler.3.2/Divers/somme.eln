@@ -1,0 +1,66 @@
+module somme
+import global builtinInt bool eq[term] ;
+end
+
+sort state set;
+end
+
+operators global
+  go		: state;
+  init(@)	: (builtinInt) state;
+  error		: state;
+  state(@,@,@)	: (set set builtinInt) state;
+  U(@,@)	: (set set) set (AC);
+  empty		: set;
+  buildSet(@)	: (builtinInt) set;
+  set(@)	: (builtinInt) set;
+  in(@,@)	: (builtinInt set) bool;
+
+end
+
+rules for bool
+     I,J  : builtinInt;
+     S	  : set;
+global
+  [] in(I,empty)	=> false		end
+  [] in(I,U(set(J),S))	=> true if I==J		end
+  [] in(I,S)		=> false		end
+end
+
+rules for set
+     I,J  : builtinInt;
+     S	  : set;
+global
+  [] buildSet(0)	=> empty end
+  [] buildSet(I)	=> U(set(I),buildSet(I-1)) end
+end
+
+rules for state
+      I,J	: builtinInt;
+      S1,S2	: set;
+global
+  [] go	=> state(buildSet(100),
+		 empty,
+		 0)
+  end
+
+  [] init(I)	=> state(buildSet(I),
+		 empty,
+		 0)
+  end
+
+  [] state(U(set(I),S1) , S2 , J)
+     =>
+     error
+     if in(I,S2)
+  end
+
+  [] state(U(set(I),S1) , S2 , J)
+     =>
+     state(S1, U(S2,set(I)), J+I)
+     if not(in(I,S2))
+  end
+end
+
+
+end

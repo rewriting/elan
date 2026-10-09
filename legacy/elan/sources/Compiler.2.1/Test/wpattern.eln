@@ -1,0 +1,68 @@
+module wpattern
+
+//import global int;
+//end
+
+sort term eq equation;
+end
+
+operators global
+ a      : term;
+ b      : term;
+ c      : term;
+ d      : term;
+ e      : term;
+ f      : term;
+
+ s(@) : (term) term;
+
+ f(@,@) : (term term) term;
+ g(@) : (term) term;
+ h(@,@) : (term term) term;
+end
+
+/*
+stratop global
+  s0    : <term>        builtin;
+  s1    : <term>        builtin;
+end
+*/
+
+/*
+rules for term
+  x,y,z : term;
+global
+  [] f(x,y) => a end
+  [] f(g(x),g(y)) => d end
+  [] f(a,g(x)) => b end
+  [] f(g(b),g(x)) => c end
+end
+*/
+
+rules for term
+  x,y,z,z1,z2,z3,z4 : term;
+global
+  [] f(x,y) => h(z1,z2)
+	where z:=() g(x)
+	//where (term)h(z1,z2):=() h(y,z)
+	where (term) h(h(h(b,z1),z2),g(a)) :=() h(y,z)	
+  end
+
+//  [] f(x,y) => h(x,y) end
+end
+
+
+
+/*
+strategies for term
+implicit
+  [.] s0 => dk(r0)
+  end
+  [.] s1 => dc( go )
+  end
+
+end
+*/
+
+
+end

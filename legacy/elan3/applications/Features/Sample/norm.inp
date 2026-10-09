@@ -1,0 +1,8 @@
+ t end
+ n(t,tt) end 
+ n(n(t,tt),n(tt,t)) end
+ g(m(n(t,t))) end
+ h(k(g(m(n(t,t))),v),v) end 		
+ g(g(h(k(g(m(n(t,t))),v),v))) end
+ f( s(s(a)), g(g(h(k(g(m(n(t,t))),v),l(n(n(t,tt),n(tt,t))))))) end
+ f( s(s(a)), g(g(h(k(g(m(n(t,t))),v),l(n(n(t,tt),n(tt,t))))))) end

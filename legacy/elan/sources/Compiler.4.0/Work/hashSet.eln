@@ -1,0 +1,86 @@
+module hashSet[X]
+
+import 
+global
+  vector[X];
+local
+  cmp[entry[X]]
+  builtinHashTerm[X]
+  builtinArray[entry[X]];
+end
+
+sort hashSet[X] X entry[X];
+end 
+
+operators
+global
+  new(@)        : (int) hashSet[X];
+
+  @.add(@)      : (hashSet[X] X) hashSet[X];
+  @.contains(@) : (hashSet[X] X) bool;
+
+  @.size        : (hashSet[X]) int;
+  size(@)       : (hashSet[X]) int alias @.size:;
+
+  hashTerm(@)	: (X) int;
+local  
+  [@]           : (builtinArray[entry[X]]) hashSet[X];
+  [@]           : (X) entry[X];
+  empty	        : entry[X];
+  @ U @         : (entry[X] entry[X]) entry[X] (AC);
+  @ in @        : (X entry[X]) bool;
+end
+
+rules for hashSet[X]
+  i      : int;
+  t      : builtinArray[entry[X]];
+  e      : X;
+  hcode	: builtinInt;
+  entry : entry[X];
+  newEntry : entry[X];
+global
+  [] new(i) => [new(valueOf(i),empty)]				end
+
+  [] [t].add(e) => [t.set(hcode,newEntry)]
+		   where hcode:=() builtinHashTerm(e) % t.length
+		   where entry:=() t.get(hcode)
+		   where newEntry:=() entry U [e]
+  end
+end
+
+rules for int
+  e   : X;  
+  t   : builtinArray[entry[X]];
+global
+  [] hashTerm(e) => builtinHashTerm(e)				end
+  [] [t].size => t.length					end
+end
+
+rules for bool
+  b   : bool;
+  e   : X;  
+  t   : builtinArray[entry[X]];
+  hcode	: builtinInt;
+  entry : entry[X];
+global
+  [] [t].contains(e) => e in entry 
+		     where hcode:=() builtinHashTerm(e) % t.length
+		     where entry:=() t.get(hcode)
+  end
+  [] e in empty		=> false				end
+  [] e in [e] U entry	=> true					end
+end
+
+
+rules for entry[X]
+  entry : entry[X];
+global
+  [] entry U entry => entry end
+end
+
+end
+				
+
+
+
+

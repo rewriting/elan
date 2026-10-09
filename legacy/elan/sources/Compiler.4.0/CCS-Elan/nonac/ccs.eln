@@ -1,0 +1,215 @@
+module ccs
+
+import global bool eq[labelname];
+end
+
+sort ccst rccst label labelname procId resId relId;
+end
+
+operators global
+  
+
+  tau	: label pri 50;
+  p(@)	: (labelname) label;
+  @     : (labelname) label pri 1 alias p(@) :;
+  q(@)	: (labelname) label;
+  '\39' @ : (labelname) label alias q(@):;  // '@ is inverse Action  (39="'")
+
+  @     : (procId) ccst 		pri 40;         //Defined Process
+  0 	: ccst				pri 50;		//empty Process
+  |(@,@) : (ccst ccst) ccst assocRight	pri 10;
+  +(@,@) : (ccst ccst) ccst assocRight	pri 20;
+  @ | @ : (ccst ccst) ccst assocRight 	pri 10 alias |(@,@):;         //parallel
+  @ # @ : (ccst ccst) ccst assocRight 	pri 10 alias |(@,@):;         //parallel
+  @ + @	: (ccst ccst) ccst assocRight 	pri 20 alias +(@,@):;         //choice
+  @.@ : (label ccst) ccst 		pri 30;         //action
+  (@) : (ccst) ccst;
+  @ \ @: (ccst resId) ccst pri 5;
+  @ [@]: (ccst relId) ccst pri 7;
+
+  (@;;@)	: (label ccst) rccst;
+  (;@)	: (ccst) rccst;
+
+
+
+Q_L: procId;
+Q_M: procId;
+Q_ff: procId;
+Q_tt: procId;
+M: procId;
+M1: procId;
+M2: procId;
+L: procId;
+L1: procId;
+L2: procId;
+Mutex: procId;
+F_L: relId;
+F_M: relId;
+Internal: resId;
+Internal2: resId;
+critical_L: labelname;
+critical_M: labelname;
+rd_ff: labelname;
+rd_ff_L: labelname;
+rd_ff_M: labelname;
+rd_tt: labelname;
+rd_tt_L: labelname;
+rd_tt_M: labelname;
+req_L: labelname;
+req_M: labelname;
+set_ff: labelname;
+set_ff_L: labelname;
+set_ff_M: labelname;
+set_tt: labelname;
+set_tt_L: labelname;
+set_tt_M: labelname;
+
+
+
+
+local
+  doesNotRestrict(@,@) : (resId label) bool;
+  doesNotRestrictName(@,@) : (resId labelname) bool;
+  isInverseLabel(@,@)  : (label label) bool;             //check if l1 = l2'
+  apply @ on @ : (relId label) label;             //apply relabeling on label
+  appl  @ on @ : (relId labelname) labelname;     //  "       "      "  labelname
+end
+
+stratop global
+   start_str: <rccst -> rccst> bs;
+   calc_str:  <rccst -> rccst> bs;
+end
+
+rules for bool
+  ln1,ln2: labelname;
+  l: label;
+  resId__: resId;
+global
+  [] isInverseLabel(p($ln1),q($ln2)) => true if $ln1 == $ln2 end
+  [] isInverseLabel(q($ln1),p($ln2)) => true if $ln1 == $ln2 end
+
+  [] doesNotRestrict($resId__,tau) => true end
+  [] doesNotRestrict($resId__,p($ln1)) =>  doesNotRestrictName($resId__,$ln1) end
+  [] doesNotRestrict($resId__,q($ln1)) =>  doesNotRestrictName($resId__,$ln1) end
+
+
+[] doesNotRestrictName(Internal,rd_ff_L) => false end
+[] doesNotRestrictName(Internal,rd_ff_M) => false end
+[] doesNotRestrictName(Internal,rd_tt_L) => false end
+[] doesNotRestrictName(Internal,rd_tt_M) => false end
+[] doesNotRestrictName(Internal2,set_ff_L) => false end
+[] doesNotRestrictName(Internal2,set_ff_M) => false end
+[] doesNotRestrictName(Internal2,set_tt_L) => false end
+[] doesNotRestrictName(Internal2,set_tt_M) => false end
+
+
+
+
+  [] doesNotRestrictName($resId__,$ln1) => true end
+end
+
+rules for label
+  ln, newln : labelname;
+  relId: relId;
+global
+  [] apply $relId on tau => tau end
+  [] apply $relId on p($ln) => p($newln)
+        where newln := () appl $relId on $ln
+        end
+  [] apply $relId on q($ln) => q($newln)
+        where newln := () appl $relId on $ln
+        end
+end
+
+rules for labelname
+  relId: relId;
+  ln: labelname;
+global
+  
+
+
+[] appl F_L on rd_ff => rd_ff_L end
+[] appl F_L on rd_tt => rd_tt_L end
+[] appl F_L on set_ff => set_ff_L end
+[] appl F_L on set_tt => set_tt_L end
+[] appl F_M on rd_ff => rd_ff_M end
+[] appl F_M on rd_tt => rd_tt_M end
+[] appl F_M on set_ff => set_ff_M end
+[] appl F_M on set_tt => set_tt_M end
+
+
+
+
+  [] appl $relId on $ln => $ln end
+end
+ 
+
+rules for rccst
+	t, t1, t2, t11, t21 : ccst ;
+        l,l1,l2: label;
+        term: ccst;
+        res: rccst;
+	resId: resId;
+	relId: relId;
+global
+    [start_rule] res => res end
+    
+    [act]  (;$l.$t) => ($l;;$t) end
+
+    [plus1] (;$t1 + $t2) => ($l;;$t)
+              where (rccst)($l;;$t) := (calc_str)(;$t1) end
+    [plus2] (;$t1 + $t2) => ($l;;$t)
+              where (rccst)($l;;$t) := (calc_str)(;$t2) end
+
+    [par1] (;$t1 | $t2) => ($l;; $t | $t2) 
+              where (rccst)($l;;$t) := (calc_str)(;$t1) end
+    [par2] (;$t1 | $t2) => ($l;; $t1 | $t) 
+              where (rccst)($l;;$t) := (calc_str)(;$t2) end
+
+    [par3] (;$t1 | $t2) => (tau;; $t11 | $t21)
+              where (rccst)($l1;; $t11) := (calc_str)(;$t1)
+	      where (rccst)($l2;; $t21) := (calc_str)(;$t2)
+              if isInverseLabel($l1,$l2)
+              end
+    [res] (;$t1 \ $resId) => ($l;; $t \ $resId)
+	      where (rccst) ($l;;$t) := (calc_str)(;$t1)
+              if doesNotRestrict($resId,$l)
+	      end
+    [rel] (; $t [$relId]) => ($l2 ;; $t1 [$relId])
+              where (rccst) ($l1;; $t1) := (calc_str)(;$t)
+	      where (label) $l2 := () apply $relId on $l1
+	      end
+
+
+[proc] (; Q_L ) => res where res := (calc_str) (; Q_ff[F_L]) end
+[proc] (; Q_M ) => res where res := (calc_str) (; Q_ff[F_M]) end
+[proc] (; Q_ff ) => res where res := (calc_str) (; rd_ff.Q_ff + set_ff.Q_ff + set_tt.Q_tt) end
+[proc] (; Q_tt ) => res where res := (calc_str) (; rd_tt.Q_tt + set_tt.Q_tt + set_ff.Q_ff) end
+[proc] (; M ) => res where res := (calc_str) (; req_M.'set_tt_M.M1 ) end
+[proc] (; M1 ) => res where res := (calc_str) (; 'rd_ff_L.critical_M.M2) end
+[proc] (; M2 ) => res where res := (calc_str) (; 'set_ff_M.M) end
+[proc] (; L ) => res where res := (calc_str) (; req_L.'set_tt_L.L1) end
+[proc] (; L1 ) => res where res := (calc_str) (; 'rd_ff_M.critical_L.L2) end
+[proc] (; L2 ) => res where res := (calc_str) (; 'set_ff_L.L) end
+[proc] (; Mutex ) => res where res := (calc_str) (; (L # M # Q_L # Q_M)\ Internal \Internal2) end
+
+
+
+
+end
+
+
+rules for ccst
+  t: ccst;
+global
+  [] ($t) => $t end
+end
+
+strategies for rccst
+  implicit
+    [] start_str => start_rule end
+    [] calc_str => dk( act, plus1, plus2, par1, par2, par3, proc, res, rel) end
+end
+
+
+end

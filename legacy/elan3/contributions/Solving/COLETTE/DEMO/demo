@@ -1,0 +1,11 @@
+colette N I FCMinimumDomainFirstToLastAll Calendar.spc 't 0' < BabylonianCalendar.dat
+
+colette N I FCMinimumDomainFirstToLastAll Calendar.spc 't 0' < EgyptianCalendar.dat
+
+colette N I FCMinimumDomainFirstToLastAll Calendar.spc 't 0' < BabylonianEgyptianCalendar.dat
+
+colette N I FCFirstToLastOne IntegerSpecification.spc 't 0' < example1.dat
+
+colette N I MinSatToUnFCMinimumDomainFirstToLast jobshop2x3x100x400.spc 't 0' < jobshop2x3x100x400.dat
+
+colette N C MinSatToUnFCMinimumDomainFirstToLast jobshop2x3x100x400.spc 't 0' jobshop2x3x100x400.dat

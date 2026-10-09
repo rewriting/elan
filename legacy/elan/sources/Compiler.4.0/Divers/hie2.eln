@@ -1,0 +1,149 @@
+module hie2
+
+import eq[Set] bool;
+end
+
+sort Set ;
+end
+
+operators global
+
+  s0		: Set;
+  s(@)		: (Set) Set;
+  l(@,@)	: (Set Set) Set (AC);
+  U(@,@)	: (Set Set) Set (AC);
+  ^(@,@)	: (Set Set) Set (AC);
+  -(@,@)	: (Set Set) Set;
+  contains(@,@) : (Set Set) bool;	
+  P(@)		: (Set) Set;
+  augment(@,@)	: (Set Set) Set;
+
+  a		: Set;
+  b		: Set;
+  c		: Set;
+  d		: Set;
+  e		: Set;
+
+  u		: Set;
+  v		: Set;
+  w		: Set;
+  x		: Set;
+ 
+end
+
+rules for Set
+	L,M,N : Set;
+	E,F,G : Set;
+	S,T,V : Set;
+global
+  [] s(L) => L end
+
+//*** equations between constructors to eliminate duplicate elements
+  //[] l(l(L, L), M) => l(L, M) end
+  [] l(L, L) => L end
+ 
+//*** set union
+  [] U(S, s0) => S end
+  [] U(L,M) => l(L,M) end
+
+//*** set intersection
+  [] ^(s0, S) => s0 end
+  [] ^(l(E, L), S) => U(^(E,S), ^(L,S)) end
+  [] ^(E, S) => E if contains(S, E) end
+  [] ^(E, S) => s0 end // if not(contains(S, E)) end
+ 
+//*** asymmetric set difference
+  [] -(s0, S) => s0 end
+  [] -(l(E, L), S) => U(-(E, S), -(L, S)) end
+  [] -(E, S) => s0 if contains(S, E) end
+  [] -(E, S) => E end //if not(contains(S, E)) end
+ 
+//*** power set (defined using auxiliary function "augment")
+  [] P(s0) => s0 end
+  [] P(l(E, L)) => U(P(L), augment(P(L), E)) end
+  [] P(E) => l(s0, E) end
+
+  [] augment(s0, T) => s0 end
+  [] augment(l(S, L), T) => U(U(S, T), augment(L, T)) end
+  [] augment(S, T) => U(S, T) end
+
+//*** some specific sets
+  [] u => P(P(l(l(a, b), c))) end
+  [] v => P(P(l(a, b))) end
+  [] w => P(P(l(a, c))) end
+  [] x => P(P(l(b, c))) end
+end 
+
+rules for bool
+	L,M,N : Set; //List;
+	E,F,G : Set; //Elt;
+	S,T,V : Set;
+global
+//*** set membership
+  [] contains(s0, E) => false end
+  [] contains(l(F, L), E) => true if E==F end
+  [] contains(l(F, L), E) => contains(L, E) end //if E!=F end
+  [] contains(F, E) => E==F end
+end
+
+end
+
+/*
+Maude> red ^(-(P(s(l(a, l(l(b, c), l(d, e))))), P(s(l(l(a, b), l(c, d))))),
+      -(P(s(l(a, l(l(b, c), l(d, e))))), P(s(l(l(a, b), l(c, e)))))) .
+rewrites: 3452 in 29ms cpu (39ms real) (115070 rewrites/second)
+result Set: s(l(s(l(a, b, c, d, e)), s(l(a, b, d, e)), s(l(a, c, d, e)), s(l(a, d, e)), s(l(b, c, d, e)), s(l(b, d, e)), s(l(c, d, e)), s(l(d, e))))
+
+Maude> red -(P(s(l(a, l(l(b, c), l(d, e))))), P(s(l(l(a, b), l(c, d))))) .
+rewrites: 1426 in 9ms cpu (19ms real) (142614 rewrites/second)
+result Set: s(l(s(e), s(l(a, b, c, d, e)), s(l(a, b, c, e)), s(l(a, b, d, e)), s(l(a, b, e)), s(l(a, c, d, e)), s(l(a, c, e)), s(l(a, d, e)), s(l(a, e)), s(l(b, c, d, e)), s(l(b, c, e)), s(l(b, d, e)), s(l(b, e)), s(l(c, d, e)), s(l(c, e)), s(l(d, e))))
+
+
+Maude> red -(u, U(U(v, w), x)) == ^(^(-(u, v), -(u, w)), -(u, x)) end
+rewrites: 22752030 in 1036429ms cpu (1037629ms real) (21952 rewrites/second)
+result Bool: true
+
+
+
+
+-(P(s(l(a, l(l(b, c), l(d, e))))), P(s(l(l(a, b), l(c, d))))) 
+
+-(P(s(l(l(a, b), l(c, d)))), P(s(l(a, l(l(b, c), l(d, e))))))
+
+P(s(l(l(a, b), l(c, d))))
+
+
+contains(s(l(s0,s(l(l(a,b),l(c,d))))),
+           l(s0,s(l(a,l(l(b,c),l(d,e))))))
+
+
+
+
+contains(s(s(l(l(a,b),l(c,d)))),
+           s(l(l(a,b),l(c,d))))
+
+contains(s(s(l(l(a,b),l(c,d)))),
+           s(l(a,l(l(b,c),l(d,e)))))
+
+contains(s(s(l(a,l(l(b,c),l(d,e))))),
+	   s(l(l(a,b),l(c,d))))
+           
+
+contains(s(l(l(a,b),l(c,d))),
+           l(a,l(l(b,c),l(d,e))))
+
+
+contains(s(l(a,l(l(b,c),l(d,e)))),
+	   l(l(a,b),l(c,d)))
+
+contains(s(l(a,l(b,c))),
+	   l(a,b))
+
+contains(s(l(a,b)), a)
+contains(s(l(a,b)), b)
+contains(l(a,b), b)
+
+
+end
+
+*/

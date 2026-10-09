@@ -1,0 +1,151 @@
+module Aterm
+
+import global
+	int bool ident string
+	list[Aterm] list[Awhere] list[Alex] list[list[Alex]] 
+	list[Astrat] list[list[Astrat]] list[int]
+	list[Aoperator] list[Aoperators]
+	list[Arule] list[Astrat] list[Atabitem] list[Astrategy];
+end
+
+sort Aterm Awhere Arule Aquery Astrat Astrategy Alex Aoperator
+     Aoperators Atabitem Aconstr Atab Aprogram;
+end
+
+  // --------------------------------------------------- ATERM FILE STRU
+  //  tabofidents : Atab		// all identifiers of a program
+  //  end				// separator
+  //  typet : Atab			// table of all sorts of a program
+  //  end				// separator
+  //  import : Atab			// table of all imported modules
+  //  end				// separator
+  //  binmodules : Atab			// built in modules ?????
+  //  end				// separator
+  //  visibilities : Atab		// temporary
+  //  end
+  //  rulenames : Atab			// all rule names of a program
+  //  end				// separator
+  //  strategynames : Atab		// all strategy names
+  //  end 
+  //  [
+  //    gram.rules : Aoperators		// grammar rules of one sort
+  //    end				// separator
+  //  ]*
+  //  fin end				// end of the symbol grammar
+  //  [
+  //    rule : Arule			// named and unnamed rules
+  //    end				// separator
+  //  ]*
+  //  fin end				// end of rewrite rules
+  //  [
+  //	strat : Astrategy		// definition of a built-in strategy
+  //    end				// separator
+  //  ]*
+  //  fin end
+  //  query : Aquery			// query from .lgi
+  //  end
+
+operators global         // !!! CHANGES HAVE TO BE UPDATED IN aterm.t !!!
+  // --------------------------------------------------- LEXEMS
+  Atype(@)	: (int) Alex;
+  Achar(@)	: (int) Alex;
+  Anum(@)	: (int) Alex;
+  Astring(@)	: (int) Alex;
+  Aident(@)	: (int) Alex;
+  Ablank 	:	Alex;
+  // --------------------------------------------------- GRAMMAR
+  @':'@':'@':'@':'@':'@':'@	: (int int int int int int list[Alex]) Aoperator;
+			 		// 1, 2, 3 as follows:
+					// 1 = rule belongs to topgram
+					// 2 = rule belongs to globgram
+					// 3 = belongs to both
+					// symbol index (used in terms FSYM)
+			 		// arity of the symbol
+			 		// priority and infos
+			 		// semantic (built-in symbol)
+					// c, ac or free symbol
+  nonterm @ ':' @	: (int list[Aoperator]) Aoperators;
+					// sort, gram. rules
+  fin		: Aoperators;
+  // --------------------------------------------------- TABLES
+  @':'@		: (int string) Atabitem; // for all symbol tables
+  @':'@		: (int list[int]) Atabitem; // for visibilities
+  idents @	: (list[Atabitem]) Atab;
+  sorts @	: (list[Atabitem]) Atab;
+  modules @	: (list[Atabitem]) Atab;
+  binmodules @	: (list[Atabitem]) Atab;
+  rulenames @	: (list[Atabitem]) Atab;
+  strategynames @ : (list[Atabitem]) Atab;
+  visibilities  @ : (list[Atabitem]) Atab;
+  // --------------------------------------------------- TERMS
+  VAR(@,@)	: (int int) Aterm;		// variable, its index, type
+  INT(@)	: (int) Aterm;			// integer constant
+  IDENT(@)	: (int) Aterm;			// index of identifier
+  STRING(@)	: (list[int]) Aterm;		// 
+  FSYM(@,@) 	: (list[Aterm] int) Aterm;	// subterms, symbol code
+  // --------------------------------------------------- REWRITE RULES
+  IFF(@)	: (Aterm) Awhere;		// condition
+  WHERE(@,@,@)	: (Aterm int Aterm) Awhere;	// variable, of pattern,
+						// strategy index
+						// rhs of where statement
+  RULE(@,@,@,@,@,@,@)	: (int int int int 
+			   lhs:Aterm 
+			   rhs:Aterm 
+			   wheres:list[Awhere]) Arule;
+						// rule name index
+						// rule type index
+						// module index of rule
+						// infos
+						// lhs and rhs
+						// list of ifs or wheres
+  fin		: Arule;
+  // --------------------------------------------------- BUILT-IN STRATEGIES
+  dc		: Aconstr;
+  dk		: Aconstr;
+  DC		: Aconstr;
+  DK		: Aconstr;
+  repeat*	: Aconstr;
+  iterate	: Aconstr;
+  id		: Aconstr;
+  fail		: Aconstr;
+
+  CALL(@)	: (int) Astrat;				
+						// reference to a built in strategy name
+  SUBSTR(@,@)	: (list[Astrat] Aconstr) Astrat;	
+						// DC2(...), DK2(...)
+  SUBSTRLST(@,@): (list[list[Astrat]] Aconstr) Astrat;  
+						// dc(...), dk(...)
+  RLIST(@,@)	: (list[int] Aconstr) Astrat;		
+						// list of rules (their indexes)
+
+  STRATEGY(@,@,@,@)	: (int int int list[Astrat]) Astrategy;
+						// index of the strategy name
+						// index of strategy type
+						// index of module of strategy definition
+						// concatenation of substrategies
+  fin			: Astrategy;
+  // --------------------------------------------------- LGI MODULE
+  QUERY(@,@,@,@,@)	: (int int int Aterm Aterm) Aquery;	
+						// source type index, 
+						// result type index,
+						// main strategy index,
+						// startwith term
+						// checkwith term
+  // --------------------------------------------------- PROGRAM
+  @,@,@,@,@,@,@,@,@,@,@,@,@
+		: (identtab:Atab
+	           typetab:Atab
+		   importtab:Atab		// .. ??
+		   binmodtab:Atab		// .. ??
+		   visitab:Atab			// .. ??
+		   rulenames:Atab
+		   strategynames:Atab
+		   topglobops:list[Aoperators]
+		   topops:list[Aoperators]
+		   globops:list[Aoperators]
+		   allrules:list[Arule]
+		   allstrategies:list[Astrategy]
+		   aquery:Aquery)	Aprogram;
+end
+
+end

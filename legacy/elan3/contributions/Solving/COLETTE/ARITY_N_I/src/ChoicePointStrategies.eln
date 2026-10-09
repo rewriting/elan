@@ -1,0 +1,26 @@
+module ChoicePointStrategies[Variables,Type,Values]
+
+import
+global	ChoicePointRules[Variables,Type,Values]
+	;
+end
+
+stratop
+global
+	EnumerateDisjunctiveConstraints			: < csp -> csp >		bs;
+end
+
+strategies for csp
+implicit
+
+[] EnumerateDisjunctiveConstraints =>
+repeat* (
+	dk (PostElementaryDisjunct)
+	)
+end
+
+end
+
+
+end
+

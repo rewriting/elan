@@ -1,0 +1,143 @@
+// This file is generated automatically: do not edit it directly. 
+  module ref_read[verbose]
+          import global 
+                  REF list[GrammarRules]
+                  string io[string]
+                  eq[GrammarRules] eq[RuleStatement] eq[StrategyStatement]
+                  io[RuleStatement]       io[list[RuleStatement]] 
+                  io[Tab]         prompt[Tab]
+                  io[GrammarRules]        prompt[list[GrammarRules]] io[list[GrammarRules]]
+                  io[StrategyStatement]  
+                  io[list[StrategyStatement]] prompt[list[StrategyStatement]]
+                  io[QueryStatement]
+                  ;
+          end
+              operators global
+                read_ref_file(@)      : (string) Program;
+                read_file(@)          : (string) Program;   
+              local
+                read_rules(@) : (Pid) list[RuleStatement];
+                read_symtab(@): (Pid) list[GrammarRules];
+                read_strat(@) : (Pid) list[StrategyStatement];
+              end    
+          rules for Program
+          pid, pid1               : Pid;
+          ref_file_name           : string;
+          void0, void1, void2, void3, 
+          void4, void5, void6, void7, 
+          void8, void9, void10, void11,
+          void12                  : string;
+          r                       : RuleStatement;
+          rs, rs1                 : list[RuleStatement];
+          strats, strats1         : list[StrategyStatement];
+          idtab, idtab1,
+          sorttab, sorttab1,
+          Modules, Modules1,
+          rnamestab, rnamestab1,
+          snamestab, snamestab1
+                                  : Tab;
+          TopGlobalGrammar, topGlobalGrammar1             : list[GrammarRules];
+          TopGrammar, TopGrammar1         : list[GrammarRules];
+          GlobalGrammar, GlobalGrammar1           : list[GrammarRules];
+          Query, Query1           : QueryStatement;
+          global
+            []    read_ref_file(ref_file_name) => 
+                          read_file(ref_file_name+".ref")
+            end
+            []    read_file(ref_file_name) => 
+                          idtab,sorttab,Modules,
+                          rnamestab,snamestab,
+                          TopGlobalGrammar,TopGrammar,GlobalGrammar,
+                          rs,strats,Query
+                          //--- how to get it ---
+                                  where pid  := ()open(ref_file_name,"r")
+
+                                  where idtab := ()read(pid)
+          IF verbose == 1 : {     where void0 := ()write(stdout,"--- Identifiers is loaded\n")    }
+                                  where sorttab := ()read(pid)
+                                  //where sorttab1 := ()write(stdout,sorttab)
+          IF verbose == 1 : {     where void1 := ()write(stdout,"--- Sorts is loaded\n")}
+
+                                  where Modules := ()read(pid)
+                                  //where Modules1 := ()write(stdout,Modules)
+          IF verbose == 1 : {     where void2 := ()write(stdout,"--- Modules is loaded\n")}
+
+                                  where rnamestab := ()read(pid)
+                                  //where rnamestab1 := ()write(stdout,rnamestab)
+          IF verbose == 1 : {     where void5 := ()write(stdout,"--- RuleNames tab is loaded\n")}
+
+                                  where snamestab := ()read(pid)
+                                  //where snamestab1 := ()write(stdout,snamestab)
+          IF verbose == 1 : {     where void6 := ()write(stdout,"--- StrategyNames tab is loaded\n")}
+
+                                  where TopGlobalGrammar := ()read_symtab(pid)
+                                  //where TopGlobalGrammar1 := ()write(stdout,topGlobalGrammar)
+          IF verbose == 1 : {     where void4 := ()write(stdout,"--- TopGlobalGrammar is loaded\n")}
+
+                                  where TopGrammar := ()read_symtab(pid)
+                                  //where TopGrammar1 := ()write(stdout,TopGrammar)
+          IF verbose == 1 : {     where void10 := ()write(stdout,"--- TopGrammar is loaded\n")}
+
+                                  where GlobalGrammar := ()read_symtab(pid)
+                                  //where GlobalGrammar1 := ()write(stdout,GlobalGrammar)
+          IF verbose == 1 : {     where void11 := ()write(stdout,"--- GlobalGrammar is loaded\n")}
+
+                                  where rs := ()read_rules(pid)
+                                  //where rs1 := ()write(stdout,rs)
+          IF verbose == 1 : {     where void7 := ()write(stdout,"--- AllRules is loaded\n")}
+
+                                  where strats := ()read_strat(pid)
+                                  //where strats1 := ()write(stdout,strats)
+          IF verbose == 1 : {     where void8 := ()write(stdout,"--- AllStrategies is loaded\n")}
+
+                                  where Query := ()read(pid)
+                                  //where Query1 := ()write(stdout,Query)
+          IF verbose == 1 : {     where void9 := ()write(stdout,"--- query is loaded\n")}
+
+                                  where pid1 := ()close(pid) end
+          end
+
+          rules for list[RuleStatement]
+          pid             : Pid;
+          r               : RuleStatement;
+          rs              : list[RuleStatement];
+          global
+            []    read_rules(pid) => r.rs
+                                  where r:=()read(pid)
+                                  if neq_RuleStatement(r, EndDef)
+                                  where rs:=()read_rules(pid)
+            end
+            []    read_rules(pid) => nil
+            end
+          end
+
+          rules for list[GrammarRules]
+          pid     : Pid;
+          fs, fs1 : GrammarRules;
+          fss     : list[GrammarRules];
+          global
+            []    read_symtab(pid) => fs.fss
+                                  where fs:=()read(pid)
+                                  if neq_GrammarRules(fs,EndDef)
+                                  where fss:=()read_symtab(pid)
+            end
+            []    read_symtab(pid) => nil
+            end
+          end
+
+          rules for list[StrategyStatement]
+          pid     : Pid;
+          fs, fs1 : StrategyStatement;
+          fss     : list[StrategyStatement];
+          global
+            []    read_strat(pid) => fs.fss
+                                  where fs:=()read(pid)
+                                  if neq_StrategyStatement(fs, EndDef)
+                                  where fss:=()read_strat(pid)
+            end
+            []    read_strat(pid) => nil
+            end
+          end
+  end  
+   
+

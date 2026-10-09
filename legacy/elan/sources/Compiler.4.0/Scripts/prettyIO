@@ -1,0 +1,23 @@
+#!/bin/csh
+
+# usage: prettyIO executable ref_file
+if($#argv>0) then
+  set ARCH = `uname -m`
+  set QUERY2REF  = "${ELANLIB}/../bin/${ARCH}/query2ref"
+  set REF2RESULT = "${ELANLIB}/../bin/${ARCH}/ref2result"
+
+  #  ${QUERY2REF} $2 --query \
+  #  | sed -f ${ELANLIB}/Compiler/add_end \
+  #  | $1 -query -REF \
+  #  | sed -f ${ELANLIB}/Compiler/ref_filter \
+  #  | ${REF2RESULT} $2
+
+  #
+  # the first and the second sed filter are no longer necessary
+  #
+  ${QUERY2REF} $2 --query | $1 -REFInput -REFOutput | ${REF2RESULT} $2
+
+else
+ echo "usage: prettyIO executable ref_file"
+endif
+

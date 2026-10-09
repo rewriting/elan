@@ -1,0 +1,196 @@
+module FormuleManipulation[Variables,Type,Values]
+
+import
+global	IntegerCSP Values
+	;
+local	tuple[2,list[formule],list[formule]]
+	tuple[4,list[formule],list[formule],list[formule],list[formule]]
+	io[string] io[formule] io[list[formule]]
+	occur[var,formule] occur[var,list[formule]]
+	;
+end
+
+operators
+global	GetConstraintsOnVar(@,@,@,@)	: (var list[formule] list[formule] list[formule])
+					  tuple[list[formule],list[formule]];
+	GetDegreeOfConstraint(@,@)	: (var list[formule])				int;
+	GetMinimumDomain(@,@,@)		: (list[formule] list[formule] int)		list[formule];
+	GetMaximumDegree(@,@,@,@)	: (list[formule] list[formule] list[formule] int) list[formule];
+	GetVarInHead(@,@,@)		: (var list[formule] list[formule])		list[formule];
+	AddNormalConstraint(@)		: (formule)					list[formule];
+	WriteConstraint(@,@)		: (string formule)				formule;
+	WriteCSP(@,@,@)			: (string formule csp)				csp;
+
+end
+
+
+rules for tuple[list[formule],list[formule]]
+
+	l,l1,l2	: list[formule];
+	x:var;
+	c:formule;
+
+global 
+
+[]	GetConstraintsOnVar(x,c.l,l1,l2)
+	=>
+	switch
+	case	occurs x in c	then
+		GetConstraintsOnVar(x,l,c.l1,l2)
+	otherwise
+		GetConstraintsOnVar(x,l,l1,c.l2)
+	end
+end
+[]	GetConstraintsOnVar(x,nil,l1,l2)
+	=>
+	[l1,l2]
+end
+
+end
+
+
+rules for int
+
+	x	: var;
+	c	: formule;
+	C	: list[formule];
+
+global 
+
+[]	GetDegreeOfConstraint(x,c.C)
+	=>
+	switch
+	case	not(occurs x in c)	then
+		GetDegreeOfConstraint(x,C)
+	otherwise
+		1+GetDegreeOfConstraint(x,C)
+	end
+end
+[]	GetDegreeOfConstraint(x,nil)
+	=>
+	0
+end
+
+end
+
+
+rules for list[formule]
+
+	x,x1,x2		: var;
+	v		: Type;
+	D,D1,D2		: domain;
+	n,m		: int;
+	c,c1,c2,c3,c4	: formule;
+	l,l1,l2,l3,l4,C	: list[formule];
+	L		: tuple[list[formule],list[formule],list[formule],list[formule]];
+global 
+
+[]	GetVarInHead(x,c.l1,l2)
+	=>
+	switch
+	case	not(occurs x in c)	then
+		GetVarInHead(x,l1,c.l2)
+	otherwise
+		append(c.l1,l2)
+	end
+end
+[]	GetVarInHead(x,nil,l2)
+	=>
+	nil
+end
+
+[]	GetMinimumDomain(c1.x2 in? D2.l1,l2,n)
+	=>
+	where	m := ()GetCard(D2)
+	switch
+	case	m < n	then
+		GetMinimumDomain(x2 in? D2.l1,c1.l2,m)
+	otherwise
+		GetMinimumDomain(c1.l1,x2 in? D2.l2,n)
+	end
+end
+[]	GetMinimumDomain(c.nil,l2,n)
+	=>
+	c.l2
+end
+
+[]	GetMaximumDegree(c1.x2 in? D2.l1,C,l2,n)
+	=>
+	where	m := ()GetDegreeOfConstraint(x2,C)
+	switch
+	case	m > n	then
+		GetMaximumDegree(x2 in? D2.l1,C,c1.l2,m)
+	otherwise
+		GetMaximumDegree(c1.l1,C,x2 in? D2.l2,n)
+	end
+end
+[]	GetMaximumDegree(c.nil,C,l2,n)
+	=>
+	c.l2
+end
+
+[]	AddNormalConstraint(c)
+	=>
+	where	n := ()ArityOfConstraint(c)
+	where	c1 := ()NormalFormOfConstraint(c)
+	switch
+	case	n == 2	then
+		c1.c2.nil
+		where	c2 := ()NormalFormOfConstraint(GetInverse(c))
+	case	n == 1	then
+		c1.nil
+	end
+end
+
+end
+
+
+rules for formule
+
+	c,c_out		: formule;
+	title,s_out,s10	: string;
+
+global 
+
+[]	WriteConstraint(title,c)
+	=>
+	c
+	where	s_out := ()write(stdout,"<STRONG>"+title+":</STRONG> ")
+	where	c_out := ()write(stdout,c)
+	where	s10   := ()write(stdout,"\n<BR>")
+end
+
+end
+
+
+rules for csp
+
+	n		: int;
+	c,c_out		: formule;
+	lmc,lec,C,store,
+	l1,l2,l3,l4	: list[formule];
+	s1_out,s2_out,s3_out,s4_out,s5_out,s6_out,title:string;
+
+global 
+
+[]	WriteCSP(title,c,CSP[lmc,lec,C,store])
+	=>
+	CSP[lmc,lec,C,store]
+	where	s6_out	:= ()write(stdout,"\n<HR>")
+	where	s1_out	:= ()write(stdout,"\n"+"<STRONG>Applying "+title+" on:</STRONG> ")
+	where	c_out	:= ()write(stdout,c)
+	where	s2_out	:= ()write(stdout,"\n<BR><STRONG>LMC:</STRONG>")
+	where	l1	:= ()write(stdout,lmc)
+	where	s3_out	:= ()write(stdout,"\n<BR><STRONG>LEC&nbsp;:</STRONG>")
+	where	l2	:= ()write(stdout,lec)
+	where	s4_out	:= ()write(stdout,"\n<BR><STRONG>C&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:</STRONG>")
+	where	l3	:= ()write(stdout,C)
+	where	s5_out	:= ()write(stdout,"\n<BR><STRONG>STORE&nbsp;:</STRONG>")
+	where	l4	:= ()write(stdout,store)
+//	where	n	:= ()getc(stdin)
+end
+
+end
+
+
+end

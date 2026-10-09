@@ -1,0 +1,75 @@
+module CooperationRules[Variables,Type,Values]
+
+import
+global
+	CooperationDefinition[Variables,Type,Values]
+	OptimizationRules[Variables,Type,Values]
+	ForwardCheckingChoicePointMinimumDomain[Variables,Type,Values]
+	eq[csop]
+	solver1CSOP[Variables,Type,Values]
+	solver2CSOP[Variables,Type,Values]
+ 	;
+end
+
+
+rules for csopbis
+
+        x       					: var;
+        lb, ub, lb1, ub1, lb2, ub2, newlb, newub  	: Type;
+	P, Q, R						: csp;
+        P1, P2    					: csop;
+	lcsop						: list[csop];
+	string1, s1					: string;
+
+global 
+
+[UpdateBounds]
+	CSOPbis[CSOP[P,x,lb1,ub1],CSOP[Q,x,lb2,ub2].lcsop]
+	=>
+	CSOPbis[CSOP[R,x,newlb,newub],lcsop]
+	if	lb1 != ub1
+	choose
+	try
+		if ub2 < ub1
+		where	    R := ()Q
+		where	newlb := ()lb1
+		where	newub := ()ub2
+	try
+		if lb2 > lb1
+		where	    R := ()Q
+		where	newlb := ()lb2
+		where	newub := ()ub1
+	try
+		where	    R := ()P
+		where	newlb := ()lb1
+		where	newub := ()ub1
+	end
+end
+
+[Solver1]
+	CSOPbis[P1,lcsop]
+	=>
+	CSOPbis[P1,P2.lcsop]
+	where	P2 :=(strat1)P1
+end
+
+[Solver2]
+	CSOPbis[P1,lcsop]
+	=>
+	CSOPbis[P1,P2.lcsop]
+	where	P2 :=(strat2)P1
+end
+
+[GetMinimum]
+	CSOPbis[CSOP[P,x,lb,ub],lcsop]
+	=>
+	CSOPbis[P2,lcsop]
+	if	lb == ub
+	where	P1 := (first one (FCChoicePointMinimumDomainFirstToLastOne))CSOP[P,x,lb,ub]
+	where	P2 := (first one (GetSolutionCSOP))P1
+end
+
+end
+
+
+end

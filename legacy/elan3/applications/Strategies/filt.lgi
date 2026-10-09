@@ -1,0 +1,9 @@
+LPL filt description
+  
+query		of sort  	list[integ]
+		result of sort 	list[integ]
+		import 	filt
+		start with 	[filter(10,2000.nil)]query
+
+end
+

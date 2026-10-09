@@ -1,0 +1,22 @@
+LPL lpo description
+
+  specification description
+
+    part vars	of sort list[ident]
+	 	import sigSyntax
+    part ars	of sort list[pair[ident,pair[int,int]]]
+	 	import arSyntax
+    part less	of sort list[list[ident]]
+	 	import lessSyntax
+    part equiv	of sort list[list[ident]]
+	 	import lessSyntax
+
+  end
+//----------------------------------------------------------------------------------
+ 
+  query 	of sort  	   bool
+         	result of sort 	   bool
+	 	import 
+			ordre_lpo[vars,ars,less,equiv]
+         	start with () query
+end

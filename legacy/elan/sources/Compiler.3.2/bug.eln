@@ -1,0 +1,27 @@
+module bug
+
+import bool builtinString;
+end
+
+sort term;
+end
+
+operators
+global
+ go : term;
+ [@]  : (string) term;
+end
+
+rules for term
+   x,y:term;
+global
+    [] go => [string(65)] end
+end
+
+
+end
+				
+
+
+
+

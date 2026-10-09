@@ -1,0 +1,89 @@
+module poly3[Vars]
+
+import global int Vars eq[variable] identifier list[identifier];
+end
+sort variable poly;
+end
+operators global
+  FOR EACH Id:identifier SUCH THAT Id:=(listExtract) elem(Vars) :
+ { Id : variable; } 
+
+  @		: ( variable ) poly pri 1000;
+  @		: ( int ) poly pri 1000;
+  @ + @ 	: ( poly poly ) poly  assocRight pri 1 (AC);
+  (@ + @) 	: ( poly poly ) poly  alias @ + @:;
+  @ * @		: ( poly  poly) poly  assocRight pri 2 (AC);
+  (@ * @)	: ( poly  poly) poly  alias @ * @:;
+  deriv(@,@) 	: ( poly variable) poly;
+
+  pp(@)		: (poly) poly;
+end
+
+stratop global
+  last_simplify	: <poly>	builtin;
+  simplify	: <poly>	builtin;
+end
+
+rules for poly
+  P			: poly;
+  p1, p2, p3, p4, p5	: poly;
+  e1, e2, e3, e4	: poly; 
+  x, y			: variable;
+  n, n1, n2, n3		: int;
+global
+
+  []  P+0		=> P				end
+  []  P*0		=> 0				end
+  []  P*1		=> P				end
+  []  n1*n2		=> n where n:=() n1*n2		end
+  [factorize]  P + p1+p1	 => P + 2*p1		end
+
+  [factorize]  P + n1*p1 + n2*p1 => P + n3*p1
+		where n3:=()n1+n2			end
+
+  [factorize]  P + (p1*p2) + (p1*p3) => P + p4
+		where p4:=(simplify) p1*(p2+p3)		end
+
+  [expand]  P + (p1+p2)*(p3+p4) => P+e1+e2+e3+e4
+		where e4:=(simplify) p2*p4		
+		where e3:=(simplify) p2*p3
+		where e2:=(simplify) p1*p4
+		where e1:=(simplify) p1*p3		end
+  [expand]  P + (p1+p2)*p3 => P + e1+e2
+		where e2:=(simplify) p2*p3		
+		where e1:=(simplify) p1*p3		end
+
+  []  deriv(x,x) 	=> 1				end
+  []  deriv(y,x) 	=> 0    if $x != $y		end
+  []  deriv(n,x)   	=> 0				end
+  []  deriv(p1+p2,x)  	=> p3
+		where p3:=(simplify) deriv(p1,x)+deriv(p2,x)
+  end
+  []  deriv(p1*p2,x)  	=> p5
+		where p4:=(simplify) p1*deriv(p2,x)	
+		where p3:=(simplify) deriv(p1,x)*p2
+		where p5:=(simplify) p3+p4		end
+end
+
+strategies for poly
+implicit
+  [.] last_simplify =>
+//	repeat*(first(expand)) ; repeat*(first(factorize))
+	repeat*(first one(expand)) ; repeat*(first one(factorize))
+//	repeat*(dc(expand)) ; repeat*(dc(factorize))
+/*
+	repeat*(dc one(factorize)) ; repeat*(dc one(expand))
+	repeat*(dc one(expand) ; dc one(factorize) ; repeat+(dc one(factorize)))
+*/
+  end
+  [.] simplify =>
+
+	repeat*(first one(expand)) ; repeat*(first one(factorize))
+//	repeat*(dc(expand)) ; repeat*(dc(factorize))
+//	repeat*(dc one(factorize)) ; repeat*(dc one(expand))
+//	repeat*(dc one(expand) ; dc one(factorize) ; repeat+(dc one(factorize)))
+//	repeat*(first one(expand) ; first one(factorize) ; repeat+(first one(factorize)))
+  end
+end
+
+end

@@ -1,0 +1,215 @@
+/*
+  
+    REM - Reduce ELAN Machine
+
+    Copyright (C) 2000-2001  LORIA (CNRS, INPL, INRIA, UHP, U-Nancy 2)
+			     Nancy, France.
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
+
+    Pierre-Etienne Moreau	e-mail: Pierre-Etienne.Moreau@loria.fr
+
+*/
+#ifndef _builtin_h
+#define _builtin_h
+#include "termCommon.h"
+
+#define MAXFILE 300
+//[QUANG: Dec 19 01] 
+struct TabFile {
+    //  int size;
+  FILE *files[MAXFILE];
+};
+int tabfile_free_case[MAXFILE];
+extern struct TabFile *tabfile;
+
+// 1ere version
+//#define getInt(n) (((long)(n))/2)
+//#define setTag(n) ((struct term*)(((long)(n))*2+1))
+
+  /*
+   * Machine dependent
+   * >> doit inserer le bit de signe si necessaire
+   */
+
+// 2eme version
+//#define setTag(n) ((struct term*)((((long)(n))<<1)|1))
+//#define isTagged(n) (((long)(n))&1)
+
+#define bool2term(n) ((n)?con_1:con_0)
+extern Gterm *con_0,*con_1;
+/*
+ * ...xx1 : Integer
+ * ...010 : Identifier
+ * ...100 : String
+ * ...110 : not defined
+ */
+
+
+#ifdef BASETERM
+
+#define TAG_MASK ((unsigned long)7)
+#define INTEGER_MASK ((unsigned long)1)
+#define GisTagged(n) (((long)(n))&TAG_MASK)
+
+#define GgetInt(n) (((long)(n))>>1)
+#define GsetIntegerTag(n) ((Gterm*)((((long)(n))<<1)|INTEGER_MASK))
+#define GisIntegerTagged(n) (((long)(n))&INTEGER_MASK)
+
+#define IDENTIFIER_MASK 0x0000000000000002
+
+#define GgetIdentifier(n) (((unsigned long)(n))>>4)
+#define GsetIdentifierTag(n) ((Gterm*)((((unsigned long)(n))<<4)|IDENTIFIER_MASK))
+#define GisIdentifierTagged(n) ((!GisIntegerTagged(n)) &&\
+                              (((unsigned long)(n))&IDENTIFIER_MASK))
+
+#define STRING_MASK 0x0000000000000004
+
+#endif
+
+#ifdef ATERM
+extern AFun AFUN_IDENTIFIER;
+extern AFun AFUN_ARRAY;
+extern AFun AFUN_STRING;
+extern AFun AFUN_EMPTY_SUBTERM;
+
+int GgetIdentifier(Gterm *);
+void Ginit_builtin();
+#define GisTagged(n)           (GisIntegerTagged(n)) || (GisIdentifierTagged(n)) || (GisStringTagged(n))
+
+#define GgetInt(n)             ATgetInt((ATermInt)n)
+#define GisIntegerTagged(n)    (AT_INT==ATgetType(n))
+#define GsetIntegerTag(n)      (Gterm*)ATmakeInt(n)
+
+#define GisIdentifierTagged(n) ((AT_APPL==ATgetType(n))&&(ATisEqualAFun(ATgetAFun(n),AFUN_IDENTIFIER)))
+#define GsetIdentifierTag(n)   (Gterm *)(ATmakeAppl1(AFUN_IDENTIFIER,(Gterm *)ATmakeInt(n)))
+
+//#define GisStringTagged(t)     ((AT_APPL==ATgetType(t))&&(ATgetAFun(t)==AFUN_STRING))
+//#define isArrayTagged(t)       ((AT_APPL==ATgetType(t))&&(ATgetAFun(t)==AFUN_ARRAY))
+#endif
+
+#define CODE_STRING 249
+#define GisStringTagged(t) (GgetSymb(t)==CODE_STRING)
+#define GgetString(t)      term_getString(t)
+#define GsetStringTag(s)   term_newString(s)
+
+
+#define CODE_ARRAY 204
+#define GisArrayTagged(t) (GgetSymb(t)==CODE_ARRAY)
+
+//#define isStringTagged(n) 0
+
+// con_0 : false
+// con_1 : true
+// 2 : emballage des variables
+#define fun_3(a,b) GsetIntegerTag(GgetInt(a) + GgetInt(b))
+#define fun_4(a,b) GsetIntegerTag(GgetInt(a) - GgetInt(b))
+#define fun_5(a,b) GsetIntegerTag(GgetInt(a) * GgetInt(b))
+#define fun_6(a,b) GsetIntegerTag(GgetInt(a) / GgetInt(b))
+// 7
+#define fun_8(a,b) bool2term(GgetInt(a) == GgetInt(b)) 
+#define fun_9(a,b) bool2term(GgetInt(a) != GgetInt(b))
+#define fun_10(a,b) bool2term(GgetInt(a) <  GgetInt(b))
+#define fun_11(a,b) bool2term(GgetInt(a) <= GgetInt(b))
+#define fun_12(a,b) bool2term(GgetInt(a) >  GgetInt(b))
+#define fun_13(a,b) bool2term(GgetInt(a) >= GgetInt(b))
+#define fun_14(a,b) bool2term(GgetIdentifier(a) == GgetIdentifier(b))
+#define fun_15(a,b) bool2term(GgetIdentifier(a) != GgetIdentifier(b))
+// 14 : eq ident
+// 15 : neq ident
+#define fun_16(a,b,c) term_rec_replace((c),(a),(b))
+#define fun_17(a,b) bool2term(term_occur((b),(a)))
+#define fun_18(x,y) bool2term(term_notDestructEqual(x,y))
+#define fun_19(x,y) bool2term(!term_notDestructEqual(x,y))
+#define fun_20(a) GsetIntegerTag((-(GgetInt(a))))
+
+#define fun_21(a,b) bool2term(GgetSymb(a) && GgetSymb(b))
+#define fun_22(a,b) bool2term(GgetSymb(a) || GgetSymb(b))
+// 23 : xor
+// [pem: Sep 24 99] bug fixed
+//#define fun_24(a) bool2term(!GgetSymb(a))
+#define fun_24(a) bool2term(a!=con_1)
+#define fun_25(a) (a) 
+#define fun_26(a) (a) 
+
+#define fun_27(a,b) GsetIntegerTag(GgetInt(a) % GgetInt(b))
+#define fun_28(a,b) GsetIntegerTag(GgetInt(a) & GgetInt(b))
+#define fun_29(a,b) GsetIntegerTag(GgetInt(a) | GgetInt(b))
+// 30 : <
+// 31 : <=
+// 32 : >
+// 33 : >=
+
+//#define fun_112: help
+#define fun_113(pid)       (Gterm*)GsetIntegerTag(Getc(GgetInt(pid)))
+#define fun_114(pid,c)     (Gterm*)GsetIntegerTag(Putc(GgetInt(pid),GgetInt(c)))
+//#define fun_115: create
+#define fun_116(file,mode) (Gterm*)GsetIntegerTag(open_file(term_getString(file),term_getString(mode)))
+//#define fun_117: create_noblock
+#define fun_118(pid)       (Gterm*)GsetIntegerTag(close_file(GgetInt(pid)))
+#define fun_119(pid,t)     (Gterm*)term_write(GgetInt(pid),t)
+#define fun_120(pid,t)     (Gterm*)term_read(GgetInt(pid),t)
+#define fun_121(i)         (Gterm*)GsetIntegerTag(GgetInt(i))
+
+#define fun_122(pid)       (Gterm*)GsetIntegerTag(flush_file(GgetInt(pid)))
+//#define fun_123: error
+
+#define fun_128(code,strategy,list,start,end) term_build(4,128,\
+                strategy,list,start,end)
+#define fun_129(code,strategy,term) term_build(2,code,strategy,term)
+#define fun_130(code,strategy,term,noSol) term_build(3,code,strategy,term,noSol)
+
+#define fun_141(a)     term_build(1,141,a)
+#define fun_144(a)     term_build(1,144,a)
+
+#define fun_150(t)       GsetIntegerTag(strlen(term_getString(t)))  // strlen(t)
+#define fun_151(a,b)     term_newString(ccat(term_getString(a),term_getString(b))) // strcat(a,b)
+#define fun_152(s,n)     GsetIntegerTag(selectChar(term_getString(s),GgetInt(n))) // @[@]
+#define fun_153(s,n1,n2) term_newString(substitute(term_getString(s),GgetInt(n1),GgetInt(n2)))
+#define fun_154(s,i,l)   term_newString(subString(term_getString(s),GgetInt(i),GgetInt(l)))
+#define fun_156(s1,s2)   GsetIntegerTag(strspn(term_getString(s1),term_getString(s2)))
+#define fun_157(s1,s2)   GsetIntegerTag(strcmp(term_getString(s1),term_getString(s2)))
+#define fun_158(t)       term_newString(build_string(GgetInt(t))) // string(t)
+#define fun_177(t)       term_newString(findIdent(GgetIdentifier(t))) // ident2string(t)
+
+//builtinSyntacticUnification
+// fun_175: TODO
+
+// builtinSyntacticMatching
+#define fun_191(pattern,subject,listVar,fail)\
+        term_syntacticMatching(pattern,subject,listVar,fail)
+
+#define fun_192()      asfNull()
+#define fun_193(a,b)   asfCons(a,b)
+#define fun_194(a)     asfHead(a)
+#define fun_195(a)     asfTail(a)
+#define fun_196(a)     asfPrefix(a)
+#define fun_197(a)     asfLast(a)
+#define fun_198(a)     asfNotEmptyList(a)
+#define fun_199(a)     asfIsSingleElement(a)
+
+#define fun_200(a,b)   term_newArray(GgetInt(a),b)   // newArray(a,b)
+#define fun_201(a,b)   term_getArray(a,GgetInt(b))   // getArray(a,b) 
+#define fun_202(a,b,c) term_setArray(a,GgetInt(b),c) // setArray(a,b,c) 
+#define fun_203(a)     GsetIntegerTag(term_getLength(a)) // length(a)
+// 205
+// 206
+// 207
+#define fun_210(a)     GsetIntegerTag((int)hashTerm(a)) // hashCode
+
+#define fun_215(m1,m2) bool2term(isEqMolecule(m1,m2)) // builtinIsEqMolecule
+
+
+#endif

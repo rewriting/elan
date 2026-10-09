@@ -1,0 +1,19 @@
+module set[X]
+sort X set[X];
+end
+
+operators
+  global
+    empty	: set[X];
+    @		: ( X ) set[X];
+    @ u @	: ( set[X] set[X] ) set[X]		(AC);
+end
+
+
+rules for set[X]
+global
+  empty u empty 	=> empty
+end
+
+
+end

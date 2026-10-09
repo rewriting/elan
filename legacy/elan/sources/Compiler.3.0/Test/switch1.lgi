@@ -1,0 +1,8 @@
+LPL switch1 description
+  query    of sort term
+  result   of sort term
+  import   switch1
+
+  start with (s0) a
+
+end

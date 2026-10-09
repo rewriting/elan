@@ -1,0 +1,57 @@
+module string
+import
+  global
+    builtinString int ;
+end
+
+sort
+  string ;
+end
+
+operators global
+  @               : (builtinString)  string; // pri 5000 ; 
+
+  strlen(@)       : (string)         int    pri 2000 ;
+  strcat(@,@)     : (string string)  string pri 2000 assocRight ;
+  @+@             : (string string)  string pri 2000 assocRight alias strcat(@,@):;
+  @[@]            : (string int)     int    pri 2000 ;
+  @[@<-@]         : (string int int) string pri 2000 ;
+  substr(@,@,@)   : (string int int) string pri 2000 ;
+  strspn(@,@)     : (string string)  int    pri 2000 ;
+  strcmp(@,@)     : (string string)  int    pri 2000 ;
+  string(@)       : (int)            string pri 2000 ;
+  ident2string(@) : (ident)          string ;
+  getString(@)    : (string) builtinString ;
+local
+  [@]             : (builtinString)  string alias @:;
+  @               : (builtinString)  string pri 5000 alias [@]:;
+end
+
+rules for string
+  s, s1, s2 : builtinString ;
+  i, j : int ;
+  Id : ident ;
+global
+  [] [s1] + [s2]      => [s]  where s :=()string_strcat(s1,s2)                   end
+  [] [s][i<-j]        => [s1] where s1:=()string s[valueOf(i)<-valueOf(j)]       end
+  [] substr([s],i,j)  => [s1] where s1:=()string_substr(s,valueOf(i),valueOf(j)) end
+  [] string(i)        => [s]  where s :=()string_string(valueOf(i))              end
+  [] ident2string(Id) => [s]  where s :=()string_ident2string(Id)                end
+end
+
+rules for int
+  s, s1, s2 : builtinString ;
+  i, j : int ;
+ global
+  [] strlen([s])       => i  where i :=() [string_strlen(s)]     end
+  [] [s][i]            => j  where j :=() [string s[valueOf(i)]] end
+  [] strspn([s1],[s2]) => i  where i :=() [string_strspn(s1,s2)] end
+  [] strcmp([s1],[s2]) => i  where i :=() [string_strcmp(s1,s2)] end
+end
+
+rules for builtinString
+  s : builtinString ;
+ global
+  [] getString([s]) => s end
+end
+end

@@ -1,0 +1,86 @@
+module VA[Vars,Fss1,Fss2]
+import 	global 	termAlien[Vars,Fss1,Fss2] ;
+
+ 	local  	int identifier bool list[int] 
+	        eqSystem ;
+end
+
+
+operators 
+
+   local addfirst(@,@): (equation eqSystem) eqSystem ;
+         addtruefirst(@) : (eqSystem) eqSystem ;
+end
+
+
+rules for eqSystem
+// declare 
+P,Q:eqSystem ; s,t,l,r:term ; omega:list[int] ; n:int ;
+global
+
+[VArhs]    P & s=t   =>  
+                         P
+                       & s = t[vabst[t at omega]] at omega 
+                       & vabst[t at omega] = t at omega   
+                 where omega := (chooseOcc) alienocc(t, theory(t))
+end
+
+[VArhs]    s=t   =>  
+                       s = t[vabst[t at omega]] at omega 
+                       & vabst[t at omega] = t at omega   
+                 where omega := (chooseOcc) alienocc(t, theory(t))
+end
+
+[VAlhs]    P & t=s   => 
+                         P   
+                       & t[vabst[t at omega]] at omega = s 
+                       & vabst[t at omega] = t at omega   
+                 where omega := (chooseOcc) alienocc(t, theory(t))
+end
+
+[VAlhs]    t=s       => 
+                       t[vabst[t at omega]] at omega = s 
+                       & vabst[t at omega] = t at omega   
+                 where omega := (chooseOcc) alienocc(t, theory(t))
+end
+
+[VAdelete]  P & vabst[s] = t => P end
+
+[newdelete]  P & xnew.n = t => P end
+
+[]  addtruefirst(P & l=r) => addtruefirst(P) & l = r end
+[]  addtruefirst(l=r) => true & l = r end 
+[]  addfirst(s=t,P & l = r) => addfirst(s=t,P) & l = r end
+[]  addfirst(s=t,l=r) => s=t & l=r end
+[]  addfirst(s=t,P & true) => addfirst(s=t,P) & true end
+[]  addfirst(s=t,true) => s=t & true end
+[addtruefirstrule] P => addtruefirst(P) end
+[addfirstrule] P & s = t => addfirst(s=t,P) end
+
+local
+[trueelim] P & true => P end
+
+end
+
+
+strategies for eqSystem 
+  
+  global
+
+  [VAstrat]
+
+  dont care choose(addtruefirstrule) ;
+
+  repeat*(
+    dont care choose(VAlhs || VArhs || addfirstrule)
+  ) ;
+
+  dont care choose(trueelim) ;
+
+  dont care choose(renamingrule) 
+  end
+end
+
+
+end
+

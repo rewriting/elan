@@ -1,0 +1,55 @@
+**********************************************************************
+*  jobshop
+*
+*  This is a specification of the "Jobshop" system, described in
+*  Milner's book.  The value-passing system has been suitably
+*  translated into the pure calculus.
+*
+*  The definition of "Jobshop" assumes a tool is replaced before the
+*  job is output, whereas the modified system "Jobshop'" outputs a job
+*  before replacing the tool used for that job.  The first can be
+*  shown to be equivalent to two "Strongjobber"'s working together,
+*  whereas the latter is different. This distinction can be realised
+*  using the "check proposition" command to note that it is possible
+*  for the system "Jobshop'" to input a hard job at some point, and
+*  then not be able to output that hard job right away; that is, it
+*  doesn't satisfy the proposition Bx ([inHard]<<'outHard>>T).  The
+*  definition of the Box operator "Bx" is given below.
+**********************************************************************
+**********************************************************************
+*  The definition of the "Hammer"
+**********************************************************************
+def Hammer = geth.puth.Hammer
+**********************************************************************
+*  The definition of the "Mallet"
+**********************************************************************
+def Mallet = getm.putm.Mallet
+**********************************************************************
+*  The normal system "Jobshop"
+**********************************************************************
+def R = {geth, puth, getm, putm}
+def Jobshop = (Jobber # Jobber # Hammer # Mallet)\R
+def Jobber = inEasy.'outEasy.Jobber + inHard.UsehammerHard + inNormal.Usetool
+def Usetool = UsehammerNormal + Usemallet
+def UsehammerNormal = 'geth.'puth.'outNormal.Jobber
+def UsehammerHard = 'geth.'puth.'outHard.Jobber
+def Usemallet = 'getm.'putm.'outNormal.Jobber
+**********************************************************************
+*  The redefined system "Jobshop'"
+**********************************************************************
+def Jobshop' = (Jobber' # Jobber' # Hammer # Mallet)\R
+def Jobber' = inEasy.'outEasy.Jobber' + inHard.UsehammerHard' + inNormal.Usetool'
+def Usetool' = UsehammerNormal' + Usemallet'
+def UsehammerNormal' = 'geth.'outNormal.'puth.Jobber'
+def UsehammerHard' = 'geth.'outHard.'puth.Jobber'
+def Usemallet' = 'getm.'outNormal.'putm.Jobber'
+**********************************************************************
+*  The specification for the "Strongjobber" which needs no tools
+**********************************************************************
+def Strongjobber = inEasy.'outEasy.Strongjobber + inNormal.'outNormal.Strongjobber + inHard.'outHard.Strongjobber
+**********************************************************************
+*  The definition of the Box (necessity) temporal operator "Bx"
+**********************************************************************
+prop Bx(P) = max.Z (P && [-]Z)
+
+prop Phi = Bx ([inHard]<<'outHard>>tt)

@@ -1,0 +1,51 @@
+module ac5
+
+import global eq[term] bool;
+end
+
+sort term;
+end
+
+operators global
+  f(@,@)	: (term term) term (AC);
+  g(@,@)	: (term term) term ;
+
+  start : term;
+  a1     : term;
+  a2     : term;
+  a3     : term;
+  a4     : term;
+  b1     : term;
+  b2     : term;
+  b3     : term;
+  b4     : term;
+end
+
+stratop global
+  s0	: <term>	builtin;
+  s1	: <term>	builtin;
+end
+
+rules for term
+	x,y,z,u,v : term;
+global
+  [] start => f(a1,f(a2,f(a3,a4))) 	end
+
+  [R0] f(x,y) => g(x,y) if x==y end
+
+  [R1] f(x,y) => x if y==a1 or y==a2	end
+
+  [R2] f(x,a3) => x end
+
+
+end
+
+strategies for term
+implicit
+  [] s0 => dc(R0,R1,R2)	end
+  [] s1 => dk(R0)		end
+end
+
+
+end
+

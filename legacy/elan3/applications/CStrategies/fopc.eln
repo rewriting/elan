@@ -1,0 +1,281 @@
+module fopc
+
+import global 
+	strat[Goals] 
+	strat[integ]  	// for map
+	strat[Seq]  	// for map
+
+	string io[string] //prompt[Term,fopc_bas]	// read read in allT
+ 	meta[Goals]
+	replace[Term,Sent] eq[Sent] eq[Label] eq[Term]
+	list[Term] 
+	replace[Term,Sent]
+	fopc_bas;
+end
+operators global
+  helptac(@,@)	: (integ Goals) <Goals>;
+  concltac(@,@) : (integ Goals) <Goals>; 
+  last_hyp 	: ((integ) <Goals>) <Goals>;
+  hyptac(@) 	: (SentList) <Goals>;
+  map @		: (<Seq>) <Goals>;
+  do_concl(@)	: (integ) <Goals>;
+  max_hypothesis_label(@)	: (Goals) integ;
+  constr(@,@)	: (Sort integ) list[Term];
+  ind_repl(@,@,@,@)	: (SentList Var Sent list[Term]) Goals;
+//  ss(@)		: (integ) <Goals>;
+end
+
+rules for list[Term]
+ fv, fv1: integ;
+global
+  []	constr(INTEG,fv)	=> zero . succ(x.fv) . nil 			end
+  []	constr(LIST,fv)	=> nill . (x.fv+1 :: x.fv) . nil		end
+end
+
+rules for Goals
+ v	: Var;
+	t	: Term;
+	X	: Sent;
+	ts	: list[Term];
+	hyp	: SentList;
+global
+  []	ind_repl(hyp,v,X,t.nil)	=> hyp |- replace v by t in X 		end
+  []	ind_repl(hyp,v,X,t.ts) 	=> hyp |- replace v by t in X .
+					ind_repl(hyp,v,X,ts)		end
+end
+
+rules for Goals
+
+        G		: Goals;
+	H		: SentList;
+	X, Y, Z		: Sent;
+	N		: integ;
+        A, B, C, D, T 	: Term;
+        v, newv		: Var;
+	ls		: list[Var];
+	err, err1	: string;
+	Lab		: Label;
+	srt		: Sort;
+global
+  [Start]
+	G	=> G . $						end
+  [End]
+	G. $	=> G 							end
+  [Tand]
+	H |- X and Y. G	
+	=> 
+	H |- X . H |- Y. G						end
+  [Tleftor]
+	H |- X or Y. G 	
+	=> 
+	H |- X. G							end
+  [Trightor]
+	H |- X or Y. G
+	=> 
+	H |- Y. G 							end
+  [Timpl]
+	H |- X impl Y. G
+	=> 
+	H ; (unique(H) : X) |- Y. G					end
+  [Tnot]
+	H |- not X. G	
+	=> 
+	H ; (unique(H) : X) |- False . G					end
+  [Ttrue]
+	H |- True .  G	
+	=> 
+	G								end
+  [Texist(T)]
+	H |- (E v Y). G
+	=> 
+	H |- replace v by T in Y. G					end
+  [Tall]
+	H |- (A v Y) . G
+	=>
+	H |- replace v by new(freevarsSeq(H |- (A v Y))) in Y. G	end
+  [Tcongr]
+	H |- succ(A) = succ(B) . G
+	=>
+	H |- A = B . G							end
+  [Tcongr_succ]
+	H |- succ(A) = succ(B) . G
+	=>
+	H |- A = B . G							end
+  [Tcongr_append]
+	H |- append(A,B) = append(C,D) . G
+	=>
+	H |- A = C . H |- B = D . G					end
+  //-------------------------------------------------------------------------
+  [ind(v,srt)]
+	H |- X. G 
+	=>
+	ind_repl(H ; 
+		(unique(H) : replace v by x.imax(freevarsSeq(H |- X)) in X),
+		v,X, constr(srt,imax(freevarsSeq(H |- X)))) . G 	end
+  [Teq]						
+	H |- A = A . G
+	=>
+	G								end
+  [cut(Y)]					
+	H |- X. G 
+	=>
+	H |- Y. H ; (unique(H) : Y) |- X. G 				end
+  [exmid]
+	H |- X or not X. G
+	=>
+	G								end
+  [hyp(N)]
+	H ; (N : X) |- X. G
+	=>
+	G								end
+  [thin]
+	H |- X
+	=>
+	* |- X								end
+  [thin(N)]
+	H ; (N : X) |- Y. G
+	=>
+	H |- Y. G							end
+  [LEMMA(Lab)]
+	H |- X. G
+	=>
+	H ; (unique(H) : concl(getlemma(Lab))) |- X. G			end
+  [AXIOM_plus1]
+	H |- A = zero ++ D . G
+	=>
+	H |- A = D . G							end
+  [AXIOM_plus2]
+	H |- A = succ(C) ++ D . G
+	=>
+	H |- A = succ(C ++ D) . G					end
+  [AXIOM_plus3]
+	H |- A = B ++ C . G
+	=>
+	H |- A = C ++ B . G						end
+  [AXIOM_memb1]
+	H |- member(A, (B :: C)). G
+	=>
+	H |- A = B .  G							end
+  [AXIOM_memb2]
+	H |- member(A, (B :: C)). G
+	=>
+	H |- not A = B and member(B,C). G				end
+  [AXIOM_memb]
+	H |- member(A, (B :: C)). G
+	=>
+	H |- A = B or not A = B and member(A,C). G			end
+  [AXIOM_app1]
+	H |- T = append(nill,A). G
+	=>
+	H |- T = nill. G						end
+  [AXIOM_app2]
+	H |- T = append(A,(B::C)). G
+	=>
+	H |- T = (A::append(B,C)). G					end
+  [AXIOM_eq]
+	H |- succ(A) = succ(B). G				
+	=>
+	H |- A = B. G							end
+  [LEMMA_7]
+	H |- A = A ++ zero. G
+	=>
+	G								end
+  [LEMMA_8]
+	H |- C = A++succ(B). G
+	=>
+	H |- C = succ(A++B). G						end
+  [LEMMA_9]
+	H |- A++B = B++A. G
+	=>
+	G								end
+  [exit(err)]
+	G
+	=>
+	G		where err1:=()write(stdout,err)		end
+  //-------------------------------------------------------------------------
+  [andT(N)]
+	H ; (N : X and Y) |- Z. G 
+	=> 
+	H ; 
+	(N : X) ; 
+	(unique(H ; (N : X)) : Y) |- Z. G				end
+  [orT(N)]
+	H ; (N : X or Y) |- Z. G  
+	=> 
+	H ; 
+	(N : X) |- Z . H ;
+ 	 (unique(H ; (N : X)) :Y) |- Z. G 				end
+  [implT(N)]
+	H ; (N : X impl Y) |- Z. G
+	=> 
+	H |- X . H ; (N : Y) |- Z. G					end
+  [notT(N)]
+	H ; (N : not X) |- Y. G  
+	=> 
+	H ; (N : not X) |- X. G	 					end
+  [notnotT(N)]
+	H ; (N : not not X) |- Y. G 
+	=> 
+	H ; (N : X) |- Y. G						end 
+  [falseT(N)]
+	H ; (N : False) |- Y. G 
+	=> 
+	G								end
+  [existT(N)]	
+	H ; (N : (E v X)) |- Y. G
+	=>
+	H ; (N : replace v by new(freevarsSeq(H ; (N : (E v X)) |- Y)) in X) |- Y. G
+									end
+  [allT(T,N)]	
+	H ; (N : (A v X)) |- Y. G
+	=>
+	H ; (N : (A v X)) ; 
+	(unique(H ; (N : (A v X))) : replace v by T in X) |- Y. G	end
+  end
+
+
+strategies for Goals
+ sel 	: integ;
+        G	: Goals;
+        H   	: SentList;
+        X, Y	: Sent;
+	T1, T2	: Term;
+	N	: integ;
+	v	: Var;
+	s	: <Seq>;
+defined
+  // apply a sequent transfo for conjunction
+//  [map s] 	first(map s. map s , s)					end
+  [do_concl(sel)]	concltac(sel,self)				end
+
+  // Oracle --- HYP & CONCL
+  [helptac(sel, G)]	concltac(sel,G)					end
+  [helptac(sel, G)]	hyptac(H)					end
+
+  // Oracle --- CONCLUSION
+  [ concltac(sel, H |- X impl Y. G)]Timpl 				end
+  [ concltac(sel, H |- T1 = T2. G)]Teq	 			end
+  [ concltac(sel, H |- not X. G)]Tnot	 			end
+  [ concltac(sel, H |- True .  G)]Ttrue 	 			end
+  [ concltac(1, H |- X or Y. G)]Tleftor				end
+  [ concltac(2, H |- X or Y. G)]Trightor				end
+  [ concltac(sel, H |- (A v X). G)]Tall				end
+//  [ concltac(sel, H |- (E v X). G)]Texist(prompt("term:"))		end
+//  [ concltac(2, H |- X. G)]ind(prompt("variable:"),LIST)		end
+  [ concltac(sel, G)]exit("could not guess rule to apply\n")	end
+ 
+  // Oracle --- CONCLUSION
+  [ hyptac(H ; (N : X and Y)) ]andT(N)				end
+  [ hyptac(H ; (N : X impl Y))]implT(N)				end
+  [ hyptac(H ; (N : X or Y)) ]orT(N)				end
+  [ hyptac(H ; (N : not X)) ]notT(N)				end
+  [ hyptac(H ; (N : not not X)) ]notnotT(N)				end
+  [ hyptac(H ; (N : False)) ]falseT(N)				end
+  [ hyptac(H ; (N : (E v X)))]existT(N)				end
+//  [ hyptac(H ; (N : (A v X)))]allT(prompt("term:"),N)		end
+  [ hyptac(H ; (N : X))]thin(N)					end
+
+//  [ last_hyp ss]ss(max_hypothesis_label(self))			end
+end
+
+end

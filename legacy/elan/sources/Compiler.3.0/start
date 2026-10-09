@@ -1,0 +1,1 @@
+inconsistency_proof([p(a)]union[not p(a)]) end

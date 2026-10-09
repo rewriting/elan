@@ -1,0 +1,24 @@
+// This file is generated automatically: do not edit it directly. 
+module anyQuotedIdentifier
+/*
+        This module is          ***built-in***
+        What follows are only   ***comments*** 
+        for explaining its semantics
+
+import anyIdentifier ;
+op
+ global
+
+ "a"    : ident alias a:;
+ "b"    : ident alias b:;
+ "aa"   : ident alias aa:;
+ "ab"   : ident alias ab:;
+ "aab"  : ident alias aab:;
+ ... ... ...
+end
+*/
+end
+
+  
+
+

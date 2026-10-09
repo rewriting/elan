@@ -1,0 +1,13 @@
+LPL polyDer description
+
+  specification description
+    part Vars	of sort list[identifier]
+	 	modules identifier list[identifier]
+  end
+
+  query    of sort 		polynomial
+	   result of sort 	polynomial
+           modules  		polyDer[Vars]
+           start with 		[derive(X)]query
+
+end

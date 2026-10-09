@@ -1,0 +1,68 @@
+// This file is generated automatically: do not edit it directly. 
+  module tcstrat[X,Y]
+  //--- Use this module, if you want to work with type-changing strategies
+  //--- of the following kind X->Y
+          //--- strcommons.begin
+          import global bool strsig[X,Y] eq[Y]; end
+          sort StrList[X,Y] <X->Y>; end
+          stratop global
+              eval_ONE    : <Y>           bs;
+              eval_DC     : <Y>           bs;
+              eval_DK     : <Y>           bs;
+              eval        : <Y>           bs;
+          end
+          rules for Y 
+          //strategies for Y  ... there is a problem (see fin1: in semact.c)
+           a, l   : X;                    b, r    : Y;
+           s1, s2 : <X->Y>;               ss1     : StrList[X,Y];
+          global 
+          //explicit         ... there is a problem (see fin1: in semact.c)
+            [IF1] [if true then s1 else s2 fi]a => b      where b :=[s1]a end
+            [IF2] [if false then s1 else s2 fi]a => b     where b :=[s2]a end
+
+            [DK]  [dk(ss1)]a => b where b:=(eval_DK)((ss1))a              end
+            [DK1] ((s1,ss1))a => b where b:=[s1]a                         end
+            [DK2] ((s1,ss1))a => b where b:=(eval_DK)((ss1))a             end
+
+            [DC]  [dc(ss1)]a => b where b:=(eval_DC)((ss1))a              end
+            [DC1] ((s1,ss1))a => b where b:=[s1]a                         end
+            [DC2] ((s1,ss1))a => b where b:=(eval_DC)((ss1))a             end
+
+            [ONE] [one(ss1)]a => b where b:=(eval_ONE)((ss1))a            end
+            [ONE1] ((s1,ss1))a => b where b:=[s1]a                        end
+            [ONE2] ((s1,ss1))a => b where b:=(eval_ONE)((ss1))a           end
+
+            // the following rules are added because of `missing rule warning'
+            [ID]          b => b if false                                 end
+            [CONST]       b => b if false                                 end
+            [IFO1]        b => b if false                                 end
+            [IFO2]        b => b if false                                 end
+            [IFO3]        b => b if false                                 end
+            [FSYM]        b => b if false                                 end
+            [LAB]         b => b if false                                 end
+            [DSTR]        b => b if false                                 end
+            [CONCAT]      b => b if false                                 end
+          end
+          strategies for Y                // evaluation ELAN-strategy of the interpreter
+          implicit
+            [.] eval_ONE => dc one(dk(ONE1) , dk(ONE2) )                  end
+            [.] eval_DC => dc(dk(DC1) , dk(DC2) )                 end
+            [.] eval_DK => dk(DK1 , DK2)                                  end
+            [.] eval =>
+             first(
+               dk(FSYM)                                           ,
+               dk(DSTR)                                           ,
+               dk(DK)                                             ,
+               dk(DC)                                             ,
+               dk(ONE)                                            ,
+               dk(LAB)                                            ,
+               dc(ID)                                             ,
+               dc(CONST)                                          ,
+               dk(CONCAT)                                         ,
+               dk(IF1) , dk(IF2)                          ,
+               dc( dk(IFO1)                                       , 
+               dk(IFO2) ); dk(IFO3) ) 
+            end
+          end
+  end  
+

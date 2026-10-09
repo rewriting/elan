@@ -1,0 +1,172 @@
+module sdart
+
+sort Int Set;
+end
+
+operators global
+  o		: Int;
+  s(@)		: (Int) Int;
+  plus(@,@)	: (Int Int) Int;  
+  mult(@,@)	: (Int Int) Int;  
+  five		: Int;
+  ten		: Int;
+  fifteen	: Int;
+  twentyfive	: Int;
+  fifty		: Int;
+
+  empty		: Set;
+  set(@)	: (Int) Set;
+  p1(@,@)	: (Set Set) Set (AC);
+  @ + @		: (Set Set) Set (AC) alias p1(@,@):;
+  p2(@,@)	: (Set Set) Set (AC);
+  m2(@,@)	: (Set Set) Set (AC);
+  singles	: Set;
+  doubles	: Set;
+  triples	: Set;
+  all		: Set;
+  finish	: Set;
+end
+
+rules for Int
+	x,y : Int;
+global
+  [] five	=> s(s(s(s(s(o)))))	end
+  [] ten	=> s(s(s(s(s(five)))))	end
+  [] fifteen	=> s(s(s(s(s(ten)))))	end
+  [] twentyfive	=> s(s(s(s(s(s(s(s(s(s(fifteen))))))))))	end
+  [] fifty	=> plus(twentyfive,twentyfive)	end
+
+  [] plus(x,s(y)) => s(plus(x,y))	end
+  [] plus(x,o) => x			end
+  [] mult(x,o)	=> o			end
+  [] mult(x,s(y)) => plus(mult(x,y),x)	end
+end	
+
+rules for Set
+	S,S1,S2 : Set;
+	I,J	: Int;
+	tmp	: Set;
+global
+  [] p1( S,empty )	=> S end
+  [] p1( S,S )		=> S end
+
+  [] p2( empty,S	)	=> S end
+  [] p2( set(I),set(J) )	=> set( plus(I,J) ) end
+  [] p2( p1( S,S1 ) , S2 ) => p1( p2( set(I),tmp ) , p2( S1,tmp )  )
+	where (Set)set(I):=()S 
+	where tmp:=() S2
+   end
+  [] m2( empty,S )		=> S end
+  [] m2( set(I),set(J) )	=> set( mult(I,J) ) end
+  [] m2( p1( S,S1 ) ,  S2 ) => p1( m2( set(I),tmp ) , m2( S1,tmp ) )
+	where (Set)set(I):=()S 
+	where tmp:=() S2
+   end
+
+
+  [] singles		=>
+	// 1
+	set( s(o) ) + set( s(s(o)) ) + set( s(s(s(o))) ) + set( s(s(s(s(o)))) )
+	+set(five)+
+	// 6
+	set( s(five) ) + set( s(s(five)) ) + set( s(s(s(five))) ) + 
+	set( s(s(s(s(five)))) ) + set( ten )
+
+
+ +
+	// 11
+	set( s(ten) ) + set( s(s(ten)) ) + set( s(s(s(ten))) ) + 
+	set( s(s(s(s(ten)))) ) + set( fifteen ) +
+	// 16
+	set( s(fifteen) ) + set( s(s(fifteen)) ) + set( s(s(s(fifteen))) ) + 
+	set( s(s(s(s(fifteen)))) ) + set( plus(five,fifteen) )
+
+
+  end
+
+
+/*
+  [] singles		=> set( s(o) ) + set( s(s(o)) )
+  end
+*/
+
+  [] doubles		=> m2( singles , set(s(s(o))) ) end
+  [] triples		=> m2( singles , set(s(s(s(o)))) ) end
+  [] all		=> p1(singles,p1(doubles,p1(triples,p1(
+				 set(twentyfive),p1(set(fifty),set(o))))))
+  end
+  [] finish		=> p2( p1( doubles , set(fifty) )  , p2( all , all ) ) end
+end
+
+end
+
+
+/*
+reduce in DARTS : doubles .
+reduce in DARTS : triples .
+reduce in DARTS : all .
+reduce in DARTS : finish .
+*/
+
+/*
+[] result term:
+   (2)mp1(4)mp1(5)mp1(6)mp1(7)mp1(8)mp1(9)mp1(10)mp1(11)mp1(12)mp1(13)mp1(14)mp1(15)mp1(16)mp1(17)mp1(18)mp1(19)mp1(20)mp1(21)mp1(22)mp1(23)mp1(24)mp1(25)mp1(26)mp1(27)mp1(28)mp1(29)mp1(30)mp1(31)mp1(32)mp1(33)mp1(34)mp1(35)mp1(36)mp1(37)mp1(38)mp1(39)mp1(40)mp1(41)mp1(42)mp1(43)mp1(44)mp1(45)mp1(46)mp1(47)mp1(48)mp1(49)mp1(50)mp1(51)mp1(52)mp1(53)mp1(54)mp1(55)mp1(56)mp1(57)mp1(58)mp1(59)mp1(60)mp1(61)mp1(62)mp1(63)mp1(64)mp1(65)mp1(66)mp1(67)mp1(68)mp1(69)mp1(70)mp1(71)mp1(72)mp1(73)mp1(74)mp1(75)mp1(76)mp1(77)mp1(78)mp1(79)mp1(80)mp1(81)mp1(82)mp1(83)mp1(84)mp1(85)mp1(86)mp1(87)mp1(88)mp1(89)mp1(90)mp1(91)mp1(92)mp1(93)mp1(94)mp1(95)mp1(96)mp1(97)mp1(98)mp1(99)mp1(100)mp1(101)mp1(102)mp1(103)mp1(104)mp1(105)mp1(106)mp1(107)mp1(108)mp1(109)mp1(110)mp1(111)mp1(112)mp1(113)mp1(114)mp1(115)mp1(116)mp1(117)mp1(118)mp1(119)mp1(120)mp1(121)mp1(122)mp1(123)mp1(124)mp1(125)mp1(126)mp1(127)mp1(128)mp1(129)mp1(130)mp1(131)mp1(132)mp1(133)mp1(134)mp1(135)mp1(136)mp1(137)mp1(138)mp1(139)mp1(140)mp1(141)mp1(142)mp1(143)mp1(144)mp1(145)mp1(146)mp1(147)mp1(148)mp1(149)mp1(150)mp1(151)mp1(152)mp1(153)mp1(154)mp1(155)mp1(156)mp1(157)mp1(158)mp1(160)mp1(161)mp1(164)mp1(167)mp1(170)mp1(3)
+
+il y a 162 mp1
+
+Huggy :
+------
+ Statistics:
+ total time     (915.111+0.000)=915.111 sec     (main+subprocesses)
+
+ average speed  17 inf/sec
+            16218 nonamed rules applied, 88464 tried
+                0   named rules applied,     0 tried
+
+ named rules
+           applied   tried    rule for symbol
+
+ end of statistics
+
+Huggy : avec intern_malloc dans AC match
+------
+Statistics:
+ total time     (779.970+0.000)=779.970 sec     (main+subprocesses)
+
+ average speed  20 inf/sec
+            16218 nonamed rules applied, 88464 tried
+                0   named rules applied,     0 tried
+
+ named rules
+           applied   tried    rule for symbol
+
+ end of statistics
+
+Robin :
+------
+OBJ> OBJ> OBJ> OBJ> reduce in DARTS : finish
+rewrites: 203849
+result Set: [170] + [167] + [164] + [161] + [2] + [3] + [156] + [153] + 
+    [10] + [11] + [12] + [8] + [13] + [9] + [6] + [7] + [4] + [5] + 
+    [16] + [17] + [18] + [19] + [15] + [14] + [117] + [120] + [121] + 
+    [124] + [123] + [126] + [127] + [130] + [136] + [131] + [134] + 
+    [137] + [140] + [143] + [146] + [150] + [133] + [139] + [142] + 
+    [145] + [148] + [151] + [154] + [157] + [160] + [132] + [138] + 
+    [129] + [135] + [149] + [152] + [155] + [158] + [141] + [144] + 
+    [147] + [86] + [38] + [40] + [42] + [44] + [46] + [48] + [50] + 
+    [52] + [54] + [56] + [58] + [60] + [62] + [64] + [66] + [68] + 
+    [70] + [72] + [74] + [76] + [80] + [71] + [77] + [78] + [82] + 
+    [83] + [84] + [88] + [104] + [98] + [92] + [118] + [93] + [89] + 
+    [95] + [101] + [107] + [110] + [113] + [116] + [90] + [94] + [96] + 
+    [100] + [102] + [106] + [108] + [87] + [85] + [81] + [79] + [75] + 
+    [73] + [69] + [32] + [34] + [36] + [26] + [22] + [23] + [24] + 
+    [28] + [29] + [30] + [35] + [45] + [41] + [47] + [53] + [59] + 
+    [65] + [39] + [37] + [33] + [31] + [27] + [25] + [43] + [49] + 
+    [55] + [61] + [67] + [51] + [57] + [63] + [91] + [97] + [99] + 
+    [103] + [105] + [109] + [112] + [115] + [114] + [111] + [21] + 
+    [20] + [128] + [125] + [122] + [119]
+OBJ> Bye.
+2052.48u 15.31s 34:47.38 99.0%
+
+
+*/

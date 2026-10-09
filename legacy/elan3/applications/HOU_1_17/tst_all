@@ -1,0 +1,14 @@
+# !/bin/csh -f
+tst hou exa       exa
+tst hou specPat   specPat
+tst hou specPat1  specPat1
+tst hou specPat2  specPat2
+tst hou specPat3  specPat3
+tst hou specPat4  specPat4
+tst hou specPat5  specPat5
+tst phou specPat  specPatp
+tst phou specPat1 specPat1p
+tst phou specPat2 specPat2p
+tst phou specPat3 specPat3p
+tst phou specPat4 specPat4p
+tst phou specPat5 specPat5p

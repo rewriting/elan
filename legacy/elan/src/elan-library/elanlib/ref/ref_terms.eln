@@ -1,0 +1,213 @@
+// This file is generated automatically: do not edit it directly. 
+  module ref_terms
+          import global
+                  int
+                  REF
+                  ref_idents
+                  io[string] io[int]
+                  io[list[GrammarRules]]
+                  ;
+          end
+              operators global
+                print(@,@':'@,@)      : (Pid Term int Program) int;
+                print_Fsym(@':'@,@,@,@): (list[Term] int Pid int Program) int;
+
+                print(@,@,@)          : (Pid Term Program) int;
+                print_Fsym(@,@,@,@)   : (list[Term] Pid int Program) int;
+
+                max_var(@)            : (Term) int;
+                shift_vars(@,@)       : (Term int) Term;   
+              local
+                print(@,@,@)          : (Pid list[Term] Program) int;
+                max_var(@,@)          : (Term int) int;
+                max_var(@,@)          : (list[Term] int) int;
+                shift_vars(@,@)       : (list[Term] int) list[Term];
+
+                print_Fsym(@':'@,@,@,@,@)     : (list[Term] int Program Pid 
+                                                 int list[GrammarRules]) int;
+                print_fs(@':'@,@,@,@,@)       : (list[Term] int Program Pid 
+                                                 int GrammarRules) int;
+
+                print_Fsym(@,@,@,@,@) : (list[Term] Program Pid int list[GrammarRules]) int;
+                print_fs(@,@,@,@,@)   : (list[Term] Program Pid int GrammarRules) int;
+
+                print_fsym(@,@,@,@,@)         : (list[Term] Program Pid 
+                                                 int list[GrammarRule]) int;
+                print_lexem(@,@,@,@)          : (list[Term] Program Pid
+                                                 list[Lexem]) int;
+              end    
+          rules for int
+          t                       : Term;
+          P                       : Program;
+          ts                      : list[Term];
+          pid                     : Pid;
+          n, m, n_void, m_void    : int;
+          sorte                   : int;
+          void,
+          void1,
+          void2   : string;
+          global
+            []    print(pid,INT(n),P) => 999
+                          where n_void:=()write(pid,n)            end
+            []    print(pid,VAR(n,m),P) => 999
+                          where void1:=()write(pid,"VAR(")
+                          where n_void:=()write(pid,n)
+                          where void2:=()write(pid,")")           end
+            []    print(pid,FSYM(ts,n),P) => 999
+                          where n_void:=()print_Fsym(ts,pid,n,P)  end
+
+            []    print(pid,INT(n):sorte,P) => 999
+                          where n_void:=()write(pid,n)            end
+            []    print(pid,VAR(n,m):sorte,P) => 999
+                          where void1:=()write(pid,"VAR(")
+                          where n_void:=()write(pid,n)
+                          where void2:=()write(pid,")")           end
+            []    print(pid,FSYM(ts,n):sorte,P) => 999
+                          where n_void:=()print_Fsym(ts:sorte,pid,n,P)    end
+          /*******
+            []    print(pid,FSYM(ts,n):sorte,P) => 999
+                          where n_void:=()print_Fsym(pid,n,P)
+                          where void1:=()write(pid,"(")
+                          where m_void:=()print(pid,ts,P)
+                          where void2:=()write(pid,")")           end
+            []    print(pid,nil,P) => 999                         end
+            []    print(pid,t.nil,P) => 999
+                          where n_void:=()print(pid,t,P)          end
+            []    print(pid,t.ts,P) => 999        
+                          where n_void:=()print(pid,t,P)
+                          where void:=()write(pid,",")
+                          where m_void:=()print(pid,ts,P)         end
+          *******/
+          end
+
+          rules for int
+          t       : Term;
+          mv      : int;
+          i,j     : int;
+          is      : list[Term];
+          global
+            []    max_var(t) => max_var(t,-1)             end
+            []    max_var(VAR(i,j),mv) => i if i >= mv    end
+            []    max_var(FSYM(is,i),mv) => max_var(is,mv)        end
+          //else
+            []    max_var(t,mv) => mv                     end
+          /*
+            []    max_var(VAR(i,j),mv) => mv              end
+            []    max_var(INT(i),mv) => mv                end
+            []    max_var(IDENT(i),mv) => mv              end
+            []    max_var(STRING(i),mv) => mv             end
+          */
+            []    max_var(nil,mv) => mv                   end
+            []    max_var(t.is,mv) => max_var(is,max_var(t,mv))   end
+          end
+
+          rules for Term
+          t       : Term;
+          mv      : int;
+          i,j     : int;
+          is      : list[Term];
+          global
+            []    shift_vars(VAR(i,j),mv) => VAR(i+mv,j)          end
+            []    shift_vars(FSYM(is,i),mv) => FSYM(shift_vars(is,mv),i)  end
+            []    shift_vars(t,mv) => t                                   end
+          end
+
+          rules for list[Term]
+          t       : Term;
+          mv      : int;
+          i,j     : int;
+          is      : list[Term];
+          global
+            []    shift_vars(nil,mv) => nil                               end
+            []    shift_vars(t.is,mv) => shift_vars(t,mv).shift_vars(is,mv) end
+          end
+
+          rules for int
+          pid     : Pid;
+          void    : string;
+          P       : Program;
+          gr      : GrammarRules;
+          grs     : list[GrammarRules];
+          fsym,
+          n,m,
+          n_void,
+          m_void,
+          bin,
+          sorte   : int;
+          grrule  : GrammarRule;
+          grrules : list[GrammarRule];
+          ls      : list[Lexem];
+          t       : Term;
+          ts      : list[Term];
+          global
+          // *** avec sorte
+            []  print_Fsym(ts:sorte,pid,fsym,P) => 
+                  print_Fsym(ts:sorte,P,pid,fsym,P.TopGlobalGrammar)      
+            end
+
+            []  print_Fsym(ts:sorte,P,pid,fsym,nil) => 0                  end
+            []  print_Fsym(ts:sorte,P,pid,fsym,gr.grs) => n_void
+                  where n_void:=()print_fs(ts:sorte,P,pid,fsym,gr)
+                  if n_void > 0                                           end
+            []  print_Fsym(ts:sorte,P,pid,fsym,gr.grs) => n_void
+                  where n_void:=()print_Fsym(ts:sorte,P,pid,fsym,grs)     end
+
+            []  print_fs(ts:sorte,P,pid,fsym,GrammarForSort sorte:bin:grrules)
+                   =>
+                  print_fsym(ts,P,pid,fsym,grrules)                       end
+            []  print_fs(ts:sorte,P,pid,fsym,gr) => 0                     end
+
+
+          // *** sans sorte
+            []  print_Fsym(ts,pid,fsym,P) => 
+                  print_Fsym(ts,P,pid,fsym,P.TopGlobalGrammar)    
+            end
+
+            []  print_Fsym(ts,P,pid,fsym,nil) => 0                        end
+            []  print_Fsym(ts,P,pid,fsym,gr.grs) => n_void
+                  where n_void:=()print_fs(ts,P,pid,fsym,gr)
+                  if n_void > 0                                           end
+            []  print_Fsym(ts,P,pid,fsym,gr.grs) => n_void
+                  where n_void:=()print_Fsym(ts,P,pid,fsym,grs)   end
+
+            []  print_fs(ts,P,pid,fsym,GrammarForSort sorte:bin:grrules)
+                   =>
+                  print_fsym(ts,P,pid,fsym,grrules)                       end
+            []  print_fs(ts,P,pid,fsym,gr) => 0                           end
+          // ***
+
+            []  print_fsym(ts,P,pid,fsym,nil) => 0                        end
+            []  print_fsym(ts,P,pid,fsym,grrule.grrules) => n_void
+                  if grrule.fsym == fsym
+                  where n_void:=()print_lexem(ts,P,pid,grrule.profile)    end
+            []  print_fsym(ts,P,pid,fsym,grrule.grrules) => n_void
+                  where n_void:=()print_fsym(ts,P,pid,fsym,grrules)       end
+
+            []  print_lexem(ts,P,pid,nil) => 999                  end
+          /*
+            []  print_lexem(ts,P,pid,Type(n).ls) => n_void
+                  where void:=()write(pid,"@")
+                  where n_void:=()print_lexem(ts,P,pid,ls)                end
+          */
+            []  print_lexem(t.ts,P,pid,Type(sorte).ls) => n_void
+                  where m_void:=()print(pid,t:sorte,P)
+                  where n_void:=()print_lexem(ts,P,pid,ls)                end
+            []  print_lexem(ts,P,pid,Ident(n).ls) => n_void
+                  where void:=()write(pid,get_ident(n,P.Identifiers))
+                  where n_void:=()print_lexem(ts,P,pid,ls)                end
+            []  print_lexem(ts,P,pid,Char(n).ls) => n_void
+                  where void:=()write(pid,string(n))
+                  where n_void:=()print_lexem(ts,P,pid,ls)                end
+            []  print_lexem(ts,P,pid,Num(n).ls) => n_void
+                  where m_void:=()write(pid,n)
+                  where n_void:=()print_lexem(ts,P,pid,ls)                end
+            []  print_lexem(ts,P,pid,Blank.ls) => n_void
+                  where void:=()write(pid," ")
+                  where n_void:=()print_lexem(ts,P,pid,ls)                end
+            []  print_lexem(ts,P,pid,String(n).ls) => n_void
+                  where void:=()write(pid,"$")
+                  where n_void:=()print_lexem(ts,P,pid,ls)                end
+          end
+  end  
+   
+

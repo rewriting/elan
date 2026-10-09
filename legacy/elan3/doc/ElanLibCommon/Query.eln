@@ -1,0 +1,44 @@
+module Query[I,O,P]
+
+import 	global bool int anyIdentifier;
+end
+sort 	Query[I,O,P] ide ids;
+end
+operators global
+  @	: (ident) ide;
+  @[@]	: (ident ids) ide;
+  @	: (ide) ids;
+  @,@	: (ide ids) ids;
+        
+  quit		: Query[I,O,P]		code 90; 	// bye bye
+  help		: Query[I,O,P]		code 112;       // help
+  load @ 	: (ide) Query[I,O,P]	code 91;	// load .eln file
+  batch @ 	: (ide) Query[I,O,P]	code 107;	// run batch file
+  run @		: (I) Query[I,O,P]	code 94;	// run with this query
+
+  sorts @ @ @ 	: (ide ide ide) Query[I,O,P]code 92;	// define query, result and print-out sorts
+  startwith (@)@ : (ident O) Query[I,O,P]code 93;	// redefine start-with term
+  checkwith @	: (bool) Query[I,O,P] 	code 102;	// re-define check-with term
+  printwith @ 	: (P) Query[I,O,P]	code 98;	// re-define print-out term
+
+  qs 		: Query[I,O,P]		code 100;	// dump a stack of queries
+  rs		: Query[I,O,P]		code 101;	// dump a stack of results
+
+  stat 		: Query[I,O,P]		code 96;	// print a statistic
+  dump		: Query[I,O,P]		code 95;	// dump all rules
+  dump @ 	: (ident) Query[I,O,P]	code 108;	// dump only rules with id
+  dump @ 	: (int) Query[I,O,P]	code 109;	// dump all about symbol 
+  display @ 	: (int) Query[I,O,P]	code 103;	// change mode of prints
+
+  trace @ 	: (int) Query[I,O,P]	code 97;	// change level of debugging
+  break @ 	: (ident) Query[I,O,P]	code 104;	// set a break-point
+  break @ 	: (int) Query[I,O,P]	code 110;
+  unbreak @ 	: (ident) Query[I,O,P]	code 105;	// delete a break-point
+  unbreak @ 	: (int) Query[I,O,P]	code 111;	
+  breaks 	: Query[I,O,P]		code 106;	//list break points
+
+// DO NOT USE CODE 99 - cf COMPILMAIN
+end
+
+end
+

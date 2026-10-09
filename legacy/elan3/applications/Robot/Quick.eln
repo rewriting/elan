@@ -1,0 +1,41 @@
+module Quick
+
+import global State list[state];
+end
+sort pair;
+end
+operators global
+  sort(@) 		: (list[state]) list[state];
+  pivot(@,@,@,@)	: (state list[state] list[state] list[state]) pair;
+  [@,@]			: (list[state] list[state]) pair;
+end
+
+rules for list[state]
+ x	: state;
+	xs,s,l	: list[state];
+global
+  []  sort(nil) => nil					
+  end
+  []  sort(x.xs) => 
+		append(sort(l),x.sort(s)) // inverse order
+//		append(sort(s),x.sort(l))  		
+		where (pair)[s,l]:=()pivot(x,xs,nil,nil)
+  end
+end
+rules for pair
+ p1, p2, x1, x2	: int;
+ xs,s,l		: list[state];
+global
+  []  pivot(state(p1,p2),nil,s,l) => [s,l]			
+  end
+  []  pivot(state(p1,p2),state(x1,x2).xs,s,l) => switch
+			     case p1 < x1 then pivot(state(p1,p2),xs,s,
+						     state(x1,x2).l)
+			     otherwise pivot(state(p1,p2),xs,state(x1,x2).s,l)
+			   end
+  end
+end	
+
+end
+
+

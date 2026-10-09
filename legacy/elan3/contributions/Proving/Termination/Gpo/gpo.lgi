@@ -1,0 +1,33 @@
+LPL gpo description
+
+  specification description
+
+    part Vars	of sort list[identifier]
+	 	import sigSyntax
+    part Ops	of sort list[pair[identifier,int]]
+	 	import sigSyntax
+
+    part Rules	of sort list[pair[term,term]]
+		import
+			termCommons[Ops, Vars]
+			rwRules[Ops, Vars] list[pair[term,term]]
+  end
+
+  query 	of sort mixed_constraint
+         	result of sort mixed_constraint
+	 	import mixed_constraint[Vars, Ops] gpo_solve[Vars,Ops,Rules]
+         	start with (gpo_strat) query 
+
+end
+
+
+
+
+
+
+
+
+
+
+
+

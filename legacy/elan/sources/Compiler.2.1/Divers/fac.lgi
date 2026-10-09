@@ -1,0 +1,10 @@
+LPL fac description
+
+  query 	of sort term
+         	result of sort term
+	 	import fac
+         	start with (s0) start
+//         	start with () query
+//         	start with () start
+end
+

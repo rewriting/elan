@@ -1,0 +1,21 @@
+module sel
+
+import global int bool;
+end
+sort Pair;
+end
+operators 
+  global
+  [@,@]	: (fst:int snd:bool) Pair;
+  f(@)	: (Pair) Pair;
+end
+
+rules for Pair
+ p:Pair; r:int;
+global
+  []	f(p) => p[.fst<-p.fst+5][.snd<-true] if p.fst < 5	end
+end 
+
+end
+
+

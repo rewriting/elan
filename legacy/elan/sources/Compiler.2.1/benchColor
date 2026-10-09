@@ -1,0 +1,103 @@
+**************************************************
+propc q1
+********
+without color:
+rewrite_step = 12589
+tab_rewrite_step[202] : 15786   8890
+tab_rewrite_step[203] : 5965    3612
+tab_rewrite_step[204] : 0       14
+tab_rewrite_step[205] : 0       16
+tab_rewrite_step[206] : 0       48
+tab_rewrite_step[207] : 0       8
+tab_rewrite_step[226] : 0       1
+
+with color:
+rewrite_step = 12589
+tab_rewrite_step[202] : 10544   8890
+tab_rewrite_step[203] : 3059    3612
+tab_rewrite_step[204] : 0       14
+tab_rewrite_step[205] : 0       16
+tab_rewrite_step[206] : 0       48
+tab_rewrite_step[207] : 0       8
+tab_rewrite_step[226] : 0       1
+
+**************************************************
+propc q2
+********
+without color:
+rewrite_step = 220470
+tab_rewrite_step[202] : 275133  148821
+tab_rewrite_step[203] : 93380   71558
+tab_rewrite_step[204] : 0       22
+tab_rewrite_step[205] : 0       8
+tab_rewrite_step[206] : 0       46
+tab_rewrite_step[207] : 0       14
+tab_rewrite_step[227] : 0       1
+32.628u
+
+with color:
+rewrite_step = 220470
+tab_rewrite_step[202] : 190099  148821
+tab_rewrite_step[203] : 38475   71558
+tab_rewrite_step[204] : 0       22
+tab_rewrite_step[205] : 0       8
+tab_rewrite_step[206] : 0       46
+tab_rewrite_step[207] : 0       14
+tab_rewrite_step[227] : 0       1
+30.383
+27.7 (24/05/98)
+**************************************************
+bool3
+*****
+without color:
+rewrite_step = 68875
+tab_rewrite_step[202] : 0       37
+tab_rewrite_step[211] : 36302   3290
+tab_rewrite_step[212] : 123524  65524
+tab_rewrite_step[213] : 0       7
+tab_rewrite_step[214] : 0       7
+tab_rewrite_step[215] : 0       9
+12.664u
+
+with color:
+rewrite_step = 68875
+tab_rewrite_step[202] : 0       37
+tab_rewrite_step[211] : 34622   3290
+tab_rewrite_step[212] : 88428   65524
+tab_rewrite_step[213] : 0       7
+tab_rewrite_step[214] : 0       7
+tab_rewrite_step[215] : 0       9
+11.517u
+**************************************************
+manySorted
+**********
+without color:
+rewrite_step = 14292
+tab_rewrite_step[204] : 16918   1
+tab_rewrite_step[205] : 0       6875
+tab_rewrite_step[206] : 0       955
+tab_rewrite_step[207] : 0       1533
+tab_rewrite_step[208] : 0       1246
+tab_rewrite_step[209] : 0       858
+tab_rewrite_step[210] : 0       2816
+tab_rewrite_step[216] : 0       3
+tab_rewrite_step[217] : 0       2
+tab_rewrite_step[218] : 0       2
+tab_rewrite_step[221] : 0       1
+2.104u
+
+with color:
+rewrite_step = 14292
+tab_rewrite_step[204] : 16918   1
+tab_rewrite_step[205] : 0       6875
+tab_rewrite_step[206] : 0       955
+tab_rewrite_step[207] : 0       1533
+tab_rewrite_step[208] : 0       1246
+tab_rewrite_step[209] : 0       858
+tab_rewrite_step[210] : 0       2816
+tab_rewrite_step[216] : 0       3
+tab_rewrite_step[217] : 0       2
+tab_rewrite_step[218] : 0       2
+tab_rewrite_step[221] : 0       1
+2.107u
+**************************************************

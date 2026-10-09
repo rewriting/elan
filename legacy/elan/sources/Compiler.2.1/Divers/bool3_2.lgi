@@ -1,0 +1,20 @@
+LPL bool3_2 description
+
+
+
+  query 	of sort bool
+         	result of sort bool
+	 	import bool3_2 eq[Bool3]
+//         	start with () query
+         	start with () start
+
+
+/*
+  query 	of sort Bool3
+         	result of sort Bool3
+	 	import bool3 
+         	start with () query
+*/
+
+end
+

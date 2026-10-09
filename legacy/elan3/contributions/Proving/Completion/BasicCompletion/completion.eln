@@ -1,0 +1,661 @@
+module completion[vars,ops,prec,syst]
+
+import local 	syst
+		int
+		bool
+		list[variable]
+		pair[int,int]
+		pair[equation,int]
+		pair[equation,pair[int,int]]
+		list[pair[equation,pair[int,int]]]
+		pair[list[equation],list[pair[equation,pair[int,int]]]]
+		pair[equation,list[pair[equation,pair[int,int]]]]
+		pair[pair[equation,pair[int,int]],list[pair[equation,pair[int,int]]]]
+		eq[list[int]] eq[term] eq[equation] eq[list[equation]] eq[pair[equation,int]] eq[list[pair[equation,pair[int,int]]]]
+		termCommons[ops,vars]
+                EtermCommons[ops,vars]
+                Elist[equation]
+		Elist[pair[equation,pair[int,int]]]
+		fastRewrite[vars,ops,prec]
+		substitution
+		equation[vars,ops,prec]
+                syntacticUnification[ops,vars]
+                occur[equation,list[equation]]
+                applySubstOn[ops,vars,equation]
+		strapply[equation]
+		strat[equation]
+		strat[pair[list[equation],list[pair[equation,pair[int,int]]]]];
+end
+
+operators
+global
+
+// Regles du module de FastCompletion
+	compose(@,@)			: (equation equation) equation;
+  	simplify(@,@)			: (equation equation) equation;
+    	collapse(@,@)			: (equation equation) equation;
+    	deduce(@,@)			: (equation equation) equation;
+    	internal_deduce(@,@)		: (equation equation) equation;
+    	supemb(@,@,@,@)			: (equation equation list[int] substitution) bool;
+// Sous-regles pour la completion
+	renomme_var(@)			: (term) term;
+	renomme_var2(@)			: (term) term;
+	lvar_to_subst(@)		: (list[variable]) substitution;
+	lvar_to_subst2(@)		: (list[variable]) substitution;
+	mark1(@)			: (pair[equation,pair[int,int]]) int;
+	mark2(@)			: (pair[equation,pair[int,int]]) int;
+	max_nb(@,@)			: (list[pair[equation,pair[int,int]]] int) int;
+	regle(@)			: (pair[equation,pair[int,int]]) equation;
+	forme_normale(@,@)		: (equation list[pair[equation,pair[int,int]]]) equation;
+	composition(@,@)		: (equation list[pair[equation,pair[int,int]]]) equation;
+	simplification(@,@)		: (equation equation) equation;
+	ens_paires_critiques(@,@)	: (pair[equation,int] list[pair[equation,pair[int,int]]]) list[equation];
+	ens_equ(@)			: (pair[list[equation],list[pair[equation,pair[int,int]]]]) list[equation];
+	append_trie(@,@)		: (list[equation] list[equation]) list[equation];
+	trier(@)			: (list[equation]) list[equation];
+	marked_rule(@)			: (pair[pair[equation,pair[int,int]],list[pair[equation,pair[int,int]]]]) pair[equation,pair[int,int]];
+	list_rules(@)			: (pair[pair[equation,pair[int,int]],list[pair[equation,pair[int,int]]]]) list[pair[equation,pair[int,int]]];
+	append_trier_R(@,@)		: (list[pair[equation,pair[int,int]]] list[pair[equation,pair[int,int]]]) list[pair[equation,pair[int,int]]];
+	trier_R(@)			: (list[pair[equation,pair[int,int]]]) list[pair[equation,pair[int,int]]];
+	ens_regles(@)			: (pair[list[equation],list[pair[equation,pair[int,int]]]]) list[pair[equation,pair[int,int]]];
+	Compose(@,@)			: (list[pair[equation,pair[int,int]]] list[pair[equation,pair[int,int]]]) list[pair[equation,pair[int,int]]];
+	first_rule_non_marked(@)	: (list[pair[equation,pair[int,int]]]) pair[pair[equation,pair[int,int]],list[pair[equation,pair[int,int]]]];
+	Collapse(@,@)			: (pair[equation,pair[int,int]] list[pair[equation,pair[int,int]]]) pair[list[equation],list[pair[equation,pair[int,int]]]];
+// Regles de demarrage de la completion
+	eqlist				: list[equation];
+	completion			: pair[list[equation],list[pair[equation,pair[int,int]]]];
+	Completion(@)			: (pair[list[equation],list[pair[equation,pair[int,int]]]]) pair[list[equation],list[pair[equation,pair[int,int]]]];
+end
+
+stratop
+global	
+	simplif		: <equation -> equation> builtin;
+	first_rule	: <pair[pair[equation,pair[int,int]],list[pair[equation,pair[int,int]]]] -> pair[pair[equation,pair[int,int]],list[pair[equation,pair[int,int]]]]> builtin;
+	Complete 	: <pair[list[equation],list[pair[equation,pair[int,int]]]] -> pair[list[equation],list[pair[equation,pair[int,int]]]]> builtin;
+	init		: <pair[list[equation],list[pair[equation,pair[int,int]]]] -> pair[list[equation],list[pair[equation,pair[int,int]]]]> builtin;
+	Procedure	: <pair[list[equation],list[pair[equation,pair[int,int]]]] -> pair[list[equation],list[pair[equation,pair[int,int]]]]> builtin;
+end
+
+///////////////////////////////////////////////
+///////// REGLES DU MODULE DE FASTCOMPLETION
+///////////////////////////////////////////////
+
+
+rules for equation
+
+        s,t,l,r,v,g,d   : term;
+        eq_renommee,rrwr: equation;
+        unif,filtre     : eqSystem;
+        omega           : list[int];
+        sigma           : substitution;
+
+global
+
+[compose] compose(s->t,l->r)          => s->v
+        where rrwr:=() translate(l->r,maxvar(s,0))
+        where v:=(dk(rewriteStep)) rewriteStep(t,rrwr)
+end
+
+[simplify1] simplify(s=t,l->r)         => s=v
+        where rrwr:=() translate(l->r,maxvar(s,maxvar(t,0)))
+        where v:=(dk(rewriteStep)) rewriteStep(t,rrwr)
+end
+[simplify2] simplify(s=t,l->r)         => v=t
+        where rrwr:=() translate(l->r,maxvar(s,maxvar(t,0)))
+        where v:=(dk(rewriteStep)) rewriteStep(s,rrwr)
+end
+
+[collapse] collapse(s->t,l->r)        => v=t
+        where rrwr:=() translate(l->r,maxvar(s,0))
+        where omega := (nvocc) nvocc(s)
+        where filtre := (matchs) true & left(rrwr) = s at omega
+        where sigma := () system_to_subst(filtre)
+        where v:=() s[sigma(right(rrwr))] at omega
+        if supemb(s->t,l->r,omega,sigma)
+end
+
+[deduce1] deduce(g->d,l->r)            => eq_renommee
+	where omega:=(nvocc) nvocc(g)
+        where unif:=(unifys) true & g at omega = l
+        where sigma:=() system_to_subst(unif)
+        where eq_renommee:=() sigma(g)[sigma(r)] at omega = sigma(d)
+end
+
+[deduce2] internal_deduce(g->d,l->r)   => eq_renommee
+	where omega:=(nvocc) nvocc(g)
+	if neq_list[int](omega,nil)
+        where unif:=(unifys) true & g at omega = l
+        where sigma:=() system_to_subst(unif)
+        where eq_renommee:=() sigma(g)[sigma(r)] at omega = sigma(d)
+end
+end
+
+rules for bool
+
+        eq1,eq2 : equation;
+        omega   : list[int];
+        rho     : substitution;
+
+global
+
+[] supemb(eq1,eq2,omega,rho)  => true if neq_list[int](omega,nil)
+end
+[] supemb(eq1,eq2,omega,rho)  => true if left(eq1)!=left(eq2)
+end
+[] supemb(eq1,eq2,omega,rho)  => right(eq1) >lpo rho(right(eq2))
+end
+end
+
+
+///////////////////////////////////////////////////////////
+////////  REGLES DE LA COMPLETION
+//////////////////////////////////////////////////////////
+
+
+// renomme_var et lvar_to_subst permettent de reecrire une equation de var(n) en evar(n) et vice-versa 
+// afin d'eviter le renommage systematique des equations lors de la procedure de simplification.
+
+rules for term
+
+	t	: term;
+	lv	: list[variable];
+
+global
+
+[] renomme_var(t) => normalize(t,lvar_to_subst(lv))
+	where lv :=() list_variable(t)
+end
+
+[] renomme_var2(t) => normalize(t,lvar_to_subst2(lv))
+	where lv :=() list_variable(t)
+end
+end
+
+
+rules for substitution
+
+	L	: list[variable];
+	S	: substitution;
+	n	: int;
+
+global
+
+[] lvar_to_subst(nil) => identity
+end
+[] lvar_to_subst(var(n).L) => var(n) -> evar(n) o S
+	where S :=() lvar_to_subst(L)
+end
+[] lvar_to_subst(evar(n).L) => S
+	where S :=() lvar_to_subst(L)
+end
+
+[] lvar_to_subst2(nil) => identity
+end
+[] lvar_to_subst2(evar(n).L) => evar(n) -> var(n) o S
+	where S :=() lvar_to_subst2(L)
+end
+[] lvar_to_subst2(var(n).L) => S
+	where S :=() lvar_to_subst2(L)
+end
+end
+
+
+rules for pair[list[equation],list[pair[equation,pair[int,int]]]]
+
+	l_eq,r_eq	: term;
+	marque_2	: int;
+	eq,eq_or	: equation;	
+	L_equ,L_equ1	: list[equation];
+	rm		: pair[equation,pair[int,int]];
+	R,R1		: list[pair[equation,pair[int,int]]];
+	Coll		: pair[list[equation],list[pair[equation,pair[int,int]]]];
+	First		: pair[pair[equation,pair[int,int]],list[pair[equation,pair[int,int]]]];
+
+global
+
+
+//On decide de simplifier la 1ere equation de L_equ
+
+[Simplify] [eq.L_equ,R] => [forme_normale(normalize(eq),R).L_equ,R]
+end
+
+
+//Teste si la 1ere equation de L_equ est a supprimer. Si c'est le cas, e = out
+
+[Delete] [eq.L_equ,R] => [L_equ,R]
+		where l_eq := () left(eq)
+		where r_eq := () right(eq)
+		if eq_term(l_eq,r_eq)
+end
+
+//Oriente la 1ere equation de L_equ si l'orientation n'echoue pas et l'ajoute en TETE de R
+
+[Orient] [eq.L_equ,R] => [L_equ,[eq_or,[0,plus(max_nb(R,0),1)]].R]
+		where eq_or := (s_orient_eq) orient(eq)
+end
+
+//Applique Collapse sur R\r avec comme regle r la 1ere de R (celle que l'on vient d'ajouter par Orient)
+
+[Collapse] [L_equ,rm.R] => [append_trie(L_equ,L_equ1),rm.R1]
+		where Coll := () Collapse(rm,R)
+		where L_equ1 := () ens_equ(Coll)
+		where R1 := () ens_regles(Coll)
+end
+
+//Applique Compose sur l'ensemble des regles
+
+[Compose] [L_equ,R] => [L_equ,trier_R(R1)]
+		where R1 := () Compose(R,R)
+end
+
+// Deduit toutes les nouvelles paires critiques entre la 1ere des regles non marquees et le reste des regles
+
+[Deduce] [L_equ,R] => [append_trie(L_equ,L_equ1),append_trier_R(R1,[eq,[1,marque_2]].nil)]
+		where First := (first_rule) first_rule_non_marked(R)
+		where rm := () marked_rule(First)
+		where R1 := () list_rules(First)
+		where marque_2 := () mark2(rm)
+		where eq := () regle(rm)
+		where L_equ1 := () ens_paires_critiques([eq,marque_2],R)
+end
+end
+
+
+//////////////////////////////////////////////////////////////
+////////// SOUS-REGLES POUR LA COMPLETION
+/////////////////////////////////////////////////////////////
+
+
+rules for int
+
+	regle			: equation;
+	ent,marque_1,marque_2,N	: int;
+	Lregles_marquees	: list[pair[equation,pair[int,int]]];
+
+global
+
+// mark1 nous donne l'entier marque_1 marquant la regle r : c'est l'entier qui indique si toutes les pc ont ete calculees entre r
+// et les autres regles dont le numero 2 est plus petit que marque_2.
+
+[] mark1([regle,[marque_1,marque_2]]) => marque_1
+end
+
+
+// mark2 nous donne l'entier marque_2 marquant la regle r : c'est l'entier qui donne l'ordre d'introduction de cette regle dans
+// la liste des regles.
+
+[] mark2([regle,[marque_1,marque_2]]) => marque_2
+end
+
+
+// max_nb nous donne la regle qui a le numero marque_2 le plus grand
+
+[] max_nb (nil,ent) => ent
+end
+[] max_nb ([regle,[marque_1,marque_2]].Lregles_marquees,ent) => N
+			choose	try 	if marque_2 <= ent
+					where N := () max_nb(Lregles_marquees,ent)
+				try	if not(marque_2 <= ent)
+					where N := () max_nb(Lregles_marquees,marque_2)
+			end
+end
+end
+
+
+rules for equation
+
+	n1,n2			: int;
+	b			: bool;
+	s,t,sr,tr,s1,t1		: term;
+	e,e1,e2,eq,r,r1,r2	: equation;
+	R			: list[pair[equation,pair[int,int]]];
+	p			: pair[equation,list[pair[equation,pair[int,int]]]];
+
+global
+
+// regle nous donne la regle r, 1er element de la paire [r,[n1,n2]]
+
+[] regle([r,[n1,n2]]) => r
+end
+
+
+// forme_normale met une equation e1 sous sa forme normale en lui appliquant tant que possible l'ensemble des regles de reecriture R1
+
+[] forme_normale(s=t,R) => eq
+		where sr :=() renomme_var(s)
+		where tr :=() renomme_var(t)
+		where p := (repeat*(first(f_norm))) [sr=tr,R]
+		where e1 := () first(p)
+		where s1 := () left(e1)
+		where t1 := () right(e1)
+		where b := () (eq_term(s,s1) and eq_term(t,t1)) or (eq_term(s,t1) and eq_term(s1,t))
+		if eq_bool(b,false)
+		where eq := () forme_normale(e1,R)
+end
+[] forme_normale(s=t,R) => sr=tr
+		where sr :=() renomme_var2(s)
+		where tr :=() renomme_var2(t)
+end
+
+
+// composition est utilise par Compose pour operer compose d'un ensemble R de regles sur une regle r
+
+[] composition(r,nil) => r
+end
+[] composition(r,[r1,[n1,n2]].R) => composition(r2,[r1,[n1,n2]].R)
+		where r2 := (first(compose)) compose(r,r1)
+end
+[] composition(r,[r1,[n1,n2]].R) => composition(r,R)
+end
+
+
+// simplification simplifie e par e1 si possible, sinon, rend e
+
+[] simplification(e,e1) => e2
+		where e2 := (simplif) simplify(e,e1)
+end
+[] simplification(e,e1) => e
+end
+end
+
+
+rules for pair[equation,list[pair[equation,pair[int,int]]]]
+
+	e,e1,e2,e3	: equation;
+	rm		: pair[equation,pair[int,int]];
+	R		: list[pair[equation,pair[int,int]]];
+
+global
+
+[f_norm] [e,rm.R] => [simplification(e,regle(rm)),R]
+end
+end
+
+
+rules for list[equation]
+
+	e,e1,e2,e3	: equation;
+	n,n1,n2		: int;
+	E,E1,E2		: list[equation];
+	R		: list[pair[equation,pair[int,int]]];
+
+global
+
+
+// ens_paires_critiques calcule l'ensemble des paires critiques entre une regle e et les regles de R
+// qui ont un 2nd numero plus petit que n (ou egal => c'est la cas des calculs de pc d'une regle sur elle-meme).
+
+[] ens_paires_critiques([e,n],nil) => trier(setof(dk(deduce2),internal_deduce(e,e1)))
+		where e1 := () translate(e,maxvar(e,0))
+end
+[] ens_paires_critiques([e,n],[e1,[n1,n2]].R) => append_trie(E,ens_paires_critiques([e,n],R))
+			if n2 < n
+		where e3 := () translate(normalize(e1),maxvar(e,0))
+		where E1 :=() setof(dk(deduce1),deduce(e,e3))
+		where E2 :=() setof(dk(deduce1),deduce(e3,e))
+		where E := () append_trie(trier(E1),trier(E2))
+end
+[] ens_paires_critiques([e,n],[e1,[n1,n2]].R) => ens_paires_critiques([e,n],R)
+end
+
+
+// ens_equ nous donne la liste des equations de la paire [E,R]
+
+[] ens_equ([E,R]) => E
+end
+
+
+// append_trie fait un append trie de deux listes d'equations triees
+
+[] append_trie(nil,E) => E
+end
+[] append_trie(E,nil) => E
+end
+[] append_trie(e1.E1,e2.E2) => e1.E
+		where n1 := () taille(e1)
+		where n2 := () taille(e2)
+			if n1 <= n2
+		where E := () append_trie(E1,e2.E2)
+end
+[] append_trie(e1.E1,e2.E2) => e2.E
+		where E := () append_trie(e1.E1,E2)
+end
+
+
+// trier trie une liste d'equation
+
+[] trier(nil) => nil
+end
+[] trier(e.nil) => e.nil
+end
+[] trier(e.E) => E2
+		if neq_list[equation](E,nil)
+		where E1 := () trier(E)
+		where E2 := () append_trie(e.nil,E1)
+end
+end
+
+
+rules for pair[equation,pair[int,int]]
+
+	rm 	: pair[equation,pair[int,int]];
+	R	: list[pair[equation,pair[int,int]]];
+
+global
+
+// marked_rule nous donne le 1er elt de la paire que composent une regle marquee et une liste de telles regles
+
+[] marked_rule([rm,R]) => rm
+end
+end
+
+
+rules for list[pair[equation,pair[int,int]]]
+
+	rm 	: pair[equation,pair[int,int]];
+	R	: list[pair[equation,pair[int,int]]];
+
+global
+
+// list_rules nous donne le 2nd elt de la paire que composent une regle marquee et une liste de telles regles
+
+[] list_rules([rm,R]) => R
+end
+end
+
+	
+rules for list[pair[equation,pair[int,int]]]
+
+	n,m1,m2,n1,n2,t1,t2	: int;
+	r,r1,rm			: equation;
+	E			: list[equation];
+	p,p1			: pair[equation,pair[int,int]];
+	R,R1,R2			: list[pair[equation,pair[int,int]]];
+
+global
+
+
+// append_trier_R fait un append de deux listes de regles marquees triees
+
+[] append_trier_R(nil,R) => R
+end
+[] append_trier_R(R,nil) => R
+end
+[] append_trier_R([rm,[m1,m2]].R1,[r,[n1,n2]].R2) => [rm,[m1,m2]].R
+		where t1 := () taille(rm)
+		where t2 := () taille(r)
+			if t1 <= t2
+		where R := () append_trier_R(R1,[r,[n1,n2]].R2)
+end
+[] append_trier_R([rm,[m1,m2]].R1,[r,[n1,n2]].R2) => [r,[n1,n2]].R
+		where R := () append_trier_R([rm,[m1,m2]].R1,R2)
+end
+
+
+// trier_R trie une liste de regles marquees
+
+[] trier_R(nil) => nil
+end
+[] trier_R([rm,[m1,m2]].nil) => [rm,[m1,m2]].nil
+end
+[] trier_R([rm,[m1,m2]].R) => R2
+		where R1 := () trier_R(R)
+		where R2 := () append_trier_R([rm,[m1,m2]].nil,R1)
+		if neq_list[pair[equation,pair[int,int]]](R,nil)
+end
+
+
+// ens_regles nous donne la liste des regles de la paire [E,R]
+
+[] ens_regles([E,R]) => R
+end
+
+
+//Compose tente de simplifier chaque membre droit des regles de R
+
+[] Compose(nil,R) => nil
+end
+[] Compose(p.R,p1.R1) => [r1,[n1,n2]].Compose(R,append(R1,[r1,[n1,n2]].nil))
+		where r := () regle(p)
+		where n1 := () mark1(p)
+		where n2 := () mark2(p)
+		where r1 := () composition(r,R1)
+end
+end
+
+rules for pair[pair[equation,pair[int,int]],list[pair[equation,pair[int,int]]]]
+
+	n1,n2	: int;
+	rm	: equation;
+	rm1	: pair[equation,pair[int,int]];
+	R,R1	: list[pair[equation,pair[int,int]]];
+	P,P1	: pair[pair[equation,pair[int,int]],list[pair[equation,pair[int,int]]]];
+
+global
+
+// first_rule_non_marked nous donne la 1ere regle non marquee (cad dt ttes les pc n'ont pas ete calculees) et le reste de la liste
+
+[First_rule] first_rule_non_marked([rm,[n1,n2]].R) => P1
+				choose	try	if eq_int(n1,0)
+						where P1 := () [[rm,[n1,n2]],R]
+					try	if neq_int(n1,0)
+						where P := (first_rule) first_rule_non_marked(R)
+						where rm1 := () first(P)
+						where R1 := () second(P)
+						where P1 := () [rm1,[rm,[n1,n2]].R1]
+				end
+end
+end
+
+rules for pair[list[equation],list[pair[equation,pair[int,int]]]]
+
+	r1,r2,r3 : equation;
+	E1,E2	 : list[equation];
+	rm,rm1	 : pair[equation,pair[int,int]];
+	R,R1	 : list[pair[equation,pair[int,int]]];
+	P	 : pair[list[equation],list[pair[equation,pair[int,int]]]];
+
+global
+
+//Collapse cherche a appliquer la regle r pour simplifier le membre gauche des regles de R
+
+[] Collapse(rm,nil) => [nil,nil]
+end
+[] Collapse(rm,rm1.R) => [E2,R1]
+		where r1 := () regle(rm)
+		where r2 := () regle(rm1)
+		where r3 := (first(collapse)) collapse(r2,r1)
+		where P := () Collapse(rm,R)
+		where E1 := () ens_equ(P)
+		where R1 := () ens_regles(P)
+		where E2 := () append_trie(r3.nil,E1)
+end
+[] Collapse(rm,rm1.R) => [E1,rm1.R1]
+		where P := () Collapse(rm,R)
+		where E1 := () ens_equ(P)
+		where R1 := () ens_regles(P)
+end
+end
+
+
+
+///////////////////////////////////////////////////////////////
+// REGLES DE DEMARRAGE DE LA COMPLETION
+//////////////////////////////////////////////////////////////
+
+rules for list[equation]
+
+global
+
+// Transformation du systeme donne dans la specification en liste d'equations
+
+[] eqlist => FOR EACH X:equation SUCH THAT X:=(listExtract)elem(syst):{X.} nil
+end
+end
+
+
+rules for pair[list[equation],list[pair[equation,pair[int,int]]]]
+
+	resul	: pair[list[equation],list[pair[equation,pair[int,int]]]];
+	E	: list[equation];
+
+global
+
+[Init] completion => resul
+		where E := () trier(eqlist)
+		where resul :=  [Complete] [E,nil]
+end
+end
+
+
+///////////////////////////////////////////////////
+/////// STRATEGIES 
+///////////////////////////////////////////////////
+
+strategies for equation
+
+implicit
+
+[] simplif => first(simplify1;simplify2, simplify1, simplify2)
+end
+end
+
+strategies for pair[pair[equation,pair[int,int]],list[pair[equation,pair[int,int]]]]
+
+implicit
+
+[] first_rule => first(First_rule, fail)
+end
+end
+
+
+strategies for pair[list[equation],list[pair[equation,pair[int,int]]]]
+
+	E	: list[equation];
+	R	: list[pair[equation,pair[int,int]]];
+	P,P1	: pair[list[equation],list[pair[equation,pair[int,int]]]];
+
+explicit
+
+[.] [Complete] [nil,R] => [nil,R]
+end
+[.] [Complete] [E,R] => P1
+		where P := (Procedure) [E,R]
+		where P1 := [Complete] P
+end
+
+implicit
+
+[] init => first one(Init)
+end
+[] Procedure => repeat*(first one(Simplify);first one(	Delete, 
+							first one(	Orient;Collapse;Compose, 
+							id;fail)));
+		repeat*(first one(Deduce);repeat*(first one(Simplify);first one(	Delete, 
+											first one(	Orient;Collapse;Compose, 
+											id;fail))))
+end
+end
+
+
+end

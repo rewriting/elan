@@ -1,0 +1,7 @@
+LPL monkey description
+  query    of sort State
+  result   of sort State
+  import   monkey
+  start with () query
+
+end

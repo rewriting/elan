@@ -1,0 +1,23 @@
+LPL buble description
+
+query		of sort  	array[30,int]
+		result of sort 	array[30,int]
+		import	 	int buble[array[30,int]]
+				strat[array[30,int]]
+				loops[i,array[30,int]]
+				loops[j,array[30,int]]
+		start with 	[for i=1 to 28 do
+				   for j=28 downto i do
+//				     dc(swap(j-1,j),id)
+				     dc(swap(j),id)
+				   od
+				 od
+				]
+[
+4 6 3 1 2 3 4 5 6 7
+4 6 3 1 2 3 4 5 6 7
+4 6 3 1 2 3 4 5 6 7
+]
+
+end
+

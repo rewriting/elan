@@ -1,0 +1,47 @@
+module nd
+
+import 	global int cmp[term];
+end
+
+sort term;
+end
+
+operators
+global
+  go : term;
+  f(@,@) : (term term) term;
+  g(@,@) : (term term) term;
+  h(@,@) : (term term) term;
+  P(@)   : (term) bool;
+  a : term;
+  b : term;
+  c : term;
+end
+
+stratop global 
+  S : <term> bs;
+end
+
+rules for term
+  x,y : term;
+global 
+  [] go => a end
+
+  [R1] f(x,y) => g(x,y) if P(f(x,y))  end
+  [R1] f(x,y) => h(f(x,x),y) if not P(f(x,y))  end
+
+end
+
+rules for bool
+  x,y : term;
+global 
+  [] P(f(x,y)) => x==y end
+end
+
+
+strategies for term
+   implicit
+   [] S => normalize(dc one(R1)) end
+end
+
+end

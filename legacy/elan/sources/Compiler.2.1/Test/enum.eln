@@ -1,0 +1,78 @@
+module enum
+
+import global eq[Int];
+end
+
+sort Int selection interval;
+end
+
+operators global
+ [@,@] : (Int Int) interval;
+ [@,@] : (Int interval) selection;
+ getInt(@) : (selection) Int;
+ enum(@,@) : (Int Int) Int;
+
+ o : Int;
+ s(@) : (Int) Int;
+ plus(@,@)	: (Int Int) Int;
+ times(@,@)	: (Int Int) Int;
+ fac(@)	: (Int) Int;
+
+
+end
+
+
+stratop global
+  s0    : <Int>        builtin;
+  s1    : <Int>        builtin;
+end
+
+
+
+rules for Int
+  x,y,z,min,max : Int;
+  i : interval;
+  s : selection;
+
+global
+  [] getInt([x,i]) => x end
+
+  [r0] enum(min,max) => getInt(s)
+	// one marche aussi
+	where s:=(iterate*( dc(R) )) [min,[s(min),max]]
+  end
+
+  [] plus(o,x) => x 			end
+  [] plus(s(x),y) => plus(x,s(y))	end
+  [] times(o,x)=> o			end
+  [] times(s(x),y) => plus(y,times(x,y)) end
+  [] fac(o) => s(o)			end
+  [] fac(s(x)) => times(s(x),fac(x))	end
+
+
+end
+
+rules for selection
+  x,min,max : Int;
+global
+  [R] [x,[min,max]] => [min,[s(min),max]] if min != s(max)
+  end
+
+end
+
+
+strategies for Int
+implicit
+  // ici : dc et non one
+  [.] s0 => dk(r0)
+  end
+end
+
+
+
+end
+
+/*
+
+query : enum( o , fac(s(s(s(s(s(s(s(o)))))))) )
+*/

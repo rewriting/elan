@@ -1,0 +1,970 @@
+//--------------------------------------------------------------------------------------
+// Another termCommons with functions for infix operators
+//--------------------------------------------------------------------------------------
+// Take care with the parantheses for @[@] at @
+// in the rule for infix operators
+//--------------------------------------------------------------------------------------
+// 
+//  variables_of(@)	: variables of term
+//  variables_ofLT(@)	: variables of term (result - list[term])
+//  var_lin(@)		: list of linear variables of a term
+//  get_list_variables(@,@): x.1 .... x.n
+//
+//  getTermsAll(@,@)	: Subterms having a specific head - we search in deapth as well
+//  getTerms(@,@)	: Subterms having a specific head 
+//  getTermsPair(@,@)	: Subterms having a specific head from a list of pairs of terms
+//
+//  getTermsVar(@,@)	: True if the term contains a specific variable
+//
+//  list_subterm(@)	: list subterms
+//  term_to_variable(@) : term --> variable;
+//
+//  Var_at(@,@)		: if variable at depth <  d	
+//  Strict_at(@,@)	: if strict at depth = d	
+//
+//     makeTerm(@ ,@, ...)	: make all terms with different args
+/*--- lists ---*///-------------------------------------------------------------------
+//  unicate(@)		: list of unicates
+//  member(@,@)		: ? an elem belongs to alist ?
+//  elim(@,@)		: eliminate an element from a list
+//  elim_first one(@,@)	: eliminate one occurence of an element from a list
+//  reverse(@)		: reverses a list
+//--------------------------------------------------------------------------------------
+module termCommons[Vars,Ars]
+import global	
+		int bool ident 
+		list[int] list[variable] list[ident] list[term] list[pair[term,term]] 
+		eq[term] eq[variable] 
+		substitution
+		pair[int,int] pair[term,term]
+		pair[ident,int] list[pair[ident,int]]
+		pair[ident,pair[int,int]] list[pair[ident,pair[int,int]]]
+
+		Alist[list[int]]
+		Alist[term]
+		Alist[variable]
+
+		Vars Ars 
+;
+end
+sort variable term;
+end
+operators global
+/*--- term ---*///-------------------------------------------------------------------
+  var(@)       		: ( int ) variable;
+  @            		: ( variable ) term		pri 1000;
+
+  head(@)		: ( term ) ident;
+  @-th subterm(@) 	: ( int term ) term;
+  isvar(@)              : ( term ) bool;
+  nvocc(@)              : ( term ) list[int];
+  nlvocc(@,@)           : ( term list[variable] ) list[int];
+  vocc(@,@)		: ( variable term ) list[int];
+
+  arity(@)		: ( ident ) int;
+  
+  @ at @                : ( term list[int] ) term;
+  @[@] at @             : ( term term list[int] ) term;
+  (@[@] at @)             : ( term term list[int] ) term	alias @[@] at @:;
+
+  rename_subst(@,@)     : ( list[variable] int ) substitution;
+
+//--------------------------------------------------------------------------------------
+  variables_of(@)	: ( term ) list[variable];
+  variables_ofLT(@)	: ( term ) list[term];
+  var_lin(@)		: ( term ) list[variable];
+  get_list_variables(@,@) : ( int int) list[variable];
+
+  getTermsAll(@,@)	: ( ident term ) list[term];
+  getTerms(@,@)		: ( ident term ) list[term]	pri 100;
+  getTermsPair(@,@)	: ( ident  list[pair[term,term]] ) list[term];
+
+  getTermsVar(@,@)	: ( variable term ) bool;
+
+//--------------------------------------------------------------------------------------
+  list_subterm(@)	: ( term ) list[term];
+
+  term_to_variable(@) 	: ( term ) variable;
+//--------------------------------------------------------------------------------------
+  Var_at(@,@)		:	(int term) bool;
+  Strict_at(@,@)	:	(int term) bool;
+
+/*--- termF ---*///-------------------------------------------------------------------
+// This creates from the user specification the actual 
+// rank for operators d of arity zero (the constants)
+FOR EACH SS:pair[ident,pair[int,int]]; 
+	F:ident;  A:pair[int,int];
+	AL:int; AR:int
+SUCH THAT SS:=(listExtract) elem(Ars) 
+	AND F:=()first(SS) 
+	AND A:=()second(SS) 
+	AND AL:=()first(A) 
+	AND AR:=()second(A) 
+	ANDIF AL==0  
+	ANDIF AR==0 :{
+      F()     	: term;
+      F	: term				alias F():;
+    }
+
+// infix operators
+// 
+FOR EACH SS:pair[ident,pair[int,int]]; 
+	F:ident;  A:pair[int,int];
+	AL:int; AR:int; N:int
+SUCH THAT SS:=(listExtract) elem(Ars) 
+	AND F:=()first(SS) 
+	AND A:=()second(SS) 
+	AND AL:=()first(A) 
+	AND AR:=()second(A) 
+	AND N:=()AL+AR
+	ANDIF AL>0 :{
+
+     {@ }~AL F {@ }~AR	: ( {term }~AL {term }~AR ) term		pri 100;
+
+     ({@ }~AL F {@ }~AR)	: ( {term }~AL {term }~AR ) term 
+     				alias {@ }~AL F {@ }~AR:;
+
+    }
+
+// postfix operators
+// 
+FOR EACH SS:pair[ident,pair[int,int]]; 
+	F:ident;  A:pair[int,int];
+	AL:int; AR:int; N:int
+SUCH THAT SS:=(listExtract) elem(Ars)
+	AND F:=()first(SS) 
+	AND A:=()second(SS) 
+	AND AL:=()first(A) 
+	AND AR:=()second(A) 
+	AND N:=()AL+AR
+	ANDIF AL==0 
+	ANDIF N>0 :{
+
+     F({,@}~N)  : ({term}~N)term;
+
+     F({@,}~N)          : ({term}~N)term        alias F({,@}~N):;
+     F(,{@,}~N) : ({term}~N)term        alias F({,@}~N):;
+     F(@ {,@}~(N-1))    :({term}~N) term        alias F({,@}~N):;
+
+    }
+
+// maximal arity ==> 4 -----------------------------------------------------------
+     makeTerm(@,@)	   : ( ident list[term]) list[term];
+     makeTerm(@,@,@)       : ( ident list[term] list[term] ) list[term];
+     makeTerm(@,@,@,@)     : ( ident list[term] list[term] list[term] ) list[term];
+     makeTerm(@,@,@,@,@)   : ( ident list[term] list[term] list[term] list[term] ) 
+						list[term];
+//--------------------------------------------------------------------------------
+
+     freshTerm(@,@)	   : ( int term) term;
+
+//---------------------------------------------------------------------------
+/*--- termV ---*/
+    FOR EACH SS:ident SUCH THAT SS:=(listExtract) elem(Vars) :{
+      SS     : variable;
+    }
+    x.@			: (int)	variable;
+    v-@			: (ident)	variable;
+    var-@		: (variable)	variable;
+    @-@			: (variable int)	variable;
+    varlist_Vars	: list[variable];
+    varnum_Vars         : int;
+end
+
+//-------------------------------------------------------------------
+stratop
+  global
+   chooseOccurence	: <list[int]>		builtin;
+   NLVchooseOccurence	: <list[int]>		builtin;
+   VchooseOccurence	: <list[int]>		builtin;
+end
+//-------------------------------------------------------------------
+
+/*--- termV ---*///------------------------------------------------------------------
+rules for list[variable]
+global
+  [] varlist_Vars => 
+  FOR EACH SS:ident SUCH THAT SS:=(listExtract) elem(Vars) :{ SS.} nil
+  end
+end
+
+FOR EACH N:int SUCH THAT 
+	N:=() size_of_variable_list(FOR EACH SS:ident 
+				    SUCH THAT SS:=(listExtract) elem(Vars) 
+					:{ SS.} nil ) 
+:{
+rules for int 
+global
+  [] varnum_Vars => N end
+end
+}
+
+/* --- termF ---*///------------------------------------------------------------------
+FOR EACH SS:pair[ident,pair[int,int]]; 
+	F:ident;  A:pair[int,int];
+	AL:int; AR:int
+SUCH THAT SS:=(listExtract) elem(Ars) 
+	AND F:=()first(SS) 
+	AND A:=()second(SS) 
+	AND AL:=()first(A) 
+	AND AR:=()second(A) 
+	ANDIF AL==0  
+	ANDIF AR==0 :{
+
+  rules for term
+	k : int;
+  global
+  	[] freshTerm(k,F) =>  F
+  	end
+  end
+
+  rules for list[variable]
+  global
+  	[] variables_of(F) =>  nil
+  	end
+  end
+  rules for list[term]
+  global
+  	[] variables_ofLT(F) =>  nil
+  	end
+  end
+
+  rules for list[term]
+	$f:ident;
+  global
+	[] getTermsAll($f,F) => F.nil
+					if eq_ident($f,F)
+	end
+  	[] getTermsAll($f,F) =>   nil
+					if not eq_ident($f,F)
+  	end
+
+	[] getTerms($f,F) => F.nil
+					if eq_ident($f,F)
+	end
+  	[] getTerms($f,F) =>   nil
+					if not eq_ident($f,F)
+  	end
+  end
+
+  rules for bool
+	$v:variable;
+  global
+	[] getTermsVar($v,F) => false
+  	end
+  end
+
+  rules for list[term]
+  global
+    [] list_subterm(F) => nil end
+  end
+
+  rules for bool
+	d : int;
+  global
+	[] Var_at(d,F) =>  false
+	end
+
+	[] Strict_at(1,F) =>  true
+	end
+	[] Strict_at(d,F) =>  false
+	end
+  end
+
+}
+
+// infix operators ----------------------------------------------------------------
+// 
+FOR EACH SS:pair[ident,pair[int,int]]; 
+	F:ident;  A:pair[int,int]; N:int; NEXT:int;
+	AL:int; AR:int
+SUCH THAT SS:=(listExtract) elem(Ars) 
+	AND F:=()first(SS) 
+	AND A:=()second(SS) 
+	AND AL:=()first(A) 
+	AND AR:=()second(A) 
+	AND NEXT:=()AL+1
+	AND N:=()AL+AR
+	ANDIF AL>0 :{
+
+//------------------------------------------------------------------------------------
+  rules for term
+	{t_I,}_I=1...N xst : term;
+	k : int;
+  global
+  	[] freshTerm(k,{t_I }_I=1...AL F {t_I }_I=NEXT...N) =>  
+		{freshTerm((k+1)*I,t_I) }_I=1...AL F {freshTerm((k+1)*I,t_I) }_I=NEXT...N
+  	end
+  end
+
+//------------------------------------------------------------------------------------
+   rules for ident
+	{t_I,}_I=1...N xst : term;	
+   global
+     [] head({t_I }_I=1...AL F {t_I }_I=NEXT...N) => F end
+   end
+
+//------------------------------------------------------------------------------------
+   rules for int
+	{t_I,}_I=1...N xst : term;	
+   global
+     [] arity(F) => N end
+   end
+
+//------------------------------------------------------------------------------------
+  rules for list[term]
+   t_1,...,t_N : term;
+  global
+    [] list_subterm({t_I }_I=1...AL F {t_I }_I=NEXT...N) => {t_I.}_I=1...N nil end
+  end
+
+//------------------------------------------------------------------------------------
+   rules for term
+	{t_I,}_I=1...N xst : term;
+   global
+   	{ [] J-th subterm({t_I }_I=1...AL F {t_I }_I=NEXT...N)   => t_J		end
+   	}_J=1...N
+   end
+
+//------------------------------------------------------------------------------------
+   rules for list[int]
+	{t_I,}_I=1...N xst : term;
+	oocc:list[int];
+	lv:list[variable];
+	v:variable;
+   local
+   { [inOccRule] nvocc({t_I }_I=1...AL F {t_I }_I=NEXT...N)	=> J.oocc 
+		where oocc:=(chooseOccurence) nvocc(t_J)
+      end
+   }_J=1...N
+
+   { [NLVinOccRule] nlvocc({t_I }_I=1...AL F {t_I }_I=NEXT...N,lv)	=> J.oocc 
+		where oocc:=(NLVchooseOccurence) nlvocc(t_J,lv)
+      end
+   }_J=1...N
+
+   { [VinOccRule] vocc($v,{t_I }_I=1...AL F {t_I }_I=NEXT...N)	=> J.oocc 
+		where oocc:=(VchooseOccurence) vocc($v,t_J)
+      end
+   }_J=1...N
+
+   end
+
+//------------------------------------------------------------------------------------
+   rules for term
+	{t_I,}_I=1...N xst : term;
+	  $s	: term;
+	  l	: list[int];
+   global
+
+  { [] ({t_I }_I=1...AL F {t_I }_I=NEXT...N) [$s] at J.l => 
+		{t_I }_I=1...(J-1) (t_J[$s] at l) {t_I }_I=(J+1)...AL F {t_I }_I=NEXT...N
+    end
+  }_J=1...AL
+
+  { [] ({t_I }_I=1...AL F {t_I }_I=NEXT...N) [$s] at J.l => 
+		{t_I }_I=1...AL F {t_I }_I=NEXT...(J-1) (t_J[$s] at l) {t_I }_I=(J+1)...N
+    end
+  }_J=NEXT...N
+
+   end
+
+//------------------------------------------------------------------------------------
+  rules for list[variable]
+   t_1,...,t_N : term;
+  global
+  	[] variables_of({t_I }_I=1...AL F {t_I }_I=NEXT...N) => 
+				{ variables_of(t_I) @ }_I=1...N  nil
+  	end
+  end
+
+  rules for list[term]
+   t_1,...,t_N : term;
+  global
+  	[] variables_ofLT({t_I }_I=1...AL F {t_I }_I=NEXT...N) => 
+				{ variables_ofLT(t_I) @ }_I=1...N  nil
+  	end
+  end
+
+//------------------------------------------------------------------------------------
+  rules for list[term]
+	t_1,...,t_N : term;
+	$s	: term;
+	$f:ident;
+	l	: list[int];
+  global
+	[] getTermsAll($f,{t_I }_I=1...AL F {t_I }_I=NEXT...N) => 
+					//{t_I }_I=1...AL F {t_I }_I=NEXT...N.nil
+					cons({t_I }_I=1...AL F {t_I }_I=NEXT...N,nil)
+					@ { getTermsAll($f,t_I) @ }_I=1...N  nil
+					if eq_ident($f,F)
+	end
+  	[] getTermsAll($f,{t_I }_I=1...AL F {t_I }_I=NEXT...N) => 
+					{ getTermsAll($f,t_I) @ }_I=1...N  
+					nil
+					if not eq_ident($f,F)
+  	end
+
+	[] getTerms($f,{t_I }_I=1...AL F {t_I }_I=NEXT...N) => 
+						{t_I }_I=1...AL F {t_I }_I=NEXT...N.nil
+					if eq_ident($f,F)
+	end
+  	[] getTerms($f,{t_I }_I=1...AL F {t_I }_I=NEXT...N) => 
+						nil
+					if not eq_ident($f,F)
+  	end
+  end
+
+//------------------------------------------------------------------------------------
+  rules for bool
+	t_1,...,t_N : term;
+	$s	: term;
+	$v:variable;
+	l	: list[int];
+  global
+	[] getTermsVar($v,{t_I }_I=1...AL F {t_I }_I=NEXT...N) => false
+						{ or getTermsVar($v,t_I)}_I=1...N 
+	end
+  end
+
+//------------------------------------------------------------------------------------
+  rules for list[term]
+	t_1,...,t_N : term;
+	$f:ident;
+  global
+	[] makeTerm(F{,t_I.nil}_I=1...N) => {t_I }_I=1...AL F {t_I }_I=NEXT...N.nil
+  	end
+  end
+
+//------------------------------------------------------------------------------------
+  rules for bool
+	d : int;
+	t_1,...,t_N : term;
+	$s	: term;
+	$v:variable;
+	l	: list[int];
+  global
+	[] Var_at(1,{t_I }_I=1...AL F {t_I }_I=NEXT...N) =>  false
+	end
+	[] Var_at(d,{t_I }_I=1...AL F {t_I }_I=NEXT...N) =>  false
+						{ or Var_at(d-1,t_I)}_I=1...N 
+	end
+  end
+
+//------------------------------------------------------------------------------------
+  rules for bool
+	d : int;
+	t_1,...,t_N : term;
+	$s	: term;
+	$v:variable;
+	l	: list[int];
+  global
+	[] Strict_at(1,{t_I }_I=1...AL F {t_I }_I=NEXT...N) =>  true
+	end
+	[] Strict_at(d,{t_I }_I=1...AL F {t_I }_I=NEXT...N) =>  false
+						{ or Strict_at(d-1,t_I)}_I=1...N 
+	end
+  end
+
+//------------------------------------------------------------------------------------
+
+    }
+
+// postfix operators ----------------------------------------------------------------
+// 
+FOR EACH SS:pair[ident,pair[int,int]]; 
+	F:ident;  A:pair[int,int];
+	AL:int; AR:int; N:int
+SUCH THAT SS:=(listExtract) elem(Ars)
+	AND F:=()first(SS) 
+	AND A:=()second(SS) 
+	AND AL:=()first(A) 
+	AND AR:=()second(A) 
+	AND N:=()AL+AR
+	ANDIF AL==0 :{
+//------------------------------------------------------------------------------------
+   rules for ident
+    t_1,...,t_N : term;
+   global  
+     [] head(F(t_1,...,t_N)) => F end
+   end
+
+//------------------------------------------------------------------------------------
+   rules for int	
+   global
+     [] arity(F) => N end
+   end
+
+//------------------------------------------------------------------------------------
+  rules for list[term]
+   t_1,...,t_N : term;
+  global
+    [] list_subterm(F(t_1,...,t_N)) => {t_I.}_I=1...N nil end
+  end
+
+//------------------------------------------------------------------------------------
+}
+
+// postfix operators ----------------------------------------------------------------
+// 
+FOR EACH SS:pair[ident,pair[int,int]]; 
+	F:ident;  A:pair[int,int];
+	AL:int; AR:int; N:int
+SUCH THAT SS:=(listExtract) elem(Ars)
+	AND F:=()first(SS) 
+	AND A:=()second(SS) 
+	AND AL:=()first(A) 
+	AND AR:=()second(A) 
+	AND N:=()AL+AR
+	ANDIF AL==0 
+	ANDIF N>0 :{
+//------------------------------------------------------------------------------------
+  rules for term
+    t_1,...,t_N : term;
+	k : int;
+  global
+  	[] freshTerm(k,F(t_1,...,t_N)) =>  
+		F(freshTerm((k+1)*1,t_1){,freshTerm((k+1)*I,t_I) }_I=2...N)
+  	end
+  end
+
+//------------------------------------------------------------------------------------
+   rules for term
+    t_1,...,t_N : term;
+   global
+
+    { [] I-th subterm(F(t_1,...,t_N))   => t_I		end
+    }_I=1...N
+
+   end
+
+//------------------------------------------------------------------------------------
+   rules for list[int]
+    oocc:list[int];
+    t_1,...,t_N : term;
+    lv:list[variable];
+    v:variable;
+   local
+   { [inOccRule] nvocc(F(t_1,...,t_N))	=> J.oocc 
+		where oocc:=(chooseOccurence) nvocc(t_J)
+      end
+   }_J=1...N
+
+   { [NLVinOccRule] nlvocc(F(t_1,...,t_N),lv)	=> J.oocc 
+		where oocc:=(NLVchooseOccurence) nlvocc(t_J,lv)
+      end
+   }_J=1...N
+
+   { [VinOccRule] vocc($v,F(t_1,...,t_N))	=> J.oocc 
+		where oocc:=(VchooseOccurence) vocc($v,t_J)
+      end
+   }_J=1...N
+
+   end
+
+//------------------------------------------------------------------------------------
+  rules for term
+   t_1,...,t_N : term;
+	  $s	: term;
+	  l	: list[int];
+  global
+  { [] F(t_1,...,t_N)[$s] at I.l => F(t_1,...,t_(I-1),t_I[$s] at l,t_(I+1),...,t_N)
+    end
+  }_I=1...N
+  end
+
+//------------------------------------------------------------------------------------
+  rules for list[variable]
+   t_1,...,t_N : term;
+  global
+  	[] variables_of(F(t_1,...,t_N)) => { variables_of(t_I) @ }_I=1...N  nil
+  	end
+  end
+
+  rules for list[term]
+   t_1,...,t_N : term;
+  global
+  	[] variables_ofLT(F(t_1,...,t_N)) => { variables_ofLT(t_I) @ }_I=1...N  nil
+  	end
+  end
+
+  rules for list[term]
+	t_1,...,t_N : term;
+	$s	: term;
+	$f:ident;
+	l	: list[int];
+  global
+	[] getTermsAll($f,F(t_1,...,t_N)) => 
+					//F(t_1,...,t_N).nil
+					cons(F(t_1,...,t_N),nil)
+					@ { getTermsAll($f,t_I) @ }_I=1...N  nil
+					if eq_ident($f,F)
+	end
+  	[] getTermsAll($f,F(t_1,...,t_N)) => 
+					{ getTermsAll($f,t_I) @ }_I=1...N  
+					nil
+					if not eq_ident($f,F)
+  	end
+
+	[] getTerms($f,F(t_1,...,t_N)) => F(t_1,...,t_N).nil
+					if eq_ident($f,F)
+	end
+  	[] getTerms($f,F(t_1,...,t_N)) => 	nil
+					if not eq_ident($f,F)
+  	end
+  end
+
+//------------------------------------------------------------------------------------
+  rules for bool
+	t_1,...,t_N : term;
+	$v:variable;
+  global
+	[] getTermsVar($v,F(t_1,...,t_N)) => 	false
+						{ or getTermsVar($v,t_I)}_I=1...N 
+	end
+  end
+
+//------------------------------------------------------------------------------------
+
+  rules for list[term]
+	t_1,...,t_N : term;
+	$f:ident;
+  global
+	[] makeTerm(F{,t_I.nil}_I=1...N)	=>	F(t_1,...,t_N).nil
+  	end
+  end
+//------------------------------------------------------------------------------------
+  rules for bool
+	d : int;
+	t_1,...,t_N : term;
+	$s	: term;
+	$v:variable;
+	l	: list[int];
+  global
+	[] Var_at(1,F(t_1,...,t_N)) =>  false
+	end
+	[] Var_at(d,F(t_1,...,t_N)) =>  false
+						{ or Var_at(d-1,t_I)}_I=1...N 
+	end
+  end
+
+//------------------------------------------------------------------------------------
+  rules for bool
+	d : int;
+	t_1,...,t_N : term;
+	$s	: term;
+	$v:variable;
+	l	: list[int];
+  global
+	[] Strict_at(1,F(t_1,...,t_N)) =>  true
+	end
+	[] Strict_at(d,F(t_1,...,t_N)) =>  false
+						{ or Strict_at(d-1,t_I)}_I=1...N 
+	end
+  end
+
+//------------------------------------------------------------------------------------
+
+}
+
+//------------------------------------------------------------------------------------
+// For each operator  ----------------------------------------------------------------
+//------------------------------------------------------------------------------------
+// Arity == 4 ------------------------------------------------------------------------
+// 
+FOR EACH SS:pair[ident,pair[int,int]]; 
+	F:ident;  A:pair[int,int];
+	AL:int; AR:int; N:int
+SUCH THAT SS:=(listExtract) elem(Ars)
+	AND F:=()first(SS) 
+	AND A:=()second(SS) 
+	AND AL:=()first(A) 
+	AND AR:=()second(A) 
+	AND N:=()AL+AR
+	ANDIF N==4 :{
+
+  rules for list[term]
+	t_1,...,t_N : term;
+	lt_1,...,lt_N : list[term];
+	$f:ident;
+  global
+	[] makeTerm(F, t_1.nil, t_2.nil, t_3.nil, t_4.lt_4) =>	
+		makeTerm(F, t_1.nil, t_2.nil, t_3.nil, t_4.nil) @
+		makeTerm(F, t_1.nil, t_2.nil, t_3.nil, lt_4)
+  	end
+	[] makeTerm(F, t_1.nil, t_2.nil, t_3.lt_3, lt_4) =>	
+		makeTerm(F, t_1.nil, t_2.nil, t_3.nil, lt_4) @
+		makeTerm(F, t_1.nil, t_2.nil, lt_3, lt_4)
+  	end
+	[] makeTerm(F, t_1.nil, t_2.lt_2, lt_3, lt_4) =>	
+		makeTerm(F, t_1.nil, t_2.nil, lt_3,lt_4) @
+		makeTerm(F, t_1.nil, lt_2,lt_3, lt_4)
+  	end
+	[] makeTerm(F, t_1.lt_1, lt_2, lt_3, t_4.lt_4) =>	
+		makeTerm(F, t_1.nil, lt_2, lt_3, t_4.nil) @
+		makeTerm(F, lt_1, lt_2, lt_3, lt_4)
+  	end
+  end
+
+}
+//------------------------------------------------------------------------------------
+// Arity == 3 ------------------------------------------------------------------------
+// 
+FOR EACH SS:pair[ident,pair[int,int]]; 
+	F:ident;  A:pair[int,int];
+	AL:int; AR:int; N:int
+SUCH THAT SS:=(listExtract) elem(Ars)
+	AND F:=()first(SS) 
+	AND A:=()second(SS) 
+	AND AL:=()first(A) 
+	AND AR:=()second(A) 
+	AND N:=()AL+AR
+	ANDIF N==3 :{
+
+  rules for list[term]
+	t_1,...,t_N : term;
+	lt_1,...,lt_N : list[term];
+	$f:ident;
+  global
+	[] makeTerm(F, t_1.nil, t_2.nil, t_3.lt_3) =>	
+		makeTerm(F, t_1.nil, t_2.nil, t_3.nil) @
+		makeTerm(F, t_1.nil, t_2.nil, lt_3)
+  	end
+	[] makeTerm(F, t_1.nil, t_2.lt_2, lt_3) =>	
+		makeTerm(F, t_1.nil, t_2.nil, lt_3) @
+		makeTerm(F, t_1.nil, lt_2,lt_3)
+  	end
+	[] makeTerm(F, t_1.lt_1, lt_2, lt_3	) =>	
+		makeTerm(F, t_1.nil, lt_2, lt_3) @
+		makeTerm(F, lt_1, lt_2, lt_3)
+  	end
+  end
+
+}
+//------------------------------------------------------------------------------------
+// Arity == 2 ------------------------------------------------------------------------
+// 
+FOR EACH SS:pair[ident,pair[int,int]]; 
+	F:ident;  A:pair[int,int];
+	AL:int; AR:int; N:int
+SUCH THAT SS:=(listExtract) elem(Ars)
+	AND F:=()first(SS) 
+	AND A:=()second(SS) 
+	AND AL:=()first(A) 
+	AND AR:=()second(A) 
+	AND N:=()AL+AR
+	ANDIF N==2 :{
+
+  rules for list[term]
+	t_1,...,t_N : term;
+	lt_1,...,lt_N : list[term];
+	$f:ident;
+  global
+	[] makeTerm(F, t_1.nil, t_2.lt_2) =>	
+		makeTerm(F, t_1.nil, t_2.nil) @
+		makeTerm(F, t_1.nil, lt_2)
+  	end
+	[] makeTerm(F, t_1.lt_1, lt_2) =>	
+		makeTerm(F, t_1.nil, lt_2) @
+		makeTerm(F, lt_1, lt_2)
+  	end
+  end
+
+}
+//------------------------------------------------------------------------------------
+// Arity == 1 ------------------------------------------------------------------------
+// 
+FOR EACH SS:pair[ident,pair[int,int]]; 
+	F:ident;  A:pair[int,int];
+	AL:int; AR:int; N:int
+SUCH THAT SS:=(listExtract) elem(Ars)
+	AND F:=()first(SS) 
+	AND A:=()second(SS) 
+	AND AL:=()first(A) 
+	AND AR:=()second(A) 
+	AND N:=()AL+AR
+	ANDIF N==1 :{
+
+  rules for list[term]
+	t_1,...,t_N : term;
+	lt_1,...,lt_N : list[term];
+	$f:ident;
+  global
+	[] makeTerm(F, t_1.lt_1) =>	
+		makeTerm(F, t_1.nil) @
+		makeTerm(F, lt_1)
+  	end
+  end
+
+}
+//------------------------------------------------------------------------------------
+
+/*--- term ---*///------------------------------------------------------------------
+rules for term
+ t,s:term;  i:int;  l:list[int];
+global
+  [] t at nil   	=> t				end
+  [] t at i.l		=> i-th subterm(t) at l		end
+  [] t[s] at nil        => s				end
+  [] (t[s] at nil)      => s				end
+end
+
+rules for bool
+	v:variable;
+	t:term;
+global
+  [] isvar($v)   => true				end
+  [] isvar($t)   => false				end
+end
+
+rules for substitution
+ i:int; vn:variable; vl:list[variable];
+global
+  [] rename_subst(nil,i)     => identity			    end
+  [] rename_subst(vn.vl , i) => vn->var(i) o rename_subst(vl , i+1) end
+end
+
+rules for list[int]
+ t:term;
+ v:variable;
+ lv:list[variable];
+local
+  [topOccRule]  nvocc(t)          => nil	if not isvar(t)	    end
+
+  [NLVtopOccRule]  nlvocc($v,lv)          => nil	
+					if not member($v,lv)	    
+  end
+  [VtopOccRule]  vocc($v,$v)          => nil 
+  end
+end
+
+rules for ident
+    f : ident;
+global  
+     [] head(v-$f) => $f end
+end
+
+rules for ident
+ x:variable;
+global
+  [] head($x)	=> var			end
+end
+
+rules for list[term]
+ X : variable;
+global
+  [] list_subterm(X)	=> nil end
+end
+
+  rules for list[term]
+	f:ident;
+	t:term;
+	pt:pair[term,term];
+	Lpt:list[pair[term,term]];
+  global
+  	[] getTermsPair($f,nil)		=>	nil
+	end
+  	[] getTermsPair($f,pt.Lpt) =>	getTerms($f,first(pt)) @ getTerms($f,second(pt))
+					@ getTermsPair($f,Lpt)
+	end
+  end
+
+/* --- termV ---*///------------------------------------------------------------------
+
+  rules for term
+	v : variable;
+	k : int;
+  global
+  	[] freshTerm(k,$v) =>  $v-k	
+  	end
+  end
+
+rules for bool
+	v : variable;
+	d : int;
+global
+	[] Var_at(d,$v) =>  true
+	end
+
+	[] Strict_at(d,$v) =>  false
+	end
+end
+
+rules for variable
+ X : variable;
+global
+  [] term_to_variable(X)        => X end
+end
+
+  rules for list[variable]
+	v:variable;
+  global
+  	[] variables_of($v) => $v.nil
+  	end
+  end
+  
+  rules for list[term]
+	v:variable;
+  global
+  	[] variables_ofLT($v) => $v.nil
+  	end
+  end
+  
+  rules for list[term]
+	$f:ident;
+	v:variable;
+  global
+	[] getTermsAll($f,$v) => nil
+	end
+	[] getTerms($f,$v) => nil
+	end
+  end
+
+  rules for bool
+	u, v:variable;
+  global
+	[] getTermsVar($v,$v) => true
+	end
+	[] getTermsVar($u,$v) => false
+	end
+  end
+
+//-----------------------------------------------------------------------------------
+  rules for list[variable]
+	t:term;
+  global
+  	[] var_lin(t) 	=> 	singletons( variables_of(t) )
+  	end
+  end
+
+//-----------------------------------------------------------------------------------
+  rules for list[variable]
+	n,k : int;
+  global
+  	[] get_list_variables(n,0) 	=> 	nil
+  	end
+  	[] get_list_variables(n,k) 	=> 	x.n . get_list_variables(n+1,k-1) 
+  	end
+  end
+
+
+//-----------------------------------------------------------------------------------
+strategies for list[int]
+implicit
+ [.] chooseOccurence => dk(topOccRule , inOccRule)	end
+end
+
+strategies for list[int]
+implicit
+ [.] NLVchooseOccurence => dk(NLVtopOccRule , NLVinOccRule)	end
+end
+
+strategies for list[int]
+implicit
+ [.] VchooseOccurence => dk(VtopOccRule , VinOccRule)	end
+end
+
+//-----------------------------------------------------------------------------------
+end
+
+

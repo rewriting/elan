@@ -1,0 +1,162 @@
+module rewriting[Vars,Ops,Types,Rwrules,Labels]
+import 	local	rwrule[Vars,Ops,Types,Labels] Rwrules 
+
+		list[rwrule]
+		msTermCommons[Vars,Ops,Types]
+
+//		myEqSystemAC[Vars,Ops,Types]
+//		mySyntacticUnificationAC[Vars,Ops,Types]
+		myEqSystem[Vars,Ops,Types]
+		mySyntacticUnification[Vars,Ops,Types]
+
+		msApplySubstOn[term,Vars,Ops,Types]
+		eq[bool]
+		replace[term,term]
+		list[int]
+		preprocessing[Vars,Ops,Types,Rwrules,Labels]
+		eq[rulebodies]
+		proofterm[Vars,Ops,Types,Rwrules,Labels]
+		pair[term,proofterm]
+		Esubstitution[Vars,Ops,Types]
+	;
+end
+
+sort rewrite_state;
+end
+
+operators
+  global
+    	rewriteStep(@,@) 	: (term rwrule) rewrite_state;
+
+  local
+	[@,@,@,@,@]':'@	: (term list[int] label rulebodies substitution proofterm) rewrite_state;
+	rs2t(@)	     	: (rewrite_state) term;
+	rs2pt(@)	: (rewrite_state) proofterm;
+    	transform(@)	: (rulebodies) rulebodies;
+end
+
+stratop
+  global
+   s_rewrite	: <pair[term,proofterm]>	builtin;
+   rewrite_state : <rewrite_state>	builtin;
+end
+
+rules for rewrite_state
+
+	s,t	: term;
+	g,d 	: term;
+	c,wp	: term;
+	v	: variable;
+	rw 	: rwrule;
+	rb 	: rulebodies;
+	sigma	: substitution;
+	rsigma	: substitution;
+	omega	: list[int];
+	mc	: eqSystem;
+	lab	: label;
+	pi,pi2	: proofterm;
+	lpi	: list[proofterm];
+	couple	: pair[term,proofterm];
+
+global
+  [] rewriteStep(s,rw)	=> [s,nil,label(rw),rw2rb(rw),identity]:proofnil
+  end
+
+local
+  [match] [s,nil,lab,rb,identity]:pi =>
+	  [s,omega,lab,rb,sigma]:pi;t2pt(s[pt2t(lab(rsigma))] at omega)[[nil]]
+	where g := () left(rb)
+	where omega := (chooseOccurence) nvocc(s)
+     	where mc := (matchs) g = s at omega
+	where sigma := () system_to_subst(mc)
+	where rsigma := () sigma
+  end
+
+  [if_elim]  [s,omega,lab,rb if c,sigma]:pi;pi2[[lpi]] =>
+	     [s,omega,lab,rb,sigma]:pi;pi2[[second(couple).lpi]]
+	//where couple:=(repeat*(dc one(r_rewrite))) [sigma(c),proofnil]
+	where couple:=(s_rewrite) [sigma(c),proofnil]
+	where t:=() first(couple)
+	// true builtin
+	if t==true
+  end
+
+  [where_elim] [s,omega,lab,rb where v:=wp,sigma]:pi;pi2[[lpi]] =>
+	       [s,omega,lab,rb,sigma o v->t]:pi;pi2[[second(couple).lpi]]
+	//where couple:=(repeat*(dc one(r_rewrite))) [sigma(wp),proofnil]
+	where couple:=(s_rewrite) [sigma(wp),proofnil]
+	where t:=() first(couple)
+  end
+
+  [replace] [s,omega,lab,rb,sigma]:pi;pi2[[lpi]] =>
+	    [s[sigma(d)] at omega,omega,lab,rb,identity]:comp(pi,pi2[[lpi]])
+	if rb==rb2r(rb)
+	where d := () right(rb)
+  end
+end
+
+rules for term
+
+	t 	: term;
+	omega	: list[int];
+        rb	: rulebodies;
+	sigma	: substitution;
+	lab	: label;
+	pi	: proofterm;
+global
+  [] rs2t([t,omega,lab,rb,sigma]:pi) => t
+  end
+end
+
+rules for proofterm
+
+	t 	: term;
+	omega	: list[int];
+        rb	: rulebodies;
+	sigma	: substitution;
+	lab	: label;
+	pi	: proofterm;
+global
+  [] rs2pt([t,omega,lab,rb,sigma]:pi) => pi
+  end
+end
+
+rules for pair[term,proofterm]
+	s,t 	: term;
+	rs	: rewrite_state;
+        rwr	: rwrule;
+	pi	: proofterm;
+local
+  [rewriteStep]  [s,pi] => [rs2t(rs),pi;simplif(rs2pt(rs))]
+	where rwr:= (listExtract) elem(pprwrules)
+	where rs:=(rewrite_state) rewriteStep(s,rwr)	
+  end
+end
+
+rules for rulebodies
+
+	rb,rb2 	: rulebodies;
+	v	: variable;
+	wp	: term;
+global
+  [] transform(rb) => rb
+  end
+end
+
+
+strategies for pair[term,proofterm]
+implicit
+  [.] s_rewrite => repeat*(dc one(rewriteStep))
+  end
+end
+
+strategies for rewrite_state
+implicit
+  [.] rewrite_state =>  dc one(match) ;
+			repeat*(dc one(if_elim , where_elim)) ;
+			dc one(replace)
+  end
+end
+
+end
+

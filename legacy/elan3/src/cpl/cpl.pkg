@@ -1,0 +1,14 @@
+package
+identification
+         name=cpl
+      version=0.6
+     location=http://www.loria.fr/ELAN/Soft
+         info=http://www.loria.fr/ELAN/Toolkit
+  description='Choice Point Library. Functions for efficient choice point
+       management to support backtrack programming.'
+     keywords=choice point, nondeterminism, backtracking
+
+interface
+
+requires
+aterm 2.0.5

@@ -1,0 +1,25 @@
+// This file is generated automatically: do not edit it directly. 
+  module ref2term[X]
+          import global string REF ref2string[Term]; end
+          sort X; end
+              operators global
+                ref2term(@)   : (Term) X;
+                term2ref(@)   : (X) Term;
+              end   
+          rules for Term
+          x       : X;
+          global
+            []    term2ref(x) => string2term(
+                          term2refstring(x):"Term","REF.ref")
+            end
+          end
+
+          rules for X
+          t       : Term;
+          global
+            []    ref2term(t) => refstring2term(term2string(t,"REF.ref"))
+            end
+          end
+  end  
+   
+

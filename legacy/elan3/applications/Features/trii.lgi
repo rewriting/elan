@@ -1,0 +1,53 @@
+LPL trii description
+
+   query of sort  	Foo
+   result of sort 	Foo
+   import 		trii
+   start with 		()f(a) //query
+
+end
+
+
+
+
+
+/*
+RULE(
+-1,
+292,40,1,1,5,FSYM(  VAR(0,292).nil, 204),		// lhs
+ VAR(3,292),						// rhs
+WHERE( VAR(1,292),-1, VAR(0,292)).
+TRY(
+  WHERE( VAR(2,292),-1,FSYM( nil, 201)).
+  IFF(FSYM( nil, 0)).
+  nil.
+  WHERE( VAR(2,292),-1, VAR(0,292)).
+  IFF(FSYM( nil, 1)).
+  nil.
+  WHERE( VAR(2,292),-1,FSYM( nil, 202)).
+  nil.
+  nil)
+.
+WHERE( VAR(3,292),-1,FSYM( nil, 203)).
+IFF(FSYM( nil, 0)).
+nil)
+*/
+/*
+x, y, z, u, uu	: Foo;
+global
+  []	f(x) => uu
+		where z:=()x
+		try
+		  choice where y:=()b if false
+		  choice where y:=()x if true 
+		  choice where y:=()c 
+		end
+		where uu:=()d
+		if false
+  end
+*/
+
+
+
+
+

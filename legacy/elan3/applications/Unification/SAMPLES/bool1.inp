@@ -1,0 +1,2 @@
+or(b,true)=or(false,true)
+end

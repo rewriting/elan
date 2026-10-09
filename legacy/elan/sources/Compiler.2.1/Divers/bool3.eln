@@ -1,0 +1,154 @@
+module bool3
+
+import eq[Bool3] bool;
+end
+
+sort Bool3;
+end
+
+operators global
+  b0		: Bool3;
+  b1		: Bool3;
+  b2		: Bool3;
+
+  a1		: Bool3;
+  a2		: Bool3;
+  a3		: Bool3;
+  a4		: Bool3;
+  a5		: Bool3;
+  a6		: Bool3;
+  a7		: Bool3;
+  a8		: Bool3;
+
+  p(@,@)	: (Bool3 Bool3) Bool3 (AC);
+  m(@,@)	: (Bool3 Bool3) Bool3 (AC);
+
+  and(@,@)	: (Bool3 Bool3) Bool3;
+  or(@,@)	: (Bool3 Bool3) Bool3;
+  not(@)	: (Bool3) Bool3;
+
+  start		: bool;
+end
+
+rules for Bool3
+	X,Y,Z : Bool3;
+	mX,mY,mZ,tZ : Bool3;
+global
+  [] p(X, p(X, X)) => b0 end
+  [] p(b0, X) => X end
+
+  [] m(b1, X) => X end
+  [] m(X, m(X, X)) => X end
+  [] m(b0, X) => b0 end
+  [] m(p(X, Y), Z) => p(m(X, Z), m(Y, Z)) end
+  [] b2 => p(b1, b1) end
+  [] not(X) => p(m(b2, X), b1) end
+ 
+  [] and(X,Y) =>
+		   p( m(mX, mY),
+                   p( m(b2, m(mX, Y)),
+                   p( m(b2, m(mY, X)),
+                   m(b2, m(X, Y)) )))
+	where mX:=() m(X,X)
+	where mY:=() m(Y,Y)
+  end
+  [] or(X,Y) =>   p( m(b2, m(mX, mY)),
+                  p( m(mX, Y),
+                  p( m(mY, X),
+                  p( m(X, Y),
+                  p(X, Y) ))))
+	where mX:=() m(X,X)
+	where mY:=() m(Y,Y)
+  end
+
+/*
+  [] and(X,Y) =>   p( m(m(X,X), m(Y,Y)),
+                   p( m(b2, m(m(X,X), Y)),
+                   p( m(b2, m(m(Y,Y), X)),
+                   m(b2, m(X, Y)) )))
+  end
+
+  [] or(X,Y) =>   p( m(b2, m(m(X,X), m(Y,Y))),
+                  p( m(m(X,X), Y),
+                  p( m(m(Y,Y), X),
+                  p( m(X, Y),
+                  p(X, Y) ))))
+  end
+*/
+
+end
+
+rules for bool
+global
+  [] start => 
+and(and(and(a1, a2), and(a3, a4)), and(and(a5, a6), and(a7, a8)))
+==
+not(or(or(or(not(a1), not(a2)), or(not(a3), not(a4))),
+       or(or(not(a5), not(a6)), or(not(a7), not(a8)))))
+
+/*
+and(and(and(a1, a2), and(a3, a4)),and(a5,a6))
+==
+not(or(or(or(not(a1), not(a2)), or(not(a3), not(a4))),or(not(a5),not(a6))))
+*/
+
+  end
+end
+
+end
+
+/*
+and(a1, a2) == not(or(not(a1), not(a2)))
+
+
+Maude> red and(and(a, b), c) == not(or(or(not(a), not(b)), not(c))) .
+rewrites: 1103 in 19ms cpu (49ms real) (55152 rewrites/second)
+result Bool: true
+
+Maude> red not(and(and(a, b), c)) == or(or(not(a), not(b)), not(c)) .
+rewrites: 1087 in 19ms cpu (29ms real) (54352 rewrites/second)
+result Bool: true
+
+Maude> red and(and(and(a, b), and(c, d)), and(and(e, f), and(g, h))) ==
+not(or(or(or(not(a), not(b)), or(not(c), not(d))),
+       or(or(not(e), not(f)), or(not(g), not(h))))) end
+rewrites: 3966599 in 149299ms cpu (149459ms real) (26567 rewrites/second)
+result Bool: true
+
+--------------------------------------------------
+and(and(a1, a2), a3) == not(or(or(not(a1), not(a2)), not(a3)))
+end
+
+total time     (2.270+0.000)=2.270 sec (main+subprocesses)
+average speed  251 inf/sec
+              571 nonamed rules applied, 58290 tried
+                0   named rules applied,     0 tried
+
+--------------------------------------------------
+not(and(and(a1, a2), a3)) == or(or(not(a1), not(a2)), not(a3))
+end
+
+total time     (2.175+0.000)=2.175 sec (main+subprocesses)
+average speed  255 inf/sec
+              555 nonamed rules applied, 55674 tried
+                0   named rules applied,     0 tried
+
+--------------------------------------------------
+
+and(and(and(a1, a2), and(a3, a4)),and(a5,a6))
+==
+not(or(or(or(not(a1), not(a2)), or(not(a3), not(a4))),or(not(a5),not(a6))))
+
+end
+
+
+--------------------------------------------------
+and(and(and(a1, a2), and(a3, a4)), and(and(a5, a6), and(a7, a8)))
+==
+not(or(or(or(not(a1), not(a2)), or(not(a3), not(a4))),
+       or(or(not(a5), not(a6)), or(not(a7), not(a8)))))
+end
+
+--------------------------------------------------
+
+*/

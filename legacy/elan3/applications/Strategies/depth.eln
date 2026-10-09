@@ -1,0 +1,23 @@
+module depth[X]
+
+import global symbol[1,X,bool] strat[X];	
+end
+
+stratop global
+  depth-first(@,@) : (Symbol[X,bool] <X>) <X>;
+end
+
+strategies for X
+p : Symbol[X,bool];
+s : <X>;
+implicit
+  [.] depth-first(p,s) =>
+	if p(self) then
+	  s; depth-first(p,s)	
+	else
+	  id
+	fi
+  end
+end
+
+end

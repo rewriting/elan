@@ -1,0 +1,6 @@
+
+rm -rf server *.a *.o .elan.firewall
+elanc -O -lib -output libfirewall.a firewall 
+gmake --file firewall.make
+gmake
+./server

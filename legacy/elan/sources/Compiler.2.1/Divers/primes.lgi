@@ -1,0 +1,8 @@
+LPL primes description 
+
+query 		of sort list
+      result 	of sort list
+      import   	primes builtinInt
+      start with () primes(10000)
+
+end

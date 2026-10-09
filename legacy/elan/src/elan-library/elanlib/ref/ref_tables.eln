@@ -1,0 +1,87 @@
+// This file is generated automatically: do not edit it directly. 
+  module ref_tables
+          import global
+                  int bool
+                  REF
+                  ;
+          end
+              operators global
+                get_string(@,@)       : (int list[TabItem]) string;
+                new_string_index(@)   : (list[TabItem]) int;
+
+                add_string(@,@,@)     : (int string list[TabItem]) list[TabItem];
+                member_string(@,@)    : (string list[TabItem]) int;
+                member(@,@)            : (int list[TabItem]) bool;
+                add_hash_string(@,@,@) : (string list[TabItem] int) list[TabItem];
+                hash_function(@,@,@,@) : (int string int int) int;   
+              local
+                add_hash_loop(@,@,@,@) : (string list[TabItem] int int) list[TabItem];
+              end    
+          rules for bool
+          i, ind  : int;
+          ti      : string;
+          tis     : list[TabItem];
+          global
+            []  member(i,nil) => false                                    end
+            []  member(i,i:ti.tis) => true                                end 
+            []  member(i,ind:ti.tis) => member(i,tis)                     end
+          end
+
+          rules for list[TabItem]
+          ind, ind1       : int;
+          hash, tsize             : int;
+          ti              : TabItem;
+          tis             : list[TabItem];
+          s, s1           : string;
+          global
+            []  add_string(ind,s,nil) => ind:s.nil                        end
+            []  add_string(ind,s,ind1:s1.tis) => ind:s.ind1:s1.tis
+                                  if ind < ind1                           end
+            []  add_string(ind,s,ind1:s1.tis) => ind1:s1.
+                                                  add_string(ind,s,tis)   end
+
+            []  add_hash_string(s,tis,tsize) =>
+                          add_hash_loop(s,tis,tsize,hash)
+                          where hash:=()hash_function(strlen(s),s,0,tsize)
+            end
+            []  add_hash_loop(s,tis,tsize,hash) => add_string(hash,s,tis)
+                          if not member(hash,tis)
+            end
+            []  add_hash_loop(s,tis,tsize,hash) => 
+                          add_hash_loop(s,tis,tsize,(hash+211)%tsize)
+            end
+          end
+
+          rules for int
+          ind     : int;
+          ti      : TabItem;
+          tis     : list[TabItem];
+          s       : string;
+          tsize, n, m             : int;
+          global
+            []  member_string(s,nil) => -1                                end
+            []  member_string(s,ind:s.tis) => ind                         end 
+            []  member_string(s,ti.tis) => member_string(s,tis)           end
+
+
+            []  new_string_index(nil) => 1                                end
+            []  new_string_index(ind:s.nil) => ind+1                      end
+            []  new_string_index(ti.tis) => new_string_index(tis)         end
+
+            []    hash_function(0,s,m,tsize) => m % tsize                 end
+            []    hash_function(n,s,m,tsize) => 
+                                  hash_function(n-1,s,s[n-1]+m,tsize)     end
+          end
+
+          rules for string
+          ind     : int;
+          ti      : TabItem;
+          tis     : list[TabItem];
+          s       : string;
+          global
+            []  get_string(ind,nil) => ""                                 end
+            []  get_string(ind,ind:s.tis) => s                            end
+            []  get_string(ind,ti.tis) => get_string(ind,tis)             end
+          end
+  end  
+

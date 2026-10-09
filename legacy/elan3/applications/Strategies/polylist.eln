@@ -1,0 +1,8 @@
+module polylist
+
+import global list[Any];
+
+op global
+  size(@)	: (list[Any]  
+
+end

@@ -1,0 +1,161 @@
+module exp1
+
+import global 
+  int 
+  eq[variable] 
+  identifier 
+  list[identifier]
+;
+end
+
+sort variable coeff exp;
+end
+
+operators
+global
+  X : variable;
+  Y : variable;
+  Z : variable;
+
+
+  @		: ( int )		coeff pri 1000;
+
+  @		: (variable)		exp pri 1000;
+  @		: (coeff)		exp pri 1000;
+  @ * @		: (coeff exp)		exp pri 1000;
+  @ ^ @		: (exp int)		exp pri 5;
+
+  (@ + @) 	: ( exp exp )		exp (AC) pri 1;
+  @ + @ 	: ( exp exp )		exp  assocRight pri 1 alias (@ + @):;
+  (@ * @) 	: ( exp exp )		exp (AC) pri 2;
+  @ * @ 	: ( exp exp )		exp  assocRight pri 2 alias (@ * @):;
+
+  cf(@)		: (exp) exp;
+
+  deriv @ @ 	: (exp variable)	exp;
+  elimCst @  	: (exp)			exp;
+
+local
+  deriv(@,@)		: (exp variable) exp;
+  collectMonome(@) 	: (exp) exp;
+end
+
+stratop global
+  eval		: <exp>	bs;
+
+end
+
+
+rules for exp
+  c		: coeff;
+  x		: variable;
+  n		: int;
+  e1,e2		: exp;
+global
+
+  [] cf(e1)	=> e2 where e2:=(cform) e1
+  end
+
+  [cf] x	=>	x^1
+  end
+  [cf] c*x	=>	c*x^1
+  end
+  [cf] x^n	=>	1*x^n
+  end
+
+  [toto] x => x end
+end
+
+
+rules for exp
+  n,n1,n2	: int;
+  e		: exp;
+global
+
+  [simplify1]  e+0		=> e				end
+  [simplify1]  e*0		=> 0				end
+  [simplify1]  e*1		=> e				end
+
+  [simp1]  n1*n2	=> n where n:=() n1*n2		end
+  [simp1]  n1+n2	=> n where n:=() n1+n2		end
+
+end
+
+
+//
+// Internal no named rules
+//
+rules for exp
+  c		: coeff;
+  x,y		: variable;
+  n		: int;
+  e,e1,e2	: exp;
+global
+
+  [] deriv(x,x) 	=> 1					end
+  [] deriv(y,x) 	=> 0    if $x != $y			end
+  [] deriv(n,x)   	=> 0					end
+  [] deriv(e1+e2,x)  	=> deriv(e1,x) + deriv(e2,x)		end
+  [] deriv(e1*e2,x)  	=> e1*deriv(e2,x) + deriv(e1,x)*e2	end
+  [] deriv(e1^n,x)  	=> n*deriv(e1,x)^(n-1)			end
+
+  [] e+0		=> e	end 
+  [] e*0		=> 0	end 
+  [] e*1		=> e	end 
+
+  [cm] x*x		=> x^2		end
+  [cm] y*x*x		=> y*x^2	end
+
+end
+
+//
+// Small interpreter
+//
+rules for exp
+  x		: variable;
+  e1,e2,e3	: exp;
+global
+  [DERIV]
+	 deriv e1 x => deriv(e1,x) 
+  end
+
+  [COLLECTMONOME]
+	 collectMonome e1 => collectMonome(e2) 
+	 where e2:=(eval) e1
+  end
+
+end
+
+strategies for exp
+implicit
+  [.] eval => dc one(
+	   DERIV,
+	   COLLECTMONOME
+	   )
+  end
+
+end
+
+
+end
+
+
+
+/*
+
+deriv(3*X*X+7*X+1 , X)
+end
+
+deriv(4*X*X*X + 3*X*X + 2*X + 1 , X)
+end
+
+(2+((X*3)+((X*3)+((X*(X*4))+((X*(X*4))+(X*(X*4)))))))
+end
+
+deriv(1 + 1*X + 2*X*X + 3*X*X*X + 4*X*X*X*X
+	+ 5*X*X*X*X*X+ 6*X*X*X*X*X*X,  X)
+end
+
+
+
+*/

@@ -1,0 +1,5 @@
+def A=a.A + b.A + a.B
+def B = a.A
+
+prop Phi = [a](min X.<a>X || <b>tt)
+

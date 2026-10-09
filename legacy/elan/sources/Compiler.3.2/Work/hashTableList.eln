@@ -1,0 +1,149 @@
+module hashTableList[Key,Value]
+
+import 
+global
+  int
+  ;
+local
+  builtinArray[list[entry[Key,Value]]]
+  cmp[entry[Key,Value]]
+  cmp[Key]
+  builtinHashTerm[Key]
+  ;
+end
+
+sort hashTable[Key,Value] Key Value entry[Key,Value] list[entry[Key,Value]];
+end 
+
+operators
+global
+  new(@,@)         : (int Value) hashTable[Key,Value];
+  @.cleanAll       : (hashTable[Key,Value]) hashTable[Key,Value];
+
+  @.add(@,@)       : (hashTable[Key,Value] Key Value) hashTable[Key,Value];
+  @.get(@)         : (hashTable[Key,Value] Key) Value;
+  @.containsKey(@) : (hashTable[Key,Value] Key) bool;
+
+  @.size           : (hashTable[Key,Value]) int;
+  size(@)          : (hashTable[Key,Value]) int alias @.size:;
+
+  hashTerm(@)	   : (Key) int;
+
+local  
+  [@]              : (builtinArray[list[entry[Key,Value]]]) hashTable[Key,Value];
+  [@,@]            : (Key Value) entry[Key,Value];
+  emptyKeyHashTable  : Key;
+
+  nil_HT             : list[entry[Key,Value]];
+  @.@                : (entry[Key,Value] list[entry[Key,Value]]) list[entry[Key,Value]];
+  [@,@]              : (entry[Key,Value] list[entry[Key,Value]]) list[entry[Key,Value]];
+  find(@,@)          : (Key list[entry[Key,Value]]) entry[Key,Value];
+
+  append(@,@)       : (list[entry[Key,Value]] list[entry[Key,Value]]) list[entry[Key,Value]];
+  update(@,@,@)     : (entry[Key,Value] list[entry[Key,Value]] list[entry[Key,Value]]) list[entry[Key,Value]];
+  @.cleanIndex(@)   : (hashTable[Key,Value] int) hashTable[Key,Value];
+
+end
+
+rules for hashTable[Key,Value]
+  ht1,ht2   : hashTable[Key,Value];
+  i         : int;
+  t,t2      : builtinArray[list[entry[Key,Value]]];
+  k1,k2     : Key;
+  v1,v2	    : Value;
+  hcode	    : builtinInt;
+  l1,l2     : list[entry[Key,Value]];
+  newList   : list[entry[Key,Value]];
+  e	    : entry[Key,Value];
+global
+  [] new(i,v1) => [new(valueOf(i),[emptyKeyHashTable,v1].nil_HT)]
+  end
+
+  [] ht1.cleanAll => ht1.cleanIndex(ht1.size -1) end
+
+  [] [t].cleanIndex(0) => [t2]
+		where e :=() find(emptyKeyHashTable, t.get(0))
+		where t2 :=() t.set(0,e.nil_HT)
+  end
+  [] [t].cleanIndex(i) => [t2].cleanIndex(i-1)
+		where e :=() find(emptyKeyHashTable, t.get(valueOf(i)))
+		where t2 :=() t.set(valueOf(i),e.nil_HT)
+  end
+
+  [] [t].add(k1,v1) => [t.set(hcode,newList)]
+		   where hcode :=() builtinHashTerm(k1) % t.length
+		   where l1:=() t.get(hcode)
+		   where newList :=() update([k1,v1], nil_HT, l1)
+  end
+end
+
+rules for int
+  k        : Key;
+  t        : builtinArray[list[entry[Key,Value]]];
+global
+  [] hashTerm(k) => builtinHashTerm(k)				end
+  [] [t].size => t.length					end
+end
+
+rules for bool
+  k1,k2     : Key;
+  v	    : Value;
+  t	    : builtinArray[list[entry[Key,Value]]];
+  hcode	    : builtinInt;
+  entry     : entry[Key,Value];
+  l1,l2 : list[entry[Key,Value]];
+global
+  [] [t].containsKey(k1) => true 
+		     where hcode:=() builtinHashTerm(k1) % t.length
+		     where l1:=() t.get(hcode)
+		     where (entry[Key,Value]) [k2,v]:=() find(k1,l1)
+		     if k1 == k2
+  end
+  [] [t].containsKey(k1) => false
+  end 
+end
+
+rules for Value
+  b	    : bool;
+  k1,k2     : Key;
+  v	    : Value;
+  t	    : builtinArray[list[entry[Key,Value]]];
+  hcode	    : builtinInt;
+  l1        : list[entry[Key,Value]];
+global
+  [] [t].get(k1) => v 
+		     where hcode:=() builtinHashTerm(k1) % t.length
+		     where l1:=() t.get(hcode)
+		     where (entry[Key,Value]) [k2,v]:=() find(k1,l1)
+  end
+end
+
+rules for list[entry[Key,Value]]
+  l1,l2 : list[entry[Key,Value]];
+  k1,k2	: Key;
+  v1,v2	: Value;
+  e     : entry[Key,Value];
+global
+  [] update([k1,v1], l1, e.nil_HT)   => append([k1,v1].l1 , e.nil_HT) end
+  [] update([k1,v1], l1, [k1,v2].l2) => append([k1,v1].l1 , l2)       end
+  [] update([k1,v1], l1, e.l2)       => update([k1,v1], e.l1, l2)     end
+
+  [] append(nil_HT, l1) => l1              end
+  [] append(e.l1, l2)   => e.append(l1,l2) end
+
+end
+
+rules for entry[Key,Value]
+  l 	: list[entry[Key,Value]];
+  e     : entry[Key,Value];
+  k1,k2	: Key;
+  v1,v2	: Value;
+global
+  [] find(k1, [k2,v1].l)  => [k1,v1]   if k1 == k2 end
+  [] find(k1, e.nil_HT)  => e                      end
+  [] find(k1, e.l)       => find(k1,l)             end
+end
+
+
+end
+				

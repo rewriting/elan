@@ -1,0 +1,11 @@
+module builtinident
+
+op
+ global
+
+  IDENTEQUAL(@,@)    	:(t_identifier t_identifier)boolean	code 14;
+  IDENTNONEQUAL(@,@)	:(t_identifier t_identifier)boolean	code 15;
+
+endop
+
+end of module

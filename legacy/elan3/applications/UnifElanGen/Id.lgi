@@ -1,0 +1,9 @@
+LPL Id description
+
+
+  query 	of sort eqSystem
+         	result of sort eqSystem
+	 	import term bool eqSystem list[variable] Id 
+         	start with (chooseIdeqSys) query 
+
+end

@@ -1,0 +1,164 @@
+module to_coq
+
+import global syntax_rho syntax_cci;
+end
+
+/* PI to CCI */
+rules for term
+ x,y,z,t:term;
+ 
+ global
+	// simple rewrite step
+	[] pi2CCI(#(x,y,neutral(z))) => (A_neutral z) end
+	[] pi2CCI(#(x,y,Opp_Null)) => A_Opp_Null end
+	[] pi2CCI(#(x,y,Opp_Opp(z))) => (A_Opp_Opp z) end
+	[] pi2CCI(#(x,y,Opp_Plus(z,t))) => (A_Opp_Plus z t) end
+	[] pi2CCI(#(x,y,invert(z))) => (A_invert z) end
+
+	// lemma eq_ac if necessary
+	[] pi2CCI(trans_eq(x,y)) => (trans_equal A In(x) Out(x) Out(y) pi2CCI(x) (trans_equal A Out(x) In(y) Out(y) equal_generator(Out(x),In(y))  pi2CCI(y))) 
+				if not eq_term(Out(x),In(y))
+				if eq_term(Out(x),term_ac_in(Out(x),In(y)))
+				end
+
+	 //[NGUYEN: May  9 01] 
+	[] pi2CCI(trans_eq(x,y)) => 
+			(trans_equal A In(x) Out(x) Out(y) pi2CCI(x) (trans_equal A Out(x) In(y) Out(y) 
+				     (lemma_generator(term_ac_context(Out(x),In(y))) term_ac_in(Out(x),In(y)) term_ac_out(Out(x),In(y))  term_ac_compare(Out(x),In(y))) 
+			pi2CCI(y))) 
+			if not eq_term(Out(x),In(y)) 
+			end
+
+	[] pi2CCI(trans_eq(x,y)) => (trans_equal A In(x) Out(x) Out(y) pi2CCI(x) pi2CCI(y)) end
+
+	// Lemma Context
+	[] pi2CCI(ctx(x,y)) => (lemma_generator(x) In(y) Out(y) pi2CCI(y)) end
+
+	//Lemma parallel reductions
+	[] pi2CCI(eq_concat_+(x,y)) => (eq_2 In(x) In(y) [v1,v2:A](A_Plus In(x) In(y))=(A_Plus v1 v2) (refl_equal A (A_Plus In(x) In(y))) Out(x) pi2CCI(x) Out(y) pi2CCI(y)) end
+
+	[] pi2CCI(eq_concat_*(x,y)) => (eq_2 In(x) In(y) [v1,v2:A](A_Mult In(x) In(y))=(A_Mult v1 v2) (refl_equal A (A_Mult In(x) In(y))) Out(x) pi2CCI(x) Out(y) pi2CCI(y)) end
+
+end
+
+
+//[NGUYEN: May  9 01]  optimise la verification d'egalite AC
+// we only compare by lpo the syntactically different subterms
+rules for term
+ 	x,y,z,t:term;
+global
+	// return the syntactically different subterms
+	[]term_ac_compare((A_Plus x y),(A_Plus z t)) => term_ac_compare(y,t) if eq_term(x,z) end
+	[]term_ac_compare((A_Plus x y),(A_Plus z t)) => term_ac_compare(x,z) if eq_term(y,t) end
+	[]term_ac_compare((A_Plus x y),(A_Plus z t)) => equal_generator((A_Plus x y),(A_Plus z t)) end
+	[]term_ac_compare((A_Mult x y),(A_Mult z t)) => term_ac_compare(y,t) if eq_term(x,z) end
+	[]term_ac_compare((A_Mult x y),(A_Mult z t)) => term_ac_compare(x,z) if eq_term(y,t) end
+	[]term_ac_compare((A_Mult x y),(A_Mult z t)) => equal_generator((A_Mult x y),(A_Mult z t)) end
+	[]term_ac_compare((A_Opp x),(A_Opp y)) => term_ac_compare(x,y) end
+
+	//return the context of these subterms
+	[]term_ac_context((A_Plus x y),(A_Plus z t)) => (A_Plus x term_ac_context(y,t)) if eq_term(x,z) end
+	[]term_ac_context((A_Plus x y),(A_Plus z t)) => (A_Plus term_ac_context(x,z) y) if eq_term(y,t) end
+	[]term_ac_context((A_Plus x y),(A_Plus z t)) => CTX end
+	[]term_ac_context((A_Mult x y),(A_Mult z t)) => (A_Mult x term_ac_context(y,t)) if eq_term(x,z) end
+	[]term_ac_context((A_Mult x y),(A_Mult z t)) => (A_Mult term_ac_context(x,z) y) if eq_term(y,t) end
+	[]term_ac_context((A_Mult x y),(A_Mult z t)) => CTX end
+	[]term_ac_context((A_Opp x),(A_Opp y)) => (A_Opp term_ac_context(x,y)) end
+
+	//return the left-of-equality subterm
+	[]term_ac_out((A_Plus x y),(A_Plus z t)) => term_ac_out(y,t) if eq_term(x,z) end
+	[]term_ac_out((A_Plus x y),(A_Plus z t)) => term_ac_out(x,z) if eq_term(y,t) end
+	[]term_ac_out((A_Plus x y),(A_Plus z t)) => (A_Plus z t) end
+	[]term_ac_out((A_Mult x y),(A_Mult z t)) => term_ac_out(y,t) if eq_term(x,z) end
+	[]term_ac_out((A_Mult x y),(A_Mult z t)) => term_ac_out(x,z) if eq_term(y,t) end
+	[]term_ac_out((A_Mult x y),(A_Mult z t)) => (A_Mult z t) end
+	[]term_ac_out((A_Opp x),(A_Opp y)) => term_ac_out(x,y) end
+
+	// return the right-of-equality subterm
+	[]term_ac_in((A_Plus x y),(A_Plus z t)) => term_ac_in(y,t) if eq_term(x,z) end
+	[]term_ac_in((A_Plus x y),(A_Plus z t)) => term_ac_in(x,z) if eq_term(y,t) end
+	[]term_ac_in((A_Plus x y),(A_Plus z t)) => (A_Plus x y) end
+	[]term_ac_in((A_Mult x y),(A_Mult z t)) => term_ac_in(y,t) if eq_term(x,z) end
+	[]term_ac_in((A_Mult x y),(A_Mult z t)) => term_ac_in(x,z) if eq_term(y,t) end
+	[]term_ac_in((A_Mult x y),(A_Mult z t)) => (A_Mult x y) end
+	[]term_ac_in((A_Opp x),(A_Opp y)) => term_ac_in(x,y) end
+end
+
+ //[NGUYEN: May 11 01]
+rules for term
+	t1,t2,s1,s2,t,s,ac_term: term;
+	Inst,Var: list[term];
+	name:int;
+
+global
+	[] eq_ac((A_Plus t1 t2),(A_Plus s1 s2),Var,Inst,name) => 
+			((A_Plus v(name) 1st(ac_term)),(A_Plus v(name) 2nd(ac_term)),list_var(ac_term),list_inst(ac_term))
+			 where ac_term :=() eq_ac(t2,s2,append(Var,v(name).nil),append(Inst,t1.nil),name+1)
+	  					     if eq_term(t1,s1)
+						     end
+		
+	[] eq_ac((A_Plus t1 t2),(A_Plus s1 s2),Var,Inst,name) => 
+			 ((A_Plus t1 1st(ac_term)),(A_Plus s1 2nd(ac_term)), list_var(ac_term), list_inst(ac_term))
+			 where ac_term := () eq_ac(t2,s2,Var,Inst,name)
+						     end
+	[] eq_ac(t,s,Var,Inst,name) => (v(name),v(name),append(Var,v(name).nil),append(Inst,t.nil)) if eq_term(t,s)
+				  end
+
+	[] eq_ac((A_Opp t),(A_Opp s),Var,Inst,name) => 
+				((A_Opp 1st(ac_term)),(A_Opp 2nd(ac_term)),list_var(ac_term), list_inst(ac_term))
+				 where ac_term :=() eq_ac(t,s,Var,Inst,name)
+				end
+	[] eq_ac(t,s,Var,Inst,name) => (t,s,Var,Inst) end
+
+	[] 1st((t,s,Var,Inst)) => t end
+	[] 2nd((t,s,Var,Inst)) => s end
+
+end
+
+
+rules for term
+ x,y,z: term;
+
+global
+	[] In(#(x,y,z)) => x end
+	[] In(trans_eq(x,y)) => In(x) end
+	[] In((A_Plus x y)) => (A_Plus In(x) In(y)) end
+	[] In((A_Mult x y)) => (A_Mult In(x) In(y)) end
+	[] In((A_Opp x)) => (A_Opp In(x)) end
+	[] In(eq_concat_+(x,y)) => (A_Plus In(x) In(y)) end
+	[] In(eq_concat_*(x,y)) => (A_Mult In(x) In(y)) end
+	[] In(ctx(x,y)) => remCTX(x,In(y)) end
+	[] In(A_Zero) => A_Zero end
+	[] In(y0) => y0 end
+	[] In(y1) => y1 end
+	[] In(y2) => y2 end
+	[] In(y3) => y3 end
+
+	[] Out(#(x,y,z)) => y end
+	[] Out(trans_eq(x,y)) => Out(y) end
+	[] Out((A_Plus x y)) => (A_Plus Out(x) Out(y)) end
+	[] Out((A_Mult x y)) => (A_Mult Out(x) Out(y)) end
+	[] Out(( A_Opp x)) => (A_Opp Out(x)) end
+	[] Out(eq_concat_+(x,y)) => (A_Plus Out(x) Out(y)) end
+	[] Out(eq_concat_*(x,y)) => (A_Mult Out(x) Out(y)) end
+	[] Out(ctx(x,y)) => remCTX(x,Out(y)) end
+	[] Out(A_Zero) => A_Zero end
+	[] Out(y0) => y0 end
+	[] Out(y1) => y1 end
+	[] Out(y2) => y2 end
+	[] Out(y3) => y3 end
+
+	[] remCTX(CTX,x) => x end
+	[] remCTX((A_Plus x y),z) => (A_Plus remCTX(x,z) remCTX(y,z)) end
+	[] remCTX((A_Mult x y),z) => (A_Mult remCTX(x,z) remCTX(y,z)) end
+	[] remCTX((A_Opp x),y) => (A_Opp remCTX(x,y)) end
+	[] remCTX(A_Zero ,x) => A_Zero end
+	[] remCTX(y0,x) => y0 end
+	[] remCTX(y1,x) => y1 end
+	[] remCTX(y2,x) => y2 end
+	[] remCTX(y3,x) => y3 end
+
+end
+
+
+end

@@ -1,0 +1,47 @@
+#! /bin/csh -f
+#        LGI             SPC        INP        OUT
+
+if ($1 =~ *I*) then
+echo "Interpreter"
+itest    prolog          member     imember1    imember1
+itest    prolog          lovers     ilovers1    ilovers1
+if ($1 =~ *L*) then
+itest    prolog          member     imember2    imember2
+itest    prolog          lovers     ilovers2    ilovers2
+itest    prolog          queens     iqueens     iqueens
+endif
+endif
+
+if ($1 =~ *I* && $1 =~ *A*) then
+echo "Aterm-Interpreter"
+aitest    prolog          member     imember1    imember1
+aitest    prolog          lovers     ilovers1    ilovers1
+if ($1 =~ *L*) then
+aitest    prolog          member     imember2    imember2
+aitest    prolog          lovers     ilovers2    ilovers2
+aitest    prolog          queens     iqueens     iqueens
+endif
+endif
+
+if ($1 =~ *C*) then
+echo "Compiler"
+ctest    prolog          member     cmember1    cmember1
+ctest    prolog          lovers     clovers1    clovers1
+if ($1 =~ *L*) then
+ctest    prolog          member     cmember2    cmember2
+ctest    prolog          lovers     clovers2    clovers2
+ctest    prolog          queens     cqueens     cqueens
+endif
+endif
+
+if ($1 =~ *C* && $1 =~ *A*) then
+echo "Aterm-Compiler"
+actest    prolog          member     cmember1    cmember1
+actest    prolog          lovers     clovers1    clovers1
+if ($1 =~ *L*) then
+actest    prolog          member     cmember2    cmember2
+actest    prolog          lovers     clovers2    clovers2
+actest    prolog          queens     cqueens     cqueens
+endif
+endif
+

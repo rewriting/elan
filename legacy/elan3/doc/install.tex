@@ -1,0 +1,963 @@
+
+\section{Using \elan}
+
+The language can be used either through an interpreter or a compiler
+as described below in section~\ref{Run the interpreter}
+and \ref{how_to_compile} respectively. 
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{How to run the \elan{} interpreter}
+\label{Run the interpreter}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+You can now execute \elan{} by just typing the \verb|elan| command with the
+following usage: 
+{\footnotesize\begin{verbatim}
+
+        ******** ELAN version 3.6
+        (c) LORIA (CNRS, INPL, INRIA, UHP, U-Nancy 2)
+            1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
+
+Usage:
+        elan [options] lgi_file [spc_file]
+Options:
+        --dump, -d              : dump of signature, strategies and rules
+        --trace, -t [num]       : tracing of execution (default max)
+        --statistic, -s/-S      : statistics: short/long
+        --warningsoff, -w       : suppress warning messages of the parser
+        --quiet, -q             : quiet regime of execution
+        --batch, -b             : batch regime (no messages at all)
+        --elanlib               : elanlib
+        --secondlib, -l lib     : second elan library (by default ..)
+        --command, -C           : command language
+        --export, --cexport     : export to a .ref file
+        --import                : import from a .ref file
+
+\end{verbatim} }
+
+\noindent
+Both the logic description file (\verb|lgi_file|) and  
+the specification file (\verb|spc_file|)
+may be written without their suffixes. 
+Default suffixes for \elan{} files are:
+\begin{description}
+\item[\tt .lgi] -- for the top level logic description file,
+\item[\tt .eln] -- for modules used in the top level logic description file,
+\item[\tt .spc] -- for the specification file,
+\item[\tt .ref] -- for the file in \REF{} format.
+\end{description}
+%
+The system \elan{} searches these files 
+(i.e. \verb|.eln|, \verb|.lgi|, \verb|.spc|, \verb|.ref|)
+in the following directories with the decreasing priorities:
+\begin{itemize}
+  \item in the current directory,
+  \item in the directory described by the value of a 
+    system variable {\tt SECONDELANLIB},
+  \item in the directories described as {\tt ELANLIB/commons},
+    {\tt ELANLIB/noquote}, {\tt ELANLIB/strategy} and {\tt ELANLIB/ref},
+    in this order.
+\end{itemize}
+%
+The default value of the variable {\tt ELANLIB} is set to the subdirectory {\tt elan\_library/elanlib} of the source directory but it can be locally replaced by the switch \verb|--elanlib|. 
+The default value of the variable {\tt SECONDELANLIB} is set to the
+parent directory, however, it can be also locally replaced by the
+switch \verb|--secondlib| (or, \verb|-l|) (for details, see below).
+
+In Chapter \ref{short}, we have shown, how to simply run the 
+\elan{} interpreter with a logic description. We now illustrate
+on several examples the usage of the different switches.
+
+\begin{description}
+%-------------------------------
+ \item[{\tt -d}, (or, {\tt --dump})]
+      dumps out the signature of the described logic
+      (i.e. all sorts and function symbols with their
+      profiles), definitions of all strategies and rewrite rules.
+      For the example \verb|poly3| from Chapter \ref{short}:
+{\footnotesize\begin{verbatim}
+> elan -d poly3 someVariables
+\end{verbatim} }
+\noindent
+we obtain a list of rewrite rules of the form:
+{\footnotesize\begin{verbatim}      
+local rule expand:poly/poly3[Vars] [1/3/fsym=233/vars=9]
+ ( VAR(0)+(( VAR(1)+ VAR(2))*( VAR(3)+ VAR(4))))         => 
+                     ( VAR(0)+( VAR(5)+( VAR(6)+( VAR(7)+ VAR(8)))))
+     where VAR(8) := (simplify:poly/poly3[Vars]) ( VAR(2)* VAR(4))
+     where VAR(7) := (simplify:poly/poly3[Vars]) ( VAR(2)* VAR(3))
+     where VAR(6) := (simplify:poly/poly3[Vars]) ( VAR(1)* VAR(4))
+     where VAR(5) := (simplify:poly/poly3[Vars]) ( VAR(1)* VAR(3))
+
+local rule expand:poly/poly3[Vars] [2/4/fsym=233/vars=6]
+ ( VAR(0)+(( VAR(1)+ VAR(2))* VAR(3)))   => ( VAR(0)+( VAR(4)+ VAR(5)))
+     where VAR(5) := (simplify:poly/poly3[Vars]) ( VAR(2)* VAR(3))
+     where VAR(4) := (simplify:poly/poly3[Vars]) ( VAR(1)* VAR(3))
+. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . etc
+\end{verbatim} }
+\noindent 
+Names of rewrite rules (e.g. \verb|expand|) are displayed
+together with their sorts (e.g. \verb|poly|), over which these rules
+work, and with a module name, where they have been defined
+(e.g. \verb|poly3[Vars]|).  
+An internal code of the top-most function symbol of its left-hand side 
+and the number of variables of each rule are also displayed as an
+additional information.  
+Variables appearing in rewrite rules are displayed in a uniform way: \verb|VAR(i)|, where
+$i$ is an internal index.
+
+\noindent
+The print-out continues with a list of strategies in the form:
+{\footnotesize\begin{verbatim}
+strategy global simplify:poly/poly3[Vars]
+ repeat* (
+   dc one(expand:poly )
+ );
+ repeat* (
+   dc one(factorize:poly )
+ )
+. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . etc
+\end{verbatim} }
+%
+%{\footnotesize\begin{verbatim}
+%strategy global last_simplify:poly/poly3[Vars]
+% repeat* (
+%   dc(expand:poly )
+% );
+% repeat* (
+%   dc(factorise:poly )
+% )
+%
+%strategy global simplify:poly/poly3[Vars]
+% repeat* (
+%   dc(expand:poly );
+%   dc(factorise:poly );
+%   dc(factorise:poly );
+%   repeat* (
+%     dc(factorise:poly )
+%   )
+% )
+%. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . etc
+%\end{verbatim} }
+\noindent The label of the strategy is composed of the name of the
+strategy, its sort and the name of the module where it has been
+defined (as for labelled rules).
+
+The specification of the signature of the described logic 
+is composed of a set of defined (and internal) sorts:
+{\footnotesize\begin{verbatim}
+Sorts
+intern int, ident, identifier, string, list[identifier], 
+intern ident, int, variable, intern string, bool, 
+poly, 
+\end{verbatim} }
+and of a list of function symbols with their profiles in the following form:
+{\footnotesize\begin{verbatim}
+Function symbols
+ @                     : (variable)poly        pri 0 code 231;
+ @                     : (int)poly             pri 0 code 232;
+ @ '+' @               : (poly poly)poly       assocRight      pri 1 code 233;
+'(' @ '+' @ ')'        : (poly poly)poly       pri 0 code 233;
+ @ '*' @               : (poly poly)poly       assocRight      pri 2 code 234;
+'(' @ '*' @ ')'        : (poly poly)poly       pri 0 code 234;
+'deriv' '(' @ ',' @ ')': (poly variable)poly   pri 0 code 235;
+. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . etc
+\end{verbatim} }
+%-------------------------------
+ \item[{\tt -t} (or, {\tt --trace})] allows tracing \elan{}
+programs.  The maximal depth of tracing can be specified, 
+like \verb|-t 9|, however, by default (i.e. \verb|-t|), it traces all levels.  The
+number specified as the trace level counts matchings of a left-hand
+side, verifications of the conditional part of a rule, and evaluations
+of strategies applied over terms in local affectations. Thus, if the
+user wants to trace his/her rewrite derivation up to the 5-th level, the
+trace argument should be specified as \verb|-t 15|.
+%
+{\footnotesize\begin{verbatim} > elan -t poly3 someVariables
+. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . etc enter
+query term finished by the key word 'end':
+deriv(X*X,X) end
+
+[] start with term :
+    deriv((X*X),X)
+
+       [reduce] start:
+       [0]  deriv((X*X),X)
+                   [reduce] start:
+                   [0] (X*deriv(X,X))
+                   [1] (X*1)
+                   [2]  X
+                   [reduce] stop :
+               applying strategy 'simplify:poly/poly3[Vars]' on  X
+                 trying  'expand:poly' on        X
+                 fail of 'expand:poly' 
+                 trying  'expand:poly' on        X
+                 fail of 'expand:poly' 
+                 trying  'factorize:poly' on     X
+                 fail of 'factorize:poly' 
+                 trying  'factorize:poly' on     X
+                 fail of 'factorize:poly' 
+                 trying  'factorize:poly' on     X
+                 fail of 'factorize:poly' 
+             setting VAR(4) on  X
+                   [reduce] start:
+                   [0] (deriv(X,X)*X)
+                   [1] (1*X)
+                   [2]  X
+                   [reduce] stop :
+               applying strategy 'simplify:poly/poly3[Vars]' on  X
+                 trying  'expand:poly' on        X
+                 fail of 'expand:poly' 
+                 trying  'expand:poly' on        X
+                 fail of 'expand:poly' 
+                 trying  'factorize:poly' on     X
+                 fail of 'factorize:poly' 
+                 trying  'factorize:poly' on     X
+                 fail of 'factorize:poly' 
+                 trying  'factorize:poly' on     X
+                 fail of 'factorize:poly' 
+             setting VAR(5) on  X
+                   [reduce] start:
+                   [0] (X+X)
+                   [reduce] stop :
+               applying strategy 'simplify:poly/poly3[Vars]' on (X+X)
+                 trying  'expand:poly' on       (X+X)
+                 fail of 'expand:poly' 
+                 trying  'expand:poly' on       (X+X)
+                 fail of 'expand:poly' 
+                 trying  'factorize:poly' on    (X+X)
+                 fail of 'factorize:poly' 
+                 trying  'factorize:poly' on    (X+X)
+                 fail of 'factorize:poly' 
+                 trying  'factorize:poly' on    (X+X)
+                 fail of 'factorize:poly' 
+             setting VAR(3) on (X+X)
+       [1] (X+X)
+       [reduce] stop :
+     trying  'expand:poly' on   (X+X)
+     fail of 'expand:poly' 
+     trying  'expand:poly' on   (X+X)
+     fail of 'expand:poly' 
+     trying  'factorize:poly' on        (X+X)
+     fail of 'factorize:poly' 
+     trying  'factorize:poly' on        (X+X)
+     fail of 'factorize:poly' 
+     trying  'factorize:poly' on        (X+X)
+     fail of 'factorize:poly' 
+
+[] result term:
+   (X+X)
+
+[] end
+\end{verbatim} }
+
+%-------------------------------
+ \item[{\tt -s} ({\tt -S}, or {\tt --statistics})]
+   displays
+   a brief ({\tt -s}) or a complete ({\tt -S}) version of statistics. These
+   statistics contain the information about the running time
+   of the last query, average speed in rewrites per second,
+   the statistics of labelled and unlabelled rules, which were tried and applied.
+{\footnotesize\begin{verbatim}
+> elan -S poly3 someVariables
+ . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . etc
+ enter query term finished by the key word 'end':
+ deriv(X*X,X) end
+
+[] start with term :
+    deriv((X*X),X)
+
+[] result term:
+   (X+X)
+
+[] end
+
+ Statistics:
+ total time     (0.007+0.000)=0.007 sec (main+subprocesses)
+
+ average speed  714 inf/sec
+                5 nonamed rules applied,    23 tried
+                0   named rules applied,    20 tried
+ named rules
+           applied   tried    rule for symbol
+                 0       8    expand:poly
+                 0      12    factorize:poly
+ nonamed rules
+           applied   tried    rule for symbol
+                 0       4    ( poly + poly )
+                 2      12    ( poly * poly )
+                 3       7    deriv( poly , variable )
+ end of statistics
+\end{verbatim} } 
+%
+The complete statistics show a detailed list of
+applications and tries for labelled and unlabelled rules.
+The brief statistics do not precise the last paragraph about 
+unlabelled rules.
+
+%-------------------------------
+ \item[{\tt -w} (or, {\tt --warningsoff})]
+   eliminates all ambiguity warnings
+   produced during parsing of the \elan{} description of a logic.
+
+ \item[{\tt -q} (or, {\tt --quiet})]
+   suppresses all error messages and warnings during the
+   execution of the \elan{} program.
+
+ \item[{\tt -b} (or, {\tt --batch})]
+   suppresses all messages, thus this mode
+   is useful when the \elan{} system is 
+   executed from a script file in the batch mode.
+
+%-------------------------------
+ \item[{\tt --elanlib dir}]
+   locally redefines the value
+   of the system variable {\tt ELANLIB} by the string \verb|dir|.
+
+ \item[{\tt --secondlib dir} (or, {\tt --secondlib dir})]
+   does the same with
+   the variable {\tt SECONDELANLIB}.
+
+%-------------------------------
+ \item[{\tt --export fname}, {\tt --cexport fname}]
+  exports the input specification into the \REF{} format stored in the file {\tt fname}.
+  The switch {\tt cexport} is used only when the produced \REF{} file is compiled by the
+        \elan{} compiler.
+
+ \item[{\tt --import fname}] 
+  imports a specification in the \REF{} format from the \REF{} file {\tt fname}
+  produced, in general, by the switch {\tt --export}.
+{\footnotesize\begin{verbatim}
+> elan --export poly3.ref poly3 someVariables.spc
+
+        ******** ELAN version 3.6 ********
+
+         (c)   LORIA (CNRS, INPL, INRIA, UHP, U-Nancy 2), 1994 - 2001
+ . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . etc
+
+Export file poly3.ref has been created
+
+> elan --import poly3.ref
+        ******** ELAN version 3.6 ********
+
+         (c)   LORIA (CNRS, INPL, INRIA, UHP, U-Nancy 2), 1994 - 2001
+
+Import form file poly3
+
+Importing Identifiers
+Importing Sorts
+Importing Modules
+Importing RuleNames
+Importing StrategyNames
+Import rule extractrule1:identifier/list[identifier]!LO form module list[identifier]
+Import rule extractrule2:identifier/list[identifier]!LO form module list[identifier]
+Import rule expand:poly/poly3[Vars]!LO form module poly3[Vars]
+Import rule expand:poly/poly3[Vars]!LO form module poly3[Vars]
+Import rule factorize:poly/poly3[Vars]!LO form module poly3[Vars]
+Import rule factorize:poly/poly3[Vars]!LO form module poly3[Vars]
+Import rule factorize:poly/poly3[Vars]!LO form module poly3[Vars]
+Import strategy listExtract:identifier/list[identifier]
+Import strategy simplify:poly/poly3[Vars]
+Import strategy last_simplify:poly/poly3[Vars]
+
+enter query term finished by the key word 'end':
+\end{verbatim} }
+
+%-------------------------------
+ \item[{\tt -C}]
+   runs the \elan\ interpreter
+   with a simple command language interpreted on the top-most level.
+   This mode is described in Section~\ref{TopLevelInter}.
+
+%-------------------------------
+% \item[
+%   {\tt -c} ({\tt --compiler}),
+%   {\tt -O} ({\tt --optimise}),
+%   {\tt --code},
+%   {\tt -o} ({\tt --output}),
+%   {\tt -n} ({\tt --deterministic}) and
+%   {\tt --exe}] concern the \elan{} compiler and they will
+%   be explained in Section~\ref{how_to_compile}.
+\end{description}
+
+\noindent
+After loading all modules specified in the logic description file, 
+\elan{} requires to enter a query term, which
+has to be finished by the word 'end' or by character \verb|^D| (control-D).
+Its evaluation can be interrupted by typing \verb|^C|, 
+the interpreter then proposes a simple run-time menu:
+\begin{itemize}
+  \item {\tt ExecutionAbort} - A -
+    aborts the current execution and allows to enter another query term,
+  \item {\tt Continue} - C -
+    continues the interrupted execution,
+  \item {\tt Dump} - D -
+    dumps the signature, rules and strategies of the currently loaded
+    logic,
+  \item {\tt Exit} - E -
+    quits the \elan{} system,
+  \item {\tt Statistics} - S, s -
+    writes the actual statistics corresponding to the last evaluated query,
+  \item {\tt ChangeTrace} - T -
+    changes trace level of the current derivation such that 
+    the interpreter asks for a new trace level,
+  \item {\tt ChangeQuiet} - Q -
+    switches between two displaying modes: quiet -- unquiet,
+\comment{
+  \item {\tt Input} - I -
+    changes the input sort of the query,
+  \item {\tt Output} - O -
+    changes the output sort of the query,
+  \item {\tt stRategy} - R -
+    changes the name of the top-most strategy applied on the entered query.
+}
+\end{itemize}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Top level interpreter} \label{TopLevelInter}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+The command language of the \elan\ interpreter improves the user's interface 
+by offering to the user several commands, which allow to:
+\begin{itemize}
+  \item change several parameters of the system,
+  \item debug programs using  break-points,
+  \item keep the history of queries and their results,
+  \item runs the current logic with different strategies, different entries, etc.
+\end{itemize}
+
+\noindent
+When the \elan{} interpreter is started with the option \verb|-C|, instead of asking:\\
+\verb|enter query term finished by the key word 'end'| \\
+\elan{} prompts the user: \\
+\verb|enter command finished by ';'| \\
+We show a brief description of all commands of the top level command language
+%(also found in the file {\tt ELANLIB/help.txt}), 
+which will be later illustrated on several examples.
+%
+\begin{description}
+  \item[{\tt quit}]   
+    terminates the session and leaves the  \elan{} interpreter.
+%  \item[{\tt help}]   
+%    shows the help file {\tt ELANLIB/help.txt}.
+  \item
+    [{\tt load mod}]  
+    loads (i.e. imports) an additional module, where the identifier \verb|mod| 
+    describes its name (possibly with its arguments),
+  \item
+    [{\tt batch mod}] 
+    calls a script file with the name 
+    \verb|mod| (an identifier), which contains a stream of commands
+    of the command language.
+    It tries to evaluate all commands of the script file, and
+    it returns the control to the interactive mode.
+    The script files can be also concatenated.
+ \item
+   [{\tt qs}]  shows the queue of input queries (i.e. the history up to the
+       last ten queries).
+       The terms in this queue of queries {\tt qs} can be
+       referenced by the identifiers
+       \verb|Q|, \verb|Q1|, ..., \verb|Q9| respecting their sorts.
+       These sorted identifiers could be used in constructions of
+       further queries.
+ \item
+   [{\tt rs}] shows the queue of the latest results 
+         (i.e. the history up to the last ten results).
+       Terms in this queue of results {\tt rs} are
+       referenced by identifiers
+       \verb|R|, \verb|R1|, ..., \verb|R9|.
+       In the case of non-deterministic computations, 
+       there is no correspondence between query terms
+       \verb|Qi| and result terms \verb|Ri|.
+  \item
+    [{\tt startwith (str)term}]  
+    redefines the 'start with' pattern originally defined in the 
+    logic description file \verb|.lgi|.
+    The pattern \verb|term| may contain also symbols
+          \verb|query| standing as a place-holder of an input term
+          entered by the user using the command \verb|run|,
+          or symbols \verb|Q|, $\dots$, \verb|Qi| or 
+          \verb|R|, $\dots$, \verb|Ri|
+          standing for values of previously put queries or results.
+  \item
+    [{\tt checkwith term}]
+    redefines the 'check with' pattern originally defined in the 
+    logic description file.
+    The boolean pattern \verb|term| may contain any symbol amongst
+    \verb|query|, 
+    \verb|Q|, $\dots$, \verb|Qi| or 
+          \verb|R|, $\dots$, \verb|Ri|.
+  \item
+    [{\tt printwith term}]
+    sets-up the `print-with' pattern. The `print-with' pattern
+    may contain the symbol \verb|result|, which is a place-holder for
+    result terms. Intuitively, the meaning of the `print-with' term $P$
+    is that any result $r$ of the computation is substituted for the
+    place-holder \verb|result| in the pattern $P$. The substituted term
+    $P[result/r]$ is normalized and printed out.
+    This command can be used for the automatic transformation
+    of results into different formats, e.g.
+    a transformation of 
+    very large result terms into more readable or incomplete
+    notation, or a conversion into a \LaTeX\ notation.
+    The default value of the `print-with' pattern is \verb|result|, i.e.
+        the identity.
+  \item
+    [{\tt run term}]
+    evaluates the term \verb|term| as a query w.r.t. rewrite rules of the current logic 
+    and eventually returns results.
+    The entry term \verb|term| may contain identifiers
+    \verb|Q|, \verb|Q1|, ..., \verb|Q9|,
+    (resp. \verb|R|, \verb|R1|, ..., \verb|R9|) 
+    referring to values of preceding queries or results, e.g.
+        items of the queue of queries {\tt qs}
+    (resp. results {\tt rs}).
+  \item
+    [{\tt sorts type type type}]  
+    sets-up sorts of the symbols \verb|query|, 
+    \verb|result| and of the `print-with' pattern.
+  \item
+    [{\tt stat}]
+    prints the statistics,
+  \item
+    [{\tt dump}] 
+    prints rules, strategies and the signature,
+  \item
+    [{\tt dump name}]
+    dumps only labelled rules with the name \verb|name|,
+    strategies labelled by \verb|name| or
+    unlabelled rules with the head symbol \verb|name|.
+  \item
+    [{\tt dump n}]     
+    dumps only unlabelled rules of a function symbol with the 
+    internal code \verb|n|.
+  \item
+    [{\tt display n}]  
+    if \verb|n| is not zero, all printed terms are in the internal form.
+    The internal form of a term attaches to a symbol name its internal code,
+    which allows to identify overloaded function symbols.
+    {\tt display 0} switches all print-outs into traditional (thus, overloaded)
+    format.
+  \item 
+    [{\tt trace n}]
+     sets-up the trace level to the value \verb|n|.
+  \item
+    [{\tt break name}] (resp. {\tt unbreak name})
+    sets (resp. removes) break-points to all labelled rules 
+    with the name \verb|name|, to all strategies 
+    labelled by \verb|name| and to all unlabelled rewrite rules with 
+    the head symbol \verb|name|.
+  \item
+    [{\tt break n}] (resp. {\tt unbreak n})
+    sets (resp. removes) break-points to unlabelled rules with the head symbol 
+    with the internal code \verb|n|.
+  \item 
+    [{\tt breaks}]
+    shows a list of all breakpoints.
+\end{description}
+
+\noindent
+We illustrate the command language on a small \elan{} session with
+the example \verb|poly3| from the previous Chapter.
+When the switch \verb|-C| is specified, the \elan{} interpreter  loads
+the module \verb|Query| describing the syntax of commands.
+{\footnotesize\begin{verbatim}
+> elan -q -C poly3 someVariables
+
+        ******** ELAN version 3.6 ********
+
+         (c)   LORIA (CNRS, INPL, INRIA, UHP, U-Nancy 2), 1994 - 2001
+   handling module identifier
+     handling module ident
+       handling module bool
+       end of bool
+     end of ident
+     handling module eq[identifier]
+       handling module cmp[identifier]
+       end of cmp[identifier]
+     end of eq[identifier]
+   end of identifier
+   handling module list[identifier]
+     handling module int
+       handling module builtinInt
+       end of builtinInt
+     end of int
+   end of list[identifier]
+   handling module poly3[Vars]
+     handling module eq[variable]
+       handling module cmp[variable]
+       end of cmp[variable]
+     end of eq[variable]
+   end of poly3[Vars]
+ handling module Query[poly,poly,poly]
+ end of Query[poly,poly,poly]
+\end{verbatim} }
+
+\noindent
+We can run simple queries using the command \verb|run|:
+{\footnotesize\begin{verbatim}
+enter command finished by ';':
+run deriv(X*X,X);   
+[] start with term :
+    deriv((X*X),X)
+[] result term:
+   (X+X)
+[] end
+
+enter command finished by ';':
+run deriv(X*X*X+X*X+X+1,X);
+[] start with term :
+    deriv(((X*(X*X))+((X*X)+(X+1))),X)
+[] result term:
+   (1+(X*(((X*2)+2)+X)))
+[] end
+\end{verbatim} }
+
+\noindent
+The queries and their results are stored in two queues, which can be
+listed by commands \verb|qs|, \verb|rs|:
+{\footnotesize\begin{verbatim}
+enter command finished by ';':
+qs;
+Queries ... 2 : elements 
+Q1      poly     deriv((X*X),X)
+Q       poly     deriv(((X*(X*X))+((X*X)+(X+1))),X)
+
+enter command finished by ';':
+rs;
+Results ... 2 : elements 
+R1      poly    (X+X)
+R       poly    (1+(X*(((X*2)+2)+X)))
+\end{verbatim} }
+
+\noindent
+The previous queries and their results can be 
+referenced in the construction of the new ones:
+{\footnotesize\begin{verbatim}
+enter command finished by ';':
+run deriv(R,X) ;
+[] start with term :
+    deriv((1+(X*(((X*2)+2)+X))),X)
+[] result term:
+   ((X*6)+2)
+[] end
+
+enter command finished by ';':
+run deriv(Q*Q,X) ;
+[] start with term :
+    deriv((deriv((1+(X*(((X*2)+2)+X))),X)*deriv((1+(X*(((X*2)+2)+X))),X)),X)
+[] result term:
+   (24+(X*72))
+[] end
+\end{verbatim} }
+
+\noindent
+Function symbols defined by unlabelled rules can be debugged, 
+for example, 
+if we know their internal code. In the following example, the command
+\verb|dump| displays the symbol with the internal code \verb|216|,
+and then, we can put a break-point on this function.
+{\footnotesize\begin{verbatim}
+dump 235;
+function dump
+'deriv' '('  @ ','  @ ')'        : (poly variable)poly   pri 0 code 235;
+
+enter command finished by ';':
+break 235;
+function dump
+'deriv' '('  @ ','  @ ')'        : (poly variable)poly   pri 0 code 235;
+\end{verbatim} }
+
+\noindent
+Having break-points set, 
+the execution shows all entry and exit points of traced functions, or
+strategies:
+{\footnotesize\begin{verbatim}
+enter command finished by ';':
+run deriv(X*X,X);
+
+[] start with term :
+    deriv((X*X),X)
+ [0]  deriv((X*X),X)
+       [0]  deriv(X,X)
+       [1]  1
+       [0]  deriv(X,X)
+       [1]  1
+ [1] (X+X)
+[] result term:
+   (X+X)
+[] end
+\end{verbatim} }
+
+\noindent
+We can switch all outputs into the internal format by the command 
+\verb|display 1|:
+{\footnotesize\begin{verbatim}
+enter command finished by ';':
+display 1;
+
+enter command finished by ';':
+run deriv(X*X,X);
+[] start with term :
+    deriv_235((X_228*X_228),X_228)
+ [0]  deriv_235((X_228*X_228),X_228)
+       [0]  deriv_235(X_228,X_228)
+       [1]  1
+       [0]  deriv_235(X_228,X_228)
+       [1]  1
+ [1] (X_228+X_228)
+[] result term:
+   (X_228+X_228)
+[] end
+\end{verbatim} }
+
+\noindent
+We can change the `start-with' pattern to \verb|(last_simplify)deriv(query,X)|,
+and the command \verb|stat| informs us about the current setting and the
+performance of the last executed query.
+{\footnotesize\begin{verbatim}
+enter command finished by ';':
+startwith (last_simplify)deriv(query,X);
+
+enter command finished by ';':
+stat;
+Input type : poly
+Output type: poly
+Print type : poly
+Strategy   : last_simplify
+Start_with :  deriv_235( VAR(0),X_228)
+Check_with :  true_1
+Print_with :  VAR(0)
+------------
+
+ Statistics:
+ total time     (0.013+0.010)=0.023 sec (main+subprocesses)
+
+ average speed  384 inf/sec
+                5 nonamed rules applied,    23 tried
+                0   named rules applied,    20 tried
+ named rules
+           applied   tried    rule for symbol
+                 0       8    expand:poly
+                 0      12    factorize:poly
+ nonamed rules
+           applied   tried    rule for symbol
+                 0       4    ( poly + poly )
+                 2      12    ( poly * poly )
+                 3       7    deriv( poly , variable )
+ end of statistics
+\end{verbatim} }
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{How to run the \elan{} compiler}
+\label{how_to_compile}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+The \elan{} compiler transforms a logic description into an executable
+binary file.  The compiler (for detailed description,
+see~\cite{Vittek-RTA96,MoreauK-PLILP+ALP98}) produces an efficient
+\verb|C| code, which is later compiled by the \verb|cc| or the
+\verb|gnu gcc| compiler. 
+The executable binary code is dependent on the particular
+architecture, because a small part of the \elan{} library performing
+the basic non-deterministic operations is written in assembly
+language~\cite{Moreau-JICSLPW98}.
+Up to now, this is the only reason that makes
+the compiler available only on the architectures DEC-ALPHA, SUN4 and
+Intel-PC.  This release of the \elan{} compiler does not compile the
+whole \elan{} language: the main restriction is that the \elan{}
+compiler does not treat input/output and reflective capabilities of
+the \elan{} language. There is also a restriction on the class of rules
+containing AC-symbols that can be compiled.
+Thus, any logic description containing AC-symbols should be carefully
+studied before being compiled (see Section~\ref{compilo} for more
+details).\\
+
+
+\noindent To run the \elan\ compiler, a Java Virtual Machine (JAVA 2 SDK, aka
+jdk 1.2, or newer), a C compiler (gcc recommended) and a C-shell (tcsh
+recommended) have to be installed on your system. 
+To complete the installation, the script {\tt PWD/bin/elanc} has to be
+modified: {\tt CLASSPATH} and {\tt JAVA} variables have to be set according to
+your system. 
+Then, you can now execute the \elan\ compiler by just typing the \verb|elanc|
+command with the following usage: 
+{\footnotesize\begin{verbatim}
+elanc [[elan options][compiler options]] file[.lgi] [file.[spc]]
+Options:
+        -output <name>
+        -verbose
+        -nocode
+        -nosplit
+        -quiet
+        -debug
+        -noOptimiseChoicePoint [default]
+        -optimiseChoicePoint
+        -proofterm
+\end{verbatim}
+}
+
+\noindent
+By default, the compiler produces a lot of \verb|C|~files and a
+\texttt{lgiName.makefile} file, which are later compiled.
+\begin{description}
+\item [The switch] \verb|-output nqueens| produces the executable
+  file with the name \verb|nqueens|. 
+
+\item [The switch] \verb|-nosplit| generates only two files:
+  \texttt{lgiName.c} and \texttt{lgiName.core.c}. This switch is
+  useful to compile small specifications.
+
+\item [The switch] \verb|-nocode| directly builds an executable file and
+  deletes all generated \verb|C|~files. 
+
+\item [The switch] \verb|-quiet| suppresses all printed messages during
+  compilation phase.
+
+\item [The switch] \verb|-debug| activates the debugging mode: more
+  messages are printed during compilation and the generated code becomes
+  less efficient.
+
+\item [The switch] \verb|-noOptimiseChoicePoint [default]| avoids the 
+  deterministic analysis phase.
+
+\item [The switch] \verb|-optimiseChoicePoint| reduces the number of
+  set choice-points: this switch reduces the runtime needed memory and
+  improve the efficiency.
+  It is recommended to not activate this switch if your specification
+  contains AC symbols.
+
+\item [The switch] \verb|-proofterm| generates the complete trace of the
+  normalisation process with respect to a set of labelled rules by the
+  strategy \rw{normin} described in Section~\ref{language}.
+%\item -color [default]
+%\item -noColor
+%\item -choicePointDebug
+%\item -oldVariableAffectation
+%\item -strategy <0|1|2>
+%\item -withGoto
+\end{description}
+
+\noindent
+We illustrate the compiler on a simple example of a distributed file.
+The first example shows the compilation of the program \verb|nqueens|
+with the query \verb|queens(8)| (given in the \texttt{.lgi} file):
+
+{\footnotesize\begin{verbatim}
+> elanc -output queens -nosplit -nocode -optimiseChoicePoint nqueens
+elan --cexport nqueens.ref ./nqueens.lgi
+
+        ******** ELAN version 3.6 ********
+
+         (c)   LORIA (CNRS, INPL, INRIA, UHP, U-Nancy 2), 1994 - 2001
+   handling module nqueens
+     handling module int
+       handling module builtinInt
+         handling module bool
+         end of bool
+       end of builtinInt
+     end of int
+   end of nqueens
+
+Export file nqueens.ref has been created
+
+java -classpath classes.zip:elanlib/Compiler/classes REM nqueens.ref
+-output queens -nosplit -nocode -optimiseChoicePoint
+Reduce ELAN Code Machine. Reading from file nqueens.ref . . .
+Parsing...........
+Compiling nonamed rules...................
+Compiling strategies..
+Building queens...
+
+> queens
+result = .([](4),.([](2),.([](7),.([](3),.([](6),.([](8),.([](5),.([](1),nil))))))))
+result = .([](5),.([](2),.([](4),.([](7),.([](3),.([](8),.([](6),.([](1),nil))))))))
+result =
+.([](3),.([](5),.([](2),.([](8),.([](6),.([](4),.([](7),.([](1),nil))))))))
+...
+after 91 solutions:
+result = .([](5),.([](7),.([](2),.([](6),.([](3),.([](1),.([](4),.([](8),nil))))))))
+
+rewrite_step = 227356
+\end{verbatim} }
+
+\noindent
+It is also possible to get the whole trace of the execution. In order
+to produce this information the executable code has to be compiled in
+the debugging mode and the switch {\tt -trace} has to be used:
+
+{\footnotesize\begin{verbatim}
+> elanc -debug -nosplit nqueens
+ ...
+Reduce ELAN Code Machine. Reading from file nqueens2.ref . . .
+Parsing
+Compiling nonamed rules...................
+Compiling strategies..
+execute the following line to build your program
+        gmake -f nqueens.make
+> gmake -f nqueens.make
+gcc -pipe -g3 -DDEBUG -DPDEBUG -DBITSET32 ...
+...
+
+> a.out -trace 
+|start with: fun_221_queens()_([](8))
+|rewrite[1] queens(,,)([](8),[](8),nil)
+|start with: str_176(queens(,,)([](8),[](8),nil))
+| start with: fun_211_greater_int(,)_([](8),[](0))
+| rewrite[2] true
+| start with: str_278([](8))
+| rewrite(str_278)[3] [](1)
+| start with: fun_222_noattack(,,)_([](1),[](1),nil)
+| rewrite[4] true
+| start with: fun_202_minus(,)_([](8),[](1))
+| rewrite[5] [](7)
+| start with: str_176(queens(,,)([](7),[](8),.([](1),nil)))
+|  start with: fun_211_greater_int(,)_([](7),[](0))
+|  rewrite[6] true
+|  start with: str_278([](8))
+|  rewrite(str_278)[7] [](1)
+|  start with: fun_222_noattack(,,)_([](1),[](1),.([](1),nil))
+|   start with: fun_210_neq_int(,)_([](1),[](1))
+|   rewrite[8] false
+|  rewrite[8] noattack(,,)([](1),[](1),.([](1),nil))
+...
+\end{verbatim}}
+
+\noindent
+A more detailed description of the compiler can be found in
+Section~\ref{compilo}. 
+
+\Attention{
+Another way to call the \elan\ compiler (also known as {\em
+  Reduced \elan\ Machine}) consists in running Java as follows:\\
+\texttt{java -classpath \$\{ELANLIB\}/Compiler/classes REM} \nt{REF file name}
+\nt{options}\\
+The \nt{REF file name} must be created by the option \texttt{--cexport}
+\nt{REF file name} of the \elan\ interpreter simply used here to parse the 
+\nt{LGI file name}. 
+}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Keep in touch}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+In case you have any problems, questions or comments about \elan{}, 
+or just only to be keeping in touch with the \elan{} team,
+please use the following e-mail address:\\
+\indent\mbox{\tt elan@loria.fr}
+or post on the elan-users mailing-list:\\
+\indent\mbox{\tt elan-users@loria.fr}
+
+\noindent
+More informations on \elan\ can be found on the web page:\\
+\indent\localisationWebElan.
+
+\noindent
+\elan\ is issued from the PROTHEO research team, information about
+this research project can be found at the following address:\\
+\indent\verb|http://www.loria.fr/equipes/protheo|.
+

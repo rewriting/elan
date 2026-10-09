@@ -1,0 +1,108 @@
+module w
+
+import global eq[Foo] 
+		strat[Foo];
+end
+operators global
+  a	: Foo;
+  b	: Foo;
+  c	: Foo;
+  d 	: Foo;
+  doit(@)	: (Foo) Foo;
+  d(@)	: (Foo) Foo;
+  add(@):(Foo) Foo;
+  p(@,@): (Foo Foo) Foo;
+  @ + @ : (Foo Foo) Foo  (AC);
+end
+
+stratop
+  global
+   ss		: <Foo>		builtin;
+   shift 	: <Foo> 	builtin;
+   choice	: <Foo>		builtin;
+   ff		: <Foo>		builtin;
+end
+
+rules for Foo
+ r,t,y, z, x, u , f, g: Foo;
+global
+  []	add(a)	=> b							end
+  []	add(b)  => c 							end
+  []	add(c)  => a							end
+local
+  [QQ]	doit(x) => p(p(z,y),p(p(f,g),p(t,u))) //p(x,p(t,p(f,u)))
+	where (Foo) p(z,b):=()p(add(x),add(x))			
+	where (Foo) t+u:=()x+b
+	where (Foo) f+g:=()a+b
+	where (Foo) y:=(shift)add(a)
+	where (Foo) g:=[id]t
+	where (Foo) f:=[id]u						end
+  [SS]	doit(x) => r
+	where (Foo)r:=()a						
+	where (Foo)r:=()a						end
+  [RR]	doit(x) => p(p(f,g),p(t,u))
+	where (Foo) t+u:=()x+b						
+	where (Foo) f+g:=()a+b						end
+  [UU]	doit(x) => p(t,u) where (Foo) t+u:=()x+b			end
+  [XX]	doit(x) => p(t,u) where (Foo) t+u:=(choice)add(x)		end
+  [WW]	doit(x) => t where (Foo) t:=()a					end
+  [MM]	doit(x) => p(r,t)  where r:=(ff)d(a+b) where t:=(ff)d(x+b)	end
+  [TT]	doit(x) => p(z,p(y,t))
+  	where t:=(choice)a
+        where (Foo)y:=(choice)a
+	if y == t
+  	where z:=(choice)a
+  end
+  [FF]    d(x+y) => p(x,y) 						end
+
+  [SHIFT]	a	=> b						end
+  [SHIFT]	b  => c 						end
+  [SHIFT]	c  => a	 						end
+
+  [CHOICE]	a	=> b						end
+  [CHOICE]	a  => c 						end
+  [CHOICE]	a  => a							end
+
+  [CHOICE]	b  => a+b						end
+  [CHOICE]	b  => b+c						end
+ 
+  [EE]		a => a if a==b						end
+end
+
+strategies for Foo
+implicit
+  [.] ss =>
+    dk(
+	dk(TT) ,
+	dk(MM) ,
+	dk(WW) ,
+	dk(XX) ,
+	dk(UU) ,
+	dk(RR) ,
+	dk(SS) ,
+	dk(QQ) ,
+	first one(TT) ,
+  	first one(EE , id) 
+//	dc(TT) ,
+//  	dc(EE , id) 
+)
+//.. dk(TT)		// 9
+//..  dk(MM)		// 4
+//..  dk(WW)		// 1
+//..  dk(XX)		// 4
+//..  dk(UU)		// 2
+//..  dk(RR)		// 4
+//..  dk(SS)		// 1
+//..  dk(QQ)		// 2
+//..  dc(TT) 		// 1
+//  dc(EE , id)
+  end
+  [.] shift => dk(SHIFT)
+  end
+  [.] choice => dk(CHOICE)
+  end
+  [.] ff =>	   dk(FF)
+  end
+end
+
+end

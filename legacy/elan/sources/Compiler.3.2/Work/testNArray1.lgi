@@ -1,0 +1,10 @@
+LPL testNArray1  description
+
+query of sort  Term
+result of sort Term
+	  
+import testNArray1
+start with () go
+
+end
+

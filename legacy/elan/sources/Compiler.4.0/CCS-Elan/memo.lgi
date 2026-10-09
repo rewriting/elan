@@ -1,0 +1,9 @@
+LPL memo description
+  query    of sort rccst
+  result   of sort rccst
+  import   memo int identifier
+//  start with (start_str) query
+  start with (calc_str) query
+
+end
+

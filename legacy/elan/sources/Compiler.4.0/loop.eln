@@ -1,0 +1,44 @@
+	module test
+
+import
+  global
+    string
+    IO[string]
+  ;
+end
+
+operators
+  global
+    go : string ; 
+end
+
+ rules for string
+  s1, s2, s3, s4, s5, s6 : string ;
+  i,j : File;
+  x, k : int;
+  global
+
+  [] go => ident2string(hassen) + " " + s6
+            where s1:=()write(stdout,"gimme a file name: ")
+            where s2:=()read(stdin)
+            where s3:=()write(stdout,"gimme a mode: ")
+            where s4:=()read(stdin)
+            where i :=()open(s2,s4)
+	    where s6:=()read(i)
+            //where x :=()putc(stdout,getc(i))
+            //where s5:=()read(i)
+            //where s6:=()write(stdout,s5)
+            where j:=()close(i)
+  end
+
+/*
+  [] go => ident2string(name) + " = " + s2
+            where s1:=()write(stdout,"your name: ")
+            where s2:=()read(stdin)
+  end
+*/
+
+end 
+
+	
+end

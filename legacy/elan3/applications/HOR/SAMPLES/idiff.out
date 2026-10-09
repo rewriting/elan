@@ -1,0 +1,5 @@
+ lam(\(z,div(one,times(plus(app(ln,z),one),z)))) end
+
+ end end
+end
+

@@ -1,0 +1,28 @@
+module normalizeFirst
+
+	// The module identity is part of the standard library (see index)
+import 
+	local identity[term] ;
+   end
+
+sort term ; end
+
+operators
+	global
+  	a	: term;
+	f(@)	: (term) term;
+end
+
+rules for term
+	x,y,z : term;
+global
+  [r1] f(x) => x end
+  []   f(x) => x end
+end
+
+strategies for term
+global
+  [s1] dc(r1) end
+  [s2] dc( dc(r1) || dc(identity)) end
+   end
+end

@@ -1,0 +1,179 @@
+module PropagationRules[Variables,Type,Values]
+
+import
+global	IntegerCSP[Variables,Values]
+	occur[var,constraint] occur[var,list[constraint]]
+	replace[term,constraint]
+	;
+end
+
+operators
+local	GetRemainingConstraintsInEC(@,@,@,@)	:
+	(constraint list[constraint] list[constraint] list[constraint])
+	tuple[list[constraint],list[constraint]];
+	GetRemainingConstraintsInDC(@,@,@,@,@)	:
+	(constraint list[constraint] list[constraint] list[constraint] list[constraint])
+	tuple[list[constraint],list[constraint],list[constraint]];
+end
+
+
+rules for csp
+
+	x				: var;
+	v				: Type;
+	D				: domain;
+	P				: csp;
+	lmc, lec, EC, DC, store		: list[constraint];
+	l1, l2, l3, l4, l5, lu, lb	: list[constraint];
+
+global 
+
+[Instantiation]
+
+	CSP[x in? D.lmc,lec,EC,DC,store]
+	=>
+	CSP[lmc,x = v.lec,EC,DC,store]
+	if	GetCard(D) == 1
+	where	v := ()GetFirstValueOfDomain(D)
+end
+
+[Elimination]
+
+	CSP[lmc,x = v.lec,EC,DC,store]
+	=>
+	P
+	if	occurs x in EC or occurs x in DC  
+	where	(tuple[list[constraint],list[constraint]])
+		[l1,l2] := ()GetRemainingConstraintsInEC(x = v,EC,nil,nil)
+	choose
+	try
+		if l1 == false.nil
+		where P := () Unsatisfiable
+	try
+		where (tuple[list[constraint],list[constraint],list[constraint]])
+		[l3,l4,l5] := ()GetRemainingConstraintsInDC(x = v,DC,nil,nil,nil)
+		choose
+		try
+			if l3 == false.nil
+			where P := () Unsatisfiable
+		try
+			where lu := ()append(l1,l3)
+			where lb := ()append(l2,l4)
+			where P := () CSP[lmc,ShiftConstraint(lec,x = v),append(lu,lb),l5,store]
+		end
+	end
+end
+
+end
+
+
+rules for tuple[list[constraint],list[constraint]]
+
+	x		: var;
+	v		: Type;
+	n		: int;
+	c, c1, c2	: constraint;
+	EC, lu, lb	: list[constraint];
+	tf		: tuple[list[constraint],list[constraint]];
+
+global 
+
+[]	GetRemainingConstraintsInEC(x = v,c.EC,lu,lb)
+	=>
+	tf
+	choose
+	try
+		if occurs x in c
+		where	c1 := ()replace(x,v,c)
+		where	c2 := ()SimplifyConstants(c1)
+		where	n  := ()ArityOfConstraint(c2)
+		choose
+		try
+			if n >= 2
+			where tf := () GetRemainingConstraintsInEC(x = v,EC,lu,c2.lb)
+		try
+			if n == 1
+			where tf := () GetRemainingConstraintsInEC(x = v,EC,c2.lu,lb)
+		try
+			choose
+			try
+				if EvaluateGroundConstraint(c2)
+				where tf := () GetRemainingConstraintsInEC(x = v,EC,lu,lb)
+			try
+				where tf := () [false.nil,nil]
+			end
+		end
+	try
+		where	n := ()ArityOfConstraint(c)
+		choose
+		try
+			if n >= 2
+			where tf := () GetRemainingConstraintsInEC(x = v,EC,lu,c.lb)
+		try
+			where tf := () GetRemainingConstraintsInEC(x = v,EC,c.lu,lb)
+		end
+	end
+end
+
+[]	GetRemainingConstraintsInEC(c,nil,lu,lb)
+	=>
+	[lu,lb]
+end
+
+end
+
+
+rules for tuple[list[constraint],list[constraint],list[constraint]]
+
+	x			: var;
+	v			: Type;
+	n			: int;
+	c, c1, c2		: constraint;
+	DC, newDC, lu, lb	: list[constraint];
+	tf			: tuple[list[constraint],list[constraint],list[constraint]];
+
+global 
+
+[]	GetRemainingConstraintsInDC(x = v,c.DC,lu,lb,newDC)
+	=>
+	tf
+	choose
+	try
+		if occurs x in c
+		where	c1 := ()replace(x,v,c)
+		where	c2 := ()SimplifyConstants(c1)
+		where	n  := ()ArityOfConstraint(c2)
+		choose
+		try
+			if n == 1000
+			where tf := () GetRemainingConstraintsInDC(x = v,DC,lu,lb,c2.newDC)
+		try
+			if n >= 2
+			where tf := () GetRemainingConstraintsInDC(x = v,DC,lu,c2.lb,newDC)
+		try
+			if n == 1
+			where tf := () GetRemainingConstraintsInDC(x = v,DC,c2.lu,lb,newDC)
+		try
+			choose
+			try
+				if EvaluateGroundConstraint(c2)
+				where tf := () GetRemainingConstraintsInDC(x = v,DC,lu,lb,newDC)
+			try
+				where tf := () [false.nil,nil,nil]
+			end
+		end
+	try
+		where tf := () GetRemainingConstraintsInDC(x = v,DC,lu,lb,c.newDC)
+	end
+end
+
+[]	GetRemainingConstraintsInDC(c,nil,lu,lb,newDC)
+	=>
+	[lu,lb,newDC]
+end
+
+end
+
+
+end
+

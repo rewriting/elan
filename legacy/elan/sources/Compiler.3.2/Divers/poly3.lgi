@@ -1,0 +1,28 @@
+LPL poly3 description
+
+  specification description
+    part Vars	of sort list[identifier]
+	 	import identifier list[identifier]
+  end
+
+  query    of sort 		poly
+	   result of sort 	poly
+           import  		poly3[Vars]
+
+           start with (simplify)
+
+//	  X * deriv(X*X, X)
+//	  deriv(X*X*X, X)
+//	  deriv(X*X*X + X + 1, X)
+//        X + (X*(X+2)) + (X*X)
+//          deriv(X*X*X + X*X + X + 1, X)
+
+	    deriv((X^2) + 2*X*Y + (Y^2) ^2,X)
+
+/*
+		deriv(1 + 3*X + 7*X*X + 12*X*X*X
+                	+ 2*X*Y + 5*X*Y*Y + 3*X*X*Y
+                	+ 3*X*Y*Z , X)
+*/
+end
+

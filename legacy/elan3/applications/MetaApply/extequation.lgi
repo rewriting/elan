@@ -1,0 +1,41 @@
+LPL extequation description
+
+	specification description
+
+		part Vars of sort list[identifier]
+	 	import sigSyntax
+
+		part Ops of sort list[pair[identifier,int]]
+	 	import sigSyntax
+
+		part Prec of sort list[pair[identifier,int]]
+	 	import sigSyntax
+
+		part System of sort list[equation]
+		import 	sigSyntax
+			list[equation]
+			eqSystem[Ops,Vars]
+			termCommons[Ops,Vars]
+			extequation[Vars,Ops,Prec]
+	end
+
+/*	query of sort list[list[int]]
+
+	result of sort list[list[int]]*/
+
+	query of sort extequation
+
+	result of sort extequation
+
+	import extequation[Vars,Ops,Prec]
+
+       	start with ()query
+
+end
+
+
+
+
+
+
+

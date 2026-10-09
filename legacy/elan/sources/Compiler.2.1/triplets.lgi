@@ -1,0 +1,24 @@
+LPL triplets description
+
+query of sort set_formula //list[prop]//formula
+result of sort set_formula //list[prop]//set_formula
+import reduce  triplets
+
+start with ()query
+
+/*
+start with ()
+short_abst(not((x_1 or x_32 or x_34) and (x_4 or x_5 or x_32) and (not x_4 or x_5 or not x_34) and (not x_5 or x_32 or not x_34) and (x_29 or not x_32 or x_43) and (x_29 or x_36 or not x_43))) 
+*/
+
+
+
+//start with ()short_abst(query)
+//start with ()z_saturate(create_pair(short_abst(query)))
+//start with ()elim_assign(setof(elim_not(vars(short_abst(query)))),v(1):=FALSE) 
+//start with ()one_saturate([first(create_pair(short_abst(query))),z_saturate(create_pair(short_abst(query)))])
+//start with ()one_saturate(create_pair(short_abst(query)))
+//start with  ()filter(one_sat(setof(elim_not(vars(first(create_pair(short_abst(query)))))),first(create_pair(short_abst(query))),second(create_pair(short_abst(query)))))
+//start with ()pairs_l(setof(vars(query)))
+//start with ()two_saturate([first(create_pair(short_abst(query))),one_saturate(create_pair(short_abst(query)))])
+end

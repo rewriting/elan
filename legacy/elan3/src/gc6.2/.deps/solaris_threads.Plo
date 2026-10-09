@@ -1,0 +1,1 @@
+solaris_threads.lo solaris_threads.o: solaris_threads.c

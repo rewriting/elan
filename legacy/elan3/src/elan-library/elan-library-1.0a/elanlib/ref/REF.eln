@@ -1,0 +1,180 @@
+// This file is generated automatically: do not edit it directly. 
+  module REF
+          import global
+                  int bool ident string
+                  list[Term] list[WhereStatement] list[Lexem] list[list[Lexem]] 
+                  list[int]
+                  list[GrammarRule] list[GrammarRules]
+                  list[RuleStatement] list[StrategyStatement]
+                  list[SwitchBranch] list[list[WhereStatement]]
+                  list[TabItem] list[StrategyStatement];
+          end
+          sort                               // Exported sorts
+               Term                          // ELAN first-order terms
+               WhereStatement                // a construction of local assignment
+               Rule                          // a rewrite rule, with lhs, rhs and local affectations
+               RuleStatement                 // a rewrite rule with auxiliary information
+               SwitchStatement               // a structured condition of a rewrite rule
+               SwitchBranch                  // one branch of a structured condition of a rewrite rule
+               QueryStatement                // the format of the input query
+               StrategyChoice                // a list of choices of a dk, dc, etc.
+               Strategy                      // a single strategy
+               StrategyStatement             // a strategy definition with flags
+               Lexem                         // an element of a grammar defining the signature
+               Sort                          // sorts of the signature
+               GrammarRule GrammarRules      // rules of the signature
+               TabItem Tab                   // tables of symbols, like rulenames, sortnames, strategynames, etc.
+               Program;                      // a representation of an ELAN program.
+          end
+              operators global         // !!! CHANGES HAVE TO BE UPDATED IN aterm.t, etc. !!!
+                // --------------------------------------------------- LEXEMS
+                Type(@)       : (int) Lexem;
+                Char(@)       : (int) Lexem;
+                Num(@)        : (int) Lexem;
+                String(@)     : (int) Lexem;
+                Ident(@)      : (int) Lexem;
+                Blank         :       Lexem;
+                // --------------------------------------------------- GRAMMAR
+                @':'@':'@':'@':'@':'@':'@':'@':'@ 
+                      : (int fsym:int int int int int int 
+                       profile:list[Lexem] 
+                       loc_strat:list[int]) GrammarRule;
+                                      // 1, 2, 3 as follows:
+                                      // 1 = rule belongs to topgram
+                                      // 2 = rule belongs to globgram
+                                      // 3 = belongs to both
+                                      // index of symbol (used in Terms, see FSYM)
+                                      // priority (0-007777)
+                                      // syntactic infos
+                                      //   1=RLEFTASSOC, 2=RRIGHTASSOC, 4=RBINSTR 8=PRINTABLE
+                                      // code of semantic function of a built-in symbol
+                                      // matching infos
+                                      //  0=free, 1=c, 2=ac symbol
+                                      // a flag for strategy compilation
+                GrammarForSort @ ':' @ ':' @  : (int int profile:list[GrammarRule]) GrammarRules;
+                                      // index of sort, gram. rules
+                                      // builtin-flag of the sort
+                EndDef                : GrammarRules;
+                // --------------------------------------------------- TABLES
+                @':'@         : (int string) TabItem;         // for all symbol tables
+                @':'@         : (int list[int]) TabItem;      // for visibilities
+                Identifiers @ : (Identifiers:list[TabItem]) Tab;
+                @             : (string) Sort;
+                Sorts @       : (Sorts:list[TabItem]) Tab;
+                Modules @     : (Modules:list[TabItem]) Tab;
+                RuleNames @   : (RuleNames:list[TabItem]) Tab;
+                StrategyNames @ : (StrategyNames:list[TabItem]) Tab;
+                // --------------------------------------------------- TERMS
+                VAR(@,@)      : (int int) Term;               // variable, its index, type
+                INT(@)        : (int) Term;                   // integer constant
+                IDENT(@)      : (int) Term;                   // index of identifier
+                STRING(@)     : (list[int]) Term;             // 
+                FSYM(@,@)     : (list[Term] int) Term;                // subterms, symbol code
+                // --------------------------------------------------- REWRITE RULES
+                IFF(@)        : (Term) WhereStatement;        // condition
+                PWHERE(@,@,@) : (Term int Term) WhereStatement;
+                WHERE(@,@,@)  : (Term int Term) WhereStatement;// variable, of pattern,
+                                                              // strategy index
+                                                              // rhs of where statement
+                TRY(@)        : (list[list[WhereStatement]]) WhereStatement;
+
+                @,@,@         : (lhs:Term             // lhs
+                                  rhs:Term            // rhs
+                                  wheres:list[WhereStatement]) Rule;
+
+                RULE(@,@,@,@,@,@,@):(rule_name_index:int              // rule name index
+                                         rule_sort:int                // rule type index
+                                         module_index:int             // module index of rule
+                                         rule_flags:int              // infos
+                                         ac_flags:int                // achead
+                                         nof_vars:int               // number of variables
+                                         rwrule:Rule) RuleStatement;
+
+                //--- TEMPORARY SHIT
+                NOSWITCH(@,@) : (list[WhereStatement] Term) SwitchStatement;
+                                                              // where and ifs, rhs
+                SWITCH(@,@)    : (list[WhereStatement] list[SwitchBranch]) SwitchStatement;
+                @,@            : (Term SwitchStatement) SwitchBranch;  // condition
+
+                @,@           :  (SW_lhs:Term         // lhs
+                                  SW_rhs:SwitchStatement) Rule;
+
+                SWRULE(@,@,@,@,@,@,@):(sw_rule_name_index:int         // rule name index
+                                         sw_rule_sort:int             // rule type index
+                                         sw_module_index:int          // module index of rule
+                                         sw_rule_flags:int            // infos
+                                         sw_ac_flags:int              // achead
+                                         sw_nof_vars:int              // number of variables
+                                         sw_rule:Rule) RuleStatement;
+                //--- UP to HERE
+
+                EndDef                        : RuleStatement;// terminator I
+                // --------------------------------------------------- BUILT-IN STRATEGIES
+
+                DK(@)                 : (DK_choices:StrategyChoice) StrategyStatement;
+                ONE(@)                : (ONE_choices:StrategyChoice) StrategyStatement;
+                DC(@)                 : (DC_choices:StrategyChoice) StrategyStatement;
+                @                     : (Strategy) StrategyChoice;
+                @ , @                 : (StrategyChoice Strategy) StrategyChoice;
+                @ , @         : (StrategyChoice Strategy) StrategyChoice;
+
+                dk(@)                 : (dk_choices:list[int]) StrategyStatement;
+                one(@)                : (one_choices:list[int]) StrategyStatement;
+                dc(@)                 : (dc_choices:list[int]) StrategyStatement;
+
+                repeat*(@)            : (Strategy) StrategyStatement;
+                repeat+(@)            : (Strategy) StrategyStatement;
+                iterate*(@)           : (Strategy) StrategyStatement;
+                iterate+(@)           : (Strategy) StrategyStatement;
+                id                    : StrategyStatement;
+                fail                  : StrategyStatement;
+                call(@)               : (int) StrategyStatement;
+
+                @                     : (StrategyStatement) Strategy;
+                @ ; @                 : (Strategy StrategyStatement) Strategy;
+
+                STRATEGY(@,@,@,@)     : (strategy_name_index:int //index of the strategy name
+                                         strategy_sort:int       // index of strategy type
+                                         module_index:int        // index of module of strategy definition
+                                         body:Strategy)    // concatenation of substrategies
+                                              StrategyStatement;
+                EndDef                        : StrategyStatement;       // terminator II
+                // --------------------------------------------------- LGI MODULE
+                QUERY(@,@,@,@,@)      : (int                  // source type index
+                                         int                  // result type index,
+                                         int                  // main strategy index,
+                                         Term                 // startwith term
+                                         Term)                // checkwith term
+                                              QueryStatement;
+                // --------------------------------------------------- PROGRAM
+                @,@,@,@,@,@,@,@,@,@,@ :
+                                (Identifiers:Tab              // table of all identifiers
+                                 Sorts:Tab                    // table of all sorts
+                                 Modules:Tab                 // table of all imported modules
+                                 RuleNames:Tab                // table of rule labels
+                                 StrategyNames:Tab            // table of strategy names
+                                 TopGlobalGrammar:list[GrammarRules]  // intersection of two following grammars
+                                 TopGrammar:list[GrammarRules]        // grammar visible in .lgi module
+                                 GlobalGrammar:list[GrammarRules]     // all global symbols
+                                 AllRules:list[RuleStatement]       // all rules of a program
+                                 AllStrategies:list[StrategyStatement]// all strategies
+                                 Query:QueryStatement)         // description of .lgi module
+                                      Program;
+                //----------------------------------------------------------------------
+                SPEC(@,@)     : (string string) Program  code 174;  // .lgi .spc - abbreviation of a  specification:
+                                                                    // a constructor introduced as an abbreviation
+                                                                    // of a "constant" specification used in meta_apply
+
+              // auxiliary functions
+                Sort2string(@)        : (Sort) string;
+
+              end
+   
+          rules for string
+          type    : string;
+          global
+            []   Sort2string(type) => type                        end
+          end
+  end  
+   
+

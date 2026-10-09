@@ -1,0 +1,18 @@
+LPL rep description 
+
+      query     of sort Foo
+      result    of sort Foo
+      import    rep
+      start with () g(f(a,g(f(b,b))))
+//      start with () query
+
+ //f(a,f(f(b,b),f(c,b)))
+
+end
+
+
+/*
+
+g(f(a,g(f(b,b))))
+
+*/

@@ -1,0 +1,13 @@
+package
+identification
+         name=gc
+      version=6.2
+     location=http://www.hpl.hp.com/personal/Hans_Boehm/gc/gc_source/
+         info=http://www.hpl.hp.com/personal/Hans_Boehm/gc/
+  description='A garbage collector for C and C++.'
+     keywords= C, C++, Garbage Collector
+
+interface
+
+requires
+

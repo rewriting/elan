@@ -1,0 +1,30 @@
+module err
+
+import 	global eq[Bool] eq[Int];				end
+sort Bool Int lterm; 						end
+operators global
+        FALSE		: Bool;
+        TRUE		: Bool;
+	@ OR @		: (Bool Bool) Bool;
+
+        one		: Int;
+        succ(@)		: (Int) Int;
+
+  	@		: (Int) lterm;
+	(@ @)		: (lterm lterm) lterm;
+	la @		: (lterm) lterm;
+
+	repl(@,@,@)	: (Int lterm lterm) lterm;
+end
+rules for lterm
+v, w	: Int;
+M, N, Q	: lterm;
+global
+  []	repl(v,w,M) => M if v==w			end
+  []	repl(v,w,M) => w				end
+  []	repl(v,(M N),Q) => (repl(v,M,Q) repl(v,N,Q))	end
+  []	repl(v,la N,M) => la repl(succ(v),N,M)		end
+end
+
+end
+

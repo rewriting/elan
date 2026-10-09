@@ -1,0 +1,34 @@
+module axmSyntax[Vars,Ars]
+import 	global	
+		anyIdentifier
+		termCommons[Vars,Ars] 
+		pair[term,term]  
+		list[pair[term,term]]
+		pair[list[pair[term,term]],list[pair[term,term]]]
+		list[pair[list[pair[term,term]],list[pair[term,term]]]]
+	;
+end
+operators
+ global
+
+// declaration for the (empty) rule part
+//   '#''#' : pair[term,term];
+
+//----------- axioms ------------------------------------------------------
+
+   @ '=' @		: ( term term ) pair[term,term]   alias [@,@]:;
+ 
+   .	: list[pair[term,term]]				alias nil:;
+   @,@	: ( pair[term,term] list[pair[term,term]] ) list[pair[term,term]]
+				alias cons(@,@):;
+
+   @ '=''>' @	: ( list[pair[term,term]] list[pair[term,term]] ) 
+			pair[list[pair[term,term]],list[pair[term,term]]]   alias [@,@]:;
+
+   Epsilon	: list[pair[list[pair[term,term]],list[pair[term,term]]]]   alias nil:;
+   @ @  	: ( pair[list[pair[term,term]],list[pair[term,term]]]
+		list[pair[list[pair[term,term]],list[pair[term,term]]]])
+		list[pair[list[pair[term,term]],list[pair[term,term]]]] alias cons(@,@):;
+end
+
+end

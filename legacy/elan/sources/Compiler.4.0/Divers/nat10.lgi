@@ -1,0 +1,19 @@
+LPL nat10 description
+/*
+  specification description
+    part Base   of sort int
+                import int
+  end
+*/
+
+  query 	of sort Nat
+         	result of sort Nat
+	 	import int nat10[10]
+//		start with ()  ((d)1)2 + ((d)3)4
+//		start with ()  (d)5 * (d)7
+//		start with ()  ((d)8)9 * ((d)7)7
+         	start with () fib(((d)1)6)
+//         	start with () fib(((d)2)2)
+//         	start with () fact((((d)1)0)0)
+end
+

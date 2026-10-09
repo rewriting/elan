@@ -1,0 +1,59 @@
+//
+//		(c)	INRIA-Lorraine & CRIN
+//			615, rue du Jardin Botanique, BP 101
+//		        54602 Villers-les-Nancy
+//			France
+//			email: elan@loria.fr
+//
+//	$Source: /CVS/aircube/elan3/doc/ElanLibCommon/pair.eln,v $
+//	$Revision: 1.1 $
+//	$Date: 1997/03/25 16:46:49 $
+//	$Author: moreau $
+//
+
+module pair[X,Y]
+import bool;
+end
+sort X Y pair[X,Y];
+end
+operators
+  global
+
+    [@,@]	: ( X Y ) pair[X,Y];
+
+    first(@)	: ( pair[X,Y] ) X;
+    1-th (@)	: ( pair[X,Y] ) X	alias first(@):;
+
+    second(@)	: ( pair[X,Y] ) Y;
+    2-th (@)	: ( pair[X,Y] ) Y	alias second(@):;
+
+    ispair(@)	: ( pair[X,Y] ) bool;
+
+end
+
+rules for X
+	x : X;
+	y : Y;
+local
+  [] first([x,y])	=> x  	end
+end
+
+rules for Y
+	x : X;
+	y : Y;
+local
+  [] second([x,y])	=> y	end
+end
+
+rules for bool
+	x : X;
+	y : Y;
+	p : pair[X,Y];
+local
+	// Note in the following set of rules the use of the order of 
+	// evaluation: the rules are assumed to be applied in sequence
+  [] ispair([x,y])	=> true		end
+  [] ispair(p)		=> false	end
+end
+
+end

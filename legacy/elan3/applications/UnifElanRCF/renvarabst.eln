@@ -1,0 +1,69 @@
+module renvarabst
+import  global term varabst  ;
+	local bool int list[variable] occur[variable,list[variable]] eqSystem ;
+
+end
+
+operators
+
+global
+
+multivabst(@)        : ( term) list[variable] ;
+multivabst(@)        : ( eqSystem) list[variable] ;
+
+local 
+
+setof(@)             : (list[variable]) list[variable] ;
+rename(@,@,@)        : (eqSystem list[variable] int) eqSystem ;
+
+
+end
+
+      rules for list[variable]
+      // declare 
+      n:int ; s,t:term ; P: eqSystem ; v:variable ; r:list[variable] ;
+       
+      global
+   
+      [] multivabst (vabst[s]) => vabst[s] . nil end
+      [] multivabst (v)  => nil end 
+      [] multivabst(s=t) => multivabst(s) @ multivabst(t) end
+      [] multivabst(P & s=t) => multivabst(P) @ multivabst(s=t) end
+      [] multivabst(true) => nil end
+      [] multivabst(false) => nil end
+
+      [] setof(v.r) => v . setof(r) if not occurs(v,r) end
+      [] setof(v.r) => setof(r) if occurs(v,r) end
+      [] setof(nil) => nil end
+      
+      end
+
+
+      rules for eqSystem
+      // declare 
+      n:int ; P:eqSystem ; v:variable ; r:list[variable] ;
+       
+      global
+   
+      [] rename(P,v.r,n) => rename(apply(v -> xnew.n,P),r,n+1) end
+      [] rename(P,nil,n) => P end 
+
+      [renamingrule] P => rename(P,setof(multivabst(P)),1) end
+      
+      end
+
+
+strategies for eqSystem 
+
+  global 
+
+  [renamingstrat]
+  dont care choose(renamingrule)
+  end
+
+end
+
+
+end
+
+

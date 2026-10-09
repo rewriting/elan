@@ -1,0 +1,9 @@
+LPL foo description
+
+query		of sort  	Any
+		result of sort 	Any
+		modules 	lis_lterm
+		start with 	[mis(id)]query
+
+end
+

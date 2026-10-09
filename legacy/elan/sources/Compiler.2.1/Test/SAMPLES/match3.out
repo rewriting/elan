@@ -1,0 +1,4 @@
+
+result = h(,)(a,f()(b))
+
+rewrite_step = 2

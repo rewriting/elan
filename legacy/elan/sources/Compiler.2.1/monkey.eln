@@ -1,0 +1,502 @@
+module monkey
+
+import global int bool eq[Place] eq[Fruit];
+end
+
+sort Fruit Position Place Tool State Goals Name
+     Action Explanation;
+end
+
+operators global
+ go                           : State;
+ go(@)                        : (int) State;
+
+
+//--------------------------------------------------
+// State and Monkey
+//--------------------------------------------------
+ monkey(old goals=@,new goals=@,place=@,position=@,hold=@)
+ ladder=@
+ explanation(@)
+     : (Goals       Goals       Place   Position   Fruit
+        Tool
+        Explanation) State;
+
+//--------------------------------------------------
+// Place
+//--------------------------------------------------
+ placeA                       : Place;
+ placeB                       : Place;
+ placeC                       : Place;
+ placeD                       : Place;
+ placeE                       : Place;
+
+//--------------------------------------------------
+// Position
+//--------------------------------------------------
+ high                         : Position;
+ ground                       : Position;
+ onLadder                     : Position;
+
+//--------------------------------------------------
+// Action
+//--------------------------------------------------
+ catchA                       : Action;
+ moveWithLadder               : Action;
+ move                         : Action;
+ 
+//--------------------------------------------------
+// Goal
+//--------------------------------------------------
+ empty                        : Goals;
+ @ U @                        : (Goals Goals) Goals (AC);
+ [action=@, concernedWith=@, toBeFoundIn=@] :
+ (Action    Fruit            Place) Goals;
+
+ goal-1                       : Goals;
+ goal-2                       : Goals;
+ goal-3                       : Goals;
+ goal-4                       : Goals;
+ goal-5                       : Goals;
+
+//--------------------------------------------------
+// Tool
+//--------------------------------------------------
+ [@]                          : (Place) Tool;
+
+//--------------------------------------------------
+// Fruit
+//--------------------------------------------------
+ [@|@,@]                      : (Name Place Position) Fruit;
+ nothing                      : Fruit;
+ banana                       : Name;
+ apple                        : Name;
+ orange                       : Name;
+ pear                         : Name;
+ grape                        : Name;
+
+//--------------------------------------------------
+// Explanation
+//--------------------------------------------------
+ nil                          : Explanation;
+ @.@                          : (Explanation Explanation) Explanation assocLeft;
+ taking(@)                    : (Fruit) Explanation;
+ dropping(@)                  : (Fruit) Explanation;
+ climbing                     : Explanation;
+ goingDown                    : Explanation;
+ movingWithLadder(@->@)       : (Place Place) Explanation;
+ moving(@->@)                 : (Place Place) Explanation;
+ monkeyIsIn(@)                : (Place) Explanation;
+ wantToCatch(@)               : (Fruit) Explanation;
+ translateGoal(@)             :(Goals) Explanation;
+
+end
+
+stratop global
+  loop   : <State> bs;
+end
+
+rules for Goals
+global
+ [] empty U empty    => empty end
+ [] goal-1 => [action=catchA,
+               concernedWith=[banana|placeA,high],
+               toBeFoundIn=placeA]
+ end
+ [] goal-2 => [action=catchA,
+               concernedWith=[apple|placeB,ground],
+               toBeFoundIn=placeB]
+ end
+ [] goal-3 => [action=catchA,
+               concernedWith=[orange|placeD,high],
+               toBeFoundIn=placeD]
+ end
+ [] goal-4 => [action=catchA,
+               concernedWith=[pear|placeA,ground],
+               toBeFoundIn=placeA]
+ end
+ [] goal-5 => [action=catchA,
+               concernedWith=[grape|placeE,high],
+               toBeFoundIn=placeE]
+ end
+end
+
+rules for Explanation
+ fruit : Fruit;
+ place : Place;
+global
+ [] translateGoal([action=catchA,concernedWith=fruit,toBeFoundIn=place])
+ => wantToCatch(fruit)
+ end
+end
+rules for State
+  old,new : Goals;
+  W : Explanation;
+  fruit, fruit1, fruit2 : Fruit;
+  place1,place2, fruitPlace,ladderPlace : Place;
+  pos,fruitPosition : Position;
+  l : Tool;
+  R : State;
+  name : Name;
+  n : int;
+global
+ [] go(n) => go(n-1)
+             if n>0
+             where R:=()go
+ end
+
+ [] go => R
+          where R:=(loop) 
+                monkey(
+                 old goals=empty,
+                 new goals=empty U goal-1 U goal-2 U goal-3 U goal-4 U goal-5,
+                 place=placeC,
+                 position=ground,
+                 hold=nothing)
+                 ladder=[placeC]
+                 explanation(nil . monkeyIsIn(placeC) .
+		 translateGoal(goal-1) .
+		 translateGoal(goal-2) .
+		 translateGoal(goal-3) .
+		 translateGoal(goal-4) .
+		 translateGoal(goal-5))
+ end
+
+ [R1] // taking a fruit
+    monkey(
+     old goals=old,
+     new goals=new U
+         [action=catchA,
+          concernedWith=[name|fruitPlace,fruitPosition],
+          toBeFoundIn=place1],
+     place=fruitPlace,
+     position=fruitPosition,
+     hold=nothing)
+    ladder=l
+    explanation(W)
+ =>  
+    monkey(
+     old goals=empty,
+     new goals=old U new,
+     place=fruitPlace,
+     position=fruitPosition,
+     hold=[name|fruitPlace,fruitPosition])
+    ladder=l
+    explanation(W . taking([name|fruitPlace,fruitPosition]))
+ end
+
+ [R2] // taking a fruit with the ladder
+    monkey(
+     old goals=old,
+     new goals=new U
+         [action=catchA,
+          concernedWith=[name|fruitPlace,high], 
+          toBeFoundIn=place1],
+     place=fruitPlace,
+     position=onLadder,
+     hold=nothing)
+    ladder=l
+    explanation(W)
+ =>  
+    monkey(
+     old goals=empty,
+     new goals=old U new,
+     place=fruitPlace,
+     position=onLadder,
+     hold=[name|fruitPlace,high])
+    ladder=l
+    explanation(W . taking([name|fruitPlace,high]))
+ end
+
+ [R3] // dropping a fruit
+    monkey(
+     old goals=old,
+     new goals=new U
+         [action=catchA,
+          concernedWith=fruit1,
+          toBeFoundIn=place1],
+     place=place2,
+     position=pos,
+     hold=fruit2)
+    ladder=l
+    explanation(W)
+ =>  
+    monkey(
+     old goals=empty,
+     new goals=old U new U
+         [action=catchA,
+          concernedWith=fruit1,
+          toBeFoundIn=place1],
+     place=place2,
+     position=pos,
+     hold=nothing)
+    ladder=l
+    explanation(W . dropping(fruit2))
+    if fruit2 != nothing
+ end
+
+ [R4] // moving to get a fruit on the ground
+    monkey(
+     old goals=old,
+     new goals=new U 
+         [action=catchA, 
+          concernedWith=[name|fruitPlace,ground], 
+          toBeFoundIn=place1],
+     place=place2,
+     position=pos,
+     hold=fruit)
+    ladder=l
+    explanation(W)
+ =>  
+    monkey(
+     old goals=old U
+         [action=catchA, 
+          concernedWith=[name|fruitPlace,ground], 
+          toBeFoundIn=place1],
+     new goals=new U
+         [action=move, 
+          concernedWith=[name|fruitPlace,ground], 
+          toBeFoundIn=place1],
+     place=place2,
+     position=pos,
+     hold=fruit)
+    ladder=l
+    explanation(W)
+    if place2 != fruitPlace
+ end
+
+ [R5] // climbing the ladder
+    monkey(
+     old goals=old,
+     new goals=new U 
+         [action=catchA, 
+          concernedWith=[name|fruitPlace,high], 
+          toBeFoundIn=place1],
+     place=fruitPlace,
+     position=ground,
+     hold=fruit)
+    ladder=[fruitPlace]
+    explanation(W)
+ =>  
+    monkey(
+     old goals=empty,
+     new goals=old U new U
+         [action=catchA, 
+          concernedWith=[name|fruitPlace,high], 
+          toBeFoundIn=place1],
+     place=fruitPlace,
+     position=onLadder,
+     hold=fruit)
+    ladder=[fruitPlace]
+    explanation(W . climbing)
+ end
+
+ [R6] // moving to get a fruit in high position
+    monkey(
+     old goals=old,
+     new goals=new U 
+         [action=catchA, 
+          concernedWith=[name|fruitPlace,high], 
+          toBeFoundIn=place1],
+     place=place2,
+     position=pos,
+     hold=fruit)
+    ladder=[ladderPlace]
+    explanation(W)
+ =>  
+    monkey(
+     old goals=old U
+         [action=catchA, 
+          concernedWith=[name|fruitPlace,high], 
+          toBeFoundIn=place1],
+     new goals=new U
+         [action=moveWithLadder, 
+          concernedWith=[name|fruitPlace,high], 
+          toBeFoundIn=fruitPlace],
+     place=place2,
+     position=pos,
+     hold=fruit)
+    ladder=[ladderPlace]
+    explanation(W)
+    if ladderPlace != fruitPlace
+ end
+
+ [R7] // going down the ladder to move
+    monkey(
+     old goals=old,
+     new goals=new U 
+         [action=move, 
+          concernedWith=[name|fruitPlace,fruitPosition], 
+          toBeFoundIn=place1],
+     place=place2,
+     position=onLadder,
+     hold=fruit)
+    ladder=l
+    explanation(W)
+ =>  
+    monkey(
+     old goals=empty,
+     new goals=old U new U
+         [action=move, 
+          concernedWith=[name|fruitPlace,fruitPosition], 
+          toBeFoundIn=place1],
+     place=place2,
+     position=ground,
+     hold=fruit)
+    ladder=l
+    explanation(W . goingDown)
+    if fruitPlace != place2
+ end
+
+ [R8] // going down the ladder to move with it
+    monkey(
+     old goals=old,
+     new goals=new U 
+         [action=moveWithLadder, 
+          concernedWith=[name|fruitPlace,fruitPosition], 
+          toBeFoundIn=place1],
+     place=place2,
+     position=onLadder,
+     hold=fruit)
+    ladder=l
+    explanation(W)
+ =>  
+    monkey(
+     old goals=empty,
+     new goals=old U new,
+     place=place2,
+     position=ground,
+     hold=fruit)
+    ladder=l
+    explanation(W . goingDown)
+    if place1 != place2
+ end
+
+ [R9] // moving to get the ladder
+    monkey(
+     old goals=old,
+     new goals=new U
+         [action=moveWithLadder, 
+          concernedWith=fruit1,
+          toBeFoundIn=place1],
+     place=place2,
+     position=pos,
+     hold=fruit2)
+    ladder=[ladderPlace]
+    explanation(W)
+ =>  
+    monkey(
+     old goals=old U
+         [action=moveWithLadder, 
+          concernedWith=fruit1,
+          toBeFoundIn=place1],
+     new goals=new U
+         [action=move,
+          concernedWith=fruit1,
+          toBeFoundIn=ladderPlace],
+     place=place2,
+     position=pos,
+     hold=fruit2)
+    ladder=[ladderPlace]
+    explanation(W)
+    if place2 != ladderPlace
+ end
+
+ [R10] // moving when the ladder is there
+    monkey(
+     old goals=old,
+     new goals=new U
+         [action=moveWithLadder,
+          concernedWith=[name|fruitPlace,fruitPosition], 
+          toBeFoundIn=place1],
+     place=ladderPlace,
+     position=ground,
+     hold=fruit2)
+    ladder=[ladderPlace]
+    explanation(W)
+ =>  
+    monkey(
+     old goals=empty,
+     new goals=old U new,
+     place=place1,
+     position=ground,
+     hold=fruit2)
+    ladder=[place1]
+    explanation(W . movingWithLadder(ladderPlace->place1))
+ end
+
+ [R11] // moving without the ladder
+    monkey(
+     old goals=old,
+     new goals=new U
+         [action=move,
+          concernedWith=fruit1,
+          toBeFoundIn=place1],
+     place=place2,
+     position=ground,
+     hold=fruit2)
+    ladder=l
+    explanation(W)
+ =>  
+    monkey(
+     old goals=empty,
+     new goals=old U new,
+     place=place1,
+     position=ground,
+     hold=fruit2)
+    ladder=l
+    explanation(W . moving(place2->place1))
+    if place2 != place1
+ end
+
+ [R12] // everything that is holded moves in the same way
+    monkey(
+     old goals=old,
+     new goals=new,
+     place=place1,
+     position=pos,
+     hold=[name|fruitPlace,fruitPosition])
+    ladder=[ladderPlace]
+    explanation(W)
+ =>  
+    monkey(
+     old goals=empty,
+     new goals=old U new,
+     place=place1,
+     position=pos,
+     hold=[name|place1,fruitPosition])
+    ladder=[ladderPlace]
+    explanation(W)
+    if fruitPlace != place1
+ end
+
+end
+
+strategies for State
+implicit
+  [] loop => repeat*(first one(R2,R12,R11,R10,R9,R8,R7,R5,R1,R3,R4,R6))   end
+end
+
+end
+
+/*
+Linux
+*****
+
+go(1000)
+rewrite_step = 67001
+total time    = 2.150 sec
+average speed = 31163 rwr/sec
+
+go(5000)
+rewrite_step = 335001
+total time    = 11.540 sec
+average speed = 29029 rwr/sec
+
+go(10000)
+rewrite_step = 670001
+total time    = 23.930 sec
+average speed = 27998 rwr/sec
+
+
+*/

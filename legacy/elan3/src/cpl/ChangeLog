@@ -1,0 +1,20 @@
+2001-11-29  Pierre-Etienne Moreau  <moreau@loria.fr>
+
+	* src/choice.c: remove "extern" before __memcpy_by4
+			resize msg is printed only when DEBUG is defined 
+	
+2001-09-25  Pierre-Etienne Moreau  <moreau@loria.fr>
+
+	* configure.in: start version 0.3
+          - build libchoice-dbg, -prof and -gcc
+
+2001-09-24  Pierre-Etienne Moreau  <moreau@loria.fr>
+
+	* configure.in: start version 0.2
+
+	* src/choice.c: dynamic allocation of internal stacks
+
+2001-01-23  Eelco Visser  <visser@acm.org>
+
+	* Setup of CPL under automake
+

@@ -1,0 +1,12 @@
+LPL nim1 description
+
+  query of sort		list[list[state]]
+  result of sort	list[list[state]]
+  modules int 		nim
+  start with 		(eval_list_list_state__)[findawinner]query
+//  start with 		(eval_list_list_state__)[next]query
+
+end
+
+
+

@@ -1,0 +1,79 @@
+module sequence[X]
+
+import global bool int eq[X]; end
+
+sort int X sequence[X]; end
+
+operators global
+  @ 		: (X) sequence[X];
+  @ , @		: (sequence[X] sequence[X]) sequence[X] (AC);
+  elem(@)	: (sequence[X]) X;
+  @ in @	: (X sequence[X]) bool;
+  size(@)	: (sequence[X]) int;
+end
+
+
+// stratop global
+//   seqExtract : <X->X> bs;
+// end
+
+rules for sequence[X]
+  S : sequence[X];
+//  E,E1 : X;
+  E,E1 : sequence[X];
+
+global
+//  [] E , E1 , S => E , S        if eq_X(E,E1)   end
+//  [] E , E1     => E            if eq_X(E,E1)   end
+// PEM: non-linearity is possible
+//  [] S , E , E  => S , E         end
+  [] E , E      => E             end
+end
+
+rules for  bool
+  S : sequence[X];
+  E,F : X;
+
+global
+//  [] E in F 	=> eq_X(E,F)		end
+  [] E in E 	=> true			end
+//  [] E in F , S => true if eq_X(E,F)	end
+  [] E in E , S => true 		end
+// un-pure elan! we know that the rule above are applied before the next one
+//  [] E in F , S => E in S 		end
+// add a try/choose
+  [] E in F , S => false		end
+end
+
+rules for int
+  S : sequence[X];
+  E : X;
+  
+global
+  [] size(E)	=> 1		end
+  [] size(E,S)	=> size(S)+1	end
+end
+
+end 
+
+// these rules and strategies are useless
+
+// rules for X
+//   S : sequence[X];
+//   E : X;
+
+// local
+//   [extractrule1] elem(E)	=> E		end
+//   [extractrule1] elem(E , S) 	=> E		end
+//   [extractrule2] elem(E , S) 	=> elem(S) 	end
+// end
+
+
+
+// strategies for X
+// implicit
+//   [.] seqExtract => iterate*(dc one(extractrule2)) ; dc one(extractrule1) end
+// end
+
+// end
+

@@ -1,0 +1,50 @@
+choice.o choice.o: choice.c choice.h /usr/include/setjmp.h \
+  /usr/include/machine/setjmp.h /usr/include/ppc/setjmp.h \
+  /usr/include/sys/cdefs.h /usr/include/machine/signal.h \
+  /usr/include/ppc/signal.h /usr/include/sys/appleapiopts.h \
+  /usr/include/string.h /usr/include/machine/ansi.h \
+  /usr/include/ppc/ansi.h /usr/include/stdlib.h \
+  /usr/include/machine/types.h /usr/include/ppc/types.h \
+  /usr/include/alloca.h /usr/include/stdio.h /usr/include/sys/types.h \
+  /usr/include/machine/endian.h /usr/include/ppc/endian.h \
+  /usr/include/gcc/darwin/3.3/assert.h
+
+choice.h:
+
+/usr/include/setjmp.h:
+
+/usr/include/machine/setjmp.h:
+
+/usr/include/ppc/setjmp.h:
+
+/usr/include/sys/cdefs.h:
+
+/usr/include/machine/signal.h:
+
+/usr/include/ppc/signal.h:
+
+/usr/include/sys/appleapiopts.h:
+
+/usr/include/string.h:
+
+/usr/include/machine/ansi.h:
+
+/usr/include/ppc/ansi.h:
+
+/usr/include/stdlib.h:
+
+/usr/include/machine/types.h:
+
+/usr/include/ppc/types.h:
+
+/usr/include/alloca.h:
+
+/usr/include/stdio.h:
+
+/usr/include/sys/types.h:
+
+/usr/include/machine/endian.h:
+
+/usr/include/ppc/endian.h:
+
+/usr/include/gcc/darwin/3.3/assert.h:

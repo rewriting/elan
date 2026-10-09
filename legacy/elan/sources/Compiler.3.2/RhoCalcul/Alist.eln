@@ -1,0 +1,184 @@
+//------------------------------------------------------------------------------
+// Auxiliary rules for module: list
+//------------------------------------------------------------------------------
+//    member(@,@)	: ? an elem belongs to alist ?
+//    included(@,@)	: list1 included in list2 ? (modulo the number of elements)
+//    elim(@,@)         : eliminate an element from a list (all occurrences)
+//    elimOne(@,@)      : eliminate an element from a list (one occurrence)
+//    elimList(@,@)     : eliminate a list from a list
+//    unicates(@)       : the list contains only unicates
+//    intersect(@,@) 	: intersection
+//    intersectLeft(@,@) : elements form left list that are in right list
+//    intersectRight(@,@): elements form right list that are in left list
+//    union(@,@)        : union of two lists
+//    list2set(@)       : eliminate doubletons from a list
+//------------------------------------------------------------------------------
+module Alist[X]
+
+import global	
+		bool;
+	local
+		list[X]
+		eq[X]
+;end
+
+operators
+  global
+    member(@,@)		: ( X list[X] ) bool;
+    included(@,@)	: ( list[X] list[X] ) bool;
+    elim(@,@)           : ( X list[X] ) list[X];
+    elimOne(@,@)        : ( X list[X] ) list[X];
+    elimList(@,@)       : ( list[X] list[X] ) list[X];
+    unicates(@)		: ( list[X] ) bool;
+    intersect(@,@)      : ( list[X] list[X] ) list[X];
+    intersectLeft(@,@)      : ( list[X] list[X] ) list[X];
+    intersectRight(@,@)      : ( list[X] list[X] ) list[X];
+    elements_of(@,@)    : ( list[X] list[X] ) list[X];
+    union(@,@)    	: ( list[X] list[X] ) list[X];
+    list2set(@)       	: ( list[X] ) list[X];
+end
+
+rules for bool
+	v,u:X;
+	l:list[X];
+global
+	[] member($v,nil) => false
+	end
+	[] member($v,$v.l) => true
+	end
+	[] member($v,$u.l) => member($v,l)
+	end
+end
+
+rules for bool
+	l,k		: list[X];
+	v		: X;
+global
+  	[] included(nil,nil) => true
+	end
+	[] included($v.nil,nil) => false
+	end
+	[] included($v.nil,$l) => member($v,$l)
+	end
+	[] included($v.$k,$l) => member($v,$l) and included($k,$l)
+	end
+end
+
+rules for list[X]
+        v,u:X;
+        l,q:list[X];
+global
+        [] elim($v,nil) => nil
+        end
+        [] elim($v,$v.l) => elim($v,l)
+        end
+        [] elim($v,$u.l) => $u.elim($v,l)
+        end
+
+        [] elimOne($v,nil) => nil
+        end
+        [] elimOne($v,$v.l) => l
+        end
+        [] elimOne($v,$u.l) => $u.elimOne($v,l)
+		if neq_X($v,$u)
+        end
+
+        [] elimList($q,nil) => nil
+        end
+        [] elimList($u.$q,$l) => elimList($q,elim($u,$l))
+        end
+        [] elimList(nil,$l) => $l
+        end
+end
+
+rules for bool
+	l,k		: list[X];
+	v		: X;
+global
+  	[] unicates(nil) => true
+	end
+	[] unicates($v.$l) => not member($v,$l) and unicates($l)
+	end
+end
+
+rules for list[X]
+        $v:X;
+        $l,$q:list[X];
+global
+        [] intersect($l,nil) => nil
+        end
+        [] intersect(nil,$q) => nil
+        end
+        [] intersect($v.$l,$q) => $v.intersect($l,elimOne($v,$q))
+			if member($v,$q)
+        end
+        [] intersect($v.$l,$q) => intersect($l,$q)
+			if not member($v,$q)
+        end
+end
+
+rules for list[X]
+        $v:X;
+        $l,$q:list[X];
+global
+        [] intersectLeft($l,nil) => nil
+        end
+        [] intersectLeft(nil,$q) => nil
+        end
+        [] intersectLeft($v.$l,$q) => $v.intersectLeft($l,$q)
+			if member($v,$q)
+        end
+        [] intersectLeft($v.$l,$q) => intersectLeft($l,$q)
+			if not member($v,$q)
+        end
+end
+
+rules for list[X]
+        $v:X;
+        $l,$q:list[X];
+global
+        [] intersectRight($l,nil) => nil
+        end
+        [] intersectRight(nil,$q) => nil
+        end
+        [] intersectRight($l,$v.$q) => $v.intersectRight($l,$q)
+			if member($v,$l)
+        end
+        [] intersectRight($l,$v.$q) => intersectRight($l,$q)
+			if not member($v,$q)
+        end
+end
+
+rules for list[X]
+        v,u:X;
+        l,q,qq:list[X];
+global
+        [] union($l,nil) => $l
+        end
+        [] union(nil,$q) => $q
+        end
+        [] union($v.$l,$q) => $v.union($l,$qq)
+			where qq := () elimOne($v,$q)
+        end
+        //[] union($v.$l,$q) => $v.union($l,$qq)
+	//		if member($v,$q)
+	//		where qq := () elim($v,$q)
+        //end
+        //[] union($v.$l,$q) => $v.union($l,$q)
+	//		if not member($v,$q)
+        //end
+end
+
+rules for list[X]
+        $v:X;
+        $l:list[X];
+global
+        [] list2set(nil) => nil
+        end
+        [] list2set($v.$l) => $v.list2set(elim($v,$l))
+        end
+end
+
+end
+
+

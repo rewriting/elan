@@ -1,0 +1,9 @@
+LPL bup1 description
+  
+query		of sort   	Tree[foo]
+		result of sort  Tree[foo]
+		modules  	bup1
+		start with 	[bup(ass,TRY swap)]query
+
+end
+

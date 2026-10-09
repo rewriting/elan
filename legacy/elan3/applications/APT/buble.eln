@@ -1,0 +1,27 @@
+module buble[S]
+ 
+import global int S strat[S]
+	; end
+
+rules for S
+	i,j, ii,jj	: int;
+	x		: S;
+global  
+  [swap(j)]    x => x[j-1<-x[j]][j<-x[j-1]]    if x[j-1] > x[j]   end
+/*
+  [swap(j)]	x => x[i<-jj][j<-ii]	
+				where i:=()j-1
+				where ii:=()x[i] 
+				where jj:=()x[j]
+				if ii > jj
+  end
+*/
+end
+
+end
+
+
+
+
+
+

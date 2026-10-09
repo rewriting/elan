@@ -1,0 +1,2539 @@
+% -*- Document-Type: LaTeX; Master-File: manual.tex -*- 
+% test pad
+\documentclass{article}
+
+
+\usepackage{graphics,epsfig,makeidx,latexsym,fancyhead,supertabular}
+\usepackage{./lgrind-ck}
+\LGnuminterval=0\LGindent=\parindent
+%\usepackage{lgrind}
+% (pas de num de ligne)
+
+%\newenvironment{elanCode}{\par\medskip
+%\begin{lgrind}\scriptsize}%
+%{\end{lgrind}\smallbreak}  
+
+%\newcommand{\insertCode}[2]{%
+%\begin{elanCode} \input{#1/ElanTeX/#2} \end{elanCode}}
+ 
+%\newcommand{\insertExamples}[1]{\insertCode{ElanExamples}{#1}}
+%\newcommand{\insertLibCommon}[1]{\insertCode{ElanLibCommon}{#1}}
+%\newcommand{\insertLibNoquote}[1]{\insertCode{ElanLibNotquote}{#1}}
+%\newcommand{\insertLibStrategy}[1]{\insertCode{ElanLibStrategy}{#1}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\versionElan}{V2.00}
+
+\newcommand{\elan}{{\sf ELAN}}
+\newcommand{\EX}{\begin{example}\begin{it}}
+\newcommand{\FEX}{\end{it}\end{example}}
+\input macros
+
+\begin{document}
+
+\tableofcontents
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Syntax}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Lexical unities}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\index{letter}
+\grrule{letter}{\tt
+A\sor B\sor C\sor D\sor E\sor F\sor G\sor H\sor 
+I\sor J\sor K\sor L\sor M\sor N\sor O\sor P\sor Q\sor R\sor S\sor T\sor 
+U\sor V\sor W\sor X\sor Y\sor Z 
+\gror
+ a\sor b\sor c\sor d\sor e\sor f\sor g\sor h\sor 
+i\sor j\sor k\sor l\sor m\sor n\sor o\sor p\sor q\sor r\sor s\sor t\sor 
+u\sor v\sor w\sor x\sor y\sor z
+}
+
+\index{numeral}
+\grrule{numeral}{\tt
+0\sor 1\sor 2\sor 3\sor 4\sor 5\sor 6\sor 7\sor 8\sor 9
+}
+
+\index{identifier}
+\grrule{identifier}{ 
+  \nt{letter} \itzero{\nt{letter} \sor \nt{numeral} \sor ~\sym{\_}}
+}
+
+\grrule{number}{ \itone{\nt{numeral}}}
+
+\subsection{Definition of signatures}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\index{sort name}\index{name!sort}
+\grrule{sort name} {
+  \nt{identifier}
+ \gror
+  \nt{identifier}\sym{[}\nt{sort name}\itzero{\sym{,}\nt{sort name}}\sym{]}
+}
+
+\index{symbol declaration}\index{declaration!function}
+\grrule{symbol declaration}{
+  \nt{new symbol declaration}
+\gror
+  \nt{alias}
+}
+
+\grrule{new symbol declaration}{
+   \nt{identifier} \sym{:} \nt{rank} \omm{\nt{options}}
+}
+
+\index{alias}
+\grrule{alias}{\nt{new symbol declaration} \rw{alias} \nt{old name}\sym{:}}
+
+
+\grrule{name} {\itone{\nt{symbol}}}
+\grrule{symbol}{
+  \nt{single lexem}
+\gror
+  \sym{@}
+\gror
+  \sym{'}\nt{single lexem}\sym{'}
+\gror
+  \sym{'$\backslash$}\nt{number}\sym{'}
+}
+\grrule{single lexem}{
+  \nt{identifier}
+\gror
+  \nt{number}
+\gror
+  \nt{nchar}
+}
+
+\index{selector}
+\grrule{rank}{
+  \nt{sort name}
+\gror
+  \sym{(} \itone{\nt{sort name}} \sym{)} \nt{sort name}
+\gror
+  \sym{(} \itone{\nt{name} \sym{:} \nt{sort name}} \sym{)} \nt{sort name}
+}
+
+\index{assocLeft}\index{assocRight}\index{pri}\index{AC}\index{code}
+\grrule{option}{
+  \rw{assocLeft}
+\gror
+  \rw{assocRight}
+\gror
+  \rw{pri} \nt{number}
+\gror
+  \sym{(} \rw{AC} \sym{)}
+\gror
+  \rw{code} \nt{number}
+}
+
+
+\subsection{Definition of module}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\grrule{module}{
+        \rw{module } \nt{formal module name} \nl
+        \omm{\nt{imports}}              \nl
+        \omm{\nt{sort definition}}      \nl
+        \omm{\nt{operator definition}}  \nl
+        \itzero{\nt{family of rules}}   \nl
+        \itzero{\nt{family of strategies}}      \nl
+        \rw{end}
+}
+
+\grrule{imports}{
+   \rw{import}                          \nlp{5}
+        \omm{\rw{global} \itone{\nt{module name}} \sym{;}} \nlp{5}
+        \omm{\rw{local} \itone{\nt{module name}} \sym{;}} \nl
+   \rw{end}
+}
+
+
+\index{sort name}\index{name!sort}
+\grrule{sort name} {
+  \nt{identifier}
+ \gror
+  \nt{identifier}\sym{[}\nt{identifier}\itzero{\sym{,}\nt{identifier}}\sym{]}
+}
+
+\index{sort definition}\index{name!sort}
+\grrule{sort definition} {
+  \rw{sort}
+  \itone{\nt{sort name}} \sym{;}
+  \rw{end}
+}
+\index{operator definition}\index{operator!signature}
+\grrule{operator definition}{
+          \rw{operators}                \nlp{5}
+          \omm{\rw{global} \itone{\nt{symbol declaration}\sym{;}}}      \nlp{5}
+          \omm{\rw{local} \itone{\nt{symbol declaration}\sym{;}}}       \nl
+          \rw{end}
+}
+
+\subsection{Definition of rules}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\grrule{family of rules}{
+        \rw{rules for} \nt{sort name}                \nl
+        \omm{\itone{\nt{variable declare}}}           \nl
+        \omm{\rw{global} \itone{\nt{labelled or unlabelled rule}}} \nl
+        \omm{\rw{local}  \itone{\nt{labelled rule}}} \nl
+        \rw{end}
+}
+
+\grrule{labelled or unlabelled rule}{
+        \nt{labelled rule}\nl
+\gror   \nt{labelled rule}
+}
+
+\grrule{labelled rule}{
+        \sym{[} \nt{rule name} \sym{]} \nt{rule body} \rw{end}
+}
+
+\grrule{unlabelled rule}{
+        \sym{[} \sym{]} \nt{rule body} \rw{end}
+}
+
+\grrule{rule body}{
+        \nt{term} \sym{=$>$} \nt{rhs}\
+}
+
+\grrule{rhs}{
+        \nt{term}
+\gror   \nt{rhs} \rw{if} \nt{boolean term}    \nl
+\gror   \nt{rhs} \rw{where} \nt{var name} \sym{:=}
+                 \sym{(} \omm{\nt{strategy}} \sym{)} \nt{term} \nl
+\gror   \nt{rhs} \rw{where} \nt{var name} \sym{:=}
+                 \sym{[} \nt{Pstrategy} \sym{]} \nt{term} \nl
+\gror   \nt{rhs} \rw{where} \sym{(} \nt{sort} \sym{)} \nt{term} \sym{:=}
+                 \sym{(} \omm{\nt{strategy}} \sym{)} \nt{term} \nl
+\gror   \nt{rhs} \rw{where} \sym{(} \nt{sort} \sym{)} \nt{term} \sym{:=}
+                 \sym{[} \nt{Pstrategy} \sym{]} \nt{term} \nlp{2}
+\gror   \rw{switch}\nlp{5}
+        \itone{\rw{case} \nt{boolean term} \rw{then} \nt{rhs} }\nlp{5}
+        \omm{\rw{otherwise} \nt{rhs}} \nl
+        \rw{end}
+}
+
+
+\subsection{Definition of strategies}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\grrule{family of strategies}{
+        \rw{strategies for} \nt{sort name}                \nl
+        \omm{\rw{global} \itone{\nt{non complete strategy}}} \nl
+        \omm{\rw{local}  \itone{\nt{non complete strategy}}} \nl
+        \rw{end}
+}
+
+\grrule{non complete strategy}{
+        \sym{[} \nt{strategy name} \sym{]} \nt{strategy} \rw{end}\nl
+}
+
+\grrule{strategy}{
+       \nt{strategy name}
+\gror  \nt{choosing}
+\gror  \nt{concatenation}
+\gror  \nt{iterator}
+\gror  \nt{normalise}
+\gror  \rw{id}
+}
+
+\grrule{strategy name}{\nt{identifier}}
+
+\grrule{strategy\_rule}{
+       \nt{strategy}
+\gror  \nt{rule name}
+}
+
+\grrule{choosing}{
+       \rw{dont care choose} \sym{(} \nt{strategy\_rule} 
+                \itzero{\sym{$||$} \nt{strategy\_rule}} \sym{)}
+\gror  \rw{dont know choose} \sym{(} \nt{strategy\_rule} 
+                \itzero{\sym{$||$} \nt{strategy\_rule}} \sym{)}
+\gror  \rw{dc} \sym{(} \nt{strategy\_rule} 
+                \itzero{\sym{$||$} \nt{strategy\_rule}} \sym{)}
+\gror  \rw{dk} \sym{(} \nt{strategy\_rule} 
+                \itzero{\sym{$||$} \nt{strategy\_rule}} \sym{)}
+}
+
+\grrule{concatenation}
+  {\nt{strategy} \sym{;} \nt{strategy}}
+
+\grrule{iterator}{
+       \rw{iterate} \sym{(} \nt{strategy} \sym{)} 
+\gror  \rw{repeat*} \sym{(} \nt{strategy} \sym{)} 
+\gror  \rw{repeat+} \sym{(} \nt{strategy} \sym{)} 
+}
+
+\grrule{normalise}{
+       \rw{normalise} \sym{(} \nt{strategy} \sym{)} 
+}
+
+\subsection{How to transform a program ?}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+You have to modify declaration parts:
+\begin{itemize}
+\item \texttt{import ...} becomes \texttt{import ... end}
+\item \texttt{sort ...} becomes \texttt{sort ... end}
+\item \texttt{op ... endop} becomes \texttt{operators ... end}
+\end{itemize}
+
+Now, there is only one constructions to define rules, you have to
+replace: 
+\begin{itemize}
+\item \texttt{rule for ...} by \texttt{rules for ...}
+\item \texttt{rule <name> for ...} by \texttt{rules for ... [name] ...}
+\item suppress \texttt{declare} keyword
+\item \texttt{body} or \texttt{bodies} by \texttt{global} or
+  \texttt{local}
+\item texttt{end of rule}, texttt{end of rules} by \texttt{end}
+\end{itemize}
+
+Definition of strategies looks like rules definitions, you have to
+replace: 
+\begin{itemize}
+\item \texttt{strategy ...} by \texttt{strategies for ... global|local
+    [name] ...} 
+\item \texttt{iterate ... enditerate} by \texttt{iterate(...)}
+\item \texttt{while ... endwhile} by \texttt{repeat*(...)}
+\item \texttt{repeat ... endrepeat} by \texttt{repeat*(...)}
+\item \texttt{dont know choose(r1 r2 r3)} by \texttt{dc(r1 || r2 ||
+    r3)}
+\item \texttt{repeat ... endrepeat dont care choose(...)} by
+  \texttt{repeat*(...) ; dc(...)}
+\item \texttt{end of strategy} by \texttt{end}
+\item \texttt{end of module} by \texttt{end}
+\end{itemize}
+
+Local affectations and conditions are now evaluated from top to
+bottom. You have to reverse the order:
+
+\begin{verbatim}
+  [] l => r
+          if c2
+          where v2:=(...) ...
+          where v1:=(...) ...
+          if c1
+\end{verbatim}
+
+becomes in the new syntax:
+\begin{verbatim}
+  [] l => r
+          if c1
+          where v1:=(...) ...
+          where v2:=(...) ...
+          if c2
+\end{verbatim}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Library}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+The new library is split in 3 directories:
+\begin{itemize}
+\item \texttt{elanlib/commons} contains common modules definitions:
+  int, bool, string, pair, list, array,\ldots
+\item \texttt{elanlib/noquote} contains modules connected to
+  identifier representation: identifier, term, substitution,
+  constraint, unification,\ldots
+\item \texttt{elanlib/strategy} contains modules for user-defined
+  strategies: meta, any, strapply, \ldots
+\end{itemize}
+
+Definition of terms have changed, you no longer need to play with
+quotes `{''}`. All modules \texttt{term}, \texttt{termF},
+\texttt{termV}, \texttt{termFExt}, \texttt{termVExt} have been
+replaced by only one: \texttt{termCommons} parametrized by
+\texttt{Fss} and \texttt{Vars}.
+
+\texttt{eqSystem} and \texttt{applySubstOn} are now paretrized by
+\texttt{Fss} and \texttt{Vars}.
+
+\texttt{syntacticUnification[Vars,Fss]} is replaced by
+\texttt{syntacticUnification[Fss,Vars]}.
+ 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{New Language Features}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------
+% Peter's macro defs file
+%\def \FULL{0} \def \ETCS{1}
+\def \FULL{1} \def \ETCS{0}
+%
+\newcommand{\comment}[1]   {  }
+\newcommand{\ELAN}{{\sf ELAN}}
+%
+\newcommand{\mathdef}[1]{\relax\ifmmode #1\else $#1$\fi}
+\newcommand{\rrule}[2]{\mathdef{\frac{\large #1}{\large #2}}}
+\renewcommand{\o}{\:\circ\:}
+\newcommand{\oo}{\infty}
+%
+\newcommand{\te}[0]{\mathdef{\:\vdash\:}}
+\newcommand{\rewrite}[0]{\mathdef{\Rightarrow}}
+\newcommand{\red}[0]{_{\downarrow}}
+%
+\newcommand{\TT}[0]{{\cal T}}
+\newcommand{\FF}[0]{{\cal F}}
+\newcommand{\DD}[0]{{\cal D}}
+\newcommand{\OO}[0]{{\cal O}}
+\renewcommand{\SS}[0]{{\cal S}}
+\newcommand{\EE}[0]{{\cal E}}
+\newcommand{\XX}[0]{{\cal X}}
+\newcommand{\LL}[0]{{\cal L}}
+%
+%\newcommand{\SS}[0]{{\cal S}}
+\newcommand{\II}[0]{{\cal I}}
+\newcommand{\RR}[0]{{\cal R}}
+\newcommand{\CC}[0]{{\cal C}}
+%
+\newcommand{\IF}[0]{{\rm ~if~}}
+\newcommand{\ELSE}[0]{{\rm ~else~}}
+\newcommand{\FI}[0]{{\rm ~fi~}}
+\newcommand{\THEN}[0]{{\rm ~then~}}
+\newcommand{\WHERE}[0]{{\rm ~where~}}
+\newcommand{\AND}[0]{{\rm ~and~}}
+\newcommand{\OR}[0]{{\rm ~or~}}
+\newcommand{\FOR}[0]{{\rm ~for~}}
+\newcommand{\ANY}[0]{{\rm ~any~}}
+\newcommand{\IFF}[0]{{\rm ~iff~}}
+\newcommand{\IN}[0]{{\rm ~in~}}
+\newcommand{\LET}[0]{{\rm ~let~}}
+\newcommand{\MATCH}[0]{{< \hspace{-1mm} < ^{?}}}
+%\newcommand{\Strat}[0]{{\bf Strat}}
+%
+\newcommand{\Strat}[1]{\langle #1 \rangle}
+\newcommand{\Symb}[1]{Symbol^{#1}}
+\newcommand{\Bool}[0]{Bool}
+\newcommand{\List}[0]{list}
+\newcommand{\appl}[2]{#1 \lceil #2 \rceil}
+\newcommand{\appll}[2]{#1 \lceil \lceil #2 \rceil \rceil}
+\newcommand{\MV}[0]{{\cal MV}}
+%
+\newcommand{\FSYM}[0]{{\sf FSYM}}
+\newcommand{\RULE}[0]{{\sf LAB}}
+\newcommand{\DSTR}[0]{{\sf DSTR}}
+\newcommand{\DK}[0]{{\sf DK}}
+\newcommand{\DC}[0]{{\sf DC}}
+\newcommand{\CASE}[0]{{\sf CASE}}
+\newcommand{\CONC}[0]{{\sf CONC}}
+\newcommand{\ID}[0]{{\sf ID}}
+\newcommand{\FIN}[0]{{\sf FIN}}
+\newcommand{\FAIL}[0]{{\sf FAIL}}
+%
+\newcommand{\FILTER}[0]{{\sf FILTER}}
+\newcommand{\dc}[0]{{\bf dc}}
+\newcommand{\dk}[0]{{\bf dk}}
+\newcommand{\cas}[0]{{\bf case}}
+\newcommand{\nil}[0]{{\bf nil}}
+\newcommand{\lab}[0]{{\bf lab}}
+\newcommand{\cons}[0]{{\bf cons}}
+\newcommand{\id}[0]{{\bf id}}
+\newcommand{\fail}[0]{{\bf fail}}
+\newcommand{\f}[0]{{\bf f}}
+\newcommand{\h}[0]{{\bf h}}
+%\renewcommand{\l}[0]{{\bf l}}
+%\renewcommand{\r}[0]{{\bf r}}
+\newcommand{\lll}[0]{{\bf l}}
+\newcommand{\dd}[0]{{\bf d}}
+\newcommand{\map}[0]{{\bf map}}
+%
+\newcommand{\while}[0]{{\bf while}}
+\newcommand{\repeate}[0]{{\bf repeat}}
+\newcommand{\dcwhile}[0]{{\bf dcwhile}}
+\newcommand{\apply}[0]{{\bf apply}}
+%
+\newcommand{\joint}[0]{join}
+%\newcommand{\Set}[0]{{\bf Set}}
+
+\newcommand{\Set}[0]{{\bf List}}
+
+\newcommand{\ter}[1]    {{\tt #1}}
+
+\newlength{\largeurtexte}
+\setlength{\largeurtexte}{134mm} % \textwidth - 5mm
+
+\newcommand{\lban}[0]{ (  {\kern -2pt} [ }
+\newcommand{\rban}[0]{ ]  {\kern -2pt} ) }
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------
+
+\subsection{Inputs and Outputs}
+
+Up to now, 
+there exists only the following proposition, 
+which is not updated for the version elan.test4.
+
+\marginpar{
+See the following library modules: prompt, io and stdio}
+
+{\scriptsize
+\subsubsection{How to read \& write}
+
+For the beginning, let us suppose that there are two built-in symbols 
+for low-level IOs (like read, write), which are defined in some
+system library module (stdio.eln, io.eln, io\_aux.eln -- cf. appendix)
+and handled by a built-in strategy $IO$. This assumption allows us to define the
+following ELAN module for terminal IOs.
+%..print
+{\scriptsize
+\begin{verbatim}
+module print[X]
+import local io[X];
+op global 
+  read     : X;
+  print(@) : (X) X;
+endop
+rules for X
+declare t,tt : X;
+bodies
+  [] read => tt     where tt:=()read(stdin)     end
+  [] print(t) => tt where tt:=()write(stdout,t) end
+end of rules
+\end{verbatim}
+}
+%
+The module $print$ should/could be imported with any ELAN sort $X$,
+values of which we want to read in or write out. 
+This module uses a system library module
+$io$, which (finally) defines (the syntax of) low-level primitives 
+$read$ and $write$.
+By importing this module, the user can easily write out any term of any
+sort. However, they can also construct IO-terms whose meanings are
+not easy to find out, e.g. $print(read.read.nil)$ - supposing that (s)he
+imported $print[int]$ and also $print[list[int]]$\footnote{
+a behaviour depends on the ELAN reduction strategy, which is, in fact, 
+left-most-inner-most}.
+
+%...................................
+\subsubsection{File Input \& Outputs}
+
+Intuitively, the same kind of operations, as we have shown for terminal IOs,
+we can do with files. The module $stdio.eln$ defines basic built-ins:
+$open$ for opening and $close$ for closing files. The idea of
+processes and files is that they are uniquely represented in ELAN 
+by a value of the sort $Pid$. Thus, any io ($open$, $read$, $write$, $close$)
+with a file identified by $pid$ goes via $pid$ (and the same for processes).
+
+The following example shows a way how to write out a triangle into a file:
+{\scriptsize
+\begin{verbatim}
+ 10 end 
+ 10+ 9+ 8+ 7+ 6+ 5+ 4+ 3+ 2+ 1+ 0end 
+ 9+ 8+ 7+ 6+ 5+ 4+ 3+ 2+ 1+ 0end 
+ 8+ 7+ 6+ 5+ 4+ 3+ 2+ 1+ 0end 
+ 7+ 6+ 5+ 4+ 3+ 2+ 1+ 0end 
+ 6+ 5+ 4+ 3+ 2+ 1+ 0end 
+ 5+ 4+ 3+ 2+ 1+ 0end 
+ 4+ 3+ 2+ 1+ 0end 
+ 3+ 2+ 1+ 0end 
+ 2+ 1+ 0end 
+ 1+ 0end 
+\end{verbatim}
+}
+%
+The solution uses two loops ($loop$ and $loop2$) and a top-level
+procedure ($wloop$), which opens and closes a file.
+$loop$ writes out one line of the output file $pid$ (except the symbol $end$) and 
+returns the sum of written numbers. $loop2$ writes out the whole
+triangle by calling $loop$ $n$-times.
+%
+{\scriptsize
+\begin{verbatim}
+import global string io[string] io[int];  // to be able to write/read strings and ints
+op global
+  wloop(@,@)    : (string int) int;
+  loop(@,@)     : (Pid int) int;
+  loop2(@,@)    : (Pid int) int;
+endop
+rules for int
+declare s1, s2, n, n1, n2, i    : int;
+        pid, pid1               : Pid;
+        file, id1               : string;
+bodies
+  [] loop2(pid,0) => 0                                end
+  [] loop2(pid,n) => s1+s2
+                 where s2 :=()loop2(pid,n-1)
+                 where id1:=()write(pid,"0 end\n")             
+                 where s1 :=()loop(pid,n)             end
+  [] loop(pid,0) => 0                                 end
+  [] loop(pid,n) => n+loop(pid,n-1) 
+                 where id:=()write(pid,"+")
+                 where n1:=()write(pid,n)           end
+  [] wloop(file,n) => n1 if iserr(pid1) == false      // test the correctness
+                 where pid1:=()close(pid)           // close the file
+                 where n1  :=()loop2(pid,n)           // write out whole triangle
+                 where id1 :=()write(pid,"end\n")
+                 where n2  :=()write(pid,n)         // write out the first line
+                 if iserr(pid) == false               // test if is is open correctly
+                 where pid :=()open(file,"w")       // open file for write
+  end
+\end{verbatim}
+}
+%
+As usually, $~where$'s and $if$'s in ELAN should be read from bottom to
+up. In this sens, $wloop("foo",10)$ opens the file "foo" identified by
+the string variable $file$,
+tests whether it was correctly opened, writes out the first line 
+with $10~end$, writes out the whole triangle by calling $loop2$, 
+and closes the file. Any error of the $open$ or $close$ operation is detected
+by $pid$ of this file.
+
+\bigskip
+
+The following example tries to read the file produced by $wloop$.
+{\scriptsize
+\begin{verbatim}
+op global
+  rloop(@)      : (string) int;
+  sum(@,@)      : (int Pid) int;
+endop
+rules for int
+declare s1, s2, n, n1, n2, i    : int;
+        pid, pid1               : Pid;
+        file, id1               : string;
+bodies
+  [] rloop(file) => n1  if iserr(pid1) == false             // and test
+                        where pid1:=()close(pid)          // close
+                        where n2  :=()write(stdout,n1)    // write out the total sum of all numbers
+                        where n1  :=()sum(i,pid)            // read the triangle
+                        where i   :=()read(pid)           // read a size of the triangle - the first line
+                        if iserr(pid) == false              // test of correctness
+                        where pid :=()open(file,"r")      // open a file for read
+  end
+  [] sum(0,pid) => 0                                            end
+  [] sum(i,pid) => n+n2 where n2  :=()sum(i-1,pid)          // loop again
+                        where n1  :=()write(stdout,n)     // write out read integer term
+                        where n   :=()read(pid) if i>0    // read one line of input file    
+  end
+end of rules
+\end{verbatim}
+}
+%
+The body of $rloop$ called by $rloop("foo")$ opens the file "foo", reads the first line until the
+symbol $end$, and it starts a loop of $sum$. What might be interesting is
+that the loop of $sum$ runs $10$ times and each pass of $sum$
+reads one terms of the sort $int$ until $end$, i.e. one line of
+the input file. When you try to run this example for larger $n$ (like
+$100$), you see that reading, analysing and normalising of 
+the term $100 + 99 + \dots + 1 + 0$ takes some time.
+
+Another (silly) example of low-level IOs tries to sketch the `interaction'
+with the user. $ccode$ reads an integer (as a confidential code),
+and after a `verification' ($n < 10000$) it appends this code as a log-information
+into the log-file and finishes this communication.
+%
+{\scriptsize
+\begin{verbatim}
+rules for int
+declare id, id1, id2            : string;
+        fid, fid1               : Pid;
+        n, n1, n2, m            : int;
+bodies
+  [] ccode => n1
+        where fid1:=()close(fid)
+        where id1:= ()write(stdout,"\nSorry, there are no money\n") 
+        where id2:= ()write(fid,"is logged\n")    // log-info
+        where n1 := ()write(fid,n)                // write code into the log-file
+        where fid:= ()open(logfile,"a")           // open to append
+        if n < 10000                                // validity test :-)
+        where n  := ()read(stdin)
+        where id := ()write(stdout,"\nEnter your code confidential: ") end
+  [] ccode => 9999
+        where id := ()write(stdout,"\nSorry, your code is invalid\n")   end
+\end{verbatim}
+}
+}
+
+%----------------------------------------------------------------
+\subsection{Communication with external processes}
+
+Up to now, 
+there exists only the following proposition, 
+which is not updated for the version elan.test4.
+
+\marginpar{
+See the following library modules: io and stdio}
+
+For a reasonable example, see Castro's distributed csp-solver.
+
+{\scriptsize
+In this section we show an example of the communication between
+processes (cf. Figure \ref{solvers}), namely between a solver which for some partial tasks
+calls two sub-solvers ($solver1$ and $solver2$). To say a little-bit more
+about these solvers (although it is not the crucial point), the solver
+$solver1$ transforms an input constraint satisfaction problem $csp$
+to a resolved form using rules of arch/node consistency.
+For any input problem (or a term of the sort $csp$) it gives one
+resolved solution (or a term of the sort $csp$).
+The solver $solver2$ enumerates all solutions of a solved form, e.g.
+for one solved $csp$ it may give more enumerated solutions.
+The solvers $solver1$ and $solver2$ are two elan-tasks\footnote{
+the only restriction to sub-solvers is that they should communicate
+via streams stdin and stdout} 
+started by the following script files:
+%
+\begin{figure}[h]
+\centering
+%\input{solvers.pstex_t}
+
+\begin{picture}(0,0)%
+\special{psfile=/u/protheo/borovan/elan/IOS/PROPOSITION/solvers.pstex}%
+\end{picture}%
+\setlength{\unitlength}{0.012500in}%
+\begin{picture}(521,227)(15,570)
+\end{picture}
+
+\caption{Communication of solvers}
+\label{solvers}
+\end{figure}
+%
+{\scriptsize
+\begin{verbatim}
+solver1:   elan -b file1 
+
+solver2:   elan -b file2 
+\end{verbatim}
+}
+%
+To better visualise flows of terms between processes, we can
+monitor the input to $solver1$ in the Unix-file $pipe1$,
+and the output in the file $pipe2$ (analogically, $pipe3$, $pipe4$ for
+$solver2$):
+{\scriptsize
+\begin{verbatim}
+tee pipe1 | elan -b file1 | tee pipe2
+\end{verbatim}
+}
+%
+Now, we can describe small piece of ELAN code which describes the 
+communication of $solver$ with their two sub-solvers. It is described
+in the body of $sol$:
+{\scriptsize
+\begin{verbatim}
+module solver
+import global string bool signature_csp list[csp]
+              io_aux[csp,signature_csp] io[string];
+op global
+  sol(@)                : (csp) list[csp];
+  delay(@)              : (int) int;
+  read_all(@,@,@)       : (int Pid list[csp]) list[csp];
+endop
+rules for list[csp]
+declare 
+        id, id1, id2, id3, id4, id5, id6, id7, id8      : string;
+        PIDA, PIDA1,PIDB,PIDB1                          : Pid;
+        pb, pb1, sol, sol1, sol2                        : csp;
+        n, m                                            : int;
+        lst                                             : list[csp];
+bodies
+  [] sol(pb) => lst
+          //--- kill solvers
+          where PIDB1 := ()close(PIDB)
+          where PIDA1 := ()close(PIDA)
+
+          //---  read up to 100-solution of the solver2 and collect them into a list
+          where lst :=()read_all(100,PIDB,nil)  
+          
+          //--- send the result of the solver1 to the solver2
+          where id7  := ()write(stdout,"sent to solver 2\n")
+          if iserror(sol1) == false and iserror(id6) == false 
+          where id6   := ()write(PIDB,"end\n")
+          where sol1  := ()write(PIDB,sol)
+
+          //--- read the solution produced by the solver1
+          where id2  := ()write(stdout,"received from solver1\n")
+          if iserror(sol) == false
+          where sol  := ()read(PIDA)
+
+          //--- send the initial $csp$ problem to solver1
+          where id1  := ()write(stdout,"sent to solver 1\n")
+          if iserror(pb1) == false and iserror(id) == false 
+          where id   := ()write(PIDA,"end\n")
+          where pb1  := ()write(PIDA,pb)
+
+          //--- start solver2 and test errors occured
+          where id5  := ()write(stdout,"solver2 is running\n")
+          if iserror(PIDB) == false 
+          where PIDB  := ()create(solver2)
+
+          //--- start solver1 and test errors occured
+          where id3  := ()write(stdout,"solver1 is running\n")
+          if iserror(PIDA) == false 
+          where PIDA  := ()create(solver1)              
+  end
+end of rules
+rules for list[csp]
+declare 
+        id, id1, id2, id3, id4, id5, id6, id7, id8      : string;
+        pid                                             : Pid;
+        sol, sol1                                       : csp;
+        n                                               : int;
+        lst                                             : list[csp];
+bodies // reads all solutions up to n
+  [] read_all(0,pid,lst) => lst                         end
+  [] read_all(n,pid,lst) => read_all(n-1,pid,sol1.lst)
+           where id1  := ()write(stdout,"\n\n")
+           where sol1 := ()write(stdout,sol)
+           where id   := ()write(stdout,"received solution from solver2:")
+           if iserror(sol) == false
+           where sol := ()read(pid)              end
+  [] read_all(n,pid,lst) => lst
+           where id := ()write(stdout,"\n--- FINITO ---\n\n") end
+end of rules
+\end{verbatim}
+}
+%
+The following demo shows the execution of the solver $solver$. It is
+necessary mentioned that between messages `sent to solver 1' and
+`received from solver1' there is long delay  not because of
+complexity of this problem/example, but because of loading to ELAN
+with sub-tasks. If we want to execute solver for more input problems,
+we should little-bit change the communication of $solver$ that
+sub-solvers are loaded (created) and killed only once.
+{\scriptsize
+\begin{verbatim}
+elan solver
+ . . . . . .
+enter query term finished by the key word 'end':
+X1 in_domain? 1.2.3.4.5.nil.X2 in_domain?1.2.3.4.5.nil.nil,nil,
+X1(+)2<=?X2.X2>=?X1(+)2.nil,nil,nil,false end
+
+ solver1 is running 
+ solver2 is running 
+ sent to solver 1
+ received from solver1 
+ sent to solver 2
+ received solution from solver2: nil,nil,nil,X1=?3.X2=?5.nil,X2>=?X1(+)2.X1(+)2<=?X2.nil,true 
+ received solution from solver2: nil,nil,nil,X1=?2.X2=?5.nil,X2>=?X1(+)2.X1(+)2<=?X2.nil,true 
+ received solution from solver2: nil,nil,nil,X1=?1.X2=?5.nil,X2>=?X1(+)2.X1(+)2<=?X2.nil,true 
+ received solution from solver2: nil,nil,nil,X1=?3.X2=?4.nil,X2>=?X1(+)2.X1(+)2<=?X2.nil,true 
+ received solution from solver2: nil,nil,nil,X1=?2.X2=?4.nil,X2>=?X1(+)2.X1(+)2<=?X2.nil,true 
+ received solution from solver2: nil,nil,nil,X1=?1.X2=?4.nil,X2>=?X1(+)2.X1(+)2<=?X2.nil,true 
+ received solution from solver2: nil,nil,nil,X1=?3.X2=?3.nil,X2>=?X1(+)2.X1(+)2<=?X2.nil,true 
+ received solution from solver2: nil,nil,nil,X1=?2.X2=?3.nil,X2>=?X1(+)2.X1(+)2<=?X2.nil,true 
+ received solution from solver2: nil,nil,nil,X1=?1.X2=?3.nil,X2>=?X1(+)2.X1(+)2<=?X2.nil,true 
+ received solution from solver2: end 
+\end{verbatim}
+}
+
+\comment{
+\subsubsection{Library modules}
+
+In this section, we briefly explain tree system modules which define IO-built-ins.
+
+\subsubsubsection{stdio}
+
+As we have said, $pid:Pid$ uniquely identifies a file or a
+process. For a file, it represents a file handle, for a process it is
+a process identification number. Files can be opened for write, read
+or append ("w", "r", "a") which is specified by the second string of
+$open$. The first one represents the name of a file. The sort $Pid$
+has two constructors, which are hidden for the user, thus the user
+cannot play with pids. The second $Pid$ constructor refers to a
+situation where some IO-operation finished unsuccessfully. In this
+case, we could (by $iserr$, and $errno$) detect an error and see its code.
+%.. stdio
+{\scriptsize
+\begin{verbatim}
+module stdio
+// !!! not implemented in the compiled version !!!
+import global int bool string; 
+sort Pid;
+op 
+ global
+  create(@)     : (string) Pid          code 115; // a process
+  open(@,@)     : (string string) Pid   code 116; // open a file for read/write/append
+  close(@)      : (Pid) Pid             code 118; // close a file/kill a process
+  //------------------------------------
+  stdin         : Pid;
+  stdout        : Pid;
+  stderr        : Pid;
+  iserr(@)      : (Pid) bool;
+  errno(@)      : (Pid) int;
+ local
+  @             : (int) Pid             code 121;
+  Error(@)      : (int) Pid             code 122;
+endop
+rules for Pid
+declare x:Pid;
+bodies // should be an alias, but it does not work
+  []    stdin   => 0    end
+  []    stdout  => 1    end
+  []    stderr  => 2    end
+end of rules
+rules for bool
+declare x:Pid; e:int;
+bodies
+  []    iserr(Error(e)) => true         end
+  []    iserr(x) => false               end
+end of rules
+rules for int
+declare x:Pid; e:int;
+bodies
+  []    errno(Error(e)) => e            end
+end of rules
+
+strategy IO 
+   builtin(1)
+end of strategy
+
+end of module
+\end{verbatim}
+}
+
+\subsubsubsection{io\_aux}
+
+The module $io\_aux$ defines the operation $read$ and $write$.
+It should be imported with two arguments, where $X$ is the name of
+ELAN sort and $IX$ is the module which defines the sort $X$.
+In many cases (at least in the ELAN library), a sort $X$ is defined
+in the module $X$. That is why we have defined module $io.eln$
+(belove), which simplifies the importation.
+%.. io_aux
+{\scriptsize
+\begin{verbatim}
+module io_aux[X,IX]
+// !!! not implemented in the compiled version !!!
+// X should be a sort, IX module with sort X
+import global IX bool int stdio string;
+op global
+  write(@,@)     : (Pid X) X   pri 200 code 119;     // write to a file/output to a pipe
+  read(@)        : (Pid) X     pri 200 code 120;     // read from a file/get from a pipe
+
+  iserror(@)     : (X) bool;
+  errno(@)       : (X) int;
+ local
+  Error(@)       : (int) X     pri 200 code 123;
+endop
+rules for bool
+declare x:X; e:int;
+bodies
+  []  iserror(Error(e)) => true         end
+  []  iserror(x) => false               end
+end of rules
+rules for int
+declare x:X; e:int;
+bodies
+  []  errno(Error(e)) => e              end
+end of rules
+\end{verbatim}
+}
+%
+$write(pid,x)$ writes a term $x:X$ to a file $pid$ or to an output pipe of the
+process $pid$ and in the successful
+case, it returns the same term $x$. If an error is occured, the result of $write$ is
+a term $Error(e)$, where $e$ is a index of error.
+$read(pid)$ reads a term of the type $X$, in the error case, it returns a term $Error(e)$.
+
+\bigskip 
+
+{\scriptsize
+\begin{verbatim}
+module io[X]
+import global io_aux[X,X];
+end of module
+\end{verbatim}
+}
+}
+}
+%----------------------------------------------------------------
+\subsection{Selectors and modifiers}
+
+The following proposition has been extracted from a `pub'-mail.
+
+{\scriptsize
+Grace a l'inspiration de Pierre E. j'ai fait une petite extension d'Elan.
+Cette extension generalise la syntax du profile de vos operateurs, qui
+normalement, contient les sortes du domaine et co-domaine.
+Maintenant, vous {\bf pouvez} pre-fixer les sortes avec des identificateurs
+(les noms de champs):
+\begin{verbatim}
+operators global
+  [@,@] : (first:int second:bool) Pair;
+end        ^^^^^     ^^^^^^
+\end{verbatim}
+et vous allez obtenir (pour chaque champ nome') un selecteur et un modificateur
+cad:
+\begin{verbatim}
+  @ .first : (Pair) int;               @ .second  : (Pair) bool;
+  @[.first<-@] : (Pair int) Pair;      @[.second<-@] : (Pair bool) Pair;
+\end{verbatim}
+avec la semantique:
+\begin{verbatim}
+ (x,y).first => x              
+ (x,y).second => y
+ (x,y)[.first<-z] => (z,y)     
+ (x,y)[.second<-w] => (x,w)
+\end{verbatim}
+
+La syntaxe du selecteur et modificateur est fixe' et la semantique
+est definie par deux regles de reecriture (assez evidentes).
+Donc, pas de choses magiques, eventuelement, on va remplacer les
+regles par des built-ins, si on aime cette extension (justement pour
+la raison d'efficacite').
+Par contre, je pense, que l'utilisation de cette extension va changer
+le style qu'on utilise pour vos 'medium-size' elan applications.
+
+Bon, pour illustration, ma petite 'self-explaining' application:
+module sel
+
+\begin{verbatim}
+import global int bool; end
+sort Pair; end
+operators global
+  [@,@] : (first:int second:bool) Pair;
+  f(@)  : (Pair) Pair;
+end
+
+rules for Pair
+p:Pair; r:int;
+bodies
+  []    f(p) => p[.first<-p.first+5][.second<-true] if p.first < 5      end
+end
+\end{verbatim}
+}
+%----------------------------------------------------------------
+\subsection{Switch construction}
+
+{\scriptsize
+The syntax of the {\bf switch} construction is the following:
+\[\begin{array}{ll}
+ l \Rightarrow & {\bf switch~} \\
+            & \quad whifs \\
+            & \quad {\bf ~case~} c_1 {\bf ~then~} r_1 \quad whifs_1 \\
+            & \quad \dots \quad \dots \quad \dots \quad \dots\\
+            & \quad {\bf ~case~} c_n {\bf ~then~} r_n \quad whifs_n \\
+            & \quad {\bf ~otherwise~}  \quad ~r_0 \quad whifs_0 \\
+            & {\bf ~end~} \\
+ {\bf ~end~}
+\end{array}\]
+where the sequence of wheres and ifs is defined as follows:
+\[
+ whifs     ::= \{ {\bf ~where~} affectation  ~|~ {\bf ~if~} c \}^{*}
+\]
+
+\noindent
+The semantics of the {\bf switch} construction is the following:
+\[\begin{array}{lll}
+  l \Rightarrow & r_1 \quad whifs \quad {\bf ~if~} c_1 & whifs_1 \\
+  l \Rightarrow & r_2 \quad whifs \quad {\bf ~if~} c_2 {\bf ~if~} not(c_1) & whifs_2 \\
+            & \quad \dots \quad \dots \quad \dots \quad \dots\\
+  l \Rightarrow & r_n \quad whifs \quad {\bf ~if~} c_n {\bf ~if~} not(c_{n-1}) {\bf ~if~} not(c_1) 
+                         & whifs_n\\
+  l \Rightarrow & r_0 \quad whifs &  whifs_0\\
+\end{array}\]
+
+\noindent
+The construction {\bf ~switch~} is recursive.
+
+See Castro's csp-solver for even nested switch constructions.
+}
+
+%----------------------------------------------------------------
+\subsection{Construction where with a pattern}
+
+{\scriptsize
+The syntax of the {\bf where} statement with patterns is the following:
+\[
+  {\bf ~where~} (sort)pat ~:= ~[~ ()term ~|~ (s)term ~|~ [s]term ~]
+\]
+where the pattern $pat$ if of the type $sort$.
+
+\noindent
+The pattern $pat$ of the sort $s$ is defined as follows:
+\begin{itemize}
+  \item $pat$ is a variable of the type $s$, either
+  \item $pat = f(p_1, \dots, p_n)$, where the symbol $f$ has the 
+    profile $f:(s_1 \dots s_n)~s$ and the pattern $p_i$ has the type $s_i$,
+    for any $i = 1..n$.
+\end{itemize}
+Even non-linear, and/or AC-patterns are treated.
+
+There exists an example instead of some proposition:
+
+\begin{verbatim}
+module quick
+import global int list[int]; end
+sort pair; end
+operators global
+  sort(@)               : (list[int]) list[int];
+  pivot(@,@,@,@)        : (int list[int] list[int] list[int]) pair;
+  [@,@]                 : (list[int] list[int]) pair;
+end
+
+rules for list[int]
+x       : int;
+xs,s,l  : list[int];
+global
+  []  sort(nil) => nil                                  
+  end
+  []  sort(x.xs) => append(sort(s),x.sort(l))           
+                where (pair)[s,l]:=()pivot(x,xs,nil,nil)
+  end
+end
+rules for pair
+p, x    : int;
+xs,s,l  : list[int];
+global
+  []  pivot(p,nil,s,l) => [s,l]                 
+  end
+  []  pivot(p,x.xs,s,l) => switch
+                             case p < x then pivot(p,xs,s,x.l)
+                             otherwise pivot(p,xs,x.s,l)
+                           end
+  end
+end
+end
+\end{verbatim}}
+
+%----------------------------------------------------------------
+\subsection{meta\_apply and its family}
+
+\marginpar{See the library modules Meta\_apply and Meta\_strat}
+
+    The built-in symbol \verb|meta_apply(@,@)| with the profile
+    $(Strategy~X)~ X$ applies
+    an ELAN strategy on a term of the sort $X$.
+    It returns a result of the same sort.
+    Roughly saying, the ELAN construction
+    \verb@where y:=(META)meta_apply(S,t)@
+    has the same effect as
+    \verb@where y:=(s)t@.
+    The difference between two of them comes from the relation between
+    two objects (strategies) 
+    $s$ and $S$. While $s$ is an ELAN built-in strategy
+    (a language construction), $S$ is a term-representing an ELAN
+    built-in strategy.
+    This means that $s$ is a language object parsed by the
+    ELAN system and transformed into its internal form
+    (which may be
+    an internal data structure, or a compiled c++ code).
+    However, $S$ represents an ELAN term constructed
+    in the run-time, and it adopts the representation of terms.
+    The operational semantics of
+    \verb|meta_apply(S,t)| embody the interface between these two levels.
+    More precisely, \verb|meta_apply(S,t)| transforms the run-time
+    representation of the strategy $S$ into its internal form $s$,
+    then, it applies the obtained strategy $s$ on the term $t$. The results of
+    this applications are results of the \verb@meta_apply(S,t)@.
+
+    There exists also a sightly modified construction
+    \verb|meta_apply(@,@,@) : (Strategy X int) X|
+    meaning that 
+    \verb|where y:=(META)meta_apply(s,t,n)| gives $n$-th solution
+    of the application of $(s)t$ (if it exists).
+
+    Values of the sort $Strategy$ are constructed by several constructors
+    defined in the module \verb@Meta_strat@,
+    which mimics the syntax of ELAN built-in strategies.
+    We show some of them:
+    {\small
+    \begin{verbatim}
+    sort Labels Strategies Strateg Strategy;
+    operators global
+     @        : (Strateg) Strategy;
+     @ @      : (Strateg Strategy) Strategy; // list of sub-strategies
+
+     id       : Strateg;                     // several primitive
+     fail     : Strateg;                     // strategies
+
+     dk(@)    : (Labels) Strateg;            // non-deterministic strategies
+     dk(@)    : (Strategies) Strateg;           
+     dc(@)    : (Labels) Strateg;            // non-deterministic strategies
+     dc(@)    : (Strategies) Strateg;         
+
+     repeat*( @ ) : (Strategy) Strateg;      // iterators
+
+     @        : (Label) Strateg;             // call a sub-strategy
+     \end{verbatim} }
+     The signature describing term of the sort $Strategy$ is chosen
+     as close as possible to the syntax of the ELAN built-in strategies.
+     There are two main reasons for it:
+         to do not introduce another strategy formalism, and,
+         to make the transformation of $S:Strategy$ into $s$ as simple as possible
+     However, there is no principal
+     obstacle to enrich (or, modified) the structure of the sort $Strategy$
+     except the fact, that the transformation of a sort $Strategy$ into its
+     internal form should be also adapted to this extension.
+
+     In the compiled version of ELAN,
+     the transformation $S$ into its internal form $s$ means 
+     a compilation of $S$.
+     Effectively, to be able to support the full semantics of 
+     \verb@meta_apply@ in the compiled version, we would have to
+     recompile a strategies $S$ in the run-time. This explicitely
+     implies the presence of the ELAN compiler in the run-time code
+     of an ELAN program, which is not (up to now) our intended solution.
+     That is why, there is a restriction of
+     \verb@meta_apply@
+     for the compiled version of ELAN, 
+     which means, 
+     that the strategy $S$ should 
+     be a name of already defined (i.e. in compile time) strategy.
+    
+     The symbol \verb|meta_apply(@,@)| is an ELAN symbol (or, a constructor),
+     which is evaluated due to an ELAN built-in strategy $META$.
+     In the system ELAN, 
+     each reduction (normalisation) 
+     of a term into its normal form is deterministic,
+     and the only source of the non-determinism comes from
+     strategies.
+     Thus, following this concept of ELAN,
+     the built-in symbol
+     \verb|meta_apply(@,@)| cannot be defined as a built-in functional
+     symbol
+     (and, applied as \verb@where y:=()meta_apply(S,t)@),
+     because it would return only one solution (its normal form).
+     As we have explained above, according the strategy $S$
+     (if it is non-deterministic), there may exist more than one solution
+     of \verb|(s)t|. Thus, the application of \verb|meta_apply| has
+     a form of a reduction the strategy $META$ over the term
+     \verb|meta_apply(S,t)|.
+
+An example of using \verb|meta_apply| is a definition of the symbol
+\verb|set_of(s,t,n,m)| returning
+a set of $m$ solutions of the application $(s)t$ from $n-$th solution:
+%
+{\small
+\begin{verbatim}
+  set_of(@,@,@,@) : (Strategy X int int) list[X]; 
+
+  []    set_of(S,t,n,0) => nil                    
+  []    set_of(S,t,n,m) => res.set_of(S,t,n+1,m-1)
+               where res:=(META)meta_apply(S,t,n) 
+  []    set_of(S,t,n,m) => nil                    
+\end{verbatim}}
+%
+The first rule terminates the recursion when all $m$ solutions
+have been already found.
+The second rule asks and collects 
+next solutions of $(S)t$. If they do not exist, the third
+rule terminates the recursion either.
+
+Semantically, the definition of the symbol \verb|set_of|
+by this system of three rules is clear.
+From the point of view the complexity,
+the implementation of \verb|set_of| is not ideal, because it is
+quadratic on the size of $m$. The problem comes from the fact,
+that to be able to find out $m$-th solution of the application
+$(s)t$, we have to compute-and-skip the first $m-1$ solutions.
+Thus, this solution can be viewed as a nice specification of
+an eventual c++ implementation, which is not available yet.
+The principal problem of the
+re-implementation of \verb|set_of|
+in C++ is that we need to build-in the sorts list[X].
+
+A nice example of using the symbol \verb|set_of| is 
+the definition of \verb|setof| for defined strategies.
+The signature is $(\Strat{X \mapsto Y}~X)~list[Y]$ and 
+its definition:
+{\small
+\begin{verbatim}
+  []    setof(s,t,n,m) =>  set_of(eval,[s]t,n,m) 
+\end{verbatim}}
+The key idea of this definition is that whenever
+we need to evaluate an application
+of a defined
+strategy $s:\Strat{X \mapsto Y}$ on a term $t$,
+we construct an application term $[s]t$,
+over which the principal ELAN strategy $eval$ of the
+meta-interpreter of defined strategies is executed.
+
+%----------------------------------------------------------------
+\subsection{Modifications of built-in strategies}
+
+\begin{itemize}
+  \item strategies {\bf id}, and {\bf fail},
+  \item strategy {\bf repeat+},
+  \item strategy {\bf normalise},
+\end{itemize}
+
+There are small examples showing the force of the new 
+strategy primitive  $normalise$:
+
+\begin{itemize}
+\item {\bf lambda terms normalised by $\beta\eta$ rules}
+{\scriptsize\begin{verbatim}
+module m
+import  global  int;
+        local   bool eq[lterm];
+end
+sort lterm;
+end
+operators global
+        @               : (int) lterm;
+        (@ @)           : (lterm lterm) lterm;
+        la @            : (lterm) lterm;
+end
+rules for lterm
+ v, w   : int;
+ M, N, Q        : lterm;
+local
+  [beta](la M N) => repl(1,M,N)                         end
+  [eta] (la M 1) => M if not free(1,M)                  end
+end
+strategies for lterm
+global 
+  [ss]  normalise(dc(beta||eta))
+  end
+end
+\end{verbatim}}
+\item {\bf derivation of polynoms}
+{\scriptsize\begin{verbatim}
+module poly4[Vars]
+
+import global int Vars eq[variable] identifier list[identifier];
+end
+sort variable poly;
+end
+operators global
+  FOR EACH Id:identifier SUCH THAT Id:=(listExtract) elem(Vars) :
+ { Id : variable; } 
+
+  @             : ( variable ) poly;
+  @             : ( int ) poly;
+  @ + @         : ( poly poly ) poly  assocRight pri 1 (AC);
+  (@ + @)       : ( poly poly ) poly  alias @ + @:;
+  @ * @         : ( poly  poly) poly  assocRight pri 2 (AC);
+  (@ * @)       : ( poly  poly) poly  alias @ * @:;
+  deriv(@,@)    : ( poly variable) poly;
+
+  pp(@)         : (poly) poly;
+end
+
+rules for poly
+  P                     : poly;
+  p1, p2, p3, p4        : poly;
+  x, y                  : variable;
+  n, n1, n2, n3         : int;
+local
+
+  []  P+0               => P                            end
+  []  P*0               => 0                            end
+  []  P*1               => P                            end
+  []  n1*n2             => n where n:=() n1*n2          end
+
+  [factorize]  P + p1+p1         => P + 2*p1            end
+
+  [factorize]  P + n1*p1 + n2*p1 => P + n3*p1
+                where n3:=()n1+n2                       end
+
+  [factorize]  P + (p1*p2) + (p1*p3) => P + p1*(p2+p3)  end
+
+  [expand]  P + (p1+p2)*(p3+p4) => P + p2*p4 + p2*p3
+                                     + p1*p4 + p1*p3    end
+
+  [expand]  P + (p1+p2)*p3 => P + p2*p3 + p1*p3         end
+
+  []  deriv(x,x)        => 1                            end
+  []  deriv(y,x)        => 0    if $x != $y             end
+  []  deriv(n,x)        => 0                            end
+  []  deriv(p1+p2,x)    => p3
+                where p3:=(simplify) deriv(p1,x)+deriv(p2,x)
+  end
+  []  deriv(p1*p2,x)    => p1*deriv(p2,x) + deriv(p1,x)*p2
+  end
+end
+
+strategies for poly
+global
+  [simplify]
+    normalise( dc(expand) ) ; normalise( dc(factorize) )
+  end
+end
+\end{verbatim}}
+\end{itemize}
+%----------------------------------------------------------------
+\subsection{Dynamic typing}
+
+The following proposition has no been updated for the version elan.test4.
+
+{\scriptsize
+In this section, we explore an idea based on a simple sort
+construction called {\em dynamics} \cite{DYNA-ML}, or
+{\em dynamic typing} \cite{DYNATYPING,DYNAMIC}, which allows
+elegantly work with sorted terms in a non-sorted manner. 
+It allows also to  define functions that essentially require
+run-time type-checking in statically typed language.
+
+A weakness of static typing can be eliminated by the
+construction of {\em objects with dynamic types}
+(or dynamics, for short) \cite{MODULA3}, or by the introduction 
+of an {\em advanced polymorphic system} \cite{MilnerTofteHarper91}.
+Both methods were combined in \cite{3LOGY}, where the concept
+of dynamics is generalised into {\em dependent data types}.
+Another approach combining dynamics and the parametric polymorphism
+is studied in \cite{DYNA-ML} from the point of the {\em type-inference}.
+
+The definition $type~Any = t:Type,~ x:t$ introduces a
+sort $Any$ (known also as $dyn$, \cite{DYNA-ML,DYNATYPING}), 
+which is the simplest example of a dependent data type.
+The first part of the pair $Any$ indicates the sort of the
+second part. 
+This means that the type indicator $t$ ranges over a domain
+of all types, and the type of $x$ depends on value of $t$.
+There are different approaches with respect to the construction
+of the set of all types.
+The situation becomes simpler moving the idea of dynamics 
+into a framework of the first-order logic, 
+where a set of all sorts $\SS$ is finite.
+
+The sort $Any$ could be defined in the parametric module $any[X]$:
+%
+{\small
+\begin{verbatim}
+module any[X]
+sort Any;
+op global
+  (X)@   : (X) Any;
+endop
+end of module
+\end{verbatim}}\noindent
+%
+where the argument $X$ of this module is supposed to be a name of a sort
+(like $int$, or $list[int]$). This module defines also one
+{\em embedding} coercion wrapping up terms of the sort $X$ into terms of
+the sort $Any$, in a such way, that if $t:X$, then $(X)t:Any$.
+A projection $(X^{-1})@  ~:~ (Any) \mapsto X$ 
+from the sort $Any$ into $X$ can be also defined  with the following 
+semantics:
+$(X^{-1})(X)t \rewrite t$.
+ 
+In this section, we show that the construction of dynamics gives 
+a possibility:
+\begin{itemize}
+ \item
+   to combine advantages of statically-typed non-polymorphic 
+   many-sorted languages, like ELAN,
+   with flexibilities of untyped (or mono-typed) systems, like LISP,
+ \item
+   to define functions in a 'ad-hoc' polymorphic style,
+ \item
+   to introduce a set of term-handling constructors and and de-constructors,
+ \item
+   to write polymorphic term-traversal strategies.
+\end{itemize}
+
+\subsubsection{'ad-hoc' polymorphic functions}
+
+A simple example of 'ad-hoc' polymorphic function is a function $export$
+converting (or, exporting) terms into a stream of lexems, i.e. list of lexems.
+The 'ad-hoc' polymorphism of $export$ means that it works
+for terms of different types, and terms of different type are treated
+in different ways.
+
+Supposing, that there are only two types of lexems: 
+integers and strings,
+they can be represented as $Any$-terms, e.g.
+$(int)n$ and $(string)s$, where $n:int$ and $s:string$. 
+The profile of the function $export$ could be $(Any) \mapsto list[Any]$.
+There are two elementary cases:
+\[\begin{array}{ll}
+  export((int)n)     & \rewrite (int)n ~.~ nil \\
+  export((string)n)  & \rewrite (string)n ~.~ nil \\
+\end{array}\]
+and other sorts are treated by another set of rules.
+For instance, the following rules for the sort $list[X]$ 
+can be used:
+\[\begin{array}{ll}
+  export((list[X])nil)     & \rewrite (string)"nil" ~.~nil \\
+  export((list[X])a.as)    & \rewrite 
+       export((X)a) + (string)"." ~.~ export((list[X])as)
+\end{array}\]
+where the symbol $+$ stands for the $append$ over $list[Any]$.
+For terms of an arbitrary type $s$, there are rules for
+each constructor $f : (s_1~ \dots~ s_n) \mapsto s$ 
+of the type $s$, where $t_i$ are variables of the sorts $s_i$:
+\[\begin{array}{ll}
+  export((s)f(t_1,\dots,t_n)) \rewrite & (string)"f(" ~.~ \\
+  & export((s_1)t_1) + (string)"," ~.~ \\
+  & \dots  \quad \dots \quad  \dots \quad \dots \\
+  & export((s_n)t_n) ~.~ (string)")" ~.~ nil
+\end{array}\]
+These rules can be generated by the pre-processor of ELAN.
+
+A definition of the inverse (or, parsing) function 
+$import : (list[Any]) \mapsto Any$ is from the algorithmic
+point-of-view more complicated due to a parsing algorithm.
+
+\subsubsection{explode, implode, functor}
+
+As we could see on the last example, the sort $Any$ allows to
+define 'ad-hoc' polymorphic functions handling with terms of
+an arbitrary sort. There is a small obstacle that for 
+each such function and each term
+constructor we should define (in general) one rule defining the
+behaviour of the function over that term. The solution mentioned
+above says that these rules can be generated by pre-processor of ELAN.
+The following solution seems to be conceptually simpler.
+
+Basic operations with $Any$ terms are a composition and a decomposition,
+which are defined by two function symbols $explode$ and $implode$. 
+The symbol $explode$
+destructs an $Any$-term into a list of its arguments (or sub-terms), 
+which are also wrapped into the $Any$-envelope. 
+To be able to construct back the initial term, we introduce
+a symbol $implode$, which from a list of arguments 
+(or, sub-terms $t_i$) in the $Any$-form,
+and from a function symbol name $f$ constructs the term $f(t_1, \ldots, t_n)$
+(also wrapped into the $Any$-form).
+If $f$ is the top most function symbol of a term $t$ (i.e. $f = functor(t)$), 
+then $t = implode(f,explode(t))$ holds.
+As a consequence of this, we have to deal with function symbol names as terms (or values).
+Therefore, we introduce a new sort $Functor$, which collects all names of function symbols in such way that if
+$ f(@,\ldots,@) : (s_1 \ldots s_n) \mapsto s \in \Sigma$, 
+then the following symbol is introduced:
+$ f(s_1 \ldots s_n)  :  Functor$.
+
+The following module $Any$ introduces signatures of the symbols $explode$ and
+$implode$, the sort $Functor$, and a function symbol $functor$ which extracts
+a function symbol name from an $Any$ term.
+%
+{\small
+\begin{verbatim}
+module Any
+import global list[Any];
+sort Any Functor;
+op global
+  functor(@)    : (Any) Functor;
+  explode(@)    : (Any) list[Any];
+  implode(@,@)  : (Functor list[Any]) Any;
+endop
+end of module
+\end{verbatim}}\noindent
+%
+Let us illustrate these ideas on the following example: \\
+%
+By importing $any[int]$ and $any[tree[int]]$, where $tree[X]$ is defined 
+as follows:
+%
+{\small
+\begin{verbatim}
+op global 
+  empty         : tree[X];
+  leaf(@)       : (X) tree[X];
+  node(@,@,@)   : (tree[X] X tree[X]) tree[X];
+endop
+\end{verbatim}}\noindent
+%
+we can destruct an $Any$ term 
+\[
+(tree[int])node(leaf(3),4,node(leaf(5),6,empty))  : Any
+\]
+by $explode$ into a list of $Any$ terms, i.e.
+\[\begin{tabular}{l}
+        explode((tree[int])node(leaf(3),4,node(leaf(5),6,empty)) \\
+        \qquad \rewrite
+        (tree[int])leaf(3)  . 
+        (int)4  . 
+        (tree[int])node(leaf(5),6,empty)  . 
+        nil
+\end{tabular}\]
+To get back, we use the symbol $implode$ applied on this list with a function
+symbol name $node(tree[int],int,tree[int])  :  Functor$, and we obtain:
+\[\begin{tabular}{l}
+        implode(
+        node(tree[int],int,tree[int]), \\
+        \qquad (tree[int])leaf(3)  .
+        (int)4  .
+        (tree[int])node(leaf(5),6,empty)  .  nil) \\
+        \qquad \rewrite 
+        (tree[int])node(leaf(3),4,node(leaf(5),6,empty))
+\end{tabular}\]
+%
+% HELENE: devepopper 
+This feature allows us to include typed terms using type flags 
+(or type decorations) into mono-sorted $Any$-terms. We can also
+make projections of $Any$-terms into a particular sort $X$, which
+is a run-time test of a type flag (it can fail).
+We can define various symbols and strategies over this sort $Any$,
+which can be viewed (from the point of view of many-sorted systems)
+as polymorphic symbols or strategies. \\
+% HELENE: devepopper  end
+%
+From the implementation point of view, the semantics of 
+$explode$, $implode$ and $functor$ are defined by three sets
+of rewrite rules. 
+The only trick is that these rewrite rules 
+are generated and imported automatically,
+whenever the user declares 
+(by the importation of the module $any$)
+the usage of this feature.
+This is the only point making from this construction a built-in 
+feature.
+
+From the users point of view, the user should 
+only declare importing of modules $any[X]$ (for various sorts $X$) and
+the system automatically generates (and imports) semantical rules
+defining the symbols $explode$, $implode$ and $functor$ and
+it also defines appropriate function symbol names. 
+The importations of the module $any$ can be viewed in terms of the
+previous section as strategy declarations.
+% HELENE: what are strategy declarations
+
+One triple of rewrite rules produced for the symbol $node(@,@,@)$ is
+an example of symbols and rules automatically generated:
+%
+\[\begin{tabular}{l}
+  explode((Any)node(x,y,z)) \rewrite 
+        (tree[int])x  .  (int)y  .  (tree[int])z  .  nil \\
+  implode(node(tree[int],int,tree[int]),~
+        (tree[int])x  .  (int)y  .  (tree[int])z  .  nil) \\
+        \qquad \rewrite
+        ((Any)node(x,y,z)) \\
+  functor((Any)node(x,y,z)) \rewrite 
+        node(tree[int],int,tree[int])
+\end{tabular}\]
+%
+where $x, z : tree[int]$ and $y : int$ are variables. These rules
+can be correctly parsed if the following function symbol name is declared:
+\[
+node(tree[int],int,tree[int]) : Functor
+\]
+Similar rewrite rules and symbol definitions are also automatically produced
+for other constructor of the sort $tree[int]$, and in general, 
+they are produced for any 
+function symbol $f : (s_1 \ldots s_n) \mapsto s \in \Sigma$, 
+if the user has already 
+imported modules $any[s_i]$ and $any[s]$, for any $i=1..n$.
+
+\bigskip
+
+Using these general $Any$-term constructors and destructor 
+we can easily define
+function accessing $n$-th argument of an arbitrary term $a$ ($n-th~arg(a)$),
+or function replacing $n$-th argument of $a$ by $b$ ($a[n-th b]$):
+\[\begin{array}{ll}
+    @-th~arg(@)      & : (int~Any) \mapsto Any   \\
+    @[@-th~@]   & : (Any~int~Any) \mapsto Any
+\end{array}\]
+where for the definition of their semantics we use library list-indexing 
+functions:
+\[\begin{array}{ll}
+    n-th~arg(a)      & \rewrite n-th~elem(explode(a)) \\
+    a[n-th~b]        & \rewrite implode(functor(a),
+                          replace~ n-th~elem(explode(a))~by~b)
+\end{array}\]
+
+\noindent
+Similarly, we can re-define ELAN's built-in library functions
+$occur~a~in~b$, or $replace~a~in~b~by~c$.
+
+\subsubsection{Polymorphic strategies}
+
+Up to now (in this section), we have illustrated the idea, which allows to
+write `polymorphic' rewrite systems. Now, we concentrate ourself to the definition
+of `polymorphic' strategies, i.e. strategies working over an arbitrary user defined sort. 
+There is a strong motivation for this kind of extension, otherwise
+we are not able to define strategies (like `left-most inner-most')
+which work over any sort. What we are able to do, 
+is to define those general strategies
+for any particular sort, for example $tree[int]$. This means that
+in a such definition, it is explicitly expressed that it runs
+over a particular sort,  because it contains their particular term 
+constructors and destructor.
+However, our intention is to define a polymorphic version of 
+the `left-most inner-most' strategy, which runs over any sort, i.e. over
+$tree[int]$ and over lambda terms as well.
+
+The following module defines a strategy $lis(s) : (\Strat{X}) \mapsto \Strat{Any}$
+(an abbreviation for `left-most inner-most'), which applies
+an argument strategy $s : \Strat{X}$ on the
+left-most inner-most redex of the sort $X$.
+%
+{\small
+\begin{verbatim}
+module lis[X]
+import global Any list[Any] strat[X] strat[Any] strat[list[Any]];
+op global
+  lis(@)  : (<X>) <Any>;
+ local
+  map(@)  : (<X>) <list[Any]>;
+  mis(@)  : (<X>) <Any>;
+endop
+strategy for <Any>
+declare s   : <X>;     a   : Any;    as  : list[Any];
+body
+  []  lis(s)    ==> case(mis(s),(X)s)                   end
+  []  [mis(s)]a =>  implode(functor(a),as) 
+                        where as:=[map(s)]explode(a)    end
+end of strategy
+strategy for <list[Any]>
+declare s  : <X>;
+body
+  []  map(s) ==> case(cons(lis(s),id), cons(id,map(s))) end 
+end of strategy
+end of module
+\end{verbatim}}\noindent
+%
+This definition introduces two auxiliary strategies,
+$map$ and $mis$. 
+The definition of the strategy $mis$ is temporary 
+(cf. section \ref{let}),
+and the definition of $lis(s)$ will be later simplified
+by introducing a new strategy constructor $let-in$.
+The strategy $mis(s)$ assigns to the variable $as$
+a  list of sub-terms of $a$ over which the $map(s)$ strategy is
+applied. Eventually, we obtain a result of this application and
+the final result (an $Any$ term) is constructed by $implode(functor(a),as)$.
+Otherwise, the second sub-strategy in the $case$ expression, i.e.
+the strategy $(X)s  :  \Strat{Any}$, is applied.
+This strategy expression is little bit tricky, however for its explanation 
+it is sufficient
+to recall that $(X)@  :  (X) \mapsto Any$ is a function symbol defined in the
+module $any[X]$. That is why, there is also an elementary strategy symbol
+$(X)@:(\Strat{X}) \mapsto \Strat{Any}$, 
+which allows us to combine the strategy 
+$s:\Strat{X}$
+into 
+the strategy
+$(X)s  :  \Strat{Any}$. The operational meaning of this strategy expression is:
+when it is applied on an $Any$ term, it destructs the $Any$ term into a term of the 
+sort $X$ (which is, in fact, a test of the type flag)
+and then, it applies the strategy $s$ on the obtained
+term. Finally, it constructs back a result term
+from a result of the strategy application 
+(which has a sort $X$) by its wrapping by $(X)@$ to the form of an $Any$ term. 
+The resume is that this notation might be seen little bit
+difficile for the first reading, however, there is noting hacked behind it. 
+
+The second auxiliary strategy $map(s)  :  \Strat{list[Any]}$ tries to
+apply the strategy $lis(s)$ to the left-most element of the input list.
+Actually, it applies $lis(s)$ on the head, and if it fails,
+$map(s)$ continues on the tail of this list. If the input list does not contain
+any element, on which the strategy $lis(s)$ is applicable, $map(s)$
+fails also. This causes the invocation of the strategy $(X)s$ (as it was described
+in the previous paragraph).
+
+If we swap two strategy expressions in the $case$ of $lis(s)$
+%
+{\small
+\begin{verbatim}
+  []  lis(s) ==> case(s,mis(s))                         end
+\end{verbatim}}\noindent
+%
+we obtain an analogical `left-most outer-most' polymorphic strategy
+(which, for better understanding, should be renamed to $los(s)$).
+
+Now, we have the first definitions of $lis$ and $los$ strategies.
+% If we import the module $lis[int]$ and having any strategy $s$
+% of the type $\Strat{int}$, we can apply $lis(s)$ on the $tree[int]$.
+In this paragraph, we would like to stress the fact, that
+the argument $s$ of $lis(s)$ in its definition should by
+``typed-strategy'', i.e. a strategy of the type $\Strat{X}$ for certain
+sort $X$. We also want to show another definitions of the strategies
+$lis$ and $los$, which work with argument strategies $s$ of the sort 
+$\Strat{Any}$.
+As an example of a such strategy, let us look at the following 
+{\em artificial} strategy $swap : \Strat{Any}$:
+%
+{\small
+\begin{verbatim}
+strategies for <Any>
+declare x,z     : tree[int];         y       : int;
+bodies
+  []    [swap] (int)y => (int)y+1                                end
+  []    [swap] (tree[int])node(x,y,z) => (tree[int])node(z,y,x)  end
+end of strategies
+\end{verbatim}} \noindent
+%
+This strategy is applicable to any $Any$ term, and in the case of
+$int$-term, i.e. $(int)n$, where $n:int$, 
+it increments its value ($n$) by $1$.
+In the case of a $tree[int]$ term, 
+it swaps left and right subtrees of $node$, if there are any subtrees.
+Otherwise, it fails.
+This could be
+a meaningless example of an 'ad-hoc' polymorphic strategy, which can be
+passed as an argument to the following definition of $lis$. 
+The redefinition of $lis$ and $los$ is in the following 
+non-parametric module $lis1$:
+%
+{\small
+\begin{verbatim}
+module lis1
+import global Any list[Any] strat[Any] strat[list[Any]];
+op global
+       lis(@)   : (<Any>) <Any>;
+       los(@)   : (<Any>) <Any>;
+    local
+        map(@)  : (<Any>) <list[Any]>;
+        mis(@)  : (<Any>) <Any>;
+endop
+strategy for <Any>
+declare s   : <Any>;
+        a   : Any;         as  : list[Any];
+body
+  []  lis(s) ==> case(mis(lis(s)),s)                    end
+  []  los(s) ==> case(s,mis(los(s)))                    end
+  []  [mis(s)]a => implode(functor(a),as) 
+                           where as:=[map(s)]explode(a) end
+end of strategy
+strategy for <list[Any]>
+declare s : <Any>;
+body
+  []  map(s) ==> case(cons(s,id), cons(id,map(s)))      end
+end of strategy
+end of module
+\end{verbatim}}\noindent
+%
+Now, we can call a new strategy $lis(s)$ parameterised by a strategy 
+$s:\Strat{Any}$.
+If the strategy $s$ has a type $\Strat{Y}$, we can call
+the new version of $lis$ with a strategy $(Y)s$, i.e. $lis((Y)s)$,
+because, as we have shown, $(Y)s : \Strat{Any}$.
+This small example shows a way how to convert a $\Strat{Y}$ strategy into 
+a $\Strat{Any}$ strategy.
+Later (cf. section \ref{inline}), 
+we show a conversion of an $\Strat{Any}$ strategy into a $\Strat{X}$ strategy.
+}
+
+%----------------------------------------------------------------
+\subsection{HO-extension}
+
+The following proposition has no been updated for the version elan.test4.
+
+{\scriptsize
+In this section, we illustrate another simple extension of ELAN,
+which opens ELAN's doors to typical second-order applications
+known from the functional programming world.
+We propose a way how one can elegantly define and use the
+second-order functions,
+like {\em uniform traversal combinators} \cite{COMBIN-CADE-11},
+or
+{\em catamorphisms},
+{\em anamorphisms},
+{\em hylomorphisms} and
+{\em paramorphisms} \footnote{
+in functional programming community familiarly called
+bananas, lenses, envelopes and barbed wires} \cite{Bananas}.
+
+The stress in this section is not put on the fact that we use
+the first-order rewriting logic to mimic a manipulation with
+functional objects, but on the fact, that a lot of things we can
+do elegantly. There is no doubt that rewriting logic is powerful
+enough to simulate $\beta\eta$-normalisation of $\lambda$-terms,
+however, this is not our goal.
+All functions defined in this section are weakly motivated
+examples of the second-order functions well-known from
+the functional programming folklore. We do not advocate, that
+they represent functions, which the ELAN's programmer needs
+every day. \\
+To simplify our presentation,
+all examples (of combinators and morphisms) in this section,
+we illustrate on a recursive type $list[X]$.
+Extensions for general types are out of the scope of this section.
+
+The paper \cite{COMBIN-CADE-11} introduces a notion of the
+{\em uniform traversal combinator} representing a pattern of
+the recursion.  Due to a crucial result,
+that any function has a unique representation as a
+traversal combinator, this paper shows that these combinators
+can substantially help the theorem proving process by
+eliminating the need for induction.
+
+A {\em list traversal combinator} is a function:
+\[
+tclist : (Y,~ (X,list[X],Y) \mapsto  Y,~ list[X]) \mapsto  Y
+\]
+defined as follows:
+\[\begin{array}{ll}
+ tclist ( fnil, fcons )( nil )  &= fnil \\
+ tclist ( fnil, fcons )( a.as ) &= fcons(a,as,tclist(fnil,fcons)(as) \\
+\end{array}\]
+Having a function $rev : (X, list[X], list[X]) \mapsto  list[X]$ defined as
+$rev(a,as,l) \rewrite append(l,a.nil)$,
+we can reverse a list using this list traversal combinator:
+\[
+    reverse(x) = tclist(nil, rev)(x)
+\]
+Definitions of different $list$ traversal functions, 
+like $length$, $append$, etc., 
+using the list traversal combinator $tclist$ is a 
+typical functional exercise.
+The proclaimed goal of this section is to show their analogical
+definitions in ELAN --- in the first-order framework.
+The problem is the second (functional) argument of $tclist$,
+and
+there is no strighforward way to re-define $tclist$
+using the first-order framework of rewriting logic.
+
+We introduce a new sort $\Symb{(X,list[X],Y) \mapsto Y}$ which is 
+a sort of all function symbols (from $\Sigma$) of the profile
+$(X, list[X], Y) \mapsto  Y$.
+In our example, there exists at least one,
+$rev : \Symb{(X,list[X],Y) \mapsto Y}$.
+We introduce also one operation of application of a function symbol 
+$p \in \Symb{(X,list[X],Y) \mapsto Y}$ to a triple of its arguments:
+\[
+~@~ \lban ~@,~@,~@~ \rban ~:~ 
+    (\Symb{(X,list[X],Y) \mapsto Y},X,list[X],Y)\mapsto Y
+\]
+and this operation $@\lban @,@,@ \rban$ has the following interpretation:
+\[
+p \lban x, xs, y \rban \rewrite p(x,xs,y)
+\]
+This construction allows us to re-define the function 
+$tclist$ as follows:
+\[\begin{array}{ll}
+  tclist(fnil,fcons)(nil)  &\rewrite fnil \\
+  tclist(fnil,fcons)(a.as) &\rewrite 
+  fcons \lban a,as,tclist(fnil,fcons)(as) \rban
+\end{array}\]
+and define it $reverse(x) = tclist(nil,rev)(x)$, where
+$fnil,as : list[X]$, $a:X$ and $fcons : \Symb{(X,list[X],Y) \mapsto Y}$
+are first-order variables, while
+$rev: \Symb{(X,list[X],Y) \mapsto Y}$ is a constant representing
+an index of the function $rev: (X,list[X],Y) \mapsto Y$.
+
+The function $tclist$ is an example of a
+{\em paramorphism}%\footnote{barbed wire}
+studied in \cite{Meert}.
+All mentioned examples ($length$, $append$ and $reverse$) are,
+however,
+examples of {\em catamorphisms}%\footnote{bananas}
+, because
+the function $fcons$ does not depend on its second argument.
+Thus, the definition of the list-catamorphisms can be simplified 
+to the form:
+$catalist : (Y, \Symb{(X,Y) \mapsto Y}, list[X]) \mapsto  Y$,
+programmed as:
+\[\begin{array}{ll}
+  catalist(fnil,fcons)(nil)  &\rewrite fnil \\
+  catalist(fnil,fcons)(a.as) &\rewrite 
+  fcons \lban a,catalist(fnil,fcons)(as) \rban
+\end{array}\]
+The catamorphism $catalist$ is known in functional programming
+as $foldr$.
+
+One example of {\em paramorphism} not definable by $catalist$
+could be a function computing all tail segments of a list,
+i.e. $tails : (list[X]) \mapsto list[list[X]]$, which is an
+instantiation of $tclist$, where $Y = list[list[X]]$ and
+\[
+   tails(x) = tclist(nil.nil,cons\_cons)
+\]
+where $cons\_cons : (X, list[X], list[list[X]]) \mapsto list[list[X]]$
+is defined as follows:
+\[\begin{array}{ll}
+  cons\_cons(a,as,ass) = a.as.ass
+\end{array}\]
+
+The last example of a morphism known in the functional programming crowd
+as {\em anamorphism}%\footnote{lenses} 
+is illustrated on
+the function $unfold$:
+\[
+  unfold : ( Y \mapsto bool, Y \mapsto Pair[X,Y], Y) \mapsto list[X]
+\]
+\[\begin{array}{lll}
+  unfold(p, g)(b) & = nil                & \IF p(b) \cr
+  unfold(p, g)(b) & = a . unfold(p,g)(c) & \WHERE [a,c]:=g(b) 
+\end{array}\]
+The function $unfold$ is parameterised by two functional objects.
+The first one is a 'predicate' terminating the iteration, which is a 
+function symbol from a sort $\Symb{Y \mapsto bool}$.
+The second argument develops one element of a constructed list and 
+a continuation value $c$. Thus, we instantiate the second argument
+by a function symbol from $\Symb{Y \mapsto Pair[X,Y]}$.
+Then, the ELAN's definition is strighforward
+\[
+ unfold : ( \Symb{Y \mapsto bool}, \Symb{Y \mapsto Pair[X,Y]} , Y) \mapsto list[X]
+\]
+\[\begin{array}{lll}
+  unfold(p, g)(b) & \rewrite Nil                & \IF p \lban b \rban \\
+  unfold(p, g)(b) & \rewrite a . unfold(p,g)(c) & \WHERE [a,c]:=g \lban b \rban 
+\end{array}\]
+%
+If, for example, we instantiate the anamorphism $unfold$ as follows:
+\begin{itemize}
+ \item 
+   $Y = Pair[list[A],list[B]]$, and $X = Pair[A,B]$, where $A,B \in \SS$,
+ \item
+   $ p : ( Pair[list[A],list[B]] ) \mapsto bool$, s.t. \\
+   $ p([as,bs]) = (as == nil) \OR (bs == nil) $,
+ \item
+   $ g : ( Pair[list[A],list[B]] ) \mapsto Pair[Pair[A,B] ,Pair[list[A],list[B]] ] $, s.t.\\
+   $ g([a.as, b.bs]) = [~ [a,b],~ [as,bs]~ ] $
+\end{itemize}
+we obtain a function $zip(xs,ys) = unfold(p,g)([xs,ys])$
+zipping two lists into one, i.e.
+$zip([1.2.3.nil,a.b.nil]) = [1,a].[2,b].nil$.
+
+\bigskip
+
+\noindent
+We have shown a small palette of different second-order
+examples. Now, we generalise the constructions of a 
+{\em system of symbol sorts}. \\
+A symbol sort $\Symb{(s_1 \ldots s_n) \mapsto s}$ 
+is a sort of all function symbol names $f(s_1, \ldots, s_n)$ of
+function symbols $f : (s_1 ~ \ldots ~ s_n) \mapsto s$ from $\Sigma$.
+For example, a sort $\Symb{(int) \mapsto bool}$ 
+collects all symbol names of function symbols of
+the profile $(int) \mapsto bool$, i.e. names of all integer predicates. 
+For example, having a test of prime numbers $prime(@): (int) \mapsto bool$,
+the symbol $prime(int)$ has a type $\Symb{(int) \mapsto bool}$.
+We have slightly simplified examples in the first part of this section,
+because symbol names were represented by function symbols $f$,
+e.g. $primes$,
+however, the definition above introduces symbol names as 
+$f(s_1, \ldots, s_n)$, e.g. $primes(int)$. The reason for it is
+to remove ambiguities.
+
+The sort $\Symb{(s_1 \ldots s_n) \mapsto s}$ 
+(typed as \verb@Symbol[s_1,...,s_n,s]@) is defined in the following
+(sophisticatedly parameterised) library module $symbol$:
+%
+{\small
+\begin{verbatim}
+module symbol[n, s_1,...,s_n, s]
+sort   Symbol[s_1,...,s_n,s];
+op global
+  @ (@ {,@}_I=2...n) : (Symbol[s_1,...,s_n,s] {s_I}_I=1...N) s;
+endop
+end of module
+\end{verbatim}}\noindent
+The first side-effect caused by importing
+the module $symbol[n,s_1,\ldots,s_n,s]$ is that the system generates
+function symbol names for all symbols of the sort 
+$\Symb{(s_1 \ldots s_n) \mapsto s}$,
+i.e. of the profile $(s_1 ~ \ldots ~ s_n) \mapsto s$. 
+The first argument $n$ refers to the
+arity of these symbols and it must be explicitly mentioned.
+For any symbol sort $\Symb{(s_1 \ldots s_n) \mapsto s}$ defined by the 
+module $symbol$, the module $symbol$ defines 
+one $(n+1)$-ary application operation of the profile:
+\[
+~@~ \overbrace{ \lban ~@, \ldots, @~ \rban }^{n} ~:~ 
+    (\Symb{(s_1~\ldots~s_n) \mapsto s}~s_1~\ldots~s_n)\mapsto s
+\]
+The second side-effect caused by importing
+the module $symbol[n,s_1,\ldots,s_n,s]$ is that 
+for any function symbol name $p : \Symb{(s_1 \ldots s_n) \mapsto s}$ 
+of the symbol $f : (s_1 \ldots s_n) \mapsto s$
+there is automatically generated rewrite rule:
+\[
+p \lban x_1, \ldots, x_n \rban \rewrite f(x_1, \ldots, x_n) \quad       
+                        where~x_i:s_i
+\]
+which allows (dynamically) assemble terms from the name of its 
+function symbol
+$p:\Symb{(s_1~\ldots~s_n)\mapsto s}$ and their sub-terms $x_i:s_i$.
+
+Finally, we illustrate these ideas on two definitions of simple strategies.
+
+\noindent
+The following module $depth[X]$ defines a depth-first search 
+strategy $depth-first(p,s)$ iterating
+the strategy $s$ while a certain condition $p$ holds.
+%
+{\small
+\begin{verbatim}
+module depth[X]
+import global symbol[1,X,bool] strat[X];
+op global
+  depth-first(@,@) : (Symbol[X,bool] <X>) <X>;
+endop
+strategy for <X>
+declare p : Symbol[X,bool];           s : <X>;
+body
+  []  depth-first(p,s) ==>
+        if p(self) then
+          s; depth-first(p,s)
+        else
+          id
+        fi
+  end
+end of strategy
+end of module
+\end{verbatim}}\noindent
+%
+The first argument of $depth-first$ has a sort $\Symb{(X)\mapsto bool}$,
+which is a domain of all function symbol names of boolean predicates 
+for the sort $X$, i.e. all symbols with the profile $(X) \mapsto bool$.
+The condition $p \lban self \rban :bool$ in the 
+$if-then-else-fi$ strategy is assembled form 
+the function symbol name $p$ and the term
+$self:X$ using the application symbol and the rewrite rule
+described above.
+
+Another simple example of a strategy using this feature is the traditional  
+$filter(p,s)$ strategy, which selects from a list only elements
+satisfying a condition $p$, and afterwards, it applies a strategy $s$
+to all accepted elements.
+{\small
+\begin{verbatim}
+module filter[X]
+import global X list[X] symbol[1,X,bool] strat[X] strat[list[X]];
+op global
+  filter(@,@) : (Symbol[X,bool] <X>) <list[X]>;
+endop
+strategy for <list[X]>
+declare h, h1 : X;        t, t1 : list[X]; 
+        s : <X>;          p : Symbol[X,bool];
+body
+  []  [filter(p,s)]nil  => nil                            end
+  []  [filter(p,s)]h.t  => h1.t1 where t1:=[filter(p,s)]t
+                                 where h1:=[s]h
+                           if p(h)                        end
+  []  [filter(p,s)]h.t  => t1 where t1:=[filter(p,s)]t
+                           if not p(h)                    end
+end of strategy
+end of module
+\end{verbatim}}\noindent
+%
+where the last two rules can be simplified into:
+{\small
+\begin{verbatim}
+  []  [filter(p,s)]h.t  => switch
+                             case p(h) then h1.t1
+                               where h1:=[s]h
+                             otherwise t1
+                           end
+                           where t1:=[filter(p,s)]t
+\end{verbatim}}\noindent
+To summarise this section, it becomes clear that we are able to
+define several strategies corresponding to some higher-order
+functions known from the functional programming. 
+We have to stress, that each
+symbol sort $\Symb{(s_1 \ldots s_n) \mapsto s}$ contains only a finite
+set of symbol names (and we have no 'abstraction' construction), thus,
+our extension with symbol names has nothing to do with the higher-order
+rewriting\footnote{Moreover, it might be seen as an advantage}.
+The proposed extension allows us to work with functions
+(or function symbol names as their indexes) in the same way as it is
+used in procedural languages, like c++.
+}
+
+%----------------------------------------------------------------
+\subsection{Built-in data types (i.e. strings and reals)}
+
+\marginpar{See the library module string}
+There is nothing written neither about strings, nor about reals.
+There is a library specification of built-ins over strings:
+{\scriptsize \begin{verbatim}
+   strlen(@)    : (string) int             // the length of a string
+   strcat(@,@)  : (string string) string   // concatenation of strings
+   @+@          : (string string) string   // alias to the concatenation of strings
+   @[@]         : (string int) int         // s[i] :: selects i-th character of the string s
+   @[@<-@]      : (string int int) string  // s[i<-c] :: modifies i-th character of the string s by the character c
+   substr(@,@,@): (string int int) string  // substr(s,i,n) :: extracts a substring from the i-th position with n charters
+   strspn(@,@)  : (string string) int      // computes the length of the maximum initial segment, see the unix function strspn
+   strcmp(@,@)  : (string string) int      // compares two strings, see unix function strcmp
+   string(@)    : (int) string             // conversion from a integer (character) into a string
+\end{verbatim}}
+
+and, just a small non-trivial example:
+
+{\scriptsize \begin{verbatim}
+   module moi_meme
+import global int bool string; end
+operators global
+  moi(@)        : (int) string;
+  loop(@,@,@)   : (int int int) string;
+  trans(@,@)    : (int string) string;
+  moi_meme      : string;
+end
+rules for string
+i, j, k: int; 
+s      : string;
+local
+  [] moi(00) => "module moi_meme" end
+  [] moi(01) => "import global int bool string; end" end
+  [] moi(02) => "operators global" end
+  [] moi(03) => "  moi(@)        : (int) string;" end
+  [] moi(04) => "  loop(@,@,@)   : (int int int) string;" end
+  [] moi(05) => "  trans(@,@)    : (int string) string;" end
+  [] moi(06) => "  moi_meme      : string;" end
+  [] moi(07) => "end" end
+  [] moi(08) => "rules for string" end
+  [] moi(09) => "i, j, k: int; " end
+  [] moi(10) => "s      : string;" end
+  [] moi(11) => "local" end
+  [] moi(12) => "  [] loop(i,j,k) => switch" end
+  [] moi(13) => "                      case i <= j and k == 0 then moi(i)+string(10)+loop(i+1,j,k)" end
+  [] moi(14) => "                      case i <= j and k == 1 then trans(i,moi(i))+loop(i+1,j,k)" end
+  [] moi(15) => "                      otherwise string(0)" end
+  [] moi(16) => "                    end" end
+  [] moi(17) => "  end" end
+  [] moi(18) => "  [] trans(i,s) => string(32)+string(32)+string(91)+string(93)+string(32)+string(109)+string(111)+string(105)+" end
+  [] moi(19) => "                   string(40)+string(48+i/10)+string(48+i%10)+string(41)+string(32)+string(61)+string(62)+string(32)+" end
+  [] moi(20) => "                   string(34)+s+string(34)+string(32)+string(101)+string(110)+string(100)+string(10) end" end
+  [] moi(21) => "  [] moi_meme => loop(0,11,0)+loop(0,23,1)+loop(12,23,0) end" end
+  [] moi(22) => "end" end
+  [] moi(23) => "end" end
+  [] loop(i,j,k) => switch
+                      case i <= j and k == 0 then moi(i)+string(10)+loop(i+1,j,k)
+                      case i <= j and k == 1 then trans(i,moi(i))+loop(i+1,j,k)
+                      otherwise string(0)
+                    end
+  end
+  [] trans(i,s) => string(32)+string(32)+string(91)+string(93)+string(32)+string(109)+string(111)+string(105)+
+                   string(40)+string(48+i/10)+string(48+i%10)+string(41)+string(32)+string(61)+string(62)+string(32)+
+                   string(34)+s+string(34)+string(32)+string(101)+string(110)+string(100)+string(10) end
+  [] moi_meme => loop(0,11,0)+loop(0,23,1)+loop(12,23,0) end
+end
+end
+\end{verbatim}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{New Implementation Features}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------
+\subsection{Typing of strategies}
+
+This is about the fact, that the Marian's strategies were not typed,
+while the current strategies are strictly typed. This represents
+a language restriction, however, one can discuss also the possibility
+of overloading strategy names over different types. The type-checking
+algorithm for built-in strategies is not interesting enough for description.
+
+Not documented yet.
+
+%----------------------------------------------------------------
+\subsection{Encapsulation of rules and strategies (i.e. local/global)}
+
+In the latest version of \elan, the names rules and strategies could
+be specified as global or local.
+The only readable document is an exercise we did during one 
+Tuesday session.
+
+Not documented yet.
+
+%----------------------------------------------------------------
+\subsection{Linearisation of rewrite rules}
+
+This feature allows to compile non-linear rules with the current
+version of the compiler.
+
+Not documented yet.
+
+%----------------------------------------------------------------
+%\subsection{Partial evaluation}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{New Interface Features}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Compilation}
+
+All the stuff about the compiler should be described, also
+with the Pierre's option \verb@--earley@, which produces 
+the independent executable file.
+
+%----------------------------------------------------------------
+\subsection{Command language}
+
+There are two text files:
+\begin{itemize}
+\item a help file (from the library):
+{\scriptsize\begin{verbatim}
+elan -C -q ... lgi-file spc-file
+
+  quit          - to unix
+  help          - show the file $ELANLIB/help.txt
+  load module   - load a 'module' 
+  batch ident   - run a script file 'ident'
+  run term      - 'term' may contain Q, Q1,..., R, R1,... 
+                  which refer to stacks of qs and rs
+
+  sorts type type type  - set query, result and print sorts
+  startwith (str)term   - set the 'start with' term (may contain the symbol 
+                          query and Q, Qi, R, Ri)
+  checkwith term        - set the 'check with' term:bool (as in startwith)
+  printwith term        - set the print-with term (contains result)
+
+  qs            - queue of queries (history of the last 10)
+  rs            - queue of results (history of the last 10)
+                - term in qs, rs are referenciable by 'variables'
+                  'Q, Q1, ..., R, R1, ...', respecting their types
+
+  stat          - statistic
+  dump          - dump all
+  dump ident    - dump named rules 'ident' or strategies 'ident' or
+                  rules with head symbol 'ident'
+  dump int      - dump rules for a symbol with the internal code 'int'
+
+  display int   - display 1 - show always internal forms of term
+                  display 0 - tratitional form 
+  trace int     - set trace level (Marian's trace value)
+  break ident   - set a break-point to named rules 'ident' or to strategies 
+                  'ident' or to non-named rules with head symbol ~'ident'
+  break int     - set a break-point to rules with head symbol of the internal
+                  code 'int'
+  unbreak ident - remove break-point ...
+  unbreak int   - remove break-point ...
+  breaks  - list of all breakpoints
+\end{verbatim}}
+
+\item a small demostrattion file:
+{\scriptsize\begin{verbatim}
+elan -C -q test
+        ******** ELAN version v1.17 (25/03/96.11:46) ********
+
+           (c)   INRIA-Lorraine  &  CRIN,   1994            
+
+ handling module int
+   handling module bool
+   end of bool
+ end of int
+ handling module test
+   handling module list[int]
+     handling module listCommons
+     end of listCommons
+   end of list[int]
+ end of test
+ handling module Query[int,list[int],list[int]]
+ end of Query[int,list[int],list[int]]
+enter command finished by ';':
+
+run 0;
+------
+[] start with term :
+    f(0)
+[] result term:
+    1.1.nil
+[] result term:
+    0.0.nil
+[] fin
+enter command finished by ';':
+
+run 1;
+------
+[] start with term :
+    f(1)
+[] result term:
+    1.0.nil
+[] result term:
+    1.1.nil
+[] fin
+enter command finished by ';':
+
+qs;
+---
+Queries ... 2 : elements 
+Q1      int      0
+Q       int      1
+enter command finished by ';':
+
+rs;
+---
+Results ... 4 : elements 
+R3      list[int]        1.1.nil
+R2      list[int]        0.0.nil
+R1      list[int]        1.0.nil
+R       list[int]        1.1.nil
+enter command finished by ';':
+
+run Q+Q1;
+---------
+[] start with term :
+    f(plus(1,0))
+[] result term:
+    1.0.nil
+[] result term:
+    1.1.nil
+[] fin
+enter command finished by ';'
+
+run size(R)+size(R1);
+---------------------
+[] start with term :
+    f(plus(size_of_int_list(1.1.nil),size_of_int_list(1.0.nil)))
+[] result term:
+    1.g(4).nil
+[] result term:
+    4.4.nil
+[] fin
+enter command finished by ';':
+
+break DO1;
+----------
+[1]
+rule DO1 [1]
+ varnum = 1     match = 1       nameindex = 196
+  f( VAR(0))     =>  1.g( VAR(0)).nil
+end of rule
+enter command finished by ';':
+
+run 1;
+------
+[] start with term :
+    f(1)
+     trying  'DO1' on    f(1)
+     'DO1' :     1.g(1).nil
+     [red] :     1.0.nil
+[] result term:
+    1.0.nil
+     still trying  'DO1' on      f(1)
+     fail of 'DO1' 
+[] result term:
+    1.1.nil
+[] fin
+enter command finished by ';':
+
+break g; unbreak DO1;
+--------
+[1]
+rule [1]
+ varnum = 0     match = 1       nameindex = -1
+  g(0)   =>  1
+end of rule
+[2]
+rule [2]
+ varnum = 0     match = 1       nameindex = -1
+  g(1)   =>  0
+end of rule
+'g' '('  @ ')'   : (int)int      pri 0 code 139;
+enter command finished by ';':
+
+run 1;
+------
+[] start with term :
+    f(1)
+ [0]  g(1)
+ [1]  0
+[] result term:
+    1.0.nil
+[] result term:
+    1.1.nil
+[] fin
+enter command finished by ';':
+
+breaks;
+-------
+[1]
+rule [1]
+ varnum = 0     match = 1       nameindex = -1
+  g(0)   =>  1
+end of rule
+
+[2]
+rule [2]
+ varnum = 0     match = 1       nameindex = -1
+  g(1)   =>  0
+end of rule
+enter command finished by ';':
+
+checkwith small_int(query+5);
+-----------------------------
+enter command finished by ';':
+
+stat;
+-----
+Input type : int
+Output type: list[int]
+Print type : list[int]
+Strategy   : do
+Start_with :  f( VAR(0))
+Check_with :  small_int(plus( VAR(0),5))
+Print_with :  VAR(0)
+------------
+[] statistics: time 0.033 sec
+                1 nonamed rules applied,     2 tried
+                3   named rules applied,     3 tried
+
+                rule: applied   tried                 rule: applied   tried
+         extractrule1       0       0          extractrule2       0       0
+                  foo       1       1                   DO1       1       1
+                  DO2       1       1 
+
+enter command finished by ';':
+
+printwith 1996.result;
+----------------------
+enter command finished by ';':
+
+run 0;
+------
+[] start with term :
+    f(0)
+[] print term:
+    1996.1.1.nil
+[] print term:
+    1996.0.0.nil
+[] fin
+enter command finished by ';':
+
+startwith (fou) query.nil;
+--------------------------
+enter command finished by ';':
+
+stat;
+-----
+
+Input type : int
+Output type: list[int]
+Print type : list[int]
+Strategy   : fou
+Start_with :  VAR(0).nil
+Check_with :  small_int(plus( VAR(0),5))
+Print_with :  1996. VAR(0)
+.....
+
+enter command finished by ';':
+
+run 0;
+------
+[] start with term :
+    0.nil
+[] print term:
+    1996.0.nil
+[] fin
+enter command finished by ';':
+
+load mest[bool];
+----------------
+ handling module mest[bool]
+   handling module list[bool]
+   end of list[bool]
+ end of mest[bool]
+
+enter command finished by ';':
+
+sorts bool bool bool;
+---------------------
+ handling module Query[bool,bool,bool]
+ end of Query[bool,bool,bool]
+enter command finished by ';':
+
+checkwith true; printwith result; startwith (fou) true and query; stat;
+----------------------------------------------------------------------
+
+Input type : bool
+Output type: bool
+Print type : bool
+Strategy   : fou
+Start_with : (true and VAR(0))
+Check_with :  true
+Print_with :  VAR(0)
+........
+enter command finished by ';':
+
+run false;
+----------
+[] start with term :
+   (true and false)
+[] print term:
+    false
+[] fin
+enter command finished by ';'
+quit;
+.......
+\end{verbatim}}
+\end{itemize}
+
+
+\bibliography{/users/protheo/bibtex/abbrev,/users/protheo/bibtex/protheo,/users/protheo/bibtex/ckirchne}
+\bibliographystyle{plain}  
+\end{document}
+
+
+

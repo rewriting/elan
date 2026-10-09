@@ -1,0 +1,53 @@
+module getc
+
+import global int io[int];
+
+op global 
+   loop	: int;
+end
+
+rules for int
+i,j : int;
+bodies
+  []   loop => loop
+//		where   j:=() write(stdout,i)
+		where   j:=() putc(stdout,i)
+		where 	i:=() getc(stdin)
+
+  end
+end
+
+
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

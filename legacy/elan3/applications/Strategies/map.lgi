@@ -1,0 +1,26 @@
+ 
+LPL map description
+
+//------------------------------------------------------------------
+//query	of sort int	result of sort int	import int map[int]	start with 
+//[dk(add(100),dk(add1,dk(sub1,dk(mul2,dk(div2,ass(55))))))]query
+
+//------------------------------------------------------------------
+query	of sort  list[int] result of sort list[int] import int map[int] start with 
+//[map(dk(add1,ass(55)))]query
+//[mac(id)]query
+
+
+//[nil]query
+//[cons(id,id)]query
+//[dk(case(fail,fail),id)]query
+[map(dk(add1,ass(55)))] query
+//[map(dk(add1(id),dk(sub1(id),dk(mul2(id),dk(div2(id),ass(55))))))]query
+//[cons(dk(add1(id),ass(55)),nil)]query 
+//[cons(add1(id),nil)]query
+//(dd)query// [dk(add1(id),ass(55)).id]query
+
+end
+
+
+

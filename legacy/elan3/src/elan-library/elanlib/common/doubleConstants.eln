@@ -1,0 +1,41 @@
+// This file is generated automatically: do not edit it directly. 
+//
+//              (c)     INRIA-Lorraine & CRIN
+//                      615, rue du Jardin Botanique, BP 101
+//                      54602 Villers-les-Nancy
+//                      France
+//                      email: elan@loria.fr
+//
+//      $Source: /CVS/aircube/elan3/src/elan-library/elanlib/common/doubleConstants.eln,v $
+//      $Revision: 1.1.1.1 $
+//      $Date: 2001/11/29 08:28:46 $
+//      $Author: pem $
+//
+
+module doubleConstants
+import global anyInteger;
+sort double;
+op
+ global
+
+  @.            : ( int ) double                pri 10000 code 34;
+  @.@           : ( int int ) double            pri 10000 code 35;
+  @.@E+@        : ( int int int ) double        pri 10000 code 36;
+  @.@E-@        : ( int int int ) double        pri 10000 code 37;
+  @.@e+@        : ( int int int ) double        pri 10000 alias @.@E+@:;
+  @.@e-@        : ( int int int ) double        pri 10000 alias @.@E-@:;
+  .@            : ( int ) double                pri 10000 code 64;
+  .@E+@         : ( int int ) double            pri 10000 code 65;
+  .@E-@         : ( int int ) double            pri 10000 code 66;
+  .@e+@         : ( int int ) double            pri 10000 alias .@E+@:;
+  .@e-@         : ( int int ) double            pri 10000 alias .@E-@:;
+
+local
+
+  DOUBLECONSTRUCTOR(@,@)        : ( int int ) double    code 49;
+
+end
+
+end
+  
+  

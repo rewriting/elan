@@ -1,0 +1,257 @@
+module lpo[vars,fss,prec]
+
+/* Module concerning the calculation of orientation of an equation */
+/* using lpo and the comparison of two equations */
+
+/* vars : variables, 
+   fss  : operators,
+   prec : precedence */
+
+
+import	
+	global  
+		/* to define the sort term so variable */
+		eqSystem[fss,vars] /* to define the sort eqSystem so equation */
+	;
+       
+        local 
+		vars
+		fss
+		prec
+		identifier
+		pair[identifier,int]
+		list[pair[identifier,int]]
+		terms[vars,fss,prec]
+		eq[term]
+		eq[variable]
+	;
+end
+
+
+operators
+  global
+
+	/* Orientation using LPO */
+
+	precedence(@)	: (identifier) int;
+	@ >sig @	: (identifier identifier) bool;
+	@ ==sig @	: (identifier identifier) bool;
+
+	lpo(@,@)	: (term term) bool;
+	@ >lpo @	: (term term) bool		alias lpo(@,@):;
+
+	lex(@,@)	: (list[term] list[term]) bool;
+	@ >lex @	: (list[term] list[term]) bool	alias lex(@,@):;
+
+	lpo(@,@)	: (list[term] term) bool;
+	lpo(@,@)	: (term list[term]) bool;
+	lpo1(@,@)	: (term term) bool;
+	lpo2(@,@)	: (term term) bool;
+	lpo3(@,@)	: (term term) bool;
+
+	/* Test if an equation is bigger than another one */
+	/* g=d >lpo l=r if g >lpo l or *g = s and d >lpo r */
+	lpo(@,@)	: (equation equation) bool;
+	@ >lpo @	: (equation equation) bool	alias lpo(@,@):;
+end
+
+
+/* precedence */
+
+FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+SUCH THAT SS:=(listExtract) elem(prec) AND F:=()first(SS) 
+AND N:=()second(SS) :{
+  rules for int	
+  global	
+      [] precedence(F) => N
+      end
+  end
+}
+
+
+/* >sig, ==sig */
+
+rules for bool
+$ide, $idd : identifier;
+global
+	[] $ide >sig $idd     => precedence($ide) > precedence($idd)
+	end
+	[] $ide ==sig $idd    => precedence($ide) == precedence($idd)
+	end
+end
+
+
+/* lpo for terms and list of terms */
+
+rules for bool
+  	s,t 	      	: term;
+	lists,listt 	: list[term];
+	b		: bool;
+global
+
+       	/* Cas : {s1,...,sn} >lex {t1,...,tn} */
+       	/* if s1 = t1 et {s2,...,sn} >lex {t2,...,tn} */
+       	/* or s1 >lpo t1 */
+
+	[] s.lists >lex t.listt 	=> true
+					if eq_term(s,t)
+					where b:=() lists >lex listt 
+					if b
+	end
+
+	[] s.lists >lex t.listt 	=> lpo(s,t)
+	end
+
+	/* f(s1,...,sn) >lpo f(t1,...,tn)  if: */
+	/* s >lpo t1,...,tn et {s1,...,sn} >lex {t1,...,tn} */
+
+	[] lpo(s,t) 			=> 	true
+					if not(isvar(s)) 
+					if not(isvar(t))
+					if head(s) ==sig head(t)
+					where b:=() lpo3(s,t) 
+					if b 
+	end
+
+//	[] lpo3(s,t) 			=> 
+//			lpo(s,list_subterms_strict(t))and 
+//			list_subterms_strict(s) >lex list_subterms_strict(t) 
+//	end 
+
+	[] lpo3(s,t) 			=> 
+			switch
+			case lpo(s,list_subterms_strict(t))
+			then 
+			list_subterms_strict(s) >lex list_subterms_strict(t) 
+			otherwise
+			false
+			end
+	end 
+
+	/* f(s1,...,sn) >lpo g(t1,...,tm) if: */
+	/* f >sig g and s >lpo t1,...,tm) */
+
+	[] lpo(s,t) 			=>  true
+					if not(isvar(s)) 
+					if not(isvar(t))
+				   	if head(s) >sig head(t)
+					where b:=() lpo2(s,t) 
+					if b 
+    	end	
+
+	[] lpo2(s,t) 			=> lpo(s,list_subterms_strict(t))
+	end
+
+	/* f(s1,...,sn) >lpo f(t1,...,tn)  if: */
+	/* si >lpo t */
+
+	[] lpo(s,t) 			=> lpo1(s,t)
+        end
+
+        [] lpo1(s,t) 			=> lpo(list_subterms_strict(s),t)
+        end
+
+	/* Utilities */
+
+	[] nil >lex listt 		=> false
+	end
+
+	[] s.lists >lex nil 		=> true
+	end
+
+	[] lpo(s.lists,t)       	=> true if $s==$t
+	end
+
+        [] lpo(s.lists,t) 		=> true if lpo(lists,t)
+	end
+
+	[] lpo(s.lists,t) 		=> lpo(s,t)
+	end
+
+	[] lpo(nil,t) 			=> false
+	end
+
+//	[] lpo(s,t.listt) 		=> lpo(s,t) and lpo(s,listt)
+//	end
+
+	[] lpo(s,t.listt) 		=> 
+					switch
+					case lpo(s,t) 
+					then lpo(s,listt)
+					otherwise false
+					end
+	end
+
+	[] lpo(s,nil) 			=> true
+	end
+end
+
+
+/* lpo for equations */
+
+rules for bool
+	g, d, l, r : term;
+
+global 
+	[] lpo(g=d,l=r)		=> 
+				switch 
+				case g >lpo l
+				then true
+				otherwise
+					switch
+					case eq_term(g,l)
+					then d >lpo r
+					otherwise false
+					end
+				end
+	end
+
+	[] lpo(g->d,l=r)	=>
+ 				switch 
+				case g >lpo l
+				then true
+				otherwise
+					switch
+					case eq_term(g,l)
+					then d >lpo r
+					otherwise false
+					end
+				end
+	end
+
+	[] lpo(g=d,l->r)	=> 
+				switch 
+				case g >lpo l
+				then true
+				otherwise
+					switch
+					case eq_term(g,l)
+					then d >lpo r
+					otherwise false
+					end
+				end
+	end
+
+	[] lpo(g->d,l->r)	=> 
+				switch 
+				case g >lpo l
+				then true
+				otherwise
+					switch
+					case eq_term(g,l)
+					then d >lpo r
+					otherwise false
+					end
+				end
+	end
+
+end
+
+end
+
+
+
+
+
+
+

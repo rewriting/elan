@@ -1,0 +1,80 @@
+module try1
+
+import global bool eq[Foo]; end
+
+sort Foo; end
+
+operators global
+  a	: Foo;
+  b	: Foo;
+  c	: Foo;
+  d	: Foo;
+  f(@)	: (Foo) Foo;
+  @(@)	: (Foo Foo) Foo;
+end
+
+
+rules for Foo
+//  x1,x2,x3,x4,x5,x6,x7,x8 : Foo;
+//  y1,y2,y3,y4 : Foo;
+//  z1,z2,z3,z4,z5,z6,z7,z8,z9 : Foo;
+
+  x1 : Foo;
+  z1,z2,z3,z4,z5,z6,z7,z8,z9 : Foo;
+  x2,x3,x4,x5,x6,x7,x8 : Foo;
+  y1,y2,y3,y4 : Foo;
+
+global
+  []	f(x1) => z1(z2(z3(z4(z5(z6(z7(z8(z9))))))))
+		where x2:=()x1
+		if x1==x2
+
+		try
+		  choice where x3:=()x1
+			 where x4:=()x2
+		  choice where x3:=()x2
+			 where x4:=()x1
+		end
+
+		where x5:=()x1
+		where x6:=()x2
+		where x7:=()x3
+		where x8:=()x4
+	
+		try
+		  choice where y1:=()x2
+			 where y2:=()x3
+			try
+			  choice where y3:=()x2
+			         where y4:=()x3
+			  choice where y3:=()x4
+			         where y4:=()x5
+		        end
+		  choice where y1:=()x6
+			 where y2:=()x7
+			try
+			  choice where y3:=()x8
+			         where y4:=()x1
+			  choice where y3:=()x2
+			         where y4:=()x3
+		        end
+		end
+
+		where z1:=()x2
+		where z2:=()x3
+		where z3:=()x4
+		where z4:=()x5
+		where z5:=()x6
+		where z6:=()y1
+		where z7:=()y2
+		where z8:=()y3
+		where z9:=()y4
+  end 
+end 
+
+end
+
+
+
+
+

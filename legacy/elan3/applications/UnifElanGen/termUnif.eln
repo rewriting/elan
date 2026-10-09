@@ -1,0 +1,172 @@
+module termUnif[Fss]
+import 	global 	term varabst ;
+ 	local  	Fss int identifier bool pair[identifier,int]
+		list[int] list[identifier] list[pair[identifier,int]] ; 
+                // anyIdentifier 
+        end
+
+operators
+
+global
+
+
+	// This creates from the user specification the actual 
+	// rank for operators declared of arity zero (the constants)
+  FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+  SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS) 
+	AND N:=()second(SS) ANDIF N==0 :{
+      F     	: term;
+    }
+
+	// From the user specification, this creates the actual
+	// rank for non constant operators
+FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS) 
+	AND N:=()second(SS) ANDIF N > 0 :{
+
+     F (@ {,@}~(N-1))	:({term}~N) term ;
+    }
+
+///        vabst[@]        : ( term) variable ; 
+///        xnew.@          : (int) variable ;
+        
+///        maxv(@,@)       : (term variable) int ;    
+///        @ ?max @        : (int int) int           assocLeft;
+
+end
+
+
+
+FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS) 
+	AND N:=()second(SS) ANDIF N > 0 :{
+
+   rules for int
+   // declare 
+          t_1,...,t_N:term ; n:int ;
+   global
+       [] maxv(F(t_1,...,t_N),xnew.n)	=>  
+	      n { ?max  maxv(t_I,xnew.n) }_I=1...N  end
+       [] maxv(F(t_1,...,t_N),var(n))	=>  
+	      n { ?max  maxv(t_I,var(n)) }_I=1...N  end
+                
+   end
+
+   }
+
+FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS) 
+	AND N:=()second(SS) ANDIF N == 0 :{
+
+   rules for int
+   // declare 
+          n:int ;
+   global
+       [] maxv(F,xnew.n)	=>  n end
+       [] maxv(F,var(n))	=>  n end
+                
+   end
+
+   }
+
+
+/* Definition des fonctions declarees dans term.eln  */
+
+FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS) 
+	AND N:=()second(SS) ANDIF N > 0 :{
+  rules for term
+  // declare 
+         t_1,...,t_N : term;
+  global
+
+   { [] I-th subterm(F(t_1,...,t_N))   => t_I		end
+   }_I=1...N
+  end
+
+   rules for identifier
+   // declare 
+          t_1,...,t_N : term;
+   global   
+     [] head(F(t_1,...,t_N)) 		=> F		end
+   end
+
+   rules for list[int]
+   // declare 
+          t_1,...,t_N : term;
+          oocc:list[int];
+   global
+   { [inOccRule] nvocc(F(t_1,...,t_N))	=> J.oocc 
+		where oocc:=(chooseOccurence) nvocc(t_J)
+      end
+   }_J=1...N
+   end
+
+}
+
+FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS) 
+	AND N:=()second(SS) ANDIF N == 0 :{
+   rules for list[int]
+   // declare 
+          t_1,...,t_N : term;
+   global
+     [inOccRule]  nvocc(F) 		=> nil end
+   end
+}
+
+
+FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS) 
+	AND N:=()second(SS) ANDIF N == 0 :{
+   rules for identifier
+   // declare 
+          t_1,...,t_N : term;
+   global
+     []  head(F) 		=> F end
+   end
+}
+
+
+FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS) 
+	AND N:=()second(SS) ANDIF N > 1 :{
+  rules for term
+  // declare 
+         t_1,...,t_N : term; t,s:term; l:list[int];
+  global
+
+[] F(t_1,...,t_N)[s] at 1.l => F(t_1[s] at l,t_2,...,t_N)
+    end
+  { [] F(t_1,...,t_N)[s] at I.l => F(t_1,...,t_(I-1),t_I[s] at l,t_(I+1),...,t_N)
+    end
+  }_I=2...(N-1)
+[] F(t_1,...,t_N)[s] at N.l => F(t_1,...,t_(N-1),t_N[s] at l)
+    end
+  end
+}
+
+FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS) 
+	AND N:=()second(SS) ANDIF N == 1 :{
+  rules for term
+  // declare 
+         t_1: term; t,s:term; l:list[int];
+  global
+
+[] F(t_1)[s] at 1.l => F(t_1[s] at l)
+    end
+
+  end
+}
+
+strategies for list[int]
+
+global 
+  [chooseOccurence]
+  dk(topOccRule || inOccRule)
+  end
+end
+
+end
+

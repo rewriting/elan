@@ -1,0 +1,35 @@
+File: Examples/append.spc
+Results:
+[cons(a,cons(b,nil)),proofnil;("r1"(y->nil o x->a o z->cons(b,nil)))[[("r2"(z->cons(b,nil))).nil]]] end
+
+ end end
+end
+
+File: Examples/congruence.spc
+Results:
+[f(c,d),proofnil;f(("r1"(identity)),b);f(c,("r2"(identity)))] end
+
+ end end
+end
+
+File: Examples/peano.spc
+Results:
+[s(s(s(s(s(o))))),proofnil;("r1"(y->s(o)o x->s(s(s(o)))))[[("r1"(y->o o x->s(s(s(o)))))[[("r2"(x->s(s(s(o))))).nil]].nil]]] end
+
+ end end
+end
+
+File: Examples/primes.spc
+Results:
+[cons(s(s(o)),cons(s(s(s(o))),nil)),proofnil;("primes4"(n->s(s(s(o)))));addifprime(s(s(s(o))),primes(("moins3"(y->o o x->s(s(o))))));addifprime(s(s(s(o))),primes(("moins1"(x->s(s(o))))));addifprime(s(s(s(o))),("primes3"(identity)));("addifprime2"(y->nil o i->s(s(o))o n->s(s(s(o)))))[[gt(("mult2"(y->s(o)o x->s(s(o)))),s(s(s(o))));gt(("plus1"(x->mult(s(s(o)),s(o))o y->s(o))),s(s(s(o))));gt(s(("plus1"(y->o o x->mult(s(s(o)),s(o))))),s(s(s(o))));gt(s(s(("plus2"(x->mult(s(s(o)),s(o)))))),s(s(s(o))));gt(s(s(("mult2"(y->o o x->s(s(o)))))),s(s(s(o))));gt(s(s(("plus1"(x->mult(s(s(o)),o)o y->s(o))))),s(s(s(o))));gt(s(s(s(("plus1"(y->o o x->mult(s(s(o)),o)))))),s(s(s(o))));gt(s(s(s(s(("plus2"(x->mult(s(s(o)),o))))))),s(s(s(o))));gt(s(s(s(s(("mult1"(x->s(s(o)))))))),s(s(s(o))));("gt3"(y->s(s(o))o x->s(s(s(o)))));("gt3"(y->s(o)o x->s(s(o))));("gt3"(y->o o x->s(o)));("gt1"(x->o)).nil]];cons(s(s(o)),("append2"(z->cons(s(s(s(o))),nil))))] end
+
+ end end
+end
+
+File: Examples/sample.spc
+Results:
+[h(f(f(h(a)))),proofnil;h(g(("r1"(identity))));h(("r2"(x->a)))[[h(("r1"(identity))).nil]]] end
+
+ end end
+end
+

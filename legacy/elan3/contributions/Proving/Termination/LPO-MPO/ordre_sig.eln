@@ -1,0 +1,119 @@
+//---------------------------------------------------------------------------------------
+// The precedence as specified in Lss and Equiv
+//--------------------------------------------------------------------------------------
+module ordre_sig[Vars,Ars,Lss,Equiv]
+import	global	
+		termCommons[Vars,Ars]
+		pair[ident,ident] list[pair[ident,ident]]
+		list[list[ident]] eq[list[ident]]
+		Alist[ident]
+		Lss Equiv 
+;end
+//--------------------------------------------------------------------------------
+sort
+	Ordre
+;end 
+//--------------------------------------------------------------------------------------
+
+operators
+  global 
+
+    LPO : Ordre;
+    MPO : Ordre;
+    RPO : Ordre;
+
+    supsig(@,@) : (ident ident) bool;
+    eqsig(@,@) : (ident ident) bool;
+
+    @ >sig @	: (ident ident) bool	alias supsig(@,@):;
+    @ ==sig @	: (ident ident) bool	alias eqsig(@,@):;
+end
+//--------------------------------------------------------------------------------------
+
+rules for bool
+ 	$fv : ident;
+global	
+
+//-------------------------- supsig ------------------------------------------------
+  FOR EACH LP:list[ident]
+  SUCH THAT LP:=(listExtract) elem(Lss):{
+  	FOR EACH F:ident; RL:list[ident]
+  	SUCH THAT F:=(listExtract) elem(LP)
+		AND RL:=()restList(F,LP)
+		ANDIF neq_list[ident](RL,nil):{
+ 
+ 			FOR EACH G:ident
+  			SUCH THAT G:=(listExtract) elem(RL):{
+
+  [] supsig(F,G)	=>	true
+  end
+			}
+	}
+  }
+
+  FOR EACH LP:list[ident]
+  SUCH THAT LP:=(listExtract) elem(Lss):{
+  	FOR EACH F:ident; RL:list[ident]
+  	SUCH THAT F:=(listExtract) elem(LP)
+		AND RL:=()restList(F,LP)
+		ANDIF neq_list[ident](RL,nil):{
+
+  [] supsig(F,$fv)	=>
+ 			FOR EACH G:ident
+  			SUCH THAT G:=(listExtract) elem(RL):{
+				supsig(G,$fv)	or
+				eqsig(G,$fv)	or
+			}
+				false
+  end
+	}
+  }
+
+
+  FOR EACH SS:pair[ident,pair[int,int]];F:ident
+  SUCH THAT SS:=(listExtract) elem(Ars)
+	AND F:=()first(SS) :{
+
+  [] supsig(F,$fv)	=>	false
+  end
+  [] supsig($fv,F)	=>	false 
+  end
+  }
+
+//-------------------------- eqsig ------------------------------------------------
+// no symbol is defined twice
+//---------------------------------------------------------------------------------
+
+  FOR EACH LP:list[ident]
+  SUCH THAT LP:=(listExtract) elem(Equiv):{
+  	FOR EACH F:ident; RL:list[ident]
+  	SUCH THAT F:=(listExtract) elem(LP)
+		AND RL:=()restList(F,LP)
+		ANDIF neq_list[ident](RL,nil):{
+  			FOR EACH G:ident
+  			SUCH THAT G:=(listExtract) elem(RL):{
+
+  [] eqsig(F,G)		=>	true
+  end
+  [] eqsig(G,F)		=>	true
+  end
+			}
+  	}
+  }
+
+  FOR EACH SS:pair[ident,pair[int,int]];F:ident
+  SUCH THAT SS:=(listExtract) elem(Ars)
+	AND F:=()first(SS) :{
+
+  [] eqsig(F,F)		=>	true
+  end
+  [] eqsig(F,$fv)	=>	false 
+  end
+  [] eqsig($fv,F)	=>	false 
+  end
+  }
+end
+
+//--------------------------------------------------------------------------------
+end
+

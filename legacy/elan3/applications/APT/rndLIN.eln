@@ -1,0 +1,16 @@
+module rndLIN[X]
+
+import global arrayLIN[X]; end
+
+operators global
+	rnd(@)		: (int) arrayLIN[X];
+end
+
+rules for arrayLIN[X]
+ i: int;
+global
+  [] rnd(0) => new(0)					end
+  [] rnd(i) => (100-i,(17*i+7)%33).rnd(i-1)		end
+end
+
+end

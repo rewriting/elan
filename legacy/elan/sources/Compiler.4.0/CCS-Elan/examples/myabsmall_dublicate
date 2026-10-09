@@ -1,0 +1,26 @@
+
+def Tr = send_d0.('trans_d0.Tr + 'trans_bot.Tr + 'trans_d0.'trans_d0.Tr) + send_d1.('trans_d1.Tr + 'trans_bot.Tr + 'trans_d1.'trans_d1.Tr)
+
+def Ack = reply_0.('ack_0.Ack+'ack_bot.Ack+'ack_0.'ack_0.Ack) + reply_1.('ack_1.Ack+'ack_bot.Ack+'ack_1.'ack_1.Ack)
+
+def Sr_0  =  acc_d.S_d0
+
+def Sr_1 = acc_d.S_d1
+ 
+def S_d0 = 'send_d0.W_d0
+def S_d1 = 'send_d1.W_d1
+
+def W_d0 = ack_0.Sr_1 + ack_1.S_d0 + ack_bot.S_d0
+def W_d1 = ack_1.Sr_0 + ack_0.S_d1 + ack_bot.S_d1
+
+def Rec_0  =  trans_d0.Rpy_d0  + trans_d1.'reply_1.Rec_0 + trans_bot.'reply_1.Rec_0
+
+def Rec_1  =  trans_d1.Rpy_d1  + trans_d0.'reply_0.Rec_1 + trans_bot.'reply_0.Rec_1
+
+def Rpy_d0  =  'deliver_d.'reply_0.Rec_1
+def Rpy_d1  =  'deliver_d.'reply_1.Rec_0
+
+def Rest  =  { send_d0,send_d1,trans_d0,trans_d1,reply_0,reply_1,ack_0,ack_1,trans_bot,ack_bot }
+
+def ABP  =   (Sr_0 | Tr | Rec_0 | Ack) \ Rest
+

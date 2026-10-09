@@ -1,0 +1,43 @@
+def Knuth = (P1 | P2 | K1 | C1_0 | C2_0) \ L
+def K1 = kw1.K1 + kw2.K2 + 'kr1.K1
+def K2 = kw1.K1 + kw2.K2 + 'kr2.K2
+
+def C1_0 = c1w0.C1_0 + c1w1.C1_1 + c1w2.C1_2 + 'c1r0.C1_0
+def C1_1 = c1w0.C1_0 + c1w1.C1_1 + c1w2.C1_2 + 'c1r1.C1_1
+def C1_2 = c1w0.C1_0 + c1w1.C1_1 + c1w2.C1_2 + 'c1r2.C1_2
+
+def C2_0 = c2w0.C2_0 + c2w1.C2_1 + c2w2.C2_2 + 'c2r0.C2_0
+def C2_1 = c2w0.C2_0 + c2w1.C2_1 + c2w2.C2_2 + 'c2r1.C2_1
+def C2_2 = c2w0.C2_0 + c2w1.C2_1 + c2w2.C2_2 + 'c2r2.C2_2
+
+def P1 = tau.P11 + tau.0
+def P11 = 'c1w1.req1.P12
+def P12 = kr1.P14 + kr2.P13
+def P13 = c2r0.P14 + c2r1.P12 + c2r2.P12
+def P14 = 'c1w2.P15
+def P15 = c2r0.P16 + c2r1.P16 + c2r2.P17
+def P16 = 'kw1.enter1.exit1.'kw2.'c1w0.P1
+def P17 = 'c1w1.P12
+
+def P2 = tau.P21 + tau.0
+def P21 = 'c2w1.req2.P22
+def P22 = kr2.P24 + kr1.P23
+def P23 = c1r0.P24 + c1r1.P22 + c1r2.P22
+def P24 = 'c2w2.P25
+def P25 = c1r0.P26 + c1r1.P26 + c1r2.P27
+def P26 = 'kw2.enter2.exit2.'kw1.'c2w0.P2
+def P27 = 'c2w1.P22
+
+def L = {kw1,kw2,kr1,kr2,c1w0,c1w1,c1w2,c1r0,c1r1,c1r2,c2w0,c2w1,c2w2,c2r0,c2r1,c2r2}
+
+def KBig = Knuth|Knuth|Knuth
+
+prop Safety = max Z.((~(<exit1>tt && <exit2>tt)) && [-]Z)
+
+prop Liveness = max Z.( ([req1]EICS1() && [req2]EICS2()) && [-]Z)
+
+prop EICS1 = min Y.((<exit1>tt || ([-]Y && <->tt)))
+prop EICS2 = min Y.((<exit2>tt || ([-]Y && <->tt)))
+
+
+

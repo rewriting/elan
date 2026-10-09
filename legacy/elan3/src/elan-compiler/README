@@ -1,0 +1,30 @@
+To install the complete system:
+-------------------------------
+
+STEP 1: update your environment
+-------
+
+# modify the PATH variable
+setenv PATH $ELANLIB/bin:${PATH} 
+
+
+STEP 2: install third party libraries
+-------
+
+# install the ATerm library
+cd aterm-xx; configure --prefix=$ELANLIB ; make install
+
+# install de BDW Garbage Collector
+cd gc-xx; configure --prefix=$ELANLIB ; make install
+cp gc-xx/include/gc.h $ELANLIB/include
+
+STEP 3: install ELAN components
+-------
+# install the Choice-Point Library
+cd cpl-xx; configure --prefix=$ELANLIB ; make install
+
+# install the parser and the interpreter
+cd elan-xx; configure --prefix=$ELANLIB ; make install
+
+# install the ELAN compiler
+cd compiler-xx; configure --prefix=$ELANLIB ; make install

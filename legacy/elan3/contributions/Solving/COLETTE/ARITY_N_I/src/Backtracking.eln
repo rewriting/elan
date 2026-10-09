@@ -1,0 +1,70 @@
+module Backtracking[Variables,Type,Values]
+
+import
+global
+	EnumerationRules[Variables,Type,Values]
+	PropagationRules[Variables,Type,Values]
+	;
+end
+
+stratop
+global
+	BacktrackingFirstToLastAll		: < csp -> csp >         bs;
+	BacktrackingFirstToLastOne		: < csp -> csp >         bs;
+	BacktrackingLastToFirstAll		: < csp -> csp >         bs;
+	BacktrackingLastToFirstOne		: < csp -> csp >         bs;
+end
+
+
+strategies for csp
+implicit
+
+/* Strategy		: Backtracking  	*/
+/* Value selection	: From first to last	*/
+/* Number of solutions	: All 			*/
+
+[] BacktrackingFirstToLastAll =>
+repeat* (
+	dk (iterate* (EliminateFirstValueOfDomain));
+	first one (InstantiateFirstValueOfDomain);
+	first one (Elimination)
+	);
+first one (GetSolutionCSP)
+end
+
+
+/* Strategy		: Backtracking 		*/
+/* Value selection	: From first to last	*/
+/* Number of solutions	: First			*/
+
+[] BacktrackingFirstToLastOne =>
+first one (BacktrackingFirstToLastAll)
+end
+
+
+/* Strategy		: Backtracking 		*/
+/* Value selection	: From last to first	*/
+/* Number of solutions	: All 			*/
+
+[] BacktrackingLastToFirstAll =>
+repeat* (
+	dk (iterate* (EliminateLastValueOfDomain));
+	first one (InstantiateLastValueOfDomain);
+	first one (Elimination)
+	);
+first one (GetSolutionCSP)
+end
+
+
+/* Strategy		: Backtracking		*/
+/* Value selection	: From last to first	*/
+/* Number of solutions	: First			*/
+
+[] BacktrackingLastToFirstOne =>
+first one (BacktrackingLastToFirstAll)
+end
+
+end
+
+
+end

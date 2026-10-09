@@ -1,0 +1,100 @@
+module nqueensAC
+import 
+  bool int list[int] eq[set];
+end
+
+sort set state;
+end
+
+operators
+ global
+    nqueens(@)	: (int) list[int];
+  local
+    ok(@,@,@)   : ( int int list[int] ) bool;
+    @ U @       : (set set) set (AC);
+    (@)         : (int) set ;
+    empty	: set;
+    [@ U @]     : (int set) set ;
+    pool(@)     : (int) set ;
+    [[@,@]]	: (list[int] set) state;
+end
+
+stratop 
+  global
+        queens  : <list[int]>   bs;
+  local
+        extractPos : <set>      bs;
+        step       : <state>    bs;
+end
+
+rules for set 
+  S : set ;
+  i : int ;
+  n : int;
+global 
+  [] pool(1) => empty U (1)        end
+  [] pool(n) => (n) U pool(n-1)    end
+  [extractrule] (i) U S => [i U S] end
+end
+
+rules for list[int]
+  sol    : list[int];
+  pool   : set;
+  n      : int;
+  l      : int;
+  s      : state;
+global
+  [queensRule] nqueens(n) => sol
+		     where (state) [[sol,empty]]:=(step)[[nil,pool(n)]]
+  end
+end
+
+rules for state
+  solution : list[int];
+  pool     : set;
+  newPool  : set;
+  pos      : int;
+  level    : int;
+local
+ [oneStep] 
+
+   [[solution,pool]] => [[pos.solution,newPool]]
+			    where (set) [pos U newPool] :=(extractPos) pool
+			    if ok(1,pos,solution)
+/*
+   [[solution,(pos) U newPool]] => [[pos.solution,newPool]]
+			    if ok(1,pos,solution)
+*/
+   end
+end
+
+rules for bool
+          p,d,diff : int;
+        l : list[int];
+global
+  [] ok(diff,d,nil)     => true                         end
+//  [] ok(diff,d,p.l)   => false        if d == p       end
+//  no more necessary
+  [] ok(diff,d,p.l)     => false        if d-p == diff  end
+  [] ok(diff,d,p.l)     => false        if p-d == diff  end
+  [] ok(diff,d,p.l)     => ok(diff+1,d,l)               end
+end
+
+
+strategies for set
+implicit
+  [] extractPos => dk(extractrule) end
+end
+
+strategies for state
+implicit
+  [] step => repeat*(dk(oneStep)) end
+end
+
+strategies for list[int]
+implicit
+  [] queens => dk(queensRule) end
+end
+
+end                     
+

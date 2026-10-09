@@ -1,0 +1,190 @@
+//--------------------------------------------------------------------------------------
+// Another syntacticUnification with functions for infix operators
+//--------------------------------------------------------------------------------------
+module syntacticUnification[Vars,Ars]
+import 	global 	
+		eqSystem[Vars,Ars] 
+		occur[variable,term] occur[variable,eqSystem]
+;end
+
+operators
+  global
+    @ = @		: (term term) equation 		alias @=@:;
+    @ 		: ( equation ) eqSystem	alias @:;
+  local
+    mergingClash(@,@,@)	: ( eqSystem variable term ) bool;
+
+end
+
+stratop
+  global 
+    unify	: <eqSystem>		builtin;
+    unifys	: <eqSystem>		builtin;
+    match	: <eqSystem>		builtin;
+    matchs	: <eqSystem>		builtin;
+end
+
+rules for eqSystem
+	P,Q,R:eqSystem;
+	$s,$t:term;
+	$x,$y:variable;
+global
+
+  [delete] 	P & $x=$y	=> P		
+			if eq_variable($x,$y)
+  end
+  [coalesce] 	P & $x=$y	=> $x=$y & apply($x->$y,P)
+			if neq_variable($x,$y)
+  end
+  [conflict]	P & $s=$t	=> false
+			if neq_ident(head($s),head($t))
+			   and not(isvar($s)) and not(isvar($t))
+  end
+  [occCheck1]	P & $x=$s	=> false
+			if occurs $x in $s and not isvar($s)
+  end
+  [occCheck2]	P & $s=$x	=> false
+			if occurs $x in $s and not isvar($s)
+  end
+  [eliminate1]	P & $x=$s	=> $x=$s & apply($x->$s,P)
+			if not(occurs $x in $s) 
+  end
+  [eliminate2]	P & $s=$x	=> $x=$s & apply($x->$s,P)
+			if not(occurs $x in $s) 
+  end
+  [matchClash]	P & $s=$x	=> false
+			if not isvar($s) 
+  end
+  [mergeClash] 	P & $x=$s => false
+			if mergingClash(P,$x,$s)
+  end
+  [mergePass1] 	P & $x=$s => $x=$s & P
+  end
+  [mergePass2] 	P & $x=$s => $x=$s & P
+			if not(occurs $x in P) // and not mergingClash(P,$x,$s)
+  end
+  [mergePass3] 	P & $x=$s => P
+			if occurs $x in P // and  not mergingClash(P,$x,$s)
+  end
+
+//  [unfold]	 P & (Q & R)		=> (P & Q) & R		end
+
+// initial and final transitions rules
+
+  [trueelim]	P & true	=> P				end
+  [truepass]	P & true	=> true & P			end
+  [trueadd]	P 		=> true & P			end
+  [falsepropag]	false		=> false			end
+  [truepropag]	true		=> true				end
+
+end
+
+FOR EACH SS:pair[ident,pair[int,int]]; 
+	F:ident;  A:pair[int,int]; N:int; NEXT:int;
+	AL:int; AR:int
+SUCH THAT SS:=(listExtract) elem(Ars) 
+	AND F:=()first(SS) 
+	AND A:=()second(SS) 
+	AND AL:=()first(A) 
+	AND AR:=()second(A) 
+	AND NEXT:=()AL+1
+	AND N:=()AL+AR
+	ANDIF AL>0 :{
+
+rules for eqSystem
+      P:eqSystem;
+   t_1,...,t_N,s_1,...,s_N : term;
+global
+
+	[decompose] P & {t_I }_I=1...AL F {t_I }_I=NEXT...N
+		=    {s_I }_I=1...AL F {s_I }_I=NEXT...N => 
+	P 
+	{& J-th subterm({t_I }_I=1...AL F {t_I }_I=NEXT...N) 
+	= 
+	J-th subterm({s_I }_I=1...AL F {s_I }_I=NEXT...N)
+	}_J=1...N 
+
+	end
+end
+}
+
+FOR EACH SS:pair[ident,pair[int,int]]; 
+	F:ident;  A:pair[int,int];
+	AL:int; AR:int; N:int
+SUCH THAT SS:=(listExtract) elem(Ars)
+	AND F:=()first(SS) 
+	AND A:=()second(SS) 
+	AND AL:=()first(A) 
+	AND AR:=()second(A) 
+	AND N:=()AL+AR
+	ANDIF AL==0:{
+   rules for eqSystem
+      P:eqSystem;
+             s_1,...,s_N:term; t_1,...,t_N:term;
+   local
+     [decompose] P & F(s_1,...,s_N)=F(t_1,...,t_N)	=> P { & s_I=t_I }_I=1...N end
+   end
+}
+
+rules for bool
+ P,Q	: eqSystem;
+	$s,$t	: term;
+	$x,$y	: variable;
+global
+  [] mergingClash(true,$x,$s) => false				end
+  [] mergingClash(P & Q,$x,$s) => mergingClash(P,$x,$s) 
+				or mergingClash(Q,$x,$s) 		end
+  [] mergingClash($x=$s,$y,$t) => eq_variable($x,$y) and neq_term($s,$t)			end
+end
+
+strategies for eqSystem
+implicit
+  [.] unify =>
+  dc one(trueadd);
+  repeat* (
+    dc one(
+      	unfold , 
+	delete , decompose , conflict , coalesce ,
+        occCheck1 , occCheck2 , eliminate1 , eliminate2 )
+  );
+  dc one(trueelim , truepropag , falsepropag)
+  end
+  [.] unifys =>
+  repeat* (
+    dc one(
+      	unfold , 
+	delete , decompose , conflict , coalesce , 
+        occCheck1 , occCheck2 , eliminate1 , eliminate2 )
+  ) ;
+  dc one(truepass , truepropag)
+  end
+  [.] match =>
+  dc one(trueadd);
+  repeat* (
+    dc one( unfold , 
+	delete , decompose , conflict , 
+		     matchClash , mergePass1)
+  );
+  dc one(truepass , truepropag , falsepropag);
+  repeat* (
+    dc one( unfold , 
+	mergeClash , mergePass2 , mergePass3)
+  );
+  dc one(trueelim , truepropag , falsepropag)
+  end
+  [.] matchs =>
+  repeat* (
+    dc one( unfold , 
+	delete , decompose , conflict ,
+		     matchClash , mergePass1)
+  );
+  dc one(truepass , truepropag);
+  repeat* (
+    dc one( unfold , 
+	mergeClash , mergePass2 , mergePass3)
+  );
+  dc one(truepass , truepropag)
+  end
+end
+
+end

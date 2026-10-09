@@ -1,0 +1,16 @@
+LPL ac2 description
+         query  of sort term
+                result of sort term
+                import ac2
+                start with (doit) query 
+//                start with () query 
+end
+
+
+// g(U(a,V(a,c)),V(a,b))  end			... f(a,c)
+
+
+// U(a,U(V(a,b),V(a,c))) end			...  f(a,c)
+
+// U(a,U(V(a,b),U(V(a,c),V(a,d)))) end		... f(U(a,V(a,c)),d)
+//						... f(U(a,V(a,d)),c)

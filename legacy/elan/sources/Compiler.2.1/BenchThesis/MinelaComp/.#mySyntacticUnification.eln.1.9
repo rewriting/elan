@@ -1,0 +1,144 @@
+module mySyntacticUnification[Vars,Ops,Types]
+import
+	Vars Ops Types int bool
+	msTermCommons[Vars,Ops,Types]
+	myEqSystem[Vars,Ops,Types]
+	sigFunctions[Types]
+	occur[variable,term]
+	occur[variable,eqSystem]
+	eq[symbol] eq[variable]
+	identity[eqSystem]
+	builtIn[Vars,Ops,Types]
+	;
+end
+
+operators
+  global
+    @ = @	: (term term) equation 		alias @=@:;
+    @ 		: ( equation ) eqSystem		alias @:;
+end
+
+stratop
+  global 
+    unify	: <eqSystem>		builtin;
+    unifys	: <eqSystem>		builtin;
+    match	: <eqSystem>		builtin;
+    matchs	: <eqSystem>		builtin;
+end
+
+rules for eqSystem
+	P,Q,R:eqSystem; s,t:term; x,y:variable;
+local
+
+  [trueelim]    P & true        => P                            end
+  [trueadd]     P               => true & P                     end
+  [truepropag]  true            => true                         end
+
+
+  [delete2] 	P & true & true	=> P & true
+  end
+  [delete3] 	P & false	=> false 
+  end
+
+
+  [delete] 	P & $s=$s	=> P
+  end
+
+  [coalesce] 	P & $x=$y	=> apply($x->$y,P) & $x=$y
+//		if occurs $x in P   and    occurs $y in P    and    neq_variable($x,$y)
+		if neq_variable($x,$y)
+  end
+  [conflict]	P & $s=$t	=> false
+			if neq_symbol(head($s),head($t))
+			if not(isvar($s))
+			if not(isvar($t))
+  end
+
+  [occ_check1]	P & $x=$s	=> false
+			if occurs $x in $s and not isvar($s)
+  end
+  [occ_check2]	P & $s=$x	=> false
+			if occurs $x in $s and not isvar($s)
+  end
+
+  [eliminate1]	P & $x=$s	=> apply($x->$s,P) & $x=$s
+		if not(occurs $x in $s)
+//		and   occurs $x in P
+//		and   not isvar($s)
+  end
+  [eliminate2]	P & $s=$x	=> apply($x->$s,P) & $x=$s
+		if not(occurs $x in $s)
+//		and   occurs $x in P
+//		and   not isvar($s)
+  end
+
+  [orient_unif]	P & $y=$x	=> P & $x=$y
+		if not occurs $x in P
+		and occurs $y in P
+  end
+  [orient_unif]	P & $t=$x	=> P & $x=$t
+		if not isvar($t)
+  end
+
+// Matching
+
+  [MergingClash] 	P & $x=$s & $x=$t	=> false
+			if neq_term($s,$t)
+  end
+  [SymbolVariableClash]	P & $s=$x	=> false
+			if not(isvar($s))
+  end
+end
+
+FOR EACH F:pair[identifier,sig]; N:int
+SUCH THAT F:=(listExtract) elem(Ops) AND N:=()arity(F) :{
+  rules for eqSystem
+        s_1,...,s_N:term;
+        t_1,...,t_N:term;
+        P :eqSystem;
+  local
+    [decompose]  P & F(s_1,...,s_N)=F(t_1,...,t_N)      => P { & s_I=t_I }_I=1..
+.N end
+  end
+}
+
+strategies for eqSystem
+implicit
+  [.] unify =>dc(trueadd);
+  repeat* (
+    dc(delete , delete2 , delete3 , decompose , conflict , coalesce , 
+       occ_check1 , occ_check2 , eliminate1 , eliminate2 , orient_unif)
+  );
+  dc(trueelim , identity)
+  end
+
+  [.] unifys =>
+  dc(trueadd);
+  repeat* (
+    dc(delete , delete2 , delete3 , decompose , conflict , coalesce , occ_check1 ,
+       occ_check2 , eliminate1 , eliminate2 , orient_unif)
+  );
+  dc(trueelim , truepropag)
+  end
+
+  [.] match =>
+  dc(trueadd);
+  repeat* (
+    dc(delete , delete2 , delete3 , decompose , conflict , MergingClash 
+	, SymbolVariableClash)
+  );
+  dc(trueelim , identity)
+  end
+
+  [.] matchs =>
+  first one(trueadd);
+  repeat*(
+    first one(delete, delete2, delete3, decompose, conflict, MergingClash,
+       SymbolVariableClash )
+  );
+  first one(trueelim , truepropag)
+  end
+end
+
+end
+

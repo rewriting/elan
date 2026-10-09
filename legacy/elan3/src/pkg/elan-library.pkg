@@ -1,0 +1,12 @@
+package
+identification
+         name=elan-library
+      version=1.0c
+     location=http://www.loria.fr/ELAN/Soft
+         info=http://www.loria.fr/ELAN
+  description='A library for the ELAN language.'
+     keywords=library, rewrite rules, strategies
+
+configuration interface
+
+requires

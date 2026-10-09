@@ -1,0 +1,61 @@
+module enum2
+
+import global int;
+end
+
+sort selection interval;
+end
+
+operators global
+ [@,@] : (int int) interval;
+ [@,@] : (int interval) selection;
+ getInt(@) : (selection) int;
+ enum(@,@) : (int int) int;
+end
+
+
+stratop global
+  s0    : <int>        builtin;
+  s1    : <int>        builtin;
+end
+
+
+
+rules for int
+  x,y,z,min,max : int;
+  i : interval;
+  s : selection;
+
+global
+  [] getInt([x,i]) => x end
+
+  [r0] enum(min,max) => getInt(s)
+	// one marche aussi
+	where s:=(iterate*( dc(R) )) [min,[min+1,max]]
+  end
+end
+
+rules for selection
+  x,min,max : int;
+global
+  [R] [x,[min,max]] => [min,[min+1,max]] if min <= max
+  end
+
+end
+
+
+strategies for int
+implicit
+  // ici : dc et non one
+  [.] s0 => dk(r0)
+  end
+end
+
+
+
+end
+
+/*
+
+query : enum(1,10)
+*/

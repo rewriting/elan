@@ -1,0 +1,7 @@
+LPL test_setof description
+
+  query    of sort list[pair] //pair
+  result   of sort list[pair] //pair
+  import   test_setof
+  start with (setofS) query
+end

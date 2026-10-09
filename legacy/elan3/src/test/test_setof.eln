@@ -1,0 +1,66 @@
+module test_setof
+
+import global 
+   list[pair] Meta_apply[pair];
+end
+
+sort elt set pair;
+end
+
+operators global
+ a    : elt;
+ b    : elt;
+ c    : elt;
+ d    : elt;
+
+ @    : (elt) set;
+ extract(@) : (set) pair;
+ @+@  : (set set) set (AC);
+ [@,@]: (elt elt) pair;
+ dolist(@)      : (set) list[pair];
+end
+
+stratop global 
+  S     : <pair> bs;
+  setofS: <list[pair]> bs;
+end
+
+rules for pair
+  x,y : elt;
+  Z   : set;
+global
+  [enum] extract(x + y)     => [x,y] end
+  [enum] extract(x + y + Z) => [x,y] end
+end
+
+
+rules for list[pair]
+  s : set;
+  p : pair;
+global
+  [setofRule] dolist(s) => set_of(call "S":pair, p)
+              where p:=() extract(s)
+  end
+end
+
+strategies for pair
+implicit
+  [.]  S => dk(enum) end
+end
+
+strategies for list[pair]
+implicit
+  [.]  setofS => dk(setofRule) end
+end
+
+
+end
+
+
+/*
+
+ extract(a + b +c)
+
+ dolist(a + b +c)
+
+*/

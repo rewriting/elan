@@ -1,0 +1,37 @@
+//
+//		(c)	INRIA-Lorraine & CRIN
+//			615, rue du Jardin Botanique, BP 101
+//		        54602 Villers-les-Nancy
+//			France
+//			email: elan@loria.fr
+//
+//	$Source: /CVS/aircube/elan3/doc/ElanLibCommon/anyIdentifier.eln,v $
+//	$Revision: 1.1 $
+//	$Date: 1997/03/25 16:46:43 $
+//	$Author: moreau $
+//
+
+module anyIdentifier
+
+/*
+	This module is		***built-in***
+	What follows are only	***comments*** 
+	for explaining its semantics
+
+sort ident;
+op
+ global
+
+ a 	: ident ;
+ b 	: ident ;
+ aa 	: ident ;
+ ab 	: ident ;
+ aab 	: ident ;
+ ...
+ ...
+
+end
+
+*/
+
+end

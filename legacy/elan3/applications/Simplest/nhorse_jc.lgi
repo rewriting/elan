@@ -1,0 +1,8 @@
+LPL nhorse_jc description 
+
+query 		of sort list
+      result 	of sort list
+      import    nhorse
+      start with (horse_strat) horse(5)
+
+end

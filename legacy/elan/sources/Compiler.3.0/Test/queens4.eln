@@ -1,0 +1,92 @@
+module queens4
+import 
+  bool int list[int] occur[int,list[int]];
+end
+operators
+  global
+    queens	: list[int];
+  local
+    ok(@,@,@)	: ( int int list[int] ) bool;
+    give(@)	: (list[int]) int;
+
+end
+
+stratop 
+  global
+	queens	: <list[int]>	builtin;
+  local
+	stry	: <int>		builtin;
+end
+
+rules for list[int]
+        p1,p2,p3,p4,p5,p6,p7,p8,p9,p10 : int;
+	pp1,pp2,pp3,pp4,pp5,pp6,pp7,pp8,pp9,pp10 : list[int];
+local
+   [queensrule] queens	=> p4.pp3
+			where p1:=(stry) give(nil)
+			where p2:=(stry) give(p1.nil)
+			where pp1:=() p1.nil
+			if ok(1,p2,pp1)
+			where p3:=(stry) give(p2.pp1)
+			where pp2:=() p2.pp1
+			if ok(1,p3,pp2)
+			where p4:=(stry) give(p3.pp2)
+			where pp3:=() p3.pp2
+			if ok(1,p4,pp3)
+  end
+end
+
+rules for bool
+          p,d,diff : int;
+	l : list[int];
+global
+  [] ok(diff,d,nil)	=> true				end
+  [] ok(diff,d,p.l)	=> false	if d == p  	end
+  [] ok(diff,d,p.l)	=> false        if d-p == diff  end
+  [] ok(diff,d,p.l)	=> false        if p-d == diff  end
+  [] ok(diff,d,p.l)	=> ok(diff+1,d,l)		end
+end
+
+
+rules for int
+	x:int;
+	l : list[int];
+local
+{
+  [tryrule] give(l) => I if not(occurs(I,l))	end
+}_I=1...4
+
+/*
+  [tryrule] x	=> 1	end
+  [tryrule] x	=> 2	end
+  [tryrule] x	=> 3	end
+  [tryrule] x	=> 4	end
+  [tryrule] x	=> 5	end
+  [tryrule] x	=> 6	end
+  [tryrule] x	=> 7	end
+  [tryrule] x	=> 8	end
+  [tryrule] x	=> 9	end
+  [tryrule] x	=> 10	end
+*/
+end
+
+strategies for int
+implicit
+  [] stry => dk(tryrule) end
+end
+
+strategies for list[int]
+implicit
+  [] queens => dk(queensrule) end
+end
+
+//strategies for int
+//local
+//  [try] dk(tryrule) end
+//end
+//strategies for list[int]
+//global
+//  [queens] dk(queensrule) end
+//end
+
+end			

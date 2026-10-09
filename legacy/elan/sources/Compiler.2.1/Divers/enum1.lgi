@@ -1,0 +1,7 @@
+ LPL enum1 description
+  query    of sort int
+  result   of sort int
+  import   enum1
+  start with (enumStrat) enum(1,3)
+
+end

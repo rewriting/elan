@@ -1,0 +1,18 @@
+LPL rocalculus description
+
+  specification description
+
+    part vars   of sort list[identifier]
+                import sigSyntax
+    part funs   of sort list[pair[identifier,int]]
+                import sigSyntax
+  end
+
+  query    of sort term // bool // list[variable] // substitution // int // eqSystem // 
+  result   of sort term // 
+  import
+	rocalculus[funs,vars]
+  // start with () query
+  // start with (one_step) query
+  start with (reduce) query
+end

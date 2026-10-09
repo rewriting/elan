@@ -1,0 +1,76 @@
+module matrix[X]
+
+import 
+global
+  int;
+local
+  vector[X] vector[vector[X]];
+end
+
+sort matrix[X] X;
+end 
+
+operators
+global
+  new(@,@,@)      : (int int X) matrix[X];
+
+  @.get(@,@)      : (matrix[X] int int) X;
+  @[@,@]          : (matrix[X] int int) X
+                     alias @.get(@,@):;
+
+  @.set(@,@,@)    : (matrix[X] int int X) matrix[X];
+  @[@,@]<-@       : (matrix[X] int int X) matrix[X]
+	             alias @.set(@,@,@) :;
+  @.clone	  : (matrix[X]) matrix[X];
+  clone(@)	  : (matrix[X]) matrix[X] alias @.clone:;
+
+local
+  [@]             : (vector[vector[X]]) matrix[X];
+  newCol(@,@,@,@) : (vector[vector[X]] int int X)
+                     vector[vector[X]];
+
+  @.init(@,@)	  : (matrix[X] vector[vector[X]] int) matrix[X];
+end
+
+rules for matrix[X]
+  i,j    : int;
+  t,v    : vector[vector[X]];
+  x      : X;
+  empty  : vector[X];
+global
+  // create an array of columns
+  [] new(i,j,x) => [newCol(new(i,empty),i,j,x)]
+		   where empty :=() new(j,x)            end	      
+  [] [t][i,j]<-x => [t.set(i,t[i][j]<-x)]               end
+
+  [] clone([t]) => [new(t.length,t[0])].init(t,t.length-1) end
+  [] [v].init(t,0) => [v[0]<-clone(t[0])]			end
+  [] [v].init(t,i) => [v[i]<-clone(t[i])] if i>0		end
+
+end
+
+rules for vector[vector[X]]
+  i,j    : int;
+  t      : vector[vector[X]];
+  x      : X;
+global
+  // build a col=array[j]
+  // fill t[i]=col
+  [] newCol(t,i,j,x) => newCol(t[i-1]<-new(j,x),i-1,j,x)
+                        if i>1                            end
+  [] newCol(t,1,j,x) => t[0]<-new(j,x)                    end
+end
+
+rules for X
+  i,j : int;
+  t   : vector[vector[X]];
+global
+  [] [t][i,j] => t[i][j]                                  end
+end
+
+end
+				
+
+
+
+

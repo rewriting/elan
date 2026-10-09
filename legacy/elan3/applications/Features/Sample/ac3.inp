@@ -1,0 +1,5 @@
+g(U(a,V(a,c)),V(a,b))  end
+U(a,U(V(a,b),V(a,c))) end
+U(a,U(V(a,b),U(V(a,c),V(a,d)))) end
+
+

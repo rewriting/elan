@@ -1,0 +1,70 @@
+#! /bin/csh -f
+#        LGI         SPC        INP        OUT
+
+if ($1 =~ *I*) then
+echo "Interpreter"
+itest     prim       no         primes     primes
+itest     primes     no         primes     primes
+itest     main       no         main       main  
+itest     hanoi      no         hanoi      ihanoi
+itest     nhorse     no         nhorse     inhorse
+itest     fib        no         ifib       ifib
+if ($1 =~ *L*) then
+  itest     nqueens    no         nqueens    nqueens
+  itest     queens     no         queens     queens
+  itest     hor	       no	  hor        hor
+endif
+endif
+
+if ($1 =~ *J*) then
+echo "Java Compiler"
+jtest     prim_jc       no      prim_jc	
+jtest     primes_jc     no      primes_jc	
+jtest     main_jc       no      main_jc 	
+jtest     hanoi_jc      no      hanoi_jc	
+jtest     nhorse_jc     no      nhorse_jc 	
+jtest     fib_jc        no      fib_jc	
+jtest     nqueens_jc    no      nqueens_jc
+jtest     queens_jc     no      queens_jc
+endif
+
+if ($1 =~ *I* && $1 =~ *A*) then
+#if ( $1 =~ *A*) then
+echo "Aterm-Interpreted"
+aitest     prim       no         primes     primes
+aitest     primes     no         primes     primes
+aitest     hanoi      no         hanoi      ihanoi
+aitest     nhorse     no         nhorse     inhorse
+aitest     fib        no         ifib       ifib
+aitest     main       no         main       main  
+if ($1 =~ *L*) then
+  aitest     nqueens    no         nqueens    nqueens
+  aitest     queens     no         queens     queens
+endif
+endif
+
+if ($1 =~ *C*) then
+echo "Compiler"
+ctest     prim       no         primes     cprimes
+ctest     primes     no         primes     cprimes
+ctest     hanoi      no         hanoi      chanoi
+ctest     nhorse     no         nhorse     cnhorse
+ctest     fib        no         cfib       cfib
+if ($1 =~ *L*) then
+  ctest     nqueens    no         nqueens    cnqueens
+  ctest     queens     no         queens     cqueens
+endif
+endif
+
+if ($1 =~ *C* && $1 =~ *A*) then
+echo "Aterm-Compiler"
+actest     prim       no         primes     cprimes
+actest     primes     no         primes     cprimes
+actest     hanoi      no         hanoi      chanoi
+actest     nhorse     no         nhorse     cnhorse
+actest     fib        no         cfib       cfib
+if ($1 =~ *L*) then
+  actest     nqueens    no         nqueens    cnqueens
+  actest     queens     no         queens     cqueens
+endif
+endif

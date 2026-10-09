@@ -1,0 +1,6 @@
+LPL simplePair description
+	query    of sort	Pair
+	result of sort		Pair
+	import			simplePair
+	start with		()query
+end

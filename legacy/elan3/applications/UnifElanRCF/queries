@@ -1,0 +1,45 @@
+// elan.t4 -q Unif simplesig
+
+f0(x,y) = f0(y,x) end
+
+f0(x,y)  = f0(u,v) & x = a & y = b end
+
+f0(x,y) = f0(u,u) end
+
+f0(x,y) = f0(u,v) end
+
+f0(x,f0(x,y)) = f0(u,v) end
+
+// elan.t4 -q combiRCF sigRCF
+// unifelan is called 2 times: for AC and for 0.
+
+f0(x,y) = f0(u,v) end
+
+g(f0(x,y)) = g(f0(u,v)) end
+
+g(f0(x,y)) = g(f0(u,v)) & u = h(a,b) end
+
+g(f0(x,f0(y,h(a,a)))) = g(f0(u,v)) end
+
+g(f0(g(x),f0(g(x),y))) = g(f0(u,v)) end
+
+f0(x,y) = g(v) end
+
+x = f0(u,v) & v = g(y) & y = f0(x,w) end
+
+// elan.t4 -q combiACplusC sigACplusC
+// h is commutative (elan program derived from unification0)
+
+h(x,y) = h(a,b) end
+
+h(f0(x,y),z) = h(a,f0(u,v)) end
+
+g(h(x,a)) = g(h(a,f0(u,v))) end
+
+f0(h(x,y),f0(y,z)) = f0(u,h(y,y)) end
+
+h(g(x),g(h(u,v))) = h(g(h(a,b)),g(h(b,b))) end
+
+
+
+

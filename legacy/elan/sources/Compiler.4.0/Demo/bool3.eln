@@ -1,0 +1,84 @@
+module bool3
+
+import eq[Bool3] bool;
+end
+
+sort Bool3;
+end
+
+operators global
+  b0		: Bool3;
+  b1		: Bool3;
+  b2		: Bool3;
+
+  a1		: Bool3;
+  a2		: Bool3;
+  a3		: Bool3;
+  a4		: Bool3;
+  a5		: Bool3;
+  a6		: Bool3;
+  a7		: Bool3;
+  a8		: Bool3;
+
+  p(@,@)	: (Bool3 Bool3) Bool3 (AC);
+  m(@,@)	: (Bool3 Bool3) Bool3 (AC);
+
+  and(@,@)	: (Bool3 Bool3) Bool3;
+  or(@,@)	: (Bool3 Bool3) Bool3;
+  not(@)	: (Bool3) Bool3;
+
+  start		: bool;
+end
+
+rules for Bool3
+  X,Y,Z         : Bool3;
+  mX,mY,mZ,tZ   : Bool3;
+global
+  [] p(X, p(X, X)) => b0 end
+  [] p(b0, X) => X end
+
+  [] m(b1, X) => X end
+  [] m(X, m(X, X)) => X end
+  [] m(b0, X) => b0 end
+  [] m(p(X, Y), Z) => p(m(X, Z), m(Y, Z)) end
+  [] b2 => p(b1, b1) end
+  [] not(X) => p(m(b2, X), b1) end
+ 
+  [] and(X,Y) =>
+		   p( m(mX, mY),
+                   p( m(b2, m(mX, Y)),
+                   p( m(b2, m(mY, X)),
+                   m(b2, m(X, Y)) )))
+		   where mX:=() m(X,X)
+		   where mY:=() m(Y,Y)
+  end
+  [] or(X,Y) =>   p( m(b2, m(mX, mY)),
+                  p( m(mX, Y),
+                  p( m(mY, X),
+                  p( m(X, Y),
+                  p(X, Y) ))))
+		  where mX:=() m(X,X)
+		  where mY:=() m(Y,Y)
+  end
+
+end
+
+rules for bool
+global
+  [] start => 
+     and(and(and(a1, a2), and(a3, a4)), and(and(a5, a6), and(a7, a8)))
+     ==
+     not(or(or(or(not(a1), not(a2)), or(not(a3), not(a4))),
+            or(or(not(a5), not(a6)), or(not(a7), not(a8)))))
+
+/*
+     and(and(and(a1, a2), and(a3, a4)),and(a5,a6))
+     ==
+     not(or(or(or(not(a1), not(a2)), or(not(a3), not(a4))),or(not(a5),not(a6))))
+*/
+
+  end
+end
+
+end
+

@@ -1,0 +1,62 @@
+module testVector
+
+import bool vector[Term] int;
+end
+
+sort Term;
+end 
+
+operators global
+  go     : Term;
+  empty  : Term; 
+  a      : Term; 
+  b      : Term; 
+  c      : Term; 
+
+  array1 : vector[Term];
+  array2 : vector[Term];
+
+  g(@)   : (int) vector[Term];
+
+end
+
+rules for Term
+ x,y : Term;
+global
+
+  [] go      => array2.clone[0]
+  end
+
+end
+
+rules for vector[Term]
+  X    : vector[Term];
+  tmp1 : vector[Term];
+  tmp2 : vector[Term];
+  i : int;
+  
+global
+  [] array1      => X 
+                    where tmp1 :=() new(2,empty)
+                    where tmp2 :=() tmp1[0]<-a
+                    where X :=()    tmp2[1]<-b
+  end
+
+  [] array2      => new(3,empty)
+                    [0]<-c
+		    [1]<-b
+                    [2]<-a
+  end
+
+  [] g(i)      => new(i,empty) 
+  end
+
+
+end
+
+end
+				
+
+
+
+

@@ -1,0 +1,20 @@
+#! /bin/sh
+# les modifs faites dans unif (ck uniquement) :
+# syntaxe des termes (cf lex_parse)
+# symboles AC termines par 0
+# plus de termes aplatis en sortie -> associatif droit
+# nouvelles variables en sortie de la forme x:99
+# variables en entree: x ou x.9999 ou vabst[ n'importe quoi ] 
+#
+# option -elan pour avoir un affichage correpondant au protocole d'elan
+#
+#
+/users/protheo/ringeiss/UnifElan/bin/`uname -m`/ck -elan | sed -f call2io
+#
+# les lignes suivantes sont a virer si io ! (plus de protocole ...)
+#
+#read r
+#while (test "$r" != ";") do 
+#  read r 
+#done
+

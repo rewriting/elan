@@ -1,0 +1,34 @@
+
+(
+Tr=s_d0.(q(t_d0).Tr + q(t_b).Tr)
+ + s_d1.(q(t_d1).Tr + q(t_b).Tr),
+
+Ac=r_0.(q(a_0).Ac+q(a_b).Ac) 
+ + r_1.(q(a_1).Ac+q(a_b).Ac),
+
+S_0=acc_d.S_d0, 
+
+S_1=acc_d.S_d1, 
+ 
+S_d0=q(s_d0).W_d0,
+S_d1=q(s_d1).W_d1,
+
+W_d0=a_0.S_1 + a_1.S_d0 + a_b.S_d0,
+W_d1=a_1.S_0 + a_0.S_d1 + a_b.S_d1,
+
+R_0 = t_d0.       Rp_d0   
+    + t_d1.q(r_1).R_0   
+    + t_b .q(r_1).R_0,
+
+R_1 = t_d1.       Rp_d1   
+    + t_d0.q(r_0).R_1    
+    + t_b .q(r_0).R_1,
+
+Rp_d0 = q(del_d).q(r_0).R_1,
+Rp_d1 = q(del_d).q(r_1).R_0,
+
+def Rest = [ s_d0,s_d1,t_d0,t_d1,r_0,r_1,a_0,a_1,t_b,a_b ],
+
+ABP = new Rest (S_0 | Tr | R_0 | Ac);
+
+ABP) @

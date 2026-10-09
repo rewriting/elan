@@ -1,0 +1,21 @@
+LPL unification description
+
+  specification description
+
+    part Vars	of sort list[identifier]
+	 	import sigSyntax
+    part Ops	of sort list[pair[identifier,int]]
+	 	import sigSyntax
+  end
+
+  query 	of sort constraint
+         	result of sort constraint
+	 	import unification[Vars,Ops]
+			constraint[Ops,Vars]
+			termCommons[Ops,Vars]
+//         	start with (unify) query 
+//         	start with (unify) g(x) = g(a)
+		start with (unify) f(x,f(y,x))=f(a,f(f(z,f(u,v)),u)) 
+//         	start with (matchs) query 
+end
+

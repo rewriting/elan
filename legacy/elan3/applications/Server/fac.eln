@@ -1,0 +1,70 @@
+module fac
+
+import e_list[term];
+end
+
+sort term any;
+end
+
+operators
+global
+  [@] : (term) any;
+  o : term;
+  s(@)		: (term) term;
+  @ + @		: (term term) term;
+  plus_term(@,@): (term term) term alias @+@:;
+  times(@,@)	: (term term) term;
+  fac(@)	: (term) term;
+  fib(@)	: (term) term;
+  test(@,@)	: (term term) term;
+
+// modify elan-interpreter/src/module.cc and add the "fac" module
+  foo(@)	: (any) any  code 220; // see elan-compiler/runtime/builtin.h
+  bar(@)	: (term) term;
+  get_term(@)	: (any) term;
+
+  start		: term;
+end
+
+stratop global
+  s0    : <term>        builtin;
+end
+
+rules for term
+	x,y : term;
+global 
+  [] o + x    => x 			end
+  [] s(x) + y => x + s(y)	end
+  [] times(o,x)=> o			end
+  [] times(s(x),y) => y + times(x,y) end
+  [] fac(o) => s(o)			end
+  [] fac(s(x)) => times(s(x),fac(x))	end
+
+  [] fib(o) => s(o)			end
+  [] fib(s(o)) => s(o)			end
+  [] fib(s(s(x))) => fib(x) + fib(s(x))	end
+
+  [r0] test(s(x),y) => test(x,bar(y))
+  end
+
+  [] start => test( fac(s(s(s(s(s(s(s(o)))))))) , o ) end
+  [] get_term([x]) => x end
+end
+
+rules for term
+ x,y : term;
+global 
+  [] bar(x) => y 
+	    where (any) [y] :=() foo([x])
+  end
+end
+
+strategies for term
+implicit
+  [.] s0 => repeat*( dc(r0) )
+  end
+
+end
+
+
+end

@@ -1,0 +1,9 @@
+LPL lis3 description
+
+query		of sort  	integ
+		result of sort 	integ
+		import 	lis3_int
+		start with	[lis(swap)]query
+
+end
+

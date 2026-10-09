@@ -1,0 +1,6 @@
+LPL coq_group description
+    query of sort 0
+    result of sort 0
+    import coq_group
+    start with  () query
+end

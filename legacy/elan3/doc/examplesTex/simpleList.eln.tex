@@ -1,0 +1,25 @@
+
+\let\CF=\rm
+% Remember to use the lgrind style
+
+\File{simpleList.eln},{17:23},{Jun 21 1996}
+\L{\LB{\K{module}_\V{list}[\V{X}]}}
+\L{\LB{\K{sort}_\V{X}_\V{list}[\V{X}];}}
+\L{\LB{\K{op}}}
+\L{\LB{__\K{global}}}
+\L{\LB{}}
+\L{\LB{____\V{nil}}\Tab{16}{:_\V{list}[\V{X}];}}
+\L{\LB{____@_._@}\Tab{16}{:_(_\V{X}_\V{list}[\V{X}]_)_\V{list}[\V{X}];}}
+\L{\LB{____\V{append}(@,@)}\Tab{16}{:_(_\V{list}[\V{X}]_\V{list}[\V{X}]_)_\V{list}[\V{X}];}}
+\L{\LB{}}
+\L{\LB{\K{endop}}}
+\L{\LB{}}
+\L{\LB{\K{rules}_\K{for}_\V{list}[\V{X}]}}
+\L{\LB{\K{declare}}\Tab{8}{\V{e}_}\Tab{16}{:_\V{X};}}
+\L{\LB{}\Tab{8}{\V{l},\V{l1},\V{l2}}\Tab{16}{:_\V{list}[\V{X}];}}
+\L{\LB{\K{bodies}}}
+\L{\LB{__[\,]_\V{append}(\V{nil},\V{l})}\Tab{24}{=\>_\V{l}}\Tab{56}{\K{end}}}
+\L{\LB{__[\,]_\V{append}(\V{e}.\V{l1}_,_\V{l2})}\Tab{24}{=\>_\V{e}_._\V{append}(\V{l1},\V{l2})}\Tab{56}{\K{end}}}
+\L{\LB{\K{end}_\K{of}_\K{rules}}}
+\L{\LB{}}
+\L{\LB{\K{end}_\K{of}_\K{module}}}

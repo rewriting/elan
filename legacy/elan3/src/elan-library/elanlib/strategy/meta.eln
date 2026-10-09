@@ -1,0 +1,23 @@
+// This file is generated automatically: do not edit it directly. 
+  module meta[Y]
+          import global int strat[Y];
+          end
+          stratop global
+             TRY @                : (<Y>) <Y>;
+             repeat @             : (<Y>) <Y>;
+             repeat-@ @           : (int <Y>) <Y>;
+             while @              : (<Y>) <Y>;
+             dcwhile @            : (<Y>) <Y>;
+          end
+          strategies for Y
+           n : int; s : <Y>;
+          implicit
+            [.] repeat s =>   first(s;repeat s,id)        end
+            [.] repeat-0 s =>   id                        end
+            [.] repeat-n s =>   s; repeat-n-1 s           end
+            [.] while s =>   dk(id, s;while s)            end
+            [.] dcwhile s =>   dc(s;dcwhile s, id)        end
+            [.] TRY s =>   first(s,id)                    end
+          end
+  end  
+

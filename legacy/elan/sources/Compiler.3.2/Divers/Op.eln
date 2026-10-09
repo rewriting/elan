@@ -1,0 +1,56 @@
+module Op
+
+import
+global	
+	bool
+	;
+end
+
+sort
+
+	formula;
+
+end
+
+operators
+global
+
+	a		:					formula;
+	b		:					formula;
+	RIEN		:					formula;
+	@ & @		: (formula formula)			formula	(AC);
+
+	NOT(@)		: (formula)				formula;
+
+	WithoutNot(@)	: (formula)				formula;
+end
+
+
+rules for formula
+	c,c1	: formula;
+global 
+
+[]	c & c
+	=>
+	c
+end
+
+
+[EliminateNOT]
+
+	NOT(c)
+	=>
+	RIEN
+end
+
+[]	WithoutNot(c)
+	=>
+	c1
+	where	c1:= (normalise( dc one (EliminateNOT) ))c
+end
+
+end
+
+
+end
+

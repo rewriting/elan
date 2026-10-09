@@ -1,0 +1,79 @@
+module purifcombiSystem
+
+import 
+      global term varabst combiSystem ;
+
+      local bool int eqSystem 
+      purify ;
+
+end
+
+rules for combiSystem
+
+//declare 
+
+PH,QH,P1,Q1,P2,Q2,Sol:eqSystem ; s,t: term ; 
+
+global
+
+
+[clash]    PH & s=t . P1 . P2 . Sol  => 
+           false    . P1 . P2 . Sol 
+           if (not isvar(s)) and  (not isvar(t))
+           and theory(s) != theory(t)
+end
+
+[clash]    s=t      . P1 . P2 . Sol  => 
+           false    . P1 . P2 . Sol 
+           if (not isvar(s)) and  (not isvar(t))
+           and theory(s) != theory(t)
+end
+
+[pure1]     PH & s=t . true . P2 . Sol    => 
+            PH       . s = t . P2 . Sol
+            if (pure(s,1) and pure(t,1))
+end
+
+[pure1]     s=t . true . P2 . Sol    => 
+            true. s=t . P2 . Sol
+            if (pure(s,1) and pure(t,1))
+end
+
+[pure1]     PH & s=t . P1 . P2 . Sol    => 
+            PH       . P1 & s = t . P2 . Sol
+            if pure(s,1) and pure(t,1)
+end
+
+[pure1]     s=t . P1 . P2 . Sol    => 
+            true. P1 & s = t . P2 . Sol
+            if (pure(s,1) and pure(t,1))
+end
+
+
+[pure2]     PH & s=t . P1 . true . Sol    => 
+            PH       . P1 . s=t  . Sol
+            if (pure(s,2) and pure(t,2))
+end
+
+
+[pure2]     s=t . P1 . true . Sol    => 
+            true. P1 . s=t . Sol
+            if (pure(s,2) and pure(t,2))
+end
+
+[pure2]     PH & s=t . P1 . P2 . Sol    => 
+            PH       . P1 . P2 & s = t . Sol
+            if pure(s,2) and pure(t,2)
+end
+
+[pure2]     s=t . P1 . P2 . Sol    => 
+            true. P1 . P2 & s = t . Sol
+            if pure(s,2) and pure(t,2)
+end
+
+
+end
+ 
+
+end
+

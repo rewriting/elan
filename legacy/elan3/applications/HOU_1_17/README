@@ -1,0 +1,5 @@
+This version of HOU runs with non_quoted library::
+
+i.e.
+
+setenv ELANLIB ~/elan/noquoted_elanlib

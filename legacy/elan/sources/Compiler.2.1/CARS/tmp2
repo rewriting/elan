@@ -1,0 +1,42 @@
+global rule base:set[pair[symbole,set[lm_symbole]]]/prod_rules[Vars,Ops,Faits,Rules] [1/1/fsym=415/vars=6]
+[|Aerodynamic|, VAR(0)]U[|Body_Shape|, VAR(1)]U VAR(2) 
+=>
+[|Aerodynamic|, VAR(3).nil+U VAR(4)]U[|Body_Shape|, VAR(3).nil+U VAR(5)]U VAR(2)
+     where (set[lm_symbole]) VAR(3).nil+U VAR(4) := ()  VAR(0)
+     where (set[lm_symbole]) VAR(3).nil-U VAR(5) := ()  VAR(1)
+
+global rule base:set[pair[symbole,set[lm_symbole]]]/prod_rules[Vars,Ops,Faits,Rules] [2/2/fsym=415/vars=6]
+ [|Color_Choices|, VAR(0)]U[|Look|, VAR(1)]U VAR(2)      => [|Color_Choices|, VAR(3).nil+U VAR(4)]U[|Look|, VAR(3).nil+U VAR(5)]U VAR(2)
+
+     where (set[lm_symbole]) VAR(3).nil+U VAR(4) := ()  VAR(0)
+     where (set[lm_symbole]) VAR(3).nil-U VAR(5) := ()  VAR(1)
+
+global rule base:set[pair[symbole,set[lm_symbole]]]/prod_rules[Vars,Ops,Faits,Rules] [3/3/fsym=415/vars=6]
+ [|Most_Beautiful|, VAR(0)]U[|Look|, VAR(1)]U VAR(2)     => [|Most_Beautiful|,|Cadillac|. VAR(3).nil+U VAR(4)]U[|Look|, VAR(3).nil+U VAR(5)]U VAR(2)
+
+     where (set[lm_symbole])|head(Cadillac)|. VAR(3).nil+U VAR(4) := ()  VAR(0)
+     where (set[lm_symbole]) VAR(3).nil-U VAR(5) := ()  VAR(1)
+
+global rule base:set[pair[symbole,set[lm_symbole]]]/prod_rules[Vars,Ops,Faits,Rules] [4/4/fsym=415/vars=8]
+ [|Price_Less_Than_7000|, VAR(0)]U[|Low_Cost|, VAR(1)]U[|Most_Beautiful|, VAR(2)]U VAR(3)        => [|Price_Less_Than_7000|, VAR(4).nil+U VAR(5)]U[|Low_Cost|, VAR(4).nil+U VAR(6)]U[|Most_Beautiful|,|Corvette|. VAR(4).nil+U VAR(7)]U VAR(3)
+
+     where (set[lm_symbole]) VAR(4).nil+U VAR(5) := ()  VAR(0)
+     where (set[lm_symbole]) VAR(4).nil-U VAR(6) := ()  VAR(1)
+     where (set[lm_symbole])|head(Corvette)|. VAR(4).nil-U VAR(7) := ()  VAR(2)
+
+global rule base:set[pair[symbole,set[lm_symbole]]]/prod_rules[Vars,Ops,Faits,Rules] [5/5/fsym=415/vars=8]
+ [|Spacious|, VAR(0)]U[|Extra_Opt|, VAR(1)]U[|Comfortable|, VAR(2)]U VAR(3)     => [|Spacious|, VAR(4).nil+U VAR(5)]U[|Extra_Opt|, VAR(4).nil+U VAR(6)]U[|Comfortable|, VAR(4).nil+U VAR(7)]U VAR(3)
+
+     where (set[lm_symbole]) VAR(4).nil+U VAR(5) := ()  VAR(0)
+     where (set[lm_symbole]) VAR(4).nil+U VAR(6) := ()  VAR(1)
+     where (set[lm_symbole]) VAR(4).nil-U VAR(7) := ()  VAR(2)
+
+global rule base:set[pair[symbole,set[lm_symbole]]]/prod_rules[Vars,Ops,Faits,Rules] [6/6/fsym=415/vars=10]
+[|Look|, VAR(0)]U[|Most_Beautiful|, VAR(1)]U[|Aerodynamic|, VAR(2)]U[|Price_Less_Than_7000|, VAR(3)]U VAR(4) 
+=>
+[|Look|, VAR(5).nil+U VAR(6)]U[|Most_Beautiful|,|Cadillac|. VAR(5).nil+U VAR(7)]U[|Aerodynamic|, VAR(5).nil+U VAR(8)]U[|Price_Less_Than_7000|, VAR(5).nil+U VAR(9)]U VAR(4)
+
+     where (set[lm_symbole]) VAR(5).nil+U VAR(6) := ()  VAR(0)
+     where (set[lm_symbole])|head(Cadillac)|. VAR(5).nil+U VAR(7) := ()  VAR(1)
+     where (set[lm_symbole]) VAR(5).nil-U VAR(8) := ()  VAR(2)
+     where (set[lm_symbole]) VAR(5).nil-U VAR(9) := ()  VAR(3)

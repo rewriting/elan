@@ -1,0 +1,31 @@
+module fromto
+
+import global int string io[string] io[int]; end
+
+operators global
+  doit		: int;
+  sum(@,@)	: (int int) int;
+  prod(@,@)	: (int int) int;
+end   
+
+rules for int
+n, m	: int;
+input,
+output	: int;
+void	: string;
+global
+ /* solver interface */
+ [] doit => output
+	where input:=()read(stdin)
+	where output:=()write(stdout,input)
+	where void:=()write(stdout," end\n")
+  end
+ []	sum(m,n) => 0 if m > n 		end
+ []  	sum(n,n) => n  			end
+ []  	sum(n,m) => n+sum(n+1,m) 	end
+ []	prod(m,n) => 0 if m > n 		end
+ []  	prod(n,n) => n  		end
+ []  	prod(n,m) => n*prod(n+1,m) 	end
+end
+
+end

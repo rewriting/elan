@@ -1,0 +1,57 @@
+module set[X]
+
+import global eq[X] bool;
+end
+
+sort X set[X];
+end
+
+operators global
+  // emptySet_X : set[X];
+  [] : set[X]; //alias emptySet_X :;
+  @,@ : (X set[X]) set[X] pri 30;
+  @         : (X) set[X]; 
+  elem(@) : (set[X]) X;
+  i(@,@) : (X set[X]) set[X] pri 30 alias @,@ :;
+  @ u @ : (set[X] set[X]) set[X] pri 20;
+  @ is-in @ : (X set[X]) bool pri 5;
+end
+
+rules for X 
+  x:X; 
+  xs:set[X];
+global
+  [ex]   elem(i(x,xs)) => x end
+  [cont] elem(i(x,xs)) => elem(xs) end
+end
+
+stratop global
+   find: <X -> X> bs;
+end
+
+
+
+rules for set[X]
+  x,y:X; 
+  xs,ys:set[X];
+global
+  [] x  => i(x,[]) end
+  [] [] u xs => xs end
+  [] i(y,ys) u xs => ys u y,xs end
+end
+
+rules for bool
+  $x,$y:X; 
+  xs: set[X];
+global
+  [] x is-in [] => false end
+  [] x is-in i(y,xs) => true if $x == $y end
+  [] x is-in i(y,xs) => x is-in xs end
+end
+
+strategies for X
+  implicit
+    [.] find => iterate*( cont); dc(ex) end
+end
+
+end

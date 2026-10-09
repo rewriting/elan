@@ -1,0 +1,32 @@
+module match_system[Fss, Vars]
+import local ECterm[Vars] Cterm[Fss];
+end
+
+sort equation conj_match disj_match;
+end
+
+operators
+global
+	(@ ?= @)		: (Cterm Cterm) equation;
+	@ ?= @		: (Cterm Cterm) equation	alias (@ ?= @):;
+
+	true		: conj_match;
+	(@ ^ @)		: (equation conj_match) conj_match;
+	@ ^ @		: (equation conj_match) conj_match  alias(@ ^ @):;
+	add(@, @)	: (conj_match conj_match) conj_match;
+	
+	false		: conj_match;
+	false		: disj_match;	
+	(@ v @)		: (conj_match disj_match) disj_match;
+	@ v @		: (conj_match disj_match) disj_match alias (@ v @):;
+end
+
+rules for conj_match
+	phi1, phi2: conj_match;
+	e: equation;
+global
+[] add(true, phi2) => phi2  end
+[] add(e ^ phi1, phi2) => e ^ add(phi1, phi2)  end
+end
+
+end

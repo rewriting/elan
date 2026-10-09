@@ -1,0 +1,81 @@
+module tcstrat[X,Y]
+
+//--- Use this module, if you want to work with type-changing strategies
+//--- of the following kind X->Y
+
+//--- strcommons.begin
+import global bool strsig[X,Y] eq[Y] eq[yesno] strass;
+end
+sort StrList[X,Y] Strat[X,Y] yesno;	// an auxiliary 'bool' sort 
+end
+operators local
+  yes		: yesno;	// an auxiliary 'true'
+  no		: yesno;	// an auxiliary 'false'
+  nf(@)		: (Y) yesno;	// an auxiliary symbol for the rule FIN
+end
+
+rules for Y
+ a, l	: X;			b, r	: Y;
+ s1, s2 : <X->Y>;		ss1 	: StrList[X,Y];
+ cond	: bool;			kond	: yesno;
+global
+  [IF1] [if true then s1 else s2 fi]a => b 	where b :=[s1]a end
+  [IF2] [if false then s1 else s2 fi]a => b 	where b :=[s2]a end
+  [DK]  [dk(s1,ss1)]a => b where b:=[s1]a 			end
+  [DK]  [dk(s1,ss1)]a => b where b:=[dk(ss1)]a 			end
+  [DC1] [dc(s1,ss1)]a => b where b:=[s1]a 			end
+  [DC2] [dc(s1,ss1)]a => b where b:=[dc(ss1)]a 			end
+  [FIN] b => b where kond:=(dc(NF1||NF2))nf(b)  if kond == yes  end
+end
+//------------------------------------------------------------
+rules for yesno
+ a	: X;			b	: Y;	
+ s	: <X->Y>;
+local
+  [NF1]	nf([s]a)	=> no				end
+  [NF2]	nf(b)		=> yes				end
+end
+// --- strcommons.end
+
+rules for Y
+ b : Y;
+global
+  // the following rules are added because of `missing rule warning'
+  [ID]		b => b if false					end
+  [CONST] 	b => b if false					end
+  [IFO1] 	b => b if false					end
+  [IFO2] 	b => b if false					end
+  [IFO3] 	b => b if false					end
+  [FSYM] 	b => b if false					end
+  [LAB] 	b => b if false					end
+  [DSTR]	b => b if false					end
+  [CONCAT]	b => b if false   				end
+end
+
+strategies for Y		// evaluation ELAN-strategy of the interpreter
+global 
+[eval] 
+  repeat* (
+   dc(
+     dk(FSYM)  						||
+     dk(DSTR)  						||
+     dk(DK)						||
+     dk(DC1) || dk(DC2)					||
+     dk(LAB)  						||
+     dc(ID)						||
+     dc(CONST)						||
+     dk(CONCAT)  					||
+     dk(IF1) || dk(IF2) 				||
+     dc( dk(IFO1) 					|| 
+     dk(IFO2) ); dk(IFO3) )
+  );
+  dc(FIN)  
+  end
+end
+
+end
+
+
+
+
+

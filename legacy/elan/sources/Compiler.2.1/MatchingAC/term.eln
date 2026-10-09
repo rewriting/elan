@@ -1,0 +1,76 @@
+module term
+
+import global	eq[term] eq[variable] eq[Fsymbol] substitution;
+       local	int bool list[int] list[variable]; 
+       end
+
+sort Fsymbol variable term; end 
+
+
+operators
+
+  global
+
+  var___symbol          : Fsymbol ;
+
+  var(@)       		: ( int ) variable;
+  @            		: ( variable ) term		pri 1000;
+
+
+  varlist_Vars	: list[variable];
+  varnum_Vars         : int;
+
+  head(@) : (term) Fsymbol ;
+
+  arity(@): (Fsymbol) int ;
+
+
+  @-th subterm(@) 	: ( int term ) term;
+  isvar(@)              : ( term ) bool;
+  nvocc(@)              : ( term ) list[int];
+
+  @ at @                : ( term list[int] ) term;
+  @[@] at @             : ( term term list[int] ) term;
+
+  rename_subst(@,@)     : ( list[variable] int ) substitution;
+
+end
+
+rules for term
+ t,s:term;  i:int;  l:list[int];
+global 
+  [] t at nil   	=> t				end
+  [] t at i.l		=> i-th subterm(t) at l		end
+  [] t[s] at nil        => s				end
+end
+
+rules for bool
+ v:variable; t:term;
+global
+  [] isvar(v)   => true					end
+  [] isvar(t)   => false				end
+end
+
+rules for substitution
+ i:int; vn:variable; vl:list[variable];
+global
+  [] rename_subst(nil,i)     => identity			    end
+  [] rename_subst(vn.vl , i) => vn->var(i) o rename_subst(vl , i+1) end
+end
+
+rules for list[int]
+ t:term;
+global
+  [topOccRule]  nvocc(t)          => nil	if not isvar(t)	    end
+end
+
+rules for Fsymbol 
+ x:variable;
+global
+  [] head(x)	=> var___symbol end
+end
+
+
+end
+
+

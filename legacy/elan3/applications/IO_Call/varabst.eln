@@ -1,0 +1,38 @@
+module varabst
+import
+	local term int ;
+end
+
+
+operators
+
+global
+
+vabst[@]        : ( term) variable ;
+xnew.@          : (int) variable ;
+
+maxv(@,@)       : (term variable) int ;    
+@ ?max @        : (int int) int           assocLeft;
+
+end
+
+      rules for int 
+      // declare 
+
+      n1,n2:int ; s:term ;
+       
+      global
+   
+      [] n1 ?max n2 => n1 if n1 >= n2 end
+      [] n1 ?max n2 => n2 if n1 < n2 end
+      [] maxv(var(n1),var(n2)) => n1 ?max n2 end
+      [] maxv(xnew.n1,xnew.n2) => n1 ?max n2  end
+      [] maxv(var(n1),xnew.n2) => n2 end
+      [] maxv(xnew.n1,var(n2)) => n2 end
+      [] maxv(vabst[s],xnew.n2) => n2 end
+      [] maxv(vabst[s],var(n2)) => n2 end
+      
+      end
+
+end
+

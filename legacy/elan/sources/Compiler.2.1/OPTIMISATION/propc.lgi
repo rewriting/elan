@@ -1,0 +1,9 @@
+LPL propc description
+
+  query 	of sort Prop
+         	result of sort Prop
+	 	import propc
+//         	start with () query
+         	start with () q1
+end
+

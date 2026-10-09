@@ -1,0 +1,39 @@
+module triple[X,Y,Z]
+import bool;
+sort X Y Z triple[X,Y,Z];
+op
+  global
+
+    [@,@,@]	: ( X Y Z ) triple[X,Y,Z];
+
+    first(@)	: ( triple[X,Y,Z] ) X;
+    second(@)	: ( triple[X,Y,Z] ) Y;
+    third(@)	: ( triple[X,Y,Z] ) Z;
+endop
+
+rule for X
+declare	$x : X;
+	$y : Y;
+	$z : Z;
+body
+  first([$x,$y,$z])	=> $x
+end of rule
+
+rule for Y
+declare	$x : X;
+	$y : Y;
+	$z : Z;
+body
+  second([$x,$y,$z])	=> $y
+end of rule
+
+rule for Z
+declare	$x : X;
+	$y : Y;
+	$z : Z;
+body
+  third([$x,$y,$z])	=> $z
+end of rule
+
+end of module
+

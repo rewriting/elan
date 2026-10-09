@@ -1,0 +1,41 @@
+module ac1
+// exemples de filtrage AC
+
+//import global int bool eq[term] ;
+//end
+
+sort term;
+end
+
+operators global
+  go	: term;
+
+  f(@,@,@): (term term term) term;
+
+  U(@,@): (term term) term (AC);
+  V(@,@): (term term) term (AC);
+  W(@,@): (term term) term (AC);
+
+  a     : term;
+  b     : term;
+  c     : term;
+  d     : term;
+end
+
+rules for term
+	x,y,z : term;
+global
+  [] go => f(b,c,d)				end
+
+  [] b =>	U(a,U(a,U(a,U(a,U(a,a)))))	end
+  [] c =>	V(a,V(a,V(a,V(a,V(a,a)))))	end
+  [] d =>	W(a,W(a,W(a,W(a,W(a,a)))))	end
+
+  [] U(x,a) => x				end
+  [] V(x,a) => y where y:=() x			end
+  [] W(x,a) => y where y:=(dc(id)) x		end
+  
+
+end
+
+end

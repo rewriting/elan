@@ -1,0 +1,43 @@
+module array[N,X]
+
+
+// COMPILER VERSION
+
+import global integ  X;
+end
+sort array[N,X];
+end
+operators global
+  [ {@}_I=1...N ]	: ({X}_I=1...N) array[N,X];
+  @[@]			: (array[N,X] integ) X;
+  @[@<-@]		: (array[N,X] integ X) array[N,X];
+  new(@)		: (X) array[N,X];
+end
+
+rules for array[N,X]
+ { x_J : X; }_J=1...N
+	u : X;
+local
+  [] new(u) => [{u}_J=1...N ]
+  end
+  {
+  [] [ {x_J}_J=1...N ][I<-u] => [{x_J}_J=1...(I-1) u {x_J}_J=(I+1)...N]
+		// x_1,...,x_(I-1) u x_(I+1),...,x_N ]
+  end
+  }_I=1...N
+end
+
+rules for X
+ { x_J : X; }_J=1...N
+local
+  {
+  [] [ {x_J}_J=1...N ][I] => x_I
+  end
+  }_I=1...N
+end
+
+end
+
+
+
+

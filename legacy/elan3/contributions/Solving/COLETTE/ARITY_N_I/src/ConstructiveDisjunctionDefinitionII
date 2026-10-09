@@ -1,0 +1,56 @@
+module ConstructiveDisjunctionDefinitionII[Variables,Type,Values]
+
+import
+global
+	CSPDefinition[Variables,Type,Values]
+        tuple[5,csp,list[csp],list[csp],list[Pid],list[Pid]]
+	list[Pid]
+	list[csp]
+	;
+end
+
+sort
+
+	cspCDII;
+
+end
+
+operators
+global
+	CSPCDII@	: (set:tuple[csp,list[csp],list[csp],list[Pid],list[Pid]])	cspCDII;
+	CreateCSPCDII(@): (csp)								cspCDII;
+	GetCSP(@)	: (cspCDII)							csp;
+end
+
+
+rules for cspCDII
+
+	P	: csp;
+
+global
+
+[]	CreateCSPCDII(P)
+	=>
+	CSPCDII[P,nil,nil,nil,nil]
+end
+
+end
+
+
+rules for csp
+
+	P		: csp;
+	luCsp, lsCsp	: list[csp];
+	laPid, liPid	: list[Pid];
+
+global
+
+[]	GetCSP(CSPCDII[P,luCsp,lsCsp,laPid,liPid])
+	=>
+	P
+end
+
+end
+
+
+end

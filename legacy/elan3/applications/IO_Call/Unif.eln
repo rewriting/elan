@@ -1,0 +1,204 @@
+module Unif[Vars,Fss]
+import 	global 	term varabst varUnif[Vars] termUnif[Fss]
+                string stdio io[eqSystem] strat[eqSystem] ;
+
+
+ 	local  	int identifier bool pair[identifier,int]
+		list[int] list[identifier] list[pair[identifier,int]] 
+                list[eqSystem]
+
+                eq[variable] eq[term] eq[eqSystem]
+		eqSystem   
+                occur[variable,term] occur[variable,eqSystem] ;
+end
+
+
+operators
+
+global
+
+        DKSolver(@,@)  : (string eqSystem) list[eqSystem] ;
+        getSolutions(@) : (Pid) list[eqSystem] ;
+
+        DCSolver(@,@)  : (string eqSystem) list[eqSystem] ;
+        getOneSolution(@) : (Pid) list[eqSystem] ;
+
+
+        @ newline       : ( eqSystem ) eqSystem ;
+	@ '\10'     	: ( eqSystem ) eqSystem alias @ newline: ;
+
+        @ newline @ newline: (term term) equation ;
+        @ '\10' @ '\10' :(term term) equation alias @ newline @ newline : ;
+
+  	@ @		  :(eqSystem eqSystem ) eqSystem assocLeft ;
+
+        convert(@)      : (eqSystem) eqSystem ;
+
+	@               : (variable) term alias @: ;
+	@ 		: ( equation ) eqSystem alias @:; 
+        @ |--> @	: (term term ) equation alias @ = @:;
+        IDENTITY	: eqSystem ;
+        
+        EOS             : eqSystem ;
+
+        x ':' @           : (int) variable alias var(@): ; 
+
+        @ == @        : (term variable) term ;
+
+local
+
+        elimvar (@) : (eqSystem) eqSystem ;
+
+end
+
+
+
+
+stratop global 
+
+strataddnl : < eqSystem >  builtin ;
+unify: < eqSystem > builtin ;
+
+DKcall(@) : (string) <eqSystem> ;
+DCcall(@) : (string) <eqSystem> ;
+
+end
+
+
+
+// a mettre dans un module ``call'' !
+
+rules for list[eqSystem]
+
+s: string ;
+P,P1,Q : eqSystem ;
+PID,closePID : Pid ;
+
+global 
+
+
+[] DKSolver(s,P) => getSolutions(PID) 
+     where PID := () create(s)
+     if not iserr(PID)
+     where P1 := () write(PID,P)
+     if not iserror(P1)
+     end 
+
+
+[] getSolutions(PID) => 
+    
+      where Q := () read(PID)
+      switch 
+       case iserror(Q) or eq_eqSystem(Q,EOS) then
+           nil
+           where closePID	:= ()close(PID)
+       otherwise 
+           Q.getSolutions(PID)
+    end 
+   end
+
+
+[] DCSolver(s,P) => getOneSolution(PID) 
+     where PID := () create(s)
+     if not iserr(PID)
+     where P1 := () write(PID,P)
+     if not iserror(P1)
+     end 
+
+
+[] getOneSolution(PID) => 
+    
+      where Q := () read(PID)
+      switch 
+       case iserror(Q) or eq_eqSystem(Q,EOS) then
+           nil 
+           where closePID	:= ()close(PID)
+       otherwise 
+           Q.nil
+           where closePID	:= ()close(PID)
+      end 
+   end
+
+end
+
+
+
+///// transformation des multi-equations en forme resolue -- propre a unif
+
+rules for eqSystem 
+// declare 
+P,Q: eqSystem; v: variable ; s,t: term ;
+
+global
+  [] elimvar(P s == v = t) => elimvar(P s = t) & v = t  end 
+  [] elimvar(s == v = t) => elimvar(s = t) & v = t  end 
+  [] elimvar(P v=t) => elimvar(P) & v=t end 
+  [] elimvar(v=t) => v=t end 
+  [] elimvar(IDENTITY) => true end 
+  [nettoie] P => Q where Q:= () elimvar(P) end  
+end
+
+
+
+
+rules for eqSystem
+// declare 
+	t1,t2 : term;
+	P,Q : eqSystem;
+global
+  [addnewline]   P => P newline end
+  []             convert(P & t1 = t2) => convert(P) t1 newline t2 newline end
+  []             convert(t1 = t2) => t1 newline t2 newline end
+  [conversion]	 P => Q where Q := (strataddnl) convert(P) end
+/*  [solve]        P => Q 
+                 where Q :=  (listExtract) elem(DKSolver("unifelan",P)) end  
+  [solve1]       P => Q 
+                 where Q := (listExtract) elem(DCSolver("unifelan",P)) end  
+*/
+
+  [solve]       P => Q 
+                 where Q := [DKcall("unifelan")] P end
+
+  [solve1]       P => Q 
+                 where Q := [DCcall("unifelan")] P end
+
+  
+
+end
+
+
+
+strategies for eqSystem 
+
+
+P,Q:eqSystem ;
+s: string ;
+
+  explicit
+
+    [.] [DKcall(s)] P => Q 
+                    where Q: = (listExtract) elem(DKSolver(s,P)) end
+
+    [.] [DCcall(s)] P => Q 
+                    where Q: = (listExtract) elem(DCSolver(s,P)) end
+
+
+  implicit
+
+    [.] strataddnl => 
+    dont care choose(addnewline)
+    end
+    
+    [.] unify =>
+    dont care choose(conversion) ;
+     dont know choose(solve) ;
+//    dont know choose(solve1) ;
+    dont care choose(nettoie) 
+    end
+
+
+
+end
+
+
+end

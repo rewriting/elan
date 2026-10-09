@@ -1,0 +1,9 @@
+This version contains SWITCH - statements, selectors and call-strategies.
+
+i.e. it runs only with the last version of elan.
+
+This version of HOU runs with non_quoted library::
+
+i.e.
+
+setenv ELANLIB ~/elan/noquoted_elanlib

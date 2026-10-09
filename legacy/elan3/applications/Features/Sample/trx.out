@@ -1,0 +1,22 @@
+ a(b(a)) end
+
+ a(a(a)) end
+
+ a(g(b)(a)) end
+
+ end end
+end
+
+ end end
+end
+
+ c(c(c)) end
+
+ c(g(b)(c)) end
+
+ end end
+end
+
+ end end
+end
+

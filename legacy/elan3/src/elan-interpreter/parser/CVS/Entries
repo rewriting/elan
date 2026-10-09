@@ -1,0 +1,19 @@
+/dump.c/1.2/Tue Feb 25 10:48:23 2003//
+/envir.c/1.2/Tue Feb 25 10:48:23 2003//
+/gen.c/1.2/Tue Feb 25 10:48:23 2003//
+/globdef.c/1.1.1.1/Thu Nov 29 08:28:45 2001//
+/globdef.h/1.2/Tue Feb 25 10:48:23 2003//
+/globuse.h/1.2/Tue Feb 25 10:48:23 2003//
+/ingram.c/1.2/Tue Feb 25 10:48:23 2003//
+/init.c/1.2/Tue Feb 25 10:48:23 2003//
+/macc.c/1.2/Tue Feb 25 10:48:23 2003//
+/mallo.c/1.3/Tue Feb 25 10:48:23 2003//
+/mh.c/1.2/Tue Feb 25 10:48:23 2003//
+/mlexan.c/1.2/Tue Feb 25 10:48:23 2003//
+/rtglobde.c/1.1.1.1/Thu Nov 29 08:28:45 2001//
+/rtglobde.h/1.2/Tue Feb 25 10:48:23 2003//
+/rwtab.c/1.1.1.1/Thu Nov 29 08:28:45 2001//
+/tiderr.c/1.2/Tue Feb 25 10:48:23 2003//
+/trapsa.c/1.2/Tue Feb 25 10:48:23 2003//
+/Makefile.am/1.3/Wed Jul 30 13:26:50 2003//
+D

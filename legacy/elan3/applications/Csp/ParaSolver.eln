@@ -1,0 +1,195 @@
+module ParaSolver[Variables,Type,Values]
+
+import
+global	FormuleManipulation[Variables,Type,Values]
+	list[csp]
+	stdio
+	list[var]
+	list[formule]
+	list[csp]
+	list[Pid]
+	tuple[2,list[var],list[formule]]
+	list[tuple[list[var],list[formule]]]
+	io[string]
+	io[list[formule]]
+	io[csp]
+	io[Pid]
+	;
+local	occur[var,list[var]]
+	;
+end
+
+operators
+global	Split(@)		: (list[formule])	csp;
+	InitialComponents	:			list[tuple[list[var],list[formule]]];
+	CreateComponents(@,@)	: (list[tuple[list[var],list[formule]]] list[formule]) list[tuple[list[var],list[formule]]] ;
+	GetComponent(@,@,@)	: (var list[tuple[list[var],list[formule]]] list[tuple[list[var],list[formule]]]) list[tuple[list[var],list[formule]]] ;
+
+local	BuiltSolution(@,@)	: (csp list[csp])				csp;
+	GetOutputOfSolver(@)	: (list[Pid])					list[csp];
+	CreateSolver(@)		: (list[tuple[list[var],list[formule]]])	list[Pid];
+
+end
+
+
+rules for list[tuple[list[var],list[formule]]]
+
+	c:formule;
+	l,lf1,lf2:list[formule];
+	x1,x2:var;
+	lv,lvdos,lv1,lv2:list[var];
+	comp,comp1:tuple[list[var],list[formule]];
+	lcomp,lcomp1,lcomp2:list[tuple[list[var],list[formule]]];
+
+global 
+
+[]	CreateComponents(lcomp,c.l)
+	=>
+	where	(list[var]) x1.lv :=()GetVarOfAtomicFormule(c)
+	where	(list[tuple[list[var],list[formule]]]) [lv1,lf1].lcomp1:=()GetComponent(x1,lcomp,nil)
+	switch
+	case	lv != nil	then
+		where	(list[var]) x2.lvdos :=()lv
+		switch
+		case	occurs x2 in lv1	then
+			CreateComponents([lv1,c.lf1].lcomp1,l)
+		otherwise
+			CreateComponents([append(lv1,lv2),c.append(lf1,lf2)].lcomp2,l)
+			where (list[tuple[list[var],list[formule]]])
+				[lv2,lf2].lcomp2:=()GetComponent(x2,lcomp1,nil)
+		end
+	otherwise
+		CreateComponents([lv1,c.lf1].lcomp1,l)
+	end
+end
+
+[]	CreateComponents(lcomp,nil)
+	=>
+	lcomp
+end
+
+[]	GetComponent(x1,[lv1,lf1].lcomp1,lcomp2)
+	=>
+	switch
+	case	occurs x1 in lv1	then
+		append([lv1,lf1].lcomp1,lcomp2)
+	otherwise
+		GetComponent(x1,lcomp1,[lv1,lf1].lcomp2)
+	end
+end
+
+[]	GetComponent(x1,nil,lcomp2)
+	=>
+	nil
+end
+
+[]	InitialComponents
+	=>
+	FOR EACH x:identifier
+	SUCH THAT x:=(listExtract)elem(Variables):
+
+	{[x.nil,nil]}
+
+	nil
+end
+
+end
+
+
+rules for csp
+
+	l,lmc,lmc1,lec,lec1,C,C1,store,store1	: list[formule];
+	P	: csp;
+	lcsp	: list[csp];
+	lpid	: list[Pid];
+	lcomp	: list[tuple[list[var],list[formule]]];
+
+global 
+
+[]	BuiltSolution(CSP[lmc,lec,C,store],CSP[lmc1,lec1,C1,store1].lcsp)
+	=>
+	BuiltSolution(CSP[append(lmc1,lmc),append(lec1,lec),append(C1,C),append(store1,store)],lcsp)
+end
+
+[]	BuiltSolution(P,nil)
+	=>
+	P
+end
+
+[]	BuiltSolution(P,Unsatisfiable.lcsp)
+	=>
+	Unsatisfiable
+end
+
+[]	Split(l)
+	=>
+	BuiltSolution(CSP[nil,nil,nil,nil],lcsp)
+	where	lcomp	:= ()CreateComponents(InitialComponents,l)
+	where	lpid	:= ()CreateSolver(lcomp)
+	where	lcsp	:= ()GetOutputOfSolver(lpid)
+end
+
+end
+
+
+rules for list[Pid]
+
+	lv		: list[var];
+	lf,l		: list[formule];
+	lcomp		: list[tuple[list[var],list[formule]]];
+	PID		: Pid;
+	string1		: string;
+
+global 
+
+[]	CreateSolver([lv,lf].lcomp)
+	=>
+	switch
+	case	lf == nil	then
+		CreateSolver(lcomp)
+	otherwise
+		PID.CreateSolver(lcomp)
+		where	PID		:= ()create("rsh libellule solverCSP")
+		if 	not iserr(PID) 
+		where	l		:= ()write(PID,lf)
+		where	string1		:= ()write(PID,"\nend\n")
+		if 	not iserror(l) and not iserror(string1)
+	end
+end
+
+[]	CreateSolver(nil)
+	=>
+	nil
+end
+
+end
+
+
+rules for list[csp]
+
+	PID,closePID	: Pid;
+	lpid		: list[Pid];
+	solution,csp_out: csp;
+
+global 
+
+[]	GetOutputOfSolver(PID.lpid)
+	=>
+	solution.GetOutputOfSolver(lpid)
+	where	solution	:= ()read(PID)
+	if 	not iserror(solution)
+	where	csp_out		:= ()WriteCSP("Solution",true,solution)
+	where	closePID	:= ()close(PID)
+end
+
+[]	GetOutputOfSolver(nil)
+	=>
+	nil
+end
+
+end
+ 
+
+end
+
+

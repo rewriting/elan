@@ -1,0 +1,107 @@
+
+#define SATSTS 1500        /* velkost stacku pre s.a. */
+
+#define FFOUND(p,s,i,j) { \
+  k=i; p--; do { p++; k++; } while (k<j && s.notEqualMaccsym(p->sym));}
+#define RFOUND(p,s,i,j) { \
+  k=i; p--; do { p++; k++; } while (k<j &&  s!=p->sym); }
+
+
+extern int SEMACT(int n,lexem l,lstream *f);
+
+static void errcommon(lstream &f)
+{ lexem s;
+  /* int n; */
+  f.ilex(s);
+  sterr << "\ton symbol \'" << s.alfsy() << "\'" /* <<" in state " << st */;
+  f.beforemess(s);
+}
+
+
+static void syerror(lstream &f,int st)
+{ int n;
+  lexem s;
+  struct spr *p;
+  f.oerr();
+  sterr << "[PARSER] syntax error ";
+  errcommon(f);
+  sterr << "\tone of (";
+  p=STTAB[st].pr; n=STTAB[st].npr;
+  while (n--) {
+    s.maccsymtolex((p++)->sym);
+    sterr << " \'" << s.alfsy() << "\' ";
+  }
+  sterr << ") expected \n";
+}
+
+int PARSER(lstream &f,int state,void (*lextomodlex)(lexem lex,lexem &modlex))
+                        /* LR(1) synt analyza podla STTAB */
+			/* vysledok 0 = syntax error */
+{ int i,j,k,istack;
+  int stack[SATSTS];
+  lexem ls,nnls;
+  lexem lastl; lastl.crendofstreamlex();
+  struct spr *p,*pp;
+  struct sak *g;
+  istack=0;
+  f.fulex(nnls); lextomodlex(nnls,ls);
+  SEMACT(0,lastl,&f);
+  for(;;) {
+    p=pp=STTAB[state].pr;
+//cout << "\n state = " << state << "ls = "; ls.dump();
+    i=0; j=STTAB[state].npr;
+    if (j) {
+      FFOUND(p,ls,i,j);
+      if (ls.notEqualMaccsym(p->sym)) {
+	/* ls nie je v zozname akcii */
+	if (pp->sym == DEFAULTSYM) p=pp;
+	else { syerror(f,state);return(0); };
+      };
+    }
+    else { syerror(f,state);return(0); };
+    switch (p->action) {
+    case accept	: SEMACT(-2,lastl,&f); return(1);
+    case srerr  : case rrerr:
+                  f.oerr("[PARSER] syntax error\n");
+                  sterr << "\ton symbol \'" << lastl.alfsy() << "\' ";
+                  sterr << "in state " << state << ";\n",
+                  sterr << "\t there was an " 
+                       << ((p->action==srerr)?"shift":"reduce")
+                       << "/reduce conflict in this place";
+/*                  stbdump(state);                                */
+                  return(0);
+
+    case shift	:if (istack>=SATSTS) {
+		   f.oerr("[PARSER] stack overflow ");
+		   return(0);
+		 };
+		 stack[istack++]=state;
+		 state=p->actpar.num;
+		 f.ILEXEM(lastl); f.fulex(nnls); lextomodlex(nnls,ls);
+		 break;
+    case reduction:
+	switch(SEMACT(p->actpar.num,lastl,&f)) {
+          case ERRORIM: f.oerr();
+                        sterr << "[PARSER] semaction error ";
+			errcommon(f);
+                       return(0);
+          case ACCEPTIM:return(1);
+          case HANDERRORIM : return(0);
+        }     
+        f.fulex(nnls); lextomodlex(nnls,ls);
+        {register int l;
+	l=p->actpar.left;
+	istack-=p->actpar.lenght;
+        state=stack[istack++];
+	g=STTAB[state].ak;
+	i=0;j=STTAB[state].nak;
+	RFOUND(g,l,i,j);
+        }
+	state=g->tostate;
+//cout << "\n reduction into state " << state;
+    };
+  };
+};
+
+
+

@@ -1,0 +1,8 @@
+appl(prod([sort("E"),lit("+"),sort("E")],
+      sort("E"),attrs([atr("left")])),
+      [appl(prod([char-class([range(97,122)])],
+      sort("E"),no-attrs),[97]),
+      appl(prod([char-class([43])],
+      lit("+"),no-attrs),[43]),
+      appl(prod([char-class([range(97,122)])],
+      sort("E"),no-attrs),[98])]);

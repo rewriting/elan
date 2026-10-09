@@ -1,0 +1,39 @@
+module reduce
+
+import global  eq[formula]; // identifier list[identifier];
+end
+
+sort formula prop;
+end
+
+operators global
+a          : prop;
+b          : prop;
+TRUE       :prop;
+FALSE      :prop;
+@          :(prop) formula pri 100;
+not(@)     :(prop) prop;
+not(@)     :(formula) formula pri 50;
+@ and @    :(formula formula) formula assocLeft pri 20 (AC);
+(@ and @)  :(formula formula) formula pri 20 alias @ and @:;
+@ imp @    :(formula formula) formula assocRight pri 5;
+(@ imp @)  :(formula formula) formula pri 5 alias @ imp @:;
+end
+
+rules for formula
+  p,q,r:formula;
+  p1,p2:prop;
+
+global
+[] not(not(p))               =>p                         end
+
+[] p and not(p)              =>FALSE                     end
+[] p and not(p)              =>FALSE                     end
+//[] not(p) and p              =>FALSE                     end
+
+[] not(TRUE)                 =>FALSE                     end
+[] not(FALSE)                =>TRUE                      end
+[] p imp q                   =>not(p and not(q))         end
+
+end
+end

@@ -1,0 +1,138 @@
+module Cterm[Fss]
+import local
+	Fss	
+	bool
+	symbol[Fss] eq[symbol]  pair[identifier, int] list[pair[identifier, int]]
+	configuration[Fss];
+end
+
+/*		Cterm syntax definition and related basic functions
+		---------------------------------------------------
+
+
+A Cterm is any term build on Fss and any state symbol. Similar to 
+configurations but designed to be extended by ECterm that are any terms
+build on signature Fss, any state symbol and any variable!
+
+Two conversion functions between Cterms and configurations.
+*/
+
+
+sort Cset Cterm tuple;
+end
+
+operators global	
+	
+	@			: (state) Cterm pri 1;
+
+        FOR EACH SS:pair[identifier,int]; F:identifier; N:int
+        SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS)
+                AND N:=()second(SS) ANDIF N==0:{
+
+                F()     : Cterm	;
+                F       : Cterm  alias F():;
+
+	}
+
+        FOR EACH SS:pair[identifier,int]; F:identifier; N:int
+        SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS)
+                AND N:=()second(SS) ANDIF N>0:{
+
+                F({,@}~N)               : ({Cterm}~N) Cterm;
+
+                F({@,}~N)               : ({Cterm}~N) Cterm
+                        alias F({,@}~N):;
+                F(,{@,}~N)              : ({Cterm}~N) Cterm
+                        alias F({,@}~N):;
+                F(@ {,@}~(N-1))         : ({Cterm}~N) Cterm
+                        alias F({,@}~N):;
+		
+	}
+
+	head_of(@)		: (Cterm) symbol;
+	fun_to_tuple(@)		: (Cterm) tuple;
+	@-th subterm of @	: (int Cterm) Cterm;
+
+	empty_tuple		: tuple;
+	tuple(@, @)		: (Cterm tuple) tuple;
+	config_to_Cterm(@)	: (configuration) Cterm;
+	Cterm_to_config(@)	: (Cterm) configuration;
+end
+
+stratop global
+  Cterm_to_config_strat : <configuration> builtin;
+end
+
+
+FOR EACH SS:pair[identifier,int]; F:identifier; N:int
+SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS)
+     AND N:=()second(SS):{
+rules for tuple
+	t_1, ..., t_N: Cterm;
+global
+  [] fun_to_tuple(F(t_1, ..., t_N)) =>
+	 {tuple(t_I, }_I=1...N empty_tuple {)}_I=1...N
+  end
+end}
+
+
+FOR EACH SS:pair[identifier,int]; F:identifier; N:int
+SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS)
+     AND N:=()second(SS):{
+rules for symbol
+	t_1, ..., t_N: Cterm;
+global	
+  [] head_of(F(t_1, ..., t_N)) => F
+  end
+end}
+
+
+FOR EACH SS:pair[identifier,int]; F:identifier; N:int
+SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS)
+     AND N:=()second(SS):{
+rules for Cterm
+	t_1, ..., t_N: state;
+global	
+  [] config_to_Cterm(F(t_1, ..., t_N)) => F(t_1, ..., t_N)
+  end
+end}
+
+
+FOR EACH SS:pair[identifier,int]; F:identifier; N:int
+SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS)
+     AND N:=()second(SS) ANDIF N>0 :{
+rules for Cterm
+	t_1, ..., t_N: Cterm;
+global	
+  {[] I-th subterm of F(t_1, ..., t_N) => t_I  end}_I=1...N 
+end}
+
+
+FOR EACH SS:pair[identifier,int]; F:identifier; N:int
+SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS)
+     AND N:=()second(SS):{
+rules for configuration
+          q_1, ..., q_N: state;
+global	
+  [Cterm_to_config_r1] 
+	Cterm_to_config(F(q_1, ..., q_N)) => F(q_1, ..., q_N)
+  end
+end}
+
+
+rules for configuration
+          s: Cterm;
+global
+  [Cterm_to_config_r2]	Cterm_to_config(s) => void
+  end
+end
+
+
+strategies for configuration
+implicit
+  [.] Cterm_to_config_strat =>
+	repeat*(dc one(Cterm_to_config_r1 , Cterm_to_config_r2))
+  end
+end
+
+end

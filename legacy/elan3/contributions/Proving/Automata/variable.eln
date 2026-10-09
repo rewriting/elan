@@ -1,0 +1,17 @@
+module variable[Vars]
+import Vars list[identifier];
+end
+
+sort variable; end
+
+operators global
+
+FOR EACH Var:identifier 
+SUCH THAT Var:=(listExtract) elem(Vars) :{
+				
+		Var	:variable;
+}
+end
+end
+
+

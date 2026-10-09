@@ -1,0 +1,30 @@
+module builtinIO[X]
+        import global bool builtinInt stdio; 
+        end
+
+            operators global
+              write_builtinIO(@,@)     : (builtinInt X) X   pri 200 code 119;
+              read_builtinIO(@,@)      : (builtinInt X) X   pri 200 code 120;
+
+              iserror(@)     : (X) bool;
+              errno(@)       : (X) builtinInt;   
+            local
+              Error(@)       : (builtinInt) X     pri 200 code 123;
+            end
+    
+        rules for bool
+        x:X; e:builtinInt;
+        global
+          []    iserror(Error(e)) => true       end
+          []    iserror(x) => false             end
+        end
+
+        rules for builtinInt
+        x:X; e:builtinInt;
+        global
+          []    errno(Error(e)) => e            end
+        end
+
+end  
+ 
+

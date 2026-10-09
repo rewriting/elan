@@ -1,0 +1,22 @@
+LPL CompMatchingAC description
+
+  specification description
+
+    part Vars	of sort list[identifier]
+	 	import sigSyntax
+    part Ops	of sort list[pair[identifier,int]]
+	 	import sigSyntax
+  end
+
+  query 	of sort eqSystem
+         	result of sort eqSystem
+	 	import termV[Vars]
+                       termF[Ops]
+                       matchingAC
+
+  start with (matchAC) x + y + z + v <=AC a1 + a2 + a3 + a4 + a5 + a6 + a7
+
+// For compiler only
+
+end
+

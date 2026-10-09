@@ -1,0 +1,16 @@
+// This file is generated automatically: do not edit it directly. 
+module atom[Fss,Vars]
+        import  global  eq[atom];
+                local   int termCommons[Fss,Vars] list[atom];
+        end 
+        sort atom;
+        end   
+        operators
+          global
+
+          head(@)               : ( atom ) identifier;
+          @-th subterm(@)       : ( int atom ) term;
+
+        end  
+end 
+

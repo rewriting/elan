@@ -1,0 +1,12 @@
+module tree[X]
+
+sort tree[X];
+end
+
+operators global 
+  empty		: tree[X];
+  leaf(@)	: (X) tree[X];
+  node(@,@,@)	: (tree[X] X tree[X]) tree[X];
+end
+
+end

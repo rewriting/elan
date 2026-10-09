@@ -1,0 +1,57 @@
+#		(c)	INRIA-Lorraine & CRIN
+#			615, rue du Jardin Botanique, BP 101
+#		        54602 Villers-les-Nancy
+#			France
+#			email: elan@loria.fr
+#
+#	$Source: /users/protheo/pot/ELAN/CVSELAN/elan/sources/Makefile.distrib,v $
+#	$Revision: 1.1 $
+#	$Date: 1998/10/16 13:07:02 $
+#	$Author: moreau $
+
+export CC            = gcc
+export CPP           = g++
+export FAST          = -O2
+export ARCH          := $(shell uname -m)
+
+#export ELANLIBME     = $(PWD)/../../elanlib
+# Where ELAN is installed
+export ELANDIR       = /home/moreau/ELAN/elan
+# 
+export ELANLIBME     = $(ELANDIR)/elanlib
+#
+export ELANLIB       = $(ELANDIR)/elanlib
+# 
+export ELANDIST      = $(ELANDIR)/sources
+
+export ARCHFLAG      =
+export SPECIAL_FLAG  =
+
+#export YLIB = -ly -ll
+#export YACC = yacc
+#export YACC_OPT = -vd #--yacc
+#export LEX = lex
+export YLIB = -lfl
+export YACC = bison
+export YACC_OPT = -d --yacc
+export LEX = flex
+
+MKINSTALLDIRS  = $(ELANDIR)/sources/mkinstalldirs
+
+include Makefile.common
+
+install-dirs:
+	@for i in $(MAKEDIRS) ; do \
+		parent=`echo $$i | sed -e 's@/[^/]*$$@@' | sed -e 's@^$$@/@'`;\
+		if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi ;\
+		if [ ! -d $$i ] ; then \
+			if $(MKINSTALLDIRS) $$i ; then \
+				true ; \
+			else \
+				exit 1 ; \
+			fi ; \
+		else \
+			true ; \
+		fi ; \
+	done
+

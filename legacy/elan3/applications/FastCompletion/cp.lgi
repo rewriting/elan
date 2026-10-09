@@ -1,0 +1,27 @@
+LPL cp description 
+
+  specification description
+
+    part Vars	of sort list[identifier]
+	 	import sigSyntax
+    part Ops	of sort list[pair[identifier,int]]
+	 	import sigSyntax
+    part Prec	of sort list[pair[identifier,int]]
+	 	import sigSyntax
+    part System of sort list[equation]
+                import sigSyntax
+			termCommons[Ops,Vars]
+			equation[Vars,Ops,Prec]
+			list[equation]
+  end
+
+  query 	of sort list[equation]
+         	result of sort list[equation]
+	 	import equation[Vars,Ops,Prec]
+			ans_completion[Vars,Ops,Prec,System] 
+			list[equation] int bool
+			identity[list[equation]]
+			termCommons[Ops,Vars]
+         	start with (s_commande) cp
+end
+

@@ -1,0 +1,12 @@
+LPL test_tall  description
+
+query of sort  Term
+result of sort Term
+	  
+import test_tall
+
+//start with () go
+start with (S) query
+
+end
+

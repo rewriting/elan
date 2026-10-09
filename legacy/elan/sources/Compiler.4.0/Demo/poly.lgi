@@ -1,0 +1,8 @@
+LPL poly description
+
+  query    of sort 		exp
+	   result of sort 	exp
+           import  		poly
+	   start with		() query
+
+end

@@ -1,0 +1,8 @@
+LPL nqueensAC description 
+
+query 		of sort list[int]
+      result 	of sort list[int]
+      import   nqueensAC int list[int]
+      start with (queens) nqueens(9)
+
+end

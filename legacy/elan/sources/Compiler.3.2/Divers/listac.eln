@@ -1,0 +1,20 @@
+module listac[X]
+
+  import int;
+    end
+  sort X listac[X];
+    end
+
+operators
+ global
+  nil     : listac[X] ;
+  @   	  : (X) listac[X] ;
+  @ . @   : ( listac[X] listac[X] ) listac[X]    (AC)  ;
+
+//  @ + @     : ( listac[X] listac[X] ) listac[X]    (AC);
+  elem(@.@) : (X listac[X]) X;
+  queue(@.@): (X listac[X]) listac[X];
+  size (@)  : (listac[X]) int;
+end
+
+end

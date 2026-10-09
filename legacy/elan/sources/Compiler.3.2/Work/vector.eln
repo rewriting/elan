@@ -1,0 +1,67 @@
+module vector[X]
+
+import 
+global
+  int;
+local
+  builtinArray[X];
+end
+
+sort vector[X] X;
+end 
+
+operators
+global
+  new(@,@)        : (int X) vector[X];
+
+  @.get(@)        : (vector[X] int) X;
+  @[@]            : (vector[X] int) X alias @.get(@):;
+
+  @.set(@,@)      : (vector[X] int X) vector[X];
+  @[@]<-@         : (vector[X] int X) vector[X] alias @.set(@,@):;
+
+  @.clone	  : (vector[X]) vector[X];
+  clone(@)	  : (vector[X]) vector[X] alias @.clone:;
+
+  @.length       : (vector[X]) int;
+  length(@)      : (vector[X]) int alias @.length:;
+
+local
+  [@]             : (builtinArray[X]) vector[X];
+  @.init(@,@)	  : (vector[X] builtinArray[X] int) vector[X];
+end
+
+rules for vector[X]
+  i      : int;
+  t      : builtinArray[X];
+  x      : X;
+  v	 : vector[X];
+global
+  [] new(i,x) => [new(valueOf(i),x)]				end
+  [] [t][i]<-x  => [t.set(valueOf(i),x)]			end
+
+  [] clone([t]) => new(t.length,t[0]).init(t,t.length-1)	end
+
+  [] v.init(t,0) => v[0]<-t[0]				end
+  [] v.init(t,i) => v[i]<-t[valueOf(i)] if i>0			end
+end
+
+rules for X
+  i   : int;
+  t   : builtinArray[X];
+global
+  [] [t][i] => t[valueOf(i)]					end
+end
+
+rules for int
+  t   : builtinArray[X];
+global
+  [] [t].length => t.length				end
+end
+
+end
+				
+
+
+
+

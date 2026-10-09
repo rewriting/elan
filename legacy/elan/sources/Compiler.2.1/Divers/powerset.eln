@@ -1,0 +1,27 @@
+module powerset[X]
+
+import global sequence[X] sequence[set[X]] set[X] set[set[X]]; end
+
+sort set[X] set[set[X]]; end
+
+operators global
+  P(@)		: (set[X]) set[set[X]];
+  augment(@,@)	: (set[set[X]] set[X]) set[set[X]];
+end
+
+rules for set[set[X]]
+  S,T : set[X];
+  L : sequence[set[X]];
+  E	: X;
+  EL	: sequence[X];
+
+global
+  [] augment(emptyset,T)	=> emptyset	end
+  [] augment(mkSet(S), T)	=> mkSet(S U T) end
+  [] augment(mkSet(S , L), T)	=> mkSet(S U T) U augment(mkSet(L), T) end
+  [] P(emptyset)		=> mkSet(emptyset) 	end
+  [] P(mkSet(E))		=> mkSet(emptyset , mkSet(E))	end
+  [] P(mkSet(E , EL))		=> P(mkSet(EL)) U augment(P(mkSet(EL)), mkSet(E)) end
+end
+
+end

@@ -1,0 +1,27 @@
+
+\let\CF=\rm
+% Remember to use the lgrind style
+
+\File{ruleWithWhere.eln},{17:23},{Jun 21 1996}
+\L{\LB{\K{module}_\V{ruleWithWhere}}}
+\L{\LB{}}
+\L{\LB{\K{sort}_\V{foo};}}
+\L{\LB{}}
+\L{\LB{\K{op}_\K{global}}}
+\L{\LB{____\V{a}_:_\V{foo};}}
+\L{\LB{____\V{b}_:_\V{foo};}}
+\L{\LB{\K{endop}}}
+\L{\LB{}}
+\L{\LB{\K{rule}_\V{r0}_\K{for}_\V{foo}}}
+\L{\LB{\K{declare}_\V{x}_:_\V{foo}_;}}
+\L{\LB{\K{body}}}
+\L{\LB{__\V{a}__}\Tab{8}{=\>_\V{x}_\K{where}_\V{x}_:=_()\V{b}_\K{end}}}
+\L{\LB{\K{end}_\K{of}_\K{rule}}}
+\L{\LB{}}
+\L{\LB{\K{rule}_\V{r1}_\K{for}_\V{foo}}}
+\L{\LB{\K{declare}_\V{x}_:_\V{foo}_;}}
+\L{\LB{\K{body}}}
+\L{\LB{__\V{a}__}\Tab{8}{=\>_\V{x}_\K{where}_\V{x}_:=_(\V{strat})\V{b}_\K{end}}}
+\L{\LB{\K{end}_\K{of}_\K{rule}}}
+\L{\LB{}}
+\L{\LB{\K{end}_\K{of}_\K{module}}}

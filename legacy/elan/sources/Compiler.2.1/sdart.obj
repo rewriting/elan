@@ -1,0 +1,45 @@
+obj SET-INT is
+  protecting INT .
+  sort Set .
+  op [] : -> Set .
+  op [_] : Int -> Set .
+  op _+_ : Set Set -> Set [assoc comm] .
+  var S : Set .
+  eq S + [] = S .
+  eq S + S = S .
+jbo
+
+obj SET-PAIRS is
+  protecting SET-INT .
+  op _{+}_ : Set Set -> Set [assoc comm] .
+  op _{*}_ : Set Set -> Set [assoc comm] .
+  vars S S1 S2 : Set .
+  vars I J : Int .
+  eq [] {+} S = S .
+  eq [ I ] {+} [ J ] = [ I + J ] .
+  eq ([ I ] + S1) {+} S2 = ([ I ] {+} S2) + (S1 {+} S2) .
+
+  eq [] {*} S = S .
+  eq [ I ] {*} [ J ] = [ I * J ] .
+  eq ([ I ] + S1) {*} S2 = ([ I ] {*} S2) + (S1 {*} S2) .
+jbo
+
+obj DARTS is
+  protecting SET-PAIRS .
+  ops singles doubles triples all finish : -> Set .
+  eq singles =
+        [ 1 ] + [ 2 ] + [ 3 ] + [ 4 ] + [ 5 ] +
+        [ 6 ] + [ 7 ] + [ 8 ] + [ 9 ] + [ 10 ] +
+        [ 11 ] + [ 12 ] + [ 13 ] + [ 14 ] + [ 15 ] +
+        [ 16 ] + [ 17 ] + [ 18 ] + [ 19 ] + [ 20 ] .
+  eq doubles = singles {*} [ 2 ] .
+  eq triples = singles {*} [ 3 ] .
+  eq all = singles + doubles + triples + [ 25 ] + [ 50 ] + [ 0 ] .
+  eq finish = (doubles + [ 50 ])  {+} all {+} all .
+jbo
+--- ev (setq $$debug t $$debug_level 100) .
+reduce in DARTS : doubles .
+reduce in DARTS : triples .
+reduce in DARTS : all .
+reduce in DARTS : finish .
+

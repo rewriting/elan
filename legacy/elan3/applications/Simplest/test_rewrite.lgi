@@ -1,0 +1,8 @@
+LPL test_rewrite description
+  query    of sort Term
+  result   of sort Term
+  import   test_rewrite
+  //start with () query
+  start with (S2) query
+
+end

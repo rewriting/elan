@@ -1,0 +1,43 @@
+agent Knuth = (P1 | P2 | K1 | C1_0 | C2_0) \ L;
+agent K1 = kw1.K1 + kw2.K2 + 'kr1.K1;
+agent K2 = kw1.K1 + kw2.K2 + 'kr2.K2;
+
+agent C1_0 = c1w0.C1_0 + c1w1.C1_1 + c1w2.C1_2 + 'c1r0.C1_0;
+agent C1_1 = c1w0.C1_0 + c1w1.C1_1 + c1w2.C1_2 + 'c1r1.C1_1;
+agent C1_2 = c1w0.C1_0 + c1w1.C1_1 + c1w2.C1_2 + 'c1r2.C1_2;
+
+agent C2_0 = c2w0.C2_0 + c2w1.C2_1 + c2w2.C2_2 + 'c2r0.C2_0;
+agent C2_1 = c2w0.C2_0 + c2w1.C2_1 + c2w2.C2_2 + 'c2r1.C2_1;
+agent C2_2 = c2w0.C2_0 + c2w1.C2_1 + c2w2.C2_2 + 'c2r2.C2_2;
+
+agent P1 = tau.P11 + tau.0;
+agent P11 = 'c1w1.req1.P12;
+agent P12 = kr1.P14 + kr2.P13;
+agent P13 = c2r0.P14 + c2r1.P12 + c2r2.P12;
+agent P14 = 'c1w2.P15;
+agent P15 = c2r0.P16 + c2r1.P16 + c2r2.P17;
+agent P16 = 'kw1.enter1.exit1.'kw2.'c1w0.P1;
+agent P17 = 'c1w1.P12;
+
+agent P2 = tau.P21 + tau.0;
+agent P21 = 'c2w1.req2.P22;
+agent P22 = kr2.P24 + kr1.P23;
+agent P23 = c1r0.P24 + c1r1.P22 + c1r2.P22;
+agent P24 = 'c2w2.P25;
+agent P25 = c1r0.P26 + c1r1.P26 + c1r2.P27;
+agent P26 = 'kw2.enter2.exit2.'kw1.'c2w0.P2;
+agent P27 = 'c2w1.P22;
+
+set L = {kw1,kw2,kr1,kr2,c1w0,c1w1,c1w2,c1r0,c1r1,c1r2,c2w0,c2w1,c2w2,c2r0,c2r1,c2r2};
+
+agent KBig = Knuth|Knuth|Knuth;
+
+prop Safety = max( Z.((~(<exit1>T & <exit2>T)) & [-]Z));
+
+prop Liveness = max(Z.(( [req1]EICS1 & [req2]EICS2) & [-]Z));
+
+prop EICS1 = min(Y.((<exit1>T | ([-]Y & <->T))));
+prop EICS2 = min(Y.((<exit2>T | ([-]Y & <->T))));
+
+
+

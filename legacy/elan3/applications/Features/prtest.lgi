@@ -1,0 +1,8 @@
+LPL prtest description 
+
+  query 	of sort int
+         	result of sort 	int
+	 	import	string  prtest
+        	start with 	()query
+
+end

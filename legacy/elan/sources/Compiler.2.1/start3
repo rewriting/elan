@@ -1,0 +1,16 @@
+
+short_abst(not((x_1 or x_32 or x_34) and (x_4 or x_5 or x_32) and (not x_4 or x_5 or not x_34) and (not x_5 or x_32 or not x_34) and (x_29 or not x_32 or x_43) and (x_29 or x_36 or not x_43))) end
+
+/*
+abst(not((x_1 or x_32 or x_34) and (x_4 or x_5 or x_32) and (not
+x_4 or x_5 or not x_34) and (not x_5 or x_32 or not x_34) and (x_29 or
+not x_32 or x_43) and (x_29 or x_36 or not x_43)))
+ end
+
+abst(x_32 or x_5) end
+
+query = short_abst()(not((and)*((or)*(not((x_43)),(x_36),(x_29)),(or)*(not((x_34)),not((x_5)),(x_32)),(or)*(not((x_34)),not((x_4)),(x_5)),(or)*(not((x_32)),(x_43),(x_29)),(or)*((x_34),(x_32),(x_1)),(or)*((x_32),(x_5),(x_4)))))
+
+
+
+*/

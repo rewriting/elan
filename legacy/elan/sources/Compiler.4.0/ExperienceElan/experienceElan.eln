@@ -1,0 +1,22 @@
+module experienceElan
+
+import global
+IO[int]
+int;
+end
+
+sort chose;
+end
+
+operators global
+	(@) : (int) chose;
+end
+
+rules for chose
+	ix,x: int;
+global
+[] (x) => (x+1) 
+	if x<1000000 end
+end
+
+end

@@ -1,0 +1,58 @@
+# entferne \ Symbole an Zeilenenden, so dass nur eine Zeile entsteht
+sed -e 's/$/ /g;s/ *\\ *$//g;s/ $/@/g' $1 | tr -d "\n" | tr "@" "\n" >$1.tmp
+
+# entferne fuehrende Leerzeichen und Tabulatoren, sowie Properties und Leerzeilen
+tr -s "\t" " " <$1.tmp | tr -s " " " " | sed -e 's/^ *//g' - | grep "^\(\(def\)\|\(set\)\) .*=" - | grep -v "=.*=" - | sed -e 's/^def //g;s/^set //g' - >$1.tmp2
+
+# entferne Leerzeichen vor Kommas, Punkten und Slashen und {}, [], =
+sed -e "s/ *, */,/g ; s/ *\. */./g ; s/ *\/ */\//g ; s/ *{ */{/g ; s/ *} */}/g ; s/ *= */=/g ; s/ *\[ */[/g; s/ *\] */]/g" $1.tmp2 >$1.input
+
+# habe nun Eingabe in passendem Format vorliegen in .input Datei
+
+# trennen nach Prozess-, Restriktions- und Relabel-Mengen
+grep -v "={.*}" $1.input | grep -v "=\[.*\]" - >$1.proc
+grep    "=\[.*/.*\]" $1.input >$1.relabel
+grep    "={.*}" $1.input | grep -v "{.*/.*}" - >$1.restrict
+
+# Bezeichner
+sed -e 's/=/@=/g' $1.proc     | tr "@" "\n" | grep -v "=" - | tr -d " " >$1.procId
+sed -e 's/=/@=/g' $1.relabel  | tr "@" "\n" | grep -v "=" - | tr -d " " >$1.relId
+sed -e 's/=/@=/g' $1.restrict | tr "@" "\n" | grep -v "=" - | tr -d " " >$1.resId
+
+# Labelnamen
+sed -e 's/.*=//g' $1.relabel  | tr -s ",/[]\n " "\n" | grep -v "^$" - >$1.tmp
+sed -e 's/.*=//g' $1.restrict | tr -s ",{}\n "  "\n"   | grep -v "^$" - >>$1.tmp
+sed -e 's/.*=//g ; s/\./. /g' $1.proc     | tr -s " |+\\[]()" "\n" | grep "\." - | tr -d "." >>$1.tmp
+tr -d "'" <$1.tmp | grep -v "^tau$" - | sort -u - >$1.labelname
+
+# Operator-Code
+sed -e "s/$/: procId;/g"    $1.procId >$1.op_code
+sed -e "s/$/: relId;/g"     $1.relId  >>$1.op_code
+sed -e "s/$/: resId;/g"     $1.resId  >>$1.op_code
+sed -e "s/$/: labelname;/g" $1.labelname >>$1.op_code
+
+# Proc-Code
+sed -e "s/^/[proc] (; /g ; s/=/ ) => res where res := (calc_str) (; /g ; s/$/) end/g" $1.proc >$1.proc_code
+
+# Restrict-Code
+rm -f $1.res_code
+touch $1.res_code
+for i in `cat "$1.resId"`; do 
+  grep "$i=" $1.restrict | sed -e "s/$i=//g" - | tr -s "{}," "\n" | grep -v "^$" - | \
+  sed -e "s/^/[] doesNotRestrictName($i,/g; s/$/) => false end/g" - >>$1.res_code
+done
+
+# Relabel-Code
+rm -f $1.rel_code
+touch $1.rel_code
+for i in `cat "$1.relId"`; do
+  grep "$i=" $1.relabel | sed -e "s/$i=//g" - | tr -s "[]," "\n" | grep -v "^$" - | tr "/" "\n" | \
+  perl relcode.pl $i >>$1.rel_code
+done
+
+# Whole-Elan-File
+cat ccs.frame | \
+perl replace.pl LABEL_PROC_OPERATORS $1.op_code | \
+perl replace.pl RELABELING_RULES     $1.rel_code | \
+perl replace.pl RESTRICTION_RULES    $1.res_code | \
+perl replace.pl PROC_RULES           $1.proc_code >ccs.eln

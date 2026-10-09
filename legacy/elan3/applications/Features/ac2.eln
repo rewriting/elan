@@ -1,0 +1,68 @@
+module ac2
+// exemples de filtrage AC
+
+import global int bool eq[term]
+        ;
+end
+
+sort term;
+end
+
+operators global
+
+  f(@,@): (term term) term;
+  g(@,@): (term term) term;
+
+  U(@,@): (term term) term (AC);
+  V(@,@): (term term) term (AC);
+
+  a     : term;
+  b     : term;
+  c     : term;
+  d     : term;
+end
+
+stratop global
+  doit : <term> builtin;
+end
+
+rules for term
+        x,y,z : term;
+        X : term;
+        XX, TT : term;
+global
+//  [] U(x, U(V(a,b), V(a,y))) => f(x,y)
+//      if y == c
+//  end
+
+/*
+  [RR] 
+	g(U(x,V(a,y)),V(a,b)) => f(x,y)
+  end
+*/
+  [RR] 
+	g(X,V(a,b)) => f(x,y)
+        where (term) U(x,TT):=() X
+        where (term) V(a,y):=() TT
+  end
+/* o.k.
+  [RR] 
+	U(U(x,V(a,y)),V(a,b)) => f(x,y)
+  end
+*/
+
+  [RR] 
+	U(X,V(a,b)) => f(x,y)
+        where (term) U(x,TT):=() X
+        where (term) V(a,y):=() TT
+  end
+
+
+end
+
+strategies for term
+implicit
+  [.] doit => dk(RR) end
+end
+
+end

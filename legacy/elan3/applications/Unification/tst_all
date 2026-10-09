@@ -1,0 +1,16 @@
+#! /bin/csh -f
+#        LGI         SPC        INP        OUT
+
+if ($1 =~ *I*) then
+echo "Interpreter"
+itest    unification simplesig  simple1   isimple1
+itest    unification boolean    bool1     ibool1
+itest    unification boolean    bool2     ibool2
+endif
+
+if ($1 =~ *I* && $1 =~ *A*) then
+echo "Aterm-Interpreted"
+aitest    unification simplesig  simple1   isimple1
+aitest    unification boolean    bool1     ibool1
+aitest    unification boolean    bool2     ibool2
+endif

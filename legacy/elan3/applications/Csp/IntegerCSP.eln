@@ -1,0 +1,459 @@
+module IntegerCSP
+
+import
+global	IntegerVerification IntegerSimplification Values
+	;
+end
+
+operators
+local	NegativeTerm(@)                 : (term)                                term;
+	ReplaceAllVariablesByZero(@,@)  : (list[var] term)                      term;
+	ShiftTerm(@)                    : (term)                                term;
+	IncreasingExpression(@,@)       : (var term)                            bool;
+
+end
+
+
+rules for bool
+
+	x	: var;
+	t	: term;
+
+global 
+
+[]	IncreasingExpression(x,t)
+	=>
+	EvaluateTerm(t,x,1) > EvaluateTerm(t,x,0) 
+end
+
+end
+
+
+rules for formule
+
+	x	: var;
+	lv	: list[var];
+	t,t1	: term;
+
+global 
+
+
+[]	NormalFormOfConstraint(t >? 0)
+	=>
+	where	(list[var])	x.lv:=()GetVarOfTerm(t,nil)
+	switch
+	case	IncreasingExpression(x,ReplaceAllVariablesByZero(lv,t))	then
+		t >? 0
+	otherwise
+		t1 <?  0
+		where	t1 := ()NegativeTerm(t)
+	end
+end
+
+[]	NormalFormOfConstraint(t >=? 0)
+	=>
+	where	(list[var])	x.lv:=()GetVarOfTerm(t,nil)
+	switch
+	case	IncreasingExpression(x,ReplaceAllVariablesByZero(lv,t))	then
+		t >=? 0
+	otherwise
+		t1 <=? 0
+		where	t1 := ()NegativeTerm(t)
+	end
+end
+
+[]	NormalFormOfConstraint(t <? 0)
+	=>
+	where	(list[var])	x.lv:=()GetVarOfTerm(t,nil)
+	switch
+	case	IncreasingExpression(x,ReplaceAllVariablesByZero(lv,t))	then
+		t <? 0
+	otherwise
+		t1 >?  0
+		where	t1 := ()NegativeTerm(t)
+	end
+end
+
+[]	NormalFormOfConstraint(t <=? 0)
+	=>
+	where	(list[var])	x.lv:=()GetVarOfTerm(t,nil)
+	switch
+	case	IncreasingExpression(x,ReplaceAllVariablesByZero(lv,t))	then
+		t <=? 0
+	otherwise
+		t1 >=? 0
+		where	t1 := ()NegativeTerm(t)
+	end
+end
+
+[]	NormalFormOfConstraint(t =? 0)
+	=>
+	where	(list[var])	x.lv:=()GetVarOfTerm(t,nil)
+	switch
+	case	IncreasingExpression(x,ReplaceAllVariablesByZero(lv,t))	then
+		t =? 0
+	otherwise
+		t1 =?  0
+		where	t1 := ()NegativeTerm(t)
+	end
+end
+
+[]	NormalFormOfConstraint(t !=? 0)
+	=>
+	where	(list[var])	x.lv:=()GetVarOfTerm(t,nil)
+	switch
+	case	IncreasingExpression(x,ReplaceAllVariablesByZero(lv,t))	then
+		t !=? 0
+	otherwise
+		t1 !=? 0
+		where	t1 := ()NegativeTerm(t)
+	end
+end
+
+end
+
+
+rules for list[var]
+
+	x	: var;
+	k,k1,k2	: int;
+	t,t1,t2	: term;
+	l,l1,l2	: list[var];
+
+global 
+
+[]	GetVarOfAtomicFormule(t =? 0)
+	=>
+	GetVarOfTerm(t,nil)
+end
+[]	GetVarOfAtomicFormule(t !=? 0)
+	=>
+	GetVarOfTerm(t,nil)
+end
+[]	GetVarOfAtomicFormule(t >=? 0)
+	=>
+	GetVarOfTerm(t,nil)
+end
+[]	GetVarOfAtomicFormule(t >? 0)
+	=>
+	GetVarOfTerm(t,nil)
+end
+[]	GetVarOfAtomicFormule(t <=? 0)
+	=>
+	GetVarOfTerm(t,nil)
+end
+[]	GetVarOfAtomicFormule(t <? 0)
+	=>
+	GetVarOfTerm(t,nil)
+end
+[]	GetVarOfAtomicFormule(true)
+	=>
+	nil
+end
+[]	GetVarOfAtomicFormule(false)
+	=>
+	nil
+end
+
+[]	GetVarOfTerm(t1 (+) t2,l)
+	=>
+	l1
+	where	l2 := ()GetVarOfTerm(t2,l)
+	where	l1 := ()GetVarOfTerm(t1,l2)
+end
+[]	GetVarOfTerm(k(*)x,l)
+	=>
+	x.l
+end
+[]	GetVarOfTerm(x(*)k,l)
+	=>
+	x.l
+end
+[]	GetVarOfTerm(k1(*)k2,l)
+	=>
+	l
+end
+[]	GetVarOfTerm(k,l)
+	=>
+	l
+end
+
+end
+
+
+rules for int
+
+	x		: var;
+	v,k,k1,k2	: int;
+	t,t1,t2		: term;
+
+global 
+
+[]	EvaluateTerm(t1 (+) t2,x,v)
+	=>
+	EvaluateTerm(t1,x,v) + EvaluateTerm(t2,x,v)
+end
+[]	EvaluateTerm(k(*)x,x,v)
+	=>
+	k*v
+end
+[]	EvaluateTerm(k1(*)k2,x,v)
+	=>
+	k1*k2
+end
+[]	EvaluateTerm(k,x,v)
+	=>
+	k
+end
+
+[]	EvaluateGroundTerm(t1 (+) t2)
+	=>
+	EvaluateGroundTerm(t1) + EvaluateGroundTerm(t2)
+end
+[]	EvaluateGroundTerm(k1(*)k2)
+	=>
+	k1*k2
+end
+[]	EvaluateGroundTerm(k)
+	=>
+	k
+end
+
+end
+
+
+rules for formule
+
+	t,t1,t2,t3	: term;
+
+global 
+
+[]	GetCanonicalForm(t1 =? t2)
+	=>
+	where	t3 := ()SimplifyTerm(t1 (+) (-1(*)(t2)))
+	switch
+	case	GetVarOfTerm(t3,nil) == nil	then
+		EvaluateGroundFormule(t3 =? 0)
+	otherwise
+		t3 =? 0
+	end
+end
+[]	GetCanonicalForm(t1 !=? t2)
+	=>
+	where	t3 := ()SimplifyTerm(t1 (+) (-1(*)(t2)))
+	switch
+	case	GetVarOfTerm(t3,nil) == nil	then
+		EvaluateGroundFormule(t3 !=? 0)
+	otherwise
+		t3 !=? 0
+	end
+end
+[]	GetCanonicalForm(t1 >=? t2)
+	=>
+	where	t3 := ()SimplifyTerm(t1 (+) (-1(*)(t2)))
+	switch
+	case	GetVarOfTerm(t3,nil) == nil	then
+		EvaluateGroundFormule(t3 >=? 0)
+	otherwise
+		t3 >=? 0
+	end
+end
+[]	GetCanonicalForm(t1 >? t2)
+	=>
+	where	t3 := ()SimplifyTerm(t1 (+) (-1(*)(t2)))
+	switch
+	case	GetVarOfTerm(t3,nil) == nil	then
+		EvaluateGroundFormule(t3 >? 0)
+	otherwise
+		t3 >? 0
+	end
+end
+[]	GetCanonicalForm(t1 <=? t2)
+	=>
+	where	t3 := ()SimplifyTerm(t1 (+) (-1(*)(t2)))
+	switch
+	case	GetVarOfTerm(t3,nil) == nil	then
+		EvaluateGroundFormule(t3 <=? 0)
+	otherwise
+		t3 <=? 0
+	end
+end
+[]	GetCanonicalForm(t1 <? t2)
+	=>
+	where	t3 := ()SimplifyTerm(t1 (+) (-1(*)(t2)))
+	switch
+	case	GetVarOfTerm(t3,nil) == nil	then
+		EvaluateGroundFormule(t3 <? 0)
+	otherwise
+		t3 <? 0
+	end
+end
+
+[]	GetInverse(t =? 0)
+	=>
+	ShiftTerm(t) =? 0
+end
+
+[]	GetInverse(t !=? 0)
+	=>
+	ShiftTerm(t) !=? 0
+end
+
+[]	GetInverse(t >=? 0)
+	=>
+	ShiftTerm(t) >=? 0
+end
+
+[]	GetInverse(t >? 0)
+	=>
+	ShiftTerm(t) >? 0
+end
+
+[]	GetInverse(t <=? 0)
+	=>
+	ShiftTerm(t) <=? 0
+end
+
+[]	GetInverse(t <? 0)
+	=>
+	ShiftTerm(t) <? 0
+end
+
+end
+
+
+rules for term
+
+	x,x1,x2	:	var;
+	k,v,v1,v2,sum,cons	:	int;
+	t,t1,t2,t3	:	term;
+	lv	:	list[var];
+	lt,ts	: list[term];
+
+global 
+
+[]	ShiftTerm(t1 (+) t2 (+) t3)
+	=>
+	t2 (+) t1 (+) t3 
+end
+[]	ShiftTerm(t)
+	=>
+	t
+end
+
+[]	ReplaceAllVariablesByZero(x.lv,t)
+	=>
+	ReplaceAllVariablesByZero(lv,Replacee(x,0,t))
+end
+[]	ReplaceAllVariablesByZero(nil,t)
+	=>
+	t
+end
+
+[]	NegativeTerm(k(*)x (+) t)
+	=>
+	-k(*)x (+) NegativeTerm(t)
+end
+[]	NegativeTerm(k)
+	=>
+	-k
+end
+
+end
+
+
+rules for int
+
+	x		: var;
+	v,k,k1,k2	: int;
+	t,t1,t2		: term;
+
+global 
+
+[]	ArityOfConstraint(t =? 0)
+	=>
+	ArityOfTerm(t)
+end
+[]	ArityOfConstraint(t !=? 0)
+	=>
+	ArityOfTerm(t)
+end
+[]	ArityOfConstraint(t >=? 0)
+	=>
+	ArityOfTerm(t)
+end
+[]	ArityOfConstraint(t >? 0)
+	=>
+	ArityOfTerm(t)
+end
+[]	ArityOfConstraint(t <=? 0)
+	=>
+	ArityOfTerm(t)
+end
+[]	ArityOfConstraint(t <? 0)
+	=>
+	ArityOfTerm(t)
+end
+
+[]	ArityOfTerm(t1 (+) t2)
+	=>
+	ArityOfTerm(t1) + ArityOfTerm(t2)
+end
+[]	ArityOfTerm(k(*)x)
+	=>
+	1
+end
+[]	ArityOfTerm(k)
+	=>
+	0
+end
+[]	ArityOfTerm(k1(*)k2)
+	=>
+	0
+end
+
+end
+
+rules for int
+
+	min,max	: int;
+
+global 
+
+[]	GetCard([min,..,max])
+	=>
+	max-min+1
+end
+[]	GetCard(empty)
+	=>
+	0
+end
+
+[]	GetFirstValueOfDomain([min,..,max])
+	=>
+	min
+end
+
+end
+
+
+rules for domain
+
+	v,min,max	: int;
+
+global 
+
+[]	CreateDomainFromValue(v)
+	=>
+	[v,..,v]
+end
+
+[]	EliminateFirstValueOfDomain([min,..,max])
+	=>
+	[min+1,..,max]
+end
+
+end
+
+
+end

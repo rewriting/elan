@@ -1,0 +1,301 @@
+module automaton[Fss]
+import global aut_name transition[Fss] state state_set list[transition] 
+	list[automaton];
+
+	local int Fss pair[identifier, int] replace[state, automaton]
+		list[pair[identifier, int]] ;
+end
+
+/*
+	Automata syntax, cleaning and renaming functions.
+	------------------------------------------------
+
+* Global functions:
+"clean": clean by accessibility testing AND utility testing.
+"renum": rename the states of an automaton.
+"simplify": clean and then rename an automaton.
+
+* Local functions
+"clean_up": cleaning by accessibility testing  (states that are not 
+accessible are removed)
+"clean_down": cleaning by utility testing (states that are not used in any 
+derivation leading to a final state are removed)
+
+*/
+
+sort automaton ;
+end
+
+operators
+global
+	(@, @, @, @)			: (aut_name state_set state_set list[transition]) automaton;
+
+	Description of @ states @ final states @ transitions @ End of Description		 
+		: (aut_name state_set state_set list[transition]) automaton	alias (@, @, @, @):;
+	
+	clean(@)			: (automaton) automaton;
+	renum(@)			: (automaton) automaton;
+	simplify(@)			: (automaton) automaton;
+	list_trans(@)			: (automaton) list[transition];
+	states(@)			: (automaton) state_set;
+
+local
+
+	tmp(@)				: (int) state;
+	renum_fwd(@, @, @)			: (state_set int automaton) automaton;
+	renum_back(@, @, @)			: (state_set int automaton) automaton;
+	get_set_final_states(@, @)	: (list[transition] state_set) state_set;
+	clean_up(@, @, @, @)		: (list[transition] list[transition] bool state_set) state_set;
+	clean_down(@, @, @, @)		: (list[transition] list[transition] bool state_set) state_set;
+
+	grab(@, @, @)			: (state_set list[transition] list[transition]) list[transition]; 
+
+end
+
+
+stratop global
+  renum_strat : <automaton> builtin;
+  clean_up_strat : <state_set> builtin;
+  clean_down_strat : <state_set> builtin;
+  final_state_strat : <state_set> builtin;
+  grab_strat : <list[transition]> builtin;
+end
+
+
+rules for automaton
+          name: aut_name;
+	Q, Qf, l1, l2, final: state_set;
+	R, R1, R2: list[transition];
+	a: automaton;
+global
+[] 	simplify(a) => renum(clean(a))						end
+
+[]	clean((name, Q, Qf, R)) => (name, l2, final, R2)	
+		where l1 := (clean_up_strat) clean_up(R, nil, false, nil)	
+		where R1 := (grab_strat) grab(l1, R, nil)
+		where final := (final_state_strat) get_set_final_states(R1, Qf)
+		where l2 := (clean_down_strat) clean_down(R1, nil, false, final)
+		where R2 := (grab_strat) grab(l2, R1, nil)
+end
+
+[]	renum((name, Q, Qf, R)) => a	
+		where a:= (renum_strat) renum_fwd(Q, 0, (name, Q, Qf, R)) 	end
+end
+	
+
+
+rules for automaton
+          a1, a2: automaton;
+	s: state;
+	Q, Qf: state_set;
+	name: aut_name;
+	R: list[transition];
+	i: int;
+
+global
+
+[renum_r1]	renum_fwd(s . Q, i, a1) => renum_fwd(Q, i+1, a2)
+
+			where a2 := () replace s by tmp(i) in a1			end
+
+
+[renum_r2]	renum_fwd(nil, i, (name, Q, Qf, R)) => 
+
+		renum_back(Q, 0, (name, Q, Qf, R))				end
+
+
+[renum_r3]	renum_back(s . Q, i, a1) => renum_back(Q, i+1, a2)
+
+			where a2 := () replace s by q|i in a1			end
+
+
+[renum_r4]	renum_back(nil, i, a1) => a1					end
+
+end
+
+
+
+rules for state_set
+          l, l1: list[transition];
+	Val: bool;
+	A: state_set;
+	q: state;
+	Qf: state_set;
+	c: configuration;
+	name: aut_name;
+
+global
+[]	states((name, A, Qf, l)) => A					end
+
+[final_r1]	get_set_final_states(nil, Qf)	=> nil			end
+[final_r2]	get_set_final_states( (c -> q) . l, Qf) => add(q,A)
+
+		if q in Qf
+		where A := (final_state_strat) get_set_final_states(l, Qf)
+end
+
+
+[final_r3]	get_set_final_states( (c -> q) . l, Qf) => 
+		
+		get_set_final_states(l, Qf)	
+
+			if not(q in Qf)					end
+
+
+
+[clean_up_r1]	clean_up(nil, l, false, A) => A				end	
+[clean_up_r2]	clean_up(nil, l, true, A) => clean_up(l, nil, false, A)	end
+
+
+FOR EACH SS:pair[identifier,int]; F:identifier; N:int
+SUCH THAT SS:=(listExtract) elem(Fss) AND F :=()first(SS) AND N:=()second(SS) :{
+
+rules for state_set
+          q_1, ..., q_N: state;
+global
+  [clean_up_r3]
+	clean_up((F(q_1, ..., q_N) -> q).l, l1, Val, A) =>
+		
+	clean_up(l, l1, true, add(q,A))	
+
+		if { (q_I in A) and }_I=1...N true
+  end
+end}
+
+
+FOR EACH SS:pair[identifier,int]; F:identifier; N:int
+SUCH THAT SS:=(listExtract) elem(Fss) AND F :=()first(SS) AND N:=()second(SS) :{
+
+rules for state_set
+          q_1, ..., q_N: state;
+global
+  [clean_up_r4]
+	clean_up((F(q_1, ..., q_N) -> q).l, l1, Val, A) =>
+		
+	clean_up(l, (F(q_1, ..., q_N) -> q) . l1, Val, A)	
+
+		if not({(q_I in A) and }_I=1...N true)
+  end
+end}
+
+
+
+[clean_down_r1]	clean_down(nil, l, false, A) => A				end
+[clean_down_r2]	clean_down(nil, l, true, A) => clean_down(l, nil, false, A)	end
+
+
+FOR EACH SS:pair[identifier,int]; F:identifier; N:int
+SUCH THAT SS:=(listExtract) elem(Fss) AND F :=()first(SS) AND N:=()second(SS) :{
+
+rules for state_set
+          q_1, ..., q_N: state;
+global
+  [clean_down_r3]
+	clean_down((F(q_1, ..., q_N) -> q).l, l1, Val, A) =>
+		
+	clean_down(l, l1, true, {add(q_I, }_I=1...N A { ) }_I=1...N   )	
+
+		if (q in A)
+  end
+end}
+
+
+FOR EACH SS:pair[identifier,int]; F:identifier; N:int
+SUCH THAT SS:=(listExtract) elem(Fss) AND F :=()first(SS) AND N:=()second(SS) :{
+
+rules for state_set
+          q_1, ..., q_N: state;
+global
+  [clean_down_r4]
+	clean_down((F(q_1, ..., q_N) -> q).l, l1, Val, A) =>
+		
+	clean_down(l, (F(q_1, ..., q_N) -> q).l1, Val, A)	
+
+		if not((q in A))
+  end
+end}
+end
+
+
+rules for list[transition]
+          q: state;
+	name: aut_name;
+	A, Qf: state_set;
+	l, l1: list[transition];
+
+global
+
+[]	list_trans((name, A, Qf, l)) => l			end
+
+[grab_r1]	grab(A, nil, l) => l				end
+
+
+FOR EACH SS:pair[identifier,int]; F:identifier; N:int
+SUCH THAT SS:=(listExtract) elem(Fss) AND F :=()first(SS) AND N:=()second(SS):{
+rules for list[transition] 
+          q_1, ..., q_N: state;
+
+global
+  [grab_r2]
+	grab(A, (F(q_1, ..., q_N) -> q) . l, l1) => 
+
+	grab(A, l, (F(q_1, ..., q_N) -> q). l1)
+
+		if (q in A) {and (q_I in A)}_I=1...N
+  end
+end}
+
+
+FOR EACH SS:pair[identifier,int]; F:identifier; N:int
+SUCH THAT SS:=(listExtract) elem(Fss) AND F :=()first(SS) AND N:=()second(SS):{
+rules for list[transition] 
+          q_1, ..., q_N: state;
+
+global
+  [grab_r3]
+	grab(A, (F(q_1, ..., q_N) -> q) . l, l1) => 
+
+	grab(A, l, l1)
+
+		if not((q in A) {and (q_I in A)}_I=1...N )
+  end
+end}
+end
+
+
+strategies for automaton
+implicit 
+  [.] renum_strat =>
+	repeat*(dc one(renum_r1));
+	dc one(renum_r2);
+	repeat*(dc one(renum_r3));
+	dc one(renum_r4)
+  end
+end
+
+
+strategies for state_set
+implicit
+  [.] clean_up_strat =>
+	repeat*(dc one(clean_up_r1 , clean_up_r2 , clean_up_r3 , clean_up_r4))
+  end
+
+
+  [.] clean_down_strat =>
+	repeat*(dc one(clean_down_r1 , clean_down_r2 , clean_down_r3 , clean_down_r4))
+  end
+
+  [.] final_state_strat =>
+	repeat*(dc one(final_r1 , final_r2 , final_r3))
+  end
+end
+
+strategies for list[transition]
+implicit
+  [.] grab_strat =>
+	repeat*(dc one(grab_r1 , grab_r2 , grab_r3))
+  end
+end
+
+end
+

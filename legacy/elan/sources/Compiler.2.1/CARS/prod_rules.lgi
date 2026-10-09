@@ -1,0 +1,28 @@
+LPL prod_rules description
+
+specification description
+
+part Vars	of sort list[identifier]
+		import 	sigSyntax
+
+part Ops	of sort list[pair[identifier,int]]
+		import 	sigSyntax
+
+part Faits	of sort list[term]
+		import 	sigSyntax
+			EtermCommons[Ops,Vars]
+			list[term]
+
+part Rules	of sort	list[pair[term,term]]
+		import	sigSyntax
+			EtermCommons[Ops,Vars]
+			rule[Vars,Ops]
+			list[pair[term,term]]
+end
+
+query	of sort set[pair[symbole,set[lm_symbole]]]
+	result of sort set[pair[symbole,set[lm_symbole]]]
+	import prod_rules[Vars,Ops,Faits,Rules]
+	start with (init) fermeture
+
+end

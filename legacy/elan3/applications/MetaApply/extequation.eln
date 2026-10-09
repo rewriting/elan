@@ -1,0 +1,206 @@
+module extequation[vars,fss,prec]
+
+/* Extension of the sort equation */
+/* In Basic Completion, an equation is extended such that it is */
+/* formed of an equation, and two lists of list of integers, a list of */
+/* list of marked positions in the left hand side and a list of marked */
+/* positions in the right hand side and a list of integers representing */
+/* its ancestors */
+
+/* vars : variables, 
+   fss  : operators,
+   prec : precedence */
+
+
+import	
+	global
+		list[int]
+		list[list[int]]
+		eqSystem[fss,vars] /* defined the sorts eqSystem, equation */
+	;
+	local
+		vars
+		fss
+		prec		
+		int
+		bool
+		renaming[vars,fss,prec]
+		termCommons[fss,vars]
+	;
+end
+
+sort extequation;
+end
+
+operators
+  global
+
+	/* Constructor of the sort extequation */
+	@, @, @, @, @	: (equation int list[list[int]] list[list[int]] 
+	list[int]) extequation;
+
+	/* Destructors of an extequation */
+    	equation(@)	: (extequation)	equation;
+	counter(@)	: (extequation) int;
+	llpositions(@)	: (extequation) list[list[int]];
+	rlpositions(@)	: (extequation) list[list[int]];
+	cancestor(@)	: (extequation) list[int];
+
+	/* Test the equality of two objects of type extequation */
+	eqextequation(@,@)	: (extequation extequation) bool;
+
+	/* Give the number i of the variable writtem by var(i) such */
+	/* that i is maximum in the equation or the integer n if n > i */
+	maxvar(@,@)	: (extequation int) int;
+
+	/* Renaming of the equation from var(0) */
+	/* normalize(f(g(x),y))=x => f(g(var(1)),var(0))=var(1) */
+	normalize(@)	: (extequation) extequation;
+
+	/* Renaming of the equation from var(i) when i = n+1 */
+	/* translate(f(g(var(1)),var(0))=var(1),3) => */
+	/* f(g(var(5)),var(4))=var(5) */
+	translate(@,@)	: (extequation int) extequation;
+
+	/* size of an extequation wrt the size of the equation */
+	size(@)		: (extequation) int;
+
+	/* list of non variable positions of the left hand side of an equation */
+	lnonvarposleft(@)	: (extequation)	list[list[int]];
+
+
+
+end
+
+
+rules for equation
+	e, ee : equation;
+	n     : int;
+	l, ll : list[list[int]];
+	lll   : list[int];
+global
+	[] equation(e,n,l,ll,lll)		=> e
+	end
+end
+
+
+rules for int
+	e, ee : equation;
+	n     : int;
+	l, ll : list[list[int]];
+	lll   : list[int];
+global
+	[] counter(e,n,l,ll,lll)		=> n
+	end
+end	
+
+
+rules for list[list[int]]
+	e : equation;
+	n : int;
+	l, ll : list[list[int]];
+	lll   : list[int];
+global
+	[] llpositions(e,n,l,ll,lll)		=> l
+	end
+
+	[] rlpositions(e,n,l,ll,lll)		=> ll
+	end
+end
+
+
+rules for list[int]
+	e : equation;
+	n : int;
+	l, ll : list[list[int]];
+	lll   : list[int];
+global
+	[] cancestor(e,n,l,ll,lll)		=> lll
+	end
+end
+
+
+rules for bool
+	e1, e2		: equation;
+	num1, num2 	: int;
+	l1, l2, ll1, ll2: list[list[int]];
+	cans1, cans2 	: list[int];
+global
+	[] eqextequation(e1,num1,l1,l2,cans1,e2,num1,ll1,ll2,cans2)	=> true
+	end
+
+	[] eqextequation(e1,num1,l1,l2,cans1,e2,num2,ll1,ll2,cans2)	=> false
+	end
+end
+
+
+rules for int
+	e 	: equation;
+	num, n 	: int;
+	l1, l2 	: list[list[int]];
+	cans	: list[int];
+global
+	[] maxvar(e,num,l1,l2,cans,n)	=> maxvar(e,n)
+	end
+end
+
+
+rules for extequation
+	e 	: equation;
+	num 	: int;
+	l1, l2 	: list[list[int]];
+	cans	: list[int];
+global
+	[] normalize(e,num,l1,l2,cans)	=> normalize(e,0),num,l1,l2,cans
+	end
+end
+
+
+rules for extequation
+	e 	: equation;
+	num,n 	: int;
+	l1, l2 	: list[list[int]];
+	cans	: list[int];
+global
+	[] translate(e,num,l1,l2,cans,n)=> translate(e,n),num,l1,l2,cans
+	end
+end
+
+
+rules for int
+	e 	: equation;
+	num,n 	: int;
+	l, ll 	: list[list[int]];
+	cans	: list[int];
+global
+	[] size(e,n,l,ll,cans)	=> size(e)
+	end
+end
+
+
+rules for list[list[int]]
+	g, d	: term;
+	num	: int;
+	l1, l2 	: list[list[int]];
+	cans	: list[int];
+global
+	[] lnonvarposleft (g=d,num,l1,l2,cans) => lnonvarpos(g)
+	end
+end
+
+
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+

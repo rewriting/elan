@@ -1,0 +1,7 @@
+#! /bin/csh
+setenv REP    $APPLICATIONS/Hou
+setenv LGI    hou
+setenv SPC    specPat
+setenv OPTION -b
+setenv INPUT  $REP/Sample/specPat.inp
+setenv OUTPUT $REP/Sample/specPat.out

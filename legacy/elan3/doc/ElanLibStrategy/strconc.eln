@@ -1,0 +1,16 @@
+module strconc[X,Y,Z]
+
+import global 	strsig[X,Y] strsig[Y,Z] strsig[X,Z];
+end
+operators global
+  @ ';' @	: (<X->Y> <Y->Z>) <X->Z> assocLeft;
+end
+
+rules for Z
+	s1	: <X->Y>;	s2	: <Y->Z>;
+	x	: X;		y	: Y;		z	: Z;
+global
+  [CONCAT] 	[s1 ; s2]x => z  where y := [s1]x where z := [s2]y   end
+end
+
+end

@@ -1,0 +1,23 @@
+//
+//		(c)	INRIA-Lorraine & CRIN
+//			615, rue du Jardin Botanique, BP 101
+//		        54602 Villers-les-Nancy
+//			France
+//			email: elan@loria.fr
+//
+//	$Source: /CVS/aircube/elan3/doc/ElanLibCommon/listCommons.eln,v $
+//	$Revision: 1.1 $
+//	$Date: 1997/03/25 16:46:47 $
+//	$Author: moreau $
+//
+
+module listCommons
+
+	// Used by the module list.eln
+
+strategy listExtract
+  iterate ( dc(extractrule2) ) ;
+  dc(extractrule1)
+end
+
+end

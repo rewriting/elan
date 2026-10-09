@@ -1,0 +1,11 @@
+LPL sdart description
+
+  query 	of sort Set
+         	result of sort Set
+	 	import sdart
+//         	start with () query
+         	start with () finish
+
+
+end
+

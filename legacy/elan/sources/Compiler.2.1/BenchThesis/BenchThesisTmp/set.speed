@@ -1,0 +1,45 @@
+------------------------------------------------------------
+Set
+compiler
+powerSet(4)
+average speed = 35666 rwr/sec
+average speed = 21400 rwr/sec
+average speed = 17833 rwr/sec
+average speed = 107000 rwr/sec
+average speed = 53500 rwr/sec
+powerSet(5)
+average speed = 31875 rwr/sec
+average speed = 42500 rwr/sec
+average speed = 42500 rwr/sec
+average speed = 85000 rwr/sec
+average speed = 42500 rwr/sec
+powerSet(6)
+average speed = 53727 rwr/sec
+average speed = 59100 rwr/sec
+average speed = 53727 rwr/sec
+average speed = 53727 rwr/sec
+average speed = 53727 rwr/sec
+powerSet(7)
+average speed = 70684 rwr/sec
+average speed = 74611 rwr/sec
+average speed = 83937 rwr/sec
+average speed = 63952 rwr/sec
+average speed = 58391 rwr/sec
+powerSet(8)
+average speed = 62645 rwr/sec
+average speed = 57826 rwr/sec
+average speed = 55685 rwr/sec
+average speed = 61367 rwr/sec
+average speed = 62645 rwr/sec
+interpreter
+powerSet(4)
+ average speed	1407 inf/sec
+powerSet(5)
+ average speed	855 inf/sec
+powerSet(6)
+ average speed	462 inf/sec
+powerSet(7)
+ average speed	223 inf/sec
+powerSet(8)
+ average speed	96 inf/sec
+------------------------------------------------------------

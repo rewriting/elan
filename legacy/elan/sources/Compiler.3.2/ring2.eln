@@ -1,0 +1,56 @@
+module ring2
+
+import global  eq[term];
+end
+
+sort term;
+end
+
+operators
+  global
+    +(@,@) : (term term) term (AC);
+    *(@,@) : (term term) term (AC);
+    (@+ @) : (term term) term (AC) alias +(@,@):; 
+    (@* @) : (term term) term (AC) alias *(@,@):;  
+    (- @)   : (term) term;
+    O      : term;
+    I      : term;
+    x0      : term;
+    x1      : term;
+    x2      : term;
+    x3      : term;
+    p1      : term;
+    p2      : term;
+    q1      : term;
+    q2      : term;
+    r1      : term;
+    r2      : term;
+    s1      : term;
+    s2      : term;
+    t1      : term;
+    t2      : term;
+    u1      : term;
+    u2      : term;
+    v1      : term;
+    v2      : term;
+    w1      : term;
+    w2      : term;
+end
+
+rules for term
+    x,y,z,t    : term;
+    X,Y : term;
+  global 
+        [] (x + O) => x end
+//	[] (x + (- x))  => O end 
+        [] (x + (- y))  => O where (term) (X+(-Y)):=()(x + (- y)) end
+	[] (- O) => O end
+        [] (- (- x)) => x end
+        [] (- (x + y)) => ((- x)+ (- y))end
+	[] (x* (y+ z))  => ((x* y)+ (x* z)) end
+	[] (O* x) => O end	
+        [] (x* (- y))  => (- (x* y)) end 
+        [] (x* I)  => x end 			
+end
+
+end

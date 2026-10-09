@@ -1,0 +1,37 @@
+module io[X]
+
+import global bool int stdio; 
+end
+sort X;
+end
+operators global
+  write(@,@)	 : (Pid X) X   pri 200 code -119;     // write to a file/output/to a pipe
+  read(@)	 : (Pid) X     pri 200 code -120;     // read from a file/get from a pipe
+  iserror(@)	 : (X) bool;
+  errno(@)	 : (X) int;
+local
+  Error(@)	 : (int) X     pri 200 code 123;
+end
+/*
+Semantics:
+ - 'write(p,x)' writes a term x:X to a file or an output pipe pid and in the successful
+   case, it returns the same term x. If an error is occured, the result of write is
+   a term Error(e), where 'e' is a index of error.
+ - 'read(p)' reads a term of the type X, if the error case it returns a term Error(e).
+*/
+rules for bool
+ x:X; e:int;
+local
+  []	iserror(Error(e)) => true	end
+  []	iserror(x) => false		end
+end
+
+rules for int
+ x:X; e:int;
+local
+  [] 	errno(Error(e)) => e		end
+end
+
+end
+
+

@@ -1,0 +1,37 @@
+module main
+
+import global c; end
+sort Foo; end
+operators global
+  a	: Foo;
+end
+
+stratop global
+  ss	: <Foo->Foo>	builtin;
+end
+
+strategies for Foo
+implicit
+  [] ss => dk(
+	dk(R) ,
+	dk(GG_c) ,
+	dk(GG_a) ,
+	dk(GG_b) ,
+	dk(R , GG_c) ,
+	dk(GG_a , GG_c) )
+
+//  dk(R)			        // [b,a10] /b,a20/ (b,a30)
+//  dk(RR)			// strategy/strategy 
+//  dk(GG_c) 			// 10 20 40 50 30 31
+//  dk(GG_a) 			// 10 11
+//  dk(GG_b) 			// 20 21
+//  dk(GG_loca) 		// undefined rule or strategy GG_loca 
+//  dk(GG_locb) 		// undefined rule or strategy GG_locb
+//  dk(LL_c)			// undefined rule or strategy LL_c
+//  dk(R , GG_c)		// 10 20 30 10 20 40 50 30 31
+//  dk(GG_a , GG_c)		// 10 11  10 20 40 50 30 31
+  end
+end
+
+end
+ 

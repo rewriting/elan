@@ -1,0 +1,22 @@
+LPL S28 description
+
+query		of sort  	array[27,int]
+		result of sort 	array[27,int]
+		import 		int S28[array[27,int]]
+				strat[array[27,int]]
+				loops[i,array[27,int]]
+				loops[j,array[27,int]]
+				commit[array[27,int]]
+		start with 	[for i=1 to 9 do
+				     some j=1 to 25-2*i do
+				       add(j-1,i)
+				     od
+				   od
+				]new(0)
+
+//[191218246279458634753968357]
+//[181915267285296475384639743]
+//[191618257269258476354938743]
+// ....
+end
+

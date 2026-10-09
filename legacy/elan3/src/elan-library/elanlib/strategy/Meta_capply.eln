@@ -1,0 +1,14 @@
+// This file is generated automatically: do not edit it directly. 
+  module Meta_capply[X]
+  // ONLY FOR COMPILER
+          import global builtinInt list[X] builtinString; end
+
+              operators global
+                  meta_apply(@,@)     : (builtinString X) X                          code -129;
+                  meta_apply(@,@,@)   : (builtinString X builtinInt) X               code -130;
+              end
+   
+
+  end  
+   
+

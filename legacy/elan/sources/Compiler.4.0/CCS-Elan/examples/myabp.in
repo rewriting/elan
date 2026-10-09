@@ -1,0 +1,15 @@
+(def Trans = send_d0.(!trans_d0.Trans + !trans_bot.Trans) + send_d1.(!trans_d1.Trans + !trans_bot.Trans)
+,def Ack = reply_0.(!ack_0.Ack+!ack_bot.Ack) + reply_1.(!ack_1.Ack+!ack_bot.Ack)
+,def Sender_0  =  acc_d.Send_d0
+,def Sender_1 = acc_d.Send_d1
+,def Send_d0 = !send_d0.Wait_d0
+,def Send_d1 = !send_d1.Wait_d1
+,def Wait_d0 = ack_0.Sender_1 + ack_1.Send_d0 + ack_bot.Send_d0
+,def Wait_d1 = ack_1.Sender_0 + ack_0.Send_d1 + ack_bot.Send_d1
+,def Receiver_0  =  trans_d0.Reply_d0  + trans_d1.!reply_1.Receiver_0 + trans_bot.!reply_1.Receiver_0
+,def Receiver_1  =  trans_d1.Reply_d1  + trans_d0.!reply_0.Receiver_1 + trans_bot.!reply_0.Receiver_1
+,def Reply_d0  =  !deliver_d.!reply_0.Receiver_1
+,def Reply_d1  =  !deliver_d.!reply_1.Receiver_0
+,def Rest  =  [ send_d0,send_d1,trans_d0,trans_d1,reply_0,reply_1,ack_0,ack_1,trans_bot,ack_bot ]
+,def ABP  =   (Sender_0 | Trans | Receiver_0 | Ack) \ Rest
+; ABP ) end

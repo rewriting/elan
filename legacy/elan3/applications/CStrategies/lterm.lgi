@@ -1,0 +1,11 @@
+LPL lterm description
+
+query		of sort  	lterm
+		result of sort 	lterm
+		import 	lterm
+
+//		start with 	[reduce_top]query
+//		start with 	[reduce]query
+		start with 	[reduce_all]query
+
+end

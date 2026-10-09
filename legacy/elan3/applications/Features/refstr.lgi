@@ -1,0 +1,10 @@
+LPL refstr description 
+
+        query           of sort Foo
+        result          of sort string
+        import          refstr
+        start with 	()foo(query)
+
+end
+
+//"FSYM(FSYM(FSYM(nil,448).nil,451).FSYM(nil,449).nil,450)"

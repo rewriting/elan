@@ -1,0 +1,8 @@
+LPL hanoi_jc description 
+
+query 		of sort list
+      result 	of sort list
+      import    hanoi 
+      start with () curry(6,1,3)
+
+end

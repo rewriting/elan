@@ -1,0 +1,13 @@
+module builtinHashTerm[X]
+import global builtinInt;
+end
+
+sort X;
+end
+
+operators global
+  builtinHashTerm(@)    : (X) builtinInt                 code 210;
+end
+
+end  
+ 

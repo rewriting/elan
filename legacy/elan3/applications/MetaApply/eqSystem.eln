@@ -1,0 +1,153 @@
+//
+//		(c)	INRIA-Lorraine & CRIN
+//			615, rue du Jardin Botanique, BP 101
+//		        54602 Villers-les-Nancy
+//			France
+//			email: elan@loria.fr
+//
+//	$Source: /CVS/aircube/elan3/applications/MetaApply/eqSystem.eln,v $
+//	$Revision: 1.1 $
+//	$Date: 1998/01/24 10:53:57 $
+//	$Author: borovan $
+//
+
+module eqSystem[Fss,Vars]
+import 	global	applySubstOn[Fss,Vars,eqSystem];
+	local	bool int termCommons[Fss,Vars];
+end
+
+
+sort eqSystem equation;
+end
+
+
+operators
+global
+  eqempty	: equation;
+  @ = @		: (term term) equation; // (AC)
+  @->@          : (term term) equation;
+
+  /* right and left hand side of an equation */
+  rhs(@)	: (equation) term;
+  lhs(@)	: (equation) term;
+
+  @		: ( bool ) eqSystem;
+  @ 		: ( equation ) eqSystem;
+  @ & @		: ( eqSystem eqSystem ) eqSystem	assocLeft;
+  (@ & @)	: ( eqSystem eqSystem ) eqSystem	alias @ & @:;
+
+  system_to_subst(@)	: ( eqSystem ) substitution;
+
+  /* new functions */
+
+
+  /* Tests if a substitution is a renaming */
+  is_renaming(@): (substitution) bool;
+
+  /* Size of an equation w.r.t. its symbols functions and variables */
+  size(@)	: (equation) int;
+
+end
+
+
+stratop
+  global
+    delete_new_variables : <eqSystem>	builtin;
+end
+
+
+/* rhs and lhs */
+
+rules for term
+  g1, d1 : term;
+global
+  [] lhs(g1=d1)	=> g1
+  end
+
+  [] rhs(g1=d1)	=> d1
+  end
+
+  [] lhs(g1->d1)=> g1
+  end
+
+  [] rhs(g1->d1)=> d1
+  end
+end
+
+
+rules  for substitution
+ P,Q,R	: eqSystem;
+	$t	: term;
+	$x	: variable;
+global
+  [] system_to_subst(true) 	=> identity			end
+  [] system_to_subst($x=$t) 	=> $x->$t			end
+  [] system_to_subst(P & Q) 	=> system_to_subst(P) o system_to_subst(Q)
+  end
+end
+
+
+rules for bool
+	$v, $vv : variable;
+	P,Q : substitution;
+global
+	[] is_renaming(identity)=> true
+	end
+
+	[] is_renaming($v->$vv)	=> true
+	end
+
+	[] is_renaming(P o Q)	=> 
+			switch 
+			case is_renaming(P) 
+			then is_renaming(Q)
+			otherwise false
+			end
+	end
+
+	[] is_renaming(P)	=> false
+	end
+end
+
+
+rules for eqSystem
+ P,Q,R	: eqSystem;
+	n	: int;
+	$t	: term;
+	e	: equation;
+global
+  [new_var_elim] P & var(n) = $t 	=> apply(var(n)->$t,P)	end
+  [unfold]	 P & (Q & R)		=> (P & Q) & R		end
+  [eqPass] 	 P & e	 		=> e & P		end
+
+
+end
+
+
+rules for int
+	g, d : term;
+global
+	[] size(g=d)	=> size(g)+size(d)
+	end
+end
+
+
+strategies for eqSystem
+implicit
+  [.] delete_new_variables =>
+  repeat* (
+    dc(new_var_elim || unfold || eqPass)
+  )
+  end
+end
+
+end
+
+
+
+
+
+
+
+
+

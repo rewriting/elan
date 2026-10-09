@@ -1,0 +1,77 @@
+module fac
+
+sort term;
+end
+
+operators
+global
+  o : term;
+  s(@)		: (term) term;
+  plus(@,@)	: (term term) term;
+  times(@,@)	: (term term) term;
+  fac(@)	: (term) term;
+  fib(@)	: (term) term;
+  test(@,@)	: (term term) term;
+  start		: term;
+end
+
+stratop global
+  s0    : <term>        builtin;
+  s1    : <term>        builtin;
+end
+
+
+rules for term
+	x,y : term;
+global 
+  [] plus(o,x) => x 			end
+  [] plus(s(x),y) => plus(x,s(y))	end
+  [] times(o,x)=> o			end
+  [] times(s(x),y) => plus(y,times(x,y)) end
+  [] fac(o) => s(o)			end
+  [] fac(s(x)) => times(s(x),fac(x))	end
+
+  [] fib(o) => s(o)			end
+  [] fib(s(o)) => s(o)			end
+  [] fib(s(s(x))) => plus(fib(x),fib(s(x)))	end
+
+  [r0] test(s(x),y) => test(x,s(y))
+  end
+
+//  [] start => test( fac(s(s(s(s(s(s(s(o)))))))) , o ) end
+  [] start => fib(	s(s(s(s(s(s(s(s(s(s(
+			s(s(s(s(s(s(s(s(s(s(
+			s(s(s(
+			o
+			))))))))))))))))))))))))
+  end
+
+end
+
+strategies for term
+implicit
+  [.] s0 => repeat*( dc(r0) )
+  end
+
+end
+
+
+end
+
+/*
+test(
+fac(s(s(s(s(s(s(s(o))))))))
+,o)
+
+test(
+fac(s(s(s(s(s(s(s(s(o)))))))))
+,o)
+
+fib( s(s(s(s(s(s(s(s(s(s(s(s(s(s(s(s(o)))))))))))))))) )
+
+fib( s(s(s(s(s(s(s(s(s(s(
+     s(s(s(s(s(s(s(s(s(s(
+     s(s(s(s(s(s(s(s(s(s(
+	o
+     )))))))))))))))))))))))))))))))
+*/

@@ -1,0 +1,43 @@
+// This file is generated automatically: do not edit it directly. 
+module eqSystem[Fss,Vars]
+        import  global
+		bool int 
+		termCommonsRo[Fss,Vars]
+		applySubstOnRo[Fss,Vars];
+        end  
+        sort eqSystem equation;
+        end  
+        operators
+        global
+          @ = @         : ( term term ) equation;
+
+          @             : ( bool ) eqSystem;
+          @             : ( equation ) eqSystem;
+          @ & @         : ( eqSystem eqSystem ) eqSystem        assocLeft;
+          (@ & @)       : ( eqSystem eqSystem ) eqSystem        alias @ & @:;
+
+          system_to_subst(@)    : ( eqSystem ) substitution;
+        end 
+
+        rules  for substitution
+         P,Q,R  : eqSystem;
+                $t      : term;
+                $x      : variable;
+        global
+          [] system_to_subst(true)      => identity                     end
+          [] system_to_subst($x=$t)     => $x->$t                       end
+          [] system_to_subst(P & Q)     => system_to_subst(P) o system_to_subst(Q)
+          end
+        end
+
+        rules for eqSystem
+         	P,Q,R  : eqSystem;
+                $t      : term;
+                e       : equation;
+        global
+          [unfold]       P & (Q & R)            => (P & Q) & R          end
+//          [eqPass]       P & e                  => e & P                end
+        end
+
+end  
+

@@ -1,0 +1,9 @@
+LPL nqueens_jc description 
+
+query 		of sort list
+      result 	of sort list
+      import   	nqueens
+      start with 	(queens_strat) queens(8)
+//      start with 	(det_queens_strat) query
+
+end

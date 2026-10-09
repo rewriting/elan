@@ -1,0 +1,15 @@
+module obj[vars]
+import  local 	int bool vars sigSyntax list[identifier] ;
+end
+sort obj_vars;
+end
+operators
+  global
+    FOR EACH X:identifier SUCH THAT 
+      X:=(listExtract)elem(vars) :{
+	X     : obj_vars;
+    }
+end
+
+end
+

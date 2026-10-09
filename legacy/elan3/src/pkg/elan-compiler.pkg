@@ -1,0 +1,19 @@
+package
+identification
+         name=elan-compiler
+      version=4.3g
+     location=http://www.loria.fr/ELAN/Soft
+         info=http://www.loria.fr/ELAN
+  description='A compiler for the ELAN language.'
+     keywords=rewrite rules, strategies, compilation
+
+interface
+
+requires
+  aterm 2.0.5
+  gc 6.2
+  cpl 0.6
+  elan-library 1.0c
+  elan-interpreter 3.6g
+
+  

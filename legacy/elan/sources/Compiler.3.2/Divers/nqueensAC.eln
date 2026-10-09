@@ -1,0 +1,101 @@
+module nqueensAC
+import 
+  bool builtinInt list[builtinInt] eq[set];
+end
+
+sort set state;
+end
+
+operators
+ global
+    nqueens(@)	: (builtinInt) list[builtinInt];
+  local
+    ok(@,@,@)   : ( builtinInt builtinInt list[builtinInt] ) bool;
+    @ U @       : (set set) set (AC);
+    (@)         : (builtinInt) set ;
+    empty	: set;
+    [@ U @]     : (builtinInt set) set ;
+    pool(@)     : (builtinInt) set ;
+    [[@,@]]	: (list[builtinInt] set) state;
+end
+
+stratop 
+  global
+        queens  : <list[builtinInt]>   bs;
+  local
+        extractPos : <set>      bs;
+        step       : <state>    bs;
+end
+
+rules for set 
+  S : set ;
+  i : builtinInt ;
+  n : builtinInt;
+global 
+  [] pool(1) => empty U (1)        end
+  [] pool(n) => (n) U pool(n-1)    end
+
+  [extractrule] (i) U S => [i U S] end
+end
+
+rules for list[builtinInt]
+  sol    : list[builtinInt];
+  pool   : set;
+  n      : builtinInt;
+  l      : builtinInt;
+  s      : state;
+global
+  [queensRule] nqueens(n) => sol
+		     where (state) [[sol,empty]]:=(step)[[nil,pool(n)]]
+  end
+end
+
+rules for state
+  solution : list[builtinInt];
+  pool     : set;
+  newPool  : set;
+  pos      : builtinInt;
+  level    : builtinInt;
+local
+ [oneStep] 
+
+   [[solution,pool]] => [[pos.solution,newPool]]
+			    where (set) [pos U newPool] :=(extractPos) pool
+			    if ok(1,pos,solution)
+/*
+   [[solution,(pos) U newPool]] => [[pos.solution,newPool]]
+			    if ok(1,pos,solution)
+*/
+   end
+end
+
+rules for bool
+          p,d,diff : builtinInt;
+        l : list[builtinInt];
+global
+  [] ok(diff,d,nil)     => true                         end
+//  [] ok(diff,d,p.l)   => false        if d == p       end
+//  no more necessary
+  [] ok(diff,d,p.l)     => false        if d-p == diff  end
+  [] ok(diff,d,p.l)     => false        if p-d == diff  end
+  [] ok(diff,d,p.l)     => ok(diff+1,d,l)               end
+end
+
+
+strategies for set
+implicit
+  [] extractPos => dk(extractrule) end
+end
+
+strategies for state
+implicit
+  [] step => repeat*(dk(oneStep)) end
+end
+
+strategies for list[builtinInt]
+implicit
+  [] queens => dk(queensRule) end
+end
+
+end                     
+

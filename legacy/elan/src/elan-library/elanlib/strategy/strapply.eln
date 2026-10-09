@@ -1,0 +1,23 @@
+// This file is generated automatically: do not edit it directly. 
+  module strapply[X] 
+          import global strat[X] builtinInt Meta_strat[X] Meta_apply[X];
+          end
+
+              operators global
+                setof(@,@)    : (<X> X) list[X];
+                setof(@,@,@)  : (<X> X builtinInt) list[X];
+                setof(@,@,@,@): (<X> X builtinInt builtinInt) list[X];
+              end   
+
+          rules for list[X] 
+                  s       : <X>;
+                  t       : X;
+                  lst     : list[X];
+                  m, n    : builtinInt;
+          global
+            []    setof(s,t)      =>  set_of(call "eval":X,[s]t)          end
+            []    setof(s,t,m)    =>  set_of(call "eval":X,[s]t,m)                end
+            []    setof(s,t,m,n)  =>  set_of(call "eval":X,[s]t,m,n)      end
+          end
+  end  
+   

@@ -1,0 +1,15 @@
+-renamed sources/maccdir/{globdef.,globuse.,rtglobde.} to globdef.h
+globuse.h rtglobde.h
+
+-libgccinterface is created instead of gccinterface.o
+=libmatch.a is created instead of matchlib.a
+
+-added  to match.y
+#ifndef HAVE_YYWRAP
+int yywrap()
+{
+  return 1;
+}
+#endif
+
+- gc.a renamed to libgc.a

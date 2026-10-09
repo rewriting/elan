@@ -1,0 +1,30 @@
+Architecture de ELANLIB :
+	elanlib/common
+	elanlib/noquote
+	elanlib/quote
+	elanlib/strategy
+	elanlib/Compiled
+
+elan --quote   : version avec quote
+elan --noquote : version sans quote (default)
+
+elan --earley  : nouveau compilateur
+     --code    : pour conserver le code genere
+     --output  : pour nommer l'executable
+
+Les strategies de Marian sont strictement typees, cad 
+la construction 
+strategy <name> for <sort> ... end est obligatoire et
+strategy <name> ... end n'existe plus.
+
+Modification de elanlib :
+	- term, termV et termF sont remplaces par termCommons
+Ajout de parametres aux modules :
+	- termCommons[Fss,Vars]
+	- eqSystem[Fss,Vars]
+	- applySubstOn[Fss,Vars,X]
+	- constraint[Fss,Vars]
+Inversion des parametres de :
+	- syntacticUnification[Fss,Vars]
+
+built-in strategy fail really exists ...

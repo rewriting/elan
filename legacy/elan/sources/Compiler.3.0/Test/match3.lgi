@@ -1,0 +1,8 @@
+LPL match3 description
+  query    of sort term
+  result   of sort term
+  import   match3
+
+  start with () go
+
+end

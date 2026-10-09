@@ -1,0 +1,393 @@
+#
+#               (c)     INRIA-Lorraine & CRIN
+#                       615, rue du Jardin Botanique, BP 101
+#                       54602 Villers-les-Nancy
+#                       France
+#                       email: elan@loria.fr
+#
+#       $Source: /users/protheo/pot/ELAN/CVSELAN/elan/sources/Compiler/Makefile.common,v $
+#       $Revision: 1.12 $
+#       $Date: 1999/12/03 18:17:37 $
+#       $Author: moreau $
+
+# import CC
+# import FAST
+# import ARCH
+# import ARCHFLAG
+# import SPECIAL_FLAG
+# import ELANLIB
+
+SUBDIRS              = RuntimeSupport Scripts
+
+MAKEINSTALLDIRS  = $(ARCH) \
+	    $(ELANLIB)/Compiler/$(ARCH) $(ELANLIB)/Compiler \
+	    $(ELANLIB)/Compiler/classes $(ELANLIB)/../bin
+
+MAKEDISTDIRS  = $(ELANDIST)/Compiler\
+	        $(ELANDIST)/Compiler/classes\
+	        $(ELANDIST)/Compiler/RuntimeSupport\
+	        $(ELANDIST)/Compiler/RuntimeSupport/ACMatcher\
+	        $(ELANDIST)/Compiler/RuntimeSupport/TermIO
+
+OBJDIR    = $(ARCH) 
+OBJSRC    = RuntimeSupport
+EKERSRC   = $(OBJSRC)/ACMatcher
+TERMIOSRC = $(OBJSRC)/TermIO
+SCRIPTS   = Scripts
+GCSRC     = $(ELANDIR)/sources/gc_src
+CLIB      = $(ELANDIR)/sources/clib
+
+OBJ =	$(ARCH)/bgraph.o\
+	$(ARCH)/bitset.o\
+	$(ARCH)/bitset_32.o\
+	$(ARCH)/link.o\
+	$(ARCH)/match_state.o\
+	$(ARCH)/term.o\
+	$(ARCH)/builtinMatching.o\
+	$(ARCH)/tools.o\
+	$(ARCH)/streval.o\
+	$(ARCH)/y.tab.o 
+
+#	$(ARCH)/ac_tools.o
+
+HEADER=	$(OBJSRC)/bgraph.h\
+	$(OBJSRC)/bitset.h\
+	$(OBJSRC)/bitset_32.h\
+	$(OBJSRC)/link.h\
+	$(OBJSRC)/match_state.h\
+	$(OBJSRC)/term.h\
+	$(OBJSRC)/builtinMatching.h\
+	$(OBJSRC)/tools.h\
+	$(OBJSRC)/streval.h
+
+EKEROBJ=$(ARCH)/eker_build_match.o \
+        $(ARCH)/eker_flatten.o \
+        $(ARCH)/eker_build_free.o \
+        $(ARCH)/eker_solve_free.o \
+        $(ARCH)/eker_build_pure.o \
+        $(ARCH)/eker_solve_pure.o \
+        $(ARCH)/eker_gccmatch.o\
+        $(ARCH)/eker_tools.o
+
+TERMIOOBJ=$(ARCH)/termIn.o \
+        $(ARCH)/termOut.o 
+
+LIBRUNTIME   = $(ARCH)/libRuntimeSupport.a
+LIBACMATCHER = $(ARCH)/libACMatcher.a
+LIBTERMIO = $(ARCH)/libTermIO.a
+
+DARTOBJ = $(ARCH)/fun_p1.o $(ARCH)/fun_p2.o $(ARCH)/fun_m2.o
+
+# MEMORY_VERIFY
+# CMPOBJ
+# BITSETMASK
+# DEBUG
+# PURIFY 
+# AFFICHAGE
+# PEANO
+# BGSHARE
+# RTA
+# GREEDY
+# BITSET32
+
+INC = -I$(GCSRC) -I$(CLIB)/$(ARCH) -I$(OBJSRC) -I$(EKERSRC) -I$(TERMIOSRC)
+
+#CC = /users/protheo/moreau/egcs-1.0.1/bin/gcc
+
+
+
+ifneq (,$(findstring GCMEM,$(CC_OPT)))
+GCLIB = -lgc
+else
+GCLIB =
+endif
+
+ifeq '$(ARCH)' "alpha"
+#LIB = -L$(ELANLIB)/Compiler/$(ARCH) -L$(ARCH) -lRuntimeSupport -lACMatcher -lDBelanmv -lexc $(GCLIB)
+LIB = -L$(ELANLIB)/Compiler/$(ARCH) -L$(ARCH) -lRuntimeSupport -lACMatcher -lTermIO -learley -lDBelan $(GCLIB)
+#CC = gcc
+#FAST =  
+CC = cc
+FAST = -fast
+else
+LIB = -L$(ELANLIB)/Compiler/$(ARCH) -L$(ARCH) -lRuntimeSupport -lACMatcher -lTermIO -learley -lelan $(GCLIB)
+#LIB = -L$(ELANLIB)/Compiler/$(ARCH) -L$(ARCH) -lRuntimeSupport -lACMatcher -lTermIO -learley -lDBelan $(GCLIB)
+CC = gcc -pipe
+FAST =
+endif
+
+BASIC_OPT = -DBORO -DBGSHARE -DNONUNDERSCORED -DBITSETMASK -DGCMEM -DCOLOR
+
+# -DXGCGEN2 -DXNEWGC
+
+#CC_OPT =  -g3 -DPDEBUGG -DDEBUG -DBITSET32 -DXNOTMACRO $(BASIC_OPT) $(INC)
+CC_OPT = $(FAST) -DBITSET32 $(BASIC_OPT) $(INC)
+
+#LIB = -L$(ELANLIB)/$(ARCH) $(GCLIB) -lelan
+
+# -lelanmv -lexc
+# -lelan
+
+
+all : install-dirs $(LIBRUNTIME) $(LIBACMATCHER) $(LIBTERMIO)
+
+refparser : $(ARCH)/y.tab.o
+	$(CC) $(CC_OPT) $(ARCH)/y.tab.o -o refparser\
+        $(LIB) $(YLIB) -lgc
+
+
+# --------------------------------------------------
+# RuntimeSupport
+# --------------------------------------------------
+SRC = Makefile.common\
+      REFParser.jj\
+      yacc.ref lex.ref\
+      ACDDTree.java                  StrategyCall.java\
+      AllocVariable.java             StrategyChooseRule.java\
+      BranchEvaluation.java          StrategyCons.java\
+      Choice.java                    StrategyDcRule.java\
+      CompileError.java              StrategyDcStrat.java\
+      Condition.java                 StrategyDkRule.java\
+      DDNode.java                    StrategyDkStrat.java\
+      DDTree.java                    StrategyEval.java\
+      DetType.java                   StrategyFail.java\
+      ElanConstants.java             StrategyId.java\
+      Flags.java                     StrategyIterate.java\
+      Flatterm.java                  StrategyMeta.java\
+      StrategyOneRule.java           StrategyOneStrat.java\
+      Information.java               StrategyRepeat.java\
+      Lexem.java                     StrategyRuleName.java\
+      LexemChar.java                 StrategyTerm.java\
+      LexemIdentifier.java           SwitchTerm.java\
+      LexemModule.java               Symbol.java\
+      LexemNum.java                  SymbolAC.java\
+      LexemRuleName.java             SymbolApply.java\
+      LexemSort.java                 SymbolBuiltin.java\
+      LexemStrategyName.java         SymbolCode.java\
+      LexemVariableName.java         SymbolDstr.java\
+      LocalAffectation.java          SymbolExtensionVariable.java\
+      LocalEvaluation.java           SymbolFree.java\
+      OutputCode.java                SymbolFsym.java\
+      ParseException.java            SymbolIdentifier.java\
+      PatternInfo.java               SymbolInteger.java\
+      Query.java                     SymbolLab.java\
+      REFParser.java                 SymbolString.java\
+      REFParserConstants.java        SymbolValue.java\
+      REFParserTokenManager.java     SymbolVariable.java\
+      REM.java                       Term.java\
+      RewriteRule.java               TermInformation.java\
+      RhsNoSwitchTerm.java           TokenMgrError.java\
+      RhsSwitchTerm.java             Tools.java\
+      RhsTerm.java                   RightHandSide.java\
+      Strategy.java\
+      ASCII_CharStream.java \
+      ParseException.java\
+      REFParser.java \
+      REFParserTokenManager.java\
+      REFParserConstants.java\
+      Token.java\
+      ParseError.java\
+      PatternCode.java\
+      ACPatternNotCompiled.java\
+      LineariseCondition.java
+
+makefile:
+	@for DIR in $(SUBDIRS); \
+        do \
+		cp Makefile $$DIR;\
+                echo Make $@ in $$DIR; \
+                cd $$DIR && $(MAKE) $@; \
+		cd ..;\
+        done
+
+
+install : all
+	cp $(LIBRUNTIME) $(LIBACMATCHER) $(LIBTERMIO) $(ELANLIB)/Compiler/$(ARCH)
+	cp $(OBJSRC)/*.h $(OBJSRC)/ac_tools.c $(ELANLIB)/Compiler/
+	cp $(EKERSRC)/*.h $(ELANLIB)/Compiler/
+	cp $(TERMIOSRC)/*.h $(ELANLIB)/Compiler/
+	cp classes/*.class $(ELANLIB)/Compiler/classes/
+	cp $(SCRIPTS)/elanc $(ELANLIB)/../bin/
+	cp $(SCRIPTS)/prettyIO $(ELANLIB)/../bin/
+	cp $(SCRIPTS)/add_end $(ELANLIB)/Compiler/
+	cp $(SCRIPTS)/ref_filter $(ELANLIB)/Compiler/
+
+$(ARCH)/libRuntimeSupport.a : $(OBJ)
+	rm -f $(ARCH)/libRuntimeSupport.a
+	ar r $(ARCH)/libRuntimeSupport.a $(OBJ)
+	ranlib $(ARCH)/libRuntimeSupport.a
+
+$(OBJSRC)/bitset.h : $(OBJSRC)/bitset_tab_mask.h $(OBJSRC)/bitset_tab_int.h
+	touch $(OBJSRC)/bitset.h
+
+$(ARCH)/tools.o		: $(OBJSRC)/tools.c $(OBJSRC)/tools.h
+	$(CC) $(CC_OPT) -c -o $(ARCH)/tools.o $(OBJSRC)/tools.c
+
+#$(ARCH)/ac_tools.o	: $(OBJSRC)/ac_tools.c $(OBJSRC)/ac_tools.h
+#	$(CC) $(CC_OPT) -c -o $(ARCH)/ac_tools.o $(OBJSRC)/ac_tools.c
+
+$(ARCH)/term.o		: $(OBJSRC)/term.c $(OBJSRC)/term.h $(OBJSRC)/tools.h \
+			  $(OBJSRC)/builtin.h
+	$(CC) $(CC_OPT) -c -o $(ARCH)/term.o $(OBJSRC)/term.c
+
+$(ARCH)/builtinMatching.o : $(OBJSRC)/builtinMatching.c $(OBJSRC)/builtinMatching.h\
+	                    $(OBJSRC)/term.h $(OBJSRC)/builtin.h $(OBJSRC)/tools.h
+	$(CC) $(CC_OPT) -c -o $(ARCH)/builtinMatching.o $(OBJSRC)/builtinMatching.c
+
+$(ARCH)/bitset.o	: $(OBJSRC)/bitset.c $(OBJSRC)/bitset.h\
+		 $(OBJSRC)/tools.h $(OBJSRC)/bitset_tab_mask.h
+	$(CC) $(CC_OPT) -c -o $(ARCH)/bitset.o $(OBJSRC)/bitset.c
+
+$(ARCH)/bitset_32.o	: $(OBJSRC)/bitset_32.c $(OBJSRC)/bitset_32.h\
+		 $(OBJSRC)/tools.h
+	$(CC) $(CC_OPT) -c -o $(ARCH)/bitset_32.o $(OBJSRC)/bitset_32.c
+
+$(ARCH)/bgraph.o	: $(OBJSRC)/bgraph.c $(OBJSRC)/bgraph.h\
+		$(OBJSRC)/bitset.h $(OBJSRC)/tools.h $(OBJSRC)/link.h
+	$(CC) $(CC_OPT) -c -o $(ARCH)/bgraph.o $(OBJSRC)/bgraph.c
+
+$(ARCH)/match_state.o	: $(OBJSRC)/match_state.c $(OBJSRC)/match_state.h\
+		$(OBJSRC)/bgraph.h $(OBJSRC)/tools.h $(OBJSRC)/bitset.h\
+		$(OBJSRC)/term.h $(OBJSRC)/link.h
+	$(CC) $(CC_OPT) -c -o $(ARCH)/match_state.o $(OBJSRC)/match_state.c
+
+$(ARCH)/substitution.o	: $(OBJSRC)/substitution.c $(OBJSRC)/substitution.h\
+		$(OBJSRC)/term.h $(OBJSRC)/tools.h
+	$(CC) $(CC_OPT) -c -o $(ARCH)/substitution.o $(OBJSRC)/substitution.c
+
+$(ARCH)/link.o		: $(OBJSRC)/link.c $(OBJSRC)/link.h\
+		$(OBJSRC)/match_state.h $(OBJSRC)/tools.h $(OBJSRC)/term.h
+	$(CC) $(CC_OPT) -c -o $(ARCH)/link.o $(OBJSRC)/link.c
+
+$(ARCH)/streval.o       : $(OBJSRC)/streval.c $(OBJSRC)/term.h
+	$(CC) $(CC_OPT) -c -o $(ARCH)/streval.o $(OBJSRC)/streval.c
+
+$(ARCH)/y.tab.o         : y.tab.c lex.yy.c
+	$(CC) $(CC_OPT) -c -o $(ARCH)/y.tab.o y.tab.c
+
+y.tab.c : yacc.ref lex.yy.c
+	$(YACC) $(YACC_OPT) yacc.ref
+
+lex.yy.c             :  lex.ref
+	$(LEX) lex.ref
+
+
+# --------------------------------------------------
+#  Term IO library
+#
+$(ARCH)/libTermIO.a: $(TERMIOOBJ)
+	rm -f $(ARCH)/libTermIO.a
+	ar r $(ARCH)/libTermIO.a $(TERMIOOBJ)
+	ranlib $(ARCH)/libTermIO.a
+
+$(ARCH)/termIn.o: $(TERMIOSRC)/termIn.c
+	$(CC) $(CC_OPT) -c -o $(ARCH)/termIn.o $(TERMIOSRC)/termIn.c
+
+$(ARCH)/termOut.o: $(TERMIOSRC)/termOut.c $(TERMIOSRC)/termOut.h
+	$(CC) $(CC_OPT) -c -o $(ARCH)/termOut.o $(TERMIOSRC)/termOut.c
+
+
+# --------------------------------------------------
+#  Eker AC matcher
+#
+
+$(ARCH)/libACMatcher.a: $(EKEROBJ)
+	rm -f $(ARCH)/libACMatcher.a
+	ar r $(ARCH)/libACMatcher.a $(EKEROBJ)
+	ranlib $(ARCH)/libACMatcher.a
+
+$(ARCH)/eker_build_match.o: $(EKERSRC)/build_match.c\
+	$(EKERSRC)/defs.h $(EKERSRC)/term_types.h\
+	$(EKERSRC)/free_types.h $(EKERSRC)/pure_types.h $(EKERSRC)/state_types.h
+	$(CC) $(CC_OPT) -c -o $(ARCH)/eker_build_match.o $(EKERSRC)/build_match.c
+
+
+$(ARCH)/eker_flatten.o: $(EKERSRC)/flatten.c\
+	$(EKERSRC)/defs.h $(EKERSRC)/term_types.h\
+	$(EKERSRC)/free_types.h $(EKERSRC)/pure_types.h $(EKERSRC)/state_types.h
+	$(CC) $(CC_OPT) -c -o $(ARCH)/eker_flatten.o $(EKERSRC)/flatten.c
+
+$(ARCH)/eker_build_free.o: $(EKERSRC)/build_free.c\
+	$(EKERSRC)/defs.h $(EKERSRC)/term_types.h\
+	$(EKERSRC)/free_types.h $(EKERSRC)/pure_types.h $(EKERSRC)/state_types.h
+	$(CC) $(CC_OPT) -c -o $(ARCH)/eker_build_free.o $(EKERSRC)/build_free.c
+
+$(ARCH)/eker_solve_free.o: $(EKERSRC)/solve_free.c\
+	$(EKERSRC)/defs.h $(EKERSRC)/term_types.h\
+	$(EKERSRC)/free_types.h $(EKERSRC)/pure_types.h $(EKERSRC)/state_types.h
+	$(CC) $(CC_OPT) -c -o $(ARCH)/eker_solve_free.o $(EKERSRC)/solve_free.c
+
+$(ARCH)/eker_build_pure.o: $(EKERSRC)/build_pure.c\
+	$(EKERSRC)/defs.h $(EKERSRC)/term_types.h\
+	$(EKERSRC)/free_types.h $(EKERSRC)/pure_types.h $(EKERSRC)/state_types.h
+	$(CC) $(CC_OPT) -c -o $(ARCH)/eker_build_pure.o $(EKERSRC)/build_pure.c
+
+$(ARCH)/eker_solve_pure.o: $(EKERSRC)/solve_pure.c\
+	$(EKERSRC)/defs.h $(EKERSRC)/term_types.h\
+	$(EKERSRC)/free_types.h $(EKERSRC)/pure_types.h $(EKERSRC)/state_types.h
+	$(CC) $(CC_OPT) -c -o $(ARCH)/eker_solve_pure.o $(EKERSRC)/solve_pure.c
+
+$(ARCH)/eker_tools.o	 : $(EKERSRC)/eker_tools.c $(EKERSRC)/eker_tools.h
+	$(CC) $(CC_OPT) -c -o $(ARCH)/eker_tools.o $(EKERSRC)/eker_tools.c
+
+$(ARCH)/eker_gccmatch.o: $(EKERSRC)/gccmatch.c\
+	$(EKERSRC)/defs.h $(EKERSRC)/term_types.h\
+	$(EKERSRC)/free_types.h $(EKERSRC)/pure_types.h $(EKERSRC)/state_types.h
+	$(CC) $(CC_OPT) -c -o $(ARCH)/eker_gccmatch.o $(EKERSRC)/gccmatch.c
+
+
+
+# --------------------------------------------------
+
+
+
+# --------------------------------------------------
+ans.core.o: ans.h ans.core.c
+	$(CC) $(CC_OPT) -c ans.core.c
+
+ans.o: ans.h ans.c
+	$(CC) $(CC_OPT) -c ans.c
+
+a.out: ans.o ans.core.o 
+#	$(CC) $(CC_OPT) -o a.out ans.c ans.core.o $(LIB) -ll -ly -lgc
+#	purify -best-effort $(CC) $(CC_OPT) -o a.out ans.c ans.core.o $(LIB) -ll -ly -lgc
+#	$(CC) $(CC_OPT) -o a.out ans.c ans.core.o $(LIB) -lgc
+	$(CC) $(CC_OPT) -o a.out ans.c ans.core.o $(LIB) -lfl -lgc
+#	quantify -best-effort $(CC) $(CC_OPT) -o a.out ans.c ans.core.o $(LIB) -ll -ly -lgc
+#	purify -best-effort $(CC) $(CC_OPT) -o a.out ans.c ans.core.o $(LIB)
+
+
+bug.core.o: bug.h bug.core.c
+	$(CC) $(CC_OPT) -c bug.core.c
+
+bug.o: bug.h bug.c ac_tools.c
+	$(CC) $(CC_OPT) -c bug.c
+
+bug: bug.o bug.core.o 
+	$(CC) $(CC_OPT) -o a.bug bug.c bug.core.o $(LIB) $(YLIB) -lgc 
+
+# --------------------------------------------------
+dist: dist-dirs
+	cp $(SRC) $(ELANDIST)/Compiler
+	cp classes/*.class $(ELANDIST)/Compiler/classes
+	@for DIR in $(SUBDIRS); \
+        do \
+                echo Make $@ in $$DIR; \
+                cd $$DIR && $(MAKE) $@; \
+		cd ..;\
+        done
+
+
+clean :
+	rm -f core a.out main *.o *~ y.tab.[ch] y.output lex.yy.c $(ARCH)/*.o $(ARCH)/*.a
+	@for DIR in $(SUBDIRS); \
+        do \
+                echo Make $@ in $$DIR; \
+                cd $$DIR && $(MAKE) $@; \
+		cd ..;\
+        done
+
+
+veryclean : clean
+	rm -f ASCII_CharStream.java ParseError.java REMParser.java\
+	REMParserConstants.java REMParserTokenManager.java Token.java

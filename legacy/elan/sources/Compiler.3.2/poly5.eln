@@ -1,0 +1,174 @@
+module poly5[Vars]
+
+import global int Vars eq[variable] identifier list[identifier];
+end
+sort variable coeff exp;
+end
+operators global
+  FOR EACH Id:identifier SUCH THAT Id:=(listExtract) elem(Vars) :
+ { Id : variable; } 
+
+  @		: ( int ) coeff pri 1000;
+
+  @		: (variable)		monome;
+  @		: (coeff)		monome;
+  @ ^ @		: (variable int)	monome;
+  @ * @		: (coeff variable)	monome;
+  @ * @ ^ @	: (coeff variable int)	monome;
+
+  @		: ( monome ) poly pri 1000;
+  (@ + @) 	: ( poly poly ) poly  assocRight pri 1 (AC);
+  @ + @ 	: ( poly poly ) poly  assocRight pri 1 alias (@ + @):;
+//  (@ * @)	: ( poly  poly) poly  assocRight pri 2 (AC);
+//  @ * @		: ( poly  poly) poly  assocRight pri 2 alias (@ * @):;
+  deriv(@,@) 	: ( poly variable) poly;
+
+  fIdentical(@) : ( poly ) poly;
+end
+
+/*
+stratop global
+  simplify	: <poly>	builtin;
+
+  sexpand	: <poly>	builtin;
+  tdexpand	: <poly>	builtin;
+
+  sfactorize	: <poly>	builtin;
+  tdfactorize	: <poly>	builtin;
+end
+*/
+
+rules for monome
+  p1, p2	: poly;
+  x, y		: variable;
+  n		: int;
+global
+
+  []  deriv(x,x) 	=> 1				end
+  []  deriv(y,x) 	=> 0    if $x != $y		end
+  []  deriv(n,x)   	=> 0				end
+  []  deriv(p1+p2,x)  	=> deriv(p1,x) + deriv(p2,x)	end
+  []  deriv(p1*p2,x)  	=> p1*deriv(p2,x) + deriv(p1,x)*p2
+  end
+end
+
+/*
+rules for poly
+  P			: poly;
+  X			: poly;
+global
+  [] fIdentical(P) => X
+       where X:=(dc one(fruleIdentical,fruleTopIdentical)) P
+  end
+
+end
+
+rules for poly
+  P			: poly;
+  p1, p2, p3, p4 	: poly;
+  x, y			: variable;
+  n, n1, n2, n3		: int;
+global
+
+  []  deriv(x,x) 	=> 1				end
+  []  deriv(y,x) 	=> 0    if $x != $y		end
+  []  deriv(n,x)   	=> 0				end
+  []  deriv(p1+p2,x)  	=> deriv(p1,x) + deriv(p2,x)	end
+  []  deriv(p1*p2,x)  	=> p1*deriv(p2,x) + deriv(p1,x)*p2
+  end
+
+  []  P+0		=> P				end
+  []  P*0		=> 0				end
+  []  P*1		=> P				end
+  []  n1*n2		=> n where n:=() n1*n2		end
+
+  [fruleTopIdentical]
+	P+p1+p1		=> P+2*p1
+  end
+  [fruleIdentical]
+	p1+p1		=> 2*p1
+  end
+
+  [topfactorize]  P+n1*p1 + n2*p1 => P+n3*p1
+		where n3:=()n1+n2			end
+  [factorize]  n1*p1 + n2*p1 => n3*p1
+		where n3:=()n1+n2			end
+
+  [topfactorize]  P+(p1*p2) + (p1*p3) => P+p1*(p2+p3)	end
+  [factorize]  (p1*p2) + (p1*p3) => p1*(p2+p3)		end
+
+
+  [topexpand]  P+(p1+p2)*(p3+p4) => P+p2*p4 + p2*p3 + p1*p4 + p1*p3	end
+  [expand]  (p1+p2)*(p3+p4) => p2*p4 + p2*p3 + p1*p4 + p1*p3	end
+
+  [topexpand]  P+(p1+p2)*p3 => P+p2*p3 + p1*p3			end
+  [expand]  (p1+p2)*p3 => p2*p3 + p1*p3			end
+
+
+end
+
+strategies for poly
+implicit
+  [.] simplify => tdexpand ; tdfactorize
+  end
+
+//  [.] sexpand  => dc one(tone(dc one(expand)))  end
+//  [.] tdexpand => repeat*(first one(topexpand,sexpand))      end
+//  [.] sfactorize => dc one(tone(dc one(factorize))) end
+//  [.] tdfactorize => repeat*(first one(factorize,sfactorize))      end
+
+  [.] sexpand => tsome(expand)  end
+//  [.] sexpand  => dc one(tone(repeat*(dc one(expand))))  end
+  [.] tdexpand => first one(topexpand,id) ; 
+		  first one(sexpand,id)
+  end
+
+  [.] sfactorize  => dc one(tone(repeat*(dc one(factorize))))  end
+  [.] tdfactorize => first one(topfactorize,id) ; 
+		     first one(sfactorize,id)
+  end
+
+
+end
+*/
+
+end
+
+
+
+/*
+
+deriv(3*X*X+7*X+1 , X)
+end
+
+deriv(4*X*X*X + 3*X*X + 2*X + 1 , X)
+end
+
+(2+((X*3)+((X*3)+((X*(X*4))+((X*(X*4))+(X*(X*4)))))))
+end
+
+deriv(1 + 3*X + 7*X*X + 12*X*X*X
+                + 2*X*Y + 5*X*Y*Y + 3*X*X*Y
+                + 3*X*Y*Z , X)
+end
+
+deriv(1 + 1*X + 2*X*X + 3*X*X*X + 4*X*X*X*X
+	+ 5*X*X*X*X*X+ 6*X*X*X*X*X*X,  X)
+end
+
+deriv(1 + 1*X + 2*X*X + 3*X*X*X + 4*X*X*X*X + 5*X*X*X*X*X
+	+ 6*X*X*X*X*X*X + 7*X*X*X*X*X*X*X
+	, X)
+end
+
+
+deriv(1 + 1*X + 2*X*X + 3*X*X*X + 4*X*X*X*X + 5*X*X*X*X*X
+	+ 6*X*X*X*X*X*X + 7*X*X*X*X*X*X*X + 8*X*X*X*X*X*X*X*X
+	, X)
+end
+
+
+BUG :
+*****
+  - tsome(factorize) [1+(X+Y)*Z]
+*/

@@ -1,0 +1,44 @@
+//
+//		(c)	INRIA-Lorraine & CRIN
+//			615, rue du Jardin Botanique, BP 101
+//		        54602 Villers-les-Nancy
+//			France
+//			email: elan@loria.fr
+//
+//	$Source: /CVS/aircube/elan3/doc/ElanLibNoquote/applySubstOn.eln,v $
+//	$Revision: 1.1 $
+//	$Date: 1997/03/25 16:46:57 $
+//	$Author: moreau $
+//
+
+module applySubstOn[Fss,Vars,X]
+/*
+	specify substitution applicable on sort X
+*/
+import termCommons[Fss,Vars] replace[term,X];
+end
+
+sort X;
+end
+
+operators
+  global
+
+    @(@)	: ( substitution X ) X;
+    apply(@,@)	: ( substitution X ) X		alias @(@):;
+
+end
+
+rules for X
+ 
+	$tt	: X;
+	$s1,$s2	: substitution;
+	$v 	: variable;
+	$t	: term; 
+local
+  [] apply(identity,$tt) 	=> $tt				end
+  [] apply($s1 o $s2 ,$tt) 	=> apply($s2,apply($s1,$tt))	end
+  [] apply($v->$t,$tt) 		=> replace($v,$t,$tt)		end
+end
+
+end

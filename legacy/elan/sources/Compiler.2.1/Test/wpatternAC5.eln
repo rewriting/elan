@@ -1,0 +1,48 @@
+module wpatternAC5
+
+// pattern with builtins
+import int eq[term];
+end
+sort term;
+end
+
+operators global
+ a      : term;
+ b      : term;
+ c      : term;
+ d      : term;
+ e      : term;
+ f      : term;
+
+ go     : term;
+
+ F(@,@) : (term term) term (AC);
+ f(@,@) : (term term) term;
+ g(@)   : (int) term;
+ h(@,@) : (term term) term;
+end
+
+stratop global
+  s0 : <term> builtin;
+end
+
+rules for term
+  x1,x2,x3 : term;
+  y1,y2,y3 : int;
+  z1,z2,z3 : term;
+global
+  [] go => F(g(1),F(g(2),F(g(3),g(1))))
+  end
+
+  [r0] F(x1,x2) => g(y1)
+	where (term) F(g(y1),F(g(2),g(y1))) :=() x1
+  end
+end
+
+strategies for term
+implicit
+  [.] s0 => dk(r0)
+  end
+end
+
+end

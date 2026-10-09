@@ -1,0 +1,19 @@
+#!/bin/tcsh
+#  aterm interpreter test
+#  usage:
+#    jitest lgi_file spc_file output_file
+#  !!! all files are without extensions !!!
+#
+
+echo "  Java Compilation test of "$1 ":" $2.spc
+set d=`date`
+set tstfile = "/tmp/elan.test.$HOST.$d[4]"
+/bin/rm -f $tstfile
+$ELANLIB/../bin/elanc  -b -nosplit -nocode -quiet $1 $2
+a.out -quiet >  $tstfile
+diff SAMPLES/$3.out  $tstfile
+echo "  Java Compilation test of "$1 ":" $2.spc " optimiseChoicePoint"
+$ELANLIB/../bin/elanc  -b -nosplit -nocode -optimiseChoicePoint -quiet $1 $2
+a.out -quiet  >!  $tstfile
+diff SAMPLES/$3.out  $tstfile
+/bin/rm -f $tstfile

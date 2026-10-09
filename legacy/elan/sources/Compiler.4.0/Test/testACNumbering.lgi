@@ -1,0 +1,10 @@
+LPL testACNumbering description
+  query    of sort term
+  result   of sort term
+  import   testACNumbering
+
+//  start with () g(f(a,b))
+//  start with () h( g(F(a,b)), g(F(c,b)) )
+  start with () F(g2(g3(b)), c)
+
+end

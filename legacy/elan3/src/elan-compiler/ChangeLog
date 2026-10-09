@@ -1,0 +1,34 @@
+2003-04-23    <pem@bach>
+
+	* src/rem/REM.java: added -fast flag: compile with -O0 instead of -O2
+
+2003-04-14    <pem@bach>
+
+	* src/rem/REM.java: fix a problem with cygwin:
+	  - use g++ to generate the executable
+
+2001-12-07  Pierre-Etienne Moreau  <pem@escher>
+
+	* src/rem/compiler/Choice.java: wasr replaced by wasr_index
+	
+	* src/rem/compiler/SymbolString.java: bug fixed in string generation
+
+	* src/rem/compiler/SymbolCode.java: correction of GmakeApply with
+	variable arity
+
+2001-12-03  Pierre-Etienne Moreau  <pem@escher>
+
+	* runtime/termCommon.c: new implementation of term_metaApply
+
+	* runtime/termCommon.h (termac_add_lastColor):  bug fixed in
+	termac_add_lastColor: setHcode should not be used with COMPUTE_HCODE
+
+	* runtime/termATerm.c: bug fixed in intern_GmakeAppl_Arity: ATtrue
+	replaced by a real ATerm
+
+2001-11-29  Pierre-Etienne Moreau  <moreau@loria.fr>
+
+	* runtime/termCommon.c: fix a bug in specialApply
+
+2000-10-30 Merijn de Jonge <mdejonge@cwi.nl>
+   * Example distribution of part of Elan using automake/autoconf

@@ -1,0 +1,60 @@
+module bug
+
+import bool;
+end
+
+sort Term Label Tuple;
+end 
+
+operators global
+  go     : Term;
+  nil    : Term; 
+  a      : Term; 
+  b      : Term; 
+  c      : Term; 
+  f(@,@) : (Term Term) Term ;
+
+  [@,@]  : (Term Label) Tuple;
+
+  R1 : Label;
+  R2 : Label;
+  ID : Label;
+  nil : Label;
+end
+
+stratop global
+  SR1  : <Tuple>   bs;
+  SR2  : <Tuple>   bs;
+end
+
+
+rules for Tuple
+ x,y : Term;
+ L : Label;
+global
+
+  [R1] [f(x,y) , L] => [y,R1]
+  end
+
+  [R2] [f(x,y) , L] => [x,R2]
+  end
+
+
+  [ID] [x , L] => [x,ID]
+  end
+
+end
+
+strategies for Tuple
+implicit
+  [] SR1 => dk(R1,R2, ID) end
+
+  [] SR2 => repeat*(SR1) end
+end
+
+end
+				
+
+
+
+

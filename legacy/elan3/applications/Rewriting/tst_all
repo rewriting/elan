@@ -1,0 +1,16 @@
+#! /bin/csh -f
+#        LGI             SPC        INP        OUT
+
+if ($1 =~ *I*) then
+echo "Interpreter"
+itest    rewriting       rwAppend   rwAppend   irwAppend
+itest    rewriting       gdiv       gdiv1      igdiv1
+itest    rewriting       gdiv       gdiv2      igdiv2
+endif
+
+if ($1 =~ *C*) then
+echo "Compiler"
+ctest    rewriting       rwAppend   rwAppend   crwAppend
+ctest    rewriting       gdiv       gdiv1      cgdiv1
+ctest    rewriting       gdiv       gdiv2      cgdiv2
+endif

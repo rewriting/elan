@@ -1,0 +1,8 @@
+LPL ident1 description
+  query    of sort identifier
+  result   of sort identifier
+  import   ident1 identifier
+  //start with () query
+  start with () f(toto)
+
+end

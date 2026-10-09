@@ -1,0 +1,30 @@
+module bug2
+
+import ident bool;
+end
+
+
+operators global
+	
+	go    : bool;
+        e(@,@)	: (ident ident) bool;
+end
+
+
+rules for bool
+      $x : ident;
+global
+
+  [] go      => e(a,a) end
+  [] e(a,b)  => true   end
+  [] e(a,$x) => true   end
+//  [] e($x,a) => true   end
+
+end
+
+end
+				
+
+
+
+

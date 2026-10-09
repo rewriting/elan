@@ -1,0 +1,73 @@
+
+module reduce
+
+import global  eq[formula] ;//identifier list[identifier];
+end
+
+sort formula prop;
+end
+
+operators global
+
+{ x_I : prop; }_I=1...50
+
+TRUE       :prop;
+FALSE      :prop;
+@          :(prop) formula pri 100;
+not(@)     :(prop) prop;
+not @      :(prop) prop alias not(@):;
+not(@)     :(formula) formula pri 50;
+not @      :(formula) formula pri 50 alias not(@):;
+@ and @    :(formula formula) formula assocLeft pri 20 (AC);
+(@ and @)  :(formula formula) formula assocLeft pri 20 alias @ and @:;
+@ or @     :(formula formula) formula assocLeft pri 10 (AC);
+(@ or @)   :(formula formula) formula assocLeft pri 10 alias @ or @:;
+@ imp @    :(formula formula) formula assocRight pri 5;
+(@ imp @)  :(formula formula) formula assocRight pri 5 alias @ imp @:;
+@ equiv @  :(formula formula) formula assocRight pri 3 (AC);
+(@ equiv @):(formula formula) formula assocRight pri 3 alias @ equiv @:;
+@ ':' = @  :(prop formula) formula pri 1;
+end
+
+rules for formula
+  p,q,r:formula;
+  p1,p2:prop;
+
+global
+[] p or p                    =>p                         end
+[] p and p                   =>p                         end
+[] p or not(p)               =>TRUE                      end
+[] p and not(p)              =>FALSE                     end
+[] p imp p                   =>TRUE                      end
+[] p imp not(p)              =>not(p)                    end
+[] not(p) imp p              =>p                         end
+[] p equiv p                 =>TRUE                      end
+[] p equiv not(p)            =>FALSE                     end
+
+[] not(not(p))               =>p                         end
+[] not(p) or not(q)          =>not(p and q)              end
+[] not(p) or q               =>not(p and not(q))         end
+[] p or q                    =>not(not(p) and not(q))    end
+[] not(p) imp not(q)         =>not(not(p) and q)         end
+[] not(p) imp q              =>not(not(p) and not(q))    end
+[] p imp not(q)              =>not(p and q)              end
+[] p imp q                   =>not(p and not(q))         end
+[] not(TRUE)                 =>FALSE                     end
+[] not(FALSE)                =>TRUE                      end
+[] p and TRUE                =>p                         end
+[] p and FALSE               =>FALSE                     end
+[] p or TRUE                 =>TRUE                      end
+[] p or FALSE                =>p                         end
+[] p imp TRUE                =>TRUE                      end
+[] TRUE imp p                =>p                         end
+[] p imp FALSE               =>not(p)                    end
+[] FALSE imp p               =>TRUE                      end
+[] p equiv TRUE              =>p                         end
+[] p equiv FALSE             =>not(p)                    end
+
+[] not(p1):=not(p2)          =>p1:=p2                    end
+[] not(p1):=TRUE             =>p1:=FALSE                 end
+[] not(p1):=FALSE            =>p1:=TRUE                  end
+[] not(p1):=p2               =>p1:=not(p2)               end
+end
+end

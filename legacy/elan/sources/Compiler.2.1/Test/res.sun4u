@@ -1,0 +1,131 @@
+Java Compiler
+  Java Compilation test of bimatch : no.spc
+  Java Compilation test of bimatch : no.spc  optimiseChoicePoint
+  Java Compilation test of bool3 : no.spc
+  Java Compilation test of bool3 : no.spc  optimiseChoicePoint
+  Java Compilation test of choice1 : no.spc
+  Java Compilation test of choice1 : no.spc  optimiseChoicePoint
+  Java Compilation test of choice2 : no.spc
+  Java Compilation test of choice2 : no.spc  optimiseChoicePoint
+  Java Compilation test of condac1 : no.spc
+2c2
+< result = F(,)*+(h()(a2),h()(a1))
+---
+> result = F(,)*(h()(a2),h()(a1))
+  Java Compilation test of condac1 : no.spc  optimiseChoicePoint
+2c2
+< result = F(,)*+(h()(a2),h()(a1))
+---
+> result = F(,)*(h()(a2),h()(a1))
+  Java Compilation test of condac2 : no.spc
+2c2
+< result = g(,)(F(,)*+(a4,a3,a2,a1),g(,)(b2,G(,)*(b4,b3,b1)))
+---
+> result = g(,)(F(,)*(a4,a3,a2,a1),g(,)(b2,G(,)*(b4,b3,b1)))
+  Java Compilation test of condac2 : no.spc  optimiseChoicePoint
+2c2
+< result = g(,)(F(,)*+(a4,a3,a2,a1),g(,)(b2,G(,)*(b4,b3,b1)))
+---
+> result = g(,)(F(,)*(a4,a3,a2,a1),g(,)(b2,G(,)*(b4,b3,b1)))
+  Java Compilation test of cons1 : no.spc
+  Java Compilation test of cons1 : no.spc  optimiseChoicePoint
+  Java Compilation test of dcfail1 : no.spc
+  Java Compilation test of dcfail1 : no.spc  optimiseChoicePoint
+  Java Compilation test of dcfail2 : no.spc
+  Java Compilation test of dcfail2 : no.spc  optimiseChoicePoint
+  Java Compilation test of dcfail3 : no.spc
+  Java Compilation test of dcfail3 : no.spc  optimiseChoicePoint
+  Java Compilation test of enum : no.spc
+  Java Compilation test of enum : no.spc  optimiseChoicePoint
+  Java Compilation test of enum2 : no.spc
+  Java Compilation test of enum2 : no.spc  optimiseChoicePoint
+  Java Compilation test of ident1 : no.spc
+  Java Compilation test of ident1 : no.spc  optimiseChoicePoint
+  Java Compilation test of manySortedSet1 : no.spc
+  Java Compilation test of manySortedSet1 : no.spc  optimiseChoicePoint
+2,4c2
+< result = true
+< 
+< rewrite_step = 1984
+---
+> rewrite_step = 0
+  Java Compilation test of manySortedSet2 : no.spc
+  Java Compilation test of manySortedSet2 : no.spc  optimiseChoicePoint
+2,4c2
+< result = true
+< 
+< rewrite_step = 7575
+---
+> rewrite_step = 0
+  Java Compilation test of manySortedSet3 : no.spc
+  Java Compilation test of manySortedSet3 : no.spc  optimiseChoicePoint
+2,4c2
+< result = true
+< 
+< rewrite_step = 11363
+---
+> rewrite_step = 0
+  Java Compilation test of match11 : no.spc
+  Java Compilation test of match11 : no.spc  optimiseChoicePoint
+  Java Compilation test of match12 : no.spc
+  Java Compilation test of match12 : no.spc  optimiseChoicePoint
+  Java Compilation test of match13 : no.spc
+  Java Compilation test of match13 : no.spc  optimiseChoicePoint
+  Java Compilation test of match14 : no.spc
+  Java Compilation test of match14 : no.spc  optimiseChoicePoint
+  Java Compilation test of match2 : no.spc
+  Java Compilation test of match2 : no.spc  optimiseChoicePoint
+  Java Compilation test of match3 : no.spc
+  Java Compilation test of match3 : no.spc  optimiseChoicePoint
+  Java Compilation test of match4 : no.spc
+  Java Compilation test of match4 : no.spc  optimiseChoicePoint
+  Java Compilation test of propc1 : no.spc
+  Java Compilation test of propc1 : no.spc  optimiseChoicePoint
+  Java Compilation test of propc2 : no.spc
+  Java Compilation test of propc2 : no.spc  optimiseChoicePoint
+  Java Compilation test of rep : no.spc
+  Java Compilation test of rep : no.spc  optimiseChoicePoint
+  Java Compilation test of testACNumbering : no.spc
+  Java Compilation test of testACNumbering : no.spc  optimiseChoicePoint
+  Java Compilation test of testSubstitution : no.spc
+too many variables in the first level
+
+Error: g()(F(,)(var0,var1,var2))
+This pattern cannot be compiled
+Please, apply a program transformation as described in the manual
+2c2
+< result = g()([](1))
+---
+> result = a
+4c4
+< rewrite_step = 2
+---
+> rewrite_step = 1
+  Java Compilation test of testSubstitution : no.spc  optimiseChoicePoint
+too many variables in the first level
+
+Error: g()(F(,)(var0,var1,var2))
+This pattern cannot be compiled
+Please, apply a program transformation as described in the manual
+2c2
+< result = g()([](1))
+---
+> result = a
+4c4
+< rewrite_step = 2
+---
+> rewrite_step = 1
+  Java Compilation test of wpattern : no.spc
+  Java Compilation test of wpattern : no.spc  optimiseChoicePoint
+  Java Compilation test of wpatternAC1 : no.spc
+  Java Compilation test of wpatternAC1 : no.spc  optimiseChoicePoint
+  Java Compilation test of wpatternAC2 : no.spc
+  Java Compilation test of wpatternAC2 : no.spc  optimiseChoicePoint
+  Java Compilation test of wpatternAC3 : no.spc
+  Java Compilation test of wpatternAC3 : no.spc  optimiseChoicePoint
+  Java Compilation test of wpatternAC4 : no.spc
+  Java Compilation test of wpatternAC4 : no.spc  optimiseChoicePoint
+  Java Compilation test of wpatternAC5 : no.spc
+  Java Compilation test of wpatternAC5 : no.spc  optimiseChoicePoint
+  Java Compilation test of wpatternAC6 : no.spc
+  Java Compilation test of wpatternAC6 : no.spc  optimiseChoicePoint

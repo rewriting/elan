@@ -1,0 +1,7 @@
+LPL efib description
+  query    of sort eInt
+  result   of sort eInt
+  import   efib
+  start with () query
+
+end

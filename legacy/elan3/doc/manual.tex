@@ -1,0 +1,242 @@
+% -*- Document-Type: LaTeX; Master-File: manual.tex -*- 
+% Date de creation: [ck: Aug  8 95][ck: Jul  9 96]
+
+\listfiles
+
+\documentclass[11pt]{book}
+\usepackage{graphics,epsfig,makeidx,latexsym,fancyhead,supertabular}
+\usepackage{lgrind} \LGnuminterval=1
+
+% Pour la generation de pdf avec liens (table des matieres et bibliographie)
+% Ne sert que lorsque pdflatex est utilise
+\usepackage{hyperref}
+
+
+%\batchmode
+
+\pagestyle{plain}
+
+        \marginparwidth 0pt 
+        \oddsidemargin 0pt 
+        \evensidemargin 0pt 
+        \marginparsep 0pt
+        \topmargin -5mm 
+        \textwidth 160mm 
+        \textheight 235mm
+
+%%%%%%%%%%%%%%%% CE QUI DEPEND DE LA VERSION %%%%%%%%%%%%%%%%%%%%%
+\newcommand{\versionElan}{V3.6}
+\newcommand{\elanVersion}{\versionElan}
+\newcommand{\localisationFtpElan}{{\tt /pub/loria/protheo/softwares/Elan/elan.3.6.tgz}}
+\newcommand{\localisationWebElan}{{\tt http://elan.loria.fr}}
+%%%%%%%%%%%%%%%% DECLARATION D'ORTHOGRAPHE!%%%%%%%%%%%%%%%%%%%%%%%
+% L'orthographe du document est basee sur l'usage Americain
+%%%%%%%%%%%%%%%%
+
+% Les macros
+\input{preambule}
+
+% Les lettres  et grasses et les autres speciales
+\input{calbf}
+
+% les definitions
+\input{notation-chk}
+
+% Les specifiques
+\input{macros}
+
+% l'index
+\makeindex
+
+% l'entete de page
+\pagestyle{fancyplain}
+\addtolength{\headwidth}{\marginparsep}
+\addtolength{\headwidth}{\marginparwidth}
+\renewcommand{\chaptermark}[1]{\markboth{#1}{#1}} % remember chapter title
+\renewcommand{\sectionmark}[1]{\markright{\thesection\ #1}}
+                                                % section number and title
+\lhead[\fancyplain{}{\bf\thepage}]{\fancyplain{}{\bf\rightmark}}
+\rhead[\fancyplain{}{\bf\leftmark}]{\fancyplain{}{\bf\thepage}}
+\cfoot{{\today} \hfill \elan\ user manual}
+
+\thispagestyle{empty}
+
+% Les commentaires
+\renewcommand{\comment}[1]{}
+%\newcommand{\commentCK}[1]{{\bf #1}}
+\newcommand{\commentCK}[1]{}
+
+\sloppy
+\begin{document}
+
+\newcommand{\HRule}{\rule{\linewidth}{1.3mm}}
+
+\vspace*{\stretch{1}}
+\begin{flushleft}
+\font\PourTitreElan=cmss12 scaled 4500
+%\Huge \textbf{\elan}%\\[1mm] USER MANUAL
+{\PourTitreElan ELAN}
+\end{flushleft}
+\begin{flushright}
+\Huge   \textbf{USER MANUAL}
+\end{flushright}%
+\HRule
+\begin{flushright}
+\today\\
+\elan{}~\versionElan{}\\
+\end{flushright}
+\vspace*{\stretch{2}}
+\textbf{\Large
+\begin{tabular}{l} Peter Borovansk\'y \\ Horatiu Cirstea\\ Hubert Dubois\\
+Claude Kirchner \\  \Helene{} Kirchner \\ 
+Pierre-Etienne Moreau \\ Quang-Huy Nguyen\\
+Christophe Ringeissen\\ Marian Vittek
+\end{tabular}
+}\\
+\HRule
+\vspace*{\stretch{1}}
+\thispagestyle{empty}
+\newpage
+\input{page2}
+
+
+\begin{flushleft}
+\hligne
+\begin{description}
+\item[elan] n. {\bf 1}. Enthusiastic vigor and liveness. 
+{\bf 2}. Style; flair. [Fr $<$ OFr. {\it eslan\/}, rush $<$ eslancer, to
+throw out: es-, out ($<$ Lat. ex-) $+$ {\it lancer\/}, 
+to throw ($<$
+LLat. {\it lanceare\/}, to throw a lance $<$ Lat. {\it lancea\/}, lance).]
+\item {\sf The American Heritage Dictionary}
+
+\item \hrulefill
+
+\item[1. {\'E}LAN.] {\it n.m.} (vers 1420 selon {\sc Bloch} ; de {\it {\'e}lancer\/}.\\
+$\parallel$ {\bf 1} Mouvement pour s'{\'e}lancer. {\it Calculer son {\'e}lan} 
+(Cf. Calculer, cit. 7). \ldots \\
+$\parallel$ {\bf 2} {\it Par anal.} Mouvement par lequel la voix reprend, s'{\'e}lance. \ldots\\
+$\parallel$ {\bf 3} {\it Fig.} Mouvement ardent, subit qu'un vif sentiment inspire. 
+V. {\bf Mouvement; ardent, impulsion, pouss{\'e}e.} {\it Brusque {\'e}lan. 
+{\'E}lan imp{\'e}tueux. {\'E}lans de jeunesse, de passion.} \ldots\\
+\item[2. {\'E}LAN.] {\it n.m.} (XVII$^e$ s.; {\it hellent} au XV$^e$ s., {\it ellend} au XVI$^e$; 
+haut allem. {\it elend}, du baltique {\it elnis}). Mammif{\`e}re artiodactyle ({\it Cervid{\'e}s}), 
+des pays du Nord. {\it {\'E}lan du Canada}. V. {\bf Orignal.}
+\item {\sf LE ROBERT,} extraits.
+
+\end{description}
+\hligne
+\end{flushleft}
+
+\newpage
+
+\tableofcontents
+
+\newpage
+
+\noindent
+
+%%%% [ck: Oct 26 98] Peter + ck
+
+\section*{Foreword}
+
+This manual presents the version \versionElan\ of the \elan\ language
+and of its environment. 
+
+%With respect to the last distributed versions (V1.17, V2.0 and V3.0-2),
+%the new features are:
+%
+%\begin{itemize}
+%\item several   main  changes in the   syntax,  in order to   make the
+%        language constructions more  uniform and to add new  features:
+%        new  built in strategies, the  use  of patterns in where, rule
+%        visibility  for  rule   and strategy  labels,   the  automatic
+%        construction of selectors and modifiers.
+%
+%\item the   compiler that allows  \elan\   programs to  run  at  speed
+%        comparable to compiled functional languages,
+%  
+%\item an extended strategy language giving to the  user a much broader
+%        expressive power in the expression of strategies,
+%  
+%\item an extended user interaction loop,
+%
+%\item and of course the correction of several bugs.
+%
+%\end{itemize}
+
+This is mainly an update of version {\sf V3.4} with bug corrections with several new features offered by the compiler such that the Input/Output facilities, the new builtins (array, hashing tables) and the possibility to trace the normalisation process in \elan\ programs.
+The \elan\ compiler compiles now all possible patterns that contain AC symbols.
+No program transformation is required for the user.
+Furthermore, from this version we distribute the sources of the system.
+The compilation/installation process follows the same procedure as other GNU softwares.
+
+\vfill
+
+\begin{center}
+-----------------------------\\
+This is the user manual of \elan\ version \elanVersion \\
+We will be pleased to know any inaccuracy, error or typos.\\
+Your comments on any part of the language, the system or this manual are welcome.\\
+\mbox{\tt elan@loria.fr}\\
+-----------------------------\\
+\end{center}
+
+
+\chapter{A short introduction to \elan}\label{short}
+\input{short}
+
+\chapter{How to use \elan}\label{install}
+\input{install}
+
+\chapter{\elan: the language}\label{language}
+\input{language}
+
+\chapter{\elan: the system}
+\input{system}
+
+\chapter{The standard library and the built-ins}\label{library}
+\input{library}
+
+\chapter{Contributed works}
+\input{contrib}
+
+\newpage
+\section*{Acknowledgements}
+
+We are very grateful to Mark van den Brand whose comments, enlighting questions
+and always pertinent suggestions allowed us to come up with a much better state
+of this manual. Many thanks to Carlos Castro, Thomas Genet and Christelle
+Scharff for many fruitful discussions and constructive criticisms about \elan,
+for their careful reading of the manual and checking of examples. Many thanks
+also to Jounaidi Benhassen for his feedback.  Any remaining errors are of course
+entirely ours.
+
+Specials thanks are going to Jos{\'e} Meseguer for the many discussions we had on
+rewriting logic and rewrite based programming languages and to Steven Eker for
+his participation to a early stage of this project and for always useful
+interactions.
+
+Many thanks also to all \elan's users for their feedback on the language and the
+system.
+
+\input{manual.ind}
+
+%%%%%%%%%%%%%%%% La bibal %%%%%%%%%%%%%%%%
+%\bibliography{/users/protheo/bibtex/abbrev,%
+%%
+%/users/protheo/bibtex/elan,%
+%% manual}
+%/users/protheo/bibtex/ckirchne,%
+%/users/protheo/bibtex/hkirchne,%
+%/users/protheo/bibtex/ringeiss,%
+%/users/protheo/bibtex/castro,%
+%/users/protheo/bibtex/publis-protheo,%
+%/users/protheo/bibtex/cirstea,%
+%/users/protheo/bibtex/protheo}
+
+\bibliography{manual}
+
+\bibliographystyle{./myalpha}  
+\end{document}
+

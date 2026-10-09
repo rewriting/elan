@@ -1,0 +1,294 @@
+module IntegerDomain
+
+import
+global	 
+	int
+	;
+end
+
+sort	domain
+	;
+end
+
+operators
+global
+
+	empty				:			domain;
+	[@,..,@]			: (int int)		domain;
+	@ U @				: (domain domain)	domain assocRight;
+
+	GetCard(@)			: (domain)		int;
+	GetFirstValueOfDomain(@)	: (domain)		int;
+	GetLastValueOfDomain(@)		: (domain)		int;
+	GetFirstPartOfDomain(@,@)	: (domain int)		domain;
+	GetSecondPartOfDomain(@,@)	: (domain int)		domain;
+	MinOfDomain(@)			: (domain)		int;
+	MaxOfDomain(@)			: (domain)		int;
+	EliminateFirstValueOfDomain(@)	: (domain)		domain;
+	EliminateLastValueOfDomain(@)	: (domain)		domain;
+	EliminateValueOfDomain(@,@)	: (domain int)		domain;
+	UpdateMaxOfDomain(@,@)		: (domain int)		domain;
+	UpdateMinOfDomain(@,@)		: (domain int)		domain;
+	ValueIsInDomain(@,@)		: (domain int)		bool;
+	CreateDomainFromValue(@)	: (int)			domain;
+
+end
+
+
+rules for int
+
+	min, max	: int;
+	D1, D2		: domain;
+
+global 
+
+[]	GetCard(D1 U D2)
+	=>
+	GetCard(D1) + GetCard(D2)
+end
+[]	GetCard([min,..,max])
+	=>
+	max-min+1
+end
+[]	GetCard(empty)
+	=>
+	0
+end
+
+[]	GetFirstValueOfDomain(D1 U D2)
+	=>
+	GetFirstValueOfDomain(D1)
+end
+[]	GetFirstValueOfDomain([min,..,max])
+	=>
+	min
+end
+
+[]	GetLastValueOfDomain(D1 U D2)
+	=>
+	GetLastValueOfDomain(D2)
+end
+[]	GetLastValueOfDomain([min,..,max])
+	=>
+	max
+end
+
+[]	MaxOfDomain(D1 U D2)
+	=>
+	MaxOfDomain(D2)
+end
+
+[]	MaxOfDomain([min,..,max])
+	=>
+	max
+end
+
+[]	MinOfDomain(D1 U D2)
+	=>
+	MinOfDomain(D1)
+end
+
+[]	MinOfDomain([min,..,max])
+	=>
+	min
+end
+
+end
+
+
+rules for domain
+
+	v, min, max, m, n	: int;
+	D1, D2, RD		: domain;
+
+global 
+
+[]	GetFirstPartOfDomain(D1 U D2,n)
+	=>
+	RD
+	where	m := ()GetCard(D1)
+	choose
+	try
+		if n > m
+		where	RD := ()D1 U GetFirstPartOfDomain(D2,n-m)
+	try
+		where	RD := ()GetFirstPartOfDomain(D1,n)
+	end
+end
+
+[]	GetFirstPartOfDomain([min,..,max],n)
+	=>
+	[min,..,min+n-1]
+end
+
+[]	GetSecondPartOfDomain(D1 U D2,n)
+	=>
+	RD
+	where	m := ()GetCard(D2)
+	choose
+	try
+		if n > m
+		where	RD := ()GetSecondPartOfDomain(D1,n-m) U D2
+	try
+		where	RD := ()GetSecondPartOfDomain(D2,n)
+	end
+end
+
+[]	GetSecondPartOfDomain([min,..,max],n)
+	=>
+	[max-n+1,..,max]
+end
+
+[]	EliminateFirstValueOfDomain(D1 U D2)
+	=>
+	RD
+	choose
+	try
+		if GetCard(D1) > 1
+		where RD := ()EliminateFirstValueOfDomain(D1) U D2
+	try
+		where RD := ()D2
+	end
+end
+[]	EliminateFirstValueOfDomain([min,..,max])
+	=>
+	[min+1,..,max]
+end
+
+[]	EliminateLastValueOfDomain(D1 U D2)
+	=>
+	RD
+	choose
+	try
+		if GetCard(D2) > 1
+		where	RD := ()D1 U EliminateLastValueOfDomain(D2)
+	try
+		where	RD := ()D1
+	end
+end
+[]	EliminateLastValueOfDomain([min,..,max])
+	=>
+	[min,..,max-1]
+end
+
+[]	EliminateValueOfDomain(D1 U D2,v)
+	=>
+	RD
+	choose
+	try
+		if v <= MaxOfDomain(D1)
+		choose
+		try
+			if GetCard(D1) == 1 and v == MaxOfDomain(D1)
+			where	RD := ()D2
+		try
+			where	RD := ()EliminateValueOfDomain(D1,v) U D2
+		end
+	try
+		if v >= MinOfDomain(D2)
+		choose
+		try
+			if GetCard(D2) == 1 and v == MinOfDomain(D2)
+			where	RD := ()D1
+		try
+			where	RD := ()D1 U EliminateValueOfDomain(D2,v)
+		end
+	try
+		where	RD := ()D1 U D2
+	end
+end
+[]	EliminateValueOfDomain([min,..,max],v)
+	=>
+	RD
+	choose
+	try
+		if v == min
+		where	RD := ()[min+1,..,max]
+	try
+		if v == max
+		where	RD := ()[min,..,max-1]
+	try
+		where	RD := ()[min,..,v-1] U [v+1,..,max]
+	end
+end
+
+[]	UpdateMaxOfDomain(D1 U D2,v)
+	=>
+	RD
+	choose
+	try
+		if v >= MaxOfDomain(D1)
+		choose
+		try
+			if v >= MinOfDomain(D2)
+			where	RD := ()D1 U UpdateMaxOfDomain(D2,v)
+		try
+			where	RD := ()D1
+		end
+	try
+		where	RD := ()UpdateMaxOfDomain(D1,v)
+	end
+end
+[]	UpdateMaxOfDomain([min,..,max],v)
+	=>
+	[min,..,v]
+end
+
+[]	UpdateMinOfDomain(D1 U D2,v)
+	=>
+	RD
+	choose
+	try
+		if v <= MinOfDomain(D2)
+		choose
+		try
+			if v <= MaxOfDomain(D1)
+			where	RD := ()UpdateMinOfDomain(D1,v) U D2
+		try
+			where	RD := ()D2
+		end
+	try
+		where	RD := ()UpdateMinOfDomain(D2,v)
+	end
+end
+[]	UpdateMinOfDomain([min,..,max],v)
+	=>
+	[v,..,max]
+end
+
+[]	CreateDomainFromValue(v)
+	=>
+	[v,..,v]
+end
+
+end
+
+
+rules for bool
+
+	v, min, max	: int;
+	D1, D2		: domain;
+	b		: bool;
+
+global 
+
+[]	ValueIsInDomain(D1 U D2,v)
+	=>
+	ValueIsInDomain(D1,v) or ValueIsInDomain(D2,v)
+end
+[]	ValueIsInDomain([min,..,max],v)
+	=>
+	b
+	choose
+	try
+		if min <= v and v <= max
+		where	b := ()true
+	try
+		where	b := ()false
+	end
+end
+
+end
+
+
+end

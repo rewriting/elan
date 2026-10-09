@@ -1,0 +1,121 @@
+module Id
+
+import bool term eqSystem list[variable] eq[list[variable]] 
+       occur[variable,list[variable]] replace[variable,list[variable]] ;
+end
+
+operators
+
+  global
+
+  Id(@) : (list[variable]) list[variable] ;
+
+  IdeqSys(@) : (list[variable]) eqSystem ;
+
+  applyId(@,@) : (eqSystem eqSystem) eqSystem ;
+  
+  applyId(@,@) : (eqSystem list[variable]) list[variable] ;
+
+  
+  Gx : variable ;
+  Gy : variable ;
+  Gz : variable ;
+  Gu : variable ;
+  Gv : variable ;
+  Gw : variable ;
+
+
+  local
+
+  conseqSys(@,@) : (list[variable] list[variable]) eqSystem ;
+  equivclass(@)  : (list[variable]) list[variable] ;
+  setof(@)       : (list[variable]) list[variable] ;
+  replaceId(@,@)  : (eqSystem list[variable]) list[variable] ;
+
+
+end
+
+rules for list[variable]
+//declare	
+        x,v 	: variable ;
+	l,m	: list[variable];
+        P       : eqSystem ;
+
+global
+
+  [Idr1] Id(x.l)	=> v.m
+                           where m:= (chooseId) Id(l)
+                           where v:= (listExtract) elem(equivclass(m))
+                           end
+
+  [Idr2] Id(x.l)	=> x . m
+                           where m:= (chooseId) Id(l) 
+                           end
+  
+  [Idr3] Id(nil)        => nil end
+
+  [] equivclass(x.l)    => equivclass(l) if occurs(x,l) end 
+  [] equivclass(x.l)    => x.equivclass(l) end
+  [] equivclass(nil)    => nil end 
+
+
+  [] applyId(P,l)        => setof(replaceId(P,l)) end
+
+  [] replaceId(P & x=v,l) => replaceId(P,replace x by v in l) end
+  [] replaceId(true,l)    => l end 
+
+  [] setof(x.l) => setof(l) if occurs(x,l) end
+  [] setof(x.l) => x.setof(l) if not occurs(x,l) end
+  [] setof(nil) => nil end 
+
+
+end
+
+
+rules for eqSystem 
+//declare	
+        x,v 	: variable ;
+	l,m	: list[variable];
+        P,Q     : eqSystem ;
+
+global
+
+  [IdeqSysrule] IdeqSys(l) => conseqSys(l,m) 
+                              where m:= (chooseId) Id(l) end
+
+  [] conseqSys(x.l,x.m) => conseqSys(l,m) end
+ 
+  [] conseqSys(x.l,v.m) => conseqSys(l,m) & x = v 
+                           if x != v end
+
+  [] conseqSys(nil,nil) => true end
+
+  [] applyId(P & x=v,Q) => applyId(P,apply(x -> v,Q)) end
+  [] applyId(true,Q) => Q end
+
+
+end
+
+
+strategies for eqSystem
+
+ global 
+
+  [chooseIdeqSys] 
+  dont know choose(IdeqSysrule) 
+  end
+
+end
+
+
+strategies for list[variable]
+
+global 
+  [chooseId]
+  dont know choose(Idr1 || Idr2 || Idr3)
+  end
+
+end
+
+
+end

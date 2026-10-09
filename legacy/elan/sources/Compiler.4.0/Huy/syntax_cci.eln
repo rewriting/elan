@@ -1,0 +1,98 @@
+module syntax_cci
+
+import global list[term] list[int] IO[list[term]];
+end
+
+operators
+  global
+	Req(@,@) : (term term) term;
+	remCTX(@,@): (term term) term;
+	(trans_equal @ @ @ @ @ @): (term term term term term term) term;
+
+	//lemma eq_ac
+	equal_generator(@,@) :(term term) term;
+
+	In(@) : (term) term;
+	Out(@) : (term) term;
+
+	//syntax for CCI
+	(refl_equal @ @):(term term) term;
+    	CTX     :   term;
+    	pi2CCI(@): (term) term;
+      	ctx(@,@)    : (term term) term;
+	trans_eq(@,@): (term term) term;
+	context(@): (term) term;
+	piCTX(@)  : (term) term;
+
+	// lemma context
+	(@ @ @ @): (term term term term) term;
+
+	z1: term;
+	z2: term;
+	A: term;
+	
+	L(@): (int) term; 
+	elan_'\0'@: (int) term alias L(@):; //for naming generated lemmas
+
+	'\0': list[int] alias nil:;
+	@'\0'@:(int list[int]) list[int] alias cons(@,@):;
+	num_code(@): (term) list[int];
+	L(@,@): (list[int] list[int]) term; 
+	elan_'\0'@_'\0'@: (list[int] list[int]) term alias L(@,@):; //for naming generated lemmas
+
+	QED: term;
+	main_theorem: term;
+	EMP: term; // empty proof term
+
+	get_new_number: int;
+
+	 //[NGUYEN: May  9 01] 
+	term_ac_out(@,@): (term term) term;
+	term_ac_in(@,@): (term term) term;
+	term_ac_context(@,@): (term term) term;
+	term_ac_compare(@,@): (term term) term;	
+
+	 //[NGUYEN: May 11 01] 
+	eq_ac(@,@,@,@,@): (term term list[term] list[term] int) term;
+	(@,@,@,@): (term term list[term] list[term]) term;
+	1st(@):(term) term;
+	2nd(@):(term) term;
+	list_var(@):(term) list[term];
+	list_inst(@):(term) list[term];
+	v(@): (int) term; 
+	v_'\0'@ '\32' : (int) term alias v(@):;
+	'Lemma' @ ':' '(' @ ':' 'A' ')' @ '=' @ '.' : (term list[term] term term)term;
+	print_list(@,@): (File list[term])term;
+
+	proof_eq_ac_non_refl(@): (File) string;
+	proof_eq_ac_non_refl_clos(@): (File) string;
+	proof_eq_ac_outermost(@): (File) string;
+	proof_eq_ac_innermost(@): (File) string;
+
+	lemma_generator(@) :(term) term;
+
+	'[' 'v1' ',' 'v2' ':' 'A' ']':term;
+	'Lemma' @ ':' '(' 'z1' ':' 'A' ')' '(' 'z2' ':' 'A' ')' 'z1' '=' 'z2' '-' '>' @ '=' @ '.': (term term term) term;
+	'Lemma' @ ':' @ '=' @ '.' : (term term term)term;
+	@ ':' @ '=' @ '.' : (term term term)term;
+	'Parameter' @ ':' @ '=' @ '.' : (term term term)term;
+end
+
+/* parametrise par theorie */
+operators
+  global
+	eq_concat_+(@,@): (term term) term;
+	eq_concat_*(@,@): (term term) term;
+
+	// rule for Coq
+	(A_neutral @)	:(term) term;
+	A_Opp_Null : term;
+	(A_Opp_Opp @):(term)term;
+	(A_Opp_Plus @ @):(term term)term;
+	(A_invert @):(term)term;
+	(eq_2 @ @ @ @ @ @ @ @ @ @) :(term term term term term term term term term term) term;
+	'=' '(' 'A_Plus' 'v1' 'v2' ')':term;
+	'=' '(' 'A_Mult' 'v1' 'v2' ')': term;
+end
+
+end

@@ -1,0 +1,126 @@
+module CooperationStrategies[Variables,Type,Values]
+
+import
+global
+	CooperationRules[Variables,Type,Values]
+	;
+end
+
+stratop
+global
+	caca2				: < csp -> csp >		bs;
+	caca3				: < csp -> csp >		bs;
+	SetUpperAndLowerBounds		: < csop -> csop >		bs;
+	MinWithCooperation		: < csop -> csop >		bs;
+	Cooperation			: < csopbis -> csopbis >	bs;
+end
+
+
+rules for csopbis
+
+	P, Q	: csop;
+	lcsop	: list[csop];
+
+global
+
+[SetUpperAndLowerBounds]
+
+	CSOPbis[P,lcsop]
+	=>
+	CSOPbis[Q,lcsop]
+	where Q := (SetUpperAndLowerBounds)P
+end
+
+end
+
+
+rules for csop
+
+	P1, P2		: csop;
+	Pbis, Qbis	: csopbis;
+
+global
+
+[Cooperation]
+	P1
+	=>
+	P2
+        where   Pbis := ()CreateCSOPbis(P1)
+        where   Qbis := (Cooperation)Pbis
+        where   P2   := ()GetCSOP(Qbis)
+end
+
+end
+
+
+strategies for csop
+implicit
+
+[] SetUpperAndLowerBounds =>
+first one (PostLTEUpperBound);
+first one (WriteCSOPInASCII);
+LocalConsistencyForEC;
+first one (WriteCSOPInASCII);
+first one (GetUBFCChoicePointMinimumDomainFirstToLastOne);
+first one (WriteCSOPInASCII);
+first one (UndervalueLowerBound);
+first one (WriteCSOPInASCII)
+end
+
+[] MinWithCooperation =>
+first one (Cooperation);
+first one (GetSolutionCSOP)
+end
+
+end
+
+strategies for csp
+implicit
+
+[] caca2 =>
+repeat* (
+	dk (iterate* (EliminateFirstValueOfDomain));
+	first one (InstantiateFirstValueOfDomain);
+	first one (Elimination)
+	);
+first one (GetSolutionCSP)
+end
+
+[] caca3 =>
+first one (repeat* (
+	dk (iterate* (EliminateFirstValueOfDomain));
+	first one (InstantiateFirstValueOfDomain);
+	first one (Elimination)
+	);
+first one (GetSolutionCSP)
+)
+end
+
+
+
+end
+
+
+strategies for csopbis
+implicit
+
+[] Cooperation =>
+first one (SetUpperAndLowerBounds) ;
+repeat* (first one (Solver2) ;
+	 first (WriteCSOPbisInASCII) ;
+	 first one (UpdateBounds) ;
+	 first (WriteCSOPbisInASCII) ;
+	 first one (first one (Solver1) ; 
+		    first (WriteCSOPbisInASCII) ; 
+		    first one (UpdateBounds) ; 
+		    first (WriteCSOPbisInASCII)
+		    ,
+		    id
+		   )
+	);
+first one (GetMinimum)
+end
+
+end
+
+end

@@ -1,0 +1,25 @@
+
+def Hoehensensor  = 'unter200.Hoehensensor + \ 
+                    'ueber200.Hoehensensor
+def Fahrwerk      = FWeingefahren 
+def FWeingefahren = ausfahren.'fWausgefahren.FWausgefahren + \
+                    'eingefahren.FWeingefahren
+def FWausgefahren = einfahren.'fWeingefahren.FWeingefahren + \
+                    'ausgefahren.FWausgefahren
+def Warnung       = 'warnton.Steuerung
+def Steuerung     = knopfFWEinfahren.SteuerungEin + \
+                    knopfFWAusfahren.SteuerungAus + \
+                    ausgefahren.WarnungUp + \
+		    eingefahren.WarnungLo 
+def SteuerungEin  = ausgefahren.'einfahren.WarnungLo + \
+                    eingefahren.'beep.WarnungLo
+def SteuerungAus  = ausgefahren.'beep.WarnungUp + \
+		    eingefahren.'ausfahren.WarnungUp
+def WarnungUp     = ueber200.Warnung + unter200.Steuerung
+def WarnungLo     = unter200.Warnung + ueber200.Steuerung
+def Flugzeug      = (Steuerung # Fahrwerk # Hoehensensor) \ Internals
+def Internals     = { einfahren, ausfahren, eingefahren, ausgefahren, unter200, ueber200}
+
+
+prop Phi = [knopfFWAusfahren] AF(<'fWausgefahren>tt)
+prop Phi2 = AG( Phi() )

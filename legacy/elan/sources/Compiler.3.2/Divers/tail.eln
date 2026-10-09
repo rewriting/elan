@@ -1,0 +1,70 @@
+module tail
+
+import global int;
+end
+
+sort pair triplet;
+end
+
+operators global
+ fib(@)       : (int) int ;
+ fac(@)       : (int) int ;
+
+ tail_fib(@)  : (int) int ;
+ tail_fac(@)  : (int) int ;
+
+ [@,@]	      : (int int) pair;
+ [@,@,@]      : (int int int) triplet;
+
+end
+
+stratop global
+  S_fac : <pair>        bs;
+  S_fib : <triplet>     bs;
+end
+
+
+rules for int 
+  n,x,y,z : int;
+global
+  [] fib(0) => 1					end
+  [] fib(1) => 1					end
+  [] fib(n) => fib(n - 1) + fib(n - 2) if n > 1		end
+
+  [] fac(1) => 1					end
+  [] fac(n) => n+fac(n - 1) if n > 1			end
+
+  [] tail_fac(n) => y
+		 where (pair) [x,y] := (S_fac) [n,1]
+  end
+
+  [] tail_fib(n) => z
+		 where (triplet) [x,y,z] := (S_fib) [n,1,1]
+  end
+
+end
+
+rules for pair 
+  n,x,y : int;
+global
+  [R_fac] [n,y] => [n-1, n+y] if n>1			end
+end
+
+rules for triplet
+  n,x,y,z : int;
+global
+  [R_fib] [n,x,y] => [n-1,y,x+y] if n>1			end
+end
+
+strategies for pair
+implicit
+  [.] S_fac => repeat*( dc one(R_fac) )			end
+end
+
+strategies for triplet
+implicit
+  [.] S_fib => repeat*( dc one(R_fib) )			end
+end
+
+
+end

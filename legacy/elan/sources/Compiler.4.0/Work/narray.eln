@@ -1,0 +1,16 @@
+module narray[N,X]
+       // N : number of dimensions
+       // X : sort of the elements
+
+import global int
+       narray1[N,X];
+end
+
+
+
+end
+				
+
+
+
+

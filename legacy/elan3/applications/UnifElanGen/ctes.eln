@@ -1,0 +1,21 @@
+module ctes
+
+import 
+
+   local int term  ;
+   end
+
+
+operators
+
+   global 
+
+
+   cte.@ : (int) term ;
+
+
+end
+
+
+end
+

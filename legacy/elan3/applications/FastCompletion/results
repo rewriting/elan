@@ -1,0 +1,98 @@
+File: Examples/KNZ86.spc
+Results:
+ s(s(var(0)))->var(0).f(o,var(0))->var(0).g(o,var(0))->var(0).f(s(var(0)),var(1))->s(f(var(0),var(1))).h(o)->s(o).f(f(var(0),o),o)->var(0).g(s(var(0)),var(1))->f(g(var(0),var(1)),o).nil end
+
+ end end
+end
+
+File: Examples/Zeh89.spc
+Results:
+ p(var(0),o)->var(0).m(var(0),u)->var(0).exp(o)->u.p(p(var(0),var(1)),var(2))->p(var(0),p(var(1),var(2))).m(m(var(0),var(1)),var(2))->m(var(0),m(var(1),var(2))).p(var(0),p(o,var(1)))->p(var(0),var(1)).m(var(0),m(u,var(1)))->m(var(0),var(1)).exp(p(var(0),var(1)))->m(exp(var(0)),exp(var(1))).nil end
+
+ end end
+end
+
+File: Examples/curry.spc
+Results:
+ imp(I,var(0))->var(0).m(I,var(0))->var(0).m(var(0),I)->var(0).imp(var(0),I)->I.imp(m(var(0),var(1)),var(2))->imp(var(0),imp(var(1),var(2))).m(m(var(0),var(1)),var(2))->m(var(0),m(var(1),var(2))).imp(var(0),m(var(1),var(2)))->m(imp(var(0),var(1)),imp(var(0),var(2))).nil end
+
+ end end
+end
+
+File: Examples/exa79.spc
+Results:
+ m(var(0),o)->var(0).m(o,var(0))->var(0).i(i(var(0)))->var(0).m(i(var(0)),m(var(0),var(1)))->var(1).m(i(var(0)),var(0))->o.i(o)->o.m(var(0),m(i(var(0)),var(1)))->var(1).m(var(0),i(var(0)))->o.nil end
+
+ end end
+end
+
+File: Examples/exa80.spc
+Results:
+ m(o,var(0))->var(0).m(var(0),i(var(0)))->o.i(o)->o.m(var(0),m(i(var(0)),var(1)))->var(1).m(i(var(0)),m(var(0),var(1)))->var(1).m(m(var(0),var(1)),var(2))->m(var(0),m(var(1),var(2))).i(i(var(0)))->m(var(0),o).m(i(var(0)),o)->i(var(0)).i(m(var(0),var(1)))->m(i(var(1)),i(var(0))).nil end
+
+ end end
+end
+
+File: Examples/exa85.spc
+Results:
+ p(var(0),e)->var(0).p(e,var(0))->var(0).i(i(var(0)))->var(0).p(var(0),i(var(0)))->e.p(var(0),p(i(var(0)),var(1)))->var(1).i(e)->e.p(i(var(0)),var(0))->e.p(i(var(0)),p(var(0),var(1)))->var(1).h(e)->e.p(p(var(0),var(1)),var(2))->p(var(0),p(var(1),var(2))).h(i(var(0)))->i(h(var(0))).h(p(var(0),var(1)))->p(h(var(0)),h(var(1))).i(p(var(0),var(1)))->p(i(var(1)),i(var(0))).nil end
+
+ end end
+end
+
+File: Examples/expf.spc
+Results:
+ af->f(ag,ag).ae->f(f(ag,ag),f(ag,ag)).ad->f(f(f(ag,ag),f(ag,ag)),f(f(ag,ag),f(ag,ag))).ac->f(f(f(f(ag,ag),f(ag,ag)),f(f(ag,ag),f(ag,ag))),f(f(f(ag,ag),f(ag,ag)),f(f(ag,ag),f(ag,ag)))).ab->f(f(f(f(f(ag,ag),f(ag,ag)),f(f(ag,ag),f(ag,ag))),f(f(f(ag,ag),f(ag,ag)),f(f(ag,ag),f(ag,ag)))),f(f(f(f(ag,ag),f(ag,ag)),f(f(ag,ag),f(ag,ag))),f(f(f(ag,ag),f(ag,ag)),f(f(ag,ag),f(ag,ag))))).aa->f(f(f(f(f(f(ag,ag),f(ag,ag)),f(f(ag,ag),f(ag,ag))),f(f(f(ag,ag),f(ag,ag)),f(f(ag,ag),f(ag,ag)))),f(f(f(f(ag,ag),f(ag,ag)),f(f(ag,ag),f(ag,ag))),f(f(f(ag,ag),f(ag,ag)),f(f(ag,ag),f(ag,ag))))),f(f(f(f(f(ag,ag),f(ag,ag)),f(f(ag,ag),f(ag,ag))),f(f(f(ag,ag),f(ag,ag)),f(f(ag,ag),f(ag,ag)))),f(f(f(f(ag,ag),f(ag,ag)),f(f(ag,ag),f(ag,ag))),f(f(f(ag,ag),f(ag,ag)),f(f(ag,ag),f(ag,ag)))))).b->f(f(f(f(f(f(f(ag,ag),f(ag,ag)),f(f(ag,ag),f(ag,ag))),f(f(f(ag,ag),f(ag,ag)),f(f(ag,ag),f(ag,ag)))),f(f(f(f(ag,ag),f(ag,ag)),f(f(ag,ag),f(ag,ag))),f(f(f(ag,ag),f(ag,ag)),f(f(ag,ag),f(ag,ag))))),f(f(f(f(f(ag,ag),f(ag,ag)),f(f(ag,ag),f(ag,ag))),f(f(f(ag,ag),f(ag,ag)),f(f(ag,ag),f(ag,ag)))),f(f(f(f(ag,ag),f(ag,ag)),f(f(ag,ag),f(ag,ag))),f(f(f(ag,ag),f(ag,ag)),f(f(ag,ag),f(ag,ag)))))),f(f(f(f(f(f(ag,ag),f(ag,ag)),f(f(ag,ag),f(ag,ag))),f(f(f(ag,ag),f(ag,ag)),f(f(ag,ag),f(ag,ag)))),f(f(f(f(ag,ag),f(ag,ag)),f(f(ag,ag),f(ag,ag))),f(f(f(ag,ag),f(ag,ag)),f(f(ag,ag),f(ag,ag))))),f(f(f(f(f(ag,ag),f(ag,ag)),f(f(ag,ag),f(ag,ag))),f(f(f(ag,ag),f(ag,ag)),f(f(ag,ag),f(ag,ag)))),f(f(f(f(ag,ag),f(ag,ag)),f(f(ag,ag),f(ag,ag))),f(f(f(ag,ag),f(ag,ag)),f(f(ag,ag),f(ag,ag))))))).nil end
+
+ end end
+end
+
+File: Examples/expoclos.spc
+Results:
+ ae->f(af,af).ad->f(f(af,af),f(af,af)).ac->f(f(f(af,af),f(af,af)),f(f(af,af),f(af,af))).ab->f(f(f(f(af,af),f(af,af)),f(f(af,af),f(af,af))),f(f(f(af,af),f(af,af)),f(f(af,af),f(af,af)))).aa->f(f(f(f(f(af,af),f(af,af)),f(f(af,af),f(af,af))),f(f(f(af,af),f(af,af)),f(f(af,af),f(af,af)))),f(f(f(f(af,af),f(af,af)),f(f(af,af),f(af,af))),f(f(f(af,af),f(af,af)),f(f(af,af),f(af,af))))).b->f(f(f(f(f(f(af,af),f(af,af)),f(f(af,af),f(af,af))),f(f(f(af,af),f(af,af)),f(f(af,af),f(af,af)))),f(f(f(f(af,af),f(af,af)),f(f(af,af),f(af,af))),f(f(f(af,af),f(af,af)),f(f(af,af),f(af,af))))),f(f(f(f(f(af,af),f(af,af)),f(f(af,af),f(af,af))),f(f(f(af,af),f(af,af)),f(f(af,af),f(af,af)))),f(f(f(f(af,af),f(af,af)),f(f(af,af),f(af,af))),f(f(f(af,af),f(af,af)),f(f(af,af),f(af,af)))))).nil end
+
+ end end
+end
+
+File: Examples/furtin.spc
+Results:
+ m(var(0),e)->var(0).m(e,var(0))->var(0).i(i(var(0)))->var(0).c1->e.c2->g2.c5->g1.m(var(0),i(var(0)))->e.m(i(var(0)),var(0))->e.i(e)->e.m(var(0),m(i(var(0)),var(1)))->var(1).m(i(var(0)),m(var(0),var(1)))->var(1).m(m(var(0),var(1)),var(2))->m(var(0),m(var(1),var(2))).c3->m(g2,g2).c6->m(g1,g2).c9->m(g1,g1).i(m(var(0),var(1)))->m(i(var(1)),i(var(0))).c7->m(g1,m(g2,g2)).c10->m(g1,m(g1,g2)).c13->m(g1,m(g1,g1)).c4->m(g2,m(g2,g2)).i(g1)->m(g1,m(g1,g1)).i(g2)->m(g2,m(g2,g2)).c11->m(g1,m(g1,m(g2,g2))).m(g1,m(g1,m(g1,g1)))->e.m(g2,m(g2,m(g2,g2)))->e.c14->m(m(g1,m(g1,g1)),g2).m(g1,m(g1,m(g1,m(g1,var(0)))))->var(0).c8->m(g1,m(g2,m(g2,g2))).m(g2,m(g2,m(g2,m(g2,var(0)))))->var(0).c15->m(m(g1,m(g1,g1)),m(g2,g2)).c12->m(g1,m(g1,m(g2,m(g2,g2)))).c16->m(m(g1,m(g1,g1)),m(g2,m(g2,g2))).nil end
+
+ end end
+end
+
+File: Examples/gdiv.spc
+Results:
+ div(var(0),var(0))->E.div(E,var(0))->var(0).I(I(var(0)))->var(0).div(I(var(0)),div(var(0),var(1)))->var(1).m(var(0),var(1))->div(I(var(0)),var(1)).div(var(0),div(I(var(0)),var(1)))->var(1).I(E)->E.div(var(0),E)->I(var(0)).I(div(var(0),var(1)))->div(var(1),var(0)).div(div(var(0),var(1)),var(2))->div(var(1),div(I(var(0)),var(2))).nil end
+
+ end end
+end
+
+File: Examples/group.spc
+Results:
+ m(o,var(0))->var(0).m(var(0),o)->var(0).i(i(var(0)))->var(0).m(i(var(0)),var(0))->o.m(var(0),i(var(0)))->o.i(o)->o.m(i(var(0)),m(var(0),var(1)))->var(1).m(var(0),m(i(var(0)),var(1)))->var(1).m(m(var(0),var(1)),var(2))->m(var(0),m(var(1),var(2))).i(m(var(0),var(1)))->m(i(var(1)),i(var(0))).nil end
+
+ end end
+end
+
+File: Examples/p2.spc
+Results:
+ f(e1,var(0))->var(0).f(e2,var(0))->var(0).f(var(0),i1(var(0)))->e1.i1(e1)->e1.i1(e2)->e1.f(var(0),f(i1(var(0)),var(1)))->var(1).f(i1(var(0)),f(var(0),var(1)))->var(1).f(f(var(0),var(1)),var(2))->f(var(0),f(var(1),var(2))).i1(i1(var(0)))->f(var(0),e1).f(i1(var(0)),e1)->i1(var(0)).i2(var(0))->f(i1(var(0)),e2).i1(f(var(0),var(1)))->f(i1(var(1)),i1(var(0))).nil end
+
+ end end
+end
+
+File: Examples/sample.spc
+Results:
+ a->b.f(g(var(0)))->g(var(0)).g(b)->b.f(b)->b.nil end
+
+ end end
+end
+
+File: Examples/taussky.spc
+Results:
+ F(E,var(0))->var(0).m(E,var(0))->var(0).m(var(0),E)->var(0).I(I(var(0)))->var(0).m(I(var(0)),var(0))->E.m(I(var(0)),m(var(0),var(1)))->var(1).I(E)->E.m(var(0),I(var(0)))->E.m(var(0),m(I(var(0)),var(1)))->var(1).m(m(var(0),var(1)),var(2))->m(var(0),m(var(1),var(2))).G(var(0),var(1))->F(var(0),m(I(var(1)),var(0))).I(m(var(0),var(1)))->m(I(var(1)),I(var(0))).nil end
+
+ end end
+end
+

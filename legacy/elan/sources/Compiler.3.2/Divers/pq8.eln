@@ -1,0 +1,111 @@
+module pq8
+import 
+  bool eq[Int] ;
+end
+
+sort List Int ;
+end
+
+operators
+  global
+    nil		: List;
+    cons(@,@)	: (Int List) List;
+
+    queens	: List;
+    ok(@,@,@)	: ( Int Int List ) bool;
+
+    o		: Int;
+    s(@)	: (Int) Int;
+    plus(@,@)	: (Int Int) Int;
+end
+
+stratop 
+  global
+	queens	: <List>	builtin;
+	try	: <Int>		builtin;
+end
+
+rules for List
+        p1,p2,p3,p4,p5,p6,p7,p8 : Int;
+	pp1,pp2,pp3,pp4,pp5,pp6,pp7,pp8 : List;
+local
+   [queensrule] queens	=> cons(p8,pp7)
+			where p1:=(try) o
+			where p2:=(try) o
+			where pp1:=() cons(p1,nil)
+			if true == ok(s(o),p2,pp1)
+			where p3:=(try) o
+			where pp2:=() cons(p2,pp1)
+			if true == ok(s(o),p3,pp2)
+			where p4:=(try) o
+			where pp3:=() cons(p3,pp2)
+			if true == ok(s(o),p4,pp3)
+			where p5:=(try) o
+			where pp4:=() cons(p4,pp3)
+			if true == ok(s(o),p5,pp4)
+			where p6:=(try) o
+			where pp5:=() cons(p5,pp4)
+			if true == ok(s(o),p6,pp5)
+			where p7:=(try) o
+			where 	pp6:=() cons(p6,pp5)
+			if true == ok(s(o),p7,pp6)
+			where p8:=(try) o
+			where pp7:=() cons(p7,pp6)
+			if true == ok(s(o),p8,pp7)
+  end
+end
+
+rules for bool
+        p,d,diff : Int;
+	l : List;
+global
+  [] ok(diff,d,nil)		=> true				end
+  [] ok(diff,d,cons(p,l))	=> false	if d == p  	end
+  [] ok(diff,d,cons(p,l))	=> false        if d == plus(p,diff)  end
+  [] ok(diff,d,cons(p,l))	=> false	if p == plus(d,diff)  end
+  [] ok(diff,d,cons(p,l))	=> ok(s(diff),d,l)		end
+end
+
+
+rules for Int
+	x,y	:Int;
+global
+  [] plus(x,o) => x end
+  [] plus(x,s(y)) => s(plus(x,y)) end
+
+  [tryrule] x	=> s(o)	end
+  [tryrule] x	=> s(s(o))	end
+  [tryrule] x	=> s(s(s(o)))	end
+  [tryrule] x	=> s(s(s(s(o))))	end
+  [tryrule] x	=> s(s(s(s(s(o)))))	end
+  [tryrule] x	=> s(s(s(s(s(s(o))))))	end
+  [tryrule] x	=> s(s(s(s(s(s(s(o)))))))	end
+  [tryrule] x	=> s(s(s(s(s(s(s(s(o))))))))	end
+end
+
+strategies for Int
+implicit
+  [] try => dk(tryrule) end
+end
+
+strategies for List
+implicit
+  [] queens => dk(queensrule) end
+end
+
+end			
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

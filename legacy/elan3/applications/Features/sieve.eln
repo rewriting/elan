@@ -1,0 +1,41 @@
+module sieve
+
+import global int; end
+sort LazyList; end
+
+operators global
+  nil			: LazyList;
+  @.@ 			: (int LazyList) LazyList	strategy 0;
+  force(@,@)		: (int LazyList) LazyList	strategy 1 2 0;
+  show @ upto @ 	: (LazyList int) LazyList;
+  filter @ with @	: (LazyList int) LazyList;
+  ints-from @		: (int) LazyList;
+  sieve @ 		: (LazyList) LazyList;
+  primes		: LazyList;
+  append(@,@)		: (LazyList LazyList) LazyList;
+end
+
+
+rules for LazyList
+P, I, E	: int;
+S, L	: LazyList;
+global
+  []	append(nil,L) => L			end
+  []	append(I.S,L) => I.append(S,L)		end
+  []	ints-from I => I.ints-from(I+1)		end
+  []    sieve nil => nil			end
+  []	sieve I.S => I.sieve filter S with I	end
+  []	filter nil with P => nil		end
+  []	filter I.S with P => filter S with P   if I % P == 0	end
+  []	filter I.S with P => I.filter S with P  end
+  []	primes => sieve ints-from 2		end
+  []	force(I,S) => I.S			end
+  []	show nil upto I => nil			end
+  []	show E.S upto I => nil if I == 0	end
+  []	show E.S upto I => force(E,show S upto I-1) end
+end
+
+// show primes upto 10 end
+// show primes upto 100 end
+
+end

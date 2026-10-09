@@ -1,0 +1,8 @@
+def Protocol = (Sender | Medium | Receiver) \ Rest
+def Rest = {b,c,d,e}
+def Sender = a.Sender_1
+def Sender_1 = 'b.(e.Sender + d.Sender_1)
+def Medium = b.('c.Medium + 'd.Medium)
+def Receiver = c.'f.'e.Receiver
+
+def Buffer = a.'f.Buffer

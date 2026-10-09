@@ -1,0 +1,10 @@
+LPL trans5  description
+
+query of sort  Term
+result of sort Term
+	  
+import trans5
+start with () go
+
+end
+

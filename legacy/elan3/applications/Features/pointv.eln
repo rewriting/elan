@@ -1,0 +1,58 @@
+module pointv
+
+import global eq[Foo]; end
+
+sort Foo; end
+
+operators global
+  c	: Foo;
+  a	: Foo;
+  b	: Foo;
+  s(@)	: (Foo) Foo;
+end
+
+stratop global
+  r	: < Foo -> Foo>   builtin;
+  rr	: < Foo -> Foo>   builtin;
+  all	: < Foo -> Foo>   builtin;
+  all0	: < Foo -> Foo>   builtin;
+  all1	: < Foo -> Foo>   builtin;
+  all2	: < Foo -> Foo>   builtin;
+  all3	: < Foo -> Foo>   builtin;
+  all4	: < Foo -> Foo>   builtin;
+  all5	: < Foo -> Foo>   builtin;
+  all6	: < Foo -> Foo>   builtin;
+end
+
+rules for Foo
+x	: Foo;
+global
+  [R]  x => a if x == c	 end
+  [R]  x => b if x ==c 	end
+
+  [W]  x => s(x) end
+  [W]  x => s(s(x)) end
+
+end
+
+strategies for Foo
+implicit
+  [.]  rr => dk(R);id		end
+  [.]  r => repeat*(dk(R))	end
+  [.]  all0 => r;dk(W)		end  // 4 solutions
+  [.]  all1 => dk(r,r,r);W	end  // 12
+  [.]  all2 => dk(r);W		end  // 4
+  [.]  all3 => dc(r);W		end  // 4
+  [.]  all4 => first one(r);W		end  // 2
+  [.]  all5 => r;dk(W)		end  // 4
+  [.]  all6 => first one(dc(r);W)	end  // 1
+  [.]  all => 
+	dk(
+	dk(all0,all1,all2,all3,all4,all5,all6)  // 31
+,	dc(all0,all1,all2,all3,all4,all5,all6)  // 4
+,	first one(all0,all1,all2,all3,all4,all5,all6)  // 1
+	)
+	end
+end
+
+end

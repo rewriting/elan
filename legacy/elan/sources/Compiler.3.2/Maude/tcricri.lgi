@@ -1,0 +1,19 @@
+LPL test description
+  query    of sort eqSystem
+  result   of sort eqSystem
+  import   test
+  start with () query
+
+end
+
+// x.0 =E t.0 & x.1=F t.1 & x.2 =E t.2 & x.3 =E t.3 & x.4 =F t.4 & x.5 =F t.5 & x.0 =F t.1 & x.6 =F t.6 & x.2 =E t.2 & x.7 =E t.7 & x.7 =F t.8 & x.9 =E t.9 & x.10 =E t.10 &x.11 =F t.11 & x.12 =E t.12 & x.13 =F t.13 & x.2 =V x.1 & x.7 =V x.4 & x.7 =V x.6 & x.7 =V x.9 end
+
+// x.0 =E t.0 & x.1=F t.1 & x.2 =E t.2 & x.3 =E t.3 & x.4 =F t.4 & x.5 =F t.5 & x.0 =F t.1 & x.6 =F t.6 & x.2 =E t.2 & x.7 =E t.7 & x.7 =F t.8 & x.9 =E t.9 & x.10 =E t.10 &x.11 =F t.11 & x.12 =E t.12 & x.13 =F t.13 & x.2 =V x.1 & x.7 =V x.4 end
+
+
+
+
+// x.0 =E t.0 & x.1=F t.1 & x.2 =E t.2 & x.3 =E t.3 & x.4 =F t.2 & x.2 =V x.1 & x.3 =V x.4 end
+
+
+ 

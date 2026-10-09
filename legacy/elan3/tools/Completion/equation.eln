@@ -1,0 +1,192 @@
+module equation[vars,fss,prec]
+import	global  ordre_lpo[vars,fss,prec]
+		list[variable]
+		pair[term,term]
+		substitution
+		eqSystem[fss,vars]
+	;
+	local	int bool EtermCommons[fss,vars]
+	;
+end
+//sort equation;
+
+operators
+  global
+    @->@	: (term term) equation;
+    left(@)	: (equation) term;
+    right(@)	: (equation) term;
+    orient(@)	: (equation) equation;
+
+// renomme l'equation var(0)...var(n) a partir de n+1
+    translate(@)	: (equation) equation;
+// renomme l'equation a partir de var(N+1)
+    translate(@,@)	: (equation int) equation;
+
+// renomme une equation a partir de var(int)
+// meme si elle n'est pas en var(0)...var(n)
+    normalize(@,@)	: (equation int) equation;
+    normalize(@,@)	: (equation substitution) equation;
+    normalize(@,@)	: (eqSystem substitution) eqSystem;
+// renomme une equation a partir de var(0)
+    normalize(@)	: (equation) equation;
+
+    list_variable(@)	: (eqSystem) list[variable];
+    maxvar(@,@)		: (eqSystem int) int;
+    taille(@)		: (eqSystem) int;
+    eq2pair(@)		: (equation) pair[term,term];
+end
+
+
+stratop
+  global
+   s_orient_eq	: <equation>	builtin;
+end
+
+
+rules for pair[term,term]
+
+        l,r     : term;
+global
+  [eq2pair] eq2pair(l=r)        => [l,r]
+  end
+  [eq2pair] eq2pair(l=r)        => [r,l]
+  end
+  [eq2pair] eq2pair(l->r)       => [l,r]
+  end
+end
+
+
+rules for int
+
+	l,r	: term;
+	N	: int;
+	b	: bool;
+	C	: eqSystem;
+	eq	: equation;
+global
+  [] maxvar(l->r,N) => maxvar(l,N)
+  end
+  [] maxvar(l=r,N) => maxvar(l,maxvar(r,N))
+  end
+  [] maxvar(C & l=r,N) => maxvar(C,maxvar(l,maxvar(r,N)))
+  end
+  [] maxvar(C & b,N) => maxvar(C,N)
+  end
+  [] maxvar(b,N) => N
+  end
+
+
+  [] taille(l->r)	=> taille(l)+taille(r)
+  end
+  [] taille(l=r)	=> taille(l)+taille(r)
+  end
+  [] taille(C & l=r)	=> taille(C) + taille(l=r)
+  end
+  [] taille(C & b)	=> taille(C)
+  end
+  [] taille(b)		=> 0
+  end
+end
+
+rules for equation
+
+	l,r : term;
+	eq,req : equation;
+	sigma : substitution;
+	N : int;
+	lv : list[variable];
+global
+// renomme l'equation a partir de var(N+1)
+  [] translate(eq,N) 		=> normalize(eq,sigma)
+				where sigma := () rename_subst(maxvar(eq,0),N+1)
+  end
+
+// renomme l'equation var(0)...var(n) a partir de n+1
+  [] translate(eq) 		=> normalize(eq,sigma)
+				where N:=() maxvar(eq,0)
+				where sigma := () rename_subst(N,N+1)
+  end
+
+// renomme une equation meme si elle n'est pas en var(0)...var(n)
+  [] normalize(eq,N) 		=> normalize(eq,sigma)
+				where lv:=() list_variable(eq)
+				where sigma := () rename_subst(lv,N)
+  end
+  [] normalize(l=r,sigma)	=> normalize(l,sigma)=normalize(r,sigma)
+  end
+  [] normalize(l->r,sigma) 	=> normalize(l,sigma)->normalize(r,sigma)
+  end
+
+// renomme une equation a partir de var(0)
+  [] normalize(eq)		=> normalize(eq,0)
+  end
+end
+
+rules for eqSystem
+
+	s,t	: term;
+	c	: eqSystem;
+	sigma	: substitution;
+	b	: bool;
+global
+  [] normalize(c & s=t,sigma) => normalize(c,sigma) & normalize(s,sigma) = normalize(t,sigma)
+  end
+  [] normalize(b,sigma) => b
+  end
+end
+
+rules for term
+ x,y : term;
+global
+  [] left(x=y) => x
+  end
+  [] right(x=y) => y
+  end
+  [] left(x->y) => x
+  end
+  [] right(x->y) => y
+  end
+end
+
+rules for equation
+
+	s,t : term;
+	b : bool;
+global
+  [orient_eq1] orient(s=t) => s->t if s >lpo t
+  end
+  [orient_eq2] orient(s=t) => t->s if t >lpo s
+  end
+end
+
+rules for list[variable]
+
+	l,r : term;
+	v : variable;
+	lv,lr : list[variable];
+	C : eqSystem;
+	b : bool;
+
+global
+  [] list_variable(l=r) => list_variable(l) @@ list_variable(r)
+  end
+  [] list_variable(l->r) => list_variable(l)
+  end
+  [] list_variable(C & l=r) => list_variable(C) @@ list_variable(l) @@ list_variable(r)
+  end
+  [] list_variable(C & b) => list_variable(C)
+  end
+  [] list_variable(b) => nil
+  end
+end
+
+strategies for equation
+implicit
+  [.] s_orient_eq => first one(orient_eq1, orient_eq2)
+  end
+end
+
+
+end
+
+

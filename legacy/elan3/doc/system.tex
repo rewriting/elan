@@ -1,0 +1,339 @@
+% Document Type: LaTeX
+% Master File: manual.tex
+
+%%%% \chapter{\elan: the system}
+
+This section is devoted to the user environment of the \elan{}\
+language, and is partly borrowed from~\cite{BorovanskyKKMR-WRLA98}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Global architecture}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+The \elan\ environment consists of several components, as depicted in
+Figure~\ref{ELAN-env}. The preprocessor expands a few concise
+constructions allowed  in the language.
+The parser checks the syntax of programs and verifies that terms are
+syntactically well-formed.  The interpreter is an interactive tool
+allowing the user to check that the results he expects are indeed
+obtained. Initially, the preprocessor and the parser were integrated
+in the interpreter and so it was not possible to call them as
+stand-alone processes.  The compiler transforms specifications into
+independent executable \texttt{C} code (Section~\ref{compilo}). It is
+a stand-alone tool without any preprocessing and parsing
+facilities. The preprocessing and parsing phases are provided by the
+interpreter, which communicates the result of these processes to the
+compiler via a data exchange format called \REF. Section~\ref{ref_format}
+describes some tools to translate \elan\ to \REF\ and vice versa.
+Especially, the translation from \elan\ to \REF\ performed by the 
+\texttt{query2ref} tool relies mainly on reusing the parser initially
+integrated in the interpreter.
+
+\begin{figure*}[ht] %zoom 50
+\centering
+\input{ELAN-env.pstex_t}
+\label{ELAN-env}
+\caption{Global architecture of the \elan\ environment}
+\end{figure*}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{The preprocessor}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+The \elan\ syntax provides a few fancy constructions to perform
+textual replacements. So the preprocessor may be used to automatically
+generate parts of specifications used to analyse the rest of a
+program.  It should be emphasised that there is strong interaction
+between the parser, the preprocessor and the interpreter. 
+See Section~\ref{preprocessor} for a description of the preprocessor
+functionality. 
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{The parser}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+The \elan\ parser is based on Earley's one~\cite{Earley} and is using sort
+informations in order to determine as soon as possible in the analysis
+the right choice. This explains why in the current version, some
+construction of the language
+require to give the sort information together with the term.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{The interpreter}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+The interpreter takes a well-formed program and a well-formed query
+(both checked by the parser) and applies the rules and strategies
+defined in the program to the query. In order to find which rules can
+apply, the selection is guided by the top symbol of the rules: only
+those rules whose left-hand side has the same top symbol as the term
+to be reduced are selected. They are then tried in the order given in
+the program.  Another kind of choices arbitrarily made by the
+interpreter is for the strategy $\dc(S_1,...,S_n)$ that should select
+randomly a non-failing strategy among $S_1,...,S_n$. In practice, the
+interpreter selects the first one, so implements \dc\ and \first\ in the
+same way. Note however that there exists a  version of
+\elan\ which concurrently executes the $n$ strategies and selects the
+first one which terminates without failure~\cite{BorovanskyCastro-WRLA98}.
+
+Once a set of rules is selected, a many-to-one matching algorithm 
+is applied. When associative and
+commutative  ($AC$ for short) operators are involved, an external 
+one-to-one $AC$-matching algorithm described in~\cite{Eker-AcMatch-95}
+is called. 
+This algorithm is not fully integrated in the interpreter, so 
+data structure conversions are required and lower the efficiency of
+the $AC$-matching, already  quite complex.
+Once a match is found, local evaluations are performed and if all 
+succeed, the result term is built, taking advantage of the right-hand 
+side of the rule and of term sharing.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{The compiler}
+\label{compilo}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+The \elan{} compiler transforms a logic description into an executable
+binary file.  The compiler (for detailed description,
+see~\cite{Vittek-RTA96,MoreauK-PLILP+ALP98}) produces an efficient
+\verb|C| code, which is later compiled by the \verb|cc| or the
+\verb|gnu gcc| compiler. 
+The executable binary code is dependent on the particular
+architecture, because a small part of the \elan{} library performing
+the basic non-deterministic operations is written in assembly
+language~\cite{Moreau-JICSLPW98}.
+Up to now, this is the only reason that makes
+the compiler available only on the architectures DEC-ALPHA, SUN4 and
+Intel-PC.  
+%This release of the \elan{} compiler does not compile the
+%whole \elan{} language: the main restriction is that the \elan{}
+%compiler does not treat Input/Output and reflective capabilities of
+%the interpreter. There is also a restriction on the class of rules
+%containing AC-symbols that can be compiled.
+
+\subsection{Non-linear rules}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+The \elan\ compiler does not support non-left-linear rules (a rule is
+called non-left-linear if a variable occurs more than once in the
+left-hand side).
+The many-to-one matching algorithm only compiles linear rules. 
+The \elan\ parser automatically transforms non-left-linear rules into
+left-linear conditional rules by renaming variables that occurs more
+than once and adding some conditions to ensure their equality.
+
+For example, the rule \texttt{f(x,x) => g(x)} is transformed into
+\texttt{f(x,y) => g(x) if x==y}.
+
+
+\subsection{Built-ins}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+To be more efficient, builtin data type such as
+\textit{builtinInt} and \textit{identifier} are compiled in a
+particular way. 
+
+The main drawback of this approach is that only completely defined
+functions can be defined on builtin data type.
+
+Let \texttt{f(@) : (builtinInt) builtinInt} be an operator. 
+For each integer $n$, $f(n)$ must be reducible to an integer. Suppose
+defined the rule 
+\texttt{[] f(n) => n-1 if n > 1}, the term \texttt{f(0)} can not be
+reduced to a builtin integer. In this case, behaviour is undefined.
+This explains why \textit{builtinInt} are never used directly: it is
+recommended to use the sort \textit{int} which is no longer a builtin
+data type.
+
+
+\subsection{Input/Output facilities}
+\label{IO switches}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Input/Output facilities are now fully  implemented in the compiler. 
+Their syntax is described in the module {\bf IO.eln} of the standard library. 
+
+As in the version V3.4, it is possible, in the generated 
+program, to enter a query term in the \elan\ syntax, just like in the
+interpreter. In the same way, result terms computed by the generated
+program are now pretty-printed in the \elan\ syntax. Therefore, it is
+no more necessary to give a fixed ground term in the \verb|.lgi| file, 
+and \verb|.lgi| files involving the \verb|query| keyword can now be
+compiled. In the current version, the query is parsed dynamically in 
+the generated program by reusing a subpart of the parser integrated to
+the interpreter. 
+
+The generated program can be executed with several switches used to
+specify the different possible formats of input (query) and output
+(result) terms:
+
+\paragraph{Input switches}
+
+\begin{itemize}
+
+\item \verb|-REFInput|: the query term must be in the \REF\ 
+  format (see Section~\ref{ref_format}). 
+
+\item \verb|-noInput|: the query ground term is supposed to 
+  be located in the \verb|.lgi| file, where it replaces the
+  \verb|query| keyword. 
+
+
+\end{itemize}
+
+
+
+\paragraph{Output switches}
+
+\begin{itemize}
+
+\item \verb|-REFOutput|: result terms will be given in the
+  \REF\ format (see Section~\ref{ref_format}). 
+
+\item \verb|-noOutput|: results are computed but not
+  written out. The interest of this switch is rather limited, but it
+  can be useful for people who only want the statistics of the
+  computation, like the number of rewrite steps per seconds. 
+
+\item \verb|-internalOutput|: result terms are given by using a prefix 
+  notation. This is the original syntax used in the first version of
+  the compiler. 
+
+\end{itemize}
+
+The generated program, called by default \textit{a.out}, can 
+be executed with some other switches not necessarily related to
+Input/Ouput, like \verb|a.out -quiet| or \verb|a.out -debug|.
+
+
+At this point, it is still possible to change the content of the
+\verb|start with| instruction declared in the \verb|.lgi| file. The switch
+\verb|-strategy|~\nt{strategy name}~{\bf :}~\nt{sort name} will apply the
+strategy \nt{strategy name} on a query term of sort \nt{sort
+  name}. 
+
+
+Similarly, the switch \verb|-sort|~\nt{sort name} will apply 
+the empty strategy on a query term \nt{sort name}. Note that
+\verb|-strategy| and \verb|-sort| are mutually exclusive. 
+
+\Attention{
+The list of available sorts (resp. strategy names) can be found in the
+\texttt{.ref} file.
+} 
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{The \REF\ format}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\label{ref_format}
+
+
+The Reduced \elan\ Format, \REF\ for short, is a term-like
+representation of \elan\ programs introduced both for the
+interconnection of software components involved in the \elan\ system,
+and for combining \elan\ programs. This format is also of greatest
+interest for the implementation of reflection techniques in \elan. 
+A detailed description of its applications can be found
+in~\cite{BorovanskyKKMR-WRLA98}. 
+
+The \REF\ format has been initially developed to reuse the powerful
+Earley's parser integrated in the interpreter. By loading with the
+interpreter an \elan\ program possibly in mixfix notation, we can get a
+\REF\ program which can be viewed as the external representation of
+the interpreter working memory. \REF\ is easier to parse than \elan\
+since the \REF\ grammar is simply LALR.  
+The \elan\ interpreter generates a \REF\ file
+\textit{prog.ref} thanks to the option \texttt{--export}:
+\begin{verbatim}
+elan --export prog.ref prog.lgi [prog.spc]
+\end{verbatim}
+The \REF\ program contained in \textit{prog.ref} can be directly
+executed by the interpreter as follows:
+\begin{verbatim}
+elan --import prog.ref
+\end{verbatim}
+Then, the behavior of the interpreter is exactly the one expected
+with the command:
+\begin{verbatim}
+elan prog.lgi [prog.spc]
+\end{verbatim}
+but without the time-consuming preprocessing and parsing phases.
+
+The core of the \elan\ compiler, called REM for ``Reduced \elan\ Machine'' and
+implemented in \texttt{Java}, only knows the \REF\ syntax. This
+explains why we need a script \texttt{elanc} to first call the
+interpreter in order to obtain a \REF\ file, and second to execute REM
+with this \REF\ file as input. 
+
+Then, a compiled \texttt{C} program, 
+say \texttt{a.out}, is generated by REM. This program can be executed
+with different options like \texttt{a.out -REFInput}, \texttt{a.out -REFOutput}
+or even better \texttt{a.out -REFInput -REFOutput}:
+\begin{itemize}
+\item The option \texttt{-REFInput} reads a new query in \REF\ syntax to replace
+the ground query occurring initially in \textit{prog.lgi}.
+\item The option \texttt{-REFOutput} writes all result terms computed by
+\textit{a.out} in \REF\ syntax, instead of the \elan\ syntax used by
+default. 
+\end{itemize}
+
+So, we still have to convert an \elan\ 
+query to a \REF\ query, and conversely to retrieve the \elan\ syntax
+of result terms written in \REF\ syntax. 
+
+For this purpose, one can use another
+tool to read a query and to pretty-print result terms of the \textit{a.out}
+program, both in \elan\ syntax, similarly to the interpreter.
+This tool is called \texttt{prettyIO} and may be used as follows:
+\begin{verbatim}
+prettyIO a.out prog.ref
+\end{verbatim}
+Note that \textit{prog.ref} is needed to find the \elan\ syntax of
+functions implemented by \textit{a.out}, and so to encode a query
+term provided by the user in \elan\ syntax, and to decode terms
+written in \REF\ syntax by \texttt{a.out -REFInput -REFOutput}. 
+The executable \texttt{prettyIO} is implemented as a script calling
+some basic tools:  
+
+\begin{itemize}
+
+\item \texttt{query2ref prog.ref} reads repeatedly (from
+\texttt{stdin}) a sort, and parses a term of this sort written in 
+\elan\ syntax. The result (written to \texttt{stdout}) 
+is the corresponding term in \REF\ syntax.
+By using the option \texttt{--query} as follows: 
+\begin{verbatim}
+query2ref prog.ref --query
+\end{verbatim}
+we only parse terms of the sort of the query, as indicated in
+\textit{prog.lgi} (this information also occurs in \textit{prog.ref}).
+
+\item \texttt{ref2result prog.ref} reads repeatedly (from \texttt{stdin})
+terms encoded  in \REF\ syntax and writes (to \texttt{stdout}) 
+the related terms in \elan\ syntax, by using the signature 
+occurring in \textit{prog.ref}.
+
+\end{itemize}
+
+The script \texttt{prettyIO} is located in the directory \texttt{bin/}
+like \texttt{elanc}, and the compiled \texttt{C/C++} programs
+\texttt{query2ref} and \texttt{ref2result} are located in the
+subdirectory of \texttt{bin/} related to the current system
+architecture, like the interpreter \texttt{elan}.
+
+
+\Attention{
+The user should be aware that \texttt{prettyIO} is much 
+less interesting in the current version, since it is now possible to
+parse a query term and to pretty-print all results by simply using the
+generated program \textit{a.out} itself. 
+}
+
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: t
+%%% TeX-master: t
+%%% End: 

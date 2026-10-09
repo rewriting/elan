@@ -1,0 +1,25 @@
+module sldState
+
+import global atom eqSystem;
+       local int list[atom] pair[atom,list[atom]] list[pair[atom,list[atom]]] ;
+end
+
+sort sldState ;
+end
+
+
+operators 
+
+   global 
+
+   E Vars(@) ':' (@ | @ , @): (int list[atom] eqSystem eqSystem ) sldState ;
+
+   fail                  : sldState;
+
+   clpProg: list[pair[atom,list[atom]]] ;
+
+   clpExecute(@)       : (list[atom]) eqSystem;
+
+end
+
+end

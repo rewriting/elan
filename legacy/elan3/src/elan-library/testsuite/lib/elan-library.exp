@@ -1,0 +1,33 @@
+proc test_case_internal { prog x y } {
+  set name "$x"
+
+  xelan_load "$prog"
+  send "test_case($x,$y) end\n"
+  wait
+
+  expect {
+    -re "result = pass"        { pass "$name" }
+    -re "result = fail"        { fail "$name: wrong result"}
+    -re "syntax error.*<<<." 
+      { send_user "\n"
+        fail "$name: syntax error"
+      }
+    -re "MAX_MEM"              { fail "$name: out of memory"}
+    timeout                    { fail "$name: timeout" }
+    eof                        { fail "$name: eof" }
+  }
+  close
+}
+
+
+proc test_case { prog x y } {
+  clear_xfail
+  test_case_internal "$prog" "$x" "$y"
+}
+
+
+proc test_case_xfail { arch prog x y } {
+  setup_xfail "$arch"
+  test_case_internal "$prog" "$x" "$y"
+  clear_xfail
+}

@@ -1,0 +1,13 @@
+/*										    */
+/* Strategy                        Results                                          */
+/*										    */
+/* ForwardCheckingFirstToLastOne   CSP[nil,Ye=2.Me=8.De=30.Ne=1000.nil,nil,nil,nil] */
+/*										    */
+/* ForwardCheckingFirstToLastAll   CSP[nil,Ye=2.Me=8.De=30.Ne=1000.nil,nil,nil,nil] */
+/*										    */
+Ne =?365(*)Ye (+) 30(*)Me (+) De & 
+De <=?30 & 
+Me <=?13 & 
+Me !=?12 V De<?6 &
+Ne =? 1000
+end

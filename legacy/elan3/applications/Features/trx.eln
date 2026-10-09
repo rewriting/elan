@@ -1,0 +1,51 @@
+module trx
+
+import global bool eq[Foo]; end
+
+sort Foo; end
+
+operators global
+  a	: Foo;
+  b	: Foo;
+  c	: Foo;
+  d	: Foo;
+  f(@)	: (Foo) Foo;
+  g(@)	: (Foo) Foo;
+  @(@)	: (Foo Foo) Foo;
+end
+
+stratop global
+  ALLSOL	: <Foo> builtin;
+end
+
+rules for Foo
+x, y, z, u, uu	: Foo;
+global
+  [all]	f(x) => z(y(x)) // z(y(uu(x))) ????
+		if true
+		where z:=()x
+		choose
+		  try where u:=()a where y:=()b if true if x == a
+		  try where y:=()x if x == b
+		  try
+			choose
+			  try if true where u:=()g(a)  where y:=()x
+			  try if true where y:=()g(b)
+			end
+		end
+		where uu:=()d
+		if x == a or x == c
+  end 
+end 
+
+strategies for Foo
+implicit
+  [.] ALLSOL => dk(all) end
+end
+
+end
+
+
+
+
+

@@ -1,0 +1,8 @@
+LPL wpattern description
+  query    of sort term
+  result   of sort term
+  import   wpattern
+//  start with () f(a,b)
+  start with () f(a,h(h(b,a),b))
+
+end

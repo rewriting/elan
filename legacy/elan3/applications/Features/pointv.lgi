@@ -1,0 +1,9 @@
+LPL pointv description 
+
+        query           of sort Foo
+        result          of sort Foo
+        import          pointv
+        start with 	(all)query
+
+end
+

@@ -1,0 +1,62 @@
+
+\let\CF=\rm
+% Remember to use the lgrind style
+
+\File{pair.eln},{17:23},{Jun 21 1996}
+\L{\LB{\C{}\1\1}}
+}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{16}{(c)}\Tab{24}{INRIA-Lorraine \& CRIN}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{24}{615, rue du Jardin Botanique, BP 101}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{16}{        54602 Villers-les-Nancy}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{24}{France}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{24}{email: elan@loria.fr}}
+\CE{}\L{\LB{\C{}\1\1}}
+}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{8}{\$Source: /CVS/aircube/elan3/doc/elanlibTex/pair.eln.tex,v $}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{8}{\$Revision: 1.2 $}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{8}{\$Date: 1996/08/05 20:24:15 $}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{8}{\$Author: ckirchne $}}
+\CE{}\L{\LB{\C{}\1\1}}
+}}
+\CE{}\L{\LB{}}
+\L{\LB{\K{module}_\V{pair}[\V{X},\V{Y}]}}
+\L{\LB{\K{import}_\V{bool};}}
+\L{\LB{\K{sort}_\V{X}_\V{Y}_\V{pair}[\V{X},\V{Y}];}}
+\L{\LB{\K{op}}}
+\L{\LB{__\K{global}}}
+\L{\LB{}}
+\L{\LB{____[@,@]}\Tab{16}{:_(_\V{X}_\V{Y}_)_\V{pair}[\V{X},\V{Y}];}}
+\L{\LB{}}
+\L{\LB{____\V{first}(@)}\Tab{16}{:_(_\V{pair}[\V{X},\V{Y}]_)_\V{X};}}
+\L{\LB{____\V{second}(@)}\Tab{16}{:_(_\V{pair}[\V{X},\V{Y}]_)_\V{Y};}}
+\L{\LB{}}
+\L{\LB{____\V{ispair}(@)}\Tab{16}{:_(_\V{pair}[\V{X},\V{Y}]_)_\V{bool};}}
+\L{\LB{}}
+\L{\LB{\K{endop}}}
+\L{\LB{}}
+\L{\LB{\K{rule}_\K{for}_\V{X}}}
+\L{\LB{\K{declare}}\Tab{8}{\V{x}_:_\V{X};}}
+\L{\LB{}\Tab{8}{\V{y}_:_\V{Y};}}
+\L{\LB{\K{body}}}
+\L{\LB{__\V{first}([\V{x},\V{y}])}\Tab{16}{=\>_\V{x}}}
+\L{\LB{\K{end}_\K{of}_\K{rule}}}
+\L{\LB{}}
+\L{\LB{\K{rule}_\K{for}_\V{Y}}}
+\L{\LB{\K{declare}}\Tab{8}{\V{x}_:_\V{X};}}
+\L{\LB{}\Tab{8}{\V{y}_:_\V{Y};}}
+\L{\LB{\K{body}}}
+\L{\LB{__\V{second}([\V{x},\V{y}])}\Tab{16}{=\>_\V{y}}}
+\L{\LB{\K{end}_\K{of}_\K{rule}}}
+\L{\LB{}}
+\L{\LB{\K{rules}_\K{for}_\V{bool}}}
+\L{\LB{\K{declare}}\Tab{8}{\V{x}_:_\V{X};}}
+\L{\LB{}\Tab{8}{\V{y}_:_\V{Y};}}
+\L{\LB{}\Tab{8}{\V{p}_:_\V{pair}[\V{X},\V{Y}];}}
+\L{\LB{\K{bodies}}}
+\L{\LB{}\Tab{8}{\C{}\1\1_ Note in the following set of rules the use of the order of }}
+\CE{}\L{\LB{}\Tab{8}{\C{}\1\1_ evaluation: the rules are assumed to be applied in sequence}}
+\CE{}\L{\LB{__[\,]_\V{ispair}([\V{x},\V{y}])}\Tab{24}{=\>_\V{true}}\Tab{40}{\K{end}}}
+\L{\LB{__[\,]_\V{ispair}(\V{p})}\Tab{24}{=\>_\V{false}}\Tab{40}{\K{end}}}
+\L{\LB{\K{end}_\K{of}_\K{rules}}}
+\L{\LB{}}
+\L{\LB{\K{end}_\K{of}_\K{module}}}

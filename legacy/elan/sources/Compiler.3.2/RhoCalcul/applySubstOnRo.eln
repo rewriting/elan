@@ -1,0 +1,211 @@
+module applySubstOnRo[Fss,Vars]
+import global
+	replace[term,term]
+	substitution;
+local
+	pair[identifier,int] list[pair[identifier,int]]
+	termCommonsRo[Fss,Vars]
+	//definitionsRo[Fss,Vars]
+	list[variable] Alist[variable]
+	int Fss Vars
+;end
+
+operators
+global
+	@(@)        	: ( substitution term ) term;
+	apply(@,@)  	: ( substitution term ) term          alias @(@):;
+	graft(@,@)  	: ( substitution term ) term;
+	alpha_conv(@,@) : ( list[variable] term ) term;
+end 
+
+FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS) 
+                AND N:=()second(SS) ANDIF N == 0 :{
+rules for term
+	s : substitution;
+	lv : list[variable];
+global
+	[] apply(s,F)        => F
+	end
+	[] graft(s,F)        => F
+	end
+	[] alpha_conv(lv,F)        => F
+	end
+end
+}
+
+FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS) 
+                AND N:=()second(SS) ANDIF N > 0 :{
+
+rules for term
+	s : substitution;
+	lv : list[variable];
+	t_1,...,t_N : term;
+global
+	[] apply(s,F(t_1,...,t_N))        => F({ apply(s,t_I), }_I=1...N)
+	end
+	[] graft(s,F(t_1,...,t_N))        => F({ graft(s,t_I), }_I=1...N)
+	end
+	[] alpha_conv(lv,F(t_1,...,t_N))  => F({ alpha_conv(lv,t_I), }_I=1...N)
+	end
+end
+}
+
+rules for term
+	$tt,$u,$w,$t : term;
+	$s : substitution;
+	$v,$vv : variable;
+global
+	[] graft(identity,$tt) => $tt	
+	end
+
+	[] graft($v->$t o $s,$v) => $t
+	end
+	[] graft($v->$t,$v) => $t
+	end
+	[] graft($v->$t,$vv) => $vv
+			if neq_variable($v,$vv)
+	end
+	[] graft($v->$t o $s,$vv) => graft($s,$vv)
+			if neq_variable($v,$vv)
+	end
+
+	[] graft($s,[$u]($w)) => [graft($s,$u)](graft($s,$w))
+	end
+	[] graft($s,|$u|) => |graft($s,$u)| 
+	end
+	[] graft($s,$u.$w)=> graft($s,$u).graft($s,$w)
+	end
+	[] graft($s,#)=> #
+	end
+	[] graft($s,FIRSTT($u)) => FIRSTT(graft($s,$u))
+	end
+	[] graft($s,<$u>) 	=> <graft($s,$u)>
+	end
+	[] graft($s,$u:$w)=> graft($s,$u):graft($s,$w)
+	end
+	[] graft($s,PHI($u))=> PHI(graft($s,$u))
+	end
+	[] graft($s,PSI($u))=> PSI(graft($s,$u))
+	end
+	[] graft($s,$u +> $w) => graft($s,$u) +> graft($s,$w)
+	end
+
+	[] graft($s,Theta) => Theta
+	end
+	[] graft($s,$u;$w) => graft($s,$u);graft($s,$w)
+	end
+	[] graft($s,SpreadDown($u)) => SpreadDown(graft($s,$u))
+	end
+	[] graft($s,Oncebu($u)) => Oncebu(graft($s,$u))
+	end
+end
+
+rules for term
+	$tt,$u,u1,u2,$w,w1,w2,$t : term;
+	$v,$vv : variable;
+	fvu,lv : list[variable];
+	mv : int;
+global
+	[] alpha_conv(lv,$v) => $v
+	end
+	[] alpha_conv(lv,[$u]($w)) => [alpha_conv(lv,$u)](alpha_conv(lv,$w))
+	end
+	[] alpha_conv(lv,|$u|) => |alpha_conv(lv,$u)| 
+	end
+	[] alpha_conv(lv,$u.$w)=> alpha_conv(lv,$u).alpha_conv(lv,$w)
+	end
+	[] alpha_conv(lv,#)=> #
+	end
+	[] alpha_conv(lv,FIRSTT($u)) => FIRSTT(alpha_conv(lv,$u))
+	end
+	[] alpha_conv(lv,<$u>) 	=> <alpha_conv(lv,$u)>
+	end
+	[] alpha_conv(lv,$u:$w)=> alpha_conv(lv,$u):alpha_conv(lv,$w)
+	end
+	[] alpha_conv(lv,PHI($u))=> PHI(alpha_conv(lv,$u))
+	end
+	[] alpha_conv(lv,PSI($u))=> PSI(alpha_conv(lv,$u))
+	end
+	[] alpha_conv(lv,$u +> $w) => u2 +> w2
+			where fvu := () free_variables_of($u)
+			where u1 := () alpha_conv(lv,$u)
+			where w1 := () alpha_conv(lv,$w)
+			where mv := () max_var(variables_of(|u1.w1|) @ lv)  //**** ATT **
+			where u2 := () graft(rename_subst(fvu,mv),u1)
+			where w2 := () graft(rename_subst(fvu,mv),w1)
+	end
+
+	[] alpha_conv(lv,Theta) => Theta
+	end
+	[] alpha_conv(lv,$u;$w) => alpha_conv(lv,$u);alpha_conv(lv,$w)
+	end
+	[] alpha_conv(lv,SpreadDown($u)) => SpreadDown(alpha_conv(lv,$u))
+	end
+	[] alpha_conv(lv,Oncebu($u)) => Oncebu(alpha_conv(lv,$u))
+	end
+end
+
+rules for term
+	$tt,$u,u1,u2,$w,w1,w2,$t : term;
+	$s : substitution;
+	$v,$vv: variable;
+	fv,fu : list[variable];
+	mv : int;
+global
+	[] apply(identity,$tt)=> $tt
+	end
+
+	[] apply($v->$t o $s,$v) => $t
+	end
+	[] apply($v->$t,$v) => $t
+	end
+	[] apply($v->$t,$vv) => $vv
+			if neq_variable($v,$vv)
+	end
+	[] apply($v->$t o $s,$vv) => apply($s,$vv)
+			if neq_variable($v,$vv)
+	end
+
+	[] apply($s,[$u]($w)) => [apply($s,$u)](apply($s,$w))
+	end
+	[] apply($s,|$u|) => |apply($s,$u)| 
+	end
+	[] apply($s,$u.$w)=> apply($s,$u).apply($s,$w)
+	end
+	[] apply($s,#)=> #
+	end
+	[] apply($s,FIRSTT($u)) => FIRSTT(apply($s,$u))
+	end
+	[] apply($s,<$u>) 	=> <apply($s,$u)>
+	end
+	[] apply($s,$u:$w)=> apply($s,$u):apply($s,$w)
+	end
+	[] apply($s,PHI($u))=> PHI(apply($s,$u))
+	end
+	[] apply($s,PSI($u))=> PSI(apply($s,$u))
+	end
+
+	[] apply($s,$u +> $w)=> apply($s,u2) +> apply($s,w2)
+			where fu := () free_variables_of($u)
+			where fv := () fu @ variables_of($s)
+			where u1 := () alpha_conv(fv,$u)
+			where w1 := () alpha_conv(fv,$w)
+			where mv := () max_var(variables_of(|u1.w1|) @ fv)  //**** ATT **
+			where u2 := () graft(rename_subst(fu,mv),u1)
+			where w2 := () graft(rename_subst(fu,mv),w1)
+	end
+
+	[] apply($s,Theta) => Theta
+	end
+	[] apply($s,$u;$w) => apply($s,$u);apply($s,$w)
+	end
+	[] apply($s,SpreadDown($u)) => SpreadDown(apply($s,$u))
+	end
+	[] apply($s,Oncebu($u)) => Oncebu(apply($s,$u))
+	end
+end
+
+end
+

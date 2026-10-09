@@ -1,0 +1,25 @@
+module forests[X]
+
+import global list[Tree[X]];
+
+sort Tree[X] Forest[X];
+
+op global
+  @ @	: ( X list[Tree[X]] )   Tree[X];
+//  @	: ( list[Tree[X]] ) Forest[X];  
+
+  foldR(@)	: ( Symbol[X,list[Y],Y] ) <Tree[X] -> Y>;
+end
+
+strategies for <Tree[X] -> Y>
+ f	: Symbol[X,list[Y],Y];
+	a	: X;
+	fs	: Tree[X];
+	y	: list[Y];
+bodies
+  []	[foldr(f)] a fs => f(a,y)
+			where y:=[apply(fr)]fs		end
+  
+end
+
+end

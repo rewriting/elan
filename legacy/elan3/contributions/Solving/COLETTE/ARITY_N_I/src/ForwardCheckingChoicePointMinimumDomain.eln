@@ -1,0 +1,267 @@
+module ForwardCheckingChoicePointMinimumDomain[Variables,Type,Values]
+
+import
+global
+	LocalConsistencyStrategies[Variables,Type,Values]
+	EnumerationRules[Variables,Type,Values]
+	PropagationRules[Variables,Type,Values]
+	ChoicePointStrategies[Variables,Type,Values]
+	;
+end
+
+stratop
+global
+	FCChoicePointMinimumDomainFirstToLastAll  		: < csp -> csp >	bs;
+	FCChoicePointMinimumDomainFirstToLastOne  		: < csp -> csp >	bs;
+	FCChoicePointMinimumDomainLastToFirstAll  		: < csp -> csp >	bs;
+	FCChoicePointMinimumDomainLastToFirstOne  		: < csp -> csp >	bs;
+	FCChoicePointMinimumDomainSplitFirstToLastAll  		: < csp -> csp >	bs;
+	FCChoicePointMinimumDomainSplitFirstToLastOne  		: < csp -> csp >	bs;
+	FCChoicePointMinimumDomainSplitLastToFirstAll  		: < csp -> csp >	bs;
+	FCChoicePointMinimumDomainSplitLastToFirstOne  		: < csp -> csp >	bs;
+end
+
+
+strategies for csp
+implicit
+
+/* Strategy		: Forward Checking with Choice Point	*/
+/* Variable selection	: Minimum Domain			*/
+/* Value selection	: Value enumeration first to last	*/
+/* Number of solutions	: All 					*/
+
+[] FCChoicePointMinimumDomainFirstToLastAll =>
+dk (LocalConsistencyForECandDC);
+repeat* (
+	first one (GetVarWithMinimumDomain);
+	dk (iterate* (EliminateFirstValueOfDomain));
+	first one (InstantiateFirstValueOfDomain);
+	first one (ExtractConstraintsOnEqualityVar, id);
+	first one (Elimination, id);
+	first one (LocalConsistencyInEC, id)
+	);
+first one (GetSolutionCSP)
+end
+
+
+/* Strategy		: Forward Checking with Choice Point	*/
+/* Variable selection	: Minimum Domain			*/
+/* Value selection	: Value enumeration first to last	*/
+/* Number of solutions	: First 				*/
+
+[] FCChoicePointMinimumDomainFirstToLastOne =>
+first one (FCChoicePointMinimumDomainFirstToLastAll)
+end
+
+
+/* Strategy		: Forward Checking with Choice Point	*/
+/* Variable selection	: Minimum Domain			*/
+/* Value selection	: Value enumeration last to first	*/
+/* Number of solutions	: All 					*/
+
+[] FCChoicePointMinimumDomainLastToFirstAll =>
+dk (LocalConsistencyForECandDC);
+repeat* (
+	first one (GetVarWithMinimumDomain);
+	dk (iterate* (EliminateLastValueOfDomain));
+	first one (InstantiateLastValueOfDomain);
+	first one (ExtractConstraintsOnEqualityVar, id);
+	first one (Elimination, id);
+	first one (LocalConsistencyInEC, id)
+	);
+first one (GetSolutionCSP)
+end
+
+
+/* Strategy		: Forward Checking with Choice Point	*/
+/* Variable selection	: Minimum Domain			*/
+/* Value selection 	: Value enumeration last to first	*/
+/* Number of solutions	: First 				*/
+
+[] FCChoicePointMinimumDomainLastToFirstOne =>
+first one (FCChoicePointMinimumDomainLastToFirstAll)
+end
+
+
+/* Strategy		: Forward Checking with Choice Point	*/
+/* Variable selection	: Minimum Domain			*/
+/* Value selection	: Split domain first to last		*/
+/* Number of solutions	: All 					*/
+
+[] FCChoicePointMinimumDomainSplitFirstToLastAll =>
+dk (LocalConsistencyForECandDC);
+repeat* (
+	first one (GetVarWithMinimumDomain);
+	dk (first one (SplitDomainFirstMiddle), first one (SplitDomainSecondMiddle));
+	first one (first one (ExtractConstraintsOnEqualityVar);
+		   first one (Elimination, id);
+		   first one (LocalConsistencyInEC, id)
+		   ,
+		   first one (ExtractConstraintsOnDomainVar);
+		   first one (LocalConsistencyInEC, id)
+		   ,
+		   id)
+	);
+first one (GetSolutionCSP)
+end
+
+
+/* Strategy		: Forward Checking with Choice Point	*/
+/* Variable selection	: Minimum Domain			*/
+/* Value selection	: Split domain first to last		*/
+/* Number of solutions	: First					*/
+
+[] FCChoicePointMinimumDomainSplitFirstToLastOne =>
+first one (FCChoicePointMinimumDomainSplitFirstToLastAll)
+end
+
+
+/* Strategy		: Forward Checking with Choice Point	*/
+/* Variable selection	: Minimum Domain			*/
+/* Value selection	: Split domain last to first		*/
+/* Number of solutions	: All 					*/
+
+[] FCChoicePointMinimumDomainSplitLastToFirstAll =>
+dk (LocalConsistencyForECandDC);
+repeat* (
+	first one (GetVarWithMinimumDomain);
+	dk (first one (SplitDomainSecondMiddle), first one (SplitDomainFirstMiddle));
+	first one (first one (ExtractConstraintsOnEqualityVar);
+		   first one (Elimination, id);
+		   first one (LocalConsistencyInEC, id)
+		   ,
+		   first one (ExtractConstraintsOnDomainVar);
+		   first one (LocalConsistencyInEC, id)
+		   ,
+		   id)
+	);
+first one (GetSolutionCSP)
+end
+
+
+/* Strategy		: Forward Checking with Choice Point	*/
+/* Variable selection	: Minimum Domain			*/
+/* Value selection	: Split domain last to first		*/
+/* Number of solutions	: First					*/
+
+[] FCChoicePointMinimumDomainSplitLastToFirstOne =>
+first one (FCChoicePointMinimumDomainSplitLastToFirstAll)
+end
+
+end
+
+
+rules for csop
+
+	x, y				: var;
+	ub, lb, newub, newlb, middle	: Type;
+	P, Q				: csp;
+	lmc, lec, EC, DC, store		: list[constraint];
+	l				: list[constraint];
+
+global
+
+[FCChoicePointMinimumDomainFirstToLastOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[Q,x,lb,ub]
+	where	Q :=(FCChoicePointMinimumDomainFirstToLastOne)P
+end
+
+[FCChoicePointMinimumDomainLastToFirstOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[Q,x,lb,ub]
+	where	Q :=(FCChoicePointMinimumDomainLastToFirstOne)P
+end
+
+[FCChoicePointMinimumDomainSplitFirstToLastOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[Q,x,lb,ub]
+	where	Q :=(FCChoicePointMinimumDomainSplitFirstToLastOne)P
+end
+
+[FCChoicePointMinimumDomainSplitLastToFirstOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[Q,x,lb,ub]
+	where	Q :=(FCChoicePointMinimumDomainSplitLastToFirstOne)P
+end
+
+[GetUBFCChoicePointMinimumDomainFirstToLastOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[P,x,lb,newub]
+	where	Q :=(FCChoicePointMinimumDomainFirstToLastOne)P
+	if	Q != Unsatisfiable
+	where	(list[constraint]) y = newub.l := ()GetVarInHead(x,GetLEC(Q),nil)
+end
+
+[GetUBFCChoicePointMinimumDomainLastToFirstOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[P,x,lb,newub]
+	where	Q :=(FCChoicePointMinimumDomainLastToFirstOne)P
+	if	Q != Unsatisfiable
+	where	(list[constraint]) y = newub.l := ()GetVarInHead(x,GetLEC(Q),nil)
+end
+
+[GetUBFCChoicePointMinimumDomainSplitFirstToLastOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[P,x,lb,newub]
+	where	Q :=(FCChoicePointMinimumDomainSplitFirstToLastOne)P
+	if	Q != Unsatisfiable
+	where	(list[constraint]) y = newub.l := ()GetVarInHead(x,GetLEC(Q),nil)
+end
+
+[GetUBFCChoicePointMinimumDomainSplitLastToFirstOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[P,x,lb,newub]
+	where	Q :=(FCChoicePointMinimumDomainSplitLastToFirstOne)P
+	if	Q != Unsatisfiable
+	where	(list[constraint]) y = newub.l := ()GetVarInHead(x,GetLEC(Q),nil)
+end
+
+[GetLBFCChoicePointMinimumDomainFirstToLastOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[P,x,newlb,ub]
+	where	Q :=(FCChoicePointMinimumDomainFirstToLastOne)P
+	if	Q != Unsatisfiable
+	where	(list[constraint]) y = newlb.l := ()GetVarInHead(x,GetLEC(Q),nil)
+end
+
+[GetLBFCChoicePointMinimumDomainLastToFirstOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[P,x,newlb,ub]
+	where	Q :=(FCChoicePointMinimumDomainLastToFirstOne)P
+	if	Q != Unsatisfiable
+	where	(list[constraint]) y = newlb.l := ()GetVarInHead(x,GetLEC(Q),nil)
+end
+
+[GetLBFCChoicePointMinimumDomainSplitFirstToLastOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[P,x,newlb,ub]
+	where	Q :=(FCChoicePointMinimumDomainSplitFirstToLastOne)P
+	if	Q != Unsatisfiable
+	where	(list[constraint]) y = newlb.l := ()GetVarInHead(x,GetLEC(Q),nil)
+end
+
+[GetLBFCChoicePointMinimumDomainSplitLastToFirstOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[P,x,newlb,ub]
+	where	Q :=(FCChoicePointMinimumDomainSplitLastToFirstOne)P
+	if	Q != Unsatisfiable
+	where	(list[constraint]) y = newlb.l := ()GetVarInHead(x,GetLEC(Q),nil)
+end
+
+end
+
+
+end

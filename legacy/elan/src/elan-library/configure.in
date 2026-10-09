@@ -1,0 +1,22 @@
+AC_INIT(Makefile.in)
+AM_INIT_AUTOMAKE(elan-library,1.0a)
+
+AC_PROG_CC
+AC_PROG_CXX
+AC_PROG_RANLIB
+AC_AIX
+AM_PROG_LEX
+AC_PROG_YACC
+AC_CHECK_LIB(y,yyerror,YACCLIB="-ly",YACCLIB="")
+AC_SUBST(YACCLIB)
+
+AC_SET_MAKE
+
+AC_OUTPUT(Makefile
+	  elanlib/Makefile
+	  elanlib/common/Makefile
+	  elanlib/noquote/Makefile
+	  elanlib/ref/Makefile
+	  elanlib/strategy/Makefile
+	  doc/Makefile
+)

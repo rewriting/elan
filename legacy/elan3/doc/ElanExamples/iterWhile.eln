@@ -1,0 +1,29 @@
+module iterRepeat
+import global int bool;
+   end
+
+operators global
+  @: 		( int ) nelist ;
+  @ . @: 	( elem nelist ) nelist ;
+  element(@): 	( nelist ) elem ;
+   end
+
+rules for elem
+	e : elem;
+	l : nelist;
+global
+  [extract]  element(e) 	=> e 	end
+  [extract]  element(e.l) 	=> e 	end
+  [extract]  element(e.l) 	=> element(l) end
+   end
+
+strategies for elem
+global
+  [all0]  dk(extract) end
+  [all-rep*]  repeat* ( dk(extract) ) end
+  [all-rep+]  repeat+ ( dk(extract) ) end
+  [all-iter]  iterate ( dk(extract) ) end
+   end
+
+end
+

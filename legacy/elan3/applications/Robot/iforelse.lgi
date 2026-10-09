@@ -1,0 +1,11 @@
+LPL iforelse description
+  
+query of sort		int
+result of sort		int
+modules int 		int bool iforelse
+start with 		(eval_int)query
+
+end of LPL description
+
+
+

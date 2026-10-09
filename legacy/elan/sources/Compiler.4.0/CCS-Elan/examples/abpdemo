@@ -1,0 +1,26 @@
+def ABP = (Sender | K | L | Receiver) \ Internal
+def Sender = S_0
+def S_0 = 'input.S_0'
+def S_1 = 'input.S_1'
+def S_0' = sendreq_0.S_0''
+def S_1' = sendreq_1.S_1''
+def S_0'' = 'ack_0.S_1 + 'ack_1.S_0' + 'ack_bottom.S_0'
+def S_1'' = 'ack_1.S_0 + 'ack_0.S_1' + 'ack_bottom.S_1'
+
+def Receiver = R_0
+def R_0 = 'send_0.output.ackreq_0.R_1 + 'send_1.ackreq_1.R_0 + 'send_bottom.ackreq_1.R_0
+def R_1 = 'send_1.output.ackreq_1.R_0 + 'send_0.ackreq_0.R_1 + 'send_bottom.ackreq_0.R_1
+
+def K = 'sendreq_0.(send_0.K + send_bottom.K) + 'sendreq_1.(send_1.K + send_bottom.K)
+def L = 'ackreq_0.(ack_0.L + ack_bottom.L) + 'ackreq_1.(ack_1.L + ack_bottom.L)
+
+def Internal = { sendreq_0, sendreq_1, send_0, send_1, send_bottom, \
+                 ackreq_0, ackreq_1, ack_0, ack_1, ack_bottom }
+
+prop AG(P) = max X.P && [-]X
+prop NoDeadlock = AG(<->tt)
+prop NoLivelock = AG(max X.<tau>X)
+prop CanInput =   min Y.<'input>tt || <tau>Y
+prop CanOutput =   min Y.<output>tt || <tau>Y
+prop Operating =  AG (CanInput() || CanOutput())
+prop NoRepeat =   AG (['input](~CanInput()) || [output](~CanOutput()))

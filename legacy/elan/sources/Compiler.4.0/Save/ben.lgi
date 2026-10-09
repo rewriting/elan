@@ -1,0 +1,51 @@
+LPL ben description
+  query    of sort Bool
+  result   of sort Bool
+  import   ben
+//  start with ()  bench-evalsym17(ten)
+//  start with ()  bench-evalexp17(ten)
+  start with ()  query
+
+end
+
+
+/*
+exz
+exs(exz)
+
+exs(exs(exs(exs(exs(exs(exs(exs(exs(exs(exz))))))))))
+
+18:
+bench-evalexp17(
+	exs(exs(exs(exs(exs(exs(exs(exs(exs(exs(
+	exs(exs(exs(exs(exs(exs(exs(exs(
+		exz
+	))))))))))))))))))
+  )
+
+bench-evaltree17(
+	exs(exs(exs(exs(exs(exs(exs(exs(exs(exs(
+	exs(exs(exs(exs(exs(exs(exs(exs(
+		exz
+	))))))))))))))))))
+  )
+
+
+20:
+bench-evalexp17(
+	exs(exs(exs(exs(exs(exs(exs(exs(exs(exs(
+	exs(exs(exs(exs(exs(exs(exs(exs(exs(exs(
+		exz
+	))))))))))))))))))))
+  )
+
+bench-evaltree17(
+	exs(exs(exs(exs(exs(exs(exs(exs(exs(exs(
+	exs(exs(exs(exs(exs(exs(exs(exs(exs(exs(
+		exz
+	))))))))))))))))))))
+  )
+
+
+
+*/

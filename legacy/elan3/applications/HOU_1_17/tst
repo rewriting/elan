@@ -1,0 +1,7 @@
+# !/bin/csh
+setenv ELANLIB  /users/protheo/pot/ELAN/version.test/noquoted_elanlib/
+setenv ELAN     /users/protheo/pot/ELAN/version.test/bin/`uname -m`/elan
+echo "  test of "$1" with "$3
+rm -f SAMPLES/$3.ou
+$ELAN -b $1 $2 < SAMPLES/$2.inp > SAMPLES/$3.ou
+diff SAMPLES/$3.ou SAMPLES/$3.out

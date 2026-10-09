@@ -1,0 +1,1 @@
+aix_irix_threads.lo aix_irix_threads.o: aix_irix_threads.c

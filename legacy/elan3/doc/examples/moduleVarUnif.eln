@@ -1,0 +1,11 @@
+module Vars
+import anyidentifier signature;
+op
+  Vars : list[identifier];
+endop
+
+rule for list[identifier]
+body
+	Vars => x y z ;
+end of rule
+end of module

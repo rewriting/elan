@@ -1,0 +1,55 @@
+module testArray
+
+import bool builtinArray[Term];
+end
+
+sort Term;
+end 
+
+operators global
+  go     : Term;
+  empty  : Term; 
+  a      : Term; 
+  b      : Term; 
+  c      : Term; 
+
+  array1 : builtinArray[Term];
+  array2 : builtinArray[Term];
+
+end
+
+rules for Term
+ x,y : Term;
+global
+
+  [] go      => array2[0]
+  end
+
+end
+
+rules for builtinArray[Term]
+  X    : builtinArray[Term];
+  tmp1 : builtinArray[Term];
+  tmp2 : builtinArray[Term];
+
+global
+  [] array1      => X 
+                    where tmp1 :=() new(2,empty)
+                    where tmp2 :=() tmp1[0]<-a
+                    where X :=()    tmp2[1]<-b
+  end
+
+  [] array2      => new(3,empty)
+                    [0]<-c
+		    [1]<-b
+                    [2]<-a
+  end
+
+end
+
+end
+				
+
+
+
+

@@ -1,0 +1,88 @@
+module highOrderApplySubstOn[Fss,Vars,Mvs]
+
+import global EtermCommons[Fss,Vars,Mvs] replace[term,term];
+       local eq[mvariable] substitution
+//	     mySyntacticUnification[Fss,Vars,Mvs]
+             myApplySubstOn[Fss,Vars,Mvs,term]
+             myEqSystem[Fss,Vars,Mvs]
+	     bool int identifier
+	     Mvs pair[identifier,int] 
+             list[pair[identifier,int]] list[int] list[term] eq[term];
+end
+
+sort term variable tuple;
+end
+
+operators
+  global
+
+    @(@)                : ( highOrderSubstitution term ) term;
+    highOrderApply(@,@) : ( highOrderSubstitution term ) term           alias @(@):;
+
+    highOrderReplace(@,@,@,@) : ( mvariable list[term] term term ) term;
+
+  local
+    <@,@,@>   : ( term term term ) tuple;
+    third(@)    : ( tuple ) term;
+end
+
+stratop
+  global
+    lrs			: <tuple>	builtin;
+    highOrderSubst	: <term>	builtin;
+end
+
+rules for term
+ m,s,t: term;
+global
+  [] third(<m,s,t>) => t end
+end
+
+rules for term
+ tt,ss1res:term; ss1,ss2:highOrderSubstitution; 
+global
+  [substIdent] highOrderApply(identityHO,tt)    => tt                                   end
+  [substO] highOrderApply(ss1 o ss2 ,tt)        => highOrderApply(ss2,ss1res)
+                                where ss1res := (highOrderSubst) highOrderApply(ss1,tt)
+                                                   end
+end
+
+FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+SUCH THAT SS:=(listExtract) elem(Mvs) AND F:=()first(SS) 
+        AND N:=()second(SS) :{
+rules for term
+ v:variable; t,tt:term; {t_I:term;}_I=1...N res:tuple;
+global
+  [substMVar] highOrderApply(F(t_1,...,t_N)-->t,tt) => third(res)
+              where res := (lrs) <F(t_1,...,t_N),t,tt>
+  end
+end
+}
+
+FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+SUCH THAT SS:=(listExtract) elem(Mvs) AND F:=()first(SS) 
+        AND N:=()second(SS) :{
+rules for tuple
+ s,t,subt,rest,foo,bar:term; omega:list[int]; theta:substitution; match:eqSystem;
+        {t_I:term;}_I=1...N
+global
+  [locrewrite] <F(t_1,...,t_N),s,t> => <F(t_1,...,t_N),s,t[theta(s)] at omega>
+                          where omega := (chooseOccurence) nvocc(t)
+                          where subt  := () t at omega
+                          where match := (buildSubst) makeEqns(F(t_1,...,t_N),subt)
+                          where theta := () system_to_subst(match)
+  end
+end
+}
+
+strategies for tuple
+implicit
+  [.] lrs => repeat*(first one(locrewrite)) end
+end
+
+strategies for term
+implicit
+  [.] highOrderSubst => repeat*(first one(substIdent , substO , substMVar)) end
+end
+
+end

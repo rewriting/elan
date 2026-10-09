@@ -1,0 +1,114 @@
+module bug
+
+import global bool;
+end
+sort poly;
+end
+operators global
+
+  go : poly;
+  a : poly;
+  b : poly;
+  c : poly;
+
+  @ + @ 	: ( poly poly ) poly  assocRight;
+
+end
+
+stratop global
+  S		: <poly>	bs;
+  S1		: <poly>	bs;
+  S2		: <poly>	bs;
+end
+
+rules for poly
+  P            : poly;
+  absX1, absX2 : poly;
+  p1,p2,p3,p4  : poly;
+  X,Y,Z        : poly;
+global
+
+  [R] go => X where X:=(S1) c
+  end
+
+
+/*
+  [R1] X => Y where Y:=(S2) X+a         end
+  [R1] X => Y where Y:=(S2) X+b         end
+*/
+  [R2] X+a => a end
+  [R2] X+b => b end
+
+
+  [R1] X => Y where Y:=() X+a         end
+  [R1] X => Y where Y:=() X+b         end
+
+  [] X+a => a end
+  [] X+b => b end
+
+end
+
+strategies for poly
+implicit
+
+  [] S => dk(R) end
+
+  [] S1 => dk(R1) end
+
+  [] S2 => dk(R2) end
+end
+
+end
+
+/*
+global rule expand:poly/bug [1/1/fsym=303/vars=3]
+  VAR(0)+ VAR(1)* VAR(2)	 =>  VAR(0)
+
+     if  false
+
+global rule NORMALISE_RULE0:poly/bug [1/2/fsym=0/vars=2]
+  VAR(0)	 =>  VAR(1)
+
+     where VAR(1) := (LNORMAL_STRAT0:poly/bug)  VAR(0)
+
+global rule NORMALISE_RULE0_303:poly/bug [1/3/fsym=303/vars=3]
+  VAR(1)+ VAR(0)	 =>  VAR(1)+ VAR(2)
+
+     where VAR(2) := (GNORMAL_STRAT0:poly/bug)  VAR(0)
+
+global rule NORMALISE_RULE0_303:poly/bug [2/4/fsym=303/vars=3]
+  VAR(1)+ VAR(0)	 =>  VAR(2)+ VAR(0)
+
+     where VAR(2) := (GNORMAL_STRAT0:poly/bug)  VAR(1)
+
+global rule NORMALISE_RULE0_304:poly/bug [1/5/fsym=304/vars=3]
+  VAR(1)* VAR(0)	 =>  VAR(1)* VAR(2)
+
+     where VAR(2) := (GNORMAL_STRAT0:poly/bug)  VAR(0)
+
+global rule NORMALISE_RULE0_304:poly/bug [2/6/fsym=304/vars=3]
+  VAR(1)* VAR(0)	 =>  VAR(2)* VAR(0)
+
+     where VAR(2) := (GNORMAL_STRAT0:poly/bug)  VAR(1)
+
+
+
+strategy global simplify:poly/bug
+ repeat* (
+   DC ONE(
+     dc one(NORMALISE_RULE0:poly ) ||
+     dc one(NORMALISE_RULE0_304:poly ) ||
+     dc one(NORMALISE_RULE0_303:poly )   )
+ )
+
+strategy global GNORMAL_STRAT0:poly/bug
+ DC ONE(
+   dc one(NORMALISE_RULE0:poly ) ||
+   dc one(NORMALISE_RULE0_304:poly ) ||
+   dc one(NORMALISE_RULE0_303:poly ) )
+
+strategy global LNORMAL_STRAT0:poly/bug
+ dc one(expand:poly )
+
+
+*/

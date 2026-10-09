@@ -1,0 +1,82 @@
+module ConstructiveDisjunctionStrategiesII[Variables,Type,Values]
+
+import
+global
+	ConstructiveDisjunctionRulesII[Variables,Type,Values]
+	;
+end
+
+stratop
+global
+	LocalConsistencyWithCDInII			: < csp -> csp >		bs;
+	LocalConsistencyForECandDCWithCDInII		: < csp -> csp >		bs;
+	ConstructiveDisjunctionInII			: < cspCDII -> cspCDII >	bs;
+end
+
+
+strategies for cspCDII
+implicit
+
+[] ConstructiveDisjunctionInII =>
+
+first one (DecomposeCSPCDII);
+repeat* (first one (CreateSolverCSPCDII));
+repeat* (first one (SendToSolverCSPCDII));
+repeat* (first one (GetOutputOfSolverCSPCDII));
+repeat* (first one (ComposeCSPCDII));
+repeat* (first one (CloseSolverCSPCDII))
+end
+
+end
+
+
+rules for csp
+
+	P, Q			: csp;
+	D1, D2			: cspCD;
+	D3, D4			: cspCDII;
+	lmc1, lmc2, lmc3, lmc4, lec1, lec2	: list[constraint];
+
+global 
+
+[ConstructiveDisjunctionInII]
+	P
+	=>
+	Q
+	where	  D3 := ()CreateCSPCDII(P)
+	where	  D4 := (ConstructiveDisjunctionInII)D3
+	where	   Q := ()GetCSP(D4)
+	where	lmc1 := ()GetLMC(P)
+	where	lec1 := ()GetLEC(P)
+	where	lmc2 := ()GetLMC(Q)
+	where	lec2 := ()GetLEC(Q)
+	if	not (lmc1 == lmc2 and lec1 == lec2)
+end
+
+end
+
+
+strategies for csp
+implicit
+
+[] LocalConsistencyWithCDInII =>
+repeat* (LocalConsistencyForEC;
+	 first one (ConstructiveDisjunctionInII)
+	)
+end
+
+[] LocalConsistencyForECandDCWithCDInII =>
+repeat* (LocalConsistencyForEC;
+	 first one (ConstructiveDisjunctionInII)
+	);
+repeat* (dk (PostElementaryDisjunct);
+	 LocalConsistencyForEC;
+	 first one (ConstructiveDisjunctionInII, id)
+	)
+end
+
+end
+
+
+end
+

@@ -1,0 +1,39 @@
+module ECterm[Vars]
+import local
+	Vars
+	bool
+	variable[Vars];
+end
+
+sort Cterm;
+end
+
+/*
+
+Extension of the Cterm module: Any variable becomes also a Cterm, s.t. 
+a Cterm is any term build on signature Fss, any state symbol or any variable
+symbol.
+
+*/
+
+
+operators
+  global	
+	@		: (variable) Cterm;
+
+end
+
+
+/*
+
+
+FOR EACH Var:identifier
+        SUCH THAT Var:=(listExtract) elem(Vars) :{
+
+rules for bool
+global
+	non_var(Var) => false
+end}
+*/
+
+end

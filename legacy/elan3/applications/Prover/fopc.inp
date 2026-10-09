@@ -1,0 +1,107 @@
+Proof of * |- (A x.1 p(x.1)) impl not (E x.1 not p(x.1))
+run [Start]* |- (A x.1 p(x.1)) impl not (E x.1 not p(x.1));
+	*|-(A x.1 p(x.1))impl not(E x.1 not p(x.1)).$
+run [Timpl]R;	
+	*;(0:(A x.1 p(x.1)))|-not(E x.1 not p(x.1)).$
+run [Tnot]R;
+	(0:(A x.1 p(x.1)));*;(1:(E x.1 not p(x.1)))|-False.$
+run [existT(1)]R;
+	*;(0:(A x.1 p(x.1)));(1:not p(x.2))|-False.$
+run [allT(x.2,0)]R; 
+	*;(1:not p(x.2));(0:(A x.1 p(x.1)));(2:p(x.2))|-False.$
+run [notT(1)]R;
+	*;(2:p(x.2));(0:(A x.1 p(x.1)));(1:not p(x.2))|-p(x.2).$
+run [hyp(2)]R;
+	$
+Summary::
+run [Start;Timpl;Tnot;existT(1);allT(x.2,0);notT(1);hyp(2)]
+	* |- (A x.1 p(x.1)) impl not (E x.1 not p(x.1));
+------------------------------------------
+------------------------------------------
+------------------------------------------
+------------------------------------------
+Proof of * |- x.1 ++ zero = x.1
+
+run [Start]* |- x.1 ++ zero = x.1;
+	*|-x.1++zero=x.1.$
+run [ind(x.1,INT)]R;
+	*;(0:x.1=x.1++zero)|-zero=zero++zero.*;(0:x.1=x.1++zero)|-succ(x.2)=succ(x.2)++zero.$
+run [AXIOM_plus1]R;
+	(0:x.1=x.1++zero);*|-zero=zero.$.(0:x.1=x.1++zero);*|-succ(x.2)=succ(x.2)++zero
+run [Teq]R;
+	$.(0:x.1=x.1++zero);*|-succ(x.2)=succ(x.2)++zero
+run [AXIOM_plus3]R;
+	(0:x.1=x.1++zero);*|-succ(x.2)=zero++succ(x.2).$
+run [AXIOM_plus1]R;
+	(0:x.1=x.1++zero);*|-succ(x.2)=succ(x.2).$
+run [Teq]R;
+	$
+Summary::
+run [Start;ind(x.1,INT);AXIOM_plus1;Teq;AXIOM_plus3;AXIOM_plus1;Teq]
+	* |- x.1 ++zero = x.1;
+------------------------------------------
+------------------------------------------
+------------------------------------------
+------------------------------------------
+------------------------------------------
+Proof of (A x.1(A x.2 member(x.1,(x.1::x.2))))
+
+run [Start] * |- (A x.1(A x.2 member(x.1,(x.1::x.2))));
+	*|-(A x.1(A x.2 member(x.1,(x.1::x.2)))).$
+run [repeat-2 Tall]R;
+	*|-member(x.3,(x.3::x.4)).$
+run [AXIOM_memb1]R;
+	*|-x.3=x.3.$
+run [Teq]R;
+	$
+Summary::
+run [Start;repeat-2 Tall;AXIOM_memb1;Teq] 
+	* |- (A x.1(A x.2 member(x.1,(x.1::x.2))));
+------------------------------------------
+------------------------------------------
+------------------------------------------
+Proof of (A x.1(A x.2(A x.3 not x.1=x.2 impl member(x.1,x.3)impl member(x.1,(x.2::x.3)))))
+
+run [Start]*|-(A x.1(A x.2(A x.3 not x.1=x.2 impl member(x.1,x.3)impl member(x.1,(x.2::x.3)))))
+	*|-(A x.1(A x.2(A x.3 not x.1=x.2 impl member(x.1,x.3)impl member(x.1,(x.2::x.3)))))$
+run [repeat-3 Tall]R;
+	*|-not x.4=x.5impl member(x.4,x.6)impl member(x.4,(x.5::x.6)).$
+run [repeat-2 Timpl]R;
+	(0:not x.4=x.5);*;(1:member(x.4,x.6))|-member(x.4,(x.5::x.6)).$
+run [AXIOM_memb]R;
+	 (0:not x.4=x.5);(1:member(x.4,x.6));*|-not x.4=x.5and member(x.5,x.6).$
+run [Trightor]R;
+run [Tand]R;
+run [hyp(0)]R;
+run [hyp(1)]R;
+
+Summary::
+run [Start;repeat-3 Tall;repeat-2 Timpl;AXIOM_memb;Trightor;Tand;hyp(0);hyp(1)]
+*|-(A x.1(A x.2(A x.3 not x.1=x.2 impl member(x.1,x.3)impl 
+	member(x.1,(x.2::x.3)))))
+
+
+--------------------------- DIVERS
+--------------------------- DIVERS
+--------------------------- DIVERS
+--------------------------- DIVERS
+--------------------------- DIVERS
+--------------------------- DIVERS
+--------------------------- DIVERS
+run [concltac(2, *|- True impl False . $)] *|- True impl False . $;
+	True|-False.$
+run [do_concl(2)]*|- True impl False . $;
+	True|-False.$	
+run [allT(nill,l1)]  (l1 : (A x.1 member(x.1,(x.1 :: nill)))) ; * |- True . $;
+	*;(l1:(A x.1 member(x.1,(x.1::nill))));member(nill,(nill::nill))|-True.$
+run [hyptac(* ; (l1 : (A x.1 member(x.1,(x.1 :: nill)))))]
+            * ; (l1 : (A x.1 member(x.1,(x.1 :: nill)))) |- True . $;
+	*;(l1:(A x.1 member(x.1,(x.1::nill))));member(x.4,(x.4::nill))|-True.$
+run [hyptac(* ; (l1 : (E x.1 member(x.1,(x.1 :: nill)))))]
+            * ; (l1 : (E x.1 member(x.1,(x.1 :: nill)))) |- True . $;
+	*;member(x.2,(x.2::nill))|-True.$	
+
+run [hyptac(* ; (A x.1 member(x.1,(x.1 :: nill)) |- True))]
+
+ind_repl(x.1,member(x.1,nill),constr(LIST,5));
+

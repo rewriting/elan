@@ -1,0 +1,59 @@
+Directories:
+
+COMMON: ELAN files used by both the interpreted and compiled versions
+
+ARITY_N_C: ELAN files used by the compiled  version
+
+ARITY_N_I: ELAN files used by the interpreted version
+
+DEMO: Some examples
+
+
+The directories ARITY_N_C and ARITY_N_I have the following structure:
+
+src: The sources files (ELAN files).
+
+
+To install COLETTE:
+
+Add the path to the directory containing COLETTE.
+
+Define the variable COLETTE as the directory containing COLETTE.
+
+
+To use COLETTE:
+
+colette arity version strategy_name spc_file trace_option query_file
+
+
+where:
+
+arity must be N (eventually 2.)
+
+
+version can be I or C for the interpreted or compiled version, respectively.
+
+
+strategy_name must be one of the strategy names included in the ELAN files.
+
+
+spc_file must be a file name including the specification you want to use. In 
+the spc directory there are some example files.
+
+
+trace_option specifies the trace level and must be:
+
+b to run COLETTE in a batch mode
+q to run COLETTE in a quiet mode
+'t n' to run COLETTE with trace level 'n'
+
+
+query_file must be a file name containing the query (only used for the 
+compiled version)
+
+
+For more information you can visit COLETTE Home Page:
+
+http://www.loria.fr/~castro/COLETTE/index.html
+
+

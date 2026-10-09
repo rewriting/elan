@@ -1,0 +1,12 @@
+LPL loop description
+  
+	query	of sort integ 
+	result of sort 	integ	 
+	import 		integ loop	
+	start with 	[dk-loop(10)]query
+
+end
+
+
+
+

@@ -1,0 +1,674 @@
+%\section{The built-ins}\label{les built-in}
+%%% General comment 
+
+There are two types of built-in symbols:
+\begin{itemize}
+\item 
+  {\bf The built-in constructors}, which are non-reducible
+  symbols, built into the \elan\ system. Terms built over them are
+  either constructed, or interpreted by the \elan\ system, e.g. the
+  symbol {\tt Error} defined in the module
+  {\ldots/common/builtinIO.eln} as follows:\\
+    \begin{verbatim}
+    Error(@) : (builtinInt) X   code 122;
+    \end{verbatim}
+    which is used to report various errors of the I/O sub-system
+    written in C++.
+\item
+    {\bf The built-in functions}, which represent symbols with
+    pre-defined semantics, in general, not [easily] specifiable in
+    \elan\ itself.  The symbol {\tt open} in  the module
+    {\ldots/common/builtinStdio.eln} defined as follows:\\
+  \begin{verbatim}
+   open_builtinStdio(@,@)     : (builtinString builtinString) builtinInt code 116;
+  \end{verbatim}
+    can be taken as an example.  In this case, the declaration
+    (profile) of the symbol {\tt open} represents an interface between
+    the \elan\ specification and its built-in semantics. In this case,
+    the code ``116'' identifies its semantics.
+    
+    If there is an overloaded built-in symbol whose exact semantics
+    depends on its profile, a procedure implementing the built-in
+    symbol should know, which instance of the built-in symbol is
+    executed. The overloaded symbol
+    {\tt read\_builtinIO} is an example of this problem:\\
+  \begin{verbatim}
+    read_builtinIO(@,@)      : (builtinInt X) X   pri 200 code 120;
+  \end{verbatim}
+    When the built-in symbol {\tt read\_builtinIO} is used for several sorts {\tt
+      X}, there exist several built-in symbols {\tt read\_builtinIO} in the
+    user's specification.  All of them are linked with the same
+    semantic function (with the code 120) parameterized by the
+    concrete profile of {\tt read\_builtinIO}. Thus, the sort of a read term is
+    known in the semantic procedure due to the profile of actually
+    applied symbol {\tt read\_builtinIO}.  The difference between two kinds of
+    {\em built-in function} symbols is expressed by the sign of code
+    numbers.
+\end{itemize}
+
+
+\subsection{Booleans}
+
+At the beginning there is nothing, so \elan\ provides the true and
+false values and introduces the bool module. These two values are
+built-in and are deeply connected to the implementation of conditions
+in rewrite rules. 
+
+\subsubsection{/elanlib/common/bool.eln}
+
+%% Hubert 
+
+\begin{tabular}{|c|c|c|p{8cm}|}
+\hline
+{\bf Builtins} & {\bf Code} & {\bf Signature} & {\bf Comments} \\
+\hline
+\hline
+{\tt false}     & 0 & {\tt () bool} & The logical {\tt false}.\\
+{\tt true}      & 1 & {\tt () bool} & The logical {\tt true}.\\
+{\tt @ and @}   & 21 & {\tt (bool bool) bool} & The logical conjonction.\\
+{\tt @ or @}    & 22 & {\tt (bool bool) bool} & The logical disjonction.\\
+{\tt not(@)}    & 24 & {\tt (bool) bool} & The logical negation.\\
+{\tt @ == @}    & 8 & {\tt (bool bool) bool} & The logical equality test.\\
+{\tt @ != @}    & 9 & {\tt (bool bool) bool} & The logical inequality test.\\
+{\tt @ $<$ @}   & 10 & {\tt (bool bool) bool} & A logical test assuming that {\tt false<true}.\\
+{\tt @ $<$= @}  & 11 & {\tt (bool bool) bool} & A logical test assuming that {\tt false<true}.\\
+{\tt @ $>$ @}   & 12 & {\tt (bool bool) bool} & A logical test assuming that {\tt false<true}.\\
+{\tt @ $>$= @}  & 13 & {\tt (bool bool) bool} & A logical test assuming that {\tt false<true}.\\
+\hline
+\end{tabular}
+
+
+\subsubsection{/elanlib/common/cmp.eln}
+
+%% Hubert
+
+To enrich the booleans, {\it polymorphic\/} equality, disequality and
+inequalities are defined and are also built-in:\\
+
+\noindent \begin{tabular}{|c|c|c|p{9cm}|}
+\hline
+{\bf Builtins} & {\bf Code} & {\bf Signature} & {\bf Comments} \\
+\hline
+\hline
+@ == @          & 18 & {\tt (X X) bool} & Tests the equality between two elements of the same sort {\tt X}.\\
+@ != @          & 19 & {\tt (X X) bool} & Tests the inequality between two elements of the same sort {\tt X}.\\
+%% @ $<$ @      & 30 & {\tt (X X) bool} & \\
+%% @ $<$= @     & 31 & {\tt (X X) bool} & \\
+%% @ $>$ @      & 32 & {\tt (X X) bool} & \\
+%% @ $>$= @     & 33 & {\tt (X X) bool} & \\
+\hline
+\end{tabular}
+
+
+
+\subsection{Numbers}
+
+Numbers can of course be created ``by hand'', but we choose in \elan\
+to provide built-in integers.\\
+
+\subsubsection{/elanlib/common/builtinInt.eln}
+
+%% Hubert
+
+\begin{tabular}{|p{3cm}|c|c|p{4cm}|}
+\hline
+{\bf Builtins} & {\bf Code} & {\bf Signature} & {\bf Comments} \\
+\hline
+\hline
+{\tt @ + @}                             & 3 & {\tt (builtinInt builtinInt) builtinInt} & The addition on integers.\\
+{\tt @ - @}                             & 4 & {\tt (builtinInt builtinInt) builtinInt} & The soustration on integers.\\
+{\tt @ * @}                             & 5 & {\tt (builtinInt builtinInt) builtinInt} & The multiplication on integers.\\
+{\tt @ / @}                             & 6 & {\tt (builtinInt builtinInt) builtinInt} & The division on integers.\\
+{\tt @ \% @}                            & 27 & {\tt (builtinInt builtinInt) builtinInt} & The modulo operation.\\
+{\tt @ \& @}                            & 28 & {\tt (builtinInt builtinInt) builtinInt} & {\tt a \& b} makes the logical conjonction between the binary representations of {\tt a} and {\tt b} and returns the corresponding integer.\\
+{\tt @ $|$ @}                           & 29 & {\tt (builtinInt builtinInt) builtinInt} & {\tt a $|$ b} makes the logical disjonction between the binary representations of {\tt a} and {\tt b} and returns the corresponding integer.\\
+{\tt - @}                               & 20 & {\tt (builtinInt) builtinInt} & The opposite of any integer.\\
+{\tt @ == @}                            & 8 & {\tt (builtinInt builtinInt) bool} & The equality test.\\
+{\tt @ != @}                            & 9 & {\tt (builtinInt builtinInt) bool} & The inequality test.\\
+{\tt @ $<$ @}                           & 10 & {\tt (builtinInt builtinInt) bool} & The strict ordering test between integers.\\
+{\tt @ $<$= @}                          & 11 & {\tt (builtinInt builtinInt) bool} & The ordering test between integers.\\
+{\tt @ $>$ @}                           & 12 & {\tt (builtinInt builtinInt) bool} & The strict ordering test between integers.\\
+{\tt @ $>$= @}                          & 13 & {\tt (builtinInt builtinInt) bool} & The ordering test between integers.\\
+{\tt eq\_builtin Int(@,@)}              & 8 & {\tt (builtinInt builtinInt) bool} & The equality test.\\
+{\tt neq\_builtin Int(@,@)}             & 9 & {\tt (builtinInt builtinInt) bool} & The inequality test.\\
+{\tt less\_builtin Int(@,@)}            & 10 & {\tt (builtinInt builtinInt) bool} & The strict ordering test between integers.\\
+{\tt lesseq\_builtin Int(@,@)}          & 11 & {\tt (builtinInt builtinInt) bool} & The ordering test between integers.\\
+\hline
+\end{tabular}
+~\\
+\begin{tabular}{|p{3cm}|c|c|p{5,5cm}|}
+\hline
+{\bf Builtins} & {\bf Code} & {\bf Signature} & {\bf Comments} \\
+\hline
+\hline
+{\tt greater\_builtin Int(@,@)}         & 12 & {\tt (builtinInt builtinInt) bool} & The ordering test between integers.\\
+{\tt greatereq\_ builtinInt(@,@)}       & 13 & {\tt (builtinInt builtinInt) bool} & The ordering test between integers.\\
+{\tt btoi(@)}                           & 25 & {\tt (bool) builtinInt} & The conversion from a boolean to an integer ($false$ becomes 0 and $true$ becomes 1).\\
+{\tt itob(@)}                           & 26 & {\tt (builtinInt) bool} & The conversion from any integer to a boolean (0 becomes $false$ and any other $true$).\\
+\hline
+\end{tabular}
+
+
+\subsection{Identifiers}
+
+%Two important built-in modules concern identifiers. First the standard
+%ones (i.e. without quotes):\\
+%and a similar version but with quotes:\\
+%
+%In fact quoted identifiers are often used when defining a logic in
+%element modules in order to avoid syntactic conflicts at parsing
+%time. Unquoted identifiers are mostly used in specifications.\\
+%Then we introduce the module {\tt ident} which provides the standard
+%operations on identifiers:\\
+%and we recommand to use these operators via the module:\\ 
+%\insertLib{identifier.eln}\label{identifier module}
+
+\subsubsection{/elanlib/noquote/ident.eln}
+
+%% Hubert
+
+\begin{tabular}{|c|c|c|p{9cm}|}
+\hline
+{\bf Builtins} & {\bf Code} & {\bf Signature} & {\bf Comments} \\
+\hline
+\hline
+@ == @  & 14 & {\tt (ident ident) bool} & Tests the equality between two identifiers.\\
+@ != @  & 15 & {\tt (ident ident) bool} & Tests the inequality between two identifiers.\\
+\hline
+\end{tabular}
+
+
+
+\subsubsection{/elanlib/common/builtinString.eln}
+
+%% Hubert
+
+\begin{tabular}{|c|c|c|p{4cm}|}
+\hline
+{\bf Builtins} & {\bf Code} & {\bf Signature} & {\bf Comments} \\
+\hline
+\hline
+{\tt strlen(@)}         & 150 & {\tt (string) builtinInt} & Computes the length of a string.\\
+{\tt strcat(@,@)}       & 151 & {\tt (string string) string} & Concatenates two strings.\\
+{\tt @[@]}              & 152 & {\tt (string builtinInt)}  & {\tt s[i]} selects the {\tt i}th character of the string {\tt s}.\\
+{\tt @[@<-@]}           & 153 & {\tt (string builtinInt builtinInt) string} & {\tt s[i$<$-c]} replaces the {\tt i}th character of the string {\tt s} by the character {\tt c}.\\
+{\tt substr(@,@,@)}     & 154 & {\tt (string builtinInt builtinInt) string} & {\tt substr(s,i,n)} extracts from the string {\tt s} a substring of length {\tt n} from the {\tt i}th position.\\
+{\tt strspn(@,@)}       & 156 & {\tt (string string) builtinInt} & {\tt strspn(s1,s2)} returns the length of the first part of {\tt s1} entirely consituted by characters of {\tt s2}.\\
+\hline
+\end{tabular}
+~\\
+\begin{tabular}{|c|c|c|p{5,2cm}|}
+\hline
+{\bf Builtins} & {\bf Code} & {\bf Signature} & {\bf Comments} \\
+\hline
+\hline
+{\tt strcmp(@,@)}       & 157 & {\tt (string string) builtinInt} & {\tt strcmp(s1,s2)} compares two strings character by character and returns an integer (a negative one if {\tt s1} is less than {\tt s2}, {\tt 0} if they are equal and otherwise a positive integer).\\
+{\tt string(@)}         & 158 & {\tt (builtinInt) string} & Conversion from an integer (that is, the associated character) to a string.\\
+{\tt ident2string(@)}   & 177 & {\tt (ident) string} & Conversion from an identifier to a string.\\
+\hline
+\end{tabular}
+
+
+\subsection{Elementary term computations}
+
+Since it is of primarily use in symbolic computation on terms (and
+remember that everything in \elan\ is a term except the built-ins),
+the occurrence relation and the replacement operation are provided
+as built-ins.
+
+\subsubsection{/elanlib/common/occur.eln}
+
+%% Helene
+
+The module {\tt occur[X,Y]} is parameterized by two sorts {\tt X,Y}
+that must be non built-in.\\
+
+
+\noindent \begin{tabular}{|c|c|c|p{9cm}|}
+\hline
+{\bf Builtins} & {\bf Code} & {\bf Signature} & {\bf Comments} \\
+\hline
+\hline
+{\tt occurs @ in @}   & 17 & {\tt (X Y) bool} & {\tt occurs s in t} checks if {\tt s} occurs in {\tt t}.\\
+\hline
+\end{tabular}
+
+\subsubsection{/elanlib/common/replace.eln}
+
+%% Helene
+
+The module {\tt replace[X,Y]} is parameterized by two sorts {\tt X,Y}
+that must be non built-in.\\
+
+
+\noindent \begin{tabular}{|c|c|c|p{8cm}|}
+\hline
+{\bf Builtins} & {\bf Code} & {\bf Signature} & {\bf Comments} \\
+\hline
+\hline
+{\tt replace @ by @ in @}     & 16 & {\tt (X X Y) Y} & {\tt replace s by u in t} replaces all occurrences of {\tt s} by the {\tt u} in {\tt t}.\\
+\hline
+\end{tabular}
+
+
+\subsubsection{/elanlib/common/builtinSyntacticMatching.eln}
+
+%% Helene
+
+Matching and unification operations are provided as built-ins.\\
+
+\noindent \begin{tabular}{|p{4cm}|c|c|p{7,5cm}|}
+\hline
+{\bf Builtins} & {\bf Code} & {\bf Signature} & {\bf Comments} \\
+\hline
+\hline
+{\tt builtinSyntactic Matching(@,@,@,@)}         & 191 & {\tt (X X Y Y) Y} & {\tt builtinSyntacticMatching (t1,t2,vars,failure)} tries to match terms {\tt t1} to {\tt t2} (i.e. {\tt t1 $<<$ t2}), where {\tt vars:Y} represents list of variables occurred in {\tt t1:X} and {\tt t2:X} and {\tt failure:Y} is a value returned in a non-successful case. Otherwise, a matching substitution is returned in the form of a list of terms associated to the list of variables {\tt vars}. The sort {\tt Y} is supposed to be {\tt list[X]}. It works only for empty theories.\\
+\hline
+\end{tabular}
+~\\
+\begin{tabular}{|p{4cm}|c|c|p{7,5cm}|}
+\hline
+{\bf Builtins} & {\bf Code} & {\bf Signature} & {\bf Comments} \\
+\hline
+\hline{\tt builtinSyntactic Unification(@,@,@,@)}      & 175 & {\tt (X X Y Y) Y} & the same as the previous built-in function, except that a most general unifier is searched.\\
+\hline
+\end{tabular}
+
+
+\subsection{Input/Output}
+
+\subsubsection{/elanlib/common/Query.eln}
+
+%% Helene 
+
+The module {\tt Query[I,O,P]}
+defines the parameterized sort Query[I,O,P] and the sort ide 
+(embedding the sort ident of identifiers).
+All symbols defined in this module are built-in constructors
+w.r.t. the classification mentioned before.\\
+
+\noindent \begin{tabular}{|c|c|c|p{6cm}|}
+\hline
+{\bf Builtins} & {\bf Code} & {\bf Signature} & {\bf Comments} \\
+\hline
+\hline
+{\tt quit}              & 90 & {\tt () Query[I,O,P]} & {\tt quit} just quit the command interpreter\\
+{\tt help}              & 112 & {\tt () Query[I,O,P]} & {\tt help} prints the help menu (in the file {\tt elanlib/help.txt}) \\
+{\tt load} @            & 91 & {\tt (ide) Query[I,O,P]} & {\tt load f} loads the file {\tt f.eln} and extends the current specification\\
+{\tt batch} @           & 107 & {\tt (ide) Query[I,O,P]} & {\tt batch f} runs commands of the batch file {\tt f.eln}\\
+{\tt run @}             & 94 & {\tt (I) Query[I,O,P]} & {\tt run q} runs the current specification with the query {\tt q} \\
+{\tt sorts @ @ @}       & 92 & {\tt (ide ide ide) [I,O,P]} & {\tt sorts q r s} redefines sorts of query, results and print-outs \\
+{\tt startwith (@)@}    & 93 & {\tt (ident O) Query[I,O,P]} & {\tt startwith (s)t} redefines the  starting  term {\tt (s)t} of the {\tt .lgi} file, where {\tt s} is a strategy and {\tt t} is a pattern of the input query\\
+{\tt checkwith @}       & 102 & {\tt (bool) Query[I,O,P]} & {\tt checkwith b} redefines the checking term of the {\tt .lgi} file, where {\tt b} is a pattern of a boolean condition tested before any input query\\
+{\tt printwith @}       & 98 & {\tt (P) Query[I,O,P]} & {\tt printwith t} redefines the printing term used to pretty-print any result \\
+{\tt qs}                & 100 & {\tt Query[I,O,P]} & dump the stack of queries\\
+{\tt rs}                & 101 & {\tt Query[I,O,P]} & dump the stack of results\\
+{\tt stat}              & 96 & {\tt Query[I,O,P]} & print statistics\\
+{\tt dump}              & 95 & {\tt Query[I,O,P]} & dump all rules\\
+{\tt dump @ }           & 108  & {\tt (ident) Query[I,O,P]} & {\tt dump(l)} dumps rules or strategies with the label/name {\tt l}\\
+{\tt dump @ }           & 109 & {\tt (builtinInt) Query[I,O,P]} & {\tt dump(s)} gives all information about the symbol {\tt s} given by its code\\
+{\tt display @}         & 103 & {\tt (builtinInt) Query[I,O,P]} & {\tt display m} changes the printing mode of symbols: {\tt display 1} shows terms in internal form, while {\tt display 0} uses the traditional representation\\
+\hline
+\end{tabular}
+~\\
+\noindent \begin{tabular}{|c|c|c|p{6,5cm}|}
+\hline
+{\bf Builtins} & {\bf Code} & {\bf Signature} & {\bf Comments} \\
+\hline
+\hline
+{\tt trace @}           & 97 & {\tt (builtinInt) Query[I,O,P]} & {\tt trace n} changes the level of debugging to level {\tt n}\\
+{\tt break @}           & 104 & {\tt (ident) Query[I,O,P]} & {\tt break f} sets a break-point on rules or strategies  with the label/name {\tt f}\\
+{\tt break @}           & 110 & {\tt (builtinInt) Query[I,O,P]} & {\tt break s} sets a break-point on the symbol {\tt s} given by its code\\
+{\tt unbreak @}         & 105 & {\tt (ident) Query[I,O,P]} & {\tt unbreak f} deletes the break-point on rules or strategies  with the label/name {\tt f}\\
+{\tt unbreak @}         & 111 & {\tt (builtinInt) Query[I,O,P]} & {\tt unbreak s} deletes the break-point on the symbol {\tt s}\\
+{\tt breaks}            & 106 & {\tt () Query[I,O,P]} & lists all set break points\\
+\hline
+\end{tabular}
+
+\subsubsection{/elanlib/common/IO.eln}
+%% Huy
+The module {\tt IO[X]} defines the Input/Output primitives which can only be used with the compiler.
+This module is parameterized by the sort {\tt X} of the terms used in input/output operations.
+Currently, only the following sorts are available in the input/output operations: {\tt string}, {\tt int}, {\tt bool}, {\tt term}.
+For example, to write out or read in strings, the user only need to import {\tt IO[string]} in his or her program.
+%% Hubert
+
+\begin{tabular}{|c|c|c|p{8,5cm}|}
+\hline
+{\bf Builtins} & {\bf Code} & {\bf Signature} & {\bf Comments} \\
+\hline
+\hline
+{\tt write(@,@)}      & -119 & {\tt (File X) X}          & Writes on output {\tt File} the argument of sort {\tt X}.\\
+{\tt writeln(@,@)}      & -119 & {\tt (File X) X}          & Writes on output {\tt File} the argument of sort {\tt X} and goes to the next line.\\
+{\tt read(@)}         & -120 & {\tt (File) X}            & Reads from input {\tt File} and return an element of sort {\tt X}.\\
+{\tt Error(@)}        & 123  & {\tt (builtinInt) X}     & Reports various errors of the I/O sub-system written in C++.\\
+\hline
+\end{tabular}
+
+\subsubsection{/elanlib/common/builtinStdio.eln}
+%% Huy
+The module {\tt builtinStdio.eln} provides several input/output primitives.
+But except for {\tt open} and {\tt close}, the others can and should be replaced by the primitives in {\tt IO}.
+Notice that the module {\tt builtinStdio.eln} is already imported by {\tt IO} and do not need to be explicitly imported in {\elan} programs.
+Three constants of sort {\tt File} {\tt stdin}, {\tt stdout} and {\tt stderr} provide respectively the standard input, the standard output and the standard error output.
+%% Hubert
+
+\begin{tabular}{|c|c|c|p{4,5cm}|}
+\hline
+{\bf Builtins} & {\bf Code} & {\bf Signature} & {\bf Comments} \\
+\hline
+\hline
+{\tt getc(@)}             & 113 & {\tt (builtinInt) builtinInt} & Gets the next character from an input file or pipe.\\
+{\tt putc(@)}             & 114 & {\tt (builtinInt builtinInt) builtinInt}  & Puts a character to an output file or pipe.\\
+{\tt create(@)}           & 115 & {\tt (builtinString) builtinInt} & Creates a process with a given name. The created process is linked with the parent process via two blocking pipes.\\
+{\tt create\_noblock(@)}  & 117 & {\tt (builtinString) builtinInt} & Creates a process with a given name such that two communication pipes are in a non blocking mode.\\
+{\tt open(@,@)}           & 116 & {\tt (builtinString builtinString) File} & Opens a file for reading or writing. The first argument is the name of the file, and the second argument is either {\tt "w"} (write or create mode), {\tt "r"} (read mode) or {\tt "a"} (append mode).\\
+{\tt close(@)}            & 118 & {\tt (File) builtinInt} & Closes a file or kill a process denoted by the pipe number of sort {\tt File}.\\
+\hline
+\end{tabular}
+
+
+\subsection{Strategies}
+
+\subsubsection{/elanlib/strategy/Meta\_strat.eln}
+
+%% Helene
+
+The module {\tt Meta\_strat[X]} parameterized by a sort {\tt X} can
+only by used in interpreted mode.  This module exports the sort 
+{\tt Strategy[X]}, which specifies an external form of basic strategies
+of sort {\tt X}.  The signature of basic strategies is defined by
+several built-in constructors used to convert strategy terms of sort
+{\tt Strategy[X]} into basic strategies over the sort {\tt X}.  This
+conversion is used for the implementation of {\tt meta\_apply} symbols
+of the previous module.
+
+~\\
+\begin{tabular}{|c|c|p{5cm}|p{6,5cm}|}
+\hline
+{\bf Builtins} & {\bf Code} & {\bf Signature} & {\bf Comments} \\
+\hline
+\hline
+{\tt @}                 & 131 & {\tt (Strategy[X]) Strategies[X]} & Embeds a basic strategy in a list of basic strategies. \\
+{\tt @ , @}             & 132 & {\tt (Strategy[X] Strategies[X]) Strategies[X]} & Concatenates a basic strategy to a list of basic strategies.\\
+{\tt @}                 & 133 & {\tt (string) Labels[X]} & Embeds a string in a list of rule labels.\\
+{\tt @ , @}             & 134 & {\tt (string Labels[X]) Labels[X]} & Concatenates a string to a list of rule labels.\\
+{\tt dc(@)}             & 135 & {\tt (Labels[X]) Strateg[X]} & {\tt dc(l)} is a basic strategy that chooses one label in the list of labels {\tt l} and returns all results of the corresponding rule.\\
+{\tt dk(@)}             & 136 & {\tt (Labels[X]) Strateg[X]} & {\tt dk(l)} is a basic strategy that chooses successively all labels in the list of labels {\tt l} and returns all results of the corresponding rules.\\
+{\tt dc(@)}             & 137 & {\tt (Strategies[X]) Strateg[X]} & {\tt dc(ls)} is a basic strategy that chooses one basic strategy in the list {\tt ls} and returns all its results.\\
+{\tt dk(@)}             & 138 & {\tt (Strategies[X]) Strateg[X]} & {\tt dk(ls)} is a basic strategy that chooses successively all basic strategies in the list {\tt ls}  and returns all their results.\\
+{\tt repeat*(@)}        & 139 & {\tt (Strategy[X]) Strateg[X]} & {\tt repeat*(s)} is a basic strategy that repeats the application of the basic strategy {\tt s} until it fails.\\
+{\tt iterate*(@)}       & 140 & {\tt (Strategy[X]) Strateg[X]} & {\tt iterate*(s)} is a basic strategy that repeats the application of the basic strategy {\tt s} until it fails and returns intermediate results.\\
+{\tt @}                 & 141 & {\tt (Strateg[X]) Strategy[X]} & Embeds the previous constructions into the sort {\tt Strategy[X]}.\\
+{\tt @ ; @}             & 142 & {\tt (Strateg[X] Strategy[X])} Strategy[X] & Concatenates any previous construction to a strategy.\\
+{\tt id}                & 143 & {\tt () Strateg[X]} & {\tt id} is a basic strategy.\\
+{\tt call @ : X}        & 144 & {\tt (string) Strateg[X]} & {\tt call s:X} represents an application of a basic strategy named {\tt s} of sort {\tt X}.
+\\ \hline
+\end{tabular}
+
+
+\subsubsection{/elanlib/strategy/Meta\_apply.eln}
+
+%% Helene
+
+The module {\tt Meta\_apply[X]} parameterized by a sort {\tt X} can
+only by used in interpreted mode (cf. the module {\tt Meta\_capply[X]}
+for the compiled mode).  
+
+The construction {\tt where y:=(META)meta\_apply(s,t)} exported from
+this module is semantically equivalent to {\tt where y:=(s)t} where
+{\tt s} is a basic strategy, i.e. it gives all results of application
+{\tt s} on {\tt t}.  There exists also a sightly modified construction
+{\tt where y:=(META)meta\_apply(s,t,n)} giving only the {\tt n}-th
+solution of the application of {\tt (s)t}, if it exists.  
+
+The \ELAN\ built-in strategy {\tt META} used here just indicates
+that {\tt (META)meta\_apply(s,t)} returns in general several results,
+which would not be the case with {\tt ()meta\_apply(s,t)}.  The
+built-in strategy {\tt META} is applicable only to terms of the form
+{\tt meta\_apply(s,t)} or {\tt meta\_apply(s,t,n)}.
+
+The module {\tt Meta\_apply.eln} exports several variants of the
+symbol {\tt set\_of(s,t,m,n)} returning a list of {\tt m} results of
+the application {\tt (s)t} from the {\tt n}-th result.  The symbols
+{\tt set\_of(s,t)}, {\tt set\_of(s,t,m)} and {\tt set\_of(s,t,m,n)}
+are implemented using a result-collecting built-in symbol 
+{\tt meta\_apply(s,ts,m,n):(Strategy[X] list[X] builtinInt builtinInt)
+  list[X]} defined in this module.  
+
+
+~\\
+\begin{tabular}{|c|c|p{5cm}|p{5cm}|}
+\hline
+{\bf Builtins} & {\bf Code} & {\bf Signature} & {\bf Comments} \\
+\hline
+\hline
+{\tt meta\_apply(@,@)}          & -129 & {\tt (Strategy[X] X) X} & {\tt meta\_apply(s,t)} returns all results of application of the basic strategy {\tt s} on theterm {\tt t}.\\
+{\tt meta\_apply(@,@,@)}        & -130 & {\tt (Strategy[X] X builtinInt) X} & {\tt meta\_apply(s,t,n)} returns the {\tt n}-th result of application of the basic strategy {\tt s} on the term {\tt t}, if it exists.\\
+{\tt meta\_apply(@,@,@,@)}      & -128 & {\tt (Strategy[X] list[X] builtinInt builtinInt) list[X]} & The local built-in symbol {\tt meta\_apply(s,t.nil,m,n)} returns {\tt n} results starting from the {\tt m}-th of application of the basic strategy {\tt s} on the term {\tt t}, if they exist.\\
+\hline
+\end{tabular}
+
+
+\subsubsection{/elanlib/strategy/Meta\_capply.eln}
+
+%% Helene
+
+The module {\tt Meta\_capply[X]} parameterized by a sort {\tt X} can
+only by used in compiled mode.  It represents a simplified form of the
+module {\tt Meta\_apply[X]}, where a construction of a strategy of
+sort {\tt Strategy[X]} is restricted to a reference of an existing
+strategy (i.e. a strategy already occurring in the compiled program).
+Thus, in a {\tt meta\_apply} call, only a name (i.e. a string) of a
+referenced strategy is used instead of a strategy term of sort 
+{\tt   Strategy[X]}.
+%%% Its functionality is the same as {\tt Meta\_apply[X]}.
+
+~\\
+\begin{tabular}{|c|c|p{4cm}|p{6,5cm}|}
+\hline
+{\bf Builtins} & {\bf Code} & {\bf Signature} & {\bf Comments} \\
+\hline
+\hline
+{\tt meta\_apply(@,@)}          & -129 & {\tt (string X) X} & {\tt meta\_apply(s,t)} returns all results of application of the strategy named {\tt s} on the term {\tt t}.\\
+{\tt meta\_apply(@,@,@)}        & -130 & {\tt (string X builtinInt) X} & {\tt meta\_apply(s,t,n)} returns the {\tt n}-th result of application of the strategy named {\tt s} on the term {\tt t}, if it exists.\\
+\hline
+\end{tabular}
+
+
+
+
+\subsubsection{/elanlib/strategy/strsig.eln}
+
+%% Helene
+
+The module {\tt strsig[X,Y]} parameterized by the two sorts {\tt X,Y}
+defines the signature of the defined strategies.  It introduces several
+built-in constructors used to construct strategy terms of the strategy
+language.  The module {\tt strsig.eln} contains strategy constructors
+used both for type-preserving and type-changing strategies.
+
+~\\
+\begin{tabular}{|p{2cm}|c|p{5cm}|p{6cm}|}
+\hline
+{\bf Builtins} & {\bf Code} & {\bf Signature} & {\bf Comments} \\
+\hline
+\hline
+{\tt [@]@}              & -180 & {\tt ($<$X-$>$Y$>$ X) Y} & {\tt [S]t} applies the strategy {\tt S} to the term {\tt t}.\\
+{\tt dk(@)}             & -182 & {\tt (Strlist[X,Y]) $<$X-$>$Y$>$} & {\tt dk(l)} is the defined strategy that chooses successively all strategies in the list {\tt l} and returns all their results.\\
+{\tt dc(@)}             & -181 & {\tt (Strlist[X,Y]) $<$X-$>$Y$>$} & {\tt dc(l)} is the defined strategy that chooses one strategy in the list {\tt l} and returns all its results.\\
+%one(@)   & -190 & (Strlist[X,Y]) $<$X-$>$Y$>$ & \\
+{\tt dc one(@)}         & -190 & {\tt (Strlist[X,Y]) $<$X-$>$Y$>$} & {\tt dc one (l)} is the defined strategy that chooses one strategy in the list {\tt l} and returns one result.\\
+{\tt fail}              & -183 & {\tt () $<$X-$>$Y$>$} & The defined strategy that always gives an empty set of results.\\
+%%@ @   & -185 & ($<$X-$>$Y$>$ Strlist[X,Y]) Strlist[X,Y] &
+%%concatenates a defined strategy to a list of strategies\\
+{\tt @,@}               & -185 & {\tt ($<$X-$>$Y$>$ Strlist[X,Y]) Strlist[X,Y]} & Concatenates a defined strategy to a list of strategies.\\
+%%@ $\|$ @  & -179 & ($<$X-$>$Y$>$ Strlist[X,Y]) Strlist[X,Y] & \\
+%%@ ~,~ @  & -179 & ($<$X-$>$Y$>$ Strlist[X,Y]) Strlist[X,Y] &
+%%concatenates a defined strategy to a list of strategies\\
+{\tt Epsilon}           & -189 & {\tt () Strlist[X,Y]} & The empty list of strategies.\\
+{\tt if @ then @ else @ fi}     & -184 & {\tt (bool $<$X-$>$Y$>$ $<$X-$>$Y$>$) $<$X-$>$Y$>$} & {\tt if b then s1 else s2 fi} is the defined strategy that chooses either {\tt s1} if {\tt b} is true otherwise {\tt s2}.\\
+{\tt @}                 & 146 & {\tt (Assignment) AssignmentList} & Embeds an assignment in a list of assignments.\\
+{\tt @ , @}             & 147 & {\tt (AssignmentList Assignment) AssignmentList} & Add an assignment to the end of a list of assignments.\\
+{\tt if @}              & 145 & {\tt (bool) IfApplication} & A condition if an IfApplication.\\
+{\tt @}                 & 146 & {\tt (IfApplication) AssignmentList} & Embeds an IfApplication in a list of assignments.\\
+{\tt @ , @}             & 147 & {\tt (AssignmentList IfApplication) AssignmentList} & Add an  IfApplication to the end of a list of assignments.\\
+\hline
+\end{tabular}
+
+
+\subsubsection{/elanlib/strategy/strconc.eln}
+
+%% Helene
+
+The module {\tt strconc[X,Y,Z]} parameterized by three sorts
+{\tt X,Y,Z} introduces a concatenation symbol $;$ of
+two strategies of sorts {\tt <X->Y>} and {\tt <Y->Z>}.
+
+~\\
+\begin{tabular}{|c|c|c|p{6cm}|}
+\hline
+{\bf Builtins} & {\bf Code} & {\bf Signature} & {\bf Comments} \\
+\hline
+\hline
+{\tt @ ; @}     & -188 & {\tt ($<$X-$>$Y$>$ $<$Y-$>$Z$>$) $<$X-$>$Z$>$} & {\tt s1 ; s2} concatenates the strategies {\tt s1:$<$X-$>$Y$>$} and {\tt s2:$<$Y-$>$Z$>$} to get a strategy of sort {\tt $<$X-$>$Z$>$}.\\
+\hline
+\end{tabular}
+
+
+\subsubsection{/elanlib/strategy/strat.eln}
+
+%% Helene
+
+The module {\tt strat[X]} parameterized by a sort {\tt X}
+has to be imported for working with type-preserving strategies
+of sort {\tt <X->X>}.
+It defines the {\tt eval} strategy of the interpreter of the language
+of defined strategies, and several specific strategy constructors,
+which are not present in the case of type-changing strategies.
+The rest of strategy constructors is defined in the module {\tt
+strategy/strsig.eln}.
+
+~\\
+\begin{tabular}{|p{3cm}|c|p{7,5cm}|l|}
+\hline
+{\bf Builtins} & {\bf Code} & {\bf Signature} & {\bf Comments} \\
+\hline
+\hline
+{\tt id}                        & -186 & {\tt () $<$X-$>$X$>$} & Identity strategy.\\
+{\tt if @ then @ orelse @ fi}   & -187 & {\tt ($<$X-$>$X$>$ $<$X-$>$X$>$ $<$X-$>$X$>$) $<$X-$>$X$>$} & Orelse strategy.\\
+\hline
+\end{tabular}
+
+
+\subsection{REF Format}
+
+\subsubsection{/elanlib/ref/Meta\_Apply.eln}
+
+%% Helene
+
+The module {\tt ref/Meta\_Apply.eln} provides several variants of the
+function {\tt meta\_apply}, which apply a strategy on a term in an
+environment defined by a program.  These three components are either
+encoded in the REF-format or passed as strings.  Results are produced
+equally in the REF-format, or as strings representing terms.
+
+~\\
+\begin{tabular}{|c|c|p{5cm}|p{6cm}|}
+\hline
+{\bf Builtins} & {\bf Code} & {\bf Signature} & {\bf Comments} \\
+\hline
+\hline
+{\tt meta\_apply(@,@,@,@,@)}    & 170 & {\tt (string string string string builtinInt) string} & {\tt meta\_apply(s,t,file,spec,n)} gives the {\tt n}-th result of the application  of the strategy {\tt s} on the term {\tt t} w.r.t. the program stored in files named {\tt file.lgi} and {\tt spec.spc}.\\
+{\tt meta\_apply(@,@,@,@,@)}    & 171 & {\tt (string list[string] string string builtinInt) string} & {\tt meta\_apply(s,t.nil,file,spec,n)} gives the {\tt n}-th result of the application of the strategy {\tt s} on the term {\tt t} w.r.t. the program in files named {\tt file.lgi} and {\tt spec.spc}.\\
+{\tt meta\_apply(@,@,@,@)}      & 172 & {\tt (string string string builtinInt) string} & {\tt meta\_apply(s,t,file,n)} gives the {\tt n}-th result of the application of the strategy  {\tt s} on the term {\tt t} w.r.t. the program in the REF-format stored in file named {\tt file.ref}.\\
+{\tt meta\_apply(@,@,@,@,@)}    & 173 & {\tt (string list[string] string string builtinInt) string} & {\tt meta\_apply(s,t.nil,file,n)} gives the {\tt n}-th result of the application of the strategy {\tt s} on the term {\tt t} w.r.t. the program in the REF-format stored in file named {\tt file.ref}.\\
+%meta\_apply(@,@,@,@) & 163 & (string string string builtinInt) string &
+%meta\_apply(S,t:sort,P,n-th) gives the n-th result of the application of the
+%strategy S on the term t w.r.t. the program P \\
+%meta\_apply(@,@,@,@,@) & 164 & (string list[string] string builtinInt builtinInt) list[string] & \\
+\hline
+\end{tabular}
+
+%\bigskip
+%
+%\noindent
+%Built-in versions of these functions work over strings of REF-terms,
+%while the symbols exported from this module work over REF-terms.
+%
+%~\\
+%\begin{tabular}{|c|p{5cm}|p{5cm}|}
+%\hline
+%{\bf Functions} & {\bf Signature} & {\bf Comments} \\
+%\hline
+%\hline
+%{\tt meta\_apply(@,@,@,@,@)}    & {\tt (Strategy Term Sort Program builtinInt) Term} & {\tt meta\_apply(S,t:sort,P,n)} gives the {\tt n}-th result of a strategy application {\tt S} on the term {\tt t} w.r.t. the program {\tt P}.\\
+%{\tt meta\_apply(@,@,@,@)}      & {\tt (string string Program builtinInt) string} & {\tt  meta\_apply(strat,term,P,n)} is like the previous one, while both the strategy {\tt S}, the term {\tt t} and the obtained results are represented in the format REF.\\
+%{\tt meta\_apply(@,@,@,@,@,@)}  & {\tt (Strategy Term Sort Program builtinInt builtinInt) list[Term]} & {\tt meta\_apply(S,t:sort,P,n,m)} gives a list of {\tt m} results from the {\tt n}-th one of a strategy application {\tt S} on the term {\tt t} w.r.t. the program {\tt P}. The first result has the index 0.\\
+%{\tt meta\_apply(@,@,@,@,@)}    & {\tt (string list[string] Program builtinInt builtinInt) list[string]} & The string version of the previous function.\\
+%\hline
+%\end{tabular}
+
+
+
+%\subsection{/elanlib/ref/divers2string.eln}
+
+%% Helene
+
+%\begin{tabular}{|c|c|c|p{5cm}|}
+%\hline
+%{\bf Builtins} & {\bf Code} & {\bf Signature} & {\bf Comments} \\
+%\hline
+%\hline
+%type2string(@)  & -176 & (X) string & \\
+%ident2string(@) & 177 & (ident) string & \\
+%\hline
+%\end{tabular}
+
+\subsubsection{/elanlib/ref/ref2string.eln}
+
+%% Helene
+
+The module {\tt ref/ref2string.eln} provides two conversion functions
+between strings of REF-terms and terms of the user's defined signature.
+It also exports a pretty-printing and a parsing function parameterized
+by a signature in the REF-format.
+
+~\\
+\begin{tabular}{|l|c|c|p{8cm}|}
+\hline
+{\bf Builtins} & {\bf Code} & {\bf Signature} & {\bf Comments} \\
+\hline
+\hline
+{\tt refstring2term(@)}         & -168 & {\tt (string) X} & {\tt refstring2term(s)} builds a term of sort {\tt X} from the string {\tt s}.\\
+{\tt term2refstring(@)}         & -167 & {\tt (X) string} & {\tt term2refstring(t)} transforms the term {\tt t} of sort {\tt X} into a string.\\
+{\tt term2string(@)}            & -169 & {\tt (X) string} & {\tt term2string(t)} pretty-prints the term {\tt t} of sort {\tt X}.\\
+\hline
+\end{tabular}
+
+
+\subsubsection{/elanlib/ref/refstring2string.eln}
+
+%% Helene
+
+The module {\tt ref/refstring2string.eln} provides built-in
+pretty-printing and parsing functions converting strings of terms into
+strings of REF-terms, and vice-versa.
+%
+This module defines also two symbols {\tt spec2ref} and 
+{\tt ThisProgram} constructing a REF-representation of a program.
+
+~\\
+\begin{tabular}{|c|c|p{3cm}|p{6,2cm}|}
+\hline
+{\bf Builtins} & {\bf Code} & {\bf Signature} & {\bf Comments} \\
+\hline
+\hline
+{\tt spec2ref(@,@)}             & 162 & {\tt (string string) string} & {\tt spec2ref(file1,file2)} builds a REF-file from the specification
+described by two file {\tt file1.spc} and {\tt file2.lgi}, and it returns its name {\tt file.ref}.\\
+{\tt ThisProgram}               & 165 & {\tt () Program} & Produces the REF-format of the running program.\\
+{\tt refstring2string(@,@)}     & 160 & {\tt (string string) string} & {\tt refstring2string(s,file.ref)} pretty-prints {\tt s} according to
+the grammar defined in the file {\tt file.ref}.\\
+{\tt string2refstring(@,@,@)}   & 161 & {\tt (string string string) string} & {\tt string2refstring(st:so,file.ref)} parses the string {\tt st} of a term of sort {\tt so} according to the grammar defined in the file {\tt file.ref}.\\
+\hline
+\end{tabular}

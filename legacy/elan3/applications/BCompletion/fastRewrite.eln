@@ -1,0 +1,52 @@
+module fastRewrite[vars,fss,prec]
+import global
+		equation[vars,fss,prec]
+		applySubstOn[fss,vars,term]
+		substitution
+		list[int]
+	;
+	local
+		builtinSyntacticMatching[term,list[term]]
+		eq[list[term]]
+		EtermCommons[fss,vars]
+		list[term]
+	;
+end
+
+operators
+  global
+    rewrite(@,@)	: (term equation) term;
+  local
+    matchFail		: list[term];
+    system_to_subst(@,@) : (list[term] list[term]) substitution;
+end
+
+rules for term
+	   listVar     : list[term];
+        s,l,r	 	: term;
+	   match		: list[term];
+        theta 		: substitution;
+        omega 		: list[int];
+global
+  [rewrite] rewrite(s,l->r)	=> s[theta(r)] at omega
+			 where listVar :=() listTerm_variable(l)
+                where omega := (chooseOccurence) nvocc(s)
+			 where match := () builtinSyntacticMatching(l,s at omega,listVar,matchFail)
+			 if match != matchFail
+                where theta := () system_to_subst(listVar,match)
+  end
+end
+
+rules for substitution
+ lv      : list[term];
+ lt      : list[term];
+ $t      : term;
+ $v      : variable;
+global
+  [] system_to_subst(lv,nil)    => identity                     end
+  [] system_to_subst($v.lv,$t.lt) => $v->$t o system_to_subst(lv,lt) 
+  end
+end
+
+
+end

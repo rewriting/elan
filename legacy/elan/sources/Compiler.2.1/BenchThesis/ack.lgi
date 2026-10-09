@@ -1,0 +1,8 @@
+LPL ack description
+
+  query 	of sort Nat
+         	result of sort Nat
+	 	import ack
+         	start with () query
+end
+

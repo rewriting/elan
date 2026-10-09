@@ -1,0 +1,9 @@
+LPL normap description 
+
+        query           of sort ListFGoo
+        result          of sort ListFGoo
+        import          normap
+
+        start with      (ss3)  a.A.b.B.c.C.nil
+
+end

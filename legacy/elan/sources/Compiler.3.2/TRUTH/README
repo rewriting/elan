@@ -1,0 +1,29 @@
+LOOK in : .elan.bug
+
+To compile the program:
+-----------------------
+gmake --file bug.make 
+
+
+To run it:
+----------
+a.out -noInput
+
+
+For the GC:
+-----------
+http://www.hpl.hp.com/personal/Hans_Boehm/gc
+
+
+RuntimeSupport/term.h
+---------------------
+Description of the term data structure
+
+
+RuntimeSupport/main_skeleton.c
+------------------------------
+How to parser and call a strategy
+
+RuntimeSupport/TermIO/termIn.c
+------------------------------
+Implementation of mixfix Input/Ouput

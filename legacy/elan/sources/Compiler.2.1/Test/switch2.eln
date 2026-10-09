@@ -1,0 +1,135 @@
+module switch2
+
+import global bool eq[term];
+end
+
+sort term eq equation;
+end
+
+operators global
+ a      : term;
+ b      : term;
+ c      : term;
+ d      : term;
+ e      : term;
+ b1     : term;
+ b2     : term;
+ c1     : term;
+ c2     : term;
+
+end
+
+
+stratop global
+  s0    : <term>        builtin;
+  s1    : <term>        builtin;
+  s2    : <term>        builtin;
+end
+
+
+
+rules for term
+  x,y,z : term;
+global
+
+  [] a => switch
+		case true then b if false
+		case true then c
+		end
+  end
+
+  [R1] a => a end
+  [R1] a => b end
+  [R1] a => c end
+
+/*
+  [R2] a =>
+    where x:=(s1) a
+    switch
+      case true then a
+      case true then b
+      otherwise c
+    end
+  end
+*/
+
+/*
+  [R2] a =>
+    where x:=(s1) a
+    switch
+      case x==a then a
+      case x==b then b
+      case x==c then c
+      case true then d
+      otherwise e
+    end
+  end
+*/
+
+  [R2] a =>
+    where x:=(s1) a
+    switch
+      case x==x then x
+      otherwise x
+    end
+  end
+
+/*
+  [R2] a => x
+    where x:=(s1) a
+  end
+*/
+
+
+/*
+  [R2] a => a
+	where x:=(s1) a
+	if x==a
+  end
+  [R2] a => b
+	where x:=(s1) a
+	if x==b
+  end
+  [R2] a => c
+	where x:=(s1) a
+	if x==c
+  end
+  [R2] a => d
+	if true
+  end
+  [R2] a => e
+  end
+*/
+
+/*
+  [R2] b => b1 end
+  [R2] b => b2 end
+  [R2] c => c1 end
+  [R2] c => c2 end
+
+  [R3] c => c2 end
+*/
+
+end
+
+
+
+
+
+
+strategies for term
+implicit
+  [.] s1 => dk(R1)   end
+  [.] s0 => dk(R2)   end
+
+// [.] s0 => repeat*(dk(R1)) ; repeat*(dk(iterate*(one(R2))) ; dk(R3) )  end
+
+end
+
+
+end
+
+
+// repeat*(repeat*(...))
+
+// repeat*(iterate(...))

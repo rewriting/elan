@@ -1,0 +1,21 @@
+LPL toi_meme description
+
+
+   query of sort  	string 
+   result of sort 	string
+   import 		toi_meme
+   start with		()query
+
+end
+
+
+
+
+
+
+
+
+
+
+
+

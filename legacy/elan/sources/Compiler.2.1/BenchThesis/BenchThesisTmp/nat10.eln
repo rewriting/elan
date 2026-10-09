@@ -1,0 +1,159 @@
+module nat10[Base]
+import builtinInt list[builtinInt];
+end
+
+sort Nat;
+end
+
+operators global
+  d : Nat;
+  {
+    (@)I : (Nat) Nat;
+    mult_I(@) : (Nat) Nat;
+  }_I=0...Base
+
+  @ + @ : (Nat Nat) Nat (AC);
+  @ * @ : (Nat Nat) Nat (AC);
+  prec(@) : (Nat) Nat;
+  fact(@) : (Nat) Nat;
+  fib(@) : (Nat) Nat;
+
+  l : list[builtinInt];
+end
+
+rules for list[builtinInt]
+global
+ [] l=> {I.}_I=0...(Base-1) nil
+ end
+end
+
+rules for Nat
+  x,y : Nat;
+  r : builtinInt;
+global
+  [] (d)0 => d end
+  [] x + d => x end
+
+{
+  FOR EACH J:builtinInt; R:builtinInt; B:builtinInt SUCH THAT J:=(listExtract) elem(l)
+		AND R:=() ((I+J)-((I+J)%Base))/Base
+		AND B:=() (I+J)%Base
+		ANDIF J>=I :{
+    [] (x)I + (y)J => (x+y + (d)R )B end  
+  }
+}_I=0...(Base-1)
+
+  [] mult_0(x) => d end
+  [] mult_1(x) => x end
+
+{
+  [] mult_I(d) => d end
+
+  FOR EACH J:builtinInt; R:builtinInt; B:builtinInt SUCH THAT J:=(listExtract) elem(l)
+		AND R:=() ((I*J)-((I*J)%Base))/Base
+		AND B:=() (I*J)%Base
+		:{
+    [] mult_I((x)J) => ((d)R + mult_I(x) )B end
+  }
+}_I=2...(Base-1)
+  
+
+  [] x * d => d end
+
+{
+  [] (x)I * y => (x*y)0 + mult_I(y) end  
+}_I=0...(Base-1)
+
+FOR EACH B:builtinInt SUCH THAT B:=() Base-1 :{
+  [] prec((x)0) => (prec(x))B end
+}
+
+
+
+FOR EACH I:builtinInt; B:builtinInt SUCH THAT I:=(listExtract) elem(l)
+	AND B:=() I-1
+        ANDIF I>0
+ :{
+  [] prec((x)I) => (x)B end
+}
+
+
+  [] fact(d) => (d)1 end
+  [] fact(x) => x* fact(prec(x)) end
+
+  [] fib(d) => (d)1 end
+  [] fib((d)1) => (d)1 end
+  [] fib(x) => fib(prec(x)) + fib(prec(prec(x))) end
+
+
+
+end
+end
+
+
+/*
+
+((d)1)0 + ((d)1)0
+((d)8)9 * ((d)7)7 = 6853
+
+fact((d)4)
+fact((d)7)
+
+fib(((d)1)0) = ((d)8)9
+fib(((d)1)6) = ((((d)1)5)9)7
+
+ Statistics:
+ total time     (586.734+0.000)=586.734 sec     (main+subprocesses)
+ average speed  26 inf/sec
+            15384 nonamed rules applied, 110516 tried
+                0   named rules applied,     0 tried
+
+
+OBJ :
+-----
+reduce in TEST : fib(6(1(d)))
+rewrites: 23750
+result Nat: 7(9(5(1(d))))
+	52.71u 0.41s 0:53.25 99.7%
+
+
+reduce in TEST : fib(6(1(d))) (nat2)
+rewrites: 26936
+result Nat: 7(9(5(1(d))))
+71.39u 0.72s 1:18.85 91.4%
+
+
+CiME :
+------
+Solving problems:
+The normal form of  fib(6(1(d))) is
+7(9(5(1(d))))
+(by 10599 reductions)
+
+Number of calls to AC matching      : 990763
+Number of successful calls          : 10599 (1%)
+Number of calls to unification      : 0
+Number of unifiers generated        : 0
+Number of critical pairs considered : 0
+Number of rules produced            : 0
+Number of rules retained            : 0
+
+      times       |   user   |  system  |  total 
+------------------+----------+----------+----------
+Total times       | 16529.840 |   59.560 | 16589.400 
+                  |(275mn 29s)|( 0mn 59s)|(276mn 29s)
+Unification times |    0.000 |    0.000 |    0.000 
+Matching times    | 16429.190 |   31.680 | 16460.870 
+                  |(273mn 49s)|( 0mn 31s)|(274mn 20s)
+
+*/
+
+// NE MARCHE PAS
+/*
+{
+  {
+    [] (x)I + (y)J => (x+y + (d) ((I+J)-((I+J)%Base))/Base )(I+J)%Base
+    end
+  }_J=I...(Base-1  )
+}_I=0...(Base-1)
+*/

@@ -1,0 +1,303 @@
+module tmn
+import 
+ global
+   int
+   Alist[node] Alist[key] Alist[message] Alist[int] Alist[codath]  Alist[identity]
+   list[node] list[key] list[message] list[int] list[codath] list[identity]
+   cmp[node] eq[identity] eq[InRes] eq[key] eq[SWC]
+   bool;
+ end
+
+/*****************************************************************/
+
+
+sort
+
+  node key intruder server message identity InRes network codath
+
+ SWC CodMes state;
+
+end
+
+/*****************************************************************/
+
+operators
+ global
+
+   a : identity ; 
+   b : identity ; 
+   c : identity ; 
+   d : identity ;
+   dai : identity ;
+   s : identity ;
+   i : identity;
+   INIT : InRes ;  
+   RESP : InRes ; 
+   rien : key ;
+
+   SLEEP : SWC ;
+   WAIT : SWC ;
+   COMMIT : SWC ;
+  
+  /* nill : list[identity];
+   nll  : list[message];
+   nnl  : list[codath] ;*/
+
+ //  DI     :  CodMes ;                         // Dummy identity
+
+
+   JK(@,@)  : ( identity identity ) key ;
+
+   DK   : key  ; 
+   DK1 : key ;
+
+   @ + @ + @  : ( identity SWC  key) node ;
+
+   @ | @ | @   : (identity identity key) codath ;
+
+   @ # @       : (network network ) intruder ;
+
+   @ <> @ <> @ <> @ <> @ <> @ : ( list[node] list[node] intruder server network  int ) state ;
+
+   @ * @ * @ * @ * @ * @ : ( identity identity  key identity key InRes ) message ;
+  
+   @       : (list[codath]) server ;
+   @ : (list[message]) network ; 
+   ATTACK  : state ;
+   ERROR   : state ;
+ 
+   nile : list[codath]; 
+ 
+  existe(@,@) : (identity  list[codath]) codath ;  
+  
+end
+
+
+///    a+SLEEP+JK(dai,dai).nil  <> b+SLEEP+JK(dai,dai).nil <>nil#nil <> nil <> nil <> 0 end
+                 
+
+//*****************************************************************
+      
+stratop
+ global
+   com        : < state -> state > 		bs;
+   attStrat   : < state -> state > 		bs;
+end
+ 
+//*****************************************************************
+
+
+rules for state 
+ 
+  E ,D, E1,D1 : list[node];
+  I : intruder;
+  S : server ;
+  x,y,x1,y1,s1,s2,s3,x2,y2 : identity ;
+  Net,Net1,intr,intr2,intr1  :list[message] ;
+  ls :list[codath] ;
+  varia : InRes ;
+  cle , cle1 , dk2 , dk1, dk11 : key ;
+  test : bool ;
+  st :SWC;
+  mess : message ;
+  cmp : int ;
+  node1,node2 : node;
+
+ 
+ global 
+
+//--------------------------------------------------------------------
+
+// (A --> B)
+
+// sender creates message to server 
+// sender waits a message from y or intruder 
+
+[rulescomai]
+E <> D <> I <> S <> Net<>cmp =>
+E <> D <> I <> S <> i*s*JK(s,s)* i* JK(i,i)*INIT.Net <> cmp+1
+end
+
+[rulescoma]
+E <> D <> I <> S <> Net<>cmp =>
+x+WAIT+JK(x,y).E1 <> D <> I <> S <> x*s*JK(s,s)* y* JK(x,y)*INIT.Net <> cmp+1
+                if size(Net) < 1
+                where node1 :=(listExtract) elem(E)
+                where (node)x+SLEEP+dk1 :=()node1
+                where node2 :=(listExtract) elem(D)
+                where (node)y+SLEEP+dk2 :=()node2
+                where  E1 := ()elim(x+SLEEP+JK(dai,dai),E) 
+end
+
+//--------------------------------------------------------------------
+
+// server takes messages from the network and send a message to receiver
+
+[rulescoms]
+E <> D <> I <> ls <> Net<>cmp =>
+E <> D <> I <> x|y|JK(x,y).ls <>s*y* JK(dai,dai)*x*JK(dai,dai)*INIT.Net1<>cmp+1
+	   where mess := (listExtract)elem(Net)
+           where (message) x*s*JK(s,s)*y*JK(x,y1)*INIT :=() mess
+           where (codath)x2|y2|rien:=() existe(x,ls) 
+           where  Net1 := ()elim( x*s*JK(s,s)*y*JK(x,y)*INIT,Net)
+end
+
+// server send a message to sender
+
+[rulescoms1]
+E <> D <> I <> ls <> Net<>cmp =>
+E <> D <> I <> ls <>s*x2*cle*y2*JK(y1,x1)*RESP. Net1<>cmp+1 
+       
+     where mess := (listExtract)elem(Net)
+     where (message) y*s*JK(s,s)*x*JK(y1,x1)*RESP :=() mess
+     where (codath)x2|y2|cle:=() existe(x,ls) 
+     if cle != rien
+//     where  Net1 := ()elim( y*s*JK(s,s)*x*JK(y1,x1)*RESP,Net)
+     where  Net1 := ()elim( mess,Net)
+            
+end
+
+//--------------------------------------------------------------------
+
+// receiver
+
+[rulescomb]
+E <> D <> I <> ls <> Net<>cmp =>
+E <> y+COMMIT+JK(y,x).D1 <> I <> ls <>y*s*JK(s,s)*x*JK(y,x)*RESP. Net1<>cmp+1 
+            where node1 :=(listExtract)elem(D)
+            where (node) y+SLEEP+JK(dai,dai) :=() node1
+            where mess :=(listExtract)elem(Net) 
+            where (message) s*y1*JK(dai,dai)*x*JK(dai,dai)*INIT :=() mess
+            if y == y1
+//            where  D1 := ()elim(y+SLEEP+JK(dai,dai),D)
+            where  D1 := ()elim(node1,D)
+//            where  Net1 := ()elim(s*y*JK(dai,dai)*x*JK(dai,dai)*INIT,Net)
+            where  Net1 := ()elim( mess,Net)
+end
+
+
+[rulescoma1]
+E <> D <> I <> S <> Net<>cmp =>
+x+COMMIT+JK(x,y).E1<> D <> I <> S <> Net<>cmp+1
+          where mess := (listExtract)elem(Net)
+          where (message) s1*x*JK(x,y)*y*JK(y1,x)*RESP :=() mess
+          where node1  :=(listExtract)elem(E)
+          where (node) x1+WAIT+dk1 :=() node1
+	  // PEM
+          if x == x1
+//          where E1 := () elim (x1+WAIT+dk1 , E)
+          where E1 := () elim (node1 , E)
+          where Net1 := () elim ( s*x*JK(x,y)*y*JK(y,x)*RESP ,Net)
+end
+
+//---------------------------------------------------------------------
+//---------------------------------------------------------------------
+
+//  intruder intercepeted messages
+
+[rulescomi1]
+E <> D <> intr#intr1 <> S <> Net<>cmp =>
+//E <> D <>s1*x*cle*y*dk1*varia .intr#intr1 <> S <> Net1<>cmp+1
+E <> D <>mess .intr#intr1 <> S <> Net1<>cmp+1
+          where mess := (listExtract)elem(Net)
+          where (message) s1*x*cle*y*dk1*varia := () mess
+          if s1 != i
+//          where Net1 := () elim ( s1*x*cle*y*dk1*varia ,Net)
+//          if member( s1*x*cle*y*dk1*varia ,intr1)==false
+          where Net1 := () elim ( mess ,Net)
+          if member( mess ,intr1)==false
+          
+end
+
+
+// intruder sends a stored messages
+
+[rulescomi2]
+E <> D <> intr # intr1 <> S <> Net<>cmp =>
+//E <> D <> intr2# s1*s2*cle*s3*dk2*varia.intr1 <> S <> i*s*cle*s3*dk2*varia. Net<>cmp+1
+E <> D <> intr2# mess.intr1 <> S <> i*s*cle*s3*dk2*varia. Net<>cmp+1
+          if size(Net) < 1
+          where mess := (listExtract)elem(intr)
+          where (message) s1*s2*cle*s3*dk2*varia := () mess
+//          where intr2:= ()elim( s1*s2*cle*s3*dk2*varia ,intr)
+          where intr2:= ()elim( mess ,intr)
+end
+         
+
+[rulescomi21]
+E <> D <> intr#intr1 <> S <> Net<>cmp =>
+//E <> D <> intr2#s1*s2*JK(dai,dai)*s3*JK(dai,dai)*varia.intr1 <> S <> i*s*JK(s,s)*s3*JK(i,i)*RESP. Net<>cmp+1
+E <> D <> intr2#mess.intr1 <> S <> i*s*JK(s,s)*s3*JK(i,i)*RESP. Net<>cmp+1
+          if size(Net) < 1
+          where mess := (listExtract)elem(intr)
+          where (message) s1*s2*JK(dai,dai)*s3*JK(dai,dai)*varia := () mess
+//          where intr2 := () elim(s1*s2*JK(dai,dai)*s3*JK(dai,dai)*varia ,intr)
+          where intr2 := () elim (mess ,intr)
+end
+  
+
+//--------------------------------------------------------------------
+//--------------------------------------------------------------------
+
+
+rules for codath
+
+
+ x,y,z : identity;
+ S : list[codath];
+ cle : key ;
+
+global 
+
+[] existe (x ,nil )=>x|x| rien end
+[] existe (x , x|z|cle.S)=>x|z| cle end
+[] existe (x , y|z|cle.S)=> existe (x ,S)end
+
+end
+
+rules for key
+global
+	[] DK => JK(dai,dai)		 end 
+end
+
+
+end
+
+
+strategies for state
+
+implicit 
+  []com => 
+           dc one(rulescomai)
+           ;
+
+           repeat*(dk(
+                     rulescomi1, 
+		     rulescomi21,
+                     rulescoma,
+                     rulescoms , 
+                     rulescomb,
+		     rulescomi2,
+                     rulescoms1,
+                    rulescoma1 ))
+/*
+           repeat*(dk(
+                   dk(  rulescomi1 ), 
+		   dk(  rulescomi21),
+                   dk(  rulescoma),
+                   dk(  rulescoms) , 
+                   dk(  rulescomb),
+		   dk(  rulescomi2),
+                   dk(  rulescoms1),
+                   dk( rulescoma1 )
+		   ))
+*/
+
+  end                 
+ end
+ end
+
+
+  
+
+

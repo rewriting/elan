@@ -1,0 +1,61 @@
+#		(c)	INRIA-Lorraine & CRIN
+#			615, rue du Jardin Botanique, BP 101
+#		        54602 Villers-les-Nancy
+#			France
+#			email: elan@loria.fr
+#
+#	$Source: /users/protheo/pot/ELAN/CVSELAN/elan/sources/Compiler/RuntimeSupport/Makefile.common,v $
+#	$Revision: 1.3 $
+#	$Date: 1999/11/12 15:14:12 $
+#	$Author: moreau $
+
+# import CC
+# import FAST
+# import ARCH
+# import ARCHFLAG
+# import SPECIAL_FLAG
+# import ELANLIBME
+# import ELANLIB
+
+SUBDIRS       = ACMatcher TermIO
+MAKEINSTALLDIRS = 
+MAKEDISTDIRS    = $(ELANDIST)/Compiler/RuntimeSupport
+
+
+SRC    = Makefile.common\
+      ac_tools.c             bitset_tab_mask.c      match_state.greedy.c\
+      ac_tools.h             bitset_tab_mask.h      match_state.h\
+      bgraph.c               builtin.h              streval.c\
+      bgraph.h               builtinMatching.c      streval.h\
+      bitset.c               builtinMatching.h      term.c\
+      bitset.h               codes.h                term.h\
+      bitset_32.c            dart.h                 tools.c\
+      bitset_32.h            link.c                 tools.h\
+      bitset_tab_int.c       link.h\
+      bitset_tab_int.h       match_state.c
+
+all: 
+
+makefile:
+	@for DIR in $(SUBDIRS); \
+        do \
+		cp Makefile $$DIR;\
+                echo Make $@ in $$DIR; \
+                cd $$DIR && $(MAKE) $@; \
+		cd ..;\
+        done
+
+install:
+
+dist: dist-dirs 
+	cp $(SRC) $(ELANDIST)/Compiler/RuntimeSupport
+	@for DIR in $(SUBDIRS); \
+        do \
+                echo Make $@ in $$DIR; \
+                cd $$DIR && $(MAKE) $@; \
+		cd ..;\
+        done
+
+clean :
+	rm -f core a.out main *.o *~ y.tab.[ch] y.output lex.yy.c $(ARCH)/*.o $(ARCH)/*.a
+

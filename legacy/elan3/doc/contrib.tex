@@ -1,0 +1,218 @@
+% -*- Document-Type: LaTeX; Master-File: manual.tex -*- 
+
+%\chapter{Contributed works}
+% [ck: Aug 16 95]
+
+\section{Description of the \elan\ contributions}
+
+
+Many computational processes in Automated Deduction and Constraint
+Programming can be expressed as instances of a general approach that
+consists of applying transformation rules on formulas with some strategy, 
+until reaching specific normal forms. Such processes
+are naturally modelled in \elan, and can be classified according to
+the area of interest, namely programming, proving and solving.
+
+\noindent
+{\it Programming}:
+One of the first application was to prototype the fundamental
+mechanisms of logic and functional programming languages  like first-order
+resolution and $\lambda$-calculus.
+%
+The general framework of Constraint Logic
+Programming can be easily designed 
+in the \elan\ framework~\cite{KirchnerR-FI98}, since its operational
+semantics is clearly formalised as rewrite rules, although the
+application strategy is often defined in an informal way. 
+%
+Some implementations~\cite{Borovansky-95} related to a 
+calculus of explicit substitutions (the first-order rewrite system
+$\lambda\sigma$ that mimics $\lambda$-calculus) open the way of
+implementing higher-order logic programming languages via a
+first-order setting. Another calculus of 
+explicit substitutions based on the $\pi$-calculus is used to provide
+a formal specification of Input/Output for \elan~\cite{Viry-RwLg1996}. 
+
+\noindent
+{\it Proving}:
+\ELAN\ was used in order to implement a predicate prover based on the
+rules proposed by J.-R.~Abrial, and implemented in the
+B-tools~\cite{CirsteaKirchner97web}.
+We developed also a propositional sequent calculus, completion procedures for
+rewrite systems~\cite{KirchnerM-RTA95}, sufficient conditions
+for the termination problem~\cite{genetgnaedig-caap97}.
+A library for automata construction and manipulation has been
+designed. Approximation automata are used to check conditions for
+reachability, sufficient completeness, absence of conflicts in systems 
+described by non-conditional rewrite rules~\cite{genet-rta98,genet-these}.
+
+\noindent {\it Checking}: A very special case of proof is just exhaustive
+check of all the possibilities. Using in particular ``dont know'' strategies, it
+was efficiently rediscovered by exhaustive search that the well known Needam and
+Schroeder authentification protocol is unsafe~\cite{Cirstea-Proto-99}.
+
+%\subsubsection{Solving}
+\noindent
+{\it Solving}:
+The notion of rewriting controlled by strategies is used 
+in~\cite{Castro-FI98,KirchnerR-FI98} to describe in a unified way the
+constraint solving 
+mechanism as well as the meta-language needed to manipulate the
+constraints~\cite{castro-esslli-1997,castrokirchner:rta-war:1998}. This provides programs that are
+very close to the proof theoretical setting used now to describe
+constraint manipulations like unification or numerical constraint
+solving. \elan\ offers a constraint programming environment where
+the formal description of a constraint solver is directly
+executable. 
+\elan\ has been tested 
+on several examples of constraint solvers for various computation domains and
+combinations like abstract
+domains~\cite{KirchnerR-FI98,Ringeissen-RTA97} (term  
+algebras) and more concrete ones (finite domains, integers).
+In~\cite{Castro-ICTAI96,Castro-RwLg1996,Castro-ESSLLI97,castro:phd:1998},  
+it is shown how to use computational systems as a general framework
+for handling Constraint Satisfaction Problems (CSP for short). The
+approach leads to the design in \elan\ of \textsf{COLETTE}, a solver
+for constraints over integers and finite domains~\cite{castro:aisc:1998}. 
+We also combine rules, constraints and strategies in order to deal with problems like
+planning and scheduling~\cite{DuboisKirchner-Ercim99}.
+
+
+\section{\elan's annotated bibliography}
+
+\begin{description}
+
+\item[
+\cite{Elan-RwLg1996,Elan-ASF+SDF97,BorovanskyKKMR-WRLA98}
+] 
+General presentations of the different \elan\ system releases.
+
+
+\item[
+\cite{Strategies-RwLg1996,BorovanK-ASF+SDF97,Borovansky-WRLA98}
+]
+A description of the operational as well as denotational semantics of
+the new \elan\ strategies, available since version 2.0. This allows
+the user to define its own strategies as a computational system.
+
+
+\item[
+\cite{BKK-Fuji-98}
+]
+Towards a functional operational semantics of \elan.
+
+\item[
+\cite{BorovanskyJMR-WRLA98}
+]
+Some useful applications related to the \REF\ format.
+
+
+\item[
+\cite{BorovanskyCastro-WRLA98}
+]
+The facilities provided in \elan\ for the cooperation of constraint
+solvers.
+
+\item[
+\cite{BoroThese}
+]
+A full description of the \elan\ strategy language. In french.
+
+\item[
+\cite{Borovansky-95}
+] 
+An \elan\ implementation of higher-order unification by
+using a calculus of explicit substitutions.
+
+
+\item[
+\cite{Castro-RwLg1996,Castro-ICTAI96,Castro-ESSLLI97}
+] 
+The use of \elan\ to specify various constraint manipulation
+algorithms for CSP's.
+
+\item[
+\cite{Castro-FI98,KirchnerR-FI98,Castro-ESSLLI97,castro:aisc:1998,castro:phd:1998}
+]
+The rule-based approach to implement Constraint Programming and
+Constraint Solving Techniques. 
+
+\item[
+\cite{CirsteaKirchner-LivreFroCoS99,CirsteaKirchnerINRIA99}
+]
+The presentation of the rewriting calculus that provides a full
+semantics to \elan.
+
+\item[
+\cite{CirsteaKirchner97web}
+]
+The specification of Abrial's B predicate prover.
+
+\item[
+\cite{dubois98b}
+]
+The strategy language is used to build plans.
+
+\item[
+\cite{DuboisKirchner-Ercim99}
+]
+A combination of rewriting rules, constraints and strategy language for planning problems.
+
+\item[
+\cite{KirchnerKV-MIT95}
+] 
+The first presentation of the general
+ideas developed in \elan, with the definition of computational
+systems (including the definition of strategies) and the application
+of \elan\ to design and to prototype constraint programming languages.
+
+
+\item[
+\cite{Reflection-RwLg1996}
+] 
+An illustration of the reflective power of \elan\ and rewriting logic.
+
+\item[
+\cite{KirchnerM-RTA95}
+] 
+The \elan\ implementation of some rule-based completion
+procedures.
+
+\item[
+\cite{Kirchner-JFPLC99}
+]
+An \ELAN\ tutorial.
+
+
+\item[
+\cite{MoreauK-ASF+SDF97,MoreauK-PLILP+ALP98,KirchnerM-98,MoreauThese99}
+]
+A description of the new compilation techniques developed for \elan, in
+particular for associativity and commutativity
+
+
+\item[
+\cite{Ringeissen-RTA97}
+]
+The use of \elan\ to interface various unification algorithms
+and to build combination algorithms for unification.
+
+\item[
+\cite{Viry-RwLg1996}
+] 
+An implementation of input/output in \elan\ via an explicit
+substitution calculus for the $\pi$-calculus.
+
+\item[ \cite{Vittek-RTA96} 
+] 
+A description of the first \elan\ compiler.
+
+\item[
+\cite{VittekThese}
+] 
+The first main version of the \elan\ system in full details, from
+design to implementation. In French. 
+
+
+\end{description}
+

@@ -1,0 +1,386 @@
+module EtermCommons[Fss,Vars,Mvs]
+
+import global   eq[term] highOrderSubstitution;
+       local    int bool identifier list[int] list[variable] list[identifier]
+		Fss Vars Mvs 
+		pair[identifier,int] list[pair[identifier,int]];
+end
+
+sort amvariable mvariable variable term;
+end
+
+operators
+  global
+/*--- term ---*/
+  var(@)                : ( int ) variable;
+  @                     : ( variable ) term             pri 1000;
+// new
+  @                     : ( amvariable ) term             pri 1000;
+
+  head(@)               : ( term ) identifier;
+  @-th subterm(@)       : ( int term ) term;
+  nvocc(@)              : ( term ) list[int];
+  vocc(@)              : ( term ) list[int];
+
+  isvar(@)              : ( term ) bool;
+  isfun(@)              : ( term ) bool;
+  isamvar(@)            : ( term ) bool;  // Useful function
+
+  @ at @                : ( term list[int] ) term;
+  @[@] at @             : ( term term list[int] ) term;
+
+  [@]@                  : ( term term ) term;
+  \(@,@)                : ( term term ) term pri 1000 alias [@]@:; // Meta-abstraction
+  head(@)               : ( term ) variable;      // The formal
+  tail(@)               : ( term ) term;                // The bodies
+  @                     : ( variable ) list[variable]   pri 1000;
+
+/*--- termF ---*/
+        // This creates from the user specification the actual 
+        // rank for operators d of arity zero (the constants)
+  FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+  SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS) 
+        AND N:=()second(SS) ANDIF N==0 :{
+      F()         : term;
+      F       : term                          alias F():;
+    }
+
+        // From the user specification, this creates the actual
+        // rank for non constant operators
+FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS) 
+        AND N:=()second(SS) ANDIF N > 0 :{
+     F({,@}~N)          : ({term}~N)term;
+     F({@,}~N)          : ({term}~N)term        alias F({,@}~N):;
+     F(,{@,}~N)         : ({term}~N)term        alias F({,@}~N):;
+     F(@ {,@}~(N-1))   :({term}~N) term        alias F({,@}~N):;
+    }
+
+/*--- termV ---*/
+    FOR EACH SS:identifier SUCH THAT SS:=(listExtract) elem(Vars) :{
+      SS     : variable;
+    }
+    varlist_Vars        : list[variable];
+    varnum_Vars         : int;
+
+/*--- termM ---*/
+        // This creates from the user specification the actual 
+        // rank for meta vars d of arity zero
+  FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+  SUCH THAT SS:=(listExtract) elem(Mvs) AND F:=()first(SS) 
+        AND N:=()second(SS) ANDIF N==0 :{
+/*
+      F         : term;
+      F()       : term                          alias F:;
+*/
+      F         : amvariable;
+      F()       : amvariable                    alias F:;
+
+    }
+
+        // From the user specification, this creates the actual
+        // rank for meta vars of non-zero arity
+FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+SUCH THAT SS:=(listExtract) elem(Mvs) AND F:=()first(SS) 
+        AND N:=()second(SS) ANDIF N > 0 :{
+/*
+     F (@ {,@}~(N-1))   :({term}~N) term;
+     F({,@}~N)          : ({term}~N)term  alias F(@{,@}~(N-1)):;
+     F({@,}~N)          : ({term}~N)term  alias F(@{,@}~(N-1)):;
+     F(,{@,}~N)         : ({term}~N)term  alias F(@{,@}~(N-1)):;
+*/
+
+     F (@ {,@}~(N-1))   :({term}~N) amvariable;
+     F({,@}~N)          : ({term}~N)amvariable  alias F(@{,@}~(N-1)):;
+     F({@,}~N)          : ({term}~N)amvariable  alias F(@{,@}~(N-1)):;
+     F(,{@,}~N)         : ({term}~N)amvariable  alias F(@{,@}~(N-1)):;
+
+    }
+
+end
+
+stratop
+  global
+    isVariable		: <bool>	builtin;
+    checkAMVar		: <bool>	builtin;
+    chooseOccurence	: <list[int]>	builtin;
+    chooseVarOccurence	: <list[int]>	builtin;
+end
+
+/* --- termF ---*/
+
+FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS) 
+        AND N:=()second(SS) ANDIF N > 0 :{
+
+  rules for term
+    t_1,...,t_N: term;
+    t,s:term;
+    l:list[int];
+  global
+   { [] I-th subterm(F(t_1,...,t_N))   => t_I           end
+   }_I=1...N
+
+// Il y a un pb ici
+   { [] F(t_1,...,t_N)[s] at I.l => F(t_1,...,t_(I-1),t_I[s] at l,t_(I+1),...,t_N)
+    end
+   }_I=1...N
+
+
+  end
+}
+
+FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS) 
+        AND N:=()second(SS) ANDIF N > 0 :{
+   rules for list[int]
+   t_1,...,t_N: term;
+   oocc:list[int];
+   global
+   { [inOccRuleF] nvocc(F(t_1,...,t_N)) => J.oocc 
+                where oocc:=(chooseOccurence) nvocc(t_J)
+      end
+      [inVarOccRuleF] vocc(F(t_1,...,t_N))      => J.oocc 
+                where oocc:=(chooseVarOccurence) vocc(t_J)
+      end
+   }_J=1...N
+   end
+}
+
+
+FOR EACH SS:pair[identifier,int]; FF:identifier;  NN:int
+SUCH THAT SS:=(listExtract) elem(Fss) AND FF:=()first(SS) 
+	AND NN:=()second(SS) :{
+   rules for identifier
+    tt_1,...,tt_NN : term;
+   global  
+     [] head(FF(tt_1,...,tt_NN)) => FF end
+   end
+}
+
+// Il y a un pb ici
+FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS) 
+        AND N:=()second(SS) ANDIF N==0 :{
+   rules for bool
+    t: term;
+   global
+     [] isfun(F) => true end
+     [] isfun(t) => false end
+   end
+}
+
+FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS) 
+        AND N:=()second(SS) ANDIF N>0 :{
+   rules for bool
+    t, t_1,...,t_N: term;
+   global
+     [] isfun(F(t_1,...,t_N)) => true end
+     [] isfun(t)              => false end
+   end
+}
+
+/* --- termV ---*/
+rules for list[variable]
+global
+  [] varlist_Vars => 
+  FOR EACH SS:identifier SUCH THAT SS:=(listExtract) elem(Vars) :{ SS.} nil
+  end
+end
+
+FOR EACH N:int SUCH THAT 
+        N:=() size_of_variable_list(FOR EACH SS:identifier 
+                                    SUCH THAT SS:=(listExtract) elem(Vars) 
+                                        :{ SS.} nil ) 
+:{
+rules for int 
+global
+  [] varnum_Vars => N end
+end
+}
+
+
+FOR EACH SS:identifier SUCH THAT SS:=(listExtract) elem(Vars) :{
+   rules for bool
+    t: term;
+   global
+     [isVarOK] isvar(SS) => true end
+     [isVarNO] isvar(t)  => false end
+   end
+}
+
+/*
+// a tester
+rules for bool
+	v:variable; t:term;
+global
+  [isVarOK] isvar(v)   => true                                 end
+  [isVarNO] isvar(t)   => false                                end
+end
+*/
+
+/* --- termM ---*/
+
+
+FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+SUCH THAT SS:=(listExtract) elem(Mvs) AND F:=()first(SS) 
+        AND N:=()second(SS) ANDIF N > 0 :{
+  rules for term
+   t_1,...,t_N : term;
+  global
+
+   { [] I-th subterm(F(t_1,...,t_N))   => t_I           end
+   }_I=1...N
+
+   rules for identifier
+   global
+	[] head(F(t_1,...,t_N))           => F            end
+   end
+
+   rules for list[int]
+    oocc:list[int];
+   global
+   { [inOccRuleM] nvocc(F(t_1,...,t_N)) => J.oocc 
+                where oocc:=(chooseOccurence) nvocc(t_J)
+      end
+      [inVarOccRuleM] vocc(F(t_1,...,t_N))      => J.oocc 
+                where oocc:=(chooseVarOccurence) vocc(t_J)
+      end
+   }_J=1...N
+   end
+
+  end
+}
+
+FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+SUCH THAT SS:=(listExtract) elem(Mvs) AND F:=()first(SS) 
+        AND N:=()second(SS) :{
+   rules for identifier
+    t_1,...,t_N : term;
+   global
+	[] head(F(t_1,...,t_N))           => F            end
+   end
+}
+
+
+FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+SUCH THAT SS:=(listExtract) elem(Mvs) AND F:=()first(SS) 
+        AND N:=()second(SS) ANDIF N==0 :{
+   rules for bool
+    t: term;
+   global
+     [isamvaryes] isamvar(F) => true end
+     [isamvarno]  isamvar(t) => false end
+   end
+}
+
+/*
+// a tester
+rules for bool
+  F : amvariable;
+  t : term;
+global
+  [isamvaryes] isamvar(F) => true end
+  [isamvarno]  isamvar(t) => false end
+end
+*/
+
+FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+SUCH THAT SS:=(listExtract) elem(Mvs) AND F:=()first(SS) 
+        AND N:=()second(SS) ANDIF N>0 :{
+   rules for bool
+    t, t_1,...,t_N: term;
+   global
+     [isamvaryes] isamvar(F(t_1,...,t_N)) => true end
+     [isamvarno]  isamvar(t)            => false end
+   end
+}
+
+
+FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+SUCH THAT SS:=(listExtract) elem(Mvs) AND F:=()first(SS) 
+        AND N:=()second(SS) ANDIF N != 0 :{
+  rules for term
+   t_1,...,t_N : term; t,s:term; l:list[int];
+  global
+  { [] F(t_1,...,t_N)[s] at I.l => F(t_1,...,t_(I-1),t_I[s] at l,t_(I+1),...,t_N)
+    end
+  }_I=1...N
+  end
+}
+
+
+
+
+
+
+
+rules for term
+ t,s:term;  i:int;  ls:list[int]; v:term;
+global
+  [] \(v,t) at 1.ls     => v at ls                      end
+  [] \(v,t) at 2.ls     => t at ls                      end
+  [] t at nil           => t                            end
+  [] t at i.ls          => i-th subterm(t) at ls        end
+  [] \(v,t)[s] at 2.ls  => \(v,t[s] at ls)              end
+  [] t[s] at nil        => s                            end
+end
+
+rules for term
+ v,t: term;
+global
+  [] head(\(v,t))       => v                            end
+  [] tail(\(v,t))       => t                            end
+end
+
+rules for list[int]
+ t:term; v:term; oocc:list[int]; isitvar:bool;
+global
+  [topOccRule]  nvocc(t)          => nil
+                where isitvar := (isVariable) isvar(t)
+                if not isitvar
+                end
+  [inOccRule]   nvocc(\(v,t)) => 1.oocc
+                where oocc:=(chooseOccurence) nvocc(v)
+                end
+  [inOccRule]   nvocc(\(v,t)) => 2.oocc
+                where oocc:=(chooseOccurence) nvocc(t)
+                end
+  [topVarOccRule]  vocc(t)          => nil
+                   where isitvar := (isVariable) isvar(t)
+                   if isitvar 
+                   end
+  [inVarOccRule]   vocc(\(v,t)) => 1.oocc
+                   where oocc:=(chooseVarOccurence) vocc(v)
+                   end
+  [inVarOccRule]   vocc(\(v,t)) => 2.oocc
+                   where oocc:=(chooseVarOccurence) vocc(t)
+                   end
+end
+
+rules for identifier
+  $x:variable;
+global
+  [] head($x)    => var                                end
+end
+
+strategies for bool
+implicit
+  [.] isVariable => first one(isVarOK , isVarNO) 		end
+  [.] checkAMVar => first one(isamvaryes , isamvarno)		end
+end
+
+strategies for list[int]
+implicit
+  [.] chooseOccurence =>
+    dk(topOccRule , inOccRule , inOccRuleM , inOccRuleF)
+  end
+  [.] chooseVarOccurence =>
+    dk(topVarOccRule , inVarOccRule , inVarOccRuleM , inVarOccRuleF)
+  end
+end
+
+
+end
+

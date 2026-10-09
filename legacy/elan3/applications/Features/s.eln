@@ -1,0 +1,30 @@
+module s
+
+import global int string;
+
+sort Foo;
+
+op global
+  print(@)	: (string) Foo;
+  @		: (string) Foo;
+end
+
+rules for Foo
+x, y : string;
+bodies
+  [] print(x) => "bb"	end	
+  [] print("aaa") => "ddddd" end
+end
+
+rules for string
+x, y : string;
+bodies
+  [R] 	x => "AAA" end
+  [R] 	x => y 	where y:=()"ABC"		end
+end
+
+strategy ss
+  dk(R)
+end
+
+end

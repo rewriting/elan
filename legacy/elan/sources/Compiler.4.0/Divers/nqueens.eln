@@ -1,0 +1,76 @@
+module nqueens
+import global int bool;
+end
+sort list;
+end
+operators
+global
+
+  nil			: list;
+  @.@			: ( int list ) list;
+
+  queens(@,@)		: ( int int ) list;
+  queens(@)		: ( int ) list;
+  noattack(@,@,@)	: ( int int list ) bool;
+end
+
+stratop global
+	range		: <int>		bs;
+	queens_strat	: <list>	bs;
+end
+
+rules for list
+  n,size,x : int;
+  ql : list;
+global
+  [] queens(n)	=> queens(n,n)					end
+
+  [queens_0] queens(0,size)	=> nil
+  end
+  [queens_n] queens(n,size)	=> x . ql
+	   where ql:=(queens_strat) queens(n-1,size)
+	   where x:=(range) size
+	   if noattack(1,x,ql)
+  end
+end
+
+rules for int
+  x : int;
+global
+  [range] x => 1 end
+  [range] x => 2 end
+  [range] x => 3 end
+  [range] x => 4 end
+  [range] x => 5 end
+  [range] x => 6 end
+  [range] x => 7 end
+  [range] x => 8 end
+end
+
+rules for bool
+  p,d,diff : int;
+  l : list;
+global
+  [] noattack(diff,d,nil)	=> true	end
+  [] noattack(diff,d,p.l)	=> if d!=p
+				   if d-p!=diff 
+				   if p-d!=diff
+				   if noattack(diff+1,d,l)
+  end
+end
+
+strategies for int
+implicit
+  [] range =>	dk(range) end
+end
+
+strategies for list
+implicit
+  [] queens_strat => dk(queens_0, queens_n)	end
+  [] det_queens_strat => dc one(queens_0, queens_n)	end
+end
+
+end
+
+
+

@@ -1,0 +1,23 @@
+#! /bin/csh -f
+clear
+
+
+
+#
+# I - iterpretor
+# C - compiler
+# A - aterm exporter, loader
+# P - partial evaluation
+# L - long test (all examples)
+# J - java compiler
+#
+
+limit cputime 2000s
+
+tst_one Unification $1
+tst_one UnifPb $1
+tst_one MatchingAC $1
+tst_one Dio $1
+
+
+

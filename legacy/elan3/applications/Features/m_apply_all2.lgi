@@ -1,0 +1,9 @@
+LPL m_apply_all2 description 
+
+        query           of sort int
+        result          of sort list[Term]
+        import          m_apply_all2
+        start with 	()goo(query)
+
+end
+

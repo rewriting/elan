@@ -1,0 +1,9 @@
+LPL m_apply2 description 
+
+        query           of sort int
+        result          of sort Term
+        import          m_apply2
+        start with 	(GOO)goo(query)
+
+end
+

@@ -1,0 +1,8 @@
+#! /bin/csh -f
+#        LGI         SPC        INP        OUT
+
+itest     spike   add  spike add
+##itest     spike   trans  spike add
+
+
+

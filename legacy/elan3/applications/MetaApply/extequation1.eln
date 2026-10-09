@@ -1,0 +1,158 @@
+module extequation1[vars,fss,prec]
+
+/* Extension of the sort equation */
+/* In Basic Completion, an equation is extended such that it is */
+/* formed of an equation, and two lists of list of integers, a list of */
+/* list of marked positions in the left hand side and a list of marked */
+/* positions in the right hand side */
+
+/* vars : variables, 
+   fss  : operators,
+   prec : precedence */
+
+
+import	
+	global
+		list[int]
+		list[list[int]]
+		eqSystem[fss,vars] /* defined the sorts eqSystem, equation */
+	;
+	local
+		vars
+		fss
+		prec		
+		int
+		bool
+		renaming[vars,fss,prec]
+	;
+end
+
+sort extequation1;
+end
+
+operators
+  global
+
+	/* Constructor of the sort extequation1 */
+	@, @, @, @	: (equation int list[list[int]] list[list[int]])
+			extequation1;
+
+	/* Destructors of an extequation1 */
+    	equation(@)	: (extequation1) equation;
+	counter(@)	: (extequation1) int;
+	llpositions(@)	: (extequation1) list[list[int]];
+	rlpositions(@)	: (extequation1) list[list[int]];
+
+	/* Test the equality of two objects of type extequation1 */
+	eqextequation1(@,@)	: (extequation1 extequation1) bool;
+
+	/* Give the number i of the variable writtem by var(i) such */
+	/* that i is maximum in the equation or the integer n if n > i */
+	maxvar(@,@)	: (extequation1 int) int;
+
+	/* Renaming of the equation from var(0) */
+	/* normalize(f(g(x),y))=x => f(g(var(1)),var(0))=var(1) */
+	normalize(@)	: (extequation1) extequation1;
+
+	/* Renaming of the equation from var(i) when i = n+1 */
+	/* translate(f(g(var(1)),var(0))=var(1),3) => */
+	/* f(g(var(5)),var(4))=var(5) */
+	translate(@,@)	: (extequation1 int) extequation1;
+
+	/* size of an extequation1 wrt the size of the equation */
+	size(@)		: (extequation1) int;
+end
+
+
+rules for equation
+	e, ee : equation;
+	n     : int;
+	l, ll : list[list[int]];
+global
+	[] equation(e,n,l,ll)			=> e
+	end
+end
+
+
+rules for int
+	e, ee : equation;
+	n     : int;
+	l, ll : list[list[int]];
+global
+	[] counter(e,n,l,ll)			=> n
+	end
+end	
+
+
+rules for list[list[int]]
+	e, ee : equation;
+	n, n1, n2 : int;
+	l, ll, lll, llll : list[list[int]];
+global
+	[] llpositions(e,n,l,ll)		=> l
+	end
+
+	[] rlpositions(e,n,l,ll)		=> ll
+	end
+end
+
+
+rules for bool
+	e1, e2		: equation;
+	num1, num2	: int;
+	l1, l2, ll1, ll2: list[list[int]];
+global
+	[] eqextequation1(e1,num1,l1,l2,e2,num1,ll1,ll2)	=> true
+	end
+
+	[] eqextequation1(e1,num1,l1,l2,e2,num2,ll1,ll2)	=> false
+	end
+end
+
+
+rules for int
+	e 	: equation;
+	num, n 	: int;
+	l1, l2 	: list[list[int]];
+global
+	[] maxvar(e,num,l1,l2,n)	=> maxvar(e,n)
+	end
+end
+
+
+rules for extequation1
+	e 	: equation;
+	num 	: int;
+	l1, l2 	: list[list[int]];
+global
+	[] normalize(e,num,l1,l2)	=> normalize(e,0),num,l1,l2
+	end
+end
+
+
+rules for extequation1
+	e 	: equation;
+	num,n 	: int;
+	l1, l2 	: list[list[int]];
+global
+	[] translate(e,num,l1,l2,n)	=> translate(e,n),num,l1,l2
+	end
+end
+
+
+rules for int
+	e 	: equation;
+	num,n 	: int;
+	l, ll 	: list[list[int]];
+global
+	[] size(e,n,l,ll)	=> size(e)
+	end
+end
+
+end
+
+
+
+
+
+

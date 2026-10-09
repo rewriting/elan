@@ -1,0 +1,26 @@
+LPL critical_pairs description 
+
+  specification description
+
+    part Vars	of sort list[identifier]
+	 	import sigSyntax
+    part Ops	of sort list[pair[identifier,int]]
+	 	import sigSyntax
+    part Prec	of sort list[pair[identifier,int]]
+	 	import sigSyntax
+    part System of sort list[equation]
+                import sigSyntax
+			EtermCommons[Ops,Vars]
+			equation[Vars,Ops,Prec]
+			list[equation]
+  end
+
+  query 	
+                of sort list[criticalPair]
+         	result of sort list[criticalPair]
+	 	import critical_pairs[Vars,Ops,System] 
+			list[equation] list[int] list[list[int]] int bool
+			EtermCommons[Ops,Vars]
+         	start with () query
+end
+

@@ -1,0 +1,16 @@
+#!/bin/tcsh
+#
+# lance le test des fichiers du repertoire $1
+#
+
+
+set ELAN = "~moreau/bin/`uname -m`/elan"
+set EXAMPLEDIR = Sample
+
+foreach f ($EXAMPLEDIR/*)
+   if ($f != "$EXAMPLEDIR/Other") then
+	echo "File: $f"
+	echo "Results:"
+	$ELAN -q -b ans_completion $f < start
+   endif
+end

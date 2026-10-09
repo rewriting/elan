@@ -1,0 +1,205 @@
+module Alldiff[Variables,Values]
+
+import
+global	
+	CSPDefinition[Variables,int,Values]
+	Values Variables 
+	list[domain]
+	;
+end
+
+
+operators
+global
+
+	CreateListOfDomain(@) 	: (list[constraint])                                 	list[domain];   
+	DomainInclude(@,@)	: (domain domain)                                 	bool;
+	Comptepremier(@,@,@,@)  : (list[domain] list[domain] list[domain] int)    	int;
+	Comptesecond(@,@,@,@)   : (list[domain] list[domain] list[domain] int)    	int;
+	Comptefinal(@,@,@,@)    : (list[domain] list[domain] list[domain] int)    	int;
+	Compte(@,@)             : (list[domain] int)                              	int;
+	Alldiff1(@,@)           : (list[domain] list[domain])                     	bool;
+	Alldiff2(@,@)           : (list[domain] list[domain])                     	bool;
+	Alldiff(@)              : (list[constraint])                     		bool;
+	GetListOfDomains(@,@)	: (list[term] list[constraint])				list[constraint];
+end
+
+
+rules for list[constraint]
+
+	x	: var;
+	lt	: list[term];
+	D1	: domain;
+	l1, lmc	: list[constraint];
+	c	: constraint;
+
+global 
+
+[]	GetListOfDomains(x.lt,lmc)
+	=>
+	c.GetListOfDomains(lt,lmc)
+	where (list[constraint]) c.l1 := ()GetVarInHead(x,lmc,nil)
+end
+[]	GetListOfDomains(nil,lmc)
+	=>
+	nil
+end
+
+end
+
+
+rules for list[domain]
+
+	x	: var;
+	D	: domain;
+	lmc     : list[constraint];
+	
+global 
+
+[]	CreateListOfDomain(x in? D.lmc)   
+	=>
+	D.CreateListOfDomain(lmc)
+end
+
+[]	CreateListOfDomain(nil)
+	=>
+	nil
+end
+
+end
+	
+
+rules for bool
+
+	D1,D2,D,Dk,Di,Dj,Dl,c,d,e   : domain;
+	ld,ld1,ld2,ld3              : list[domain];
+	p                           : int;
+	A, b                           : bool;
+	lmc			    : list[constraint];
+
+global 
+
+[]	DomainInclude(Di U Dj,D2)
+	=>
+	DomainInclude(Di,D2) and DomainInclude(Dj,D2)
+end
+
+[]	DomainInclude(D1,Dk U Dl)
+	=>
+	DomainInclude(D1,Dk) or DomainInclude(D1,Dl)
+end
+
+[]      DomainInclude(D1,D2)
+	=>
+	b
+	choose
+	try
+		if MinOfDomain(D1) >= MinOfDomain(D2) and MaxOfDomain(D1) <= MaxOfDomain(D2)
+		where b := () true
+	try 
+		where b := () false
+	end
+end
+
+[]	Alldiff1(c.ld1,d.ld2)
+	=> 
+	b
+	where p := ()Compte(c.ld1,0)
+        choose
+	try
+        	if p > GetCard([MinOfDomain(c),..,MaxOfDomain(d)])
+		where b := () false
+	try
+        	if p == MaxOfDomain(d) - MinOfDomain(c) + 1
+		where b := () Alldiff1(c.ld1,ld2)
+        end
+end
+
+[]	Alldiff1(c.ld,nil)
+// a voir
+	=>
+	true
+end
+
+	
+[]	Alldiff2(c.ld1,d.ld2)	
+	=>
+  	Alldiff1(c.ld1,d.ld2) and Alldiff1(ld1,d.ld2)
+
+end
+
+[] 	Alldiff2(nil,d.ld)
+// a voir
+	=>
+	true 
+end 
+
+[]	Alldiff(lmc)
+	=>
+// a voir
+	Alldiff2(CreateListOfDomain(lmc),CreateListOfDomain(lmc))
+end
+
+end
+
+
+rules for int
+
+	c,d,e           	: domain;
+	ld1,ld2,ld3,ld	        : list[domain];
+	p, intf                 : int;
+
+global 
+
+[]	Comptepremier(c.ld1,d.ld2,e.ld3,p)
+	=>
+	intf
+	choose
+	try
+		if DomainInclude(c,[MinOfDomain(d),..,MaxOfDomain(e)])
+		where intf := () Comptepremier(ld1,d.ld2,e.ld3,p+1)
+	try
+		where intf := () Comptepremier(ld1,d.ld2,e.ld3,p)
+	end
+end
+[]	Comptepremier(nil,d.ld2,e.ld3,p)
+// a voir
+ 	=>
+	p
+end
+
+[]	Comptesecond(c.ld1,d.ld2,e.ld3,p)
+	=>
+// a voir
+  	Comptepremier(c.ld1,d.ld2,e.ld3,p) + Comptepremier(c.ld1,d.ld2,ld3,p)
+end
+
+[]	Comptesecond(c.ld1,d.ld2,nil,p)
+	=>
+// a voir
+	p
+end
+
+[]	Comptefinal(c.ld1,d.ld2,e.ld3,p)
+	=> 
+// a voir
+        Comptesecond(c.ld1,d.ld2,e.ld3,p) + Comptesecond(c.ld1,ld2,e.ld3,p)
+end
+
+[]	Comptefinal(c.ld1,nil,e.ld2,p)
+	=>
+// a voir
+	p
+end
+
+[]	Compte(c.ld,p)
+	=>
+// a voir
+	Comptefinal(c.ld,c.ld,c.ld,p)
+end
+
+end
+
+
+end
+

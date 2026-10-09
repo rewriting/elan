@@ -1,0 +1,156 @@
+module Solve[Vars,Fss]
+import 	global 	term varabst varUnif[Vars] termUnif[Fss] ;
+ 	local  	int identifier bool pair[identifier,int]
+		list[int] list[identifier] list[pair[identifier,int]] 
+                eq[variable] eq[term] 
+		eqSystem combiSystem callUnif[Vars,Fss] eqMulti
+                occur[variable,term] occur[variable,eqSystem] ;
+end
+
+operators
+
+local
+
+        maxvar(@,@)     : (eqSystem variable) int ;
+
+        elimvar(@,@,@)  : (eqSystem int int) eqSystem ;
+        elimvar1(@)     : (combiSystem) combiSystem ;
+        elimvar2(@)     : (combiSystem) combiSystem ;
+
+
+
+	@ '\10'     	: ( eqSystem ) eqSystem;
+        @ newline       : ( eqSystem ) eqSystem alias @ '\10': ;
+        @ '\10' @ '\10' :(term term) equation ;
+        @ newline @ newline: (term term) equation alias @ '\10' @ '\10' : ;
+  	@ @		  :(eqSystem eqSystem ) eqSystem assocLeft ;
+        convert(@)      : (eqSystem) eqSystem ;
+end
+
+
+      rules for int 
+      // declare 
+      n:int; P:eqSystem; t1,t2:term ;
+       
+      global 
+      []  maxvar(P & t1 = t2,xnew.n) => 
+             maxvar(P,xnew.n) ?max  maxv(t1,xnew.n) ?max maxv(t2,xnew.n)
+          end
+      []  maxvar(P & t1 = t2,var(n)) => 
+             maxvar(P,var(n)) ?max  maxv(t1,var(n)) ?max maxv(t2,var(n))
+          end
+
+      []  maxvar(t1 = t2,xnew.n) => maxv(t1,xnew.n) ?max maxv(t2,xnew.n)
+          end
+      []  maxvar(t1 = t2,var(n)) => maxv(t1,var(n)) ?max maxv(t2,var(n))
+          end
+
+
+      []  maxvar(true,var(n))     => n end
+      []  maxvar(true,xnew.n)    =>  n end 
+      
+      end
+
+
+
+rules for eqSystem
+// declare 
+t1,t2 : term; P,Q : eqSystem; i,n:int;
+global
+  [addnewline]   P => P newline end
+  []             convert(P & t1 = t2) => convert(P) t1 newline t2 newline end
+  []             convert(t1 = t2) => t1 newline t2 newline end
+  [conversion]	 P => Q where Q := (strataddnl) convert(P) end
+
+  []             elimvar(P,i,n) => elimvar(apply(var(i) -> xnew.(i+n), P),i-1,n) 
+                 if i > 0 end
+  []             elimvar(P,i,n) => P if i == 0 end
+  [solve]        P => Q where Q := (callunif) P end
+
+end
+
+
+rules for combiSystem
+//declare 
+mn,mv:int ; PH,P1,P2,Sol,Q1,Q2:eqSystem ; t1,t2: term ;
+
+global 
+
+[solve1]     PH . P1 . P2 . Sol => 
+             PH . Q1 . P2 . Sol where Q1 :=  (unify) P1
+             if not issolved(P1) end
+
+[solve2]     PH . P1 . P2 . Sol => 
+             PH . P1 . Q2 . Sol where Q2 :=  (unify) P2
+             if not issolved(P2) end
+
+[elimvar1]   PH . P1 . P2 . Sol => 
+             PH . elimvar(P1,mv,mn) . P2 . Sol
+             where mn := () maxvar(P1,xnew.0) ?max maxvar(P2,xnew.0)
+             where mv := () maxvar(P1,var(0))
+             end
+
+[elimvar2]   PH . P1 . P2 . Sol => 
+             PH . P1 . elimvar(P2,mv,mn) . Sol 
+             where mn := () maxvar(P1,xnew.0) ?max maxvar(P2,xnew.0)
+             where mv := () maxvar(P2,var(0))
+             end
+
+end of rules
+
+
+strategies for eqSystem
+    [strataddnl]
+    dont care choose(addnewline)
+    end
+
+    [unify]
+    dont care choose(conversion) ;
+    dont know choose(solve) ;
+    dont care choose(nettoie) 
+    end
+end
+
+
+strategy for combiSystem 
+     [trycombi]
+
+     repeat*(
+
+     dont know choose(solve1 || solve2)
+        
+     dont care choose(elimvar1) ;
+     dont care choose(elimvar2) ;
+
+     dont care choose(trueadd1) ;
+     repeat*(
+       dont care choose(varRep1 || next1 || unfold1)
+       )
+     dont care choose(trueelim1 || truepass1) ;
+
+
+     dont care choose(trueadd2) ;
+     repeat*( 
+       dont care choose(varRep2 || next2 || unfold2)
+       )
+     dont care choose(trueelim2 || truepass2)
+
+     )
+
+
+     dont care choose(trueadd1) ;
+     dont care choose(trueadd2) ;
+
+     
+ repeat*(
+  dont care choose(unfold1 || propagate1 || unfold2 || propagate2)
+  )
+
+ dont care choose(trueelim1 truepass1) ;
+ dont care choose(trueelim2 truepass2) 
+ end
+
+end 
+
+
+end of module

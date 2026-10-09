@@ -1,0 +1,44 @@
+if ![info exists prompt] then {
+    set prompt "Enter a query term of sort 'test'"
+}
+#
+# xelan_version -- extract and print the version number of xelan
+#
+
+proc xelan_version {} {
+    #
+}
+#
+# xelan_load -- loads the program
+#
+proc xelan_load { arg } {
+    global prompt
+    global spawn_id
+    global verbose
+    
+    if { $verbose > 1 } {
+        send_user "starting $arg\n"
+    }
+    spawn "./$arg"
+    expect {
+        -re "No such file.*" { perror "Can't start $arg"; exit 1 }
+        -re "$prompt" { }
+        timeout { perror "Failed to spawn $arg (timeout)"; exit 1 }
+    }
+}
+
+#
+# xelan_exit -- quit and cleanup
+#
+proc xelan_exit {} {
+    #
+}
+
+#
+# xelan_start -- start xelan running
+#
+proc xelan_start {} {
+    #
+}
+
+xelan_start

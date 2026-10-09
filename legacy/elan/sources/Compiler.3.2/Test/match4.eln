@@ -1,0 +1,37 @@
+module match4
+
+//import glterm.getNext()obal int;
+//end
+
+sort term ;
+end
+
+operators global
+ a      : term;
+ b      : term;
+ c      : term;
+ d      : term;
+ go	: term;
+
+ nil	: term;
+ f(@,@)	: (term term) term;
+ g(@,@)	: (term term) term;
+ h(@,@)	: (term term) term;
+
+end
+
+
+
+rules for term
+	t1,t2,t3,t4 : term;
+global 
+
+[]	go => f(g(h(a,b),c),d) end
+[]	f(g(h(t1,t2),t3),t4)	=> a end
+[]	f(g(t1,t2),t4)		=> b end
+
+
+end
+
+
+end

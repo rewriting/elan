@@ -1,0 +1,8 @@
+#!/bin/sh
+
+echo "Prettyprint for " $1
+cd $1
+./prettyprintAll
+cd ..
+
+

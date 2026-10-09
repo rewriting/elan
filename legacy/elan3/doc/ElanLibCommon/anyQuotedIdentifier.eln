@@ -1,0 +1,37 @@
+//
+//		(c)	INRIA-Lorraine & CRIN
+//			615, rue du Jardin Botanique, BP 101
+//		        54602 Villers-les-Nancy
+//			France
+//			email: elan@loria.fr
+//
+//	$Source: /CVS/aircube/elan3/doc/ElanLibCommon/anyQuotedIdentifier.eln,v $
+//	$Revision: 1.1 $
+//	$Date: 1997/03/25 16:46:44 $
+//	$Author: moreau $
+//
+
+module anyQuotedIdentifier
+
+/*
+	This module is		***built-in***
+	What follows are only	***comments*** 
+	for explaining its semantics
+
+import anyIdentidier ;
+op
+ global
+
+ "a" 	: ident alias a:;
+ "b" 	: ident alias b:;
+ "aa" 	: ident alias aa:;
+ "ab" 	: ident alias ab:;
+ "aab" 	: ident alias aab:;
+ ...
+ ...
+
+end
+
+*/
+
+end

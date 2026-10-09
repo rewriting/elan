@@ -1,0 +1,36 @@
+module listSort[Vars]
+import 	global 	Elem[Vars] ;
+ 	local  	List callSort[Vars] ;
+end
+
+operators local
+	@ '\10'     	: ( list ) list;
+        @ newline       : ( list ) list alias @ '\10': ;
+        convert(@)      : ( list ) list ;
+end
+
+
+stratop global 
+strataddnl : < list -> list > bs  ;
+extSort: < list -> list > bs ;
+end
+
+
+rules for list
+	P,Q : list ;
+        a: elem ;
+global
+  [addnewline]   P => P newline end
+  []             convert(P a) => convert(P) Q
+                            where Q:=() a newline end
+  []             convert(a) => a newline end
+  [conversion]	 P => Q where Q := (strataddnl) convert(P) end
+  [sortRule]        P => Q where Q := (callSort) P end
+end
+
+strategies for list
+implicit
+    [] strataddnl => dc one(addnewline) end
+    [] extSort => dc one(conversion) ; dc one(sortRule) end
+end
+end

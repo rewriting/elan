@@ -1,0 +1,10 @@
+LPL testArray2  description
+
+query of sort  builtinArray[Term]
+result of sort  builtinArray[Term]
+	  
+import testArray
+start with () array2
+
+end
+

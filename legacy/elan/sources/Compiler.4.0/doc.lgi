@@ -1,0 +1,166 @@
+LPL doc description  
+  specification description
+	part stagids of sort list[identifier]
+		import identifier list[identifier]
+	part ttagids of sort list[identifier]
+		import identifier list[identifier]
+	part sattrids of sort list[identifier]
+		import identifier list[identifier] 
+	part tattrids of sort list[identifier]
+		import identifier list[identifier]  end
+
+ query of sort TXML
+	result of sort TXML
+	import doc
+	start with ()query
+  end
+
+/* ---- Example D.1 -----
+app
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+		xmlns="http://www.w3.org/TR/xhtml1/strict">
+<xsl:template match=doc> 
+   <html>
+ 	<head>
+	    <title> 
+		<xsl:value-of select=title />
+	    </title>
+	</head> 
+	<body>
+	    <xsl:apply-templates/>
+   	</body>
+   </html>
+</xsl:template> 
+
+<xsl:template match=doc/title> 
+   <h1> 
+	<xsl:apply-templates/> 
+   </h1>
+</xsl:template>
+
+<xsl:template match=chapter/title> 
+   <h2> 
+	<xsl:apply-templates/> 
+   </h2>
+</xsl:template>
+
+<xsl:template match=section/title> 
+   <h3> 
+	<xsl:apply-templates/> 
+   </h3>
+</xsl:template>
+
+<xsl:template match=para> 
+   <p> 
+	<xsl:apply-templates/> 
+   </p>
+</xsl:template>
+
+<xsl:template match=note> 
+   <p class="note">
+	<b>  
+		"NOTE:"
+	</b>
+	<xsl:apply-templates/> 
+   </p>
+</xsl:template>
+
+<xsl:template match=emph> 
+   <em> 
+	<xsl:apply-templates/> 
+   </em>
+</xsl:template>
+</xsl:stylesheet>
+to
+<doc>
+	<title>"Document Title"</title>
+	<chapter>
+		<title>"Chapter Title"</title>
+		<section>
+			<title>"Section Title"</title>
+			<para>"This is a test."</para>
+			<note>"This is a note."</note>
+		</section>
+		<section>
+			<title>"Another Section Title"</title>
+			<para>
+				"This is "
+				<emph> "another" </emph>
+				" test."
+			</para>
+			<note> "This is another note." </note>
+		</section>
+	</chapter>
+</doc>
+end
+----------------- */
+
+/* ------ Example D.2 ------
+app
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+		xmlns="http://www.w3.org/TR/xhtml1/strict">
+<xsl:template match=root> 
+   <html lang="en">
+ 	<head>
+	    <title> 
+		"Sales Results By Division"
+	    </title>
+	</head> 
+	<body>
+	    <table border="1">
+		<tr>
+		    <th>"Division"</th>
+		    <th>"Revenue"</th>
+		    <th>"Growth"</th>
+		    <th>"Bonus"</th>
+		</tr>
+		<xsl:for-each select=sales/division>
+		    <xsl:sort data-type="number" select=revenue order="descending"/>
+		    <tr>
+			<td>
+			    <em>
+				<xsl:value-of select=@id />
+			    </em>
+			</td>
+			<td>
+			    <xsl:value-of select=revenue />
+			</td>
+			<td>
+			    <xsl:if test= growth<0>
+				<xsl:attribute name=style>
+				    <xsl:text> "color:red" </xsl:text>
+				</xsl:attribute>
+			    </xsl:if>
+			    <xsl:value-of select=growth />
+			</td>
+			<td>
+			    <xsl:value-of select=bonus />
+			</td>
+		    </tr>
+		</xsl:for-each>
+	    </table>
+   	</body>
+   </html>
+</xsl:template> 
+</xsl:stylesheet>
+to
+<sales>
+	<division id="North">
+		<revenue>"10"</revenue>
+		<growth>"9"</growth>
+		<bonus>"7"</bonus>
+	</division>
+	<division id="South">
+		<revenue>"4"</revenue>
+		<growth>"3"</growth>
+		<bonus>"4"</bonus>
+	</division>
+	<division id="West">
+		<revenue>"6"</revenue>
+		<growth>"-1.5"</growth>
+		<bonus>"2"</bonus>
+	</division>
+</sales>
+end
+
+----------------- */

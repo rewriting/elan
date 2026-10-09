@@ -1,0 +1,16 @@
+module quote
+import global anyIdentifier;
+end
+sort  	Foo; 
+end
+
+operators global
+  f(@)		: (ident) Foo ;
+end
+
+end
+				
+
+
+
+

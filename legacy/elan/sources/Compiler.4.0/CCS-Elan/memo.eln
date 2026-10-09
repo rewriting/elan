@@ -1,0 +1,320 @@
+module memo
+
+import global bool eq[labelname] hashTable[ccst,set] cmp[set];
+end
+
+sort ccst rccst label labelname procId resId relId set;
+end
+
+operators global
+  emptySet	        : set;
+  @ U @         : (set set) set (AC);
+  [@]		: (ccst) set;
+  @.updateHashTable(@,@) : (hashTable[ccst,set] ccst ccst) hashTable[ccst,set];
+
+  tau	: label pri 50;
+  p(@)	: (labelname) label;
+  @     : (labelname) label pri 1 alias p(@) :;
+  q(@)	: (labelname) label;
+  '\39' @ : (labelname) label alias q(@):;  // '@ is inverse Action  (39="'")
+
+  @     : (procId) ccst 		pri 40;         //Defined Process
+  0 	: ccst				pri 50;		//empty Process
+  |(@,@) : (ccst ccst) ccst assocRight	pri 10;
+  +(@,@) : (ccst ccst) ccst assocRight	pri 20;
+  @ | @ : (ccst ccst) ccst assocRight 	pri 10 alias |(@,@):;         //parallel
+  @ # @ : (ccst ccst) ccst assocRight 	pri 10 alias |(@,@):;         //parallel
+  @ + @	: (ccst ccst) ccst assocRight 	pri 20 alias +(@,@):;         //choice
+  @.@ : (label ccst) ccst 		pri 30;         //action
+  (@) : (ccst) ccst;
+  @ \ @: (ccst resId) ccst pri 5;
+  @ [@]: (ccst relId) ccst pri 7;
+
+  (@;;@ |@)	: (label ccst hashTable[ccst,set]) rccst;
+  (;@ |@)	: (ccst hashTable[ccst,set]) rccst;
+
+  go : rccst;
+
+Knuth: procId;
+K1: procId;
+K2: procId;
+C1_0: procId;
+C1_1: procId;
+C1_2: procId;
+C2_0: procId;
+C2_1: procId;
+C2_2: procId;
+P1: procId;
+P11: procId;
+P12: procId;
+P13: procId;
+P14: procId;
+P15: procId;
+P16: procId;
+P17: procId;
+P2: procId;
+P21: procId;
+P22: procId;
+P23: procId;
+P24: procId;
+P25: procId;
+P26: procId;
+P27: procId;
+KBig: procId;
+L: resId;
+c1r0: labelname;
+c1r1: labelname;
+c1r2: labelname;
+c1w0: labelname;
+c1w1: labelname;
+c1w2: labelname;
+c2r0: labelname;
+c2r1: labelname;
+c2r2: labelname;
+c2w0: labelname;
+c2w1: labelname;
+c2w2: labelname;
+enter1: labelname;
+enter2: labelname;
+exit1: labelname;
+exit2: labelname;
+kr1: labelname;
+kr2: labelname;
+kw1: labelname;
+kw2: labelname;
+req1: labelname;
+req2: labelname;
+
+
+
+
+local
+  doesNotRestrict(@,@) : (resId label) bool;
+  doesNotRestrictName(@,@) : (resId labelname) bool;
+  isInverseLabel(@,@)  : (label label) bool;             //check if l1 = l2'
+  apply @ on @ : (relId label) label;             //apply relabeling on label
+  appl  @ on @ : (relId labelname) labelname;     //  "       "      "  labelname
+end
+
+stratop global
+   start_str: <rccst -> rccst> bs;
+   calc_str:  <rccst -> rccst> bs;
+   extract :  <set -> set> bs;
+end
+
+rules for bool
+  ln1,ln2: labelname;
+  l: label;
+  resId__: resId;
+global
+  [] isInverseLabel(p($ln1),q($ln2)) => true if $ln1 == $ln2 end
+  [] isInverseLabel(q($ln1),p($ln2)) => true if $ln1 == $ln2 end
+
+  [] doesNotRestrict($resId__,tau) => true end
+  [] doesNotRestrict($resId__,p($ln1)) =>  doesNotRestrictName($resId__,$ln1) end
+  [] doesNotRestrict($resId__,q($ln1)) =>  doesNotRestrictName($resId__,$ln1) end
+
+
+[] doesNotRestrictName(L,kw1) => false end
+[] doesNotRestrictName(L,kw2) => false end
+[] doesNotRestrictName(L,kr1) => false end
+[] doesNotRestrictName(L,kr2) => false end
+[] doesNotRestrictName(L,c1w0) => false end
+[] doesNotRestrictName(L,c1w1) => false end
+[] doesNotRestrictName(L,c1w2) => false end
+[] doesNotRestrictName(L,c1r0) => false end
+[] doesNotRestrictName(L,c1r1) => false end
+[] doesNotRestrictName(L,c1r2) => false end
+[] doesNotRestrictName(L,c2w0) => false end
+[] doesNotRestrictName(L,c2w1) => false end
+[] doesNotRestrictName(L,c2w2) => false end
+[] doesNotRestrictName(L,c2r0) => false end
+[] doesNotRestrictName(L,c2r1) => false end
+[] doesNotRestrictName(L,c2r2) => false end
+
+
+
+
+  [] doesNotRestrictName($resId__,$ln1) => true end
+end
+
+rules for label
+  ln, newln : labelname;
+  relId: relId;
+global
+  [] apply $relId on tau => tau end
+  [] apply $relId on p($ln) => p(appl $relId on $ln)
+//        where newln := () appl $relId on $ln
+        end
+  [] apply $relId on q($ln) => q(appl $relId on $ln)
+//        where newln := () appl $relId on $ln
+        end
+end
+
+rules for labelname
+  relId: relId;
+  ln: labelname;
+global
+  [] appl $relId on $ln => $ln end
+end
+
+rules for set
+  x : set;
+global
+  [] x U x => x end
+end
+
+rules for hashTable[ccst,set]
+  ht1,ht2 : hashTable[ccst,set];
+  t1,t2 : ccst;
+  set, newSet : set;
+global
+  [] ht1.updateHashTable(t1,t2) => ht2
+	//if ht1.containsKey(t1)
+	where set    :=() ht1.get(t1)
+	where newSet :=() set U [t2]
+	where ht2    :=() ht1.add(t1,newSet)		    
+  end
+end
+
+ 
+rules for rccst
+	t, t1, t2, t11, t21 : ccst ;
+        l,l1,l2: label;
+        term: ccst;
+        res, R: rccst;
+	resId: resId;
+	relId: relId;
+
+	set : set;
+	ht,ht1,ht2,ht3,ht4 : hashTable[ccst,set];
+global
+
+ [] go =>  (;|(Knuth,tau.tau.0) |ht)
+       where ht :=() new(10,emptySet)
+ end
+
+    [start_rule] res => res end
+
+    [checkMemo] (;t1 |ht) => (;t1 |ht) if false end
+
+/*
+    [checkMemo] (;t1 |ht) => (;t2 |ht)
+	    where set :=() ht.get(t1)
+	    if set != emptySet
+	    where (set) [t2] :=(extract) set
+    end
+*/
+
+    [act]  (;$l.$t |ht) => ($l;;$t |ht) 
+//	      where ht2 :=() ht.updateHashTable($l.$t,$l;;$t) 
+    end
+
+
+    [plus1] (;$t1 + $t2 |ht) => (l;;$t |ht2)
+              where (rccst) (l;;$t |ht1) := (calc_str)(;$t1 |ht)
+	      where ht2 :=() ht1.updateHashTable($t1,$t) 
+    end
+
+    [plus2] (;$t1 + $t2 |ht) => (l;;$t |ht2)
+              where (rccst) (l;;$t |ht1) := (calc_str)(;$t2 |ht)
+	      where ht2 :=() ht1.updateHashTable($t2,$t) 
+    end
+
+    [par1] (;$t1 | $t2 |ht) => ($l;; $t | $t2 |ht2) 
+              where (rccst)($l;;$t |ht1) := (calc_str)(;$t1 |ht)
+	      where ht2 :=() ht1.updateHashTable($t1,$t) 
+    end
+    [par2] (;$t1 | $t2 |ht) => ($l;; $t1 | $t |ht2) 
+              where (rccst)($l;;$t |ht1) := (calc_str)(;$t2 |ht)
+	      where ht2 :=() ht1.updateHashTable($t2,$t) 
+    end
+
+    [par3] (;$t1 | $t2 |ht) => (tau;; $t11 | $t21 |ht4)
+              where (rccst)($l1;; $t11 |ht1) := (calc_str)(;$t1 |ht)
+	      where ht2 :=() ht1.updateHashTable($t1,$t11)  
+	      where (rccst)($l2;; $t21 |ht3) := (calc_str)(;$t2 |ht2)
+      	      where ht4 :=() ht3.updateHashTable($t2,$t21)  
+              if isInverseLabel($l1,$l2)
+              end
+
+    [res] (;$t1 \ $resId |ht) => ($l;; $t \ $resId |ht2)
+	      where (rccst) ($l;;$t |ht1) := (calc_str)(;$t1 |ht)
+	      where ht2 :=() ht1.updateHashTable($t1,$t) 
+              if doesNotRestrict($resId,$l)
+	      end
+    [rel] (; $t [$relId] |ht) => ($l2 ;; $t1 [$relId] |ht)
+              where (rccst) ($l1;; $t1 |ht1) := (calc_str)(;$t |ht)
+	      where ht2 :=() ht1.updateHashTable($t,$t1) 
+	      where (label) $l2 := () apply $relId on $l1
+	      end
+
+[proc] (; Knuth |ht ) => ($l1;; $t1 |ht2) 
+//       where res := (calc_str) (; (P1 | P2 | K1 | C1_0 | C2_0) \ L |ht) 
+       where (rccst) ($l1;; $t1 |ht1) := (calc_str) (; (P1 | P2 | K1 | C1_0 | C2_0) \ L |ht) 
+       where ht2 :=() ht1.updateHashTable(Knuth,$t1) 
+end
+
+[proc] (; K1  |ht) => res where res := (calc_str) (; kw1.K1 + kw2.K2 + 'kr1.K1 |ht) end
+[proc] (; K2 |ht ) => res where res := (calc_str) (; kw1.K1 + kw2.K2 + 'kr2.K2 |ht) end
+[proc] (; C1_0  |ht) => res where res := (calc_str) (; c1w0.C1_0 + c1w1.C1_1 + c1w2.C1_2 + 'c1r0.C1_0 |ht) end
+[proc] (; C1_1  |ht) => res where res := (calc_str) (; c1w0.C1_0 + c1w1.C1_1 + c1w2.C1_2 + 'c1r1.C1_1 |ht) end
+[proc] (; C1_2  |ht) => res where res := (calc_str) (; c1w0.C1_0 + c1w1.C1_1 + c1w2.C1_2 + 'c1r2.C1_2 |ht) end
+[proc] (; C2_0  |ht) => res where res := (calc_str) (; c2w0.C2_0 + c2w1.C2_1 + c2w2.C2_2 + 'c2r0.C2_0 |ht) end
+[proc] (; C2_1  |ht) => res where res := (calc_str) (; c2w0.C2_0 + c2w1.C2_1 + c2w2.C2_2 + 'c2r1.C2_1 |ht) end
+[proc] (; C2_2  |ht) => res where res := (calc_str) (; c2w0.C2_0 + c2w1.C2_1 + c2w2.C2_2 + 'c2r2.C2_2 |ht) end
+[proc] (; P1  |ht) => res where res := (calc_str) (; tau.P11 + tau.0 |ht) end
+[proc] (; P11  |ht) => res where res := (calc_str) (; 'c1w1.req1.P12 |ht) end
+[proc] (; P12  |ht) => res where res := (calc_str) (; kr1.P14 + kr2.P13 |ht) end
+[proc] (; P13  |ht) => res where res := (calc_str) (; c2r0.P14 + c2r1.P12 + c2r2.P12 |ht) end
+[proc] (; P14  |ht) => res where res := (calc_str) (; 'c1w2.P15 |ht) end
+[proc] (; P15  |ht) => res where res := (calc_str) (; c2r0.P16 + c2r1.P16 + c2r2.P17 |ht) end
+[proc] (; P16  |ht) => res where res := (calc_str) (; 'kw1.enter1.exit1.'kw2.'c1w0.P1 |ht) end
+[proc] (; P17  |ht) => res where res := (calc_str) (; 'c1w1.P12 |ht) end
+[proc] (; P2  |ht) => res where res := (calc_str) (; tau.P21 + tau.0 |ht) end
+[proc] (; P21  |ht) => res where res := (calc_str) (; 'c2w1.req2.P22 |ht) end
+[proc] (; P22  |ht) => res where res := (calc_str) (; kr2.P24 + kr1.P23 |ht) end
+[proc] (; P23  |ht) => res where res := (calc_str) (; c1r0.P24 + c1r1.P22 + c1r2.P22 |ht) end
+[proc] (; P24  |ht) => res where res := (calc_str) (; 'c2w2.P25 |ht) end
+[proc] (; P25  |ht) => res where res := (calc_str) (; c1r0.P26 + c1r1.P26 + c1r2.P27 |ht) end
+[proc] (; P26  |ht) => res where res := (calc_str) (; 'kw2.enter2.exit2.'kw1.'c2w0.P2 |ht) end
+[proc] (; P27  |ht) => res where res := (calc_str) (; 'c2w1.P22 |ht) end
+[proc] (; KBig  |ht) => res where res := (calc_str) (; Knuth|Knuth|Knuth |ht) end
+
+
+end
+
+
+rules for ccst
+  t: ccst;
+global
+  [] ($t) => $t end
+
+end
+
+rules for set
+  S: set ;
+  t : ccst;
+global 
+  [extractrule] [t] U S => [t] end
+end
+
+strategies for set
+implicit
+  [] extract => dk(extractrule) end
+end
+
+
+strategies for rccst
+  implicit
+    [] start_str => start_rule end
+    [] calc_str => 
+       first(
+	dk(checkMemo),
+	dk( act, plus1, plus2, par1, par2, par3, res, rel, proc ) 
+       )
+    end
+end
+
+
+end

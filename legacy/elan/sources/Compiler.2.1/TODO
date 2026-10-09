@@ -1,0 +1,25 @@
+[pem: Apr 21 99]
+Verifier le schema de compilation :
+
+  if(bitSet32_get(mask32,1)) {
+    if(ACPattern)
+      CUTOPEN(); /* AC matching */
+      //if(setChoicePoint()) {
+      /* AC matching failed, try next rule */
+      //goto myend3;
+      // }
+    if(ACPattern && MS_reinit(ms,v2,0)>0) {
+      while(1) {
+        if(MS_solve_rule(ms)<0) {
+            //fail();
+          goto myend3;
+        }
+        /* choicePoint AC matching */
+        if(!setChoicePoint()) {
+          break;
+        }
+      }
+    } else {
+        //fail();
+      goto myend3;
+          }

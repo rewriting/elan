@@ -1,0 +1,76 @@
+module horse
+import global int bool pair[int,int];
+end
+
+sort list; end
+
+operators
+global
+  nil			: list;
+  @.@			: ( pair[int,int] list ) list;
+  1st(@)		: ( list ) pair[int,int];
+  horse(@)		: ( int ) list;
+  noattack(@,@)		: ( pair[int,int] list ) bool;
+end
+
+stratop global
+  range		: <pair[int,int]>	builtin;
+  horse_strat	: <list>		builtin;
+end
+
+rules for pair[int,int]
+        x,y : int;
+	z :  pair[int,int];
+	l : list;
+global
+  [] 1st(z.l) => z end
+  [range_rule]  [x,y]	=> [x+1,y] if x+1<5 end
+  [range_rule]  [x,y]	=> [x,y+1] if y+1<5 end
+  [range_rule]  [x,y]	=> [x-1,y] if x-1>0 end
+  [range_rule]  [x,y]	=> [x,y-1] if y-1>0 end
+end
+
+rules for list
+        n : int;
+	x :  pair[int,int];
+	ql : list;
+local
+  //[horse_0] horse(0)	=> [1,1].nil
+  //end
+
+  [horse_0] horse(0)	=> 
+[6,8].[4,7].[2,8].[3,6].[4,8].[6,7].[8,6].[6,5].[4,4].[2,3].[1,5].[2,7].[4,6].[3,8].[1,7].[2,5].[1,3].[3,4].[2,2].[4,3].[3,1].[1,2].[2,4].[4,5].[2,6].[1,4].[3,5].[1,6].[3,7].[5,8].[7,7].[5,6].[7,5].[5,4].[3,3].[2,1].[4,2].[6,1].[8,2].[6,3].[7,1].[5,2].[7,3].[8,1].[6,2].[8,3].[6,4].[8,5].[6,6].[7,8].[5,7].[7,6].[5,5].[7,4].[5,3].[7,2].[5,1].[3,2].[1,1].nil
+  end
+
+  [horse_n] horse(n)	=> x . ql
+			   if n>0
+			   where ql:=(horse_strat) horse(n-1)
+			   where x:=(range)1st(ql) 
+			   if noattack(x,ql)
+  end
+end
+
+rules for bool
+          x,y,u,v	 :  int;
+	d :  pair[int,int];
+	l : list;
+global
+  [] noattack(d,nil)	=> true								end
+  [] noattack([x,y],[u,v].l)	=> (x!=u or y!=v) and noattack([x,y],l)	end
+end
+
+
+strategies for pair[int,int]
+implicit
+  [] range => dk(range_rule) end
+end
+
+strategies for list
+implicit
+  [] horse_strat => dk(horse_0 || horse_n)  end
+end
+
+end
+
+
+

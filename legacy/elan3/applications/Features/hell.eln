@@ -1,0 +1,54 @@
+module hell
+
+import global string int Foo prompt[string] prompt[int] prompt[Foo];
+
+rules for Foo
+c, c1	: Foo;
+d, d1	: int;
+s, s1	: string;
+bodies
+  [] who => (c,d) 	where c1:=()print(c)
+			where c:=()read 
+			where s:=()print("value of Foo:\n")
+			where d1:=()print(d)
+			where d:=()read 
+			where s1:=()print("value of int:\n")
+  end
+  [] whot => read			end
+end
+
+
+
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

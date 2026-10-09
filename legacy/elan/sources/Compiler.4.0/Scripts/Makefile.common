@@ -1,0 +1,37 @@
+#		(c)	INRIA-Lorraine & CRIN
+#			615, rue du Jardin Botanique, BP 101
+#		        54602 Villers-les-Nancy
+#			France
+#			email: elan@loria.fr
+#
+#	$Source: /users/protheo/pot/ELAN/CVSELAN/elan/sources/Compiler/Scripts/Makefile.common,v $
+#	$Revision: 1.2 $
+#	$Date: 1998/11/24 15:40:25 $
+#	$Author: moreau $
+
+# import CC
+# import FAST
+# import ARCH
+# import ARCHFLAG
+# import SPECIAL_FLAG
+# import ELANLIB
+
+MAKEINSTALLDIRS =
+MAKEDISTDIRS    = $(ELANDIST)/Compiler/Scripts
+
+
+SRC    = Makefile.common\
+       add_end prettyIO ref_filter elanc prettyOutput rm_Blank
+
+all: 
+
+makefile:
+
+install:
+	cp $(SRC) $(ELANLIB)/../bin/
+dist: dist-dirs 
+	cp $(SRC) $(ELANDIST)/Compiler/Scripts
+
+clean :
+	rm -f core a.out main *.o *~ y.tab.[ch] y.output lex.yy.c $(ARCH)/*.o $(ARCH)/*.a
+

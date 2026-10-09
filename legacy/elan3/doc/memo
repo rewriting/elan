@@ -1,0 +1,108 @@
+[ck: Nov 20 95][ck: Nov 28 95][ck: Nov 30 95]
+
+Le manuel, derniere version se trouve dans:
+/users/protheo/pot/ELAN/version.1.17/manual/
+
+pour tout formatter:
+
+1-- faire ./prettyprintAll 
+    (qui applique lgrind sur tous les fichiers utiles)
+(
+2-- latex manual
+3-- makeindex manual
+4-- bibtex manual
+)*
+
+Reste a faire (au moins!):
+
+fait * finir de modifier la librairie standard (plus de AnyTruc) --> Marian
+fait * completer la section Interfacing Built-ins --> Marian
+* des idees pour verifier automatiquement les exemples executables. Tous les exemples
+  ne le sont pas necessairement: ce qui n'est pas genial. Des idees?
+* mettre a jour le fichier README du chapitre 2 pour qu'il soit consistant
+  avec le README de la distribution (lequel est le bon??!!) (--> Marian et moi)
+fait * completer/modifier 2.1
+
+fait * relire et critiquer (--> Pierre-Etienne + Peter + Helene)
+
+Attention tous les fichiers du manuel sont ouverts a tout le groupe
+(protheo) en ecriture! Pour l'instant envoyez moi vos commentaires,
+eventuellement les paragraphes corriges, je les placerai dans les
+sources moi meme.
+
+[ck: Nov 20 95]
+[ck: Nov 28 95] reste a faire!
+L'exemple de 1.3 a faire
+
+[ck: May  2 97]
+Des remarques en vrac:
+
+-- ou est defini AnyIdentifier?
+-- Difference entre ident et identifier (avec les noquotes)
+-- Dans un where avec patterns que se passe t il si:
+	- le pattern ne contient PAS de variables
+	- le pattern contient des variables qui n'apparaissent pas dans 
+	  la regle? 
+-- avoir tous les messages d'erreur elan: exemple de revision a faire:
+	en cas de sort indefinie: => unknow type
+-- ";" dans les imports, ca sert a quoi?
+-- la strategy fail est elle bi?
+-- pb avec le repeat+ : core dump
+-- la syntaxe des labels de regles et de strategies est definie comme
+etant n <identifier> or un label tel que:
+	all-rep* pose pb ici
+	   ^   ^
+--termComons: la strategy "inOccRul" n'est pas definie si il n'y a que
+des constantes.
+
+[ck: May  2 97]
+-- Corriger la syntaxe dasn le figure xfig: im-elan1.eps
+-- Quels sont les modules bi?
+
+
+
+[ck: Oct 29 98]
+ce qui est utilise' comme exemples.
+
+-libellule 131-> grep insertExample *
+
+changes.tex:%\newcommand{\insertExamples}[1]{\insertCode{ElanExamples}{#1}}
+install.tex:%\insertExamples{install.structure.eln}
+
+language.tex:\insertExamples{simplePairSelectors.eln}
+	---> bug dans le parser [ck: Nov 21 98]
+language.tex:\insertExamples{simplePair.eln}
+	---> OK
+language.tex:\insertExamples{rule-ex.eln}
+language.tex:\insertExamples{ruleWithWhere.eln}
+language.tex:\insertExamples{quick.eln}
+language.tex:\insertExamples{indeterminism.eln}
+language.tex:\insertExamples{testStrat.eln}
+language.tex:\insertExamples{testConc.eln}
+language.tex:\insertExamples{stratFail.eln}
+language.tex:\insertExamples{iterRepeat.eln}
+language.tex:\insertExamples{normLambda.eln}
+language.tex:\insertExamples{map.eln}
+language.tex:\insertExamples{lib.eln}
+language.tex:\insertExamples{robot.eln}
+language.tex:\insertExamples{robotall.eln}
+language.tex:\insertExamples{queens.eln}
+language.tex:\insertExamples{normalizeFirst.eln}
+language.tex:\insertExamples{simpleList.eln}
+language.tex:\insertExamples{simpleList.lgi}
+language.tex:\insertExamples{testStrat.lgi}
+language.tex:\insertExamples{unification.lgi}
+language.tex:\insertExamples{simplesig.spc}
+language.tex:\insertExamples{moduleVarUnif.eln}
+language.tex:\insertExamples{moduleOpsUnif.eln}
+language.tex:\insertExamples{decomposition.eln}
+language.tex:\insertExamples{decompositionExpanded.eln}
+language.tex:\insertExamples{intListSort.eln}
+
+short.tex:\insertExamples{poly1.eln}
+short.tex:\insertExamples{poly1.lgi}
+short.tex:\insertExamples{poly2.eln}
+short.tex:\insertExamples{poly2.lgi}
+short.tex:\insertExamples{someVariables.spc}
+short.tex:\insertExamples{poly3.eln}
+

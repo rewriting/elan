@@ -1,0 +1,6 @@
+LPL ns1 description 
+ query of sort state
+   result of sort state
+   import ns1
+   start with (com) a+SLEEP+a <> b-SLEEP-b <> ii # nl#nl #nill <> nill<>0
+end

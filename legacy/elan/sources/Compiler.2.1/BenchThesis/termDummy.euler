@@ -1,0 +1,323 @@
+------------------------------------------------------------
+fib_builtin
+compiler
+fib(21)
+50 runs : moyenne = 4674285 rwr/sec
+fib(22)
+50 runs : moyenne = 4709846 rwr/sec
+fib(23)
+50 runs : moyenne = 4708937 rwr/sec
+fib(24)
+50 runs : moyenne = 4737841 rwr/sec
+fib(25)
+50 runs : moyenne = 4755925 rwr/sec
+fib(26)
+50 runs : moyenne = 4758470 rwr/sec
+fib(27)
+50 runs : moyenne = 4761196 rwr/sec
+fib(28)
+50 runs : moyenne = 4677404 rwr/sec
+------------------------------------------------------------
+nqueensAC
+compiler
+nqueens(7)
+50 runs : moyenne = 496537 rwr/sec
+nqueens(8)
+50 runs : moyenne = 581142 rwr/sec
+nqueens(9)
+50 runs : moyenne = 558924 rwr/sec
+nqueens(10)
+20 runs : moyenne = 638061 rwr/sec
+nqueens(11)
+20 runs : moyenne = 671519 rwr/sec
+------------------------------------------------------------
+Bool3
+compiler
+q3
+50 runs : moyenne = 22906 rwr/sec
+q4
+50 runs : moyenne = 21056 rwr/sec
+q5
+50 runs : moyenne = 18656 rwr/sec
+q6
+50 runs : moyenne = 15538 rwr/sec
+q8
+50 runs : moyenne = 9760 rwr/sec
+------------------------------------------------------------
+compiler
+FastCompletion
+p1
+50 runs : moyenne = 0 rwr/sec
+p2
+50 runs : moyenne = 0 rwr/sec
+p3
+50 runs : moyenne = 0 rwr/sec
+p4
+50 runs : moyenne = 0 rwr/sec
+p5
+50 runs : moyenne = 0 rwr/sec
+------------------------------------------------------------
+compiler
+MinelaComp
+primes(2)
+50 runs : moyenne = 0 rwr/sec
+primes(3)
+50 runs : moyenne = 0 rwr/sec
+primes(4)
+50 runs : moyenne = 0 rwr/sec
+primes(5)
+50 runs : moyenne = 0 rwr/sec
+primes(6)
+50 runs : moyenne = 0 rwr/sec
+primes(7)
+50 runs : moyenne = 0 rwr/sec
+primes(8)
+50 runs : moyenne = 0 rwr/sec
+------------------------------------------------------------
+Set
+compiler
+powerSet(4)
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+powerSet(5)
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+powerSet(6)
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+Bus error (core dumped) 
+------------------------------------------------------------
+fib_builtin
+compiler
+fib(21)
+50 runs : moyenne = 4627859 rwr/sec
+fib(22)
+50 runs : moyenne = 4694178 rwr/sec
+fib(23)
+50 runs : moyenne = 4729508 rwr/sec
+fib(24)
+50 runs : moyenne = 4725931 rwr/sec
+fib(25)
+50 runs : moyenne = 4744155 rwr/sec
+fib(26)
+50 runs : moyenne = 4750038 rwr/sec
+fib(27)
+50 runs : moyenne = 4751122 rwr/sec
+fib(28)
+50 runs : moyenne = 4757138 rwr/sec
+------------------------------------------------------------
+nqueensAC
+compiler
+nqueens(7)
+50 runs : moyenne = 492150 rwr/sec
+nqueens(8)
+50 runs : moyenne = 587239 rwr/sec
+nqueens(9)
+50 runs : moyenne = 567597 rwr/sec
+nqueens(10)
+20 runs : moyenne = 643506 rwr/sec
+nqueens(11)
+20 runs : moyenne = 671701 rwr/sec
+------------------------------------------------------------
+Bool3
+compiler
+q3
+50 runs : moyenne = 22947 rwr/sec
+q4
+50 runs : moyenne = 20951 rwr/sec
+q5
+50 runs : moyenne = 18642 rwr/sec
+q6
+50 runs : moyenne = 15477 rwr/sec
+q8
+50 runs : moyenne = 9812 rwr/sec
+------------------------------------------------------------
+compiler
+FastCompletion
+p1
+50 runs : moyenne = 560679 rwr/sec
+p2
+50 runs : moyenne = 557033 rwr/sec
+p3
+50 runs : moyenne = 540729 rwr/sec
+p4
+50 runs : moyenne = 562582 rwr/sec
+p5
+50 runs : moyenne = 529238 rwr/sec
+------------------------------------------------------------
+compiler
+MinelaComp
+primes(2)
+50 runs : moyenne = 263723 rwr/sec
+primes(3)
+50 runs : moyenne = 293205 rwr/sec
+primes(4)
+50 runs : moyenne = 269518 rwr/sec
+primes(5)
+50 runs : moyenne = 282169 rwr/sec
+primes(6)
+50 runs : moyenne = 294114 rwr/sec
+primes(7)
+50 runs : moyenne = 292236 rwr/sec
+primes(8)
+50 runs : moyenne = 296801 rwr/sec
+------------------------------------------------------------
+Set
+compiler
+powerSet(4)
+50 runs : moyenne = 33728 rwr/sec
+powerSet(5)
+50 runs : moyenne = 37963 rwr/sec
+powerSet(6)
+50 runs : moyenne = 36051 rwr/sec
+powerSet(7)
+50 runs : moyenne = 28527 rwr/sec
+powerSet(8)
+50 runs : moyenne = 19258 rwr/sec
+------------------------------------------------------------
+Nat10
+compiler
+fib(10)
+50 runs : moyenne = 76405 rwr/sec
+fib(11)
+50 runs : moyenne = 78401 rwr/sec
+fib(12)
+50 runs : moyenne = 80324 rwr/sec
+fib(13)
+50 runs : moyenne = 80561 rwr/sec
+fib(14)
+50 runs : moyenne = 81365 rwr/sec
+fib(15)
+50 runs : moyenne = 81822 rwr/sec
+fib(16)
+50 runs : moyenne = 81950 rwr/sec

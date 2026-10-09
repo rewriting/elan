@@ -1,0 +1,43 @@
+module syntax_rho
+
+import global bool signature;
+end
+
+sort term;
+end
+
+operators
+  global
+    // l\sigma,r\sigma,\sigma
+    #(@,@,@): 	(term term term) term;
+    // does term contain a rewrite step ?
+    pi(@):  (term) bool;
+    // concatenation
+    @;@     :   (term term) term assocLeft pri 10;
+    Equal(@,@): (term term) term;
+end
+
+operators
+global
+    (A_Plus @  @) : 	(term term) term; 
+end
+
+rules for bool
+ x,y,z: term;
+global
+	[] pi(#(x,y,z)) => true end
+
+	[] pi(A_Zero) => false end
+	[] pi(y0) => false end
+	[] pi(y1) => false end
+	[] pi(y2) => false end
+	[] pi(y3) => false end
+
+	[] pi((A_Plus x y)) => pi(x) or pi(y) end
+	[] pi((A_Mult x y)) => pi(x) or pi(y) end
+	[] pi((A_Opp x)) => pi(x) end
+	[] pi(x;y) => pi(x) or pi(y) end	 
+	
+end
+
+end

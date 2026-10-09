@@ -1,0 +1,19 @@
+#! /bin/csh -f
+
+if ($1 =~ *I*) then
+itest SolverIntegerCSP IntegerSpecification carlos carlos 
+itest SolverIntegerCSP IntegerSpecification ex1 ex1
+if ($1 =~ *L*) then
+itest SolverIntegerCSP IntegerSpecification ex2 ex2
+itest SolverIntegerCSP IntegerSpecification ex3 ex3
+endif
+endif
+
+if ($1 =~ *A*) then
+aitest SolverIntegerCSP IntegerSpecification carlos carlos 
+aitest SolverIntegerCSP IntegerSpecification ex1 ex1
+if ($1 =~ *L*) then
+aitest SolverIntegerCSP IntegerSpecification ex2 ex2
+aitest SolverIntegerCSP IntegerSpecification ex3 ex3
+endif
+endif

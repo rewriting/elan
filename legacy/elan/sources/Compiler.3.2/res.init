@@ -1,0 +1,686 @@
+Flat profile:
+
+Each sample counts as 0.01 seconds.
+  %   cumulative   self              self     total           
+ time   seconds   seconds    calls  ms/call  ms/call  name    
+ 32.94      2.23     2.23 18383283     0.00     0.00  term_notDestructEqual
+ 20.68      3.63     1.40     9830     0.14     0.25  term_rec_replace
+ 16.25      4.73     1.10    31471     0.03     0.08  term_occur
+  8.27      5.29     0.56                             GC_build_fl_clear4
+  7.24      5.78     0.49                             GC_mark_from
+  5.76      6.17     0.39                             GC_malloc
+  2.66      6.35     0.18  4674750     0.00     0.00  specialApply
+  0.44      6.38     0.03      161     0.19    29.00  str_142
+  0.44      6.41     0.03                             GC_allochblk_nth
+  0.44      6.44     0.03                             GC_block_empty
+  0.44      6.47     0.03                             GC_clear_hdr_marks
+  0.44      6.50     0.03                             GC_clear_stack_inner
+  0.44      6.53     0.03                             GC_reclaim_clear4
+  0.44      6.56     0.03                             min_words_allocd
+  0.30      6.58     0.02    51918     0.00     0.00  fun_369
+  0.30      6.60     0.02     1834     0.01     0.01  _setChoicePoint
+  0.30      6.62     0.02                             GC_add_to_fl
+  0.30      6.64     0.02                             GC_allochblk
+  0.30      6.66     0.02                             GC_new_hblk
+  0.15      6.67     0.01      335     0.03     0.03  fun_364
+  0.15      6.68     0.01      160     0.06    29.06  fun_442
+  0.15      6.69     0.01                             GC_add_map_entry
+  0.15      6.70     0.01                             GC_apply_to_all_blocks
+  0.15      6.71     0.01                             GC_block_nearly_full1
+  0.15      6.72     0.01                             GC_continue_reclaim
+  0.15      6.73     0.01                             GC_freehblk
+  0.15      6.74     0.01                             GC_generic_malloc_inner
+  0.15      6.75     0.01                             GC_install_counts
+  0.15      6.76     0.01                             GC_invoke_finalizers
+  0.15      6.77     0.01                             GC_write_hint
+  0.00      6.77     0.00    50553     0.00     0.00  fun_366
+  0.00      6.77     0.00    19247     0.00     0.21  term_replace
+  0.00      6.77     0.00    17975     0.00     0.21  fun_390
+  0.00      6.77     0.00     6698     0.00     0.00  fun_368
+  0.00      6.77     0.00     5544     0.00     0.00  fun_426
+  0.00      6.77     0.00     4747     0.00     0.00  fun_367
+  0.00      6.77     0.00     4747     0.00     0.00  fun_424
+  0.00      6.77     0.00     4747     0.00     0.00  fun_427
+  0.00      6.77     0.00     1766     0.00     0.00  globalFail
+  0.00      6.77     0.00     1766     0.00     0.00  makeLongJump
+  0.00      6.77     0.00     1499     0.00     0.00  fun_302
+  0.00      6.77     0.00     1063     0.00     0.00  fun_383
+  0.00      6.77     0.00      866     0.00     0.00  cCut
+  0.00      6.77     0.00      866     0.00     0.00  cCutMark
+  0.00      6.77     0.00      804     0.00     0.00  fun_385
+  0.00      6.77     0.00      638     0.00     0.00  fun_441
+  0.00      6.77     0.00      638     0.00     0.00  str_379
+  0.00      6.77     0.00      625     0.00     0.00  fsym_init
+  0.00      6.77     0.00      452     0.00     0.00  fun_408
+  0.00      6.77     0.00      335     0.00     0.00  fun_373
+  0.00      6.77     0.00      335     0.00     0.00  fun_409
+  0.00      6.77     0.00      319     0.00     0.00  fun_436
+  0.00      6.77     0.00      319     0.00     0.00  fun_437
+  0.00      6.77     0.00      243     0.00     0.00  fun_303
+  0.00      6.77     0.00      243     0.00     0.00  fun_312
+  0.00      6.77     0.00      161     0.00     0.00  fun_429
+  0.00      6.77     0.00      161     0.00     0.01  str_261
+  0.00      6.77     0.00      159     0.00     0.00  fun_365
+  0.00      6.77     0.00      159     0.00     0.00  fun_384
+  0.00      6.77     0.00      159     0.00     0.00  fun_401
+  0.00      6.77     0.00      159     0.00     0.00  fun_425
+  0.00      6.77     0.00      159     0.00     0.00  fun_428
+  0.00      6.77     0.00      159     0.00     0.82  fun_432
+  0.00      6.77     0.00      159     0.00     0.82  fun_433
+  0.00      6.77     0.00      134     0.00     0.00  fun_422
+  0.00      6.77     0.00      134     0.00     0.04  str_208
+  0.00      6.77     0.00      134     0.00     0.00  term_alloc
+  0.00      6.77     0.00       67     0.00     0.04  fun_440
+  0.00      6.77     0.00       18     0.00     0.00  printTextFormTerm
+  0.00      6.77     0.00       18     0.00     0.00  termOut
+  0.00      6.77     0.00       10     0.00     0.00  listTermCreate
+  0.00      6.77     0.00        2     0.00     0.00  addTermListTerm
+  0.00      6.77     0.00        1     0.00     0.00  EarleyParserInit
+  0.00      6.77     0.00        1     0.00     0.00  EkerTermInit
+  0.00      6.77     0.00        1     0.00     0.00  backStatistics
+  0.00      6.77     0.00        1     0.00     0.00  backTrackInit
+  0.00      6.77     0.00        1     0.00     0.00  choice_init
+  0.00      6.77     0.00        1     0.00     0.00  computeTerm
+  0.00      6.77     0.00        1     0.00     0.00  fun_439
+  0.00      6.77     0.00        1     0.00     0.00  globalStatistics
+  0.00      6.77     0.00        1     0.00     0.00  initTabRef
+  0.00      6.77     0.00        1     0.00     0.00  normalise
+  0.00      6.77     0.00        1     0.00  4999.99  str_151
+  0.00      6.77     0.00        1     0.00  4999.98  str_182
+  0.00      6.77     0.00        1     0.00    33.52  str_308
+  0.00      6.77     0.00        1     0.00     0.00  symbol_init
+  0.00      6.77     0.00        1     0.00  4999.99  termParser
+  0.00      6.77     0.00        1     0.00     0.00  term_unflatten
+
+ %         the percentage of the total running time of the
+time       program used by this function.
+
+cumulative a running sum of the number of seconds accounted
+ seconds   for by this function and those listed above it.
+
+ self      the number of seconds accounted for by this
+seconds    function alone.  This is the major sort for this
+           listing.
+
+calls      the number of times this function was invoked, if
+           this function is profiled, else blank.
+ 
+ self      the average number of milliseconds spent in this
+ms/call    function per call, if this function is profiled,
+	   else blank.
+
+ total     the average number of milliseconds spent in this
+ms/call    function and its descendents per call, if this 
+	   function is profiled, else blank.
+
+name       the name of the function.  This is the minor sort
+           for this listing. The index shows the location of
+	   the function in the gprof listing. If the index is
+	   in parenthesis it shows where it would appear in
+	   the gprof listing if it were to be printed.
+
+		     Call graph (explanation follows)
+
+
+granularity: each sample hit covers 4 byte(s) for 0.15% of 6.77 seconds
+
+index % time    self  children    called     name
+                                                 <spontaneous>
+[1]     73.9    0.00    5.00                 main [1]
+                0.00    5.00       1/1           termParser [2]
+                0.00    0.00       1/1834        _setChoicePoint [29]
+                0.00    0.00       1/1           choice_init [84]
+                0.00    0.00       1/1           symbol_init [89]
+                0.00    0.00       1/1           EkerTermInit [81]
+                0.00    0.00       1/1           initTabRef [88]
+                0.00    0.00       1/1           EarleyParserInit [80]
+                0.00    0.00       1/1           backTrackInit [83]
+                0.00    0.00       1/1           term_unflatten [90]
+                0.00    0.00       1/1           termOut <cycle 1> [77]
+                0.00    0.00       1/1           backStatistics [82]
+                0.00    0.00       1/1           globalStatistics [87]
+                0.00    0.00       1/1766        globalFail [51]
+-----------------------------------------------
+                0.00    5.00       1/1           main [1]
+[2]     73.9    0.00    5.00       1         termParser [2]
+                0.00    5.00       1/1           str_151 [3]
+                0.00    0.00       1/1           normalise [43]
+                0.00    0.00       1/1           computeTerm [85]
+-----------------------------------------------
+                0.00    5.00       1/1           termParser [2]
+[3]     73.9    0.00    5.00       1         str_151 [3]
+                0.00    5.00       1/1           str_182 [4]
+                0.00    0.00       1/1834        _setChoicePoint [29]
+                0.00    0.00       1/1           fun_439 [86]
+                0.00    0.00       1/1766        globalFail [51]
+-----------------------------------------------
+                0.00    5.00       1/1           str_151 [3]
+[4]     73.9    0.00    5.00       1         str_182 [4]
+                0.01    4.64     160/160         fun_442 [6]
+                0.00    0.13     159/159         fun_432 [16]
+                0.00    0.13     159/159         fun_433 [17]
+                0.00    0.03       1/1           str_308 [18]
+                0.00    0.03       1/161         str_142 [5]
+                0.01    0.00     990/1834        _setChoicePoint [29]
+                0.01    0.00     335/335         fun_364 [30]
+                0.00    0.00      67/67          fun_440 [41]
+                0.00    0.00      67/134         str_208 [40]
+                0.00    0.00     654/18383283     term_notDestructEqual [11]
+                0.00    0.00    1257/1766        globalFail [51]
+                0.00    0.00     670/1063        fun_383 [54]
+                0.00    0.00     638/638         fun_441 [58]
+                0.00    0.00     335/452         fun_408 [61]
+                0.00    0.00     335/335         fun_409 [63]
+                0.00    0.00     335/335         fun_373 [62]
+                0.00    0.00     319/319         fun_436 [64]
+                0.00    0.00     319/319         fun_437 [65]
+                0.00    0.00     159/159         fun_365 [69]
+                0.00    0.00     159/1499        fun_302 [53]
+                0.00    0.00     159/159         fun_401 [71]
+                0.00    0.00     159/159         fun_425 [72]
+                0.00    0.00      67/134         fun_422 [74]
+                0.00    0.00       1/866         cCutMark [56]
+                0.00    0.00       1/866         cCut [55]
+-----------------------------------------------
+                0.00    0.03       1/161         str_182 [4]
+                0.03    4.61     160/161         fun_442 [6]
+[5]     69.0    0.03    4.64     161         str_142 [5]
+                0.00    3.66   17812/17975       fun_390 [8]
+                0.43    0.52   12224/31471       term_occur [10]
+                0.02    0.00   51918/51918       fun_369 [25]
+                0.00    0.00   28651/18383283     term_notDestructEqual [11]
+                0.00    0.00     161/1834        _setChoicePoint [29]
+                0.00    0.00     161/161         str_261 [42]
+                0.00    0.00   45806/50553       fun_366 [45]
+                0.00    0.00    4747/4747        fun_424 [49]
+                0.00    0.00     161/1766        globalFail [51]
+                0.00    0.00     161/161         fun_429 [68]
+-----------------------------------------------
+                0.01    4.64     160/160         str_182 [4]
+[6]     68.7    0.01    4.64     160         fun_442 [6]
+                0.03    4.61     160/161         str_142 [5]
+                0.00    0.00     160/18383283     term_notDestructEqual [11]
+                0.00    0.00     160/866         cCutMark [56]
+                0.00    0.00     160/866         cCut [55]
+-----------------------------------------------
+                0.00    0.13     636/19247       fun_432 [16]
+                0.00    0.13     636/19247       fun_433 [17]
+                0.00    3.70   17975/19247       fun_390 [8]
+[7]     58.4    0.00    3.96   19247         term_replace [7]
+                1.40    1.06    9830/9830        term_rec_replace [9]
+                0.67    0.82   19247/31471       term_occur [10]
+-----------------------------------------------
+                0.00    0.03     163/17975       str_308 [18]
+                0.00    3.66   17812/17975       str_142 [5]
+[8]     54.6    0.00    3.70   17975         fun_390 [8]
+                0.00    3.70   17975/19247       term_replace [7]
+-----------------------------------------------
+                             7255327             term_rec_replace [9]
+                1.40    1.06    9830/9830        term_replace [7]
+[9]     36.4    1.40    1.06    9830+7255327 term_rec_replace [9]
+                0.88    0.00 7265157/18383283     term_notDestructEqual [11]
+                0.18    0.00 4674737/4674750     specialApply [15]
+                             7255327             term_rec_replace [9]
+-----------------------------------------------
+                             11057073             term_occur [10]
+                0.43    0.52   12224/31471       str_142 [5]
+                0.67    0.82   19247/31471       term_replace [7]
+[10]    36.1    1.10    1.35   31471+11057073 term_occur [10]
+                1.35    0.00 11088544/18383283     term_notDestructEqual [11]
+                             11057073             term_occur [10]
+-----------------------------------------------
+                             7676970             term_notDestructEqual [11]
+                0.00    0.00     117/18383283     fun_440 [41]
+                0.00    0.00     160/18383283     fun_442 [6]
+                0.00    0.00     654/18383283     str_182 [4]
+                0.00    0.00   28651/18383283     str_142 [5]
+                0.88    0.00 7265157/18383283     term_rec_replace [9]
+                1.35    0.00 11088544/18383283     term_occur [10]
+[11]    32.9    2.23    0.00 18383283+7676970 term_notDestructEqual [11]
+                             7676970             term_notDestructEqual [11]
+-----------------------------------------------
+                                                 <spontaneous>
+[12]     8.3    0.56    0.00                 GC_build_fl_clear4 [12]
+-----------------------------------------------
+                                                 <spontaneous>
+[13]     7.2    0.49    0.00                 GC_mark_from [13]
+-----------------------------------------------
+                                                 <spontaneous>
+[14]     5.8    0.39    0.00                 GC_malloc [14]
+-----------------------------------------------
+                0.00    0.00      13/4674750     normalise [43]
+                0.18    0.00 4674737/4674750     term_rec_replace [9]
+[15]     2.7    0.18    0.00 4674750         specialApply [15]
+-----------------------------------------------
+                                1272             fun_432 [16]
+                0.00    0.13     159/159         str_182 [4]
+[16]     1.9    0.00    0.13     159+1272    fun_432 [16]
+                0.00    0.13     636/19247       term_replace [7]
+                                1272             fun_432 [16]
+-----------------------------------------------
+                                1272             fun_433 [17]
+                0.00    0.13     159/159         str_182 [4]
+[17]     1.9    0.00    0.13     159+1272    fun_433 [17]
+                0.00    0.13     636/19247       term_replace [7]
+                                1272             fun_433 [17]
+-----------------------------------------------
+                0.00    0.03       1/1           str_182 [4]
+[18]     0.5    0.00    0.03       1         str_308 [18]
+                0.00    0.03     163/17975       fun_390 [8]
+                0.00    0.00       1/1834        _setChoicePoint [29]
+                0.00    0.00       1/1766        globalFail [51]
+-----------------------------------------------
+                                                 <spontaneous>
+[19]     0.4    0.03    0.00                 GC_allochblk_nth [19]
+-----------------------------------------------
+                                                 <spontaneous>
+[20]     0.4    0.03    0.00                 GC_block_empty [20]
+-----------------------------------------------
+                                                 <spontaneous>
+[21]     0.4    0.03    0.00                 GC_clear_hdr_marks [21]
+-----------------------------------------------
+                                                 <spontaneous>
+[22]     0.4    0.03    0.00                 GC_clear_stack_inner [22]
+-----------------------------------------------
+                                                 <spontaneous>
+[23]     0.4    0.03    0.00                 GC_reclaim_clear4 [23]
+-----------------------------------------------
+                                                 <spontaneous>
+[24]     0.4    0.03    0.00                 min_words_allocd [24]
+-----------------------------------------------
+                0.02    0.00   51918/51918       str_142 [5]
+[25]     0.3    0.02    0.00   51918         fun_369 [25]
+-----------------------------------------------
+                                                 <spontaneous>
+[26]     0.3    0.02    0.00                 GC_add_to_fl [26]
+-----------------------------------------------
+                                                 <spontaneous>
+[27]     0.3    0.02    0.00                 GC_allochblk [27]
+-----------------------------------------------
+                                                 <spontaneous>
+[28]     0.3    0.02    0.00                 GC_new_hblk [28]
+-----------------------------------------------
+                0.00    0.00       1/1834        main [1]
+                0.00    0.00       1/1834        str_151 [3]
+                0.00    0.00       1/1834        str_308 [18]
+                0.00    0.00     161/1834        str_261 [42]
+                0.00    0.00     161/1834        str_142 [5]
+                0.01    0.00     519/1834        str_208 [40]
+                0.01    0.00     990/1834        str_182 [4]
+[29]     0.3    0.02    0.00    1834         _setChoicePoint [29]
+-----------------------------------------------
+                0.01    0.00     335/335         str_182 [4]
+[30]     0.1    0.01    0.00     335         fun_364 [30]
+-----------------------------------------------
+                                                 <spontaneous>
+[31]     0.1    0.01    0.00                 GC_add_map_entry [31]
+-----------------------------------------------
+                                                 <spontaneous>
+[32]     0.1    0.01    0.00                 GC_apply_to_all_blocks [32]
+-----------------------------------------------
+                                                 <spontaneous>
+[33]     0.1    0.01    0.00                 GC_block_nearly_full1 [33]
+-----------------------------------------------
+                                                 <spontaneous>
+[34]     0.1    0.01    0.00                 GC_continue_reclaim [34]
+-----------------------------------------------
+                                                 <spontaneous>
+[35]     0.1    0.01    0.00                 GC_freehblk [35]
+-----------------------------------------------
+                                                 <spontaneous>
+[36]     0.1    0.01    0.00                 GC_generic_malloc_inner [36]
+-----------------------------------------------
+                                                 <spontaneous>
+[37]     0.1    0.01    0.00                 GC_install_counts [37]
+-----------------------------------------------
+                                                 <spontaneous>
+[38]     0.1    0.01    0.00                 GC_invoke_finalizers [38]
+-----------------------------------------------
+                                                 <spontaneous>
+[39]     0.1    0.01    0.00                 GC_write_hint [39]
+-----------------------------------------------
+                0.00    0.00      67/134         fun_440 [41]
+                0.00    0.00      67/134         str_182 [4]
+[40]     0.1    0.00    0.01     134         str_208 [40]
+                0.01    0.00     519/1834        _setChoicePoint [29]
+                0.00    0.00     134/1766        globalFail [51]
+-----------------------------------------------
+                0.00    0.00      67/67          str_182 [4]
+[41]     0.0    0.00    0.00      67         fun_440 [41]
+                0.00    0.00      67/134         str_208 [40]
+                0.00    0.00     117/18383283     term_notDestructEqual [11]
+                0.00    0.00     234/1063        fun_383 [54]
+                0.00    0.00     117/452         fun_408 [61]
+                0.00    0.00      67/866         cCutMark [56]
+                0.00    0.00      67/134         fun_422 [74]
+                0.00    0.00      67/866         cCut [55]
+                0.00    0.00      50/1766        globalFail [51]
+-----------------------------------------------
+                0.00    0.00     161/161         str_142 [5]
+[42]     0.0    0.00    0.00     161         str_261 [42]
+                0.00    0.00     161/1834        _setChoicePoint [29]
+                0.00    0.00     161/1766        globalFail [51]
+-----------------------------------------------
+                                  12             normalise [43]
+                0.00    0.00       1/1           termParser [2]
+[43]     0.0    0.00    0.00       1+12      normalise [43]
+                0.00    0.00      13/4674750     specialApply [15]
+                                  12             normalise [43]
+-----------------------------------------------
+[44]     0.0    0.00    0.00       1+35      <cycle 1 as a whole> [44]
+                0.00    0.00      18             termOut <cycle 1> [77]
+-----------------------------------------------
+                0.00    0.00    4747/50553       fun_424 [49]
+                0.00    0.00   45806/50553       str_142 [5]
+[45]     0.0    0.00    0.00   50553         fun_366 [45]
+-----------------------------------------------
+                0.00    0.00    6698/6698        fun_427 [50]
+[46]     0.0    0.00    0.00    6698         fun_368 [46]
+-----------------------------------------------
+                                1147             fun_426 [47]
+                0.00    0.00     159/5544        fun_425 [72]
+                0.00    0.00     638/5544        str_379 [59]
+                0.00    0.00    4747/5544        fun_424 [49]
+[47]     0.0    0.00    0.00    5544+1147    fun_426 [47]
+                                1147             fun_426 [47]
+-----------------------------------------------
+                0.00    0.00    4747/4747        fun_424 [49]
+[48]     0.0    0.00    0.00    4747         fun_367 [48]
+-----------------------------------------------
+                0.00    0.00    4747/4747        str_142 [5]
+[49]     0.0    0.00    0.00    4747         fun_424 [49]
+                0.00    0.00    4747/50553       fun_366 [45]
+                0.00    0.00    4747/4747        fun_367 [48]
+                0.00    0.00    4747/4747        fun_427 [50]
+                0.00    0.00    4747/5544        fun_426 [47]
+-----------------------------------------------
+                0.00    0.00    4747/4747        fun_424 [49]
+[50]     0.0    0.00    0.00    4747         fun_427 [50]
+                0.00    0.00    6698/6698        fun_368 [46]
+-----------------------------------------------
+                0.00    0.00       1/1766        main [1]
+                0.00    0.00       1/1766        str_151 [3]
+                0.00    0.00       1/1766        str_308 [18]
+                0.00    0.00      50/1766        fun_440 [41]
+                0.00    0.00     134/1766        str_208 [40]
+                0.00    0.00     161/1766        str_261 [42]
+                0.00    0.00     161/1766        str_142 [5]
+                0.00    0.00    1257/1766        str_182 [4]
+[51]     0.0    0.00    0.00    1766         globalFail [51]
+                0.00    0.00    1766/1766        makeLongJump [52]
+-----------------------------------------------
+                0.00    0.00    1766/1766        globalFail [51]
+[52]     0.0    0.00    0.00    1766         makeLongJump [52]
+-----------------------------------------------
+                0.00    0.00     159/1499        str_182 [4]
+                0.00    0.00    1340/1499        fun_373 [62]
+[53]     0.0    0.00    0.00    1499         fun_302 [53]
+-----------------------------------------------
+                0.00    0.00     159/1063        fun_425 [72]
+                0.00    0.00     234/1063        fun_440 [41]
+                0.00    0.00     670/1063        str_182 [4]
+[54]     0.0    0.00    0.00    1063         fun_383 [54]
+-----------------------------------------------
+                0.00    0.00       1/866         str_182 [4]
+                0.00    0.00      67/866         fun_440 [41]
+                0.00    0.00     160/866         fun_442 [6]
+                0.00    0.00     638/866         fun_441 [58]
+[55]     0.0    0.00    0.00     866         cCut [55]
+-----------------------------------------------
+                0.00    0.00       1/866         str_182 [4]
+                0.00    0.00      67/866         fun_440 [41]
+                0.00    0.00     160/866         fun_442 [6]
+                0.00    0.00     638/866         fun_441 [58]
+[56]     0.0    0.00    0.00     866         cCutMark [56]
+-----------------------------------------------
+                0.00    0.00     804/804         fun_428 [73]
+[57]     0.0    0.00    0.00     804         fun_385 [57]
+-----------------------------------------------
+                0.00    0.00     638/638         str_182 [4]
+[58]     0.0    0.00    0.00     638         fun_441 [58]
+                0.00    0.00     638/866         cCutMark [56]
+                0.00    0.00     638/638         str_379 [59]
+                0.00    0.00     638/866         cCut [55]
+-----------------------------------------------
+                0.00    0.00     638/638         fun_441 [58]
+[59]     0.0    0.00    0.00     638         str_379 [59]
+                0.00    0.00     638/5544        fun_426 [47]
+-----------------------------------------------
+                0.00    0.00     625/625         symbol_init [89]
+[60]     0.0    0.00    0.00     625         fsym_init [60]
+-----------------------------------------------
+                0.00    0.00     117/452         fun_440 [41]
+                0.00    0.00     335/452         str_182 [4]
+[61]     0.0    0.00    0.00     452         fun_408 [61]
+-----------------------------------------------
+                                1340             fun_373 [62]
+                0.00    0.00     335/335         str_182 [4]
+[62]     0.0    0.00    0.00     335+1340    fun_373 [62]
+                0.00    0.00    1340/1499        fun_302 [53]
+                                1340             fun_373 [62]
+-----------------------------------------------
+                0.00    0.00     335/335         str_182 [4]
+[63]     0.0    0.00    0.00     335         fun_409 [63]
+-----------------------------------------------
+                0.00    0.00     319/319         str_182 [4]
+[64]     0.0    0.00    0.00     319         fun_436 [64]
+-----------------------------------------------
+                0.00    0.00     319/319         str_182 [4]
+[65]     0.0    0.00    0.00     319         fun_437 [65]
+-----------------------------------------------
+                0.00    0.00     243/243         fun_428 [73]
+[66]     0.0    0.00    0.00     243         fun_303 [66]
+-----------------------------------------------
+                0.00    0.00     243/243         fun_428 [73]
+[67]     0.0    0.00    0.00     243         fun_312 [67]
+-----------------------------------------------
+                                5461             fun_429 [68]
+                0.00    0.00     161/161         str_142 [5]
+[68]     0.0    0.00    0.00     161+5461    fun_429 [68]
+                                5461             fun_429 [68]
+-----------------------------------------------
+                0.00    0.00     159/159         str_182 [4]
+[69]     0.0    0.00    0.00     159         fun_365 [69]
+-----------------------------------------------
+                0.00    0.00     159/159         fun_425 [72]
+[70]     0.0    0.00    0.00     159         fun_384 [70]
+-----------------------------------------------
+                                 167             fun_401 [71]
+                0.00    0.00     159/159         str_182 [4]
+[71]     0.0    0.00    0.00     159+167     fun_401 [71]
+                                 167             fun_401 [71]
+-----------------------------------------------
+                0.00    0.00     159/159         str_182 [4]
+[72]     0.0    0.00    0.00     159         fun_425 [72]
+                0.00    0.00     159/1063        fun_383 [54]
+                0.00    0.00     159/159         fun_384 [70]
+                0.00    0.00     159/159         fun_428 [73]
+                0.00    0.00     159/5544        fun_426 [47]
+-----------------------------------------------
+                                 243             fun_428 [73]
+                0.00    0.00     159/159         fun_425 [72]
+[73]     0.0    0.00    0.00     159+243     fun_428 [73]
+                0.00    0.00     804/804         fun_385 [57]
+                0.00    0.00     243/243         fun_312 [67]
+                0.00    0.00     243/243         fun_303 [66]
+                                 243             fun_428 [73]
+-----------------------------------------------
+                0.00    0.00      67/134         fun_440 [41]
+                0.00    0.00      67/134         str_182 [4]
+[74]     0.0    0.00    0.00     134         fun_422 [74]
+                0.00    0.00     134/134         term_alloc [75]
+-----------------------------------------------
+                0.00    0.00     134/134         fun_422 [74]
+[75]     0.0    0.00    0.00     134         term_alloc [75]
+-----------------------------------------------
+                                  18             termOut <cycle 1> [77]
+[76]     0.0    0.00    0.00      18         printTextFormTerm <cycle 1> [76]
+                                  17             termOut <cycle 1> [77]
+-----------------------------------------------
+                                  17             printTextFormTerm <cycle 1> [76]
+                0.00    0.00       1/1           main [1]
+[77]     0.0    0.00    0.00      18         termOut <cycle 1> [77]
+                                  18             printTextFormTerm <cycle 1> [76]
+-----------------------------------------------
+                0.00    0.00      10/10          computeTerm [85]
+[78]     0.0    0.00    0.00      10         listTermCreate [78]
+-----------------------------------------------
+                0.00    0.00       2/2           computeTerm [85]
+[79]     0.0    0.00    0.00       2         addTermListTerm [79]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[80]     0.0    0.00    0.00       1         EarleyParserInit [80]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[81]     0.0    0.00    0.00       1         EkerTermInit [81]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[82]     0.0    0.00    0.00       1         backStatistics [82]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[83]     0.0    0.00    0.00       1         backTrackInit [83]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[84]     0.0    0.00    0.00       1         choice_init [84]
+-----------------------------------------------
+                                  12             computeTerm [85]
+                0.00    0.00       1/1           termParser [2]
+[85]     0.0    0.00    0.00       1+12      computeTerm [85]
+                0.00    0.00      10/10          listTermCreate [78]
+                0.00    0.00       2/2           addTermListTerm [79]
+                                  12             computeTerm [85]
+-----------------------------------------------
+                0.00    0.00       1/1           str_151 [3]
+[86]     0.0    0.00    0.00       1         fun_439 [86]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[87]     0.0    0.00    0.00       1         globalStatistics [87]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[88]     0.0    0.00    0.00       1         initTabRef [88]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[89]     0.0    0.00    0.00       1         symbol_init [89]
+                0.00    0.00     625/625         fsym_init [60]
+-----------------------------------------------
+                                  17             term_unflatten [90]
+                0.00    0.00       1/1           main [1]
+[90]     0.0    0.00    0.00       1+17      term_unflatten [90]
+                                  17             term_unflatten [90]
+-----------------------------------------------
+
+ This table describes the call tree of the program, and was sorted by
+ the total amount of time spent in each function and its children.
+
+ Each entry in this table consists of several lines.  The line with the
+ index number at the left hand margin lists the current function.
+ The lines above it list the functions that called this function,
+ and the lines below it list the functions this one called.
+ This line lists:
+     index	A unique number given to each element of the table.
+		Index numbers are sorted numerically.
+		The index number is printed next to every function name so
+		it is easier to look up where the function in the table.
+
+     % time	This is the percentage of the `total' time that was spent
+		in this function and its children.  Note that due to
+		different viewpoints, functions excluded by options, etc,
+		these numbers will NOT add up to 100%.
+
+     self	This is the total amount of time spent in this function.
+
+     children	This is the total amount of time propagated into this
+		function by its children.
+
+     called	This is the number of times the function was called.
+		If the function called itself recursively, the number
+		only includes non-recursive calls, and is followed by
+		a `+' and the number of recursive calls.
+
+     name	The name of the current function.  The index number is
+		printed after it.  If the function is a member of a
+		cycle, the cycle number is printed between the
+		function's name and the index number.
+
+
+ For the function's parents, the fields have the following meanings:
+
+     self	This is the amount of time that was propagated directly
+		from the function into this parent.
+
+     children	This is the amount of time that was propagated from
+		the function's children into this parent.
+
+     called	This is the number of times this parent called the
+		function `/' the total number of times the function
+		was called.  Recursive calls to the function are not
+		included in the number after the `/'.
+
+     name	This is the name of the parent.  The parent's index
+		number is printed after it.  If the parent is a
+		member of a cycle, the cycle number is printed between
+		the name and the index number.
+
+ If the parents of the function cannot be determined, the word
+ `<spontaneous>' is printed in the `name' field, and all the other
+ fields are blank.
+
+ For the function's children, the fields have the following meanings:
+
+     self	This is the amount of time that was propagated directly
+		from the child into the function.
+
+     children	This is the amount of time that was propagated from the
+		child's children to the function.
+
+     called	This is the number of times the function called
+		this child `/' the total number of times the child
+		was called.  Recursive calls by the child are not
+		listed in the number after the `/'.
+
+     name	This is the name of the child.  The child's index
+		number is printed after it.  If the child is a
+		member of a cycle, the cycle number is printed
+		between the name and the index number.
+
+ If there are any cycles (circles) in the call graph, there is an
+ entry for the cycle-as-a-whole.  This entry shows who called the
+ cycle (as parents) and the members of the cycle (as children.)
+ The `+' recursive calls entry shows the number of function calls that
+ were internal to the cycle, and the calls entry for each member shows,
+ for that member, how many times it was called from other members of
+ the cycle.
+
+
+Index by function name
+
+  [80] EarleyParserInit       [60] fsym_init              [41] fun_440
+  [81] EkerTermInit           [53] fun_302                [58] fun_441
+  [31] GC_add_map_entry       [66] fun_303                 [6] fun_442
+  [26] GC_add_to_fl           [67] fun_312                [51] globalFail
+  [27] GC_allochblk           [30] fun_364                [87] globalStatistics
+  [19] GC_allochblk_nth       [69] fun_365                [88] initTabRef
+  [32] GC_apply_to_all_blocks [45] fun_366                [78] listTermCreate
+  [20] GC_block_empty         [48] fun_367                [52] makeLongJump (gmon-start.c)
+  [33] GC_block_nearly_full1  [46] fun_368                [24] min_words_allocd (gmon-start.c)
+  [12] GC_build_fl_clear4     [25] fun_369                [43] normalise
+  [21] GC_clear_hdr_marks     [62] fun_373                [76] printTextFormTerm
+  [22] GC_clear_stack_inner   [54] fun_383                [15] specialApply
+  [34] GC_continue_reclaim    [70] fun_384                 [5] str_142
+  [35] GC_freehblk            [57] fun_385                 [3] str_151
+  [36] GC_generic_malloc_inner [8] fun_390                 [4] str_182
+  [37] GC_install_counts      [71] fun_401                [40] str_208
+  [38] GC_invoke_finalizers   [61] fun_408                [42] str_261
+  [14] GC_malloc              [63] fun_409                [18] str_308
+  [13] GC_mark_from           [74] fun_422                [59] str_379
+  [28] GC_new_hblk            [49] fun_424                [89] symbol_init
+  [23] GC_reclaim_clear4      [72] fun_425                [77] termOut
+  [39] GC_write_hint          [47] fun_426                 [2] termParser
+  [29] _setChoicePoint        [50] fun_427                [75] term_alloc
+  [79] addTermListTerm        [73] fun_428                [11] term_notDestructEqual
+  [82] backStatistics         [68] fun_429                [10] term_occur
+  [83] backTrackInit          [16] fun_432                 [9] term_rec_replace (gmon-start.c)
+  [55] cCut                   [17] fun_433                 [7] term_replace
+  [56] cCutMark               [64] fun_436                [90] term_unflatten
+  [84] choice_init            [65] fun_437                [44] <cycle 1>
+  [85] computeTerm            [86] fun_439

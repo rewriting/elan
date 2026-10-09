@@ -1,0 +1,92 @@
+module myEqSystem[Fss,Vars,Mvs]
+import  local   bool int identifier Mvs
+		EtermCommons[Fss,Vars,Mvs]
+		substitution pair[identifier,int]
+                list[pair[identifier,int]] list[int] list[term];
+end
+
+sort eqSystem equation;
+end
+
+operators
+global
+  @ = @         : ( term term ) equation;
+
+  @             : ( bool ) eqSystem;
+  @             : ( equation ) eqSystem;
+  @ & @         : ( eqSystem eqSystem ) eqSystem        assocLeft;
+  (@ & @)       : ( eqSystem eqSystem ) eqSystem        alias @ & @:;
+
+  system_to_subst(@)    : ( eqSystem ) highOrderSubstitution;
+  system_to_subst(@)    : ( eqSystem ) substitution;
+
+  makeEqns(@,@)  : ( term term ) eqSystem;
+end
+
+stratop
+  global
+    buildSubst		: <eqSystem>			builtin;
+    hosubstitute	: <highOrderSubstitution>	builtin;
+end
+
+rules for highOrderSubstitution
+ P,Q:eqSystem; t:term; h1,h2:highOrderSubstitution;
+global
+  [s1] system_to_subst(true)    => identityHO                   end
+  [s2] system_to_subst(P & Q)   => h1 o h2
+                                where h2 := (hosubstitute) system_to_subst(Q)
+                                where h1 := (hosubstitute) system_to_subst(P)
+                                end
+end
+
+FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+SUCH THAT SS:=(listExtract) elem(Mvs) AND F:=()first(SS) 
+        AND N:=()second(SS) :{
+rules for highOrderSubstitution
+	$t:term;
+	{t_I:term;}_I=1...N
+global
+   [s3] system_to_subst(F(t_1,...,t_N)=t)       => F(t_1,...,t_N)-->$t end
+end  
+}
+
+rules for substitution
+ P,Q,R:eqSystem; t:term; x:variable;
+global
+  [] system_to_subst(true)      => identity                     end
+  [] system_to_subst($x=$t)     => $x->$t                       end
+  [] system_to_subst(P & Q)     => system_to_subst(P) o system_to_subst(Q)
+  end
+end
+
+rules for eqSystem
+ P,Q,R:eqSystem; n:int; t:term; e:equation;
+global
+  [unfold]       P & (Q & R)            => (P & Q) & R          end
+  [eqPass]       P & e                  => e & P                end
+
+end
+
+FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+SUCH THAT SS:=(listExtract) elem(Mvs) AND F:=()first(SS) 
+        AND N:=()second(SS) :{
+rules for eqSystem
+	t,tt:term;
+        {t_I,tt_I:term;}_I=1...N
+global
+  [substMatch] makeEqns(F(t_1,...,t_N),F(tt_1,...,tt_N)) =>
+	 true {& t_I=tt_I}_I=1...N end
+end
+}
+
+strategies for eqSystem
+implicit
+  [.] buildSubst => first one(substMatch)	end
+end
+
+strategies for highOrderSubstitution
+implicit
+  [.] hosubstitute => first one(s1 , s2 , s3)  end
+end
+
+end

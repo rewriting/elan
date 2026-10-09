@@ -1,0 +1,11 @@
+LPL core description
+
+   query of sort  	Foo
+   result of sort 	Foo
+   modules 		core
+   start with 		(ss)doit(query)
+
+end
+
+
+

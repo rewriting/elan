@@ -1,0 +1,22 @@
+salut,
+voici un petit jeu de tests pour mon programme Timed_Automata.lgi
+
+les sources se trouvent dans /users/protheo/kacem/an1/pdt_automatesV1.2/Timed_automata
+
+*-- pour train.spc
+  --  go(Loin.Haut.u0.nil/true,Sur.Bas.u0.nil/true) end
+     ---> REACHED
+  --  go(Loin.Haut.u0.nil/true,Loin.Haut.u0.nil/true) end
+     ---> REACHED
+  --  go(Loin.Haut.u0.nil/true,Sur.Haut.u0.nil/true) end
+     ---> CYCLE
+  --  go(Loin.Haut.u1.nil/true,Loin.Haut.u1.nil/true) end
+     ---> Wrong_Source_State
+
+*-- pour robots.spc
+  --  go(D_Wait.G_Inspect.S_Empty.B_Mov.nil/true,D_Wait.G_Inspect.S_Empty.B_Mov.nil/true) end
+    ---> REACHED
+  --  go(D_Wait.G_Inspect.S_Empty.B_Mov.nil/true,D_Turn_R.G_Turn_L.S_Empty.B_On_S.nil/true) end
+    ---> CYCLE
+  --  go(D_Pick.G_Inspect.S_Empty.B_Mov.nil/X>2^true,D_Wait.G_Inspect.S_Empty.B_Mov.nil/true) end
+    ---> Wrong_Source_State

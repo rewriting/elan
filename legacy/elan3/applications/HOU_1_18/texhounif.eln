@@ -1,0 +1,148 @@
+module texhounif[mvars,btypes,bvars]
+import
+  global	terms[mvars,btypes,bvars]
+		typech[mvars,btypes,bvars]
+		//----
+		btypes types[btypes] contexts[btypes]
+                ivars[btypes] vars[mvars,btypes] list[obj_Bvars]
+                              vars[bvars,btypes] list[obj_Mvars]
+		//---
+		texterms[mvars,btypes,bvars]
+		hounif[mvars,btypes,bvars]
+		occur[obj_Mvars,uconj] replace[tterm,uconj]
+		occur[obj_Mvars,wtterm] replace[tterm,wtterm]
+		occur[obj_Mvars,list[wtterm]] 
+		occur[obj_Mvars,tterm]
+		list[wtterm] list[uconj] 
+		eq[type] eq[usystem] eq[ueq] eq[wtterm] eq[list[uconj]]
+		ifte[list[uconj]]
+		ifte[usystem]
+		int bool;
+sort texueq texuconj texusystem texudisj texenv;
+op
+  global
+	totex(@)	: (texinput) texoutput;
+
+	@		: (ueq) texinput;
+	@		: (texueq) texoutput;
+
+	@		: (uconj) texinput;
+	@		: (texuconj) texoutput;
+
+	@		: (usystem) texinput;
+	@		: (texusystem) texoutput;
+
+	@		: (list[uconj]) texinput;
+	@		: (texudisj) texoutput;
+
+	@		: (list[wtterm]) texinput;
+	@		: (texenv) texoutput;
+
+	tex(@)		: (ueq) texueq;
+	\equa<@><@> 	: (texwtterm texwtterm) texueq	(AC);
+	tex(@)		: (uconj) texuconj;
+	tex(@)		: (list[uconj]) texudisj;
+	tex(@)		: (list[wtterm]) texenv;
+	tex(@)		: (usystem) texusystem;
+	\bool<@>	: (bool) texuconj;
+        \uequati<@>	: (texueq) texuconj;
+	\andu<@><@>	: (texuconj texuconj) texuconj;
+        \usyste<@><@><@><@>: (texudisj texudisj texenv int) texusystem;
+	@		: (texuconj) texudisj;
+	\nildisj	: texudisj;
+	\oru<@><@>	: (texuconj texudisj) texudisj;
+	\nilenv		: texenv;
+	@		: (texwtterm) texenv;
+	\conce<@><@>	: (texwtterm texenv) texenv;
+end
+
+rules for texoutput
+
+  a:ueq;
+  b:uconj;
+  c:usystem;
+  d:list[uconj];
+  e:list[wtterm];
+  g:ttype;
+  h:stype;
+  i:tterm;
+  j:tsubst;
+  k:wtterm;
+  l:wtsubst;
+bodies
+  []	totex(a) => tex(a) 			end
+  []	totex(b) => tex(b) 			end
+  []	totex(c) => tex(c) 			end
+  []	totex(d) => tex(d) 			end
+  []	totex(e) => tex(e) 			end
+  []	totex(g) => tex(g) 			end
+  []	totex(h) => tex(h) 			end
+  []	totex(i) => tex(i) 			end
+  []	totex(j) => tex(j) 			end
+  []	totex(k) => tex(k) 			end
+  []	totex(l) => tex(l) 			end
+end
+
+rules for texueq
+
+	aaa, bbb	: wtterm;
+bodies
+  []	tex(aaa = bbb) => \equa<tex(aaa)><tex(bbb)>
+  end
+end
+
+rules for texuconj
+
+	bo	: bool;
+	ue	: ueq;
+	co1, co2: uconj;
+bodies
+  []	tex(bo)	=> \bool<bo>
+  end
+  []	tex(ue)	=> \uequati<tex(ue)>
+  end
+  []	tex(co1 -AND- co2) => \andu<tex(co1)><tex(co2)>
+  end
+end
+
+rules for texudisj
+
+	co	: uconj;
+	di	: list[uconj];
+bodies
+  []	tex(nil)	=> \nildisj
+  end
+  []	tex(co.nil)	=> tex(co)
+  end
+  []	tex(co.di)	=> \oru<tex(co)><tex(di)>
+  end
+end
+
+rules for texenv
+
+	aaa	: wtterm;
+	env	: list[wtterm];
+bodies
+  []	tex(nil)	=> \nilenv
+  end
+  []	tex(aaa.env)	=> tex(aaa)
+  end
+  []	tex(aaa.env)	=> \conce<tex(aaa)><tex(env)>
+  end
+end
+
+rules for texusystem
+
+	di, slds: list[uconj];
+	env	: list[wtterm];
+	fvar	: int;
+	flags	: int;
+	isize	: int;
+bodies
+  []	tex((di,slds,env,fvar,flags,isize))=> \usyste<tex(di)><tex(slds)><tex(env)><fvar>
+  end
+end
+
+end
+
+

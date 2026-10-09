@@ -1,0 +1,36 @@
+// This file is generated automatically: do not edit it directly.
+  module Meta_apply[X]
+  // ONLY FOR INTERPRETER 
+          import global builtinInt list[X] Meta_strat[X]; end
+
+              operators global
+                  meta_apply(@,@)     : 
+                      (Strategy[X] X) X                                       code -129;
+
+                  meta_apply(@,@,@)   : 
+                      (Strategy[X] X builtinInt) X                            code -130;
+                  set_of(@,@)         : (Strategy[X] X) list[X]; 
+                  set_of(@,@,@)       : (Strategy[X] X builtinInt) list[X]; 
+                  set_of(@,@,@,@)     : (Strategy[X] X builtinInt builtinInt) list[X]; 
+                  meta_apply(@,@,@,@) : (Strategy[X] X builtinInt builtinInt) list[X]; 
+   
+              local
+                  meta_apply(@,@,@,@) : 
+                      (Strategy[X] list[X] builtinInt builtinInt) list[X]     code -128;
+              end
+    
+          
+          rules for list[X]
+                  s       : Strategy[X];
+                  t       : X;
+                  m,n     : builtinInt;
+                  res     : list[X];
+          global
+            []    meta_apply(s,t,m,n) => res where res:=()meta_apply(s,t.nil,m,n) end
+            []    set_of(s,t)     => res where res:=(META)meta_apply(s,t.nil,0,0)    end
+            []    set_of(s,t,n)   => res where res:=(META)meta_apply(s,t.nil,0,n)    end
+            []    set_of(s,t,m,n) => res where res:=(META)meta_apply(s,t.nil,m,n)    end
+          end
+  end  
+   
+

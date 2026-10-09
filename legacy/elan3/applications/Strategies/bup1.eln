@@ -1,0 +1,49 @@
+module bup1 
+
+import global strat[foo] strat[Tree[foo]]
+	      tree[foo];
+
+sort foo;
+
+op global
+   aa	: foo;
+   bb	: foo;
+end
+
+op global 
+  TRY @		: (<Tree[foo]>) <Tree[foo]>;
+  bup(@,@)	: (<foo> <Tree[foo]>) <Tree[foo]>;
+end
+
+rules for foo
+bodies
+  [ass] aa => bb	end
+end
+
+rules for Tree[foo]
+ z   : Tree[foo];
+	y   : foo;
+	x   : Tree[foo];
+bodies
+  [swap] node(x,y,z) => node(z,y,x)			end
+end
+
+strategies for <Tree[foo]>
+ 
+	r : <Tree[foo]>;
+	s : <foo>;
+bodies
+  [] TRY r ==> first(r,id)		end
+  [] bup(s,r) ==> dc( empty,
+               dc( leaf(s),
+                  node(bup(s,r),s,bup(s,r))))
+               ; r			end
+end
+
+end
+
+
+
+
+
+

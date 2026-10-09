@@ -1,0 +1,23 @@
+AC_INIT(Makefile.in)
+AM_INIT_AUTOMAKE(elan-interpreter,3.6g)
+AC_PREREQ(2.13)
+
+AC_PROG_CC
+AC_AIX
+AC_PROG_CXX
+AC_PROG_RANLIB
+AM_PROG_LEX
+AC_PROG_YACC
+AC_CHECK_LIB(y,yyerror,YACCLIB="-ly",YACCLIB="")
+AC_SUBST(YACCLIB)
+
+AC_SET_MAKE
+
+AC_OUTPUT(Makefile
+          acmatcher/Makefile
+          acmatcher/matcher/Makefile
+	  parser/Makefile
+	  src/Makefile
+	  src/doc/Makefile
+	  doc/Makefile
+)

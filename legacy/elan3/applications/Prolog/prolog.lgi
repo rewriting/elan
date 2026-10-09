@@ -1,0 +1,34 @@
+LPL prolog description
+  specification description
+
+    part VarStop of sort int
+		import int
+    part Vars	of sort list[identifier]
+	 	import sigSyntax
+    part Ops	of sort list[pair[identifier,int]]
+	 	import sigSyntax
+    part Predicates	of sort list[pair[identifier,int]]
+	 		import sigSyntax
+    part Clauses	of sort list[pair[atom,list[atom]]]
+			import termCommons[Ops,Vars]
+				atomP[Ops,Vars,Predicates]
+				hornClauseSyntax[Ops,Vars]
+				prologBuiltins[Ops,Vars]
+//				anyInteger
+				int
+// BUG : on ne peut pas mettre VarStop ici : core dump en compile !!!!
+//    part VarStop of sort int
+//		import int
+  end
+
+  query 	of sort atom
+         	result of sort sldState
+	 	import 
+		sldResolution[Ops,Vars,Predicates,Clauses,VarStop] 
+		atomP[Ops,Vars,Predicates]
+		termCommons[Ops,Vars]
+		eqSystem[Ops,Vars] bool int list[atom]
+         	start with (sldResolution)
+			(query.nil |0| true) 
+end
+

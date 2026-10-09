@@ -1,0 +1,12 @@
+LPL nonbblock description
+
+   query of sort  	string 
+   result of sort 	int
+   import		nonbblock
+  start with		()floop("bb.out",100)
+
+end
+
+
+
+

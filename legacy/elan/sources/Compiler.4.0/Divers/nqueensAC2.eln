@@ -1,0 +1,91 @@
+module nqueensAC2
+import 
+  bool int list[int] eq[set] eq[list[int]];
+end
+
+sort set;
+end
+
+operators
+ global
+    queensAC(@) : (int) list[int] ;
+  local
+    queens(@,@)	: (set list[int]) list[int] ;
+    ok(@,@,@)	: ( int int list[int] ) bool;
+    @ U @       : (set set) set (AC);
+    (@)         : (int) set ;
+    [@ U @]     : (int set) set ;
+    Set(@)      : (int) set ;
+    Empty       : set ;
+   
+end
+
+stratop 
+  global
+	queens	: <list[int]>	builtin;
+  local
+	extractPos : <set>	builtin;
+end
+
+rules for set 
+
+S: set ;
+i: int ;
+
+global 
+
+[] Set(0) => Empty U (0) end
+[] Set(i) => Set(i-1) U (i) end
+
+
+[extractrule] (i) U S => [i U S] end
+
+end
+
+
+rules for list[int]
+n:int;
+global
+[] queensAC(n) => queens(Set(n-1),nil) end
+end
+
+rules for list[int]
+        p1: int;
+        s,s1:set ;
+   	l,l1: list[int];
+
+local
+
+   [final] queens(Empty,l) => l     end  
+
+   [queensrule]  queens(s,l)	=> queens(s1,p1.l)
+			where (set) [p1 U s1] :=(extractPos) s
+			if ok(1,p1,l)
+   end
+   
+end
+
+rules for bool
+          p,d,diff : int;
+	l : list[int];
+global
+  [] ok(diff,d,nil)	=> true				end
+//  [] ok(diff,d,p.l)	=> false	if d == p  	end
+//  no more necessary
+  [] ok(diff,d,p.l)	=> false        if d-p == diff  end
+  [] ok(diff,d,p.l)	=> false        if p-d == diff  end
+  [] ok(diff,d,p.l)	=> ok(diff+1,d,l)		end
+end
+
+
+strategies for set
+implicit
+  [] extractPos => dk(extractrule) end
+end
+
+strategies for list[int]
+implicit
+  [] queens => repeat*(dk(queensrule)); dc(final) end
+end
+
+end			

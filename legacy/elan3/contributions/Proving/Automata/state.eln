@@ -1,0 +1,15 @@
+module state
+import global int pair[state, state];
+end
+
+sort state;
+end
+
+operators
+  global
+	dead		: state pri 10;
+	q|@		: (int) state pri 10;	
+	@		: (pair[state,state]) state pri 10;
+end
+end
+

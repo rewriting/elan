@@ -1,0 +1,11 @@
+LPL str1 description
+
+  query 	of sort term
+         	result of sort term
+	 	import str1
+//         	start with (s0) g( f(f(a)) , nil )
+         	start with (s0) g( f(f(f(f(f(f(f(f(f(f(a)))))))))) , nil )
+//         	start with (s1) g( f(f(a)) , nil )
+
+end
+

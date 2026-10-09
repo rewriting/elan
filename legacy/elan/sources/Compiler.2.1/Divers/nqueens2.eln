@@ -1,0 +1,83 @@
+module nqueens2
+import global int bool;
+end
+sort list;
+end
+operators
+global
+
+  nil			: list;
+  @.@			: ( int list ) list;
+
+  queens(@,@,@)		: ( int int list) list;
+  queens(@)		: ( int ) list;
+  noattack(@,@,@)	: ( int int list ) bool;
+end
+
+stratop global
+	range		: <int>		bs;
+	queens_strat	: <list>	bs;
+end
+
+rules for list
+  n,size,x : int;
+  ql1,ql2 : list;
+global
+  [] queens(n)	=> queens(n,n,nil)					end
+
+  [queens_0] queens(0,size,ql1)	=> ql1
+  end
+  [queens_n] queens(n,size,ql1)	=> ql2
+	   if n>0
+	   where x:=(range) size
+	   if noattack(1,x,ql1)
+	   where ql2:=(queens_strat) queens(n-1,size,x.ql1)
+  end
+end
+
+rules for int
+  x : int;
+global
+  [rangeRule] x => 1 end
+  [rangeRule] x => 2 end
+  [rangeRule] x => 3 end
+  [rangeRule] x => 4 end
+  [rangeRule] x => 5 end
+  [rangeRule] x => 6 end
+  [rangeRule] x => 7 end
+  [rangeRule] x => 8 end
+/*
+  [rangeRule] x => 9 end
+  [rangeRule] x => 10 end
+  [rangeRule] x => 11 end
+  [rangeRule] x => 12 end
+*/
+end
+
+rules for bool
+  p,d,diff : int;
+  l : list;
+global
+  [] noattack(diff,d,nil)	=> true	end
+  [] noattack(diff,d,p.l)	=> true
+				   if d!=p
+				   if d-p!=diff 
+				   if p-d!=diff
+				   if noattack(diff+1,d,l)
+  end
+end
+
+strategies for int
+implicit
+  [] range =>	dk(rangeRule) end
+end
+
+strategies for list
+implicit
+  [] queens_strat => dk(queens_n, queens_0)	end
+end
+
+end
+
+
+

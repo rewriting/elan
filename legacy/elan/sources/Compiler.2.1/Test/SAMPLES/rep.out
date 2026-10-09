@@ -1,0 +1,4 @@
+
+result = g()(g()(a))
+
+rewrite_step = 2

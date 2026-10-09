@@ -1,0 +1,8 @@
+LPL hello2 description 
+
+  query 	of sort 	string
+         	result of sort  string
+	 	import		string hello2
+        	start with 	()query
+
+end

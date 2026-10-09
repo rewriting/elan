@@ -1,0 +1,28 @@
+//
+//		(c)	INRIA-Lorraine & CRIN
+//			615, rue du Jardin Botanique, BP 101
+//		        54602 Villers-les-Nancy
+//			France
+//			email: elan@loria.fr
+//
+//	$Source: /CVS/aircube/elan3/doc/ElanLibNoquote/substitution.eln,v $
+//	$Revision: 1.1 $
+//	$Date: 1997/03/25 16:47:00 $
+//	$Author: moreau $
+//
+module substitution
+sort substitution variable term;
+end
+operators
+ global
+
+  identity	: substitution;
+  @ -> @ 	: ( variable term ) substitution;
+  @ o @		: ( substitution substitution ) substitution   	assocLeft;
+
+end
+
+end
+
+
+

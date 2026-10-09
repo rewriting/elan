@@ -1,0 +1,7 @@
+LPL choice1 description
+  query    of sort term
+  result   of sort term
+  import   choice1
+  start with (s1) a
+
+end

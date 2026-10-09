@@ -1,0 +1,8 @@
+LPL efib3 description
+  query    of sort eInt
+  result   of sort eInt
+  import   efib3
+  start with () query
+//  start with () go(10)
+
+end

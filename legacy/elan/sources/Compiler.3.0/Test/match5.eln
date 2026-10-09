@@ -1,0 +1,48 @@
+module bug
+
+sort  	Foo; 
+end
+
+operators global
+	
+	rule0 : Foo;
+	rule1 : Foo;
+	rule2 : Foo;
+	go    : Foo;
+
+	a : Foo;
+	b : Foo;
+
+	f(@,@,@) : (Foo Foo Foo) Foo ; 
+	g(@,@)   : (Foo Foo) Foo;
+	h(@,@)   : (Foo Foo) Foo;
+
+	k(@)     : (Foo) Foo;
+
+end
+
+rules for Foo
+	x,y,z,t : Foo;
+	n : Foo;
+global
+[] f(g(h(x,y),z),t,n)    => rule0 end
+[] f(g(h(x,y),z),t,k(a)) => rule1 end
+[] f(g(a,z),t,n)         => rule2 end
+end
+
+end
+				
+
+
+
+
+
+
+
+
+
+
+
+
+
+

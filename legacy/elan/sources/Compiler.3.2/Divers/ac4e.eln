@@ -1,0 +1,66 @@
+module ac4e
+// exemples de filtrage AC
+
+//import global int bool eq[term] ;
+//end
+
+sort term;
+end
+
+operators global
+
+  f(@)		: (term) term;
+  U(@,@)	: (term term) term (AC);
+  V(@,@)	: (term term) term (AC);
+  g(@,@)	: (term term) term ;
+
+
+  a     : term;
+  b     : term;
+  c     : term;
+  d     : term;
+  e     : term;
+  f     : term;
+end
+
+stratop global
+  s0	: <term>	builtin;
+  s1	: <term>	builtin;
+end
+
+rules for term
+	x,y,z,u,v : term;
+global
+  
+  [r0] U(x,f(y)) => g(z,f(y))
+	where z:=(s1) U(x,f(y))
+  end
+
+  [r1] U(x,f(y)) => f(y)
+  end
+
+/*
+  [r1] a => c	end
+  [r2] a => d	end
+  [r3] b => e	end
+  [r4] b => f	end
+  [r5] c => b	end
+*/
+end
+
+strategies for term
+implicit
+  [.] s0 => dk(r0)
+  end
+  [.] s1 => dk(r1)
+  end
+
+
+//  [.] s1 => dc( dk(r1) || dk(r2) || dk(r3 || r4) )
+//  end
+end
+
+
+end
+
+// U(f(a),U(f(b),U(f(c),U(f(d),f(e)))))

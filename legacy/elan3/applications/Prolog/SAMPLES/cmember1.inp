@@ -1,0 +1,4 @@
+(member(a,cons(a,cons(b,cons(c,nil)))).nil |0| true) 
+end
+
+

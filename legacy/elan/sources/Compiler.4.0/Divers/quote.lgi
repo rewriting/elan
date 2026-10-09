@@ -1,0 +1,10 @@
+LPL quote  description
+
+query of sort  Foo
+result of sort Foo
+	  
+          import quote
+          start with () query
+
+end
+

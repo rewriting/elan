@@ -1,0 +1,9 @@
+LPL bug2 description
+
+
+  query    of sort 		poly
+	   result of sort 	poly
+           import  		bug2
+           start with 		(simplify) go
+
+end

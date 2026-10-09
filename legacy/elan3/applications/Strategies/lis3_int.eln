@@ -1,0 +1,20 @@
+module lis3_int
+
+import global 	any[int] any[tree[int]]
+		int      tree[int] 
+		strat[int] lis3[int];
+end
+stratop global
+  swap	: <int>;
+end
+
+strategies for int
+ y	: int;
+explicit
+  [.] [swap] y => y+1 if y < 10	end
+end
+
+end
+
+
+

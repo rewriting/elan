@@ -1,0 +1,33 @@
+module match1
+
+import int bool;
+end
+
+sort term;
+end
+
+operators global
+ and(@,@)    : (term bool ) bool ;
+ or(@,@)     : (int term) bool ;
+ true  : term;
+ false : term;
+end
+
+rules for bool
+	b : bool ;
+	t : term ;
+	i : int ;
+global
+  [] and(true,b) => b end
+  [] and(t,true) => true end
+  [] and(false,b) => b end
+  [] and(t,false) => false end
+
+  [] or(1,t) => true end
+  [] or(i,true) => false end
+  [] or(2,t) => false end
+  [] or(i,false) => true end
+
+end
+
+end

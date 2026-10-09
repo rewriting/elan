@@ -1,0 +1,34 @@
+//
+//		(c)	INRIA-Lorraine & CRIN
+//			615, rue du Jardin Botanique, BP 101
+//		        54602 Villers-les-Nancy
+//			France
+//			email: elan@loria.fr
+//
+//	$Source: /CVS/aircube/elan3/doc/ElanLibCommon/eq.eln,v $
+//	$Revision: 1.1 $
+//	$Date: 1997/03/25 16:46:46 $
+//	$Author: moreau $
+//
+
+module eq[X]
+
+	// This module in fact hides some operations
+	// defined in the module cmp.
+	// The importation dependency could have been, instead of
+	// the present one: cmp -import-> eq -import-> bool
+
+import bool cmp[X];
+end
+operators
+  global
+
+    @ == @	: ( X X ) bool		alias @ == @:;
+    @ != @	: ( X X ) bool		alias @ != @:;
+
+    eq(@,@)	: ( X X ) bool		alias @ == @:;
+    neq(@,@)	: ( X X ) bool		alias @ != @:;
+
+end
+
+end

@@ -1,0 +1,25 @@
+module builtinArray[X]
+import global builtinInt;
+end
+
+sort X builtinArray[X] internBuiltinArray[X];
+end
+
+operators global
+  new(@,@)       : (builtinInt X) builtinArray[X]                 code 200;
+
+  @.get(@)       : (builtinArray[X] builtinInt) X                 code 201;
+  @[@]           : (builtinArray[X] builtinInt) X
+                    alias @.get(@):;
+
+  @.set(@,@)     : (builtinArray[X] builtinInt X) builtinArray[X] code 202;
+  @[@]<-@        : (builtinArray[X] builtinInt X) builtinArray[X]
+                    alias @.set(@,@):;
+
+  @.length       : (builtinArray[X]) builtinInt                   code 203;
+  length(@)      : (builtinArray[X]) builtinInt 
+                    alias @.length:;
+end
+
+end  
+ 

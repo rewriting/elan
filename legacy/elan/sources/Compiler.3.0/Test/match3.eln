@@ -1,0 +1,36 @@
+module match3
+
+//import global int;
+//end
+
+sort term var;
+end
+
+operators global
+ a      : term;
+ b      : term;
+ c      : term;
+ go	: term;
+
+ h(@,@)	: (term term) term;
+ f(@)	: (term) term;
+ g(@) : (term) term;
+
+end
+
+
+
+rules for term
+	x : var;
+	t,t1,t2,t3 : term;
+global 
+[]	go => g(h(a,f(b))) end
+
+[]	g(h(t,f(h(t1,t2)))) => a end
+[]	g(h(f(h(t1,t2)),t)) => a end
+[]	g(t)		    => t end
+
+end
+
+
+end

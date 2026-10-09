@@ -1,0 +1,88 @@
+module contexts[btypes]
+import
+  global 	int bool types[btypes];
+sort context texcontext;
+op
+  global    
+    //--------- contexts -------------------------------//
+    nocontext	: context;				// error or unknown
+    nil		: context;				// nil
+    @.@		: (type context) context;		// cons
+    cvar(@)	: (int) context;			// context variable 
+    //--------------------------------------------------//
+    @-th elem(@): (int context) type;			// k-th
+    known(@)	: (context) bool;			// not known
+    size(@)	: (context) int;			// length
+    //------------ TEX ---------------------------------//
+    tex(@)	: (context) texcontext;
+    \nocontext	: texcontext;				
+    \nilc	: texcontext;			
+    \concc<@><@>: (textype texcontext) texcontext;	
+    \cvar<@>	: (int) texcontext;
+    @		: (textype) texcontext;			
+endop
+
+rules for texcontext
+declare
+	tt	: type;
+	cc	: context;
+	i	: int;
+bodies
+  []	tex(nocontext)	=> \nocontext
+  end
+  []	tex(nil)	=> \nilc
+  end
+  []	tex(tt.nil)	=> tex(tt)
+  end
+  []	tex(tt.cc) => \concc<tex(tt)><tex(cc)>
+  end
+  []	tex(cvar(i))	=> \cvar<i>
+  end
+end of rules
+
+rules for bool
+declare
+	cc	: context;
+bodies
+  []	known(nocontext)	=> false		
+  end
+  []	known(cc)		=> true			
+  end // dirty
+end of rules
+
+rules for type
+declare	e	: type;
+	l	: context;
+	n	: int;
+bodies
+  [] 1-th elem(e.l)		=> e					
+  end
+  [] n-th elem(e.l)		=> (n-1)-th elem(l)			
+  end
+end of rules
+
+rules for int
+declare	tt	: type;
+	cc	: context;
+bodies
+  []	size(nil)	=> 0						
+  end
+  []	size(tt.cc)	=> 1+size(cc)					
+  end
+end of rules
+
+end of module
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,41 @@
+def F_L = [rd_ff_L/rd_ff, rd_tt_L/rd_tt, set_ff_L/set_ff,set_tt_L/set_tt]
+def F_M = [rd_ff_M/rd_ff, rd_tt_M/rd_tt, set_ff_M/set_ff, set_tt_M/set_tt]
+
+def Q_L = Q_ff[F_L]
+def Q_M = Q_ff[F_M]
+
+def Q_ff = rd_ff.Q_ff + set_ff.Q_ff + set_tt.Q_tt
+def Q_tt = rd_tt.Q_tt + set_tt.Q_tt + set_ff.Q_ff
+
+def Turn = Turn_L
+def Turn_L = rd_L.Turn_L + set_L.Turn_L + set_M.Turn_M
+def Turn_M = rd_M.Turn_M + set_M.Turn_M + set_L.Turn_L
+
+def L = req_L.'set_tt_L.'set_M.L1 + stop_L.0
+def L1 = 'rd_ff_M.L2 + 'rd_L.L2
+def L2 = critical_L.'set_ff_L.L
+
+def M = req_M.'set_tt_M.'set_L.M1 + stop_M.0
+def M1 = 'rd_ff_L.M2 + 'rd_M.M2
+def M2 = critical_M.'set_ff_M.M
+
+set Internal = { rd_ff_L, rd_ff_M, rd_tt_L, rd_tt_M, \
+		 set_ff_L, set_ff_M, set_tt_L, set_tt_M, \
+		 rd_L, set_L, rd_M, set_M }
+
+def Mutex = (L # M # Q_L # Q_M # Turn) \ Internal
+
+prop AG(P) = max X.(P && [-]X)
+prop EF(P) = min X.(P || <->X)
+
+prop NoDeadlock = AG(<->tt)
+prop MutualExclusion = ~EF(<critical_L>tt && <critical_M>tt)
+prop EFInf(P) = max Y. min X. <->((P && Y) || X)
+
+prop Safety = max X.(~(<critical_M>tt && <critical_L>tt) && [-]X)
+prop NoDeadlock = AG(<->tt)
+prop NoLivelock = AG(~InfiniteTau())
+prop InfiniteTau = max X.(<tau>tt && <tau>X)
+prop EGNotCriticalM = max X.(<-critical_M>tt && <-critical_M>X)
+prop EGNotCriticalL = max X.(<-critical_L>tt && <-critical_L>X)
+prop NecessaryFair = AG([req_M](~EGNotCriticalM()) && [req_L](~EGNotCriticalL()))

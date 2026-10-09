@@ -1,0 +1,331 @@
+JAVA PROFILE 1.0.1, created Thu Oct 12 19:57:03 2000
+
+Header for -Xhprof ASCII Output
+
+Copyright 1998 Sun Microsystems, Inc. 901 San Antonio Road, Palo Alto,
+California, 94303, U.S.A.  All Rights Reserved.
+
+WARNING!  This file format is under development, and is subject to
+change without notice.
+
+This file contains the following types of records:
+
+THREAD START
+THREAD END      mark the lifetime of Java threads
+
+TRACE           represents a Java stack trace.  Each trace consists
+                of a series of stack frames.  Other records refer to
+                TRACEs to identify (1) where object allocations have
+                taken place, (2) the frames in which GC roots were
+                found, and (3) frequently executed methods.
+
+HEAP DUMP       is a complete snapshot of all live objects in the Java
+                heap.  Following distinctions are made:
+
+                ROOT    root set as determined by GC
+                CLS     classes 
+                OBJ     instances
+                ARR     arrays
+
+SITES           is a sorted list of allocation sites.  This identifies
+                the most heavily allocated object types, and the TRACE
+                at which those allocations occurred.
+
+CPU SAMPLES     is a statistical profile of program execution.  The VM
+                periodically samples all running threads, and assigns
+                a quantum to active TRACEs in those threads.  Entries
+                in this record are TRACEs ranked by the percentage of
+                total quanta they consumed; top-ranked TRACEs are
+                typically hot spots in the program.
+
+CPU TIME	is a profile of program execution obtained by measuring
+                the time spent in individual methods (excluding the time
+                spent in callees), as well as by counting the number of
+                times each method is called. Entries in this record are
+                TRACEs ranked by the percentage of total CPU time. The
+                "count" field indicates the number of times each TRACE 
+                is invoked.
+
+MONITOR TIME    is a profile of monitor contention obtained by measuring
+		the time spent by a thread waiting to enter a monitor.
+		Entries in this record are TRACEs ranked by the percentage
+		of total monitor contention time and a brief description
+		of the monitor.  The "count" field indicates the number of 
+		times the monitor was contended at that TRACE.
+
+MONITOR DUMP	is a complete snapshot of all the monitors and threads in 
+		the System.
+
+HEAP DUMP, SITES, CPU SAMPLES|TIME and MONITOR DUMP|TIME records are generated 
+at program exit.  They can also be obtained during program execution by typing 
+Ctrl-\ (on Solaris) or by typing Ctrl-Break (on Win32).
+
+--------
+
+THREAD START (obj=8138058, id = 2, name="SIGQUIT handler", group="system")
+THREAD START (obj=81623e8, id = 3, name="Reference Handler", group="system")
+THREAD START (obj=8188d98, id = 4, name="Finalizer", group="system")
+THREAD START (obj=8207d70, id = 1, name="main", group="main")
+THREAD END (id = 1)
+THREAD START (obj=82b7808, id = 5, name="Thread-0", group="main")
+THREAD END (id = 5)
+TRACE 1:
+	<empty>
+TRACE 48:
+	rem/compiler/BranchEvaluation.setDetType(BranchEvaluation.java:227)
+	rem/compiler/BranchEvaluation.getDetType(BranchEvaluation.java:209)
+	rem/compiler/RewriteRule.getDetTypeEvaluation(RewriteRule.java:170)
+	rem/compiler/RewriteRule.allDetEvaluation(RewriteRule.java:175)
+TRACE 4:
+	rem/REM.main(REM.java:108)
+TRACE 31:
+	rem/parser/REFParser.BuildElanTerm(REFParser.java:809)
+	rem/parser/REFParser.ElanTerms(REFParser.java:877)
+	rem/parser/REFParser.BuildElanTerm(REFParser.java:765)
+	rem/parser/REFParser.ElanTerms(REFParser.java:877)
+TRACE 7:
+	rem/parser/REFParser.<init>(REFParser.java:1483)
+	rem/REM.main(REM.java:118)
+TRACE 15:
+	rem/parser/REFParser.LexemRuleNameDeclaration(REFParser.java:308)
+	rem/parser/REFParser.Start(REFParser.java:86)
+	rem/REM.main(REM.java:165)
+TRACE 16:
+	rem/parser/REFParser.LexemStrategyNameDeclaration(REFParser.java:335)
+	rem/parser/REFParser.Start(REFParser.java:101)
+	rem/REM.main(REM.java:165)
+TRACE 27:
+	rem/compiler/Term.getPatternInfo(Term.java:361)
+	rem/compiler/RewriteRule.transformation3_1(RewriteRule.java:1212)
+	rem/compiler/RewriteRule.transformation(RewriteRule.java:1109)
+	rem/parser/REFParser.RuleDeclaration(REFParser.java:665)
+TRACE 39:
+	rem/parser/REFParser.StrategyTerm(REFParser.java:1121)
+	rem/parser/REFParser.StrategyBody(REFParser.java:1063)
+	rem/parser/REFParser.StrategyDeclaration(REFParser.java:1034)
+	rem/parser/REFParser.Start(REFParser.java:177)
+TRACE 18:
+	rem/parser/REFParser.ALexem(REFParser.java:553)
+	rem/parser/REFParser.SymbolDeclaration(REFParser.java:434)
+	rem/parser/REFParser.GrammarDeclaration(REFParser.java:376)
+	rem/parser/REFParser.Start(REFParser.java:117)
+TRACE 21:
+	rem/compiler/SymbolVariable.getCreate(SymbolVariable.java:42)
+	rem/parser/REFParser.BuildElanTerm(REFParser.java:782)
+	rem/parser/REFParser.ElanTerms(REFParser.java:877)
+	rem/parser/REFParser.BuildElanTerm(REFParser.java:765)
+TRACE 8:
+	rem/parser/REFParser.<init>(REFParser.java:1484)
+	rem/REM.main(REM.java:118)
+TRACE 34:
+	rem/parser/REFParser.RuleName(REFParser.java:1188)
+	rem/parser/REFParser.RuleNames(REFParser.java:1199)
+	rem/parser/REFParser.StrategyTerm(REFParser.java:1108)
+	rem/parser/REFParser.StrategyBody(REFParser.java:1063)
+TRACE 5:
+	rem/REM.main(REM.java:115)
+TRACE 6:
+	rem/parser/REFParser.<init>(REFParser.java:1475)
+	rem/REM.main(REM.java:118)
+TRACE 47:
+	rem/compiler/DDNode.addACSymbol(DDNode.java:269)
+	rem/compiler/DDNode.addTerm(DDNode.java:163)
+	rem/compiler/DDNode.addVariable(DDNode.java:283)
+	rem/compiler/DDNode.addTerm(DDNode.java:156)
+TRACE 35:
+	rem/parser/REFParser.StrategyTerm(REFParser.java:1109)
+	rem/parser/REFParser.StrategyBody(REFParser.java:1063)
+	rem/parser/REFParser.StrategyTerm(REFParser.java:1152)
+	rem/parser/REFParser.StrategyBody(REFParser.java:1063)
+TRACE 23:
+	rem/compiler/Term.<init>(Term.java:26)
+	rem/parser/REFParser.BuildElanTerm(REFParser.java:783)
+	rem/parser/REFParser.ElanTerms(REFParser.java:877)
+	rem/parser/REFParser.BuildElanTerm(REFParser.java:765)
+TRACE 11:
+	rem/compiler/Tools.<clinit>(Tools.java:Unknown line)
+	rem/REM.main(REM.java:118)
+TRACE 9:
+	rem/parser/REFParser.<init>(REFParser.java:1485)
+	rem/REM.main(REM.java:118)
+TRACE 38:
+	rem/parser/REFParser.StrategyDeclaration(REFParser.java:1052)
+	rem/parser/REFParser.Start(REFParser.java:177)
+	rem/REM.main(REM.java:165)
+TRACE 33:
+	rem/parser/REFParser.Choice(REFParser.java:1004)
+	rem/parser/REFParser.Wheres(REFParser.java:910)
+	rem/parser/REFParser.RuleDeclaration(REFParser.java:640)
+	rem/parser/REFParser.Start(REFParser.java:163)
+TRACE 46:
+	rem/compiler/DDTree.addTerm(DDTree.java:157)
+	rem/compiler/DDTree.build(DDTree.java:131)
+	rem/compiler/DDTree.construction(DDTree.java:775)
+	rem/compiler/RewriteRule.compileNoNamed(RewriteRule.java:228)
+TRACE 26:
+	rem/parser/REFParser.Wheres(REFParser.java:928)
+	rem/parser/REFParser.RuleDeclaration(REFParser.java:640)
+	rem/parser/REFParser.Start(REFParser.java:163)
+	rem/REM.main(REM.java:165)
+TRACE 17:
+	rem/parser/REFParser.SymbolDeclaration(REFParser.java:501)
+	rem/parser/REFParser.GrammarDeclaration(REFParser.java:376)
+	rem/parser/REFParser.Start(REFParser.java:117)
+	rem/REM.main(REM.java:165)
+TRACE 37:
+	rem/parser/REFParser.StrategyBody(REFParser.java:1079)
+	rem/parser/REFParser.StrategyDeclaration(REFParser.java:1034)
+	rem/parser/REFParser.Start(REFParser.java:177)
+	rem/REM.main(REM.java:165)
+TRACE 24:
+	rem/parser/REFParser.RuleDeclaration(REFParser.java:629)
+	rem/parser/REFParser.Start(REFParser.java:163)
+	rem/REM.main(REM.java:165)
+TRACE 3:
+	java/lang/System.initProperties(System.java:Native method)
+	java/lang/System.initializeSystemClass(System.java:783)
+TRACE 43:
+	rem/compiler/RewriteRule.compileNoNamed(RewriteRule.java:223)
+	rem/REM.main(REM.java:221)
+TRACE 13:
+	rem/parser/REFParser.LexemSortDeclaration(REFParser.java:254)
+	rem/parser/REFParser.Start(REFParser.java:56)
+	rem/REM.main(REM.java:165)
+TRACE 29:
+	rem/parser/REFParser.LocalAffectation(REFParser.java:959)
+	rem/parser/REFParser.Wheres(REFParser.java:915)
+	rem/parser/REFParser.RuleDeclaration(REFParser.java:640)
+	rem/parser/REFParser.Start(REFParser.java:163)
+TRACE 14:
+	rem/parser/REFParser.LexemModuleDeclaration(REFParser.java:281)
+	rem/parser/REFParser.Start(REFParser.java:71)
+	rem/REM.main(REM.java:165)
+TRACE 28:
+	rem/compiler/RewriteRule.variableNumbering(RewriteRule.java:340)
+	rem/parser/REFParser.RuleDeclaration(REFParser.java:691)
+	rem/parser/REFParser.Start(REFParser.java:163)
+	rem/REM.main(REM.java:165)
+TRACE 41:
+	rem/parser/REFParser.StrategyTerm(REFParser.java:1103)
+	rem/parser/REFParser.StrategyBody(REFParser.java:1063)
+	rem/parser/REFParser.StrategyDeclaration(REFParser.java:1034)
+	rem/parser/REFParser.Start(REFParser.java:177)
+TRACE 49:
+	rem/compiler/Tools.genMainFile(Tools.java:163)
+	rem/REM.main(REM.java:263)
+TRACE 44:
+	rem/compiler/DDTree.build(DDTree.java:129)
+	rem/compiler/DDTree.construction(DDTree.java:775)
+	rem/compiler/RewriteRule.compileNoNamed(RewriteRule.java:228)
+	rem/REM.main(REM.java:221)
+TRACE 10:
+	rem/REM.main(REM.java:118)
+TRACE 45:
+	rem/compiler/DDTree.addTerm(DDTree.java:162)
+	rem/compiler/DDTree.build(DDTree.java:131)
+	rem/compiler/DDTree.construction(DDTree.java:775)
+	rem/compiler/RewriteRule.compileNoNamed(RewriteRule.java:228)
+TRACE 2:
+	java/security/AccessController.getStackAccessControlContext(AccessController.java:Native method)
+	java/security/AccessController.getContext(AccessController.java:358)
+	java/lang/Thread.init(Thread.java:270)
+TRACE 30:
+	rem/parser/REFParser.BuildElanTerm(REFParser.java:798)
+	rem/parser/REFParser.ElanTerms(REFParser.java:877)
+	rem/parser/REFParser.BuildElanTerm(REFParser.java:765)
+	rem/parser/REFParser.ElanTerms(REFParser.java:877)
+TRACE 40:
+	rem/parser/REFParser.StrategyTerm(REFParser.java:1147)
+	rem/parser/REFParser.StrategyBody(REFParser.java:1076)
+	rem/parser/REFParser.StrategyDeclaration(REFParser.java:1034)
+	rem/parser/REFParser.Start(REFParser.java:177)
+TRACE 20:
+	rem/parser/REFParser.BuildElanTerm(REFParser.java:781)
+	rem/parser/REFParser.ElanTerms(REFParser.java:877)
+	rem/parser/REFParser.BuildElanTerm(REFParser.java:765)
+	rem/parser/REFParser.unflattenedElanTerm(REFParser.java:746)
+TRACE 25:
+	rem/parser/REFParser.Condition(REFParser.java:937)
+	rem/parser/REFParser.Wheres(REFParser.java:906)
+	rem/parser/REFParser.RuleDeclaration(REFParser.java:640)
+	rem/parser/REFParser.Start(REFParser.java:163)
+TRACE 36:
+	rem/parser/REFParser.StrategyTerm(REFParser.java:1155)
+	rem/parser/REFParser.StrategyBody(REFParser.java:1063)
+	rem/parser/REFParser.StrategyDeclaration(REFParser.java:1034)
+	rem/parser/REFParser.Start(REFParser.java:177)
+TRACE 19:
+	rem/parser/REFParser.ALexem(REFParser.java:564)
+	rem/parser/REFParser.SymbolDeclaration(REFParser.java:434)
+	rem/parser/REFParser.GrammarDeclaration(REFParser.java:376)
+	rem/parser/REFParser.Start(REFParser.java:117)
+TRACE 22:
+	rem/parser/REFParser.BuildElanTerm(REFParser.java:782)
+	rem/parser/REFParser.ElanTerms(REFParser.java:877)
+	rem/parser/REFParser.BuildElanTerm(REFParser.java:765)
+	rem/parser/REFParser.unflattenedElanTerm(REFParser.java:746)
+TRACE 32:
+	rem/parser/REFParser.BuildElanTerm(REFParser.java:791)
+	rem/parser/REFParser.ElanTerms(REFParser.java:877)
+	rem/parser/REFParser.BuildElanTerm(REFParser.java:765)
+	rem/parser/REFParser.unflattenedElanTerm(REFParser.java:746)
+TRACE 42:
+	rem/parser/REFParser.QueryDeclaration(REFParser.java:1277)
+	rem/parser/REFParser.Start(REFParser.java:191)
+	rem/REM.main(REM.java:165)
+TRACE 12:
+	rem/parser/REFParser.LexemIdentifierDeclaration(REFParser.java:227)
+	rem/parser/REFParser.Start(REFParser.java:41)
+	rem/REM.main(REM.java:165)
+CPU TIME (ms) BEGIN (total = 0) Thu Oct 12 19:58:07 2000
+rank   self  accum   count trace method
+   1   nan%   nan%       0     1 <empty trace>
+   2   nan%   nan%       0    48 rem/compiler/BranchEvaluation.setDetType
+   3   nan%   nan%       0     4 rem/REM.main
+   4   nan%   nan%       0    31 rem/parser/REFParser.BuildElanTerm
+   5   nan%   nan%       0     7 rem/parser/REFParser.<init>
+   6   nan%   nan%       0    15 rem/parser/REFParser.LexemRuleNameDeclaration
+   7   nan%   nan%       0    16 rem/parser/REFParser.LexemStrategyNameDeclaration
+   8   nan%   nan%       0    27 rem/compiler/Term.getPatternInfo
+   9   nan%   nan%       0    39 rem/parser/REFParser.StrategyTerm
+  10   nan%   nan%       0    18 rem/parser/REFParser.ALexem
+  11   nan%   nan%       0    21 rem/compiler/SymbolVariable.getCreate
+  12   nan%   nan%       0     8 rem/parser/REFParser.<init>
+  13   nan%   nan%       0    34 rem/parser/REFParser.RuleName
+  14   nan%   nan%       0     5 rem/REM.main
+  15   nan%   nan%       0     6 rem/parser/REFParser.<init>
+  16   nan%   nan%       0    47 rem/compiler/DDNode.addACSymbol
+  17   nan%   nan%       0    35 rem/parser/REFParser.StrategyTerm
+  18   nan%   nan%       0    23 rem/compiler/Term.<init>
+  19   nan%   nan%       0    11 rem/compiler/Tools.<clinit>
+  20   nan%   nan%       0     9 rem/parser/REFParser.<init>
+  21   nan%   nan%       0    38 rem/parser/REFParser.StrategyDeclaration
+  22   nan%   nan%       0    33 rem/parser/REFParser.Choice
+  23   nan%   nan%       0    46 rem/compiler/DDTree.addTerm
+  24   nan%   nan%       0    26 rem/parser/REFParser.Wheres
+  25   nan%   nan%       0    17 rem/parser/REFParser.SymbolDeclaration
+  26   nan%   nan%       0    37 rem/parser/REFParser.StrategyBody
+  27   nan%   nan%       0    24 rem/parser/REFParser.RuleDeclaration
+  28   nan%   nan%       0     3 java/lang/System.initProperties
+  29   nan%   nan%       0    43 rem/compiler/RewriteRule.compileNoNamed
+  30   nan%   nan%       0    13 rem/parser/REFParser.LexemSortDeclaration
+  31   nan%   nan%       0    29 rem/parser/REFParser.LocalAffectation
+  32   nan%   nan%       0    14 rem/parser/REFParser.LexemModuleDeclaration
+  33   nan%   nan%       0    28 rem/compiler/RewriteRule.variableNumbering
+  34   nan%   nan%       0    41 rem/parser/REFParser.StrategyTerm
+  35   nan%   nan%       0    49 rem/compiler/Tools.genMainFile
+  36   nan%   nan%       0    44 rem/compiler/DDTree.build
+  37   nan%   nan%       0    10 rem/REM.main
+  38   nan%   nan%       0    45 rem/compiler/DDTree.addTerm
+  39   nan%   nan%       0     2 java/security/AccessController.getStackAccessControlContext
+  40   nan%   nan%       0    30 rem/parser/REFParser.BuildElanTerm
+  41   nan%   nan%       0    40 rem/parser/REFParser.StrategyTerm
+  42   nan%   nan%       0    20 rem/parser/REFParser.BuildElanTerm
+  43   nan%   nan%       0    25 rem/parser/REFParser.Condition
+  44   nan%   nan%       0    36 rem/parser/REFParser.StrategyTerm
+  45   nan%   nan%       0    19 rem/parser/REFParser.ALexem
+  46   nan%   nan%       0    22 rem/parser/REFParser.BuildElanTerm
+  47   nan%   nan%       0    32 rem/parser/REFParser.BuildElanTerm
+  48   nan%   nan%       0    42 rem/parser/REFParser.QueryDeclaration
+  49   nan%   nan%       0    12 rem/parser/REFParser.LexemIdentifierDeclaration
+CPU TIME (ms) END

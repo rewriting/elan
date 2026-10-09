@@ -1,0 +1,9 @@
+LPL str_to_term description 
+
+        query           of sort string
+        result          of sort string
+        import          str_to_term
+        start with 	()foo(query)
+
+end
+

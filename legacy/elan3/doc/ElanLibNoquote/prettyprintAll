@@ -1,0 +1,15 @@
+#!/bin/sh
+ELANSOURCES=.
+ELANTEX=./ElanTeX
+PRETTYPRINT=./prettyprint
+FORMATTEUR=lgrind
+
+for i in `ls *.eln *.lgi *.spc`
+do
+  /bin/rm -f $ELANTEX/$i.tex
+  $FORMATTEUR -i -d ./prettyprintdataEco -lall $i > $ELANTEX/$i.tex
+#  tgrind -f -d ./prettyprintdataEco -lall $i > $ELANTEX/$i.tex
+  echo $i " --> " $ELANTEX/$i.tex
+done
+
+

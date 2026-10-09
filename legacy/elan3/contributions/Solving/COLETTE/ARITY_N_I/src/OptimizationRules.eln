@@ -1,0 +1,122 @@
+module OptimizationRules[Variables,Type,Values]
+
+import
+global
+	CSOPDefinition[Variables,Type,Values]
+	occur[var,list[constraint]]
+	;
+end
+
+
+rules for csop
+
+	x, y				: var;
+	ub, lb, newub, newlb, middle	: Type;
+	P, Q				: csp;
+	lmc, lec, EC, DC, store		: list[constraint];
+	l				: list[constraint];
+
+global
+
+[PostLTEUpperBound]
+
+	CSOP[CSP[lmc,lec,EC,DC,store],x,lb,ub]
+	=>
+	CSOP[CSP[lmc,lec,1(*)x(+)0<=?ub.EC,DC,store],x,lb,ub]
+	if	lb <= ub
+	if	not occurs x in lec
+end
+
+[PostLTUpperBound]
+
+	CSOP[CSP[lmc,lec,EC,DC,store],x,lb,ub]
+	=>
+	CSOP[CSP[lmc,lec,1(*)x(+)0<?ub.EC,DC,store],x,lb,ub]
+	if	lb < ub
+	if	not occurs x in lec
+end
+
+[PostGTELowerBound]
+
+	CSOP[CSP[lmc,lec,EC,DC,store],x,lb,ub]
+	=>
+	CSOP[CSP[lmc,lec,1(*)x(+)0>=?lb.EC,DC,store],x,lb,ub]
+	if	ub >= lb
+	if	not occurs x in lec
+end
+
+[PostGTLowerBound]
+
+	CSOP[CSP[lmc,lec,EC,DC,store],x,lb,ub]
+	=>
+	CSOP[CSP[lmc,lec,1(*)x(+)0>?lb.EC,DC,store],x,lb,ub]
+	if	ub > lb
+	if	not occurs x in lec
+end
+
+[SetUpperBoundToMiddle]
+
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[P,x,lb,middle]
+	if	lb != ub
+	choose
+	try
+		if	lb+(ub-lb)%2 == 0
+		where	middle := ()lb+(ub-lb)/2
+	try
+		where	middle := ()lb+(ub-lb)/2 + 1
+	end
+end
+
+[SetLowerBoundToMiddle]
+
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[P,x,middle,ub]
+	if	lb != ub
+	choose
+	try
+		if	lb+(ub-lb)%2 == 0
+		where	middle := ()lb+(ub-lb)/2
+	try
+		where	middle := ()lb+(ub-lb)/2 + 1
+	end
+end
+
+[SetUpperBoundToLowerBound]
+
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[P,x,lb,lb]
+	if	ub != lb
+end
+
+[SetLowerBoundToUpperBound]
+
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[P,x,ub,ub]
+	if	lb != ub
+end
+
+[UndervalueLowerBound]
+
+	CSOP[CSP[lmc,lec,EC,DC,store],x,lb,ub]
+	=>
+	CSOP[CSP[lmc,lec,EC,DC,store],x,newlb,ub]
+	where	newlb	:= ()MinOfTerm(1(*)x,lmc,lec,0)
+end
+
+[OvervalueUpperBound]
+
+	CSOP[CSP[lmc,lec,EC,DC,store],x,lb,ub]
+	=>
+	CSOP[CSP[lmc,lec,EC,DC,store],x,lb,newub]
+	where	newub	:= ()MaxOfTerm(1(*)x,lmc,lec,0)
+end
+
+end
+
+
+end

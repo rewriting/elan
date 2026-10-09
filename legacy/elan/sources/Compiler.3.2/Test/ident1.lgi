@@ -1,0 +1,8 @@
+LPL ident1 description
+  query    of sort term
+  result   of sort term
+  import   ident1 ident
+  start with () query
+  //start with () f(a)
+
+end

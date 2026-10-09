@@ -1,0 +1,54 @@
+module test
+import local bool eq[term];
+end
+sort term;
+end
+
+operators
+global
+  o : term;
+  s(@)          : (term) term;
+  plus(@,@)     : (term term) term;
+  times(@,@)    : (term term) term;
+  p(@)          : (term) term;
+  even(@)       : (term) bool;
+  odd(@)        : (term) bool;
+end
+
+rules for bool
+        x, y: term;
+global
+        [] even(o) => true              end
+        [] odd(o) => true               end
+        [] even(s(x)) => odd(x)         end
+        [] odd(s(x)) => even(x) end
+end
+
+rules for term
+        x,y,z : term;
+	R : term;
+        b: bool;
+global
+  [] plus(x, y) => R
+     where b:=()even(x)
+     choose
+         try if b where z:=()p(p(x))
+         try where z:=()p(x)
+     end                    
+     where R:=()plus(z,y)
+
+
+/*
+     switch 
+         case b then plus(z,y)
+         where z:=()p(p(x))
+         otherwise plus(z,y)
+         where z:=()p(x)
+     end                    
+     where b:=()even(x)
+*/
+  end
+end     
+end
+
+//plus(s(s(s(o))),s(s(s(s(o))))) end

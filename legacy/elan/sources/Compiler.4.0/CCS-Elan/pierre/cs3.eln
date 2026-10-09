@@ -1,0 +1,26 @@
+module cs3
+
+import global 
+identifier eq[identifier];
+end
+
+sort label typus;
+end
+
+operators 
+global
+  @: (identifier) label pri 20;
+  theSpecialLabel : label pri 30;
+  whatAmI @ : (label) typus;
+  normalId : typus;
+  specialLabel : typus ;
+end
+
+rules for typus
+ x: label;
+global
+  [] whatAmI theSpecialLabel => specialLabel end
+  [] whatAmI $x => normalId end
+end
+
+end

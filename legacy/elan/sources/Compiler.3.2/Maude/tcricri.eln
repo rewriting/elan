@@ -1,0 +1,49 @@
+module test
+
+import global bool int eq[var] ;
+end
+
+sort var term eqSystem ;
+end
+
+operators global 
+
+t.@: (int) term ;
+x.@: (int) var ;
+
+@: (var) term ;
+
+@ =E @ : (term term) eqSystem ;
+
+@ =F @ : (term term) eqSystem ;
+
+@ < @ : (term term) bool ; 
+
+@ =V @ : (var var) eqSystem (AC) ;
+
+@ =EUF @ : (term term) eqSystem ;
+
+@ & @ : (eqSystem eqSystem) eqSystem (AC) ;
+end
+
+
+rules for bool 
+i,j: int ;
+global
+[] t.i < t.j => true if i<j end
+[] t.i < t.j => false end
+end
+
+
+rules for eqSystem
+X,Y: var ;
+u,v: term ;
+P: eqSystem ;
+global
+
+[] X =F u & Y =E v & X =V Y & P => P & X =E u & Y =F v  & u =EUF v & X =V Y 
+   if u < v end
+end
+
+end
+

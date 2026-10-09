@@ -1,0 +1,9 @@
+LPL Entiers description 
+
+        query           of sort term
+        result          of sort term
+        import          Entiers
+
+        start with () ExpandTerm(query)
+
+end

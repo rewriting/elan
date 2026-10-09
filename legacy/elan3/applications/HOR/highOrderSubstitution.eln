@@ -1,0 +1,14 @@
+module highOrderSubstitution
+sort substitution highOrderSubstitution variable amvariable mvariable term;
+end
+
+operators
+ global
+
+  identityHO    : highOrderSubstitution;
+  @ --> @       : ( term term ) highOrderSubstitution;
+  @ o @         : ( highOrderSubstitution highOrderSubstitution ) highOrderSubstitution assocLeft;
+
+end
+
+end

@@ -1,0 +1,42 @@
+To install the complete system:
+-------------------------------
+
+STEP 1: update your environment
+-------
+
+# decide where to install the ELAN system
+# example: 
+setenv ELANDIR $(HOME)/ELAN/elan
+
+# modify the PATH variable
+setenv PATH $ELANDIR/bin:${PATH} 
+
+STEP 2: install third party libraries
+------- 
+
+# install the ATerm library
+# (available at http://www.cwi.nl/projects/MetaEnv/aterm/)
+cd aterm-xx && ./configure --prefix=$ELANDIR --with-all && make install
+
+# install the patched BDW Garbage Collector
+# (available at /local/www-equipes/protheo/SOFTWARES/ELAN/Soft)
+cd gc-patched-6.0 && ./configure --prefix=$ELANDIR && make install
+
+STEP 3: install ELAN components
+-------
+# install the Choice-Point Library
+cd cpl && ./configure --prefix=$ELANDIR && make install
+
+# install the parser and the interpreter
+cd elan-interpreter && ./configure --prefix=$ELANDIR && make install
+
+# install the ELAN compiler
+cd elan-compiler && ./configure --prefix=$ELANDIR && make install
+
+# install the ELAN library
+cd elan-library && ./configure --prefix=$ELANDIR && make install
+
+
+
+
+

@@ -1,0 +1,33 @@
+chan approach, exit ;
+chan lower, raise ;
+process Train{
+clock X ;
+state Far, Near{X<=5}, On{X<=5}, After{X<=5};
+init Far;
+trans Far -> Near {sync approach!; assign X:=0; },
+Near -> On {guard X>2; },
+On -> After {},
+After -> Far {sync exit!; };
+}
+process Gate{
+clock Y ;
+state Up, t1{Y<=1}, Down, t2{Y<=2};
+init Up;
+trans Up -> t1 {sync lower?; assign Y:=0; },
+t1 -> Down {},
+Down -> t2 {sync raise?; assign Y:=0; },
+t2 -> Up {guard Y>=1; };
+}
+process Controller{
+clock Z ;
+state U0, U1{Z<=1}, U2{Z<=1};
+init U0;
+trans U0 -> U1 {sync approach?; assign Z:=0; },
+U1 -> U0 {guard Z==1; sync lower!; },
+U0 -> U2 {sync exit?; assign Z:=0; },
+U2 -> U0 {sync raise!; };
+}
+MyTrain:= Train() ;
+MyGate:=Gate();
+MyController:=Controller();
+system MyTrain, MyGate, MyController;

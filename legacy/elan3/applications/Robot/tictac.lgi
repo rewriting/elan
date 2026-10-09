@@ -1,0 +1,18 @@
+LPL tictac description
+
+  query	of sort		state
+//  query of sort	list[list[state]]
+  result of sort	state
+//  result of sort	list[list[state]]
+  import 		tictac
+//  start with 		(eval)query
+//  start with 		(eval)[movetowin]query.nil.nil
+
+  start with 		[moves]query
+//  start with 		[win]query
+//  start with 		()query
+
+end
+
+
+

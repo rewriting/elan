@@ -1,0 +1,38 @@
+#
+#               (c)     INRIA-Lorraine & CRIN
+#                       615, rue du Jardin Botanique, BP 101
+#                       54602 Villers-les-Nancy
+#                       France
+#                       email: elan@loria.fr
+#
+#       $Source: /users/protheo/pot/ELAN/CVSELAN/elan/sources/Scripts/Makefile.common,v $
+#       $Revision: 1.2 $
+#       $Date: 2001/07/23 14:57:30 $
+#       $Author: moreau $
+
+# import CC
+# import FAST
+# import ARCH
+# import ARCHFLAG
+# import SPECIAL_FLAG
+# import ELANLIB
+
+SUBDIRS    = 
+MAKEINSTALLDIRS = $(ELANLIB)/../bin
+MAKEDISTDIRS    = $(ELANDIST)/Scripts
+SRC        = Makefile.common mkinstalldirs\
+	     itest jtest aitest mitest mjtest\
+	     jolifier jolifier.sh
+
+
+all clean :
+
+makefile:
+
+
+install: install-dirs
+	cp $(SRC) $(ELANLIB)/../bin
+
+
+dist: dist-dirs
+	cp $(SRC) $(ELANDIST)/Scripts

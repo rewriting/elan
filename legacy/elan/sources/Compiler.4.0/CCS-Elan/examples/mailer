@@ -1,0 +1,36 @@
+def Buffer = insert.'remove.Buffer + 'empty.Buffer
+
+def CollectMail = Buffer[cm_insert/insert,cm_remove/remove,cm_empty/empty]
+
+def MailFile = Buffer[mf_insert/insert,mf_remove/remove,mf_empty/empty]
+
+def FileMail = Buffer[fm_insert/insert,fm_remove/remove,fm_empty/empty]
+
+def Collect = letter_posted.'cm_insert.Collect
+
+def Deliver = md_start.(t.'letter_deliver.'md_stop.Deliver +\
+                        t.'cm_insert.'md_stop.Deliver)
+
+def Mail = fm_remove.(t.'md_start.md_stop.Mail1 + t.'mf_insert.Mail1)\
+           + cm_remove.'mf_insert.Mail1
+
+def Mail1 = cm_empty.Mail + cm_remove.'mf_insert.Mail1
+
+def File = file_received.'fm_insert.File + mf_remove.'file_send.File
+
+def MInternals = { cm_insert,cm_remove,cm_empty,md_start,md_stop,\
+                   mf_insert,mf_remove,mf_empty,fm_insert,fm_remove,fm_empty }
+
+def Old_System = (Collect | Deliver | CollectMail\ 
+                  | Mail | MailFile | FileMail | File)\MInternals
+
+def Mail_out = cm_remove.'mf_insert.Mail_out
+
+def Mail_in = fm_remove.(t.'md_start.md_stop.Mail_in + t.'mf_insert.Mail_in)
+
+def File_out = mf_remove.'file_send.File_out
+
+def File_in = file_received.'fm_insert.File_in
+
+def New_System = (Collect | Deliver | CollectMail | Mail_out | Mail_in | MailFile\
+                  | FileMail | File_out | File_in)\MInternals

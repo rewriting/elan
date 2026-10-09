@@ -1,0 +1,40 @@
+module iterRepeat
+
+import global int bool;
+  end
+
+sort elem nelist list; end
+
+operators 
+  global
+    @          :	( int )        nelist ;
+    @ . @      : 	( int nelist ) nelist ;
+    element(@) : 	( nelist )     int ;
+  end
+
+stratop
+  global
+    all0    : <int -> int> bs ;
+    allRepS : <int -> int> bs ;
+    allRepP : <int -> int> bs ;
+    allIter : <int -> int> bs ;
+  end
+
+rules for int
+	e : int;
+	l : nelist;
+  global
+    [extract]  element(e) 	=> e 	      end
+    [extract]  element(e.l) 	=> e 	      end
+    [extract]  element(e.l) 	=> element(l) end
+  end
+
+strategies for int
+  implicit
+    [] all0    => dk(extract)   	  end
+    [] allRepS => repeat* ( dk(extract) ) end
+    [] allRepP => repeat+ ( dk(extract) ) end
+    [] allIter => iterate* ( dk(extract) ) end
+  end
+end
+

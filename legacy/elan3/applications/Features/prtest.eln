@@ -1,0 +1,122 @@
+module prtest
+
+import global string io[string] io[builtinInt];
+end
+operators global
+  // --- example 1
+  loop(@,@) 	: (Pid builtinInt) builtinInt;
+  loop2(@,@)	: (Pid builtinInt) builtinInt;
+  floop(@,@) 	: (string builtinInt) builtinInt;
+  rloop(@)	: (string) builtinInt;
+  sum(@,@)	: (builtinInt Pid) builtinInt;
+  // --- example 2
+  ccode		: builtinInt;
+end
+
+//---------------------------------------------------------------------------
+// EXAMPLE 1
+//---------------------------------------------------------------------------
+/* this should be self explaining
+ 10 end 
+ 10+ 9+ 8+ 7+ 6+ 5+ 4+ 3+ 2+ 1+ 0end 
+ 9+ 8+ 7+ 6+ 5+ 4+ 3+ 2+ 1+ 0end 
+ 8+ 7+ 6+ 5+ 4+ 3+ 2+ 1+ 0end 
+ 7+ 6+ 5+ 4+ 3+ 2+ 1+ 0end 
+ 6+ 5+ 4+ 3+ 2+ 1+ 0end 
+ 5+ 4+ 3+ 2+ 1+ 0end 
+ 4+ 3+ 2+ 1+ 0end 
+ 3+ 2+ 1+ 0end 
+ 2+ 1+ 0end 
+ 1+ 0end 
+*/
+rules for builtinInt
+s1, s2, n, n1, n2, n3, i 	: builtinInt;
+        pid, pid1    		: Pid;
+	idd, id1			: string;
+global
+  [] loop2(pid,0) => 0						end
+  [] loop2(pid,n) => s1+s2
+			where s1 :=()loop(pid,n)		
+			where id1:=()write(pid,"0 end\n")		
+			where s2 :=()loop2(pid,n-1)		end
+  [] loop(pid,0) => 0 						end
+  [] loop(pid,n) => n+loop(pid,n-1) 
+			where n1:=()write(pid,n)		
+			where idd:=()write(pid,"+")		end
+  [] floop(idd,n) => n1	
+			where pid :=()open(idd,"w")	
+                        if iserr(pid) == false
+			where n2  :=()write(pid,n)
+			where id1 :=()write(pid," end\n")
+			where n1  :=()loop2(pid,n)
+			where pid1:=()close(pid)
+			if iserr(pid1) == false			end
+  [] sum(0,pid)	=> 0						end
+  [] sum(i,pid) => n+n2 where n   :=()read(pid) if i>0
+			where n1  :=()write(stdout,n)
+			where n2  :=()sum(i-1,pid)		end
+  [] rloop(idd) => n1	
+			where pid :=()open(idd,"r")	
+			if iserr(pid) == false
+                        where i   :=()read(pid)
+//	where n3:=()write(stdout,i)
+//	where id1 :=()write(stdout,"\n")
+			where n1  :=()sum(i,pid)
+		    	where n2  :=()write(stdout,n1)
+			where pid1:=()close(pid)
+			if iserr(pid1) == false			end
+end
+//---------------------------------------------------------------------------
+// EXAMPLE 2
+//---------------------------------------------------------------------------
+rules for builtinInt
+id1, id2, id4, id5, id6 : string;
+	idd, id3, id7 		: string;
+        pid, pid1, fid, fid1    : Pid;
+        n, n1, n2, m            : builtinInt;
+global
+  [] ccode => n1
+	where idd := ()write(stdout,"\nEnter your code confidential: ") 
+	where n  := ()read(stdin)
+	if n < 10000
+	where fid:= ()open("logfile","a")
+	where n1 := ()write(fid,n)
+	where id2 := ()write(fid,"is logged\n")
+	where id1:= ()write(stdout,"\nSorry, there are no money\n") 	end
+  [] ccode => 9999
+ 	where idd := ()write(stdout,"\nSorry, your code is not valid\n") end
+end
+
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

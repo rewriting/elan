@@ -1,0 +1,26 @@
+/*GATE*/
+
+#locs 4
+#trans 4
+#clocks Y
+#sync lower raise
+
+loc: 0
+     prop: UPP
+     invar: TRUE
+     trans: TRUE => lower; Y:=0;  goto 1
+
+loc: 1
+     prop: t1
+     invar: Y<=1
+     trans: TRUE => down; ;  goto 2
+
+loc: 2
+     prop: DOWNN
+     invar: TRUE
+     trans: TRUE => raise; Y:=0;  goto 3
+
+loc: 3
+     prop: t2
+     invar: Y<=2
+     trans: Y>=1 => up; ;  goto 0

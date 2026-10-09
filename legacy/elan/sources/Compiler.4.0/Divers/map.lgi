@@ -1,0 +1,43 @@
+LPL map description 
+
+      query 	of sort Foo
+      result 	of sort Foo
+      import  	map
+//      start with 	(Eval)[id]go
+//      start with 	(Eval)[cons(id,id)]go
+//      start with 	[map(id)]go
+
+
+      start with 	[map(dk(R1,R2))] //;fail]
+				cons(a,
+				cons(a,
+				cons(a,
+				nil)))
+/*
+				cons(a,
+				cons(a,
+				cons(a,
+				cons(a,
+				cons(a,
+				cons(a,
+				cons(a,
+				cons(a,
+				cons(a,
+				cons(a,
+				cons(a,
+				cons(a,
+				   nil)))))))))))))))
+	*/		
+//      start with 	[map(id)]cons(a,nil)
+//      start with 	[mac]cons(a,a)
+//      start with 	[cons(dk(R1,R2),id)]cons(a,a)
+//      start with 	[cons(dk(a,id),dc(id,a))]cons(a,a)
+//      start with 	[cons(a,a)]cons(a,a)
+//      start with 	[a]a
+//      start with 	[dk(id,dk(id,fail),dc(fail,id))]go
+//      start with 	[dc(fail,fail)]go
+//      start with 	[id;id]go
+//      start with 	[id]go
+//      start with 	[fail]go
+
+end

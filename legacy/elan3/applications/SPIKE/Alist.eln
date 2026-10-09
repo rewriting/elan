@@ -1,0 +1,152 @@
+//-----------------------------------------------------------------------------------
+// Auxiliary rules for module: list
+//-----------------------------------------------------------------------------------
+//    restList(@,@)	: the rest of the list starting from an element
+//    unicate(@)	: list of all elems of a list - everyone listed only once
+//    singletons(@)	: list of singletons from a list
+//    member(@,@)	: ? an elem belongs to alist ?
+//    elim(@,@)		: eliminate an element from a list
+//-----------------------------------------------------------------------------------
+module Alist[X]
+
+import global	
+		bool;
+	local
+		list[X]
+;end
+
+operators
+  global
+    restList(@,@)	: ( X list[X] ) list[X];
+    unicate(@)		: ( list[X] ) list[X];
+    is_lin(@)		: ( list[X] ) bool;
+    singletons(@)	: ( list[X] ) list[X];
+    member(@,@)		: ( X list[X] ) bool;
+    elim(@,@)		: ( X list[X] ) list[X];
+    elim_first one(@,@)	: ( X list[X] ) list[X];
+    reverse(@)		: ( list[X] ) list[X];
+
+    lastElem(@)		: ( list[X] ) X;
+    firstList(@)	: ( list[X] ) list[X];
+end
+
+rules for list[X]
+	l		: list[X];
+	e,f		: X;
+global
+  [] restList(e,nil)	=> nil
+  end
+  [] restList(e,e.l)	=> l
+  end
+  [] restList(e,f.l)	=> restList(e,l)
+  end
+end
+
+rules for list[X]
+	l		: list[X];
+	v, u		: X;
+global
+  	[] unicate(nil) => nil
+	end
+	[] unicate($v.l) => $v.unicate(elim($v,l))
+	end
+end
+
+rules for bool
+	l		: list[X];
+	v, u		: X;
+global
+  	[] is_lin(nil) => true
+	end
+	[] is_lin($v.l) => false
+			if member($v, l)
+	end
+	[] is_lin($v.l) => is_lin(l)
+			if not member($v, l)
+	end
+end
+
+rules for bool
+	v,u:X;
+	l:list[X];
+global
+	[] member($v,nil) => false
+	end
+	[] member($v,$v.l) => true
+	end
+	[] member($v,$u.l) => member($v,l)
+	end
+end
+
+rules for list[X]
+	v,u:X;
+	l:list[X];
+global
+	[] elim($v,nil) => nil
+	end
+	[] elim($v,$v.l) => elim($v,l)
+	end
+	[] elim($v,$u.l) => $u.elim($v,l)
+	end
+end
+
+rules for list[X]
+	v:X;
+	l:list[X];
+global
+	[] singletons(nil) => nil
+	end
+	[] singletons($v.l) => singletons(elim($v,l))
+				if member($v,l)
+	end
+	[] singletons($v.l) => $v.singletons(l)
+				if not member($v,l)
+	end
+end
+
+rules for list[X]
+	v,u:X;
+	l:list[X];
+global
+	[] elim_first one($v,nil) => nil
+	end
+	[] elim_first one($v,$v.l) => l
+	end
+	[] elim_first one($v,$u.l) => $u.elim_first one($v,l)
+	end
+end
+
+rules for list[X]
+	v:X;
+	l:list[X];
+global
+	[] reverse($v.nil) => $v.nil
+	end
+	[] reverse($v.l) => reverse(l) @ $v.nil
+	end
+end
+
+rules for X
+	v:X;
+	l:list[X];
+global
+	[] lastElem($v.nil) => $v
+	end
+	[] lastElem($v.l) => lastElem(l)
+	end
+end
+
+rules for list[X]
+	v:X;
+	l:list[X];
+global
+	[] firstList($v.nil) => nil
+	end
+	[] firstList($v.l) => $v.firstList(l)
+	end
+end
+
+
+end
+
+

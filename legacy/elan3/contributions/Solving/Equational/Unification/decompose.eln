@@ -1,0 +1,71 @@
+module decompose
+
+import global term eqSystem atom ;
+       local int ;
+end
+
+operators
+
+    global 
+
+      decompose @ and add to @: (equation eqSystem) eqSystem ;
+
+      decompose @=@ and add to @: (atom atom eqSystem) eqSystem ;
+
+      conj(@,@): (eqSystem eqSystem) eqSystem ;
+
+    local 
+
+      decompose_rec(@,@): (equation int) eqSystem;
+      decAtom_rec(@,@,@): (atom atom int) eqSystem;
+
+end
+
+rules for eqSystem
+
+s,t:term ;
+i:int ;
+
+a,b:atom ;
+
+u,v:term ;
+P,Q: eqSystem;
+
+global
+
+
+  []  conj(P,Q & s=t) => conj(P,Q) & s=t end
+  []  conj(P,s=t) => P & s=t end
+  []  conj(P,true) => P end
+ 
+
+// for atoms
+
+  []  decAtom_rec(a,b,0)=> true end
+  []  decAtom_rec(a,b,1)=> 1-th subterm(a) = 1-th subterm(b)  end
+  []  decAtom_rec(a,b,i) => decAtom_rec(a,b,i-1) 
+                              & i-th subterm(a)=i-th subterm(b) 
+                              if i>1 end 
+
+  []  decompose a=b and add to P => conj(P,decAtom_rec(a,b,arity(head(a))))
+  end
+
+// NB: head(a) == head(b)
+
+
+// for equations
+
+  []  decompose_rec(s=t,0)=> true end
+  []  decompose_rec(s=t,1)=> 1-th subterm(s) = 1-th subterm(t)  end
+  []  decompose_rec(s=t,i) => decompose_rec(s=t,i-1) 
+                              & i-th subterm(s)=i-th subterm(t) 
+                              if i>1 end 
+
+  []  decompose s=t and add to P => conj(P,decompose_rec(s=t,arity(head(s))))
+  end
+
+// NB: head(s) == head(t)
+
+end
+
+end

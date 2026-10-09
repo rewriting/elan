@@ -1,0 +1,61 @@
+module stdio
+        import global builtinStdio int string; 
+        end
+	sort File;
+        end
+        operators
+        global
+          open(@,@)     : (string string) File  ;
+          close(@)      : (File) File           ;
+          getc(@)       : (File) int            ;
+          putc(@,@)     : (File int) int        ; 
+          iserr(@)      : (File) bool;
+          errno(@)      : (File) builtinInt;   
+
+          stdin         : File;
+          stdout        : File;
+          stderr        : File;
+
+	  @             : (builtinInt) File; 
+	  [@]           : (builtinInt) File alias @:; 
+        local
+          Error(@)      : (builtinInt) File;
+        end
+
+	rules for File
+	  s1, s2 : string ;
+	  x      : builtinInt ;
+	 global
+	  [] open(s1,s2)   => open_builtinStdio(getString(s1),getString(s2)) end
+	  [] close([x])    => close_builtinStdio(x) end
+	end
+
+        rules for int
+                p : builtinInt;
+                x : int;
+                bix : builtinInt;
+        global
+          [] putc([p],x) => [putc_builtinStdio(p,bix)] where bix:=()valueOf(x) end
+          [] getc([p])   => [getc_builtinStdio(p)] end
+        end
+
+        rules for File
+        global
+          []    stdin   => stdin_builtinStdio    end
+          []    stdout  => stdout_builtinStdio    end
+          []    stderr  => stderr_builtinStdio    end
+        end
+
+        rules for bool
+          x,e:builtinInt;
+        global
+          []    iserr([x]) => true if x<0         end
+          []    iserr([x]) => false               end
+        end
+
+        rules for builtinInt
+        x,e:builtinInt;
+        global
+          []    errno([x]) => -x if x<0           end
+        end
+end

@@ -1,0 +1,8 @@
+LPL mike description 
+
+query 		of sort list[int]
+      result 	of sort list[int]
+      import   mike list[int]
+      start with (s1) queens
+
+end

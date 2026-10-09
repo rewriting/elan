@@ -1,0 +1,14 @@
+LPL loop description
+  
+	query	of sort  int 
+	result of sort int	 
+	import  int loop	
+//	start with [dk(dcloop(10),dkloop(10))]query
+	start with [dkloop(10)]query
+//	start with [loop]query
+
+end
+
+
+
+ 

@@ -1,0 +1,58 @@
+#! /bin/csh
+#        LGI         SPC
+if ($1 =~ *J*) then
+echo "Java Compiler"
+#jtest group1           no group1
+#jtest group2           no group2
+#jtest minmax           no minmax
+jtest bimatch          no bimatch
+#jtest bool3            no bool3
+jtest choice1          no choice1 
+jtest choice2          no choice2
+jtest condac1          no condac1
+jtest condac2          no condac2
+jtest cons1            no cons1
+#jtest condac3          no condac3
+jtest dcfail1          no dcfail1
+jtest dcfail2          no dcfail2
+jtest dcfail3          no dcfail3
+jtest enum             no enum
+jtest enum2            no enum2 
+jtest ident1           no ident1
+jtest manySortedSet1   no manySortedSet1
+jtest manySortedSet2   no manySortedSet2
+jtest manySortedSet3   no manySortedSet3
+jtest match11          no match11
+jtest match12          no match12
+jtest match13          no match13
+jtest match14          no match14
+jtest match2           no match2
+jtest match3           no match3
+jtest match4           no match4
+jtest propc1           no propc1
+jtest propc2           no propc2
+jtest rep              no rep
+#jtest switch1          no switch1
+#jtest switch2          no switch2
+jtest testACNumbering  no testACNumbering
+jtest testSubstitution no testSubstitution
+jtest wpattern         no wpattern
+jtest wpatternAC1      no wpatternAC1
+jtest wpatternAC2      no wpatternAC2
+jtest wpatternAC3      no wpatternAC3
+jtest wpatternAC4      no wpatternAC4
+jtest wpatternAC5      no wpatternAC5
+jtest wpatternAC6      no wpatternAC6
+
+
+
+#jtest queens4  no queens4
+#jtest match5   no match5
+#jtest matchInt no matchInt
+
+# consomme trop de memoire
+#jtest propc3           no propc3
+
+
+
+endif

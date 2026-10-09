@@ -1,0 +1,40 @@
+module rule[vars,ops]
+
+import	global	EtermCommons[ops,vars]
+		pair[term,term]
+		list[term];
+end
+
+
+operators	global
+
+	@ & @	: (term term) term	(AC);
+	@ -> @	: (term term) pair[term,term];
+
+	regle_to_condition(@) : (pair[term,term]) list[term];
+	regle_to_conclusion(@): (pair[term,term]) list[term];
+end
+
+rules for list[term]
+
+	l,l1,l2,r,r1,r2	: term;
+	L1,L2,R1,R2	: list[term];
+
+global
+
+[] regle_to_condition(l1 & l2 ->r) => append(L1,L2)
+	where L1 :=() regle_to_condition(l1 -> r)
+	where L2 :=() regle_to_condition(l2 -> r)
+end
+[] regle_to_condition(l -> r) => l.nil
+end
+
+[] regle_to_conclusion(l -> r1 & r2) => append(R1,R2)
+	where R1 :=() regle_to_conclusion(l -> r1)
+	where R2 :=() regle_to_conclusion(l -> r2)
+end
+[] regle_to_conclusion(l -> r) => r.nil
+end
+end
+
+end

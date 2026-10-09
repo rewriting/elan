@@ -1,0 +1,7 @@
+LPL example description
+  query    of sort T
+  result   of sort T
+  import   example
+  start with () query
+
+end

@@ -1,0 +1,50 @@
+	module queens4
+import bool int list[int];
+end
+sort list[int] int;
+end
+operators
+  global
+    queens	: list[int];
+  local
+   nil	: list[int];
+   @.@	: ( int list[int] ) list[int];
+    ok(@,@,@)	: ( int int list[int] ) bool;
+
+end
+
+rules  for list[int]
+          p1,p2,p3,p4 : int;
+	pp1,pp2,pp3,pp4 : int;
+        xx	: list[int];
+local
+  []
+   queens	=> p1.p2.p3.p4.nil
+			where xx:=() 1.2.3.4.nil
+			where pp1:=(listExtract) elem(xx)
+			where p1:= ()pp1
+			where pp2:=(listExtract) elem(xx)
+			where p2:= ()pp2
+			if ok(1,p2,p1.nil)
+			where pp3:=(listExtract) elem(xx)
+			where p3:= ()pp3
+			if ok(1,p3,p2.p1.nil)
+			where pp4:=(listExtract) elem(xx)
+			where p4:= ()pp4
+			if ok(1,p4,p3.p2.p1.nil)
+ end
+end
+
+rules  for bool
+          p,d,diff : int;
+	l : list[int];
+local
+  [] ok(diff,d,nil)	=> true				end
+  [] ok(diff,d,p.l)	=> false	if d == p  	end
+  [] ok(diff,d,p.l)	=> false        if d-p == diff  end
+  [] ok(diff,d,p.l)	=> false        if p-d == diff  end
+  [] ok(diff,d,p.l)	=> ok(diff+1,d,l)		end
+end
+
+end			
+

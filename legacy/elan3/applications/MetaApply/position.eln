@@ -1,0 +1,433 @@
+module position[vars,fss,prec]
+
+/* Computation concerning the positions */
+
+/* Problem with the limit (nil) to take care */
+
+/* vars : variables, 
+   fss  : operators,
+   prec : precedence */
+
+import	
+	global
+		extequation1[vars,fss,prec]
+		terms[vars,fss,prec]
+	;
+	local
+		vars
+		fss
+		prec
+	;
+end
+
+operators
+  global
+
+	/* Test if a position p1 (first argument) is smaller than */
+	/* another position p2 (second argument) i.e. p1 <= p2 if p1 = p2.p */
+	/* where p is a position (p can be nil) */
+	/* It will be used in the Basic Critical Pair inference rule */
+	/* If we want to do an inference at a position p1 and that */
+	/* p2 is a marked position such that p1 <= p2, then */
+	/* we cannot do the inference because p1 is marked too. */
+	/* Otherwise, we can do it. */
+	possmall(@,@)	: (list[int] list[int]) bool;
+	@ <=p @		: (list[int] list[int]) bool alias possmall(@,@):;
+
+	/* Test if a position p1 (first argument) is greater than */
+	/* another position p2 (second argument) i.e. p1 >= p2 if p1.p = p2 */
+	/* where p is a position (p can be nil) */
+	posgreat(@,@)	: (list[int] list[int]) bool;
+	@ >=p @		: (list[int] list[int]) bool alias posgreat(@,@):;
+
+	/* Test if a position p1 (first argument) is smaller (or =) than */
+	/* all the position p2 of the list (second argument) of position */
+	lpossmall(@,@)	: (list[int] list[list[int]]) bool;
+	@ <=p @		: (list[int] list[list[int]]) bool alias 
+	lpossmall(@,@):;
+
+	/* Test if a position is marked in the left part of the equation */
+	/* of an extended equation */
+	/* Return true in this case otherwise it returns false */
+	ismarkedpos(@,@)	: (list[int] extequation1) bool;
+
+	/* Test if a position is marked in the right part of the equation */
+	/* of an extended equation */
+	/* Return true in this case otherwise it returns false */
+	ismarkedposr(@,@)	: (list[int] extequation1) bool;
+
+	/* Give the list of marked terms of a term */
+	marked_terms(@,@)	: (term list[list[int]]) list[term];
+	marked_terms(@,@,@,@,@)	: (term term int list[list[int]] list[list[int]]) 
+				list[term];
+	/* without variables */
+	marked_termssv(@,@)	: (term list[list[int]]) list[term];
+	marked_termssv(@,@,@,@,@)	: (term term int list[list[int]] list[list[int]]) 
+				list[term];
+
+	/* Let p be a position and lp be a list of positions */
+	/* This function returns the list lp minus the positions */
+	/* that can be written as p.p1 */
+	lremove(@,@)	: (list[int] list[list[int]]) list[list[int]];
+
+	/* Let p be a position and lp be a list of positions */
+	/* This function transforms lp such that the elements of lp */
+	/* p' are changed to p.p' */
+	addright(@,@)	: (list[int] list[list[int]]) list[list[int]]; 
+
+	/* Let p be a position and lp and lpp be two lists of positions */
+	/* This function transforms lp using lremove and addright */
+	ltransform(@,@,@)	: (list[int] list[list[int]] list[list[int]]) 
+	list[list[int]]; 
+
+	/* Function used to put all variables positions of an equation */
+	/* as marked. From an equation with its number in the completion */
+	/* process, we deduce an extequation1 where the lists of marked */
+	/* positions are variable positions */
+	/* markedvareq(f(x,y)=x,3) => f(x,y)=x,3,1.nil.2.nil.nil,nil.nil */
+	markedvareq(@,@)		: (equation int) extequation1;
+
+	/* Function used to know if a term is constrained or not */
+	/* A term with a marked position with is not a variables is */
+	/* a constrained term */
+	isconstrainedterm(@,@)		: (term list[list[int]]) bool;	
+
+	/* Function used to know if an (ext)equation is constrained or not */
+	/* An equation is constrained if one of its term is constrained */
+	isconstrainedeq(@)		: (extequation1) bool;	
+
+end
+
+
+/* possmall */
+
+rules for bool
+	l, ll: list[int];
+	e, ee, s, ss : int;
+global
+	[] possmall(nil,nil)	=> true
+	end
+
+	[] possmall(nil,e.l)	=> false
+	end
+
+	[] possmall(e.ll,nil)	=> true
+	end
+
+	[] possmall(e.l,ee.ll)	=> 
+			switch 
+			case size(e.l) >= size(ee.ll)
+			then
+			  switch 
+			  case $e == $ee 
+			  then possmall(l,ll)
+			  otherwise false
+			  end
+			otherwise 
+			  false
+			end
+	end
+end
+
+
+/* posgreat */
+
+rules for bool
+	l, ll: list[int];
+	e, ee, s, ss : int;
+global
+	[] posgreat(nil,nil)	=> true
+	end
+
+	[] posgreat(nil,e.l)	=> true
+	end
+
+	[] posgreat(e.ll,nil)	=> false
+	end
+
+	[] posgreat(e.l,ee.ll)	=> 
+			switch
+			case size(e.l) <= size(ee.ll)
+			then
+			  switch 
+			  case $e == $ee
+			  then posgreat(l,ll)
+			  otherwise false
+			  end
+			otherwise
+			  false
+			end
+	end
+end
+
+
+/* lpossmall */
+
+rules for bool
+	b, bb, bbb : bool;
+	e : int;
+	l, ee : list[int];
+	ll : list[list[int]];
+global
+	[] lpossmall(nil,nil)	=> false
+	end
+
+	[] lpossmall(nil,ee.nil)=> possmall(nil,ee) 
+	end
+
+	[] lpossmall(nil,ee.ll)	=> 
+				switch 
+				case possmall(nil,ee) 
+				then lpossmall(nil,ll) 
+				otherwise
+				false
+				end
+	end
+
+	[] lpossmall(e.l,nil)	=> false
+	end
+
+	[] lpossmall(e.l,ee.nil)=> possmall(e.l,ee)
+	end
+
+	[] lpossmall(e.l, ee.ll)=> 
+				switch
+				case possmall(e.l,ee) then true
+				otherwise lpossmall(e.l,ll)
+				end
+	end
+end
+
+
+/* ismarkedpos */
+
+rules for bool
+	p : list[int];
+	e : equation;	
+	n : int;
+	l, ll : list[list[int]];
+global
+	[] ismarkedpos(p,e,n,l,ll) => lpossmall(p,l)
+	end
+end
+
+
+/* ismarkedposr */
+
+rules for bool
+	p : list[int];
+	e : equation;	
+	n : int;
+	l, ll : list[list[int]];
+global
+	[] ismarkedposr(p,e,n,l,ll) => lpossmall(p,ll)
+	end
+end
+
+
+/* marked_terms */
+
+rules for list[term]
+	t	: term;
+	p 	: list[int];
+	lp 	: list[list[int]];
+global
+	[] marked_terms(t, nil)		=> nil
+	end
+
+	[] marked_terms(t, p.nil)	=> t at p.nil
+	end
+
+	[] marked_terms(t, p.lp)	=> t at p.marked_terms(t,lp)
+	end
+end
+
+
+/* marked_terms */
+
+rules for list[term]
+	l, r	: term;
+	num	: int;
+	lp1, lp2: list[list[int]];
+global
+	[] marked_terms(l, r, num, nil, nil)	=> nil
+	end
+
+	[] marked_terms(l, r, num, nil, lp2)	=> marked_terms(r,lp2)
+	end
+
+	[] marked_terms(l, r, num, lp1, nil)	=> marked_terms(l,lp1)
+	end
+
+	[] marked_terms(l, r, num, lp1, lp2)	=> append(marked_terms(l,lp1),
+						marked_terms(r,lp2))
+	end
+end
+
+/* marked_termssv */
+
+rules for list[term]
+	t	: term;
+	p 	: list[int];
+	lp 	: list[list[int]];
+global
+	[] marked_termssv(t, nil)	=> nil
+	end
+
+	[] marked_termssv(t, p.nil)	=> t at p.nil
+					if not isvar(t at p)
+	end
+
+	[] marked_termssv(t, p.nil)	=> nil
+					if isvar(t at p)
+	end
+
+	[] marked_termssv(t, p.lp)	=> t at p.marked_termssv(t,lp)
+					if not isvar(t at p)
+	end
+
+	[] marked_termssv(t, p.lp)	=> marked_termssv(t,lp)
+					if isvar(t at p)
+	end
+end
+
+
+/* marked_termssv */
+
+rules for list[term]
+	l, r	: term;
+	num	: int;
+	lp1, lp2: list[list[int]];
+global
+	[] marked_termssv(l, r, num, nil, nil)	=> nil
+	end
+
+	[] marked_termssv(l, r, num, nil, lp2)	=> marked_termssv(r,lp2)
+	end
+
+	[] marked_termssv(l, r, num, lp1, nil)	=> marked_termssv(l,lp1)
+	end
+
+	[] marked_termssv(l, r, num, lp1, lp2)	=> append(marked_termssv(l,lp1),
+						marked_termssv(r,lp2))
+	end
+end
+
+
+/* lremove */
+
+rules for list[list[int]]
+	p, pp : list[int];
+	lp : list[list[int]];
+global
+	[] lremove(p,nil)	=> nil
+	end
+
+	[] lremove(p,pp.nil)	=> switch 
+				case p >=p pp then nil
+				otherwise pp.nil
+				end
+	end 
+
+	[] lremove(p,pp.lp)	=> switch 
+				case p >=p pp then lremove(p,lp)
+				otherwise pp.lremove(p,lp)
+				end 
+	end
+end
+
+
+/* addright */
+
+rules for list[list[int]]
+	p, pp : list[int];
+	lp : list[list[int]];
+	
+global
+	[] addright(nil,lp)	=> lp
+	end
+
+	[] addright(p,nil)	=> nil
+	end
+
+	[] addright(p,pp.nil)	=> append(p,pp).nil
+	end
+
+	[] addright(p,pp.lp)	=> append(p,pp).addright(p,lp)
+	end
+end
+
+
+/* ltransform */
+
+rules for list[list[int]]
+	p : list[int];
+	lp1, lp22, lp222, l1, l2 : list[list[int]];
+global
+	[] ltransform(p,lp1,lp22)=> lp222
+				where l1 := ()lremove(p,lp1)
+ 				where l2 := ()addright(p,lp22)
+				where lp222 := ()append(l1,l2)
+	end
+end
+
+/* markedeqvar */
+
+rules for extequation1
+	l, r  : term;
+	n     : int;
+	l, ll : list[list[int]];
+global
+	[] markedvareq(l=r,n)	=> l = r ,n ,l ,ll
+				where l  := ()vocc(l)
+				where ll := ()vocc(r)
+	end
+end
+
+
+/* isconstrainedterm */
+
+rules for bool
+	t : term;
+	p : list[int];
+	l : list[list[int]];
+global
+	[] isconstrainedterm(t,nil)	=> false
+	end
+
+	[] isconstrainedterm(t,p.l)	=> true
+					if not isvar(t at p)
+	end
+
+	[] isconstrainedterm(t,p.l)	=> isconstrainedterm(t,l)	
+					if isvar(t at p)
+	end
+end
+
+
+/* isconstrainedeq */
+
+rules for bool
+	num : int;
+	g, d : term;
+	l1, l2 : list[list[int]];
+	b1, b2, b : bool;
+global
+	[] isconstrainedeq(g=d, num, l1, l2)	=> 
+						switch 
+						case isconstrainedterm(g,l1)
+						then true
+						otherwise isconstrainedterm(d,l2)
+						end
+	end
+end
+
+
+end
+
+
+
+
+
+
+

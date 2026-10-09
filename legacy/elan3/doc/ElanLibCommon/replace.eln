@@ -1,0 +1,32 @@
+//
+//		(c)	INRIA-Lorraine & CRIN
+//			615, rue du Jardin Botanique, BP 101
+//		        54602 Villers-les-Nancy
+//			France
+//			email: elan@loria.fr
+//
+//	$Source: /CVS/aircube/elan3/doc/ElanLibCommon/replace.eln,v $
+//	$Revision: 1.1 $
+//	$Date: 1997/03/25 16:46:50 $
+//	$Author: moreau $
+//
+
+module replace[X,Y]	
+
+	// The parameters X and Y must be non built-in
+
+sort X Y;
+end
+operators
+  global
+
+	// replace all occurences of the first argument by the 
+	// second argument in the third argument
+    replace @ by @ in @		: ( X X Y ) Y	code 16;
+
+	// syntactic variants
+    replace (@) by (@) in (@)	: ( X X Y ) Y	alias replace @ by @ in @ :;
+    replace(@,@,@)		: ( X X Y ) Y	alias replace @ by @ in @ :;
+
+end
+end

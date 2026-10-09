@@ -1,0 +1,47 @@
+
+\def\File#1,#2,#3{}
+
+\newif\ifcomment\newif\ifstring
+\def\C{\it\global\let\CF=\it\global\commenttrue\relax}	% Comment Start
+\def\CE{\rm\global\let\CF=\rm\global\commentfalse\relax}% Comment End
+
+\newcommand{\K}[1] {{\bf #1}}
+
+\def\LB{\hbox}
+\newbox\linesofar\setbox\linesofar=\null
+\everyhbox={\box\linesofar}
+\newdimen\TBwid
+
+\def\Tab#1{\setbox\tbox=\lastbox\TBwid=1\wd\tbox\advance\TBwid by 1\ts
+\ifdim\TBwid>#1\ts
+\setbox\linesofar=\hbox{\box\tbox\space}\else
+\setbox\linesofar=\hbox to #1\ts{\box\tbox\hfil}\fi\LB}
+
+\newdimen\ts
+\newbox\tbox
+\setbox\tbox=\hbox{0} \ts=1\wd\tbox \setbox\tbox=\hbox{\hskip 1\ts}
+
+\def\space{\hskip 1\ts\relax}
+
+
+\def\L#1{\hbox{\strut\hskip 9\ts\relax #1}}
+
+\def\|{\ifmmode|\else$|$\fi}
+\def\!{\ifmmode\backslash\else$\backslash$\fi}
+\def\<{\ifmmode<\else$<$\fi}
+\def\>{\ifmmode>\else$>$\fi}
+\def\/{\ifmmode/\else$/$\fi}
+\def\*{\ifmmode*\else$*$\fi}
+\def\-{\ifmmode-\else$-$\fi}
+\def\_{\underbar{\ }}
+\def\&{{\char'046}}
+\def\#{{\char'043}}
+\def\%{{\char'045}}
+\def\~{{\char'176}}
+\def\"{{\tt\char'042}}
+\def\'{{\tt\char'047}}
+\def\^{{\char'136}}
+\def\${{\rm\char'044}}
+
+\raggedright\obeyspaces\let =\space%
+

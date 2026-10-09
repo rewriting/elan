@@ -1,0 +1,23 @@
+module foo
+
+sort exp;
+end
+
+stratop global
+  tfoo : <exp> bs;
+end
+rules for exp
+  x		: exp;
+global
+  [toto] x => x end
+end
+
+strategies for exp
+implicit
+ [.] tfoo => dc one( toto )
+ end
+
+end
+
+
+end

@@ -1,0 +1,194 @@
+#define MYFSIZE 100000
+#define MYHASH
+
+//  fsym_init(code_392,1,"(;)",0,0, NULL);
+#define STERM_PROG 0
+#define STERM_TERM 0
+#define STERM_CODE STERM_CODE_VAL
+
+
+//  fsym_init(code_391,2,"(;;)",0,0, NULL);
+#define TERM_LABEL 0
+#define TERM_PROG 1
+#define TERM_TERM 1
+
+// xxx:"calc_str:rccst/ccs"    in ccs.ref
+#define CALC_STRAT CALC_STRAT_VAL
+
+#ifdef MYHASH
+#define MYTERM .term
+#else
+#define MYTERM 
+#endif
+
+
+struct term* myprog; // for the fix program term
+#ifdef MYHASH        // store hash_vals in table
+struct termfield {
+  struct term* term;
+  int hash_val;
+} myfield[MYFSIZE];
+#else                // or only terms
+struct term* myfield[MYFSIZE];
+#endif
+
+int          mycount; // act position in field
+int          myfsize; // elements in field
+int          myeqcount; // number of comparisions made
+int          mytranscount; // number of transitions
+
+// get Term out of Start-Term
+struct term* extractSTerm(struct term* t) {
+  return getFreeSubterm(t,STERM_TERM);
+}
+
+struct term* extractTerm(struct term* t) {
+  return getFreeSubterm(t,TERM_TERM);
+}
+struct term* extractLabel(struct term* t) {
+  return getFreeSubterm(t,TERM_LABEL);
+}
+
+// build a new request out of fix program and parameter
+struct term* combineWithProg(struct term* t) {
+  struct term* tNew;
+  TERM_ALLOC(tNew,term1,STERM_CODE);
+  setFreeSubterm(tNew,STERM_TERM,t);
+  return tNew;
+}
+
+
+void printTerm(char* s, struct term* t) {
+  printf("%s ",s);
+  termOut(stdout,t);
+  printf("\n");
+}
+
+#ifdef MYHASH
+// compute a hash-value of a term
+int compute_hash_val(struct term* t) {
+  int i;
+  if (isTagged(t)) {
+    return (int)t;
+  } else {
+    int arity,i;
+    int hc;
+    hc = getSymb(t);
+    arity = term_arity(t);
+    for (i=0; i<arity; i++) 
+      hc += compute_hash_val(getFreeSubterm(t,i));
+    return hc;
+  }
+} 
+#endif
+
+// compares two terms
+int term_eq(struct term *t1,struct term *t2) {
+  int arity;
+  int i;
+  if(isTagged(t1)) {
+    return (t1 == t2);
+  }
+
+  if(term_isAC(t1) | term_isAC(t2)) {
+    fprintf(stderr,"term_eq not implemented for AC-Terms");
+    return FALSE; // must be implemented
+  }     
+  if (getSymb(t1) != getSymb(t2)) {
+    return FALSE;
+  }
+  arity=term_arity(t1);
+  for (i=0; i<arity; i++)
+    if (!term_eq(getFreeSubterm(t1,i),getFreeSubterm(t2,i)))
+      return FALSE;
+  return TRUE;
+}
+
+// inserts term into field
+// acts like a set, not like a list
+// uses hash-values if possible
+void insert(struct term* t) {
+  int i;
+#ifdef MYHASH
+  int hc;
+#endif
+  if (myfsize == MYFSIZE) // table is full?
+    return;
+#ifdef MYHASH
+  hc = compute_hash_val(t);
+#endif
+  for (i=0; i<myfsize; i++) {
+#ifdef MYHASH
+    if (hc == myfield[i].hash_val) {
+      myeqcount++;
+      if (term_eq(t,myfield[i].term))
+	break;
+    }
+#else
+    myeqcount++;
+    if (term_eq(t,myfield[i]))
+      break;
+#endif
+  }
+  if (i==myfsize) {
+    myfield[myfsize]MYTERM = t;
+#ifdef MYHASH
+    myfield[myfsize].hash_val = hc;
+#endif
+    myfsize++;
+  }
+}
+
+// 
+int fertig() {
+  return (myfsize == mycount);
+}
+
+struct term* getnext() {
+  struct term* t;
+  t = myfield[mycount]MYTERM;
+  printf(".");
+  fflush(stdout);
+  mycount++;
+  return t;
+}
+
+
+void build_whole_system(struct term* res) {
+  int i;
+  mycount = 0;
+  res = extractSTerm(res);
+  printf("Start-Term:\n");
+  termOut(stdout,res);
+  printf("\n\n");
+  insert(res);
+  while (!fertig()) {
+    if(!setChoicePoint()) {  
+      res = getnext();           
+      res = combineWithProg(res); //add the program
+      res = strTab[CALC_STRAT](res); //calc succs
+      printf("-");fflush(stdout);
+      mytranscount++;
+      res = extractTerm(res); //and get the term
+      insert(res);
+      fail();
+    }
+  }
+  printf("\n\nSize: %d\n",myfsize);
+  printf("Transitions: %d\n",mytranscount);
+  printf("Compare-Count: %d \n", myeqcount);
+#ifdef MYHASH
+    printf("Hashvalues were used\n");
+#else
+    printf("No hashvalues were used\n");
+#endif
+ /* 
+  for (i=0; i<myfsize; i++) {
+    printf("\n[%4d]: ",i);
+    termOut(stdout, myfield[i]MYTERM);    
+  }
+   */ 
+  return;
+
+}
+  

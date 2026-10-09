@@ -1,0 +1,40 @@
+// This file is generated automatically: do not edit it directly. 
+module Query[I,O,P]
+        import  global bool builtinInt anyIdentifier;
+        end
+
+        sort    Query[I,O,P]  
+                ide     
+                ids;          
+        end
+        operators global
+          @     : (ident) ide;
+          @     : (ide) ids;            
+          @,@   : (ide ids) ids;
+          @[@]  : (ident ids) ide;
+          quit          :               Query[I,O,P]    code 90;        
+          help          :               Query[I,O,P]    code 112;
+          load @        : (ide)         Query[I,O,P]    code 91;
+          batch @       : (ide)         Query[I,O,P]    code 107;
+          run @         : (I)           Query[I,O,P]    code 94;
+          sorts @ @ @   : (ide ide ide) Query[I,O,P]    code 92;
+          startwith (@)@: (ident O)     Query[I,O,P]    code 93;
+          checkwith @   : (bool)        Query[I,O,P]    code 102;
+          printwith @   : (P)           Query[I,O,P]    code 98;
+          qs            :               Query[I,O,P]    code 100;
+          rs            :               Query[I,O,P]    code 101;
+          stat          :               Query[I,O,P]    code 96;
+          dump          :               Query[I,O,P]    code 95;
+          dump @        : (ident)       Query[I,O,P]    code 108;
+          dump @        : (builtinInt)  Query[I,O,P]    code 109;
+          display @     : (builtinInt)  Query[I,O,P]    code 103;
+          trace @       : (builtinInt)  Query[I,O,P]    code 97;
+          break @       : (ident)       Query[I,O,P]    code 104;
+          break @       : (builtinInt)  Query[I,O,P]    code 110;
+          unbreak @     : (ident)       Query[I,O,P]    code 105;
+          unbreak @     : (builtinInt)  Query[I,O,P]    code 111;
+          breaks        :               Query[I,O,P]    code 106;
+        end
+
+end  
+ 

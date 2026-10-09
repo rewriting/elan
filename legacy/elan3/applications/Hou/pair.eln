@@ -1,0 +1,38 @@
+//
+//		(c)	INRIA-Lorraine & CRIN
+//			615, rue du Jardin Botanique, BP 101
+//		        54602 Villers-les-Nancy
+//			France
+//			email: elan@loria.fr
+//
+//	$Source: /CVS/aircube/elan3/applications/Hou/pair.eln,v $
+//	$Revision: 1.3 $
+//	$Date: 1997/03/08 13:37:50 $
+//	$Author: borovan $
+//
+
+module pair[X,Y]
+import bool;
+end
+sort X Y pair[X,Y];
+end
+operators
+  global
+    [@,@]	: ( fst:X snd:Y ) pair[X,Y];
+    ispair(@)	: ( pair[X,Y] ) bool;
+
+end
+
+rules for bool
+	$x : X;
+	$y : Y;
+	p : pair[X,Y];
+local
+	// Note in the following set of rules the use of the order of 
+	// evaluation: the rules are assumed to be applied in sequence
+  [] ispair([$x,$y])	=> true		end
+  [] ispair(p)		=> false	end
+end
+
+end
+

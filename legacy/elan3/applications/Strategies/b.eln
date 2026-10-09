@@ -1,0 +1,46 @@
+module b[X]
+
+import global strat[X] strat[tree[X]]
+	      X tree[X];
+op global 
+  TRY @		: (<tree[X]>) <tree[X]>;
+  bup(@,@)	: (<X> <tree[X]>) <tree[X]>;
+end
+
+rules global for X
+ 
+    x  	: X; 
+    n	: int;
+bodies
+  [ass1(n)] x => n 						end
+  [ass2(n)] x => x+n 						end
+end
+
+rules global for tree[X]
+ z   : tree[X];
+	y   : X;
+	x   : tree[X];
+        qq  : int;
+bodies
+  [swap(qq)] node(x,y,z) => node(z,y,x) if qq > 0		end
+end
+
+strategies for <tree[X]>
+ r : <tree[X]>;
+	s : <X>;
+bodies
+  [] TRY r ==> first(r,id)					end
+  [] bup(s,r) ==> dc( empty,
+                    dc( leaf(s),
+                          node(bup(s,r),s,bup(s,r))))
+        //          ; r						
+	end
+end
+
+end
+
+
+
+
+
+

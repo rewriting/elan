@@ -1,0 +1,9 @@
+LPL cs4 description
+
+  query    of sort res
+  result   of sort res
+  import   identifier cs4
+  start with () query
+
+end
+

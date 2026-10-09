@@ -1,0 +1,9 @@
+LPL logic description 
+
+	query		of sort formula
+	result		of sort formula
+	import		Op
+
+	start with () WithoutNot(query)
+
+end

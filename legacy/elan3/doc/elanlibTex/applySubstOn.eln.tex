@@ -1,0 +1,44 @@
+
+\let\CF=\rm
+% Remember to use the lgrind style
+
+\File{applySubstOn.eln},{17:23},{Jun 21 1996}
+\L{\LB{\C{}\1\1}}
+}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{16}{(c)}\Tab{24}{INRIA-Lorraine \& CRIN}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{24}{615, rue du Jardin Botanique, BP 101}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{16}{        54602 Villers-les-Nancy}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{24}{France}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{24}{email: elan@loria.fr}}
+\CE{}\L{\LB{\C{}\1\1}}
+}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{8}{\$Source: /CVS/aircube/elan3/doc/elanlibTex/applySubstOn.eln.tex,v $}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{8}{\$Revision: 1.2 $}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{8}{\$Date: 1996/08/05 20:24:01 $}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{8}{\$Author: ckirchne $}}
+\CE{}\L{\LB{\C{}\1\1}}
+}}
+\CE{}\L{\LB{}}
+\L{\LB{\K{module}_\V{applySubstOn}[\V{X}]}}
+\L{\LB{\C{}\1\*}}
+\L{\LB{}\Tab{8}{specify substitution applicable on sort X}}
+\L{\LB{\*\1\CE{}}}
+\L{\LB{\K{import}_\V{term}_\V{replace}[\V{term},\V{X}];}}
+\L{\LB{\K{sort}_\V{X};}}
+\L{\LB{\K{op}}}
+\L{\LB{__\K{global}}}
+\L{\LB{}}
+\L{\LB{____@(@)}\Tab{16}{:_(_\V{substitution}_\V{X}_)_\V{X};}}
+\L{\LB{____\V{apply}(@,@)}\Tab{16}{:_(_\V{substitution}_\V{X}_)_\V{X}}\Tab{48}{\K{alias}_@(@):;}}
+\L{\LB{}}
+\L{\LB{\K{endop}}}
+\L{\LB{}}
+\L{\LB{\K{rules}_\K{for}_\V{X}}}
+\L{\LB{\K{declare}_\V{tt}:\V{X};_\V{s1},\V{s2}:\V{substitution};_\V{v}:\V{variable};_\V{t}:\V{term};}}
+\L{\LB{\K{bodies}}}
+\L{\LB{__[\,]_\V{apply}(\V{identity},\V{tt})_}\Tab{32}{=\>_\V{tt}}\Tab{64}{\K{end}}}
+\L{\LB{__[\,]_\V{apply}(\V{s1}_\V{o}_\V{s2}_,\V{tt})_}\Tab{32}{=\>_\V{apply}(\V{s2},\V{apply}(\V{s1},\V{tt}))}\Tab{64}{\K{end}}}
+\L{\LB{__[\,]_\V{apply}(\V{v}\-\!\>\V{t},\V{tt})_}\Tab{32}{=\>_\V{replace}(\V{v},\V{t},\V{tt})}\Tab{64}{\K{end}}}
+\L{\LB{\K{end}_\K{of}_\K{rules}}}
+\L{\LB{}}
+\L{\LB{\K{end}_\K{of}_\K{module}}}

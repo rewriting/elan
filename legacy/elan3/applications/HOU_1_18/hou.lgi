@@ -1,0 +1,19 @@
+LPL hou description
+  
+specification description 
+   part Btypes	of sort 	list[identifier]
+		import 		sigSyntax
+   part Mvars	of sort 	list[vardef]
+		import 		sigSyntax ivars[Btypes]
+   part Bvars	of sort 	list[vardef]
+		import 		sigSyntax ivars[Btypes]
+end
+query		of sort  	input
+		result of sort 	list[uconj]
+		import 		hounif[Mvars,Btypes,Bvars]
+		start with 	()hou(query)
+end
+
+
+
+

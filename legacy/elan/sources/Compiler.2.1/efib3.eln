@@ -1,0 +1,112 @@
+module efib3
+
+import global bool builtinInt eq[Strategy];
+end
+
+sort Object Space Fib Compute eInt Strategy;
+end
+
+operators global
+ @                            : (builtinInt) eInt;
+ @ U @                        : (Space Space) Space (AC);
+ empty                        : Space;
+ @                            : (Object) Space;
+
+ Fib[farg=@,val=@]            : (builtinInt eInt) Fib;
+ Compute[question=@,answer=@] : (builtinInt eInt) Compute;
+ @                            : (Fib) Object;
+ @                            : (Compute) Object;
+
+ UNDEF                        : eInt;
+
+ succes                       : Strategy;
+ failure                      : Strategy;
+ @,@                          : (Space eInt) Strategy;
+
+ go(@)                        : (builtinInt) eInt;
+ result(@,@)                  : (Space builtinInt) eInt;
+end
+
+stratop global
+  loop   : <Space> bs;
+  succes : <Strategy> bs;
+end
+
+rules for Space
+ S : Space;
+ R : Strategy;
+ n,n1,n2 : builtinInt;
+ v1,v2: builtinInt;
+global
+ [rec]
+    S U Fib[farg=n,val=UNDEF]
+ => S U Fib[farg=n,val=UNDEF] U Fib[farg=n-1,val=UNDEF]
+    if n > 2
+    where R:=(succes) S, n-1 
+    if R == failure
+ end
+
+ [compute]
+    S U Fib[farg=n1,val=v1] U Fib[farg=n2,val=v2] U Fib[farg=n,val=UNDEF]
+ => S U Fib[farg=n1,val=v1] U Fib[farg=n2,val=v2] U Fib[farg=n,val=v1+v2 % 1000000]
+    if n1 == n2 + 1
+    if n  == n1 + 1
+ end
+end
+
+rules for Strategy
+ S : Space;
+ n : builtinInt;
+ v : eInt;
+global
+ [recSucces] S U Fib[farg=n,val=v], n => succes end
+ [failure] S, n => failure                      end
+end
+
+rules for eInt
+ S : Space;
+ n : builtinInt;
+ v : eInt;
+global
+ [] go(n) => result(S,n)
+    where S:=(loop) empty U Fib[farg=0,val=1]
+                          U Fib[farg=1,val=1]
+                          U Fib[farg=n,val=UNDEF]
+ end
+ 
+ [] result(S U Fib[farg=n,val=v],n) => v       end
+end
+
+strategies for Space
+implicit
+  [] loop => repeat*(first one(compute,rec))   end
+end
+
+strategies for Strategy
+implicit
+  [] succes => first one(recSucces,failure)    end
+end
+
+end
+
+/*
+go(50)
+result =  11011074
+rewrite_step = 1275
+total time    = 0.310 sec
+average speed = 4112 rwr/sec
+
+go(100)
+result =  35084101
+rewrite_step = 5050
+total time    = 5.120 sec
+average speed = 986 rwr/sec
+
+
+go(200)
+rewrite_step = 20100
+total time    = 75.890 sec
+average speed = 264 rwr/sec
+
+
+*/

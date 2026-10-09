@@ -1,0 +1,11 @@
+LPL map3 description
+
+query	of sort  	list[int]
+	result of sort 	list[int] 
+	modules 	int map3[int] 
+	start with 	[start 2]query
+
+end
+
+
+

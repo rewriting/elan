@@ -1,0 +1,778 @@
+Identifiers
+83:"S".
+85:"U".
+88:"X".
+97:"a".
+98:"b".
+99:"c".
+100:"d".
+101:"e".
+105:"i".
+108:"l".
+110:"n".
+112:"p".
+115:"s".
+132:"AC".
+143:"IF".
+157:"l1".
+158:"l2".
+159:"n1".
+199:"dc".
+202:"ee".
+205:"id".
+207:"dk".
+211:"AND".
+213:"of".
+214:"eq".
+215:"END".
+218:"ok".
+220:"th".
+225:"or".
+231:"FOR".
+232:"LPL".
+273:"EACH".
+295:"META".
+305:"THAT".
+307:"SUCH".
+311:"end".
+320:"mod".
+322:"one".
+323:"div".
+324:"neq".
+327:"for".
+331:"pri".
+332:"set".
+334:"sol".
+337:"not".
+338:"pos".
+351:"try".
+354:"ANDIF".
+409:"diff".
+411:"code".
+412:"fail".
+418:"if".
+419:"elem".
+424:"bs".
+426:"self".
+428:"bool".
+429:"tall".
+430:"btoi".
+431:"then".
+435:"cons".
+437:"dont".
+438:"tone".
+439:"part".
+441:"umin".
+442:"pool".
+443:"size".
+444:"with".
+447:"know".
+448:"true".
+452:"plus".
+456:"sort".
+489:"dcOne".
+510:"check".
+518:"and".
+522:"alias".
+523:"local".
+531:"cmp".
+534:"nil".
+536:"level".
+539:"where".
+542:"int".
+545:"state".
+552:"tsome".
+554:"spart".
+555:"rules".
+556:"minus".
+558:"start".
+559:"empty".
+566:"query".
+611:"dccall".
+619:"dkcall".
+622:"care".
+623:"call".
+625:"global".
+632:"append".
+639:"public".
+640:"eq_int".
+641:"repeat".
+642:"time".
+646:"module".
+650:"less".
+653:"lesseq".
+655:"list".
+657:"source".
+658:"switch".
+659:"normin".
+667:"import".
+671:"result".
+674:"export".
+719:"defined".
+720:"declare".
+722:"valueOf".
+730:"Epsilon".
+734:"false".
+737:"eq_bool".
+740:"newPool".
+746:"greater".
+750:"iterate".
+751:"size_of".
+759:"builtin".
+763:"first".
+767:"nqueens".
+770:"rewrite".
+781:"stratop".
+788:"normout".
+833:"ccat".
+834:"case".
+835:"handline".
+842:"firstOne".
+847:"neq_bool".
+849:"dcconcur".
+850:"inline".
+852:"choose".
+856:"btoi_int".
+857:"dkconcur".
+859:"implicit".
+865:"less_int".
+866:"explicit".
+868:"queens".
+877:"queryend".
+883:"strategy".
+893:"solution".
+899:"definedAs".
+905:"hardAlias".
+932:"assocLeft".
+945:"oneStep".
+960:"greatereq".
+961:"neq_int".
+962:"less_bool".
+970:"normalise".
+972:"oneconcur".
+974:"private".
+977:"normalize".
+986:"otherwise".
+991:"operators".
+1046:"anyInteger".
+1047:"assocRight".
+1058:"builtinInt".
+1063:"itob".
+1065:"queensRule".
+1067:"itob_int".
+1069:"extractPos".
+1077:"less_set".
+1079:"lesseq_int".
+1080:"lesseq_set".
+1083:"strategies".
+1110:"nqueensAC".
+1172:"greater_int".
+1173:"neq_set".
+1175:"listExtract".
+1176:"lesseq_bool".
+1188:"description".
+1203:"extractrule".
+1252:"extractrule1".
+1253:"extractrule2".
+1269:"greater_bool".
+1274:"eq_set".
+1288:"step".
+1367:"eq_builtinInt".
+1377:"specification".
+1384:"greater_set".
+1386:"greatereq_int".
+1387:"greatereq_set".
+1476:"nil_builtinInt".
+1477:"neq_builtinInt".
+1483:"greatereq_bool".
+1583:"btoi_builtinInt".
+1592:"less_builtinInt".
+1594:"umin_builtinInt".
+1794:"itob_builtinInt".
+1806:"lesseq_builtinInt".
+1899:"greater_builtinInt".
+1904:"size_of_builtinInt".
+2113:"greatereq_builtinInt".
+2443:"size_of_builtinInt_list".
+nil
+end
+
+Sorts
+19:"intern int".
+32:"ident".
+45:"state".
+58:"builtinInt".
+101:"<list[builtinInt]->list[builtinInt]>".
+186:"list[builtinInt]".
+220:"intern ident".
+319:"<state->state>".
+331:"int".
+332:"set".
+345:"<builtinInt->builtinInt>".
+351:"intern string".
+390:"builtinString".
+393:"<set->set>".
+428:"bool".
+nil
+end
+
+Modules
+28:"bool".
+36:"cmp[set]".
+46:"anyInteger".
+58:"builtinInt".
+61:"nqueensAC.lgi".
+86:"list[builtinInt]".
+99:"nqueensAC".
+130:"eq[set]".
+131:"int".
+155:"anyIdentifier".
+159:"anyString".
+181:"anyQuotedIdentifier".
+nil
+end
+
+RuleNames
+289:"extractrule1:builtinInt/list[builtinInt]!LO".
+290:"extractrule2:builtinInt/list[builtinInt]!LO".
+368:"extractrule1:builtinInt".
+369:"extractrule2:builtinInt".
+471:"oneStep:state/nqueensAC!LO".
+719:"extractrule:set/nqueensAC!GL".
+809:"queensRule:list[builtinInt]".
+1337:"oneStep:state".
+1593:"extractrule:set".
+1935:"queensRule:list[builtinInt]/nqueensAC!GL".
+nil
+end
+
+StrategyNames
+24:"listExtract:builtinInt/list[builtinInt]".
+347:"queens:list[builtinInt]/nqueensAC".
+405:"extractPos:set/nqueensAC".
+493:"step:state/nqueensAC".
+nil
+end
+
+GrammarForSort 45:0:
+nil end
+GrammarForSort 58:1:
+3:3:500:1:3:0:0:Type(58).Char(43).Type(58).nil:nil.
+3:4:600:1:4:0:0:Type(58).Char(45).Type(58).nil:nil.
+3:5:700:1:5:0:0:Type(58).Char(42).Type(58).nil:nil.
+3:6:800:1:6:0:0:Type(58).Char(47).Type(58).nil:nil.
+3:27:800:1:27:0:0:Type(58).Char(37).Type(58).nil:nil.
+3:28:800:1:28:0:0:Type(58).Char(38).Type(58).nil:nil.
+3:29:800:1:29:0:0:Type(58).Char(124).Type(58).nil:nil.
+3:20:900:0:20:0:0:Char(45).Type(58).nil:nil.
+3:3:500:1:3:0:0:Char(40).Type(58).Char(43).Type(58).Char(41).nil:nil.
+3:4:600:1:4:0:0:Char(40).Type(58).Char(45).Type(58).Char(41).nil:nil.
+3:5:700:1:5:0:0:Char(40).Type(58).Char(42).Type(58).Char(41).nil:nil.
+3:6:800:1:6:0:0:Char(40).Type(58).Char(47).Type(58).Char(41).nil:nil.
+3:27:800:1:27:0:0:Char(40).Type(58).Char(37).Type(58).Char(41).nil:nil.
+3:28:800:1:28:0:0:Char(40).Type(58).Char(38).Type(58).Char(41).nil:nil.
+3:29:800:1:29:0:0:Char(40).Type(58).Char(124).Type(58).Char(41).nil:nil.
+3:20:900:0:20:0:0:Char(40).Char(45).Type(58).Char(41).nil:nil.
+3:3:0:8:3:0:0:Ident(452).Char(40).Type(58).Char(44).Type(58).Char(41).nil:nil.
+3:4:0:8:4:0:0:Ident(556).Char(40).Type(58).Char(44).Type(58).Char(41).nil:nil.
+3:5:0:8:5:0:0:Ident(642).Char(40).Type(58).Char(44).Type(58).Char(41).nil:nil.
+3:6:0:8:6:0:0:Ident(323).Char(40).Type(58).Char(44).Type(58).Char(41).nil:nil.
+3:27:0:8:27:0:0:Ident(320).Char(40).Type(58).Char(44).Type(58).Char(41).nil:nil.
+3:28:0:8:28:0:0:Ident(518).Char(40).Type(58).Char(44).Type(58).Char(41).nil:nil.
+3:29:0:8:29:0:0:Ident(225).Char(40).Type(58).Char(44).Type(58).Char(41).nil:nil.
+3:20:0:0:20:0:0:Ident(441).Char(40).Type(58).Char(41).nil:nil.
+3:20:0:8:20:0:0:Ident(1594).Char(40).Type(58).Char(41).nil:nil.
+3:25:900:0:25:0:0:Ident(430).Char(40).Type(428).Char(41).nil:nil.
+3:25:900:8:25:0:0:Ident(1583).Char(40).Type(428).Char(41).nil:nil.
+3:321:0:8:0:0:0:Ident(419).Char(40).Type(186).Char(41).nil:nil.
+3:322:0:8:0:0:0:Type(331).Char(45).Ident(220).Ident(419).Char(40).Type(186).Char(41).nil:nil.
+nil end
+GrammarForSort 101:0:
+3:334:0:12:0:0:0:Ident(868).nil:nil.
+nil end
+GrammarForSort 186:0:
+3:318:0:0:0:0:0:Ident(1476).nil:nil.
+3:318:0:8:0:0:0:Ident(534).nil:nil.
+3:319:0:0:0:0:0:Type(58).Char(46).Type(186).nil:nil.
+3:319:0:0:0:0:0:Ident(435).Char(40).Type(58).Char(44).Type(186).Char(41).nil:nil.
+3:319:0:0:0:0:0:Type(58).Type(186).nil:nil.
+3:319:0:8:0:0:0:Type(58).Char(44).Type(186).nil:nil.
+3:320:0:0:0:0:0:Ident(632).Char(40).Type(186).Char(44).Type(186).Char(41).nil:nil.
+3:320:0:8:0:0:0:Type(186).Char(64).Type(186).nil:nil.
+3:324:0:0:0:0:0:Ident(833).Char(40).Type(331).Char(42).Type(186).Char(41).nil:nil.
+3:324:0:8:0:0:0:Ident(833).Char(40).Type(331).Char(44).Type(186).Char(41).nil:nil.
+3:326:0:8:0:0:0:Ident(767).Char(40).Type(58).Char(41).nil:nil.
+nil end
+GrammarForSort 319:0:
+nil end
+GrammarForSort 331:0:
+3:323:0:0:0:0:0:Ident(443).Char(40).Type(186).Char(41).nil:nil.
+3:323:0:8:0:0:0:Ident(2443).Char(40).Type(186).Char(41).nil:nil.
+nil end
+GrammarForSort 332:0:
+nil end
+GrammarForSort 345:0:
+3:325:0:12:0:0:0:Ident(1175).nil:nil.
+nil end
+GrammarForSort 393:0:
+nil end
+GrammarForSort 428:1:
+3:8:300:0:8:0:0:Type(58).Char(61).Char(61).Type(58).nil:nil.
+3:9:300:0:9:0:0:Type(58).Char(33).Char(61).Type(58).nil:nil.
+3:10:300:0:10:0:0:Type(58).Char(60).Type(58).nil:nil.
+3:11:300:0:11:0:0:Type(58).Char(60).Char(61).Type(58).nil:nil.
+3:12:300:0:12:0:0:Type(58).Char(62).Type(58).nil:nil.
+3:13:300:0:13:0:0:Type(58).Char(62).Char(61).Type(58).nil:nil.
+3:8:300:8:8:0:0:Ident(1367).Char(40).Type(58).Char(44).Type(58).Char(41).nil:nil.
+3:9:300:8:9:0:0:Ident(1477).Char(40).Type(58).Char(44).Type(58).Char(41).nil:nil.
+3:10:300:8:10:0:0:Ident(1592).Char(40).Type(58).Char(44).Type(58).Char(41).nil:nil.
+3:11:300:8:11:0:0:Ident(1806).Char(40).Type(58).Char(44).Type(58).Char(41).nil:nil.
+3:12:300:8:12:0:0:Ident(1899).Char(40).Type(58).Char(44).Type(58).Char(41).nil:nil.
+3:13:300:8:13:0:0:Ident(2113).Char(40).Type(58).Char(44).Type(58).Char(41).nil:nil.
+3:26:900:0:26:0:0:Ident(1063).Char(40).Type(58).Char(41).nil:nil.
+3:26:900:8:26:0:0:Ident(1794).Char(40).Type(58).Char(41).nil:nil.
+nil end
+EndDef end
+GrammarForSort 45:0:
+2:333:0:8:0:0:0:Char(91).Char(91).Type(186).Char(44).Type(332).Char(93).Char(93).nil:nil.
+nil end
+GrammarForSort 58:1:
+2:317:900:8:0:0:0:Ident(722).Char(40).Type(331).Char(41).nil:nil.
+nil end
+GrammarForSort 101:0:
+nil end
+GrammarForSort 186:0:
+nil end
+GrammarForSort 319:0:
+2:336:0:12:0:0:0:Ident(1288).nil:nil.
+nil end
+GrammarForSort 331:0:
+2:300:1000:0:0:0:0:Type(58).nil:nil.
+2:300:1000:0:0:0:0:Char(91).Type(58).Char(93).nil:nil.
+2:301:500:1:0:0:0:Type(331).Char(43).Type(331).nil:nil.
+2:302:600:1:0:0:0:Type(331).Char(45).Type(331).nil:nil.
+2:303:700:1:0:0:0:Type(331).Char(42).Type(331).nil:nil.
+2:304:800:1:0:0:0:Type(331).Char(37).Type(331).nil:nil.
+2:305:800:1:0:0:0:Type(331).Char(38).Type(331).nil:nil.
+2:306:800:1:0:0:0:Type(331).Char(47).Type(331).nil:nil.
+2:307:800:1:0:0:0:Type(331).Char(124).Type(331).nil:nil.
+2:308:900:0:0:0:0:Char(45).Type(331).nil:nil.
+2:301:500:0:0:0:0:Char(40).Type(331).Char(43).Type(331).Char(41).nil:nil.
+2:302:600:0:0:0:0:Char(40).Type(331).Char(45).Type(331).Char(41).nil:nil.
+2:303:700:0:0:0:0:Char(40).Type(331).Char(42).Type(331).Char(41).nil:nil.
+2:306:800:0:0:0:0:Char(40).Type(331).Char(47).Type(331).Char(41).nil:nil.
+2:304:800:0:0:0:0:Char(40).Type(331).Char(37).Type(331).Char(41).nil:nil.
+2:305:800:0:0:0:0:Char(40).Type(331).Char(38).Type(331).Char(41).nil:nil.
+2:307:800:0:0:0:0:Char(40).Type(331).Char(124).Type(331).Char(41).nil:nil.
+2:308:900:0:0:0:0:Char(40).Char(45).Type(331).Char(41).nil:nil.
+2:301:500:8:0:0:0:Ident(452).Char(40).Type(331).Char(44).Type(331).Char(41).nil:nil.
+2:302:600:8:0:0:0:Ident(556).Char(40).Type(331).Char(44).Type(331).Char(41).nil:nil.
+2:303:700:8:0:0:0:Ident(642).Char(40).Type(331).Char(44).Type(331).Char(41).nil:nil.
+2:306:800:8:0:0:0:Ident(323).Char(40).Type(331).Char(44).Type(331).Char(41).nil:nil.
+2:304:800:8:0:0:0:Ident(320).Char(40).Type(331).Char(44).Type(331).Char(41).nil:nil.
+2:305:800:8:0:0:0:Ident(518).Char(40).Type(331).Char(44).Type(331).Char(41).nil:nil.
+2:307:800:8:0:0:0:Ident(225).Char(40).Type(331).Char(44).Type(331).Char(41).nil:nil.
+2:308:900:8:0:0:0:Ident(441).Char(40).Type(331).Char(41).nil:nil.
+2:315:900:0:0:0:0:Ident(430).Char(40).Type(428).Char(41).nil:nil.
+2:315:900:8:0:0:0:Ident(856).Char(40).Type(428).Char(41).nil:nil.
+2:300:1000:8:0:0:0:Type(58).nil:nil.
+nil end
+GrammarForSort 332:0:
+2:328:0:10:0:2:0:Type(332).Ident(85).Type(332).nil:nil.
+2:329:0:8:0:0:0:Char(40).Type(58).Char(41).nil:nil.
+2:330:0:8:0:0:0:Ident(559).nil:nil.
+2:331:0:8:0:0:0:Char(91).Type(58).Ident(85).Type(332).Char(93).nil:nil.
+2:332:0:8:0:0:0:Ident(442).Char(40).Type(58).Char(41).nil:nil.
+nil end
+GrammarForSort 345:0:
+nil end
+GrammarForSort 393:0:
+2:335:0:12:0:0:0:Ident(1069).nil:nil.
+nil end
+GrammarForSort 428:1:
+2:1:0:8:0:0:0:Ident(448).nil:nil.
+2:0:0:8:0:0:0:Ident(734).nil:nil.
+2:21:100:1:21:0:0:Type(428).Ident(518).Type(428).nil:nil.
+2:22:100:1:22:0:0:Type(428).Ident(225).Type(428).nil:nil.
+2:21:100:9:21:0:0:Char(40).Type(428).Ident(518).Type(428).Char(41).nil:nil.
+2:22:100:9:22:0:0:Char(40).Type(428).Ident(225).Type(428).Char(41).nil:nil.
+2:24:200:0:24:0:0:Ident(337).Char(40).Type(428).Char(41).nil:nil.
+2:24:200:0:24:0:0:Ident(337).Type(428).nil:nil.
+2:24:200:0:24:0:0:Char(40).Ident(337).Type(428).Char(41).nil:nil.
+2:24:200:8:24:0:0:Char(40).Ident(337).Char(40).Type(428).Char(41).Char(41).nil:nil.
+2:8:200:1:8:0:0:Type(428).Char(61).Char(61).Type(428).nil:nil.
+2:9:200:1:9:0:0:Type(428).Char(33).Char(61).Type(428).nil:nil.
+2:10:200:1:10:0:0:Type(428).Char(60).Type(428).nil:nil.
+2:11:200:1:11:0:0:Type(428).Char(60).Char(61).Type(428).nil:nil.
+2:12:200:1:12:0:0:Type(428).Char(62).Type(428).nil:nil.
+2:13:200:1:13:0:0:Type(428).Char(62).Char(61).Type(428).nil:nil.
+2:8:200:0:8:0:0:Ident(737).Char(40).Type(428).Char(44).Type(428).Char(41).nil:nil.
+2:9:200:0:9:0:0:Ident(847).Char(40).Type(428).Char(44).Type(428).Char(41).nil:nil.
+2:10:200:0:10:0:0:Ident(962).Char(40).Type(428).Char(44).Type(428).Char(41).nil:nil.
+2:11:200:0:11:0:0:Ident(1176).Char(40).Type(428).Char(44).Type(428).Char(41).nil:nil.
+2:12:200:0:12:0:0:Ident(1269).Char(40).Type(428).Char(44).Type(428).Char(41).nil:nil.
+2:13:200:0:13:0:0:Ident(1483).Char(40).Type(428).Char(44).Type(428).Char(41).nil:nil.
+2:309:300:0:0:0:0:Type(331).Char(61).Char(61).Type(331).nil:nil.
+2:310:300:0:0:0:0:Type(331).Char(33).Char(61).Type(331).nil:nil.
+2:311:300:0:0:0:0:Type(331).Char(62).Type(331).nil:nil.
+2:312:300:0:0:0:0:Type(331).Char(62).Char(61).Type(331).nil:nil.
+2:313:300:0:0:0:0:Type(331).Char(60).Char(61).Type(331).nil:nil.
+2:314:300:0:0:0:0:Type(331).Char(60).Type(331).nil:nil.
+2:309:300:8:0:0:0:Ident(640).Char(40).Type(331).Char(44).Type(331).Char(41).nil:nil.
+2:310:300:8:0:0:0:Ident(961).Char(40).Type(331).Char(44).Type(331).Char(41).nil:nil.
+2:314:300:8:0:0:0:Ident(865).Char(40).Type(331).Char(44).Type(331).Char(41).nil:nil.
+2:313:300:8:0:0:0:Ident(1079).Char(40).Type(331).Char(44).Type(331).Char(41).nil:nil.
+2:311:300:8:0:0:0:Ident(1172).Char(40).Type(331).Char(44).Type(331).Char(41).nil:nil.
+2:312:300:8:0:0:0:Ident(1386).Char(40).Type(331).Char(44).Type(331).Char(41).nil:nil.
+2:316:900:0:0:0:0:Ident(1063).Char(40).Type(331).Char(41).nil:nil.
+2:316:900:8:0:0:0:Ident(1067).Char(40).Type(331).Char(41).nil:nil.
+2:18:0:0:18:0:0:Type(332).Char(61).Char(61).Type(332).nil:nil.
+2:19:0:0:19:0:0:Type(332).Char(33).Char(61).Type(332).nil:nil.
+2:30:0:0:30:0:0:Type(332).Char(60).Type(332).nil:nil.
+2:31:0:0:31:0:0:Type(332).Char(60).Char(61).Type(332).nil:nil.
+2:32:0:0:32:0:0:Type(332).Char(62).Type(332).nil:nil.
+2:33:0:0:33:0:0:Type(332).Char(62).Char(61).Type(332).nil:nil.
+2:18:0:0:18:0:0:Ident(1274).Char(40).Type(332).Char(44).Type(332).Char(41).nil:nil.
+2:19:0:0:19:0:0:Ident(1173).Char(40).Type(332).Char(44).Type(332).Char(41).nil:nil.
+2:30:0:8:30:0:0:Ident(1077).Char(40).Type(332).Char(44).Type(332).Char(41).nil:nil.
+2:31:0:8:31:0:0:Ident(1080).Char(40).Type(332).Char(44).Type(332).Char(41).nil:nil.
+2:32:0:8:32:0:0:Ident(1384).Char(40).Type(332).Char(44).Type(332).Char(41).nil:nil.
+2:33:0:8:33:0:0:Ident(1387).Char(40).Type(332).Char(44).Type(332).Char(41).nil:nil.
+2:18:0:0:18:0:0:Type(332).Char(61).Char(61).Type(332).nil:nil.
+2:19:0:0:19:0:0:Type(332).Char(33).Char(61).Type(332).nil:nil.
+2:18:0:8:18:0:0:Ident(1274).Char(40).Type(332).Char(44).Type(332).Char(41).nil:nil.
+2:19:0:8:19:0:0:Ident(1173).Char(40).Type(332).Char(44).Type(332).Char(41).nil:nil.
+2:327:0:8:0:0:0:Ident(218).Char(40).Type(58).Char(44).Type(58).Char(44).Type(186).Char(41).nil:nil.
+nil end
+EndDef end
+GrammarForSort 19:0:
+nil end
+GrammarForSort 58:1:
+1:67:4000:8:0:0:0:Type(19).nil:nil.
+1:79:4000:8:0:0:0:Char(45).Type(19).nil:nil.
+nil end
+GrammarForSort 101:0:
+nil end
+GrammarForSort 186:0:
+nil end
+GrammarForSort 220:0:
+nil end
+GrammarForSort 331:0:
+nil end
+GrammarForSort 345:0:
+nil end
+GrammarForSort 351:0:
+nil end
+GrammarForSort 428:1:
+nil end
+EndDef end
+/*368 extractrule1:builtinInt*/
+RULE(
+289,58,86,2,1,2,FSYM( FSYM(  VAR(0,58). VAR(1,186).nil, 319).nil, 321),
+ VAR(0,58),
+nil)
+
+ end
+/*369 extractrule2:builtinInt*/
+RULE(
+290,58,86,2,1,2,FSYM( FSYM(  VAR(0,58). VAR(1,186).nil, 319).nil, 321),
+FSYM(  VAR(1,186).nil, 321),
+nil)
+
+ end
+/*809 queensRule:list[builtinInt]*/
+RULE(
+1935,186,99,1,1,2,FSYM(  VAR(0,58).nil, 326),
+ VAR(1,186),
+PWHERE(FSYM(  VAR(1,186).FSYM( nil, 330).nil, 333),45,493,FSYM( FSYM( nil, 318).FSYM(  VAR(0,58).nil, 332).nil, 333)).
+nil)
+
+ end
+/*1337 oneStep:state*/
+RULE(
+471,45,99,2,1,4,FSYM(  VAR(0,186). VAR(1,332).nil, 333),
+FSYM( FSYM(  VAR(2,58). VAR(0,186).nil, 319). VAR(3,332).nil, 333),
+PWHERE(FSYM(  VAR(2,58). VAR(3,332).nil, 331),332,405, VAR(1,332)).
+IFF(FSYM( INT(1). VAR(2,58). VAR(0,186).nil, 327)).
+nil)
+
+ end
+/*1593 extractrule:set*/
+RULE(
+719,332,99,1,0,2,FSYM( FSYM(  VAR(0,58).nil, 329). VAR(1,332).nil, 328),
+FSYM(  VAR(0,58). VAR(1,332).nil, 331),
+nil)
+
+ end
+
+RULE(
+-1,
+331,131,1,1,3,FSYM( FSYM(  VAR(0,58).nil, 300).FSYM(  VAR(1,58).nil, 300).nil, 301),
+FSYM(  VAR(2,58).nil, 300),
+WHERE(VAR(2,58),-1,FSYM(  VAR(0,58). VAR(1,58).nil, 3)).
+nil)
+
+ end
+
+RULE(
+-1,
+331,131,1,1,3,FSYM( FSYM(  VAR(0,58).nil, 300).FSYM(  VAR(1,58).nil, 300).nil, 302),
+FSYM(  VAR(2,58).nil, 300),
+WHERE(VAR(2,58),-1,FSYM(  VAR(0,58). VAR(1,58).nil, 4)).
+nil)
+
+ end
+
+RULE(
+-1,
+331,131,1,1,3,FSYM( FSYM(  VAR(0,58).nil, 300).FSYM(  VAR(1,58).nil, 300).nil, 303),
+FSYM(  VAR(2,58).nil, 300),
+WHERE(VAR(2,58),-1,FSYM(  VAR(0,58). VAR(1,58).nil, 5)).
+nil)
+
+ end
+
+RULE(
+-1,
+331,131,1,1,3,FSYM( FSYM(  VAR(0,58).nil, 300).FSYM(  VAR(1,58).nil, 300).nil, 304),
+FSYM(  VAR(2,58).nil, 300),
+WHERE(VAR(2,58),-1,FSYM(  VAR(0,58). VAR(1,58).nil, 27)).
+nil)
+
+ end
+
+RULE(
+-1,
+331,131,1,1,3,FSYM( FSYM(  VAR(0,58).nil, 300).FSYM(  VAR(1,58).nil, 300).nil, 305),
+FSYM(  VAR(2,58).nil, 300),
+WHERE(VAR(2,58),-1,FSYM(  VAR(0,58). VAR(1,58).nil, 28)).
+nil)
+
+ end
+
+RULE(
+-1,
+331,131,1,1,3,FSYM( FSYM(  VAR(0,58).nil, 300).FSYM(  VAR(1,58).nil, 300).nil, 306),
+FSYM(  VAR(2,58).nil, 300),
+WHERE(VAR(2,58),-1,FSYM(  VAR(0,58). VAR(1,58).nil, 6)).
+nil)
+
+ end
+
+RULE(
+-1,
+331,131,1,1,3,FSYM( FSYM(  VAR(0,58).nil, 300).FSYM(  VAR(1,58).nil, 300).nil, 307),
+FSYM(  VAR(2,58).nil, 300),
+WHERE(VAR(2,58),-1,FSYM(  VAR(0,58). VAR(1,58).nil, 29)).
+nil)
+
+ end
+
+RULE(
+-1,
+331,131,1,1,2,FSYM( FSYM(  VAR(0,58).nil, 300).nil, 308),
+FSYM(  VAR(1,58).nil, 300),
+WHERE(VAR(1,58),-1,FSYM(  VAR(0,58).nil, 20)).
+nil)
+
+ end
+
+RULE(
+-1,
+428,131,1,1,2,FSYM( FSYM(  VAR(0,58).nil, 300).FSYM(  VAR(1,58).nil, 300).nil, 309),
+FSYM(  VAR(0,58). VAR(1,58).nil, 8),
+nil)
+
+ end
+
+RULE(
+-1,
+428,131,1,1,2,FSYM( FSYM(  VAR(0,58).nil, 300).FSYM(  VAR(1,58).nil, 300).nil, 310),
+FSYM(  VAR(0,58). VAR(1,58).nil, 9),
+nil)
+
+ end
+
+RULE(
+-1,
+428,131,1,1,2,FSYM( FSYM(  VAR(0,58).nil, 300).FSYM(  VAR(1,58).nil, 300).nil, 311),
+FSYM(  VAR(0,58). VAR(1,58).nil, 12),
+nil)
+
+ end
+
+RULE(
+-1,
+428,131,1,1,2,FSYM( FSYM(  VAR(0,58).nil, 300).FSYM(  VAR(1,58).nil, 300).nil, 312),
+FSYM(  VAR(0,58). VAR(1,58).nil, 13),
+nil)
+
+ end
+
+RULE(
+-1,
+428,131,1,1,2,FSYM( FSYM(  VAR(0,58).nil, 300).FSYM(  VAR(1,58).nil, 300).nil, 313),
+FSYM(  VAR(0,58). VAR(1,58).nil, 11),
+nil)
+
+ end
+
+RULE(
+-1,
+428,131,1,1,2,FSYM( FSYM(  VAR(0,58).nil, 300).FSYM(  VAR(1,58).nil, 300).nil, 314),
+FSYM(  VAR(0,58). VAR(1,58).nil, 10),
+nil)
+
+ end
+
+RULE(
+-1,
+331,131,1,1,2,FSYM(  VAR(0,428).nil, 315),
+FSYM(  VAR(1,58).nil, 300),
+WHERE(VAR(1,58),-1,FSYM(  VAR(0,428).nil, 25)).
+nil)
+
+ end
+
+RULE(
+-1,
+428,131,1,1,1,FSYM( FSYM(  VAR(0,58).nil, 300).nil, 316),
+FSYM(  VAR(0,58).nil, 26),
+nil)
+
+ end
+
+RULE(
+-1,
+58,131,1,1,1,FSYM( FSYM(  VAR(0,58).nil, 300).nil, 317),
+ VAR(0,58),
+nil)
+
+ end
+
+RULE(
+-1,
+186,86,1,1,1,FSYM( FSYM( nil, 318). VAR(0,186).nil, 320),
+ VAR(0,186),
+nil)
+
+ end
+
+RULE(
+-1,
+186,86,1,1,3,FSYM( FSYM(  VAR(0,58). VAR(1,186).nil, 319). VAR(2,186).nil, 320),
+FSYM(  VAR(0,58).FSYM(  VAR(1,186). VAR(2,186).nil, 320).nil, 319),
+nil)
+
+ end
+
+RULE(
+-1,
+58,86,1,1,2,FSYM( FSYM( INT(1).nil, 300).FSYM(  VAR(0,58). VAR(1,186).nil, 319).nil, 322),
+ VAR(0,58),
+nil)
+
+ end
+
+RULE(
+-1,
+58,86,1,1,4,FSYM(  VAR(0,331).FSYM(  VAR(1,58). VAR(2,186).nil, 319).nil, 322),
+FSYM(  VAR(3,331). VAR(2,186).nil, 322),
+WHERE(VAR(3,331),-1,FSYM(  VAR(0,331).FSYM( INT(1).nil, 300).nil, 302)).
+nil)
+
+ end
+
+RULE(
+-1,
+331,86,1,1,1,FSYM( FSYM( nil, 318).nil, 323),
+FSYM( INT(0).nil, 300),
+nil)
+
+ end
+
+RULE(
+-1,
+331,86,1,1,2,FSYM( FSYM(  VAR(0,58). VAR(1,186).nil, 319).nil, 323),
+FSYM( FSYM( INT(1).nil, 300).FSYM(  VAR(1,186).nil, 323).nil, 301),
+nil)
+
+ end
+
+RULE(
+-1,
+186,86,1,1,1,FSYM( FSYM( INT(0).nil, 300). VAR(0,186).nil, 324),
+FSYM( nil, 318),
+nil)
+
+ end
+
+RULE(
+-1,
+186,86,1,1,2,FSYM(  VAR(0,331). VAR(1,186).nil, 324),
+FSYM(  VAR(1,186).FSYM( FSYM(  VAR(0,331).FSYM( INT(1).nil, 300).nil, 302). VAR(1,186).nil, 324).nil, 320),
+IFF(FSYM(  VAR(0,331).FSYM( INT(0).nil, 300).nil, 311)).
+nil)
+
+ end
+
+RULE(
+-1,
+428,99,1,1,2,FSYM(  VAR(0,58). VAR(1,58).FSYM( nil, 318).nil, 327),
+FSYM( nil, 1),
+nil)
+
+ end
+
+RULE(
+-1,
+428,99,1,1,4,FSYM(  VAR(0,58). VAR(1,58).FSYM(  VAR(2,58). VAR(3,186).nil, 319).nil, 327),
+FSYM( nil, 0),
+IFF(FSYM( FSYM(  VAR(1,58). VAR(2,58).nil, 4). VAR(0,58).nil, 8)).
+nil)
+
+ end
+
+RULE(
+-1,
+428,99,1,1,4,FSYM(  VAR(0,58). VAR(1,58).FSYM(  VAR(2,58). VAR(3,186).nil, 319).nil, 327),
+FSYM( nil, 0),
+IFF(FSYM( FSYM(  VAR(2,58). VAR(1,58).nil, 4). VAR(0,58).nil, 8)).
+nil)
+
+ end
+
+RULE(
+-1,
+428,99,1,1,4,FSYM(  VAR(0,58). VAR(1,58).FSYM(  VAR(2,58). VAR(3,186).nil, 319).nil, 327),
+FSYM( FSYM(  VAR(0,58).INT(1).nil, 3). VAR(1,58). VAR(3,186).nil, 327),
+nil)
+
+ end
+
+RULE(
+-1,
+332,99,1,1,1,FSYM( INT(1).nil, 332),
+FSYM( FSYM( nil, 330).FSYM( INT(1).nil, 329).nil, 328),
+nil)
+
+ end
+
+RULE(
+-1,
+332,99,1,1,1,FSYM(  VAR(0,58).nil, 332),
+FSYM( FSYM(  VAR(0,58).nil, 329).FSYM( FSYM(  VAR(0,58).INT(1).nil, 4).nil, 332).nil, 328),
+nil)
+
+ end
+EndDef end
+STRATEGY(24,58,86,iterate*(one(290.nil)) ; one(289.nil)) 
+end
+STRATEGY(347,186,99,dk(1935.nil)) 
+end
+STRATEGY(405,332,99,dk(719.nil)) 
+end
+STRATEGY(493,45,99,repeat*(dk(471.nil))) 
+end
+EndDef end
+QUERY(186,186,347, VAR(0,186),FSYM( nil, 1)) end 

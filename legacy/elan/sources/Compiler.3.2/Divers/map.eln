@@ -1,0 +1,37 @@
+module map
+
+import global strat[Foo]; end
+
+sort Foo; end
+
+operators global
+  nil		: Foo;
+  a		: Foo; 
+  b		: Foo;
+  c		: Foo;
+  cons(@,@)	: (Foo Foo) Foo;
+end
+
+stratop global
+  map(@)	: (<Foo>) <Foo>;
+  mac		:  <Foo>;
+end
+
+rules for Foo
+y	: Foo;
+t, y1, y2, t1, t2 : Foo;
+s1, s2 : <Foo>;
+global
+  [R1]	a => b		end
+  [R2]	a => c		end
+end
+
+strategies for Foo
+s	: <Foo>;
+implicit
+//  [.]  map(s) => s		end
+  [.]  map(s) => dc(nil,cons(s,map(s)))		end
+  [.]  mac => id				end
+end
+
+end

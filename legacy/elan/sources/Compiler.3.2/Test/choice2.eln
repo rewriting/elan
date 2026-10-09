@@ -1,0 +1,52 @@
+module choice2
+sort  	Foo; 
+end
+
+operators global
+	go    : Foo;
+	r0   : Foo;
+	r1   : Foo;
+	r2   : Foo;
+
+        a		: Foo;
+        b		: Foo;
+        c		: Foo;
+        F(@,@)		: (Foo Foo) Foo (AC);
+        f(@,@)		: (Foo Foo) Foo;
+        g1(@)		: (Foo) Foo;
+        g2(@)		: (Foo) Foo;
+        h(@,@)		: (Foo Foo) Foo;
+end
+
+stratop global
+  s0 : <Foo> builtin;
+end
+
+rules for Foo
+    x,y,z : Foo;
+global
+  []   go        => g1(F(a,g2(b))) end
+
+  [] g1(F(x,g2(y))) => z
+     choose
+     try where z:=() x 
+     try where z:=() x 
+     end
+  end
+end
+
+/*
+strategies for Foo
+implicit
+  [.] s0 => repeat*(first one(R1));
+	    repeat*(first one(R2))
+  end
+end
+*/
+
+end
+				
+
+
+
+

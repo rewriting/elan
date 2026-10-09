@@ -1,0 +1,16 @@
+LPL picalc description
+
+  specification description
+
+    part dummy of sort int      // IOSorts of sort list[identifier]
+    modules int
+
+  end
+
+  query 	of sort topprocess
+         	result of sort topprocess
+                modules picalc int ident identifier
+         	start with (run) query
+
+end of LPL description
+

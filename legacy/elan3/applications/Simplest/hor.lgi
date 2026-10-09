@@ -1,0 +1,10 @@
+LPL hor description 
+
+
+query 		of sort State
+      result 	of sort State
+      import    hor
+//      start with (horse_strat) query
+      start with (one_horse_strat) query
+
+end

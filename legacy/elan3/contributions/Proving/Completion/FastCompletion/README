@@ -1,0 +1,11 @@
+Interpreted
+===========
+
+elan ans_completion <fichier.spc> < command
+
+Compiled
+========
+
+elanc ans_completion <fichier.spc> ; gmake --file ans_completion.make ; a.out < command 
+
+

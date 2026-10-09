@@ -1,0 +1,106 @@
+module trans5
+
+import bool eq[Term];
+end
+
+sort Term;
+end 
+
+operators global
+  go     : Term;
+  a      : Term; 
+  b      : Term; 
+  c      : Term; 
+  a1     : Term; 
+  b1     : Term; 
+  c1     : Term; 
+  ok     : Term; 
+  bot    : Term; 
+  F(@,@) : (Term Term) Term (AC);
+  @+@    : (Term Term) Term (AC);
+  @*@    : (Term Term) Term (AC);
+  G(@,@) : (Term Term) Term (AC);
+
+  f(@,@,@)   : (Term Term Term) Term;
+  g(@)       : (Term) Term;
+  h(@,@,@)   : (Term Term Term) Term;
+end
+
+stratop global 
+  S : <Term> bs;
+end
+
+rules for Term
+ x,y,z : Term;
+ t1,t2,X : Term;
+global
+
+[] go      => a + g(a) + g(b)
+//[] go      => a + g(F(a,F(b,c))) + g(F(a1,F(b1,c1)))
+//[] go      => a + F(a,F(b,c)) + F(a1,F(b1,c1))
+   end
+
+//[] x+a+a+a => x+a if x==a end
+//[] y+g(x)+g(x) => x+y end
+//[] g(x)+g(x) => x end
+//[] y+x+x => y+x end
+
+
+// Case 1
+[] f(x+a, a, y+b) => ok end
+
+
+// Case 2
+
+//[] g(F(x,G(y,z))) => ok end
+/*
+[] g(F(x,G(a,z))) => ok end
+[] g(F(a,G(a,z))) => ok end
+[] F(x,G(y,z)) => ok end
+[] F(x,G(a,z)) => ok end
+[] F(a,G(a,z)) => ok end
+*/
+//[] x + F(y,z) + F(y,t1) => ok end
+//[] x + F(y,z) + F(y,z) => ok end
+//[] x + F(y,g(z)) + F(y,g(t1)) => ok end
+
+//[] x + F(y,z) => ok end
+//[] x + g(F(y,z)) => x + ok if y==a1 end
+
+//[] x + F(y,z) + F(y,z) + a => ok end
+//[] x + h(a,F(y,z),c) + h(a,G(t1,t2),c) => ok end
+
+// Case 3.1
+//[] g(F(a,F(x,x))) => ok end
+//[] g(F(F(y,y),F(x,x))) => ok end
+//[] g(F(F(x,a),F(x,a))) => ok end
+//[] g(F(F(x,a),F(x,F(a,a)))) => ok end
+//[] g(x+y+a) => ok end
+//[] g(x+y+y+a+b+b+c) => ok end
+
+// Case 3.2
+//[] x+x => ok end 
+//[] a+a => ok end 
+//[] x+a+b+c => ok if x==a end 
+//[] x+y+a+b+c => ok if x==a end 
+//[] x+x+y+y+a+b+b+c => ok if x==y end 
+
+// Case 2 + 3
+
+//[] g( x + a + b + F(y,b)) => ok end
+//[] g( x + a + b + F(x,b)) => ok end
+
+
+end
+/*
+strategies for Term
+   implicit
+   [.] S => first(R1) end
+end
+*/
+end
+				
+
+
+
+

@@ -1,0 +1,1508 @@
+//--------------------------------------------------------------------------------
+////////SPIKE - Second version (INFIX operators) ---------------------------------
+//--------------------------------------------------------------------------------
+module spike[Vars,Ars,Sorts,Css,Fss,Axs,Es,Lm,Lss,Equiv,Status]
+
+import  global
+		execute[Vars,Ars,Sorts,Css,Fss,Axs,Es,Lm,Lss,Equiv,Status]	
+		//prove[Vars,Ars,Sorts,Css,Fss,Axs,Es,Lm,Lss,Equiv,Status]
+		
+		replace[term, equationS]
+
+		occur[clause,clause]
+
+
+;end 
+//--------------------------------------------------------------------------------------
+
+stratop
+  global
+	elimRed				: <clause -> clause>	builtin;
+	subsumeStrat			: <clause -> clause>	builtin;
+
+	mainStrat			: <Rez -> Rez>		builtin;
+	StratDed			: <Rez -> Rez>		builtin;
+	tsStrat				: <Rez -> Rez>		builtin;
+	ipStrat				: <Rez -> Rez>		builtin;
+	clStrat				: <Rez -> Rez>		builtin;
+
+	rulesetdelete			: <Rez -> Rez>		builtin;
+	rulesetdecomp			: <Rez -> Rez>		builtin;
+	rulesetcleaning			: <Rez -> Rez>		builtin;
+	rewrite				: <Rez -> Rez>		builtin;
+	rec_strat_rew			: <Rez -> Rez>		builtin;
+
+	Ind				: <Rez -> Rez>		builtin;
+	OneStepRewPL			: <Rez -> Rez>		builtin;
+	OneStepRewPLR			: <Rez -> Rez>		builtin;
+	OneStepRewNPLR			: <Rez -> Rez>		builtin;
+end
+//--------------------------------------------------------------------------------------
+operators
+  global   
+
+	allClausesPL(@,@,@,@)	:(list[substitution] equationS equationS step ) clause;
+	allClausesPLR(@,@,@,@)	:(list[substitution] equationS equationS step ) clause;
+	allClausesNPLR(@,@,@,@)	:(list[substitution] equationS equationS step ) clause;
+
+end
+//--------------------------------------------------------------------------------------
+
+rules for clause
+	RC : Rez;
+	D, H, L, R, C : clause;
+	Ip : indpos;
+	Ts : testset;
+	Np, Pp, NpS, PpS : equationS;
+	s : substitution;
+	ls : list[substitution];
+global
+	[] allClausesPL(s.nil, Np, Pp, D#H#L#R#Ip#Ts)  => C 
+		where NpS := ()apply(s,Np)
+		where PpS := ()apply(s,Pp)
+		//where RC := (OneStepRewPL)[NpS,PpS]*EmptyC#[Np,Pp]*D*H#L#R#Ip#Ts
+		where RC := (OneStepRewPL)[NpS,PpS]*EmptyC#D*H#L#R#Ip#Ts
+		where C := ()getClauses(RC)
+	end
+	[] allClausesPL(s.ls, Np, Pp, D#H#L#R#Ip#Ts)  =>
+				C * allClausesPL(ls, Np, Pp, D#H#L#R#Ip#Ts)
+		where NpS := ()apply(s,Np)
+		where PpS := ()apply(s,Pp)
+		//where RC := (OneStepRewPL)[NpS,PpS]*EmptyC#[Np,Pp]*D*H#L#R#Ip#Ts
+		where RC := (OneStepRewPL)[NpS,PpS]*EmptyC#D*H#L#R#Ip#Ts
+		where C := ()getClauses(RC)
+	end
+	[] allClausesPL(s.ls, Np, Pp, D#H#L#R#Ip#Ts)  => FailC
+	end
+
+	[] allClausesPLR(s.nil, Np, Pp, D#H#L#R#Ip#Ts)  => C 
+		where NpS := ()apply(s,Np)
+		where PpS := ()apply(s,Pp)
+		//where RC := (OneStepRewPLR)[NpS,PpS]*EmptyC#[Np,Pp]*D*H#L#R#Ip#Ts
+		where RC := (OneStepRewPLR)[NpS,PpS]*EmptyC#D*H#L#R#Ip#Ts
+		where C := ()getClauses(RC)
+	end
+	[] allClausesPLR(s.ls, Np, Pp, D#H#L#R#Ip#Ts)  =>
+				C * allClausesPLR(ls, Np, Pp, D#H#L#R#Ip#Ts)
+		where NpS := ()apply(s,Np)
+		where PpS := ()apply(s,Pp)
+		//where RC := (OneStepRewPLR)[NpS,PpS]*EmptyC#[Np,Pp]*D*H#L#R#Ip#Ts
+		where RC := (OneStepRewPLR)[NpS,PpS]*EmptyC#D*H#L#R#Ip#Ts
+		where C := ()getClauses(RC)
+	end
+	[] allClausesPLR(s.ls, Np, Pp, D#H#L#R#Ip#Ts)  => FailC
+	end
+
+	[] allClausesNPLR(s.nil, Np, Pp, D#H#L#R#Ip#Ts)  => C 
+		where NpS := ()apply(s,Np)
+		where PpS := ()apply(s,Pp)
+		//where RC := (OneStepRewNPLR)[NpS,PpS]*EmptyC#[Np,Pp]*D*H#L#R#Ip#Ts
+		where RC := (OneStepRewNPLR)[NpS,PpS]*EmptyC#D*H#L#R#Ip#Ts
+		where C := ()getClauses(RC)
+	end
+	[] allClausesNPLR(s.ls, Np, Pp, D#H#L#R#Ip#Ts)  =>
+				C * allClausesNPLR(ls, Np, Pp, D#H#L#R#Ip#Ts)
+		where NpS := ()apply(s,Np)
+		where PpS := ()apply(s,Pp)
+		//where RC := (OneStepRewNPLR)[NpS,PpS]*EmptyC#[Np,Pp]*D*H#L#R#Ip#Ts
+		where RC := (OneStepRewNPLR)[NpS,PpS]*EmptyC#D*H#L#R#Ip#Ts
+		where C := ()getClauses(RC)
+	end
+	[] allClausesNPLR(s.ls, Np, Pp, D#H#L#R#Ip#Ts)  => FailC
+	end
+end
+
+
+//-------------------- Deductive part -----------------------------------------
+// [NP:...NP:EmptyT, PP:...PP:EmptyT]*...*EmptyC  --> General form for Clause
+// Clauses to be proved # Hypothesis # Lemmas # Rewrite rules # TestSet
+//--------------------------------------------------------------------------------------
+rules for Rez //preliminary step
+	C :clause;
+global
+	[r1] Start =>
+	EClause#	// clause part
+	EmptyC#		// hyp part
+	Lemma#		// lemma part
+	RulesW#		// rewrite rules part
+	IndPos#		// induction positions
+	TestSET		// test set
+	end //////////////// end starting rule r1
+//--------------------------------------------------------------------------------
+
+	[r2] prove(C) => 
+	C*EmptyC#	// the clause to be proved
+	EmptyC#		// hyp part
+	Lemma#		// lemma part
+	RulesW#		// rewrite rules part
+	IndPos#		// induction positions
+	TestSET		// test set
+	end //////////////// end starting rule r2
+//--------------------------------------------------------------------------------
+end
+
+//-------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------
+// Tautology
+rules for Rez
+	D, H, L, R : clause;
+	Ip : indpos;	
+	Np, Pp : equationS;
+	E : equation;
+	S : term;
+	Ts : testset;
+	pt, rt, st : string;
+global
+	
+	[tautology1] D*[Np,S=S:Pp]#H#L#R#Ip#Ts	=> D#H#L#R#Ip#Ts
+			where st := ()printClause("tautology1 ",[Np,S=S:Pp])
+			where pt := ()printE(D)
+			where rt := ()printH(H)
+	end 
+	
+	[tautology2] D*[E:Np,E:Pp]#H#L#R#Ip#Ts	=> D#H#L#R#Ip#Ts
+				if neq_equationS(E, EmptyT)
+			where st := ()printClause("tautology2 ",[E:Np,E:Pp])
+			where pt := ()printE(D)
+			where rt := ()printH(H)
+	end 
+	
+end
+//--------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------
+// Subsume
+rules for Rez 
+	D, H, L, R, C, Cs, LR : clause;
+	C1, C2 : pair[equationS,equationS];
+	Ip : indpos;	
+	E, F, Np, Pp : equationS;
+	f : ident;
+	Ts : testset;
+	pt, rt,st : string;
+global
+	
+	[subsumeG] D*C#H#L#R#Ip#Ts	=>	D#H#L#R#Ip#Ts
+				where Cs := (subsumeStrat) C
+				if eq_clause(Cs, EmptyC)
+			where st := ()printClause( "subsumeG",C)
+			where pt := ()printE(D)
+			where rt := ()printH(H)
+	end 
+
+
+	[subsume1] D*C*C#H#L#R#Ip#Ts	=>	D*C#H#L#R#Ip#Ts
+				if neq_clause(C, EmptyC)
+			where st := ()printClause( "subsume1",C)
+			where pt := ()printE(D*C)
+			where rt := ()printH(H)
+	end 
+	[subsume2] D*C#H*C#L#R#Ip#Ts	=>	D#H*C#L#R#Ip#Ts
+				if neq_clause(C, EmptyC)
+			where st := ()printClause( "subsume2",C)
+			where pt := ()printE(D)
+			where rt := ()printH(H*C)
+	end 
+	/***********************************************************************
+	[subsume2l] D*C#H#L*C#R#Ip#Ts	=>	D#H#L*C#R#Ip#Ts
+				if neq_clause(C, EmptyC)
+			where st := ()printClause( "subsume2l",C)
+			where pt := ()printE(D)
+			where rt := ()printH(H)
+	end 
+	[subsume3] D*C#H#L#$f:(R*C)*LR#Ip#Ts	=>	D#H#L#$f:(R*C)*LR#Ip#Ts
+				if neq_clause(C, EmptyC)
+			where st := ()printClause( "subsume3",C)
+			where pt := ()printE(D)
+			where rt := ()printH(H)
+	end 
+	***********************************************************************/
+	
+	[subsume4] D*[Np,E:Pp]*[Np,E]#H#L#R#Ip#Ts	=> D*[Np,E]#H#L#R#Ip#Ts
+			where st := ()printClause( "subsume4",[Np,E:Pp])
+			where pt := ()printE(D*[Np,E])
+			where rt := ()printH(H)
+	end 
+	[subsume5] D*[Np,E:Pp]#H*[Np,E]#L#R#Ip#Ts	=> D#H*[Np,E]#L#R#Ip#Ts
+			where st := ()printClause( "subsume5",[Np,E:Pp])
+			where pt := ()printE(D)
+			where rt := ()printH(H*[Np,E])
+	end 
+	/***********************************************************************
+	[subsume5l] D*[Np,E:Pp]#H#L*[Np,E]#R#Ip#Ts	=> D#H#L*[Np,E]#R#Ip#Ts
+			where st := ()printClause( "subsume5l",[Np,E:Pp])
+			where pt := ()printE(D)
+			where rt := ()printH(H)
+	end 
+	[subsume6] D*[Np,E:Pp]#H#L#$f:(R*[Np,E])*LR#Ip#Ts => D#H#L#$f:(R*[Np,E])*LR#Ip#Ts
+			where st := ()printClause( "subsume6",[Np,E:Pp])
+			where pt := ()printE(D)
+			where rt := ()printH(H)
+	end 
+	***********************************************************************/
+	
+	[subsume7] D*[E:Np,Pp]*[Np,Pp]#H#L#R#Ip#Ts	=> D*[Np,Pp]#H#L#R#Ip#Ts
+			where st := ()printClause( "subsume7",[E:Np,Pp])
+			where pt := ()printE(D*[Np,Pp])
+			where rt := ()printH(H)
+	end 
+	[subsume8] D*[E:Np,Pp]#H*[Np,Pp]#L#R#Ip#Ts	=> D#H*[Np,Pp]#L#R#Ip#Ts
+			where st := ()printClause( "subsume8",[E:Np,Pp])
+			where pt := ()printE(D)
+			where rt := ()printH(H*[Np,Pp])
+	end 
+	/*********************************************************************** 
+	[subsume8l] D*[E:Np,Pp]#H#L*[Np,Pp]#R#Ip#Ts	=> D#H#L*[Np,Pp]#R#Ip#Ts
+			where st := ()printClause( "subsume8l",[E:Np,Pp])
+			where pt := ()printE(D)
+			where rt := ()printH(H)
+	end 
+	[subsume9] D*[E:Np,Pp]#H#L#$f:(R*[Np,Pp])*LR#Ip#Ts => D#H#L#$f:(R*[Np,Pp])*LR#Ip#Ts
+			where st := ()printClause( "subsume9",[E:Np,Pp])
+			where pt := ()printE(D)
+			where rt := ()printH(H)
+	end 
+	***********************************************************************/
+	
+	[subsume10] D*[E:Np,F:Pp]*[Np,Pp]#H#L#R#Ip#Ts	=> D*[Np,Pp]#H#L#R#Ip#Ts
+			where st := ()printClause( "subsume10",[E:Np,F:Pp])
+			where pt := ()printE(D*[Np,Pp])
+			where rt := ()printH(H)
+	end 
+	[subsume11] D*[E:Np,F:Pp]#H*[Np,Pp]#L#R#Ip#Ts	=> D#H*[Np,Pp]#L#R#Ip#Ts
+			where st := ()printClause( "subsume11",[E:Np,F:Pp])
+			where pt := ()printE(D)
+			where rt := ()printH(H*[Np,Pp])
+	end 
+	/***********************************************************************	
+	[subsume11l] D*[E:Np,F:Pp]#H#L*[Np,Pp]#R#Ip#Ts	=> D#H#L*[Np,Pp]#R#Ip#Ts
+			where st := ()printClause( "subsume11l",[E:Np,F:Pp])
+			where pt := ()printE(D)
+			where rt := ()printH(H)
+	end 	
+	[subsume12] D*[E:Np,F:Pp]#H#L#$f:(R*[Np,Pp])*LR#Ip#Ts => D#H#L#$f:(R*[Np,Pp])*LR#Ip#Ts
+			where st := ()printClause( "subsume12",[E:Np,F:Pp])
+			where pt := ()printE(D)
+			where rt := ()printH(H)
+	end 
+	***********************************************************************/
+//--------------------------------------------------------------------------------
+	[subsume21] D*C1*C2#H#L#R#Ip#Ts	=> 	D*C1#H#L#R#Ip#Ts
+					if subsumes(C1, C2)
+			where st := ()printClause( "subsume21",C2)
+			where pt := ()printE(D*C1)
+			where rt := ()printH(H)
+	end 
+	[subsume22] D*C2#H*C1#L#R#Ip#Ts	=> 	D#H*C1#L#R#Ip#Ts
+					if subsumes(C1, C2)
+			where st := ()printClause( "subsume22",C2)
+			where pt := ()printE(D)
+			where rt := ()printH(H*C1)
+	end 
+	/***********************************************************************
+	[subsume22l] D*C2#H#L*C1#R#Ip#Ts	=> 	D#H#L*C1#R#Ip#Ts
+					if subsumes(C1, C2)
+			where st := ()printClause( "subsume22l",C2)
+			where pt := ()printE(D)
+			where rt := ()printH(H)
+	end 
+	[subsume23] D*C2#H#L#$f:(R*C1)*LR#Ip#Ts	=> 	D#H#L#$f:(R*C1)*LR#Ip#Ts
+					if subsumes(C1, C2)
+			where st := ()printClause( "subsume23",C2)
+			where pt := ()printE(D)
+			where rt := ()printH(H)
+	end 
+	***********************************************************************/
+//--------------------------------------------------------------------------------
+end
+
+//--------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------
+// Negative Clash
+rules for Rez
+	D, H, L, R : clause;
+	Ip : indpos;	
+	Np, Pp : equationS;
+	S, T : term;
+	c, d : ident;
+	Ts : testset;
+	pt, rt, st : string;
+global
+	
+	[negClash] D*[S=T:Np,Pp]#H#L#R#Ip#Ts	=> D#H#L#R#Ip#Ts
+			where c := ()head(S)
+			where d := ()head(T)
+			if neq_ident($c,$d)
+			if constructor($c)
+			if constructor($d)
+			//if freecons($c)
+			//if freecons($d)
+			where st := ()printClause("negClashx", [S=T:Np,Pp])
+			where pt := ()printE(D)
+			where rt := ()printH(H)
+	end 
+	
+	
+end
+
+//--------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------
+// Complement
+rules for Rez 
+	D, H, L, R, E, LR : clause;
+	Ip : indpos;
+	Ts : testset;	
+	Np, Pp : equationS;
+	S, T, U : term;
+	RP : Rez;
+	f : ident;
+	pt, rt, st : string;
+global
+/*************************************************************************************
+
+  [complement] D*[Np:U=S,Pp]#H#L#$f:([S=T:EmptyT,EmptyT]*R)*LR#Ip#Ts	=> 
+				D*[Np,Pp:U=T]#H#L#$f:([S=T:EmptyT,EmptyT]*R)*LR#Ip#Ts
+	if equiv_rpo(S, T)
+	//where RP := (Ind)[EmptyT,U=S:U=T:EmptyT]#H#L#$f:([S=T:EmptyT,EmptyT]*R)*LR#Ip#Ts
+	where RP := (rec_strat_rew)[EmptyT,U=S:U=T:EmptyT]#H#L#$f:([S=T:EmptyT,EmptyT]*R)*LR#Ip#Ts
+	where E := ()getClauses(RP)
+	if eq_clause(E, EmptyC)
+	where st := ()printClause( "complement",[Np:U=S,Pp])
+	where pt := ()printE(D*[Np,Pp:U=T])
+	where rt := ()printH(H)
+  end 
+  [complement] D*[Np,Pp:U=False]#H#L#$f:([True=False:EmptyT,EmptyT]*R)*LR#Ip#Ts	=> 
+  			D*[Np:U=True,Pp]#H#L#$f:([True=False:EmptyT,EmptyT]*R)*LR#Ip#Ts
+		if neq_equationS(Pp, EmptyT)
+		where st := ()printClause( "complement",[Np,Pp:U=False])
+		where pt := ()printE(D*[Np:U=True,Pp])
+		where rt := ()printH(H)
+  end 
+*************************************************************************************/
+  [complement] D*[Np,U=True:U=False:Pp]#H#L#R#Ip#Ts	=> D#H#L#R#Ip#Ts
+  end 
+
+  [complement] D*[Np:U=True,Pp]#H#L#R#Ip#Ts	=> D*[Np,Pp:U=False]#H#L#R#Ip#Ts
+		where st := ()printClause( "complement",[Np:U=True,Pp])
+		where pt := ()printE(D*[Np,Pp:U=False])
+		where rt := ()printH(H)
+  end 
+  [complement] D*[Np:U=False,Pp]#H#L#R#Ip#Ts => D*[Np,Pp:U=True]#H#L#R#Ip#Ts
+		where st := ()printClause( "complement",[Np:U=False,Pp])
+		where pt := ()printE(D*[Np,Pp:U=True])
+		where rt := ()printH(H)
+  end 	
+end
+
+/****************************************************/
+rules for clause
+	D, H, L, R, E : clause;
+	Ip : indpos;
+	Ts : testset;	
+	Np, Pp : equationS;
+	U : term;
+global
+  [elimR] [Np,U=True:U=False:Pp]	=> EmptyC
+  end 
+  [elimR] D*[Np,U=True:U=False:Pp]	=> D
+  end 
+end
+/****************************************************/
+
+//--------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------
+// Positive Decomposition
+rules for Rez 
+	D, H, L, R : clause;
+	Ip : indpos;
+	Ts : testset;	
+	Np, Pp : equationS;
+	Dc : clause;
+	S, T : term;
+	c, d : ident;
+	pt, rt, st : string;
+global
+	
+	[posDecomposition] 
+		D*[Np,S=T:Pp]#H#L#R#Ip#Ts	=> D*Dc#H#L#R#Ip#Ts
+			where c := ()head(S)
+			where d := ()head(T)
+			if eq_ident($c,$d)
+			if constructor($c)
+			//if freecons($c)
+			if arity($c) > 0
+			where Dc := () decomposePos([Np,S=T:Pp])
+			where st := ()printClause( "posDecomposition",[Np,S=T:Pp])
+			where pt := ()printE(D*Dc)
+			where rt := ()printH(H)
+	end 
+	
+	
+end
+
+//--------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------
+// Negative Decomposition
+rules for Rez //step
+	D, H, L, R : clause;
+	Ip : indpos;
+	Ts : testset;	
+	Np, Pp : equationS;
+	Dc : equationS;
+	S, T : term;
+	c, d : ident;
+	pt, rt, st : string;
+global
+	
+	[negDecomposition] 
+		D*[S=T:Np,Pp]#H#L#R#Ip#Ts	=> D*[Dc:Np,Pp]#H#L#R#Ip#Ts
+			where c := ()head(S)
+			where d := ()head(T)
+			if eq_ident($c,$d)
+			if constructor($c)
+			//if freecons($c)
+			if arity($c) > 0
+			where Dc := () decomposeNeg(S=T)
+			where st := ()printClause( "negDecomposition",[S=T:Np,Pp])
+			where pt := ()printE(D*[Dc:Np,Pp])
+			where rt := ()printH(H)
+	end 
+	
+	
+end
+
+//--------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------
+// Positive Clash
+rules for Rez //step
+	D, H, L, R : clause;
+	Ip : indpos;
+	Ts : testset;	
+	Np, Pp : equationS;
+	S, T : term;
+	c, d : ident;
+	pt, rt, st : string;
+global
+	
+	[posClash] D*[Np,S=T:Pp]#H#L#R#Ip#Ts	=> D*[Np,Pp]#H#L#R#Ip#Ts
+			where c := ()head(S)
+			where d := ()head(T)
+			if neq_ident($c,$d)
+			if constructor($c)
+			if constructor($d)
+			//if freecons($c)
+			//if freecons($d)
+			where st := ()printClause( "posClash",[Np,S=T:Pp])
+			where pt := ()printE(D*[Np,Pp])
+			where rt := ()printH(H)
+	end 
+	
+	
+end
+
+//--------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------
+// Cleaning
+rules for Rez 
+	D, H, L, R, LR : clause;
+	Ip : indpos;	
+	Ts : testset;
+	Np, Pp : equationS;
+	S, T : term;
+	f : ident;
+	pt, rt, st : string;
+global	
+	[clean] D*[Np,S=T:Pp]#H#L#$f:([S=T:EmptyT,EmptyT]*R)*LR#Ip#Ts	=> 
+					D*[Np,Pp]#H#L#$f:([S=T:EmptyT,EmptyT]*R)*LR#Ip#Ts
+			where st := ()printClause( "clean",[Np,S=T:Pp])
+			where pt := ()printE(D*[Np,Pp])
+			where rt := ()printH(H)
+	end 
+end
+
+//--------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------
+// Eliminate Negative Redundant EquationS
+rules for Rez //step
+	D, H, L, R : clause;
+	Ip : indpos;
+	Ts : testset;	
+	Np, Pp : equationS;
+	S, T : term;
+	pt, rt, st : string;
+global
+	
+	[enre] D*[S=T:S=T:Np,Pp]#H#L#R#Ip#Ts	=> D*[S=T:Np,Pp]#H#L#R#Ip#Ts
+			where st := ()printClause( "enre",[S=T:S=T:Np,Pp])
+			where pt := ()printE(D*[S=T:Np,Pp])
+			where rt := ()printH(H)
+	end 
+	// []	S=T:S=T		=>	S=T		end	
+end
+
+//--------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------
+// Eliminate Positive Redundant EquationS
+rules for Rez //step
+	D, H, L, R : clause;
+	Ip : indpos;
+	Ts : testset;	
+	Np, Pp : equationS;
+	S, T : term;
+	pt, rt, st : string;
+global
+	
+	[epre] D*[Np,S=T:S=T:Pp]#H#L#R#Ip#Ts	=> D*[Np,S=T:Pp]#H#L#R#Ip#Ts
+			where st := ()printClause( "epre",[Np,S=T:S=T:Pp])
+			where pt := ()printE(D*[Np,S=T:Pp])
+			where rt := ()printH(H)
+	end 
+	// []	S=T:S=T		=>	S=T		end
+end
+
+//--------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------
+// Eliminate Trivial EquationS
+rules for Rez 
+	D, H, L, R : clause;
+	Ip : indpos;
+	Ts : testset;	
+	Np, Pp : equationS;
+	S, T : term;
+	pt, rt, st : string;
+global
+	
+	[etriv] D*[S=S:Np,Pp]#H#L#R#Ip#Ts	=> D*[Np,Pp]#H#L#R#Ip#Ts
+			where st := ()printClause( "etriv",[S=S:Np,Pp])
+			where pt := ()printE(D*[Np,Pp])
+			where rt := ()printH(H)
+	end 
+	// []	S=S:Np		=>	Np		end	
+end
+
+//--------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------
+// Auto Simplification
+rules for Rez 
+	D, H, L, R : clause;
+	Ip : indpos;
+	Ts : testset;	
+	Np, Pp, rPp : equationS;
+	S, T : term;
+	pt, rt, st : string;
+global
+	
+	[autoSimp] D*[S=T:Np,Pp]#H#L#R#Ip#Ts	=> D*[S=T:Np,rPp]#H#L#R#Ip#Ts
+					if rpo(S,T)
+					where rPp := ()replace S by T in Pp
+					if neq_equationS(Pp,rPp)
+			where st := ()printClause( "autoSimp",[S=T:Np,Pp])
+			where pt := ()printE(D*[S=T:Np,rPp])
+			where rt := ()printH(H)
+	end 
+end
+
+//--------------------------------------------------------------------------------
+//-------- Case Splitting 2 ------------------------------------------------------
+//--------------------------------------------------------------------------------
+rules for Rez 
+	D, H, L, Rf, LR : clause;
+	Ip : indpos;
+	Ts : testset;
+	LT : list[term];
+	C : list[pair[equationS, clause]];
+	Cc, Pre, PreR : clause;	
+	Np, Pp : equationS;
+	S, T, Tr : term;
+	$f : ident;
+	IP : Rez;
+	pt, rt, st : string;
+global
+	[caseSplit2NL]  D*[S=T:Np,Pp]#H#L#$f:(Rf) * LR#Ip#Ts => 
+				D*Cc*Pre#H#L#$f:(Rf) * LR#Ip#Ts
+		where LT := ()getTermsAll($f,S)
+		if neq_list[term](LT, nil) 
+		where Tr := (listExtract) elem(LT)
+		if eq_list[pair[ident,variable]](indVariables(Tr,Ip), nil) 
+		where C := () cons_Clause_Neg_L(Tr, S=T, Np, Pp, Rf)
+		if neq_list[pair[equationS, clause]](C, nil)
+		where PreR := ()Get_Precond(C)
+		where Pre := (elimRed)PreR
+		where Cc := ()Get_Clauses(C)
+		where st := ()printClause( "caseSplit2NL",[S=T:Np,Pp])
+		where pt := ()printE(D*Pre*Cc)
+		where rt := ()printH(H)
+	end 
+	[caseSplit2NR]  D*[S=T:Np,Pp]#H#L#$f:(Rf) * LR#Ip#Ts => 
+				D*Cc*Pre#H#L#$f:(Rf) * LR#Ip#Ts
+		where LT := ()getTermsAll($f,T)
+		if neq_list[term](LT, nil) 
+		where Tr := (listExtract) elem(LT)
+		if eq_list[pair[ident,variable]](indVariables(Tr,Ip), nil) 
+		where C := () cons_Clause_Neg_R(Tr, S=T, Np, Pp, Rf)
+		if neq_list[pair[equationS, clause]](C, nil)
+		where PreR := ()Get_Precond(C)
+		where Pre := (elimRed)PreR
+		where Cc := ()Get_Clauses(C)
+		where st := ()printClause( "caseSplit2NR",[S=T:Np,Pp])
+		where pt := ()printE(D*Pre*Cc)
+		where rt := ()printH(H)
+	end 
+
+	[caseSplit2PLsimple]  D*[EmptyT,S=T:EmptyT]#H#L#$f:(Rf) * LR#Ip#Ts => 
+				//D*Pre*Cc#H * [EmptyT,S=T:EmptyT]#L#$f:(Rf) * LR#Ip#Ts
+				D*Cc*Pre#H#L#$f:(Rf) * LR#Ip#Ts
+		where LT := ()getTermsAll($f,S)
+		if neq_list[term](LT, nil) 
+		where Tr := (listExtract) elem(LT)
+		if eq_list[pair[ident,variable]](indVariables(Tr,Ip), nil) 
+		where C := () cons_Clause_Pos_L(Tr, S=T, EmptyT, EmptyT, Rf)
+		if neq_list[pair[equationS, clause]](C, nil)
+		where PreR := ()Get_Precond(C)
+		where Pre := (elimRed)PreR
+		where Cc := ()Get_Clauses(C)
+		where st := ()printClause( "caseSplit2PLsimple",[EmptyT,S=T:EmptyT])
+		where pt := ()printE(D*Pre*Cc)
+		//where rt := ()printH(H* [EmptyT,S=T:EmptyT])
+		where rt := ()printH(H)
+	end 
+	[caseSplit2PRsimple]  D*[EmptyT,S=T:EmptyT]#H#L#$f:(Rf) * LR#Ip#Ts => 
+				//D*Pre*Cc#H * [EmptyT,S=T:EmptyT]#L#$f:(Rf) * LR#Ip#Ts
+				D*Cc*Pre#H#L#$f:(Rf) * LR#Ip#Ts
+		where LT := ()getTermsAll($f,T)
+		if neq_list[term](LT, nil) 
+		where Tr := (listExtract) elem(LT)
+		if eq_list[pair[ident,variable]](indVariables(Tr,Ip), nil) 
+		where C := () cons_Clause_Pos_R(Tr, S=T, EmptyT, EmptyT, Rf)
+		if neq_list[pair[equationS, clause]](C, nil)
+		where PreR := ()Get_Precond(C)
+		where Pre := (elimRed)PreR
+		where Cc := ()Get_Clauses(C)
+		where st := ()printClause( "caseSplit2PRsimple",[EmptyT,S=T:EmptyT])
+		where pt := ()printE(D*Pre*Cc)
+		//where rt := ()printH(H* [EmptyT,S=T:EmptyT])
+		where rt := ()printH(H)
+	end 
+
+	[caseSplit2PL]  D*[Np,S=T:Pp]#H#L#$f:(Rf) * LR#Ip#Ts => 
+				D*Cc*Pre#H#L#$f:(Rf) * LR#Ip#Ts
+		where LT := ()getTermsAll($f,S)
+		if neq_list[term](LT, nil) 
+		where Tr := (listExtract) elem(LT)
+		if eq_list[pair[ident,variable]](indVariables(Tr,Ip), nil) 
+		where C := () cons_Clause_Pos_L(Tr, S=T, Np, Pp, Rf)
+		if neq_list[pair[equationS, clause]](C, nil)
+		where PreR := ()Get_Precond(C)
+		where Pre := (elimRed)PreR
+		where Cc := ()Get_Clauses(C)
+		where st := ()printClause( "caseSplit2PL",[Np,S=T:Pp])
+		where pt := ()printE(D*Pre*Cc)
+		where rt := ()printH(H)
+	end 
+	[caseSplit2PR]  D*[Np,S=T:Pp]#H#L#$f:(Rf) * LR#Ip#Ts => 
+				D*Cc*Pre#H#L#$f:(Rf) * LR#Ip#Ts
+		where LT := ()getTermsAll($f,T)
+		if neq_list[term](LT, nil) 
+		where Tr := (listExtract) elem(LT)
+		if eq_list[pair[ident,variable]](indVariables(Tr,Ip), nil) 
+		where C := () cons_Clause_Pos_R(Tr, S=T, Np, Pp, Rf)
+		if neq_list[pair[equationS, clause]](C, nil)
+		where PreR := ()Get_Precond(C)
+		where Pre := (elimRed)PreR
+		where Cc := ()Get_Clauses(C)
+		where st := ()printClause( "caseSplit2PR",[Np,S=T:Pp])
+		where pt := ()printE(D*Pre*Cc)
+		where rt := ()printH(H)
+	end 
+
+
+end
+
+//--------------------------------------------------------------------------------
+//-------- Inductive Simplification ----------------------------------------------
+//--------------------------------------------------------------------------------
+rules for Rez 
+	D, H, L, R, Rf, LR : clause;
+	Ip : indpos;
+	Ts : testset;
+	LT : list[term];
+	C : list[pair[equationS, clause]];
+	Cc, Pre : clause;	
+	Np, Pp, G, GSigma : equationS;
+	S, T, Tr, s, t, tSigma, SSigma, TSigma : term;
+	$f : ident;
+	IP : Rez;
+	matchRez : list[term]; 
+        listVar : list[term];
+	sigma : substitution;
+	pt, rt, st : string;
+global
+	[indSimplififNLsimple]  D*[S=T:Np,Pp]#[EmptyT,s=t:EmptyT]*H#L#R#Ip#Ts => 
+				D*[SSigma=T:Np,Pp]#[EmptyT,s=t:EmptyT]*H#L#R#Ip#Ts
+		if s >rpo t
+		where f := ()head(s)
+		where LT := ()getTermsAll($f,S)
+		if neq_list[term](LT, nil) 
+		where Tr := (listExtract) elem(LT)
+		where listVar :=() unicate(variables_ofLT(s))
+		where matchRez := () builtinSyntacticMatching(s,Tr,listVar,MF)
+		if neq_list[term](matchRez,MF)
+		where sigma := ()system_to_subst(listVar,matchRez)
+		where tSigma := ()apply(sigma,t)
+		//if Tr >rpo tSigma
+		where SSigma := ()replace Tr by tSigma in S	
+		if S.T.nil >mult SSigma.T.nil
+		//where IP := (Ind) [Np,Pp]#[EmptyT,s=t:EmptyT]*H#L#R#Ip#Ts
+		//if eq_clause(getClauses(IP), EmptyC)
+		where st := ()printClause( "indSimplififNLsimple",[S=T:Np,Pp])
+		where pt := ()printE(D*[SSigma=T:Np,Pp])
+		where rt := ()printH([EmptyT,s=t:EmptyT]*H)
+	end 
+	[indSimplififNRsimple]  D*[S=T:Np,Pp]#[EmptyT,s=t:EmptyT]*H#L#R#Ip#Ts => 
+				D*[S=TSigma:Np,Pp]#[EmptyT,s=t:EmptyT]*H#L#R#Ip#Ts
+		if s >rpo t
+		where f := ()head(s)
+		where LT := ()getTermsAll($f,T)
+		if neq_list[term](LT, nil) 
+		where Tr := (listExtract) elem(LT)
+		where listVar :=() unicate(variables_ofLT(s))
+		where matchRez := () builtinSyntacticMatching(s,Tr,listVar,MF)
+		if neq_list[term](matchRez,MF)
+		where sigma := ()system_to_subst(listVar,matchRez)
+		where tSigma := ()apply(sigma,t)
+		//if Tr >rpo tSigma
+		where TSigma := ()replace Tr by tSigma in T	
+		if S.T.nil >mult S.TSigma.nil
+	        //where IP := (Ind) [Np,Pp]#[EmptyT,s=t:EmptyT]*H#L#R#Ip#Ts
+                //if eq_clause(getClauses(IP), EmptyC)
+                 where st := ()printClause("indSimplififNRsimple",[S=T:Np,Pp])
+		where pt := ()printE(D*[S=TSigma:Np,Pp])
+		where rt := ()printH([EmptyT,s=t:EmptyT]*H)
+	end 
+	[indSimplififPLsimple]  D*[Np,S=T:Pp]#[EmptyT,s=t:EmptyT]*H#L#R#Ip#Ts => 
+				D*[Np,SSigma=T:Pp]#[EmptyT,s=t:EmptyT]*H#L#R#Ip#Ts
+		if s >rpo t
+		where f := ()head(s)
+		where LT := ()getTermsAll($f,S)
+		if neq_list[term](LT, nil) 
+		where Tr := (listExtract) elem(LT)
+		where listVar :=() unicate(variables_ofLT(s))
+		where matchRez := () builtinSyntacticMatching(s,Tr,listVar,MF)
+		if neq_list[term](matchRez,MF)
+		where sigma := ()system_to_subst(listVar,matchRez)
+		where tSigma := ()apply(sigma,t)
+		//if Tr >rpo tSigma
+		where SSigma := ()replace Tr by tSigma in S		
+		if S.T.nil >mult SSigma.T.nil
+		//where IP := (Ind) [Np,Pp]#[EmptyT,s=t:EmptyT]*H#L#R#Ip#Ts
+		//if eq_clause(getClauses(IP), EmptyC)
+		where st := ()printClause( "indSimplififPLsimple",[Np,S=T:Pp])
+		where pt := ()printE(D*[Np,SSigma=T:Pp])
+		where rt := ()printH([EmptyT,s=t:EmptyT]*H)
+	end 
+	[indSimplififPRsimple]  D*[Np,S=T:Pp]#[EmptyT,s=t:EmptyT]*H#L#R#Ip#Ts => 
+				D*[Np,S=TSigma:Pp]#[EmptyT,s=t:EmptyT]*H#L#R#Ip#Ts
+		if s >rpo t
+		where f := ()head(s)
+		where LT := ()getTermsAll($f,T)
+		if neq_list[term](LT, nil) 
+		where Tr := (listExtract) elem(LT)
+		where listVar :=() unicate(variables_ofLT(s))
+		where matchRez := () builtinSyntacticMatching(s,Tr,listVar,MF)
+		if neq_list[term](matchRez,MF)
+		where sigma := ()system_to_subst(listVar,matchRez)
+		where tSigma := ()apply(sigma,t)
+		//if Tr >rpo tSigma
+		where TSigma := ()replace Tr by tSigma in T	
+		if S.T.nil >mult S.TSigma.nil		
+		//where IP := (Ind) [Np,Pp]#[EmptyT,s=t:EmptyT]*H#L#R#Ip#Ts
+		//if eq_clause(getClauses(IP), EmptyC)
+		where st := ()printClause( "indSimplififPRsimple",[Np,S=T:Pp])
+		where pt := ()printE(D*[Np,S=TSigma:Pp])
+		where rt := ()printH([EmptyT,s=t:EmptyT]*H)
+	end 
+//--------------------------------------------------------------------------------
+
+	[indSimplififNLH]  D*[S=T:Np,Pp]#[G,s=t:EmptyT]*H#L#R#Ip#Ts => 
+				D*[SSigma=T:Np,Pp]#[G,s=t:EmptyT]*H#L#R#Ip#Ts
+		where f := ()head(s)
+		where LT := ()getTermsAll($f,S)
+		if neq_list[term](LT, nil) 
+		where Tr := (listExtract) elem(LT)
+		where listVar :=() unicate(variables_ofLT(s))
+		where matchRez := () builtinSyntacticMatching(s,Tr,listVar,MF)
+		if neq_list[term](matchRez,MF)
+		where sigma := ()system_to_subst(listVar,matchRez)
+		where tSigma := ()apply(sigma,t)
+		//if Tr >rpo tSigma
+		where GSigma := ()apply(sigma,G)
+		if rpo(Tr, listTerms(GSigma))
+		where SSigma := ()replace Tr by tSigma in S		
+		if S.T.nil >mult SSigma.T.nil
+		where IP := (Ind) [Np,GSigma:Pp]#[G,s=t:EmptyT]*H#L#R#Ip#Ts
+		if eq_clause(getClauses(IP), EmptyC)
+		where st := ()printClause( "indSimplififNLH",[S=T:Np,Pp])
+		where pt := ()printE(D*[SSigma=T:Np,Pp])
+		where rt := ()printH([G,s=t:EmptyT]*H)
+	end 
+	[indSimplififNRH]  D*[S=T:Np,Pp]#[G,s=t:EmptyT]*H#L#R#Ip#Ts => 
+				D*[S=TSigma:Np,Pp]#[G,s=t:EmptyT]*H#L#R#Ip#Ts
+		where f := ()head(s)
+		where LT := ()getTermsAll($f,T)
+		if neq_list[term](LT, nil) 
+		where Tr := (listExtract) elem(LT)
+		where listVar :=() unicate(variables_ofLT(s))
+		where matchRez := () builtinSyntacticMatching(s,Tr,listVar,MF)
+		if neq_list[term](matchRez,MF)
+		where sigma := ()system_to_subst(listVar,matchRez)
+		where tSigma := ()apply(sigma,t)
+		//if Tr >rpo tSigma
+		where GSigma := ()apply(sigma,G)
+		if rpo(Tr, listTerms(GSigma))
+		where TSigma := ()replace Tr by tSigma in T	
+		if S.T.nil >mult S.TSigma.nil		
+		where IP := (Ind) [Np,GSigma:Pp]#[G,s=t:EmptyT]*H#L#R#Ip#Ts
+		if eq_clause(getClauses(IP), EmptyC)
+		where st := ()printClause( "indSimplififNRH",[S=T:Np,Pp])
+		where pt := ()printE(D*[S=TSigma:Np,Pp])
+		where rt := ()printH([G,s=t:EmptyT]*H)
+	end 
+	[indSimplififPLH]  D*[Np,S=T:Pp]#[G,s=t:EmptyT]*H#L#R#Ip#Ts => 
+				D*[Np,SSigma=T:Pp]#[G,s=t:EmptyT]*H#L#R#Ip#Ts
+		where f := ()head(s)
+		where LT := ()getTermsAll($f,S)
+		if neq_list[term](LT, nil) 
+		where Tr := (listExtract) elem(LT)
+		where listVar :=() unicate(variables_ofLT(s))
+		where matchRez := () builtinSyntacticMatching(s,Tr,listVar,MF)
+		if neq_list[term](matchRez,MF)
+		where sigma := ()system_to_subst(listVar,matchRez)
+		where tSigma := ()apply(sigma,t)
+		//if Tr >rpo tSigma
+		where GSigma := ()apply(sigma,G)
+		if rpo(Tr, listTerms(GSigma))
+		where SSigma := ()replace Tr by tSigma in S		
+		if S.T.nil >mult SSigma.T.nil	
+		where IP := (Ind) [Np,GSigma:Pp]#[G,s=t:EmptyT]*H#L#R#Ip#Ts
+		if eq_clause(getClauses(IP), EmptyC)
+		where st := ()printClause( "indSimplififPLH",[Np,S=T:Pp])
+		where pt := ()printE(D*[Np,SSigma=T:Pp])
+		where rt := ()printH([G,s=t:EmptyT]*H)
+	end 
+	[indSimplififPRH]  D*[Np,S=T:Pp]#[G,s=t:EmptyT]*H#L#R#Ip#Ts => 
+				D*[Np,S=TSigma:Pp]#[G,s=t:EmptyT]*H#L#R#Ip#Ts
+		where f := ()head(s)
+		where LT := ()getTermsAll($f,T)
+		if neq_list[term](LT, nil) 
+		where Tr := (listExtract) elem(LT)
+		where listVar :=() unicate(variables_ofLT(s))
+		where matchRez := () builtinSyntacticMatching(s,Tr,listVar,MF)
+		if neq_list[term](matchRez,MF)
+		where sigma := ()system_to_subst(listVar,matchRez)
+		where tSigma := ()apply(sigma,t)
+		//if Tr >rpo tSigma
+		where GSigma := ()apply(sigma,G)
+		if rpo(Tr, listTerms(GSigma))
+		where TSigma := ()replace Tr by tSigma in T	
+		if S.T.nil >mult S.TSigma.nil		
+		where IP := (Ind) [Np,GSigma:Pp]#[G,s=t:EmptyT]*H#L#R#Ip#Ts
+		if eq_clause(getClauses(IP), EmptyC)
+		where st := ()printClause( "indSimplififPRH",[Np,S=T:Pp])
+		where pt := ()printE(D*[Np,S=TSigma:Pp])
+		where rt := ()printH([G,s=t:EmptyT]*H)
+	end 
+//--------------------------------------------------------------------------------------
+	[indSimplififNLR]  D*[S=T:Np,Pp]#H#L#$f:([G,s=t:EmptyT]*R)*LR#Ip#Ts => 
+				D*[SSigma=T:Np,Pp]#H#L#$f:([G,s=t:EmptyT]*R)*LR#Ip#Ts
+		where LT := ()getTermsAll($f,S)
+		if neq_list[term](LT, nil) 
+		where Tr := (listExtract) elem(LT)
+		where listVar :=() unicate(variables_ofLT(s))
+		where matchRez := () builtinSyntacticMatching(s,Tr,listVar,MF)
+		if neq_list[term](matchRez,MF)
+		where sigma := ()system_to_subst(listVar,matchRez)
+		where tSigma := ()apply(sigma,t)
+		//if Tr >rpo tSigma
+		where GSigma := ()apply(sigma,G)
+		where SSigma := ()replace Tr by tSigma in S		
+		if S.T.nil >mult SSigma.T.nil	
+		where IP := (Ind) [Np,GSigma:Pp]#[G,s=t:EmptyT]*H#L#R#Ip#Ts
+		if eq_clause(getClauses(IP), EmptyC)
+		where st := ()printClause( "indSimplififNLR",[S=T:Np,Pp])
+		where pt := ()printE(D*[SSigma=T:Np,Pp])
+		where rt := ()printH(H)
+	end 
+	[indSimplififNRR]  D*[S=T:Np,Pp]#H#L#$f:([G,s=t:EmptyT]*R)*LR#Ip#Ts => 
+				D*[S=TSigma:Np,Pp]#H#L#$f:([G,s=t:EmptyT]*R)*LR#Ip#Ts
+		where LT := ()getTermsAll($f,T)
+		if neq_list[term](LT, nil) 
+		where Tr := (listExtract) elem(LT)
+		where listVar :=() unicate(variables_ofLT(s))
+		where matchRez := () builtinSyntacticMatching(s,Tr,listVar,MF)
+		if neq_list[term](matchRez,MF)
+		where sigma := ()system_to_subst(listVar,matchRez)
+		where tSigma := ()apply(sigma,t)
+		//if Tr >rpo tSigma
+		where GSigma := ()apply(sigma,G)
+		where TSigma := ()replace Tr by tSigma in T	
+		if S.T.nil >mult S.TSigma.nil		
+		where IP := (Ind) [Np,GSigma:Pp]#[G,s=t:EmptyT]*H#L#R#Ip#Ts
+		if eq_clause(getClauses(IP), EmptyC)
+		where st := ()printClause( "indSimplififNRR",[S=T:Np,Pp])
+		where pt := ()printE(D*[S=TSigma:Np,Pp])
+		where rt := ()printH(H)
+	end 
+	[indSimplififPLR]  D*[Np,S=T:Pp]#H#L#$f:([G,s=t:EmptyT]*R)*LR#Ip#Ts => 
+				D*[Np,SSigma=T:Pp]#H#L#$f:([G,s=t:EmptyT]*R)*LR#Ip#Ts
+		where LT := ()getTermsAll($f,S)
+		if neq_list[term](LT, nil) 
+		where Tr := (listExtract) elem(LT)
+		where listVar :=() unicate(variables_ofLT(s))
+		where matchRez := () builtinSyntacticMatching(s,Tr,listVar,MF)
+		if neq_list[term](matchRez,MF)
+		where sigma := ()system_to_subst(listVar,matchRez)
+		where tSigma := ()apply(sigma,t)
+		//if Tr >rpo tSigma
+		where GSigma := ()apply(sigma,G)
+		where SSigma := ()replace Tr by tSigma in S		
+		if S.T.nil >mult SSigma.T.nil	
+		where IP := (Ind) [Np,GSigma:Pp]#[G,s=t:EmptyT]*H#L#R#Ip#Ts
+		if eq_clause(getClauses(IP), EmptyC)
+		where st := ()printClause( "indSimplififPLR",[Np,S=T:Pp])
+		where pt := ()printE(D*[Np,SSigma=T:Pp])
+		where rt := ()printH(H)
+	end 
+	[indSimplififPRR]  D*[Np,S=T:Pp]#H#L#$f:([G,s=t:EmptyT]*R)*LR#Ip#Ts => 
+				D*[Np,S=TSigma:Pp]#H#L#$f:([G,s=t:EmptyT]*R)*LR#Ip#Ts
+		where LT := ()getTermsAll($f,T)
+		if neq_list[term](LT, nil) 
+		where Tr := (listExtract) elem(LT)
+		where listVar :=() unicate(variables_ofLT(s))
+		where matchRez := () builtinSyntacticMatching(s,Tr,listVar,MF)
+		if neq_list[term](matchRez,MF)
+		where sigma := ()system_to_subst(listVar,matchRez)
+		where tSigma := ()apply(sigma,t)
+		//if Tr >rpo tSigma
+		where GSigma := ()apply(sigma,G)
+		where TSigma := ()replace Tr by tSigma in T	
+		if S.T.nil >mult S.TSigma.nil		
+		where IP := (Ind) [Np,GSigma:Pp]#[G,s=t:EmptyT]*H#L#R#Ip#Ts
+		if eq_clause(getClauses(IP), EmptyC)
+		where st := ()printClause( "indSimplififPRR",[Np,S=T:Pp])
+		where pt := ()printE(D*[Np,S=TSigma:Pp])
+		where rt := ()printH(H)
+	end 
+//--------------------------------------------------------------------------------
+
+	[indSimplififNLE]  [G,s=t:EmptyT]*D*[S=T:Np,Pp]#H#L#R#Ip#Ts => 
+				[G,s=t:EmptyT]*D*[SSigma=T:Np,Pp]#H#L#R#Ip#Ts
+		where f := ()head(s)
+		where LT := ()getTermsAll($f,S)
+		if neq_list[term](LT, nil) 
+		where Tr := (listExtract) elem(LT)
+		where listVar :=() unicate(variables_ofLT(s))
+		where matchRez := () builtinSyntacticMatching(s,Tr,listVar,MF)
+		if neq_list[term](matchRez,MF)
+		where sigma := ()system_to_subst(listVar,matchRez)
+		where tSigma := ()apply(sigma,t)
+		//if Tr >rpo tSigma
+		where GSigma := ()apply(sigma,G)
+		if rpo(Tr, listTerms(GSigma))
+		where SSigma := ()replace Tr by tSigma in S		
+		if S.T.nil >mult SSigma.T.nil	
+		where IP := (Ind) [Np,GSigma:Pp]#[G,s=t:EmptyT]*H#L#R#Ip#Ts
+		if eq_clause(getClauses(IP), EmptyC)
+		where st := ()printClause( "indSimplififNLE",[S=T:Np,Pp])
+		where pt := ()printE([G,s=t:EmptyT]*D*[SSigma=T:Np,Pp])
+		where rt := ()printH(H)
+	end 
+	[indSimplififNRE]  [G,s=t:EmptyT]*D*[S=T:Np,Pp]#H#L#R#Ip#Ts => 
+				[G,s=t:EmptyT]*D*[S=TSigma:Np,Pp]#H#L#R#Ip#Ts
+		where f := ()head(s)
+		where LT := ()getTermsAll($f,T)
+		if neq_list[term](LT, nil) 
+		where Tr := (listExtract) elem(LT)
+		where listVar :=() unicate(variables_ofLT(s))
+		where matchRez := () builtinSyntacticMatching(s,Tr,listVar,MF)
+		if neq_list[term](matchRez,MF)
+		where sigma := ()system_to_subst(listVar,matchRez)
+		where tSigma := ()apply(sigma,t)
+		//if Tr >rpo tSigma
+		where GSigma := ()apply(sigma,G)
+		if rpo(Tr, listTerms(GSigma))
+		where TSigma := ()replace Tr by tSigma in T	
+		if S.T.nil >mult S.TSigma.nil		
+		where IP := (Ind) [Np,GSigma:Pp]#[G,s=t:EmptyT]*H#L#R#Ip#Ts
+		if eq_clause(getClauses(IP), EmptyC)
+		where st := ()printClause( "indSimplififNRE",[S=T:Np,Pp])
+		where pt := ()printE([G,s=t:EmptyT]*D*[S=TSigma:Np,Pp])
+		where rt := ()printH(H)
+	end 
+	[indSimplififPLE]  [G,s=t:EmptyT]*D*[Np,S=T:Pp]#H#L#R#Ip#Ts => 
+				[G,s=t:EmptyT]*D*[Np,SSigma=T:Pp]#H#L#R#Ip#Ts
+		where f := ()head(s)
+		where LT := ()getTermsAll($f,S)
+		if neq_list[term](LT, nil) 
+		where Tr := (listExtract) elem(LT)
+		where listVar :=() unicate(variables_ofLT(s))
+		where matchRez := () builtinSyntacticMatching(s,Tr,listVar,MF)
+		if neq_list[term](matchRez,MF)
+		where sigma := ()system_to_subst(listVar,matchRez)
+		where tSigma := ()apply(sigma,t)
+		//if Tr >rpo tSigma
+		where GSigma := ()apply(sigma,G)
+		if rpo(Tr, listTerms(GSigma))
+		where SSigma := ()replace Tr by tSigma in S		
+		if S.T.nil >mult SSigma.T.nil	
+		where IP := (Ind) [Np,GSigma:Pp]#[G,s=t:EmptyT]*H#L#R#Ip#Ts
+		if eq_clause(getClauses(IP), EmptyC)
+		where st := ()printClause( "indSimplififPLE",[Np,S=T:Pp])
+		where pt := ()printE([G,s=t:EmptyT]*D*[Np,SSigma=T:Pp])
+		where rt := ()printH(H)
+	end 
+	[indSimplififPRE]  [G,s=t:EmptyT]*D*[Np,S=T:Pp]#H#L#R#Ip#Ts => 
+				[G,s=t:EmptyT]*D*[Np,S=TSigma:Pp]#H#L#R#Ip#Ts
+		where f := ()head(s)
+		where LT := ()getTermsAll($f,T)
+		if neq_list[term](LT, nil) 
+		where Tr := (listExtract) elem(LT)
+		where listVar :=() unicate(variables_ofLT(s))
+		where matchRez := () builtinSyntacticMatching(s,Tr,listVar,MF)
+		if neq_list[term](matchRez,MF)
+		where sigma := ()system_to_subst(listVar,matchRez)
+		where tSigma := ()apply(sigma,t)
+		//if Tr >rpo tSigma
+		where GSigma := ()apply(sigma,G)
+		if rpo(Tr, listTerms(GSigma))
+		where TSigma := ()replace Tr by tSigma in T		
+		if S.T.nil >mult S.TSigma.nil	
+		where IP := (Ind) [Np,GSigma:Pp]#[G,s=t:EmptyT]*H#L#R#Ip#Ts
+		if eq_clause(getClauses(IP), EmptyC)
+		where st := ()printClause( "indSimplififPRE",[Np,S=T:Pp])
+		where pt := ()printE([G,s=t:EmptyT]*D*[Np,S=TSigma:Pp])
+		where rt := ()printH(H)
+	end 
+//--------------------------------------------------------------------------------
+
+	[indSimplififNLL]  D*[S=T:Np,Pp]#H#[G,s=t:EmptyT]*L#R#Ip#Ts => 
+				D#H#[G,s=t:EmptyT]*L#R#Ip#Ts
+		where f := ()head(s)
+		where LT := ()getTermsAll($f,S)
+		if neq_list[term](LT, nil) 
+		where Tr := (listExtract) elem(LT)
+		where listVar :=() unicate(variables_ofLT(s))
+		where matchRez := () builtinSyntacticMatching(s,Tr,listVar,MF)
+		if neq_list[term](matchRez,MF)
+		where sigma := ()system_to_subst(listVar,matchRez)
+		where tSigma := ()apply(sigma,t)
+		//if Tr >rpo tSigma
+		where GSigma := ()apply(sigma,G)
+		if rpo(Tr, listTerms(GSigma))
+		where SSigma := ()replace Tr by tSigma in S		
+		if S.T.nil >mult SSigma.T.nil
+		where IP := (Ind) [Np,GSigma:Pp]#[G,s=t:EmptyT]*H#L#R#Ip#Ts
+		if eq_clause(getClauses(IP), EmptyC)
+		where st := ()printClause( "indSimplififNLL",[S=T:Np,Pp])
+		where pt := ()printE(D*[SSigma=T:Np,Pp])
+		where rt := ()printH(H)
+	end 
+	[indSimplififNRL]  D*[S=T:Np,Pp]#H#[G,s=t:EmptyT]*L#R#Ip#Ts => 
+				D*[S=TSigma:Np,Pp]#H#[G,s=t:EmptyT]*L#R#Ip#Ts
+		where f := ()head(s)
+		where LT := ()getTermsAll($f,T)
+		if neq_list[term](LT, nil) 
+		where Tr := (listExtract) elem(LT)
+		where listVar :=() unicate(variables_ofLT(s))
+		where matchRez := () builtinSyntacticMatching(s,Tr,listVar,MF)
+		if neq_list[term](matchRez,MF)
+		where sigma := ()system_to_subst(listVar,matchRez)
+		where tSigma := ()apply(sigma,t)
+		//if Tr >rpo tSigma
+		where GSigma := ()apply(sigma,G)
+		if rpo(Tr, listTerms(GSigma))
+		where TSigma := ()replace Tr by tSigma in T	
+		if S.T.nil >mult S.TSigma.nil		
+		where IP := (Ind) [Np,GSigma:Pp]#[G,s=t:EmptyT]*H#L#R#Ip#Ts
+		if eq_clause(getClauses(IP), EmptyC)
+		where st := ()printClause( "indSimplififNRL",[S=T:Np,Pp])
+		where pt := ()printE(D*[S=TSigma:Np,Pp])
+		where rt := ()printH(H)
+	end 
+	[indSimplififPLL]  D*[Np,S=T:Pp]#H#[G,s=t:EmptyT]*L#R#Ip#Ts => 
+				D*[Np,SSigma=T:Pp]#H#[G,s=t:EmptyT]*L#R#Ip#Ts
+		where f := ()head(s)
+		where LT := ()getTermsAll($f,S)
+		if neq_list[term](LT, nil) 
+		where Tr := (listExtract) elem(LT)
+		where listVar :=() unicate(variables_ofLT(s))
+		where matchRez := () builtinSyntacticMatching(s,Tr,listVar,MF)
+		if neq_list[term](matchRez,MF)
+		where sigma := ()system_to_subst(listVar,matchRez)
+		where tSigma := ()apply(sigma,t)
+		//if Tr >rpo tSigma
+		where GSigma := ()apply(sigma,G)
+		if rpo(Tr, listTerms(GSigma))
+		where SSigma := ()replace Tr by tSigma in S		
+		if S.T.nil >mult SSigma.T.nil	
+		where IP := (Ind) [Np,GSigma:Pp]#[G,s=t:EmptyT]*H#L#R#Ip#Ts
+		if eq_clause(getClauses(IP), EmptyC)
+		where st := ()printClause( "indSimplififPLL",[Np,S=T:Pp])
+		where pt := ()printE(D*[Np,SSigma=T:Pp])
+		where rt := ()printH(H)
+	end 
+	[indSimplififPRL]  D*[Np,S=T:Pp]#H#[G,s=t:EmptyT]*L#R#Ip#Ts => 
+				D*[Np,S=TSigma:Pp]#H#[G,s=t:EmptyT]*L#R#Ip#Ts
+		where f := ()head(s)
+		where LT := ()getTermsAll($f,T)
+		if neq_list[term](LT, nil) 
+		where Tr := (listExtract) elem(LT)
+		where listVar :=() unicate(variables_ofLT(s))
+		where matchRez := () builtinSyntacticMatching(s,Tr,listVar,MF)
+		if neq_list[term](matchRez,MF)
+		where sigma := ()system_to_subst(listVar,matchRez)
+		where tSigma := ()apply(sigma,t)
+		//if Tr >rpo tSigma
+		where GSigma := ()apply(sigma,G)
+		if rpo(Tr, listTerms(GSigma))
+		where TSigma := ()replace Tr by tSigma in T	
+		if S.T.nil >mult S.TSigma.nil		
+		where IP := (Ind) [Np,GSigma:Pp]#[G,s=t:EmptyT]*H#L#R#Ip#Ts
+		if eq_clause(getClauses(IP), EmptyC)
+		where st := ()printClause( "indSimplififPRL",[Np,S=T:Pp])
+		where pt := ()printE(D*[Np,S=TSigma:Pp])
+		where rt := ()printH(H)
+	end 
+//--------------------------------------------------------------------------------
+end
+
+//--------------------------------------------------------------------------------
+//-------- Generate 1 ------------------------------------------------------------
+//--------------------------------------------------------------------------------
+rules for Rez 
+	D, H, L, R, Cc, CcNo : clause;
+	Ip : indpos;
+	Ts : testset;
+	S, T : term;
+	liv, lis, lit : list[pair[ident,variable]];
+	k : int;
+	lsi : list[substitution];
+	Np, Pp : equationS;
+	pt, qt, rt, st, tt : string;
+global
+	[generate1]  D*[EmptyT,S=T:EmptyT]#H#L#R#Ip#Ts => 
+				D*Cc#H * [EmptyT,replaceVars(S=T):EmptyT]#L#R#Ip#Ts
+		if S >rpo T
+		//where lis := ()indVariables(S, Ip)
+		//where lit := ()indVariables(T, Ip)
+		//where liv := () unicate(lis @ lit)
+		where liv := ()unicate(indVariables(S, Ip))
+		if neq_list[pair[ident,variable]](liv,nil)
+		where k := () maxVar(listVariables(D*[EmptyT,S=T:EmptyT]),1)
+		where lsi := () makeSubst(freshVars(k, makeGroup(liv, Ts)))
+		if neq_list[substitution](lsi, nil)
+		where qt := ()print( "************ generate1 ************\n")
+		where CcNo := () allClausesPL(lsi, EmptyT, S=T:EmptyT, D#H#L#R#Ip#Ts)  
+		//if neq_clause(CcNo, FailC)
+		if not occurs FailC in CcNo
+		where Cc := () OrderNp(CcNo)
+		where rt := ()print( "***********************************\n")
+		where st := ()printClause( "generate1",[EmptyT,S=T:EmptyT])
+		where pt := ()printE(D*Cc)
+		where tt := ()printH(H * [EmptyT,replaceVars(S=T):EmptyT])
+	end 
+
+	[generate1s]  D*[EmptyT,S=T:EmptyT]#H#L#R#Ip#Ts => 
+				D*Cc#H * [EmptyT,replaceVars(T=S):EmptyT]#L#R#Ip#Ts
+		if T >rpo S
+		//where lis := ()indVariables(S, Ip)
+		//where lit := ()indVariables(T, Ip)
+		//where liv := () unicate(lis @ lit)
+		where liv := ()unicate(indVariables(S, Ip))
+		if neq_list[pair[ident,variable]](liv,nil)
+		where k := () maxVar(listVariables(D*[EmptyT,S=T:EmptyT]),1)
+		where lsi := () makeSubst(freshVars(k, makeGroup(liv, Ts)))
+		if neq_list[substitution](lsi, nil)
+		where qt := ()print( "************ generate1s ************\n")
+		where CcNo := () allClausesPL(lsi, EmptyT, T=S:EmptyT, D#H#L#R#Ip#Ts)  
+		//if neq_clause(CcNo, FailC)
+		if not occurs FailC in CcNo
+		where Cc := () OrderNp(CcNo)
+		where rt := ()print( "************************************\n")
+		where st := ()printClause( "generate1s",[EmptyT,S=T:EmptyT])
+		where pt := ()printE(D*Cc)
+		where tt := ()printH(H * [EmptyT,replaceVars(T=S):EmptyT])
+	end 
+
+	[generate2]  D*[EmptyT,S=T:EmptyT]#H#L#R#Ip#Ts => 
+				D*Cc#H * [EmptyT,replaceVars(S=T):EmptyT]#L#R#Ip#Ts
+		if not(S >rpo T) and not(T >rpo S)
+		//where lis := ()indVariables(S, Ip)
+		//where lit := ()indVariables(T, Ip)
+		//where liv := () unicate(lis @ lit)
+		where liv := ()unicate(indVariables(S, Ip))
+		if neq_list[pair[ident,variable]](liv,nil)
+		where k := () maxVar(listVariables(D*[EmptyT,S=T:EmptyT]),1)
+		where lsi := () makeSubst(freshVars(k, makeGroup(liv, Ts)))
+		if neq_list[substitution](lsi, nil)
+		where qt := ()print( "************ generate2 ************\n")
+		where CcNo := () allClausesPLR(lsi, EmptyT, S=T:EmptyT, D#H#L#R#Ip#Ts)  
+		//if neq_clause(CcNo, FailC)
+		if not occurs FailC in CcNo
+		where Cc := () OrderNp(CcNo)
+		where rt := ()print( "**********************************\n")
+		where st := ()printClause( "generate2",[EmptyT,S=T:EmptyT])
+		where pt := ()printE(D*Cc)
+		where tt := ()printH(H * [EmptyT,replaceVars(S=T):EmptyT])
+	end 
+
+	[generate3]  D*[Np,Pp]#H#L#R#Ip#Ts => 
+				D*Cc#H * replaceVars([Np,Pp])#L#R#Ip#Ts
+		where liv := ()unicate(indVariables([Np,Pp], Ip))
+		if neq_list[pair[ident,variable]](liv,nil)
+		where k := () maxVar(listVariables(D*[Np,Pp]),1)
+		where lsi := () makeSubst(freshVars(k, makeGroup(liv, Ts)))
+		if neq_list[substitution](lsi, nil)
+		where qt := ()print( "************ generate3 ************\n")
+		where CcNo := () allClausesNPLR(lsi, Np, Pp, D#H#L#R#Ip#Ts) 
+		//if neq_clause(CcNo, FailC)
+		if not occurs FailC in CcNo
+		where Cc := () OrderNp(CcNo)
+		where rt := ()print( "**********************************\n")
+		where st := ()printClause( "generate3",[Np,Pp])
+		where pt := ()printE(D*Cc)
+		where tt := ()printH(H * replaceVars([Np,Pp]))
+	end 
+end
+
+//--------------------------------------------------------------------------------
+//-------- Death -----------------------------------------------------------------
+//--------------------------------------------------------------------------------
+
+rules for Rez
+	D, H, L, R, LR : clause;
+	Ip : indpos;
+	Ts : testset;
+global
+	[death]	EmptyC#H#L#R#Ip#Ts => EmptyC#H#L#R#Ip#Ts
+	end
+	[deathTotal]	EmptyC#H#L#R#Ip#Ts => FailC#H#L#R#Ip#Ts
+	end
+
+end
+
+//--------------------------------------------------------------------------------
+//-------- Simplification --------------------------------------------------------
+//--------------------------------------------------------------------------------
+
+rules for Rez
+	D, H, L, R, LR : clause;
+	Ip : indpos;
+	Ts : testset;	
+	E, Np, Pp : equationS;
+	S : term;
+	u:equationS;
+	f : ident;
+global
+	[simplify]	D*[u:EmptyT,Pp]#H#L#R#Ip#Ts => D*[u,Pp]#H#L#R#Ip#Ts
+	end
+	[simplify]	D*[Np,u:EmptyT]#H#L#R#Ip#Ts => D*[Np,u]#H#L#R#Ip#Ts
+	end
+	[simplify]	D#H#L#$f:(R*[u:EmptyT,Pp])*LR#Ip#Ts => D#H#L#$f:(R*[u,Pp])*LR#Ip#Ts
+	end
+	[simplify]	D#H#L#$f:(R*[Np,u:EmptyT])*LR#Ip#Ts => D#H#L#$f:(R*[Np,u])*LR#Ip#Ts
+	end
+
+	[simplify]	D*EmptyC#H#L#R#Ip#Ts	=> D#H#L#R#Ip#Ts
+	end
+	[simplify]	D#H#L#R*EmptyC#Ip#Ts	=> D#H#L#R#Ip#Ts
+	end
+end
+
+//--------------------------------------------------------------------------------
+//-------- Ind Pos --------------------------------------------------------
+//--------------------------------------------------------------------------------
+
+rules for Rez
+	Ip : indpos;
+	Ts : testset;
+	C : clause;	
+global
+	[tsRule]	Ts	 => Ts
+	end
+	[ipRule]	Ip	 => Ip
+	end
+	[clRule]	C	 => C
+	end
+end
+
+//-----------------------------------------------------------------------------
+//-------------------- Deductive part -----------------------------------------
+
+strategies  for clause
+implicit
+	[] elimRed => repeat*(elimR)
+	end
+end
+strategies  for clause
+implicit
+	[] subsumeStrat => dc one(nla)
+	end
+end
+
+
+strategies  for Rez
+implicit
+
+/****************** Ilies ***********************************************/
+
+	[] OneStepRewPL => dc one(	
+				dc one(tautology1,tautology2)
+				,dc one(
+					dk(indSimplififPLR,dk(indSimplififPLE), 
+					dk(indSimplififPLsimple), dk(indSimplififPLH), 
+					dk(indSimplififPLL)
+				)
+				,dc one(dk(caseSplit2PLsimple), dk(caseSplit2PL) ))
+			)
+	end
+	[] OneStepRewPLR => dc one(	
+				dc one(tautology1,tautology2)
+				,dc one(
+					dk(indSimplififPLR), dk(indSimplififPRR),
+					dk(indSimplififPLE), dk(indSimplififPRE),
+					dk(indSimplififPLsimple), 
+					dk(indSimplififPRsimple),
+					dk(indSimplififPLH), dk(indSimplififPRH),
+					dk(indSimplififPLL), dk(indSimplififPRL)
+				)
+				,dc one( dk(caseSplit2PLsimple), dk(caseSplit2PRsimple),
+				 	dk(caseSplit2PL), dk(caseSplit2PL))
+			)
+	end
+	[] OneStepRewNPLR => dc one(	
+				dc one(tautology1,tautology2)
+				,dc one(
+					dk(indSimplififNLR), dk(indSimplififNRR),
+					dk(indSimplififPLR), dk(indSimplififPRR),
+					dk(indSimplififNLE), dk(indSimplififNRE),
+					dk(indSimplififPLE), dk(indSimplififPRE),
+					dk(indSimplififNLsimple), 
+					dk(indSimplififNRsimple),
+					dk(indSimplififPLsimple), 
+					dk(indSimplififPRsimple),
+					dk(indSimplififNLH), dk(indSimplififNRH),
+					dk(indSimplififPLH), dk(indSimplififPRH),
+					dk(indSimplififNLL), dk(indSimplififNRL),
+					dk(indSimplififPLL), dk(indSimplififPRL)
+				)
+				,dc one(dk(caseSplit2PLsimple), dk(caseSplit2PRsimple),
+					dk(caseSplit2NL), dk(caseSplit2NR),
+					dk(caseSplit2PL), dk(caseSplit2PL))
+			)
+	end
+
+	[] rulesetdelete => dc one(dk(tautology1),dk(tautology2),
+				//dk(subsumeG),
+				dk(subsume1),dk(subsume2),//dk(subsume2l),dk(subsume3),
+				dk(subsume4),dk(subsume5),//dk(subsume5l),dk(subsume6),
+				dk(subsume7),dk(subsume8),//dk(subsume8l),dk(subsume9),
+				dk(subsume10),dk(subsume11),//dk(subsume11l),dk(subsume12),
+				dk(subsume21),dk(subsume22),//dk(subsume22l),dk(subsume23),
+				dk(negClash))
+	end
+	[]rec_strat_rew => repeat*(rulesetdelete)
+	end
+	[] rulesetdecomp => dc one(dk(posDecomposition),dk(negDecomposition),
+					dk(posClash))
+	end
+	[] rulesetcleaning => dc one(clean,enre,epre,etriv)
+	end
+	[] rewrite => dc one(
+			dc one(
+				dk(indSimplififNLR),
+				dk(indSimplififNRR), 
+				dk(indSimplififPLR),
+				dk(indSimplififPRR), 
+				dk(indSimplififNLE), 
+				dk(indSimplififNRE), 
+				dk(indSimplififPLE),
+				dk(indSimplififPRE),
+				dk(indSimplififNLH),
+				dk(indSimplififNRH), 
+				dk(indSimplififPLH),
+				dk(indSimplififPRH), 
+				dk(indSimplififNLsimple),
+				dk(indSimplififPLsimple),
+				dk(indSimplififNRsimple),
+				dk(indSimplififPRsimple), 
+				dk(indSimplififNLL), 
+				dk(indSimplififNRL), 
+				dk(indSimplififPLL),
+				dk(indSimplififPRL)
+				),
+			dc one(	dk(caseSplit2PLsimple), dk(caseSplit2PRsimple),
+				dk(caseSplit2NL), dk(caseSplit2NR),
+				dk(caseSplit2PL), dk(caseSplit2PL))
+		  )
+	end
+
+	[] Ind => dc one(
+		dc one(death),
+		repeat*( repeat*( dc one(rulesetdelete, rulesetcleaning, rulesetdecomp, 
+					dk(complement)))
+			;dc one(rewrite, 
+				dc one( dk(generate1), dk(generate1s), 
+					dk(generate2),dk(generate3)),
+				dc one(deathTotal))
+		))
+	end
+
+
+	[] StratDed => dc one(
+			dc one(r1)
+			//------------------------------------------------
+			//;IndRepeat
+			;Ind
+			//------------------------------------------------
+			//;repeat*(dc one(simplify))
+		       ,
+			dc one(r2)
+			//------------------------------------------------
+			//;IndRepeat
+			;Ind
+			//------------------------------------------------
+			//;repeat*(dc one(simplify))
+		       )
+			
+	end
+	[] tsStrat => dc one(tsRule)	
+	end
+	[] ipStrat => dc one(ipRule)	
+	end
+	[] clStrat => dc one(clRule)	
+	end
+end
+
+//--------------------------------------------------------------------------------------
+//--------- Choose the rule according to the type of the argument ----------------------
+//--------------------------------------------------------------------------------------
+
+strategies  for Rez
+implicit
+	[] mainStrat  =>  dc one(
+
+	// for EXEC
+	FOR EACH F:ident
+	SUCH THAT F:=(listExtract) elem(sorts) :{
+		dc one(mainRule_F),
+	}
+	StratDed
+	,tsStrat
+	,ipStrat
+	,clStrat
+	)
+	end
+end
+
+//--------------------------------------------------------------------------------------
+
+end

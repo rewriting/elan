@@ -1,0 +1,125 @@
+#!/bin/tcsh -f
+
+unset noclobber
+
+#
+# ELAN library
+#
+#set ELAN=$ELANLIB/..
+
+#
+# COLETTE sources
+#
+set SOURCE=$COLETTE/ARITY_$1_$2/src
+echo "Sources directory:" $SOURCE
+
+#
+# Search ELAN file name containing definition of the specified strategy
+#
+set file = `fgrep $3 $SOURCE/*.eln | fgrep bs | sed "s/\/*[^\/]*\///g" | sed "s/[\.]eln://" `
+echo "ELAN file containing definition of the specified strategy:" $file[1]".eln"
+
+#
+# Search line in ELAN file containing definition of the specified strategy
+#
+set sort = `fgrep $3 $SOURCE/$file[1].eln | fgrep bs`
+echo "Sort of the strategy:" $sort[4]
+
+#
+# Creation of colette.eln file, in the current directory, that 
+# imports ELAN file containing definition of the strategy
+#
+echo "module colette[Variables,Type,Values]" > colette.eln
+echo "" >> colette.eln
+echo "import" >> colette.eln
+echo "global" >> colette.eln
+echo "	$file[1][Variables,Type,Values]" >> colette.eln
+echo "	;" >> colette.eln
+echo "end" >> colette.eln
+echo "" >> colette.eln
+echo "end" >> colette.eln
+
+
+#
+# Creation of colette.lgi file, in the current directory, that
+# defines query and result type according to the specified strategy
+#
+echo "LPL colette description" > colette.lgi
+echo "" >> colette.lgi
+echo "specification description" >> colette.lgi
+echo "" >> colette.lgi
+echo "	part Variables	of sort list[identifier]" >> colette.lgi
+echo "	import		sigSyntax" >> colette.lgi
+echo "" >> colette.lgi
+echo "	part Values	of sort domain " >> colette.lgi
+echo "	import		IntegerDomain" >> colette.lgi
+echo "end" >> colette.lgi
+echo "" >> colette.lgi
+
+
+echo "	query		of sort $sort[4]" >> colette.lgi
+echo "	result		of sort $sort[4]" >> colette.lgi
+echo "	import		colette[Variables,int,Values]" >> colette.lgi
+echo "	start with ($3) query" >> colette.lgi
+echo "end" >> colette.lgi
+
+
+if ($sort[4] == csp) then 
+	echo "CreateCSP("  > colette.dat
+	grep -v "end" $6 | grep -v "*" >> colette.dat
+ 	echo ")"  >> colette.dat
+	echo "end" >> colette.dat
+else if ($sort[4] == csop) then
+	echo "CreateCSOP("  > colette.dat
+	grep -v "end" $6 | grep -v "*" >> colette.dat
+ 	echo ")"  >> colette.dat
+	echo "end" >> colette.dat
+else if ($sort[4] == cspII) then
+	echo "CreateCSPII("  > colette.dat
+	grep -v "end" $6 | grep -v "*" >> colette.dat
+ 	echo ")"  >> colette.dat
+	echo "end" >> colette.dat
+endif
+
+#
+# Messages
+#
+echo "Running COLETTE"
+echo "Solving Strategy $3"
+echo "Specification file $4"
+
+#
+# Execution
+#
+if ($1 == 2 && $2 == C) then
+
+	echo "Not available"
+
+else if ($1 == 2 && $2 == I) then
+
+	echo "Not available"
+
+else if ($1 == N && $2 == C) then
+
+	echo "Compiled version, N arity"
+	elanc $5 --secondlib $SOURCE colette.lgi $4
+	#$ELAN/bin/`uname -m`/elanc $5 --secondlib $SOURCE colette.lgi $4
+	gmake --file colette.make #gmake -s -f colette.make
+	time a.out < colette.dat
+
+else if ($1 == N && $2 == I) then
+
+	echo "Interpreted version, N arity"
+	elan -w -s -$5 --secondlib $SOURCE colette.lgi $4 < colette.dat
+	#$ELAN/bin/`uname -m`/elan -w -s -$5 --secondlib $SOURCE colette.lgi $4 < colette.dat
+
+endif 
+
+#
+# Cleaning
+#
+/bin/rm -f colette.lgi 
+/bin/rm -f colette.eln
+/bin/rm -f colette.dat
+/bin/rm -f -r .elan.colette colette.make colette.ref 
+/bin/mv a.out colette.old

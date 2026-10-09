@@ -1,0 +1,13 @@
+LPL nshtc description 
+ query of sort state
+   result of sort state
+   import nshtc
+   // start with (attStrat) //query
+   start with (com)// query
+// a+SLEEP+N(a,a).nil <> b+SLEEP+N(b,b).nil <> ii#nil#nil <> nil <> 0 <> 1 <> 0
+// a+SLEEP+N(a,a).e+SLEEP+N(e,e).nil <> b+SLEEP+N(b,b).nil <> ii#nil#nil <> nil <> 0 <> 1 <> 0
+// a+SLEEP+N(a,a).nil <> b+SLEEP+N(b,b).d+SLEEP+N(d,d).nil <> ii#nil#nil <> nil <> 0 <> 1 <> 0
+// a+SLEEP+N(a,a).e+SLEEP+N(e,e).b+SLEEP+N(b,b).nil <>d+SLEEP+N(d,d).nil <> ii#nil#nil <> nil <> 0 <> 1 <> 0
+ a+SLEEP+N(a,a).e+SLEEP+N(e,e).nil <> b+SLEEP+N(b,b).d+SLEEP+N(d,d).nil <> ii#nil#nil <> nil <> 0 <> 1 <> 0
+
+end

@@ -1,0 +1,9 @@
+LPL m_apply1 description 
+
+        query           of sort int
+        result          of sort string
+        import          m_apply1 
+        start with 	()foo(query)
+
+end
+

@@ -1,0 +1,32 @@
+// This file is generated automatically: do not edit it directly. 
+module builtinStdio
+        import global builtinInt bool builtinString; 
+        end
+        sort Pid;
+        end
+            operators global
+              getc_builtinStdio(@)        : (builtinInt) builtinInt	             code 113;
+              putc_builtinStdio(@,@)      : (builtinInt builtinInt) builtinInt	     code 114; 
+              open_builtinStdio(@,@)      : (builtinString builtinString) builtinInt code 116;
+              close_builtinStdio(@)       : (builtinInt) builtinInt                  code 118;
+
+              stdin_builtinStdio          : builtinInt;
+              stdout_builtinStdio         : builtinInt;
+              stderr_builtinStdio         : builtinInt;
+
+              create_builtinStdio(@)      : (builtinString) builtinInt               code 115;
+              create_noblock(@)           : (builtinString) builtinInt               code 117;
+
+             //local
+              //@             : (builtinInt) Pid                          code 121;
+            end    
+
+        rules for builtinInt
+        x:Pid;
+        global
+          [] stdin_builtinStdio   => 0    end
+          [] stdout_builtinStdio  => 1    end
+          [] stderr_builtinStdio  => 2    end
+        end
+
+end 

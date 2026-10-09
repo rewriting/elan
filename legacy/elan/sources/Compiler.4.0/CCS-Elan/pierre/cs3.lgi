@@ -1,0 +1,9 @@
+LPL cs3 description
+
+  query    of sort typus
+  result   of sort typus
+  import   identifier cs3
+  start with () query
+
+end
+

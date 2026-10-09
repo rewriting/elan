@@ -1,0 +1,2 @@
+f([3,true]) end
+f([6,false]) end

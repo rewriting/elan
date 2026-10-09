@@ -1,0 +1,52 @@
+module enum1
+
+import 	global int ;
+
+end
+
+operators
+
+global
+
+  f(@): (int) int ;
+  next(@): (int) int ;
+  enum(@,@): (int int) int ;
+
+end
+
+stratop global 
+  enumStrat : <int> builtin ;
+  fStrat : <int>  builtin ;
+  nextStrat : <int>  builtin ;
+end
+
+rules for int 
+
+i,j,k,l: int ;
+
+global 
+
+// no-named rules applied leftmost innermost
+[fRule] f(i) => i end           // the identity
+[nextRule] next(i) => i+1 end   // the incrementation
+
+// named rules applied with the strategy enumStrat
+[r1] enum(i,j) => k
+		  where k:= (fStrat) f(i) 
+		  end
+[r2] enum(i,j) => l
+                  if i<j
+                  where k:= (nextStrat) next(i) 
+                  where l:= (enumStrat) enum(k,j)
+                  end
+end
+
+
+strategies for int
+   implicit
+   [.] enumStrat => dk(r1,r2) end
+   [.] nextStrat => dc one(nextRule) end
+   [.] fStrat => dc one(fRule) end
+end
+
+end

@@ -1,0 +1,153 @@
+set UserPorts1 = {setup_ind1,proceeding_request1, setup_conf1,setup_conf_error1,release_conf_error1, release_conf1,proceeding_ind1,release_ind1,setup_request1, setup_response_accept1,setup_response_reject1, release_request1}
+
+set UserPorts2 = {setup_ind2,proceeding_request2, setup_conf2,setup_conf_error2,release_conf_error2, release_conf2,proceeding_ind2,release_ind2,setup_request2, setup_response_accept2,setup_response_reject2, release_request2}
+
+def U0 = setup_request.'setup_send.U1 + call_proceeding_rec.'status_send.U0 + connect_rec.'status_send.U0 + release_rec.U12 + release_complete_rec.U0 + status_rec.U0
+
+def U1 = tau.'setup_send.UU1 + call_proceeding_rec.'proceeding_ind.U3 + release_complete_rec.'setup_conf_error.U0 + connect_rec.'status_send.'setup_conf_error.U0 + release_rec.U12 + status_rec.Diverge
+
+def UU1 = tau.'setup_conf_error.U0 + call_proceeding_rec.'proceeding_ind.U3 + release_complete_rec.'setup_conf_error.U0 + connect_rec.'status_send.'setup_conf_error.U0 + release_rec.U12 + status_rec.Diverge
+
+def U3 = tau.CLEAR_USER + connect_rec.U4 + release_rec.U12 + release_complete_rec.'status_send.'setup_conf_error.U0 + status_rec.Diverge
+
+def U4 = 'connect_ack_send.'setup_conf.U0
+
+def U12 = 'release_complete_send.'setup_conf_error.U0
+
+def CLEAR_USER = 'release_send.U11
+
+def U11 = tau.'release_send.UU11 + release_rec.'release_conf_error.U0 + release_complete_rec.'release_conf.U0 + connect_rec.'status_send.'release_conf_error.U0 + status_rec.U11 
+
+def UU11 = tau.'release_conf_error.U0 + release_rec.'release_conf_error.U0 + release_complete_rec.'release_conf.U0 + connect_rec.'status_send.'release_conf_error.U0 + status_rec.UU11 
+
+
+def N0 = setup_rec.N1 + status_rec.N0 + release_rec.'release_complete_send.N0
+
+def N1 = 'setup_pdu.'call_proceeding_send.N3 + 'release_complete_send.N0
+
+def N3 = connect_pdu.'connect_send.N10 + release_pdu.CLEAR_NETWORK + release_rec.'release_complete_send.'release_pdu.N0 + status_rec.Diverge + setup_rec.N3
+
+def N10 = connect_ack_rec.N0 + release_rec.'release_complete_send.'release_pdu.N0 + status_rec.Diverge + setup_rec.N10 
+
+def CLEAR_NETWORK = 'release_send.N12
+
+def N12 = tau.'release_send.NN12 + release_rec.N0 + release_complete_rec.N0 + status_rec.N12 
+
+def NN12 = tau.N0 + release_rec.N0 + release_complete_rec.N0 + status_rec.NN12 
+
+
+
+def UR0 = setup_rec.'setup_ind.UR6 + status_rec.UR0 + release_complete_rec.UR0 + release_rec.'release_complete_send.UR0
+
+def UR6 = proceeding_request.'call_proceeding_send.UR9 + setup_response_reject.'release_complete_send.UR0 + setup_response_accept.'connect_send.UR8
+
+def UR9 = setup_response_accept.'connect_send.UR8 + release_rec.'release_complete_send.UR0 + setup_rec.UR9 + status_rec.Diverge
+
+def UR8 = timeupT313.CLEAR_URSER + connect_ack_rec.UR0 + status_rec.Diverge + setup_rec.UR8 
+
+def CLEAR_URSER = 'release_send.UR11
+
+def UR11 = tau.'release_send.URU11 + release_rec.UR0 + release_complete_rec.'release_conf.UR0 + connect_ack_rec.'status_send.UR0 + status_rec.UR11
+
+
+def URU11 = tau.'release_conf_error.UR0 + release_rec.UR0 + release_complete_rec.'release_conf.UR0 + connect_ack_rec.'status_send.UR0 + status_rec.URU11 
+
+
+def NR0 = setup_pdu.'setup_send.NR6 + release_pdu.NR0 +call_proceeding_rec.'status_send.NR0 + connect_rec.'status_send.NR0 +release_rec.'release_complete_send.'release_pdu.NR0 +release_complete_rec.NR0
+
+
+def NR6 = tau.'setup_send.NRN6 + call_proceeding_rec.NR9 + connect_rec.NR8 + release_complete_rec.'release_pdu.NR0
+
+def NRN6 = tau.'release_pdu.NR0 + call_proceeding_rec.NR9 + connect_rec.NR8 + release_complete_rec.'release_pdu.NR0
+
+def NR9 = tau.'release_pdu.CLEAR_NRETWORK + connect_rec.NR8 + release_rec.'release_complete_send.NR5
+
+def NR5 = 'release_pdu.NR0 + release_pdu.NR0
+
+def NR8 = 'connect_ack_send.NR10
+
+def NR10 = 'connect_pdu.NR0 + release_pdu.NR0
+
+def CLEAR_NRETWORK = 'release_send.NR11
+
+
+def NR11 = tau.'release_send.NRN11 + release_rec.NR0 + release_complete_rec.NR0 + connect_rec.'status_send.NR0 + status_rec.NR11 
+
+def NRN11 = tau.NR0 + release_rec.NR0 + release_complete_rec.NR0 + connect_rec.'status_send.NR0 + status_rec.NRN11 
+
+
+
+
+def NetS1 = setup_u1_send.(tau.NetS1 + 'setup_n1_rec.NetS1) + connect_ack_u1_send.(tau.NetS1 + 'connect_ack_n1_rec.NetS1) + release_u1_send.(tau.NetS1 + 'release_n1_rec.NetS1 ) + release_complete_u1_send.(tau.NetS1 + 'release_complete_n1_rec.NetS1) + status_u1_send.(tau.NetS1 + 'status_n1_rec.NetS1) + call_proceeding_n1_send.(tau.NetS1 + 'call_proceeding_u1_rec.NetS1 ) + connect_n1_send.(tau.NetS1 + 'connect_u1_rec.NetS1 ) + release_n1_send.(tau.NetS1 + 'release_u1_rec.NetS1 ) + release_complete_n1_send.(tau.NetS1 + 'release_complete_u1_rec.NetS1 ) + status_n1_send.(tau.NetS1 + 'status_u1_rec.NetS1) 
+
+
+
+
+def NetS2 = call_proceeding_u2_send.(tau.NetS2 + 'call_proceeding_n2_rec.NetS2) + connect_u2_send.(tau.NetS2 + 'connect_n2_rec.NetS2) + release_u2_send.(tau.NetS2 + 'release_n2_rec.NetS2) + release_complete_u2_send.(tau.NetS2 + 'release_complete_n2_rec.NetS2) + status_u2_send.(tau.NetS2 + 'status_n2_rec.NetS2) + setup_n2_send.(tau.NetS2 + 'setup_u2_rec.NetS2 ) + connect_ack_n2_send.('timeupT313.NetS2 + 'connect_ack_u2_rec.NetS2 ) + release_n2_send.(tau.NetS2 + 'release_u2_rec.NetS2 ) + release_complete_n2_send.(tau.NetS2 + 'release_complete_u2_rec.NetS2 ) + status_n2_send.(tau.NetS2 + 'status_u2_rec.NetS2) 
+
+
+def LU1 = 'setup_request1.LU1 + proceeding_ind1.LU1 + setup_conf1.LU1 + setup_conf_error1.LU1 + 'release_request1.LU1 + release_ind1.LU1 + release_conf1.LU1 + release_conf_error1.LU1 
+
+ 
+def LU2 = setup_ind.LU2 + 'proceeding_request.LU2 + 'setup_response_accept.LU2 + 'setup_response_reject.LU2 + 'release_request.LU2 + release_ind.LU2 + release_conf.LU2 + release_conf_error.LU2 
+
+
+
+set InterfacePorts1 = {setup_u1_send, call_proceeding_u1_rec, connect_u1_rec, connect_ack_u1_send, release_u1_send, release_u1_rec, release_complete_u1_send, release_complete_u1_rec, status_u1_send, status_u1_rec }
+
+set InterfacePorts2 = {setup_u2_rec, call_proceeding_u2_send, connect_u2_send, connect_ack_u2_rec, release_u2_send, release_u2_rec, release_complete_u2_send, release_complete_u2_rec, status_u2_send, status_u2_rec}
+
+
+set NetworkPorts1 = {setup_n1_rec, call_proceeding_n1_send, connect_n1_send, connect_ack_n1_rec, release_n1_send, release_n1_rec, release_complete_n1_send, release_complete_n1_rec, status_n1_send, status_n1_rec}
+
+set NetworkPorts2 = {setup_n2_send, call_proceeding_n2_rec, connect_n2_rec, connect_ack_n2_send, release_n2_send, release_n2_rec, release_complete_n2_send, release_complete_n2_rec, status_n2_send, status_n2_rec, timeupT313}
+
+set Mports = {connect_pdu,release_pdu,setup_pdu}
+
+def X = U0 [setup_u1_send/setup_send, call_proceeding_u1_rec/call_proceeding_rec, connect_u1_rec/connect_rec, connect_ack_u1_send/connect_ack_send , release_u1_send/release_send, release_u1_rec/release_rec, release_complete_u1_send/release_complete_send, release_complete_u1_rec/release_complete_rec, status_u1_send/status_send, status_u1_rec/status_rec]
+
+def Y = N0 [setup_n1_rec/setup_rec, call_proceeding_n1_send/call_proceeding_send, connect_n1_send/connect_send, connect_ack_n1_rec/connect_ack_rec, release_n1_send/release_send, release_n1_rec/release_rec, release_complete_n1_send/release_complete_send, release_complete_n1_rec/release_complete_rec, status_n1_send/status_send, status_n1_rec/status_rec]
+
+
+def SENDER_INTERFACE = (X | NetS1 | Y) \InterfacePorts1 \NetworkPorts1
+
+def P = UR0 [setup_u2_rec/setup_rec, call_proceeding_u2_send/call_proceeding_send, connect_u2_send/connect_send, connect_ack_u2_rec/connect_ack_rec, release_complete_u2_send/release_complete_send, release_complete_u2_rec/release_complete_rec, release_u2_send/release_send, release_u2_rec/release_rec, status_u2_send/status_send, status_u2_rec/status_rec]
+
+
+def Q = NR0 [setup_n2_send/setup_send, call_proceeding_n2_rec/call_proceeding_rec, connect_n2_rec/connect_rec, connect_ack_n2_send/connect_ack_send, release_complete_n2_send/release_complete_send, release_complete_n2_rec/release_complete_rec, release_n2_send/release_send, release_n2_rec/release_rec, status_n2_send/status_send, status_n2_rec/status_rec]
+
+
+def RECEIVER_INTERFACE = (P | NetS1 | Q) \InterfacePorts2 \NetworkPorts2
+
+set SendPorts = {setup_request1,proceeding_ind1,setup_conf1,setup_conf_error1, release_request1, release_ind1, release_conf1, release_conf_error1 }
+
+set HideReceive = {setup_ind1,proceeding_request1, setup_response_accept1, setup_response_reject1}
+
+set ReceivePorts = {setup_ind2,proceeding_request2,setup_response_accept2, setup_response_reject2, release_request2, release_ind2, release_conf2, release_conf_error2 }
+
+
+* Not all of the renamings are needed
+
+def SENDER = SENDER_INTERFACE [ setup_ind1/setup_ind, proceeding_request1/proceeding_request, setup_conf1/setup_conf, setup_conf_error1/setup_conf_error, proceeding_ind1/proceeding_ind, setup_request1/setup_request, setup_response_accept1/setup_response_accept, setup_response_reject1/setup_response_reject, release_request1/release_request, release_ind1/release_ind, release_conf_error1/release_conf_error, release_conf1/release_conf] 
+
+def RECEIVER = ((LU2[ setup_ind2/setup_ind, proceeding_request2/proceeding_request, setup_conf2/setup_conf, setup_conf_error2/setup_conf_error, proceeding_ind2/proceeding_ind, setup_request2/setup_request, setup_response_accept2/setup_response_accept, setup_response_reject2/setup_response_reject, release_request2/release_request, release_ind2/release_ind, release_conf_error2/release_conf_error, release_conf2/release_conf] ) | (RECEIVER_INTERFACE[ setup_ind2/setup_ind, proceeding_request2/proceeding_request, setup_conf2/setup_conf, setup_conf_error2/setup_conf_error, release_conf_error2/release_conf_error, release_conf2/release_conf, proceeding_ind2/proceeding_ind, release_ind2/release_ind, setup_request2/setup_request, setup_response_accept2/setup_response_accept, setup_response_reject2/setup_response_reject, release_request2/release_request]))\UserPorts2
+
+def SYSTEM = (SENDER | RECEIVER) \Mports
+def SERVICE_SENDER = SS
+
+def SS = setup_request1.SS1
+
+def SS1 = 'setup_conf_error1.SS + 'proceeding_ind1.SS3 
+def SS3 = 'setup_conf_error1.SS + 'setup_conf1.SS + 'release_conf1.SS + 'release_conf_error1.SS 
+
+
+def RECEIVER_SPEC = RR 
+
+def RR = 'setup_ind2.RR1
+
+def RR1 = proceeding_request2.RR2 + setup_response_accept2.RR3 + setup_response_reject2.RR 
+def RR2 = setup_response_accept2.RR3 
+def RR3 = 'release_conf2.RR + 'release_conf_error2.RR + RR
+
+def Diverge = div.Diverge
+

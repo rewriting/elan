@@ -1,0 +1,451 @@
+# Generated automatically from Makefile.in by configure.
+# Makefile.in generated automatically by automake 1.4-p5 from Makefile.am
+
+# Copyright (C) 1994, 1995-8, 1999, 2001 Free Software Foundation, Inc.
+# This Makefile.in is free software; the Free Software Foundation
+# gives unlimited permission to copy and/or distribute it,
+# with or without modifications, as long as this notice is preserved.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY, to the extent permitted by law; without
+# even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE.
+
+# $Id: Makefile.am,v 1.23 2001/08/07 15:19:21 jong Exp $
+
+
+#
+# $Id: make_rules,v 1.11 2001/10/04 09:30:40 olivierp Exp $
+#
+# Common make rules for compiling the ATerm and related static/dynamic
+# libraries.
+#
+
+# Common defines for all libraries
+
+
+SHELL = /bin/sh
+
+srcdir = .
+top_srcdir = ..
+prefix = /usr/local
+exec_prefix = ${prefix}
+
+bindir = ${exec_prefix}/bin
+sbindir = ${exec_prefix}/sbin
+libexecdir = ${exec_prefix}/libexec
+datadir = ${prefix}/share
+sysconfdir = ${prefix}/etc
+sharedstatedir = ${prefix}/com
+localstatedir = ${prefix}/var
+libdir = ${exec_prefix}/lib
+infodir = ${prefix}/info
+mandir = ${prefix}/man
+includedir = ${prefix}/include
+oldincludedir = /usr/include
+
+DESTDIR =
+
+pkgdatadir = $(datadir)/aterm
+pkglibdir = $(libdir)/aterm
+pkgincludedir = $(includedir)/aterm
+
+top_builddir = ..
+
+ACLOCAL = aclocal
+AUTOCONF = autoconf
+AUTOMAKE = automake
+AUTOHEADER = autoheader
+
+INSTALL = /usr/bin/install -c
+INSTALL_PROGRAM = ${INSTALL} $(AM_INSTALL_PROGRAM_FLAGS)
+INSTALL_DATA = ${INSTALL} -m 644
+INSTALL_SCRIPT = ${INSTALL_PROGRAM}
+transform = s,x,x,
+
+NORMAL_INSTALL = :
+PRE_INSTALL = :
+POST_INSTALL = :
+NORMAL_UNINSTALL = :
+PRE_UNINSTALL = :
+POST_UNINSTALL = :
+AR = ar
+ATERM_LIB_CC = libATerm-cc.a
+ATERM_LIB_DBG = libATerm-dbg.a
+ATERM_LIB_GCC = libATerm-gcc.a
+ATERM_LIB_NS = 
+ATERM_LIB_PROF = libATerm-prof.a
+CC = gcc
+CC_CC = cc
+CC_DBG = gcc
+CC_GCC = gcc
+CC_NS = gcc
+CC_PROF = gcc
+CFLAGS_CC = -O
+CFLAGS_DBG = -Wall -g
+CFLAGS_GCC = -Wall -O4
+CFLAGS_NS = -Wall -g -O2
+CFLAGS_PROF = -Wall -pg -g
+DEFS_CC = $(DEFS) -DNDEBUG
+DEFS_DBG = $(DEFS)
+DEFS_GCC = $(DEFS) -DNDEBUG
+DEFS_NS = $(DEFS) -DNO_SHARING
+DEFS_PROF = $(DEFS)
+INCL_CC = 
+INCL_DBG = 
+INCL_GCC = 
+INCL_NS = 
+INCL_PROF = 
+JAVA_API_PS = 
+JAVA_SUBDIR = 
+LFLAGS_CC = 
+LFLAGS_DBG = -g
+LFLAGS_GCC = 
+LFLAGS_NS = 
+LFLAGS_PROF = -pg
+MAKEINFO = makeinfo
+PACKAGE = aterm
+RANLIB = ranlib
+TEX_DOCLET = 
+VERSION = 1.6.5
+VISITOR_PKG = aterm.visitor
+XDEFS = 
+
+STDDEFS = $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS)
+
+GCC_COMPILE = $(CC_GCC)    $(CFLAGS_GCC)    $(DEFS_GCC)    $(STDDEFS)
+CC_COMPILE = $(CC_CC)     $(CFLAGS_CC)     $(DEFS_CC)     $(STDDEFS)
+DBG_COMPILE = $(CC_DBG)    $(CFLAGS_DBG)    $(DEFS_DBG)    $(STDDEFS)
+PROF_COMPILE = $(CC_PROF)   $(CFLAGS_PROF)   $(DEFS_PROF)   $(STDDEFS)
+CC64_COMPILE = $(CC_CC64)   $(CFLAGS_CC64)   $(DEFS_CC64)   $(STDDEFS)
+SHARED_COMPILE = $(CC_SHARED) $(CFLAGS_SHARED) $(DEFS_SHARED) $(STDDEFS)
+COMPILE = $(CC)        $(CFLAGS)        $(DEFS)        $(STDDEFS)
+NS_COMPILE = $(CC_NS)     $(CFLAGS_NS)     $(DEFS_NS)     $(STDDEFS)
+
+TESTS = stress
+
+EXTRA_DIST = termstats.sh test.trms error.trm stress.dict 			  vararg1.c vararg2.c vararg3.c
+
+
+CLEANFILES = stress_dict.c stress_dict.h
+
+INCLUDES = -I$(top_srcdir)/aterm                            -DSRCDIR="\"$(top_srcdir)/test/\""
+
+
+LDFLAGS = -L$(top_builddir)/aterm/
+LDLIBS = -lATerm
+
+noinst_PROGRAMS = stress primes randgen termstats
+
+stress_SOURCES = stress_dict.c stress_dict.h stress.c
+stress_LDADD = $(LDLIBS)
+
+primes_SOURCES = primes.c
+primes_LDADD = $(LDLIBS)
+
+# To be used to find out which vararg-implementation
+# is used on a new platform. Do not remove, but uncomment
+# as needed.
+#vararg1_SOURCES    	= vararg1.c
+#vararg1_LDADD      	= $(LDLIBS)
+#vararg2_SOURCES    	= vararg2.c
+#vararg2_LDADD      	= $(LDLIBS)
+#vararg3_SOURCES    	= vararg3.c
+#vararg3_LDADD      	= $(LDLIBS)
+
+randgen_SOURCES = randgen.c
+randgen_LDADD = $(LDLIBS)
+
+termstats_SOURCES = termstats.c
+termstats_LDADD = $(LDLIBS)
+mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
+CONFIG_CLEAN_FILES = 
+PROGRAMS =  $(noinst_PROGRAMS)
+
+
+DEFS =  -DPACKAGE=\"aterm\" -DVERSION=\"1.6.5\" -DHAVE_STRDUP=1 -DHAVE_LRAND48=1 -DHAVE_SRAND48=1  -I. -I$(srcdir) 
+CPPFLAGS = 
+LIBS = 
+stress_OBJECTS =  stress_dict.o stress.o
+stress_DEPENDENCIES = 
+stress_LDFLAGS = 
+primes_OBJECTS =  primes.o
+primes_DEPENDENCIES = 
+primes_LDFLAGS = 
+randgen_OBJECTS =  randgen.o
+randgen_DEPENDENCIES = 
+randgen_LDFLAGS = 
+termstats_OBJECTS =  termstats.o
+termstats_DEPENDENCIES = 
+termstats_LDFLAGS = 
+CFLAGS = -g -O2
+CCLD = $(CC)
+LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
+DIST_COMMON =  Makefile.am Makefile.in
+
+
+DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
+
+TAR = gtar
+GZIP_ENV = --best
+DEP_FILES =  .deps/primes.P .deps/randgen.P .deps/stress.P \
+.deps/stress_dict.P .deps/termstats.P
+SOURCES = $(stress_SOURCES) $(primes_SOURCES) $(randgen_SOURCES) $(termstats_SOURCES)
+OBJECTS = $(stress_OBJECTS) $(primes_OBJECTS) $(randgen_OBJECTS) $(termstats_OBJECTS)
+
+all: all-redirect
+.SUFFIXES:
+.SUFFIXES: .S .c .o .s
+$(srcdir)/Makefile.in: Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) $(srcdir)/../make_rules
+	cd $(top_srcdir) && $(AUTOMAKE) --gnu test/Makefile
+
+Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status $(BUILT_SOURCES)
+	cd $(top_builddir) \
+	  && CONFIG_FILES=$(subdir)/$@ CONFIG_HEADERS= $(SHELL) ./config.status
+
+
+mostlyclean-noinstPROGRAMS:
+
+clean-noinstPROGRAMS:
+	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
+
+distclean-noinstPROGRAMS:
+
+maintainer-clean-noinstPROGRAMS:
+
+.s.o:
+	$(COMPILE) -c $<
+
+.S.o:
+	$(COMPILE) -c $<
+
+mostlyclean-compile:
+	-rm -f *.o core *.core
+
+clean-compile:
+
+distclean-compile:
+	-rm -f *.tab.c
+
+maintainer-clean-compile:
+
+stress: $(stress_OBJECTS) $(stress_DEPENDENCIES)
+	@rm -f stress
+	$(LINK) $(stress_LDFLAGS) $(stress_OBJECTS) $(stress_LDADD) $(LIBS)
+
+primes: $(primes_OBJECTS) $(primes_DEPENDENCIES)
+	@rm -f primes
+	$(LINK) $(primes_LDFLAGS) $(primes_OBJECTS) $(primes_LDADD) $(LIBS)
+
+randgen: $(randgen_OBJECTS) $(randgen_DEPENDENCIES)
+	@rm -f randgen
+	$(LINK) $(randgen_LDFLAGS) $(randgen_OBJECTS) $(randgen_LDADD) $(LIBS)
+
+termstats: $(termstats_OBJECTS) $(termstats_DEPENDENCIES)
+	@rm -f termstats
+	$(LINK) $(termstats_LDFLAGS) $(termstats_OBJECTS) $(termstats_LDADD) $(LIBS)
+
+tags: TAGS
+
+ID: $(HEADERS) $(SOURCES) $(LISP)
+	list='$(SOURCES) $(HEADERS)'; \
+	unique=`for i in $$list; do echo $$i; done | \
+	  awk '    { files[$$0] = 1; } \
+	       END { for (i in files) print i; }'`; \
+	here=`pwd` && cd $(srcdir) \
+	  && mkid -f$$here/ID $$unique $(LISP)
+
+TAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) $(LISP)
+	tags=; \
+	here=`pwd`; \
+	list='$(SOURCES) $(HEADERS)'; \
+	unique=`for i in $$list; do echo $$i; done | \
+	  awk '    { files[$$0] = 1; } \
+	       END { for (i in files) print i; }'`; \
+	test -z "$(ETAGS_ARGS)$$unique$(LISP)$$tags" \
+	  || (cd $(srcdir) && etags $(ETAGS_ARGS) $$tags  $$unique $(LISP) -o $$here/TAGS)
+
+mostlyclean-tags:
+
+clean-tags:
+
+distclean-tags:
+	-rm -f TAGS ID
+
+maintainer-clean-tags:
+
+distdir = $(top_builddir)/$(PACKAGE)-$(VERSION)/$(subdir)
+
+subdir = test
+
+distdir: $(DISTFILES)
+	here=`cd $(top_builddir) && pwd`; \
+	top_distdir=`cd $(top_distdir) && pwd`; \
+	distdir=`cd $(distdir) && pwd`; \
+	cd $(top_srcdir) \
+	  && $(AUTOMAKE) --include-deps --build-dir=$$here --srcdir-name=$(top_srcdir) --output-dir=$$top_distdir --gnu test/Makefile
+	@for file in $(DISTFILES); do \
+	  d=$(srcdir); \
+	  if test -d $$d/$$file; then \
+	    cp -pr $$d/$$file $(distdir)/$$file; \
+	  else \
+	    test -f $(distdir)/$$file \
+	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+	    || cp -p $$d/$$file $(distdir)/$$file || :; \
+	  fi; \
+	done
+
+DEPS_MAGIC := $(shell mkdir .deps > /dev/null 2>&1 || :)
+
+-include $(DEP_FILES)
+
+mostlyclean-depend:
+
+clean-depend:
+
+distclean-depend:
+	-rm -rf .deps
+
+maintainer-clean-depend:
+
+%.o: %.c
+	@echo '$(COMPILE) -c $<'; \
+	$(COMPILE) -Wp,-MD,.deps/$(*F).pp -c $<
+	@-cp .deps/$(*F).pp .deps/$(*F).P; \
+	tr ' ' '\012' < .deps/$(*F).pp \
+	  | sed -e 's/^\\$$//' -e '/^$$/ d' -e '/:$$/ d' -e 's/$$/ :/' \
+	    >> .deps/$(*F).P; \
+	rm .deps/$(*F).pp
+
+%.lo: %.c
+	@echo '$(LTCOMPILE) -c $<'; \
+	$(LTCOMPILE) -Wp,-MD,.deps/$(*F).pp -c $<
+	@-sed -e 's/^\([^:]*\)\.o[ 	]*:/\1.lo \1.o :/' \
+	  < .deps/$(*F).pp > .deps/$(*F).P; \
+	tr ' ' '\012' < .deps/$(*F).pp \
+	  | sed -e 's/^\\$$//' -e '/^$$/ d' -e '/:$$/ d' -e 's/$$/ :/' \
+	    >> .deps/$(*F).P; \
+	rm -f .deps/$(*F).pp
+check-TESTS: $(TESTS)
+	@failed=0; all=0; \
+	srcdir=$(srcdir); export srcdir; \
+	for tst in $(TESTS); do \
+	  if test -f $$tst; then dir=.; \
+	  else dir="$(srcdir)"; fi; \
+	  if $(TESTS_ENVIRONMENT) $$dir/$$tst; then \
+	    all=`expr $$all + 1`; \
+	    echo "PASS: $$tst"; \
+	  elif test $$? -ne 77; then \
+	    all=`expr $$all + 1`; \
+	    failed=`expr $$failed + 1`; \
+	    echo "FAIL: $$tst"; \
+	  fi; \
+	done; \
+	if test "$$failed" -eq 0; then \
+	  banner="All $$all tests passed"; \
+	else \
+	  banner="$$failed of $$all tests failed"; \
+	fi; \
+	dashes=`echo "$$banner" | sed s/./=/g`; \
+	echo "$$dashes"; \
+	echo "$$banner"; \
+	echo "$$dashes"; \
+	test "$$failed" -eq 0
+info-am:
+info: info-am
+dvi-am:
+dvi: dvi-am
+check-am: all-am
+	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
+check: check-am
+installcheck-am:
+installcheck: installcheck-am
+install-exec-am:
+install-exec: install-exec-am
+
+install-data-am:
+install-data: install-data-am
+
+install-am: all-am
+	@$(MAKE) $(AM_MAKEFLAGS) install-exec-am install-data-am
+install: install-am
+uninstall-am:
+uninstall: uninstall-am
+all-am: Makefile $(PROGRAMS)
+all-redirect: all-am
+install-strip:
+	$(MAKE) $(AM_MAKEFLAGS) AM_INSTALL_PROGRAM_FLAGS=-s install
+installdirs:
+
+
+mostlyclean-generic:
+
+clean-generic:
+	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
+
+distclean-generic:
+	-rm -f Makefile $(CONFIG_CLEAN_FILES)
+	-rm -f config.cache config.log stamp-h stamp-h[0-9]*
+
+maintainer-clean-generic:
+mostlyclean-am:  mostlyclean-noinstPROGRAMS mostlyclean-compile \
+		mostlyclean-tags mostlyclean-depend mostlyclean-generic
+
+mostlyclean: mostlyclean-am
+
+clean-am:  clean-noinstPROGRAMS clean-compile clean-tags clean-depend \
+		clean-generic mostlyclean-am
+
+clean: clean-am
+
+distclean-am:  distclean-noinstPROGRAMS distclean-compile distclean-tags \
+		distclean-depend distclean-generic clean-am
+
+distclean: distclean-am
+
+maintainer-clean-am:  maintainer-clean-noinstPROGRAMS \
+		maintainer-clean-compile maintainer-clean-tags \
+		maintainer-clean-depend maintainer-clean-generic \
+		distclean-am
+	@echo "This command is intended for maintainers to use;"
+	@echo "it deletes files that may require special tools to rebuild."
+
+maintainer-clean: maintainer-clean-am
+
+.PHONY: mostlyclean-noinstPROGRAMS distclean-noinstPROGRAMS \
+clean-noinstPROGRAMS maintainer-clean-noinstPROGRAMS \
+mostlyclean-compile distclean-compile clean-compile \
+maintainer-clean-compile tags mostlyclean-tags distclean-tags \
+clean-tags maintainer-clean-tags distdir mostlyclean-depend \
+distclean-depend clean-depend maintainer-clean-depend check-TESTS \
+info-am info dvi-am dvi check check-am installcheck-am installcheck \
+install-exec-am install-exec install-data-am install-data install-am \
+install uninstall-am uninstall all-redirect all-am all installdirs \
+mostlyclean-generic distclean-generic clean-generic \
+maintainer-clean-generic clean mostlyclean distclean maintainer-clean
+
+
+%-cc.o   : %.c $(ALLINCLUDES)
+	CFLAGS= $(CC_COMPILE) -c $< -o $@
+
+%-cc64.o : %.c $(ALLINCLUDES)
+	$(CC64_COMPILE) -c $< -o $@
+
+%-gcc.o  : %.c $(ALLINCLUDES)
+	$(GCC_COMPILE) -c $< -o $@
+
+%-dbg.o  : %.c $(ALLINCLUDES)
+	$(DBG_COMPILE) -c $< -o $@
+
+%-prof.o : %.c $(ALLINCLUDES)
+	$(PROF_COMPILE) -c $< -o $@
+
+%-ns.o   : %.c $(ALLINCLUDES)
+	$(NS_COMPILE) -c $< -o $@
+
+%_dict.c %_dict.h: %.dict ${top_builddir}/utils/dicttoc
+	${top_builddir}/utils/dicttoc -dict $<
+
+# Tell versions [3.59,3.63) of GNU make to not export all variables.
+# Otherwise a system limit (for SysV at least) may be exceeded.
+.NOEXPORT:

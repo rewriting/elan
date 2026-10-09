@@ -1,0 +1,28 @@
+empty:\
+		:kw = zzzzzzzzzzzzzzzzzzzzzzzzzzzzz
+all:\
+               :cb=/*:ce=*/:ab=//:ae=$:\
+               :kw=module import sort op global AC FOR EACH  SUCH THAT \
+		AND ANDIF\
+		endop rules rule for declare body endwhile \
+		strategy repeat while dont care know choose endrepeat end \
+                query of result \
+                start with iterate enditerate if where \
+		alias specification LPL description \
+                part check rules bodies local modules
+
+elan:\
+               :cb=/*:ce=*/:ab=//:ae=$:\
+               :kw=module import sort op global AC FOR EACH  SUCH THAT \
+		AND ANDIF\
+		endop rules rule for declare body endwhile \
+		stratop strategy repeat* repeat+ while dont care dc dk \
+		know choose endrepeat end \
+                query of result \
+                start with iterate enditerate if where \
+		alias specification LPL description \
+                part check rules bodies local modules
+
+
+
+

@@ -1,0 +1,36 @@
+
+def Q_L = Q_ff[rd_ff_L/rd_ff, rd_tt_L/rd_tt, set_ff_L/set_ff,set_tt_L/set_tt]
+def Q_M = Q_ff[rd_ff_M/rd_ff, rd_tt_M/rd_tt, set_ff_M/set_ff, set_tt_M/set_tt]
+
+def Q_ff = rd_ff.Q_ff + set_ff.Q_ff + set_tt.Q_tt
+def Q_tt = rd_tt.Q_tt + set_tt.Q_tt + set_ff.Q_ff
+
+def M = req_M.'set_tt_M.M1 
+def M1 = 'rd_ff_L.critical_M.M2
+def M2 = 'set_ff_M.M
+
+def L = req_L.'set_tt_L.L1
+def L1 = 'rd_ff_M.critical_L.L2
+def L2 = 'set_ff_L.L
+
+set Internal = { rd_ff_L, rd_ff_M, rd_tt_L, rd_tt_M, 
+		 set_ff_L, set_ff_M, set_tt_L, set_tt_M }
+
+
+def Mutex = (L | M | Q_L | Q_M)\ Internal
+
+prop AF(P) = min X.(P || (<->tt && [-]X))
+prop AG(P) = max X.(P && [-]X)
+prop Safety = max X.(~(<critical_M>tt && <critical_L>tt) && [-]X)
+prop NoDeadlock = AG(<->tt)
+prop NoLivelock = AG(~InfiniteTau())
+prop InfiniteTau = max X.(<tau>tt && <tau>X)
+prop EGNotCriticalM = max X.(<-critical_M>tt && <-critical_M>X)
+prop EGNotCriticalL = max X.(<-critical_L>tt && <-critical_L>X)
+prop NecessaryFair = AG([req_M](~EGNotCriticalM()) && [req_L](~EGNotCriticalL()))
+
+
+
+
+
+

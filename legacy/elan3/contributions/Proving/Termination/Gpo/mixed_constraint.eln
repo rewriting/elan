@@ -1,0 +1,28 @@
+module mixed_constraint[Vars,Ops]
+import	local	Vars Ops
+		gpo_constraint[Vars, Ops]
+		theta_constraint[Vars, Ops]
+		interp_constraint[Ops];
+end
+
+sort mixed_term mixed_constraint;  
+end
+
+operators 
+global
+	(@ || @ || @): (gpo_constraint theta_constraint interp_constraint) mixed_term; 
+	start		: mixed_constraint;
+	Fmix		: mixed_constraint;
+	initial_mixed_constraint: mixed_constraint;
+	@ v @ 		: (mixed_term mixed_constraint) mixed_constraint;
+	(@ v @)		: (mixed_term mixed_constraint) mixed_constraint alias @ v @:;
+	precedence = @  : (interp_constraint) mixed_constraint;
+	no_precedence	: mixed_constraint;
+end
+
+end
+
+
+
+
+

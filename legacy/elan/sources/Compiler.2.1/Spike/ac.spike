@@ -1,0 +1,22 @@
+% Specification fields
+
+sorts: nat ;
+
+constructors :
+0 : nat ;
+
+defined functions :
+and__ : bool bool -> bool ; ac ;
+t : bool ;
+f : bool ;
+
+axioms:
+and(x, x) = x ;
+and(x, t) = x ;
+
+status:
+and MS ;
+
+norm:
+
+and(t,and(t,t)) ;

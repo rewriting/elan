@@ -1,0 +1,2 @@
+s/result = //g
+s/rewrite_step = [0-9]*//g

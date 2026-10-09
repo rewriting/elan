@@ -1,0 +1,1357 @@
+/********************************************************/
+/*File Name: 	doc.eln					*/
+/*Version:	7.0					*/
+/*Date:		July 12, 2001				*/
+/*Authors: 	QIAN, Zhebin and SINGH, Preet Kamal	*/
+/*Function:	A XSLT(subset) Processor written in ELAN*/
+/********************************************************/
+
+module doc
+  import global
+    identifier list[identifier]
+    stagids ttagids sattrids tattrids
+    int bool string cmp[string]
+    list[SChild] list[TChild]
+    list[Node] list[SEle]
+    list[SAttr] list[TAttr]
+    list[Rule] list[NSrt];
+  end /* for import */
+
+  sort
+    SEleName  SAttrName SAttr SEle SChild
+    TEleName  TAttrName TAttr Tele TChild
+    EleNode EndStep Node
+    LocPath RelLocPath AbsLocPath Step AbbrRelLocPath
+    AxisSpecifier NodeTest Predicate 
+    AxisName AbbrAxisSpecifier PredicateExpr Expr
+    AbbrAbsLocPath AbbrRelLocPath AbbrStep AbbrAxisSpecifier
+    PrimaryExpr OrExpr UnionExpr PathExpr FilterExpr
+    UnaryExpr QName NameTest NodeType 
+    SXML SXEle SAttrS
+    TXML TXEle TAttrS
+    SortAttrName SortAttrVal SortAttr SortAttrS
+    Rule Cond BExpr NumExpr
+    XSL TLEleS TLEle Tmpl TmplEle Ins
+    NSrt;
+  end /*for sort*/
+
+  operators global
+
+    /********** Transformation of XSLT into ELAN ***********/
+
+    @			:(SAttr) SAttrS;
+    @ @			:(SAttr SAttrS) SAttrS;
+    @			:(SXEle) SXML;
+    @ @			:(SXEle SXML) SXML;
+    <@/>		:(SEleName) SXEle;
+    <@> @ </@>		:(SEleName SXML SEleName) SXEle;
+    <@ @> @ </@>	:(SEleName SAttrS SXML SEleName) SXEle;
+    @			:(string) SXEle;
+
+    @			:(TAttr) TAttrS;
+    @ @			:(TAttr TAttrS) TAttrS;
+    @			:(TXEle) TXML;
+    @ @			:(TXEle TXML) TXML;
+    <@/>		:(TEleName) TXEle;
+    <@> @ </@>		:(TEleName TXML TEleName) TXEle;
+    <@ @> @ </@>	:(TEleName TAttrS TXML TEleName) TXEle;
+    @			:(string) TXEle;
+
+    @ + @		:(TXML TXML) TXML assocRight;
+
+    /************ Parsing XML to Functional Notation **********/
+
+    Prs(@)		:(SXML) Node;
+    P(@)		:(SXML) list[SChild];
+    P(@)		:(SAttrS) list[SAttr];
+    P(@)		:(TAttrS) list[TAttr];
+
+    Tr(@)		:(XSL) list[Rule];
+    Tr(@)		:(TLEleS) list[Rule];
+    Tr(@)		:(Tmpl) list[TChild];
+
+    I(@)		:(list[TChild]) TXML;
+    I(@)		:(TChild) TXEle;
+    I(@)		:(list[TAttr]) TAttrS;
+
+    /************ Document in ELAN form **************/
+
+    @(@)		:(SEleName list[SChild]) SEle;
+    @(@,@)		:(SEleName list[SAttr] list[SChild]) SEle;
+    @(@)		:(SEleName list[SAttr]) SEle;
+    @()			:(SEleName) SEle;
+    @			:(SEle)	SChild;
+    @			:(string) SChild;
+
+    @(@)		:(TEleName list[TChild]) Tele;
+    @(@,@)		:(TEleName list[TAttr] list[TChild]) Tele;
+    @(@)		:(TEleName list[TAttr]) Tele;
+    @()			:(TEleName) Tele;
+
+    @=@			:(SAttrName string) SAttr;
+    @=@			:(TAttrName string) TAttr;
+
+    @			:(Tele)	TChild;
+    @			:(string) TChild;
+
+    /************ Read Tags from the spc file **************/
+
+    FOR EACH Id:identifier SUCH THAT Id:=(listExtract)elem(stagids):
+    {Id:SEleName;}
+
+    FOR EACH Id:identifier SUCH THAT Id:=(listExtract)elem(ttagids):
+    {Id:TEleName;}
+
+    FOR EACH Id:identifier SUCH THAT Id:=(listExtract)elem(sattrids):
+    {Id:SAttrName;}
+
+    FOR EACH Id:identifier SUCH THAT Id:=(listExtract)elem(tattrids):
+    {Id:TAttrName;}
+
+    IMPLICIT		:SEleName;
+
+    /*********** Step-base Node Expression with Context *******/
+
+    root(@)		:(list[SChild]) EleNode;
+    @/@.@		:(EleNode SEle list[SChild]) EleNode;
+
+    @.@			:(string list[SChild]) EndStep;
+    @			:(SAttr) EndStep;
+
+    @			:(EleNode) Node;
+    @/@			:(EleNode EndStep) Node;
+
+    root(@)		:(Node) list[Node];
+
+    /********** XPATH declarations ***************/
+    @			:(RelLocPath) LocPath;
+    @			:(AbsLocPath) LocPath;
+
+    /			:AbsLocPath;
+    /@			:(RelLocPath) AbsLocPath ;
+    @			:(AbbrAbsLocPath) AbsLocPath;
+
+    @			:(Step) RelLocPath;
+    @/@			:(RelLocPath Step) RelLocPath;
+    @			:(AbbrRelLocPath) RelLocPath;
+
+    @			:(NodeTest) Step; /* this is not formal in Xpath.*/
+    @@			:(AxisSpecifier NodeTest) Step;
+    @@			:(Step Predicate) Step;
+    @			:(AbbrStep) Step;
+
+    @':'':'		:(AxisName) AxisSpecifier;
+    @			:(AbbrAxisSpecifier) AxisSpecifier;
+
+    ancestor		:AxisName;
+    ancestor-or-self	:AxisName;
+    attribute		:AxisName;
+    child		:AxisName;
+    descendant		:AxisName;
+    descendant-or-self	:AxisName;
+    following		:AxisName;
+    following-sibling	:AxisName;
+    parent		:AxisName;
+    preceding		:AxisName;
+    preceding-sibling	:AxisName;
+    self		:AxisName;
+
+    subnode		:AxisName;
+    subnode-or-self	:AxisName;
+
+    /***************** Non standard *******************/
+
+    R(@)		:(AxisName) AxisName;
+    getchild(@,@)	:(Node list[SChild]) list[Node];
+    getattribute(@,@)	:(Node list[SAttr]) list[Node];
+
+    @			:(NameTest) NodeTest;
+    @()			:(NodeType) NodeTest;
+
+    [@]			:(PredicateExpr) Predicate;
+    @			:(Expr) PredicateExpr;
+
+    '/''/'@		:(RelLocPath) AbbrAbsLocPath;
+    @'/''/'@		:(RelLocPath Step) AbbrRelLocPath;
+
+    '.'			:AbbrStep;
+    '.''.'		:AbbrStep;
+    '@'			:AbbrAxisSpecifier;
+
+    @			:(OrExpr) Expr;
+    (@)			:(Expr) PrimaryExpr;
+    @			:(int) PrimaryExpr;
+
+    @			:(PathExpr) UnionExpr;
+    @|@			:(UnionExpr PathExpr) UnionExpr;
+
+    @			:(LocPath) PathExpr;
+    @			:(FilterExpr) PathExpr;
+    @/@			:(FilterExpr RelLocPath) PathExpr;
+    @'/''/'@		:(FilterExpr RelLocPath) PathExpr;
+
+    @			:(PrimaryExpr) FilterExpr;
+    @@			:(FilterExpr Predicate) FilterExpr;
+
+    @			:(bool) OrExpr;
+    @			:(UnaryExpr) OrExpr;
+    @			:(UnionExpr) UnaryExpr;
+
+    *			:NameTest;
+    @			:(QName) NameTest;
+
+    text		:NodeType;
+    node		:NodeType;
+
+    @			:(SEleName) QName;
+    @			:(SAttrName) QName;
+    @+@			:(LocPath LocPath) LocPath assocLeft;
+
+    /********** Relations between Nodes **************/
+
+    @(@)		:(AxisName Node) list[Node];
+    @(@)		:(AxisName list[Node]) list[Node];
+
+    -(@,@)		:(list[Node] Node) list[Node];
+    -(@,@)		:(list[Node] list[Node]) list[Node];
+    (@)			:(list[Node]) list[Node];
+
+    /************* For Matching in XPATH **************/
+
+    isEmpty(@)		:(list[Node]) bool;
+    match(@,@)		:(Node LocPath) bool;
+    @ in @		:(Node list[Node]) bool;
+    reverse(@)		:(LocPath) LocPath;
+    rev(@)		:(LocPath) LocPath;
+    last(@)		:(LocPath) LocPath;
+    first(@)		:(LocPath) LocPath;
+
+    Select(@,@)		:(Node LocPath) list[Node];
+
+    select(@,@)		:(list[Node] LocPath) list[Node];
+    select(@,@)		:(Node LocPath) list[Node];
+    select(@)		:(Node) list[Node];
+
+    reorder(@,@)        :(list[Node] list[Node]) list[Node];
+    reorder(@,@)        :(Node list[Node]) list[Node];
+
+    pred(@,@,@)		:(Node list[Node] Expr) list[Node];
+
+    /******** Transform of Components from StyleSheet ********/
+
+    <xsl':'stylesheet version=@ xmlns':'xsl=@ xmlns=@> @ </xsl':'stylesheet>
+			:(string string string TLEleS) XSL;
+    @			:(TLEle) TLEleS;
+    @ @			:(TLEle TLEleS) TLEleS;
+    <xsl':'template match=@> @ </xsl':'template>	
+			:(LocPath Tmpl) TLEle;
+    @			:(TmplEle) Tmpl;
+    @ @			:(TmplEle Tmpl) Tmpl;
+
+    <@/>		:(TEleName) TmplEle;
+    <@> </@>		:(TEleName TEleName) TmplEle;
+    <@ @/>		:(TEleName TAttrS) TmplEle;
+    <@ @> </@>		:(TEleName TAttrS TEleName) TmplEle;
+    <@ @/>		:(TEleName list[TAttr]) TmplEle;
+
+    <@> @ </@>		:(TEleName Tmpl TEleName) TmplEle;
+    <@ @> @ </@>	:(TEleName TAttrS Tmpl TEleName) TmplEle;
+    <@ @> @ </@>	:(TEleName list[TAttr] Tmpl TEleName) TmplEle;
+
+    @			:(string) TmplEle;
+    @			:(Ins) TmplEle;
+
+    /************ XSLT Instructions ************/
+
+    <xsl':'text> @ </xsl':'text>			:(string) Ins;
+    <xsl':'apply-templates  select=@ />			:(LocPath) Ins;
+    <xsl':'apply-templates/>				:Ins;
+    <xsl':'value-of select=@ />				:(LocPath) Ins;
+    <xsl':'value-of select=@> </xsl':'value-of>		:(LocPath) Ins;
+    <xsl':'element name=@> @ </xsl':'element>		:(TEleName Tmpl) Ins;
+    <xsl':'attribute name=@> @ </xsl':'attribute>	:(TAttrName Tmpl) Ins;
+    <xsl':'for-each select=@> @ </xsl':'for-each>	:(LocPath Tmpl) Ins;
+    <xsl':'if test=@> @ </xsl':'if>			:(BExpr Tmpl) Ins;
+    <xsl':'sort @ />					:(SortAttrS) Ins;
+    <xsl':'sort @> </xsl':'sort>			:(SortAttrS) Ins;
+
+    /************ For attributes of sort *************/
+
+    select		:SortAttrName;
+    data-type		:SortAttrName;
+    order		:SortAttrName;
+    @			:(string) SortAttrVal;
+    @			:(LocPath) SortAttrVal;
+    @=@			:(SortAttrName SortAttrVal) SortAttr;
+    @			:(SortAttr) SortAttrS;
+    @ @			:(SortAttr SortAttrS) SortAttrS;
+    get(@,@,@)		:(SortAttrName SortAttrVal SortAttrS) SortAttrVal;
+
+    /************** Convert into abstract Rules **************/
+
+    <@,@>		:(Cond list[TChild]) Rule;
+    @			:(LocPath) Cond;
+
+    @			:(TAttr) TChild;
+    val(@)		:(LocPath) TChild;
+    sel(@)		:(LocPath) TChild;
+    sel(@,@)		:(LocPath list[TChild]) TChild;
+    ifcond(@,@)		:(BExpr list[TChild]) TChild;
+    sort(@,@,@)		:(SortAttrVal SortAttrVal SortAttrVal) TChild;
+
+    /********* The language of Boolean Expressions ********/
+
+    tst(@,@)		:(Node BExpr) bool;
+    @			:(bool) BExpr;
+    not(@)		:(BExpr) BExpr;
+    @ and @		:(BExpr BExpr) BExpr;
+    @ or @		:(BExpr BExpr) BExpr;
+    @ < @		:(NumExpr NumExpr) BExpr;
+    @ <= @		:(NumExpr NumExpr) BExpr;
+    @ > @		:(NumExpr NumExpr) BExpr;
+    @ >= @		:(NumExpr NumExpr) BExpr;
+    @ = @		:(NumExpr NumExpr) BExpr;
+
+    /************ which uses Numeric Expressions ***************/
+
+
+    num(@,@)		:(Node NumExpr) int;
+    number(@)		:(string) int;
+    n1(@,@,@)		:(string int int) int;
+    @			:(int) NumExpr;
+    @			:(LocPath) NumExpr;
+    @ + @		:(NumExpr NumExpr) NumExpr;
+    @ - @		:(NumExpr NumExpr) NumExpr;
+    @ * @		:(NumExpr NumExpr) NumExpr;
+    @ / @		:(NumExpr NumExpr) NumExpr;
+
+    /************ For value-of instruction ***********/
+
+    valueof(@,@)	:(Node LocPath) string;
+    getfirst(@)		:(list[Node]) list[Node];
+    String(@)		:(list[Node]) string;
+    String(@)		:(Node) string;
+
+    /*********** For Sorting ************/
+
+    <@,@>		:(Node int) NSrt;
+    <@,@>		:(Node string) NSrt;
+    make(@,@,@)		:(list[Node] LocPath string) list[NSrt];
+    make(@,@,@)		:(Node LocPath string) NSrt;
+    extract(@)		:(list[NSrt]) list[Node];
+
+    /*********** Apply rules to node or node list ************/
+
+    app @ to @		:(XSL SXML) TXML;
+    app(@,@) 		:(XSL SXML) TXML 	alias app @ to @:;
+
+    app @,@ to @	:(list[Rule] list[Rule] Node) list[TChild];
+    app @ to @		:(list[Rule] list[Node]) list[TChild];
+    app @ to @		:(list[Rule] Node) list[TChild];
+
+    /*********** Instantiated with current node ***********/
+
+    inst @,@ with @	:(list[Rule] list[TChild] list[Node]) list[TChild];
+    inst @,@ with @	:(list[Rule] list[TChild] Node) list[TChild];
+
+  end /*for operators global*/
+
+  rules for list[TChild]
+    n			:Node;
+    nL			:list[Node];
+    pn			:EleNode;
+    str,str1		:string;
+    cL			:list[SChild];/*context list*/
+    tg			:TEleName;   
+    taL			:list[TAttr];
+    tat			:TAttr;
+    san			:SAttrName;
+    an			:TAttrName;
+    be			:BExpr;
+    patt		:RelLocPath;
+    tme			:TmplEle;
+    tm			:Tmpl;
+    r			:Rule;
+    rL,rL1		:list[Rule];
+    T			:TChild;
+    Tl,tl1,tl2		:list[TChild];  
+    ssrt		:list[NSrt];
+    sas			:SortAttrS;
+    v1,v2,v3		:SortAttrVal;
+
+global
+
+// ---------- Find which rule to be selected ---------------
+
+    [] app rL,<patt,Tl>.rL1 to n => inst rL,Tl with n
+			if match(n,patt)
+    end
+
+    [] app rL,<patt,Tl>.rL1 to n => app rL,rL1 to n
+    end
+
+// ----------- Applying rules to a set of nodes --------------
+
+    [] app rL to n.nL => app rL to n @ app rL to nL
+    end
+
+    [] app rL to nil => nil
+    end
+
+// -------- Starting application of a rule over a node -------
+
+    [] app rL to pn => app rL,rL to pn
+    end
+
+// --------- Implicit Rules --------------------
+
+    [] app rL to pn/str.cL => str.nil
+    end
+
+    [] app rL to pn/san=str => str.nil
+    end
+
+    [] app rL,nil to n => inst rL,sel(child::node()).nil with n
+    end
+
+// ----- When the rule is chosen, the chosen rule's template is ----
+// ----- then instantiated with the current node.---------
+
+    [] inst rL,sort(patt,str,"descending").Tl with nL => 
+          inst rL,Tl with extract(ssrt)
+		where ssrt:=(dSort) make(nL,patt,str)
+    end
+
+    [] inst rL,sort(patt,str,"ascending").Tl with nL => 
+          inst rL,Tl with extract(ssrt)
+		where ssrt:=(aSort) make(nL,patt,str)
+    end
+
+    [] inst rL,Tl with n.nL => inst rL,Tl with n @ inst rL,Tl with nL
+    end
+
+    [] inst rL,Tl with nil => nil
+    end
+
+    [] inst rL,str.Tl with n => str.inst rL,Tl with n
+    end
+
+    [] inst rL,tg(taL,tl1).Tl with n => tg(taL,tl2).inst rL,Tl with n
+			where tl2:=() inst rL,tl1 with n
+    end
+
+    [] inst rL,sel(patt).Tl with n => app rL to nL @ inst rL,Tl with n
+			where nL:=() Select(n,patt)
+    end
+
+    [] inst rL,sel(patt,tl1).Tl with n => inst rL,tl1 with nL 
+                                         @inst rL,Tl with n
+			where nL:=() Select(n,patt)
+    end
+
+    [] inst rL,ifcond(be,tl1).Tl with n => inst rL,tl1 with n
+                                          @inst rL,Tl with n
+			if tst(n,be)
+    end
+
+    [] inst rL,ifcond(be,tl1).Tl with n => inst rL,Tl with n
+    end
+
+    [] inst rL,val(patt).Tl with n => valueof(n,patt).inst rL,Tl with n
+    end
+
+    [] inst rL,tat.Tl with n => tat.inst rL,Tl with n
+    end
+
+    [] inst rL,Tl with n => nil
+    end
+
+// -------- Convert RHS of rule to a tree ----------
+
+    [] Tr(tme tm) => Tr(tme) @ Tr(tm)
+    end
+
+    [] Tr(<xsl:attribute name=an> str </xsl:attribute>) => an=str.nil
+    end
+
+    [] Tr(<tg taL/>) => tg(taL,nil).nil
+    end
+
+    [] Tr(<tg taL> tm </tg>) => tg(taL,Tr(tm)).nil
+    end
+
+    [] Tr(<xsl:apply-templates select=patt />) => sel(patt).nil
+    end
+
+    [] Tr(<xsl:value-of select=patt />) => val(patt).nil
+    end
+
+    [] Tr(<xsl:for-each select=patt> tm </xsl:for-each>) => sel(patt,Tr(tm)).nil
+    end
+
+    [] Tr(<xsl:if test=be> tm </xsl:if>) => ifcond(be,Tr(tm)).nil
+    end
+
+    [] Tr(<xsl:sort sas/>) => sort(v1,v2,v3).nil
+			where v1:= () get(select,node(),sas)
+			where v2:= () get(data-type,"number",sas)
+			where v3:= () get(order,"descending",sas)
+    end
+
+    [] Tr(str) => str.nil
+    end
+  end
+
+  rules for list[Rule]
+    patt	:RelLocPath;
+    tm		:Tmpl;
+    tle		:TLEle;
+    tles	:TLEleS;
+    r1L,r2L	:list[Rule];
+    str,str1	:string;
+    str2	:string;
+
+  global
+
+// -------- Transform the whole style-sheet into a set of rules --------
+
+    [] Tr(<xsl:stylesheet version=str2 xmlns:xsl=str xmlns=str1> tles 
+		</xsl:stylesheet>) => Tr(tles)
+		if str2 == "1.0"
+    end
+
+    [] Tr(tle tles) => Tr(tles) @ Tr(tle)
+    end
+ 
+    [] Tr(<xsl:template match=patt> tm </xsl:template>) => <patt,Tr(tm)>.nil
+    end
+  end    
+
+  rules for SortAttrVal
+    sas		:SortAttrS;
+    sa		:SortAttr;
+    sn,n1	:SortAttrName;
+    val,v1	:SortAttrVal;
+  global
+
+// ----------- To get the attributesof sort ------------
+
+    [] get(sn,val,sn=v1 sas) => v1
+    end
+
+    [] get(sn,val,sn=v1) => v1
+    end
+
+    [] get(sn,val,n1=v1) => val
+    end
+
+    [] get(sn,val,n1=v1 sas) => get(sn,val,sas)
+    end
+  end
+
+  rules for LocPath
+    n		:LocPath;
+    rp,rp1,rp2	:RelLocPath;
+    st,st1,st2	:Step;
+    nt,nt1	:NodeTest;
+    ax,ax1	:AxisName;
+    at		:SAttrName;
+  global
+
+/// -------- For concatenating two patterns -------------
+
+    [] /rp => root + rp
+    end
+
+    [] / => root
+    end
+
+    [] rp + st => rp/st
+    end
+
+    [] rp1 + rp2/st => rp1+rp2+st
+    end
+
+// ----------- Reverse of a pattern ------------
+
+    [] rev(st) => first(st) + last(st)
+    end
+
+    [] rev(rp) => first(rp) + reverse(rp) +  last(rp)
+    end
+
+    [] reverse(rp/st1/st2) => reverse(st1/st2) + reverse(rp/st1)
+    end
+
+    [] reverse(attribute::at/parent::nt1) => attribute::at
+    end
+
+    [] reverse(ax::nt/ax1::nt1) => R(ax1)::nt
+    end
+
+    [] first(rp/ax::nt) => self::nt
+    end
+
+    [] first(ax::nt) => self::nt
+    end
+
+    [] last(rp/st) => last(rp)
+    end
+
+    [] last(ax::nt) => R(ax)::node()
+    end
+  end
+
+  rules for Step
+    nt		:NodeTest;
+  global
+
+// ------ Convert into standard form ------------
+
+    [] root => self::root
+    end
+
+    [] nt => child::nt
+    end
+
+    [] @nt => attribute::nt
+    end
+  end
+
+  rules for string
+    n		:Node;
+    pn		:EleNode;
+    nL		:list[Node];
+    at		:SAttrName;
+    str		:string;
+    cL		:list[SChild];
+    path	:RelLocPath;
+  global
+
+// ----------- Get the first node and then its value --------
+
+    [] valueof(n,path) => String(getfirst(Select(n,path)))
+    end
+
+// --------- Converting nodes into string ----------
+
+    [] String(pn/str.cL) => str
+    end
+
+    [] String(pn/at=str) => str
+    end
+
+    [] String(pn) => String(select(pn,descendant::text()))
+    end
+
+    [] String(n.nL) => String(n)+String(nL)
+    end
+
+    [] String(nil) => ""
+    end
+  end
+
+  rules for AxisName
+    a,a1	:AxisName;
+  global
+
+// --------- Reverse Axis for all axes ---------
+
+    [] R(ancestor) => subnode
+    end
+
+    [] R(ancestor-or-self) => subnode-or-self
+    end
+
+    [] R(attribute) => parent
+    end
+
+    [] R(child) => parent
+    end
+
+    [] R(parent) => child
+    end
+
+    [] R(following) => preceding
+    end
+
+    [] R(preceding) => following
+    end
+
+    [] R(following-sibling) => preceding-sibling
+    end
+
+    [] R(preceding-sibling) => following-sibling
+    end
+
+    [] R(descendant) => ancestor
+    end
+
+    [] R(descendant-or-self) => ancestor-or-self
+    end
+
+    [] R(self) => self
+    end
+
+  end
+
+  rules for list[NSrt]
+    patt	:RelLocPath;
+    n		:Node;
+    nL		:list[Node];
+    str		:string;
+  global
+
+// -------- Making a list to be sorted ----------
+
+    [] make(nil,patt,str) => nil
+    end
+
+    [] make(n.nL,patt,str) => make(n,patt,str) . make(nL,patt,str)
+    end
+  end
+
+  rules for NSrt
+    patt	:RelLocPath;
+    n		:Node;
+  global
+
+// -------- Pair with the value in reqd data-type ----------
+
+    [] make(n,patt,"number") => <n,number(valueof(n,patt))>
+    end
+
+    [] make(n,patt,"text") => <n,valueof(n,patt)>
+    end
+  end
+
+  rules for list[Node]
+    nL,n1L	:list[Node];
+    n,n1	:Node;
+    pn		:EleNode;
+    es		:EndStep;
+    aL,aL1	:list[SAttr];
+    cL,cL1	:list[SChild];
+    pL,pL1	:list[SChild];
+    path	:RelLocPath;
+    st		:Step;
+    t,t1	:SEleName;
+    at		:SAttr;
+    an,an1	:SAttrName;
+    nt		:NodeTest;
+    str,str1	:string;
+    a,a1	:AxisName;
+    expr	:Expr;
+    i		:int;
+    nsL		:list[NSrt];
+  global
+
+// ----------- Basic List Operations ------------
+
+    [] (nL) => nL
+    end
+
+    [] -(nil,n) => nil
+    end
+
+    [] -(n.nL,n) => -(nL,n)
+    end
+
+    [] -(n1.nL,n) => n1.-(nL,n)
+    end
+
+    [] -(nL,nil) => nL
+    end
+
+    [] -(nL,n.n1L) => -(-(nL,n),n1L)
+    end
+
+// --------- For re-ordering of Nodes --------------
+
+    [] reorder(nil,nL) => nil
+    end
+
+    [] reorder(nL,nil) => nil
+    end
+
+    [] reorder(n.nL,n1L) => n . reorder(nL,-(n1L,n))
+			if n in n1L
+    end
+
+    [] reorder(n.nL,n1L) => reorder(nL,n1L)
+    end
+
+// ----------  Call select and then reorder -------------
+
+    [] Select(n,path/st) => reorder(nL,n1L)
+			where nL:= () subnode-or-self(root(n))
+			where n1L:= () select(n,path/st)
+    end
+
+    [] Select(n,st) => select(n,st)
+    end
+
+// -----------  Relation Operations ----------------
+
+    [] root(root(cL)) => root(cL).nil
+    end
+
+    [] root(pn/es) => root(pn)
+    end
+
+    [] a(nil) => nil
+    end
+
+    [] a(n.nL) => a(n)@a(nL)
+    end
+
+    [] self(n) => n.nil
+    end
+
+    [] parent(root(cL)) => nil
+    end
+
+    [] parent(pn/t(aL,pL).cL) => self(pn)
+    end
+
+    [] parent(pn/es) => self(pn)
+    end
+
+    [] ancestor(root(cL)) => nil
+    end
+
+    [] ancestor(pn) => ancestor(parent(pn))@parent(pn)
+    end
+
+    [] ancestor(pn/es) =>ancestor(pn)@self(pn)
+    end
+
+    [] ancestor-or-self(n) => ancestor(n)@self(n)
+    end
+
+    [] following-sibling(root(cL)) => nil
+    end
+
+    [] following-sibling(pn/str.nil) => nil
+    end
+
+    [] following-sibling(pn/str.t(aL,pL).cL) => 
+                      pn/t(aL,pL).cL.following-sibling(pn/t(aL,pL).cL)
+    end
+
+    [] following-sibling(pn/str.str1.cL) => 
+                      pn/str1.cL.following-sibling(pn/str1.cL)
+    end
+
+    [] following-sibling(pn/t(aL,pL).nil) => nil
+    end
+
+    [] following-sibling(pn/t(aL,pL).t1(aL1,pL1).cL) => 
+                      pn/t1(aL1,pL1).cL.following-sibling(pn/t1(aL1,pL1).cL)
+    end
+
+    [] following-sibling(pn/t(aL,pL).str.cL) => 
+                      pn/str.cL.following-sibling(pn/str.cL)
+    end
+
+    [] preceding-sibling(n) => -(-(child(parent(n)),self(n)),following-sibling(n))
+    end
+
+    [] attribute(root(pL)) => nil
+    end
+
+    [] attribute(pn/str.cL) => nil
+    end
+
+    [] attribute(pn/t(aL,pL).cL) => getattribute(pn/t(aL,pL).cL,aL)
+    end
+
+    [] getattribute(pn,nil) => nil
+    end
+
+    [] getattribute(pn,at.aL1) => pn/at.getattribute(pn,aL1)
+    end
+
+    [] child(pn/str.cL) => nil
+    end
+
+    [] child(root(pL)) => getchild(root(pL),pL)
+    end
+
+    [] child(pn/t(aL,pL).cL) => getchild(pn/t(aL,pL).cL,pL)
+    end
+
+    [] getchild(pn,nil) => nil
+    end
+
+    [] getchild(pn,str.cL) => pn/str.cL.getchild(pn,cL)
+    end
+
+    [] getchild(pn,t(aL,pL).cL) => pn/t(aL,pL).cL.getchild(pn,cL)
+    end
+
+    [] descendant(pn) => 
+            descendant-or-self(child(pn))
+    end
+
+    [] descendant(pn/es) => nil
+    end
+
+    [] descendant-or-self(n) => self(n)@descendant(n)
+    end
+
+    [] subnode(pn) => attribute(pn)@subnode-or-self(child(pn))
+    end
+
+    [] subnode(pn/es) => nil
+    end
+
+    [] subnode-or-self(n) => self(n)@subnode(n)
+    end
+
+// ----------- select() for pattern with self axis ------------
+
+    [] select(n, self::node()) => self(n)
+    end
+
+    [] select(pn/str.cL, self::text()) => self(pn/str.cL)
+    end
+
+    [] select(n, self::text()) => nil
+    end
+
+    [] select(root(cL), self::root) => self(root(cL))
+    end
+
+    [] select(n, self::root) => nil
+    end
+
+    [] select(root(cL), self::t) => nil
+    end
+
+    [] select(pn/t(aL,pL).cL, self::t) => self(pn/t(aL,pL).cL)
+    end
+
+    [] select(n, self::t) => nil
+    end
+
+    [] select(pn/an=str, self::an) => self(pn/an=str)
+    end
+
+    [] select(pn/an=str, self::an1) => nil
+    end
+
+    [] select(nil, self::nt) => nil
+    end
+
+    [] select(n.nL,self::nt) => 
+               select(n,self::nt)@select(nL,self::nt)
+    end
+
+// ---------- select() for pattern with other axis ------------
+
+    [] select(n,a::nt) => 
+                   select(a(n),self::nt)
+    end
+
+    [] select(n,a::nt[expr]) =>
+               pred(n,select(n,a::nt),expr)
+    end
+
+    [] select(n,path/st) => select(select(n,path),st)
+    end
+
+// ------------ select() for a list of starting nodes --------------
+
+    [] select(nil,path) => nil
+    end
+
+    [] select(n.nL,path) => 
+               select(n,path)@select(nL,path)
+    end
+
+    [] select(n) => select(n,child::node())
+    end
+
+    [] select(n,.) => self(n)
+    end
+
+    [] select(n,..) => parent(n)
+    end
+
+// ----------- Other functions --------------
+
+    [] getfirst(n.nL) => n.nil
+    end
+
+    [] getfirst(nil) => nil
+    end
+
+    [] extract(nil) => nil
+    end
+
+    [] extract(<n,i> . nsL) => n.extract(nsL)
+    end
+  end
+
+  rules for int
+    n		:Node;
+    i,j		:int;
+    n1,n2	:NumExpr;
+    path	:RelLocPath;
+    str,s1	:string;
+  global
+
+// ---------- Finding value of a numeric expression -----------
+
+    [] num(n,i) => i
+    end
+
+    [] num(n,path) => number(valueof(n,path))
+    end
+
+    [] num(n,n1+n2) => num(n,n1) + num(n,n2)
+    end
+
+    [] num(n,n1-n2) => num(n,n1) - num(n,n2)
+    end
+
+    [] num(n,n1*n2) => num(n,n1) * num(n,n2)
+    end
+
+    [] num(n,n1/n2) => num(n,n1) / num(n,n2)
+    end
+
+// ------- Converting string to an integer -------------
+
+    [] number(str) => - number(s1)
+			where i:= ()strlen(str)
+			where s1:= ()substr(str,1,i-1)
+			if str[0]==45
+    end	
+
+    [] number(str) => n1(str,0,strlen(str))
+    end
+
+    [] n1(str,i,0) => i
+    end
+
+    [] n1(str,i,j) => n1(substr(str,1,j-1),10*i+str[0]-48,j-1)
+    end
+  end
+
+  rules for bool
+    n,n1	:Node;
+    path	:RelLocPath;
+    nL		:list[Node];
+    st          :Step;
+    b		:bool;
+    b1,b2	:BExpr;
+    n1,n2	:NumExpr;
+  global
+
+// ---------- A node "in" a node-list ? -------------
+
+    [] n in nil => false
+    end
+
+    [] n in n.nL => true
+    end
+
+    [] n in n1.nL => n in nL
+    end
+
+// ----------- Match function ------------
+
+    [] match(n,path) => not isEmpty(select(n,rev(path)))
+    end
+
+    [] isEmpty(n.nL) => false
+    end
+
+    [] isEmpty(nil) => true
+    end
+
+// -------- Testing a boolean expression for truth ----------
+
+    [] tst(n,b) => b
+    end
+
+    [] tst(n,b1 and b2) => tst(n,b1) and tst(n,b2)
+    end
+
+    [] tst(n,b1 or b2) => tst(n,b1) or tst(n,b2)
+    end
+
+    [] tst(n,not(b1)) => not(tst(n,b1))
+    end
+
+    [] tst(n,n1 < n2) => num(n,n1) < num(n,n2)
+    end
+
+    [] tst(n,n1 > n2) => num(n,n1) > num(n,n2)
+    end
+
+    [] tst(n,n1 <= n2) => num(n,n1) <= num(n,n2)
+    end
+
+    [] tst(n,n1 >= n2) => num(n,n1) >= num(n,n2)
+    end
+
+    [] tst(n,n1 = n2) => num(n,n1) == num(n,n2)
+    end
+  end
+
+  rules for SEle
+    t		:SEleName;
+    pL		:list[SChild];
+    aL		:list[SAttr];
+  global
+
+// ------- Convert to standard form -------------
+
+    []t() => t(nil, nil)
+    end
+
+    []t(pL) => t(nil, pL)
+    end
+
+    []t(aL) => t(aL, nil)
+    end
+  end
+
+  rules for Node
+    x		:SXML;
+  global
+
+// --------- parsing source XML into a tree ----------
+
+      [] Prs(x) => root(P(x))
+    end
+  end
+
+  rules for list[SChild]
+    tg		:SEleName;
+    at		:SAttr;
+    xe		:SXEle;
+    x		:SXML;
+    str		:string;
+    al		:SAttrS;
+  global
+
+// ------- Transforming elements into tree nodes --------
+
+    [] P(xe x) => P(xe) @ P(x)
+    end
+
+    [] P(<tg/>) => tg().nil
+    end
+
+    [] P(<tg> x </tg>) => tg(P(x)).nil
+    end
+
+    [] P(<tg al> x </tg>) => tg(P(al),P(x)).nil
+    end
+
+    [] P(str) => str.nil
+    end
+
+    [] P(xe) => nil
+    end
+  end
+
+  rules for list[SAttr]
+    al		:SAttrS;
+    at		:SAttr;
+  global
+
+// ------- Convert set of attributes into list -----------
+
+    [] P(at al) => P(at) @ P(al)
+    end
+
+    [] P(at) => at.nil
+    end
+  end
+
+  rules for list[TAttr]
+    al		:TAttrS;
+    at		:TAttr;
+  global
+    [] P(at al) => P(at) @ P(al)
+    end
+
+    [] P(at) => at.nil
+    end
+  end
+
+  rules for TXML
+    al		:list[TAttr];
+    T		:list[TChild];
+    t1,t2	:TXML;
+    te		:TXEle;
+    tc		:TChild;
+    tg		:TEleName;
+    str		:string;
+    xsl		:XSL;
+    xml		:SXML;
+  global
+
+// ----------- Applying a stylesheet on source XML ----------
+
+    [] app xsl to xml => I(app Tr(xsl) to Prs(xml))
+    end
+
+// -------- and converting the result back into XML form ---------
+
+    [] I(tc.nil) => I(tc)
+    end
+
+    [] I(tc.T) => te + I(T)
+			where te:= () I(tc)
+    end
+
+    [] I(tg(nil,nil)) => <tg/>
+    end
+
+    [] I(tg(nil,T)) => <tg> I(T) </tg>
+    end
+
+    [] I(tg(al,T)) => <tg I(al)> I(T) </tg>
+    end
+
+    [] I(str) => str
+    end
+
+    [] te + t1 => te t1
+    end
+  end
+
+  rules for TAttrS
+    at		:TAttr;
+    al		:list[TAttr];
+  global
+
+// -------- Transform back list of attributes into set ----------
+
+    [] I(at.nil) => at
+    end
+
+    [] I(at.al) => at I(al)
+    end
+  end
+
+  rules for TChild
+    at		:TAttr;
+    atL		:list[TAttr];
+    tg		:TEleName;
+    Tl		:list[TChild];
+  global
+
+// ----------- Put attribute children produced in the att-list -------
+
+    [] tg(atL,at.Tl) => tg(at.atL,Tl)
+    end
+  end
+
+  rules for Tmpl
+    tm		:Tmpl;
+    atS		:TAttrS;
+    al		:list[TAttr];
+    tg		:TEleName;
+    a		:TAttrName;
+    str		:string;
+    sas		:SortAttrS;
+    rp		:RelLocPath;
+  global
+
+// --------- Converting templates into equivalent standard forms ------
+
+    [] <tg> tm </tg> => <tg nil> tm </tg>
+    end
+
+    [] <tg atS> tm </tg> => <tg P(atS)> tm </tg>
+    end
+
+    [] <xsl:element name=tg> tm </xsl:element> => <tg nil> tm </tg>
+    end
+
+    [] <xsl:text> str </xsl:text> => str
+    end
+
+    [] <xsl:apply-templates /> => <xsl:apply-templates select=node()/>
+    end
+
+    [] <xsl:sort sas> </xsl:sort> => <xsl:sort sas/>
+    end
+
+    [] <xsl:value-of select=rp> </xsl:value-of> => <xsl:value-of select=rp/>
+    end
+
+    [] <tg /> => <tg nil/>
+    end
+
+    [] <tg> </tg> => <tg nil/>
+    end
+
+    [] <tg atS /> => <tg P(atS) />
+    end
+
+    [] <tg atS> </tg> => <tg P(atS) />
+    end
+  end
+
+  rules for list[NSrt]
+    x, y        :Node;
+    x1, y1      :Node;
+    nsL		:list[NSrt];
+    i,j		:int;
+    s1,s2	:string;
+  local
+
+// ----------- Descending sort strategy -----------
+
+    [ddSort]     <x,i>.<y,j>.nsL => <y,j>.<x,i>.nsL
+                choose  try     
+			if j>i
+                end
+    end
+
+    [ddSort]     <x,s1>.<y,s2>.nsL => <y,s2>.<x,s1>.nsL
+                choose  try     
+			if strcmp(s2,s1) >0
+                end
+    end
+
+// ----------- Ascending sort strategy -----------
+
+    [aaSort]     <x,i>.<y,j>.nsL => <y,j>.<x,i>.nsL
+                choose  try     
+			if j<i
+                end
+    end
+
+    [aaSort]     <x,s1>.<y,s2>.nsL => <y,s2>.<x,s1>.nsL
+                choose  try     
+			if strcmp(s2,s1) <0
+                end
+    end
+  end
+
+  stratop global
+    aSort	:<list[NSrt]> bs;
+    dSort	:<list[NSrt]> bs;
+  end
+
+  strategies for list[NSrt]
+  implicit
+
+// ----------- Using normalize for sorting a whole list ----------
+
+    [] dSort => normalize(ddSort)
+    end
+
+    [] aSort => normalize(aaSort)
+    end
+  end 
+end /*for module*/

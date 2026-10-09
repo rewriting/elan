@@ -1,0 +1,14 @@
+LPL trc description
+
+   query of sort  	Foo
+   result of sort 	Foo
+   import 		trc
+//   start with 		(ALLSOL)f(query)
+   start with 		(ALLSOL)f(a)
+
+end
+
+
+
+
+

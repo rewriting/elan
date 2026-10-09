@@ -1,0 +1,32 @@
+module bug
+
+import bool;
+end
+
+sort Term;
+end 
+
+operators global
+  go     : Term;
+  a      : Term; 
+  b      : Term; 
+  c      : Term; 
+  f(@,@) : (Term Term) Term (AC);
+end
+
+rules for Term
+ x,y : Term;
+global
+
+[] go      => f(a,f(b,c))
+end
+
+end
+
+
+end
+				
+
+
+
+

@@ -1,0 +1,19 @@
+#! /bin/csh -f
+#        LGI     SPC                INP        OUT
+
+if ($1 =~ *I*) then
+echo "Interpreter"
+itest    poly1   someVariables      poly1      poly1
+itest    poly2   someVariables      poly2      poly2
+itest    poly3   someVariables      poly3      poly3
+itest    poly4   someVariables      poly4      poly4
+endif
+
+if ($1 =~ *I* && $1 =~ *A*) then
+echo "Aterm-Interpreted"
+aitest    poly1   someVariables      poly1      poly1
+aitest    poly2   someVariables      poly2      poly2
+aitest    poly3   someVariables      poly3      poly3
+aitest    poly4   someVariables      poly4      poly4
+endif
+

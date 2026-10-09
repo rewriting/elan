@@ -1,0 +1,23 @@
+module gpo_constraint[Vars,Ops]
+import	global termCommons[Ops,Vars];
+	local Vars Ops;
+end
+
+sort gpo_term gpo_constraint;
+end 
+  
+operators
+global
+	@ > @		: (term term) gpo_term;
+	@ = @ 		: (term term) gpo_term;
+	Tgpo		: gpo_constraint;
+	@ ^ @		: (gpo_term gpo_constraint) gpo_constraint;
+	(@ ^ @)		: (gpo_term gpo_constraint) gpo_constraint alias @ ^ @:;
+end
+
+end
+
+
+
+
+

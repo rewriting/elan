@@ -1,0 +1,45 @@
+% Specification fields
+
+use: nat ;
+
+sorts: state set ;
+
+constructors :
+  empty		: set;
+  error		: state;
+  set_		: nat -> set;
+  U__		: set set -> set; ac;
+
+defined functions :
+  init_		: nat -> state;
+  state___	: set set nat -> state;
+  buildSet_	: nat -> set;
+  in__		: nat set -> bool;
+  plus__	: nat nat -> nat ;
+axioms:
+   plus(X,0)		= X ; 
+   plus(X,s(Y))		= s(plus(X,Y)) ; 
+   in(I,empty)	        = false	;
+   I=J => in(I,U(set(J),S)) = true ;
+   in(I,S)		= false	;
+   buildSet(0)	        = empty ;
+   buildSet(s(I))       = U(set(s(I)),buildSet(I)) ;
+   init(I)	        = state(buildSet(I),empty,0) ;
+   in(I,S2)=true =>
+   state(U(set(I),S1) , S2 , J) = error ;
+
+   in(I,S2)=false =>
+   state(U(set(I),S1) , S2 , J) = state(S1, U(S2,set(I)), plus(J,I));
+
+status:
+U MS ;
+
+norm:
+
+state(buildSet(20),empty,0) ;
+
+% state(buildSet(100),empty,0) ;
+
+
+
+

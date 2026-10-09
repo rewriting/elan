@@ -1,0 +1,25 @@
+LPL fib_builtin description
+  query    of sort builtinInt
+  result   of sort builtinInt
+  import   fib_builtin
+//  start with () query
+  start with () fib(33) 
+
+end
+
+/*
+avec int :
+fib(33) (DEBUG)
+	result[34217317] = (5702887)
+	129.703u 0.449s 2:23.82
+
+fib(33) (-fast)
+	47.768u 0.332s 0:50.28
+
+fib(33) end
+	[] result term: 
+	     5702887
+	total time : 7.700 sec
+
+
+*/

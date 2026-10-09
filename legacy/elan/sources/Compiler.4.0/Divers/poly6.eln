@@ -1,0 +1,97 @@
+module poly6[Vars]
+
+import global int Vars eq[variable] identifier list[identifier] pair[poly,variable];
+end
+sort variable poly;
+end
+operators global
+  FOR EACH Id:identifier SUCH THAT Id:=(listExtract) elem(Vars) :
+ { Id : variable; } 
+
+  @             : ( variable ) poly pri 1000;
+  @             : ( int ) poly pri 1000;
+  @ + @         : ( poly poly ) poly  assocRight pri 1 (AC);
+  (@ + @)       : ( poly poly ) poly  alias @ + @:;
+  @ * @         : ( poly  poly) poly  assocRight pri 2 (AC);
+  (@ * @)       : ( poly  poly) poly  alias @ * @:;
+  deriv(@,@)    : ( poly variable) poly;
+
+  pp(@)         : (poly) poly;
+  eval(@)       : ( poly ) pair[poly,variable];
+end
+
+stratop global
+  simplify      : <poly>        builtin;
+//  strat0        : <poly->pair[poly,variable]> builtin; 
+  strat0        : <pair[poly,variable]> builtin; 
+end
+
+rules for pair[poly,variable]
+  p,q                   : poly;
+global
+  [doitx] eval(p)       => [q,X] where q:=(simplify)deriv(p,X) end
+  [doity] eval(p)       => [q,Y] where q:=(simplify)deriv(p,Y) end
+end
+
+rules for poly
+  P                     : poly;
+  p1, p2, p3, p4        : poly;
+  ac1, ac2              : poly;
+  a1,a2,a3,a4           : poly;
+  x, y                  : variable;
+  n, n1, n2, n3         : int;
+global
+
+  []  P+0               => P                            end
+  []  P*0               => 0                            end
+  []  P*1               => P                            end
+  []  n1*n2             => n where n:=() n1*n2          end
+
+  [factorize]  P + p1+p1         => P + 2*p1            end
+  
+  [factorize]  P + ac1 => P + n3*p1
+                where (poly) n1*p1 + n2*p1 :=()ac1
+                where n3:=()n1+n2               end
+
+  [factorize]  P + ac1 => P + p1*a1
+                where (poly) p1*p2 + p1*p3 :=()ac1
+                where a1:=(simplify)p2+p3               end
+
+  [expand]  P + ac1 => P + a1 + a2 + a3 + a4
+                where (poly) (p1 + p2) * (p3 + p4) :=()ac1
+                where a1:=(simplify)p2*p4
+                where a2:=(simplify)p2*p3
+                where a3:=(simplify)p1*p4
+                where a4:=(simplify)p1*p3               end
+
+  [expand]  P + ac1 => P + a1 + a2
+                where (poly) (p1+p2)*p3 :=()ac1
+                where a1:=(simplify)p2*p3
+                where a2:=(simplify)p1*p3               end
+
+  []  deriv(x,x)        => 1                            end
+  []  deriv(y,x)        => 0    if $x != $y             end
+  []  deriv(n,x)        => 0                            end
+  []  deriv(p1+p2,x)    => deriv(p1,x) + deriv(p2,x)    end
+  []  deriv(p1*p2,x)    => p1*deriv(p2,x) + deriv(p1,x)*p2
+  end
+
+end
+
+strategies for poly
+implicit
+  [.] simplify =>
+//    normalise( dc(expand) ) ; normalise( dc(factorize) )
+    normalise( first one(expand) ) ; normalise( first one(factorize) )
+  end
+end
+
+//strategies for poly->pair[poly,variable]
+strategies for pair[poly,variable]
+implicit
+ [] strat0 => dk(doitx,doity) end
+end
+
+end
+
+

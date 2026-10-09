@@ -1,0 +1,213 @@
+/* Timed graph generated for the parallel composition of:
+	automaton 0: drobot.tg
+	automaton 1: grobot.tg
+	automaton 2: station.tg
+	automaton 3: box.tg
+*/
+#states 30
+#trans  49
+#clocks  4
+	X /* drobot */
+	Y /* grobot */
+	Z /* station */
+	B /* box */
+
+
+state: 0	/* vector state: < 0, 0, 0, 0 > */
+prop: DWAIT GINSPECT SEMPTY BMOV
+invar: B<=134
+trans:
+L: 133<=B and B<=134 =C> BMOV ; RESET{ B }; goto 1
+
+state: 1	/* vector state: < 0, 0, 0, 1 > */
+prop: DWAIT GINSPECT SEMPTY BINSPECT
+invar: B<=21
+trans:
+L: B<=21 =C> MIDDLE ; RESET{ Y }; goto 2
+
+state: 2	/* vector state: < 0, 1, 0, 1 > */
+prop: DWAIT GPICK SEMPTY BINSPECT
+invar: Y<=8 and B<=21
+trans:
+L: 3<=Y and Y<=8 and B<=21 =C> GPICK ; RESET{ Y }; goto 3
+
+state: 3	/* vector state: < 0, 2, 0, 2 > */
+prop: DWAIT GTURNR SEMPTY BONG
+invar: Y<=10
+trans:
+L: 6<=Y and Y<=10 =C> GTURNR ; RESET{ Y }; goto 4
+
+state: 4	/* vector state: < 0, 3, 0, 2 > */
+prop: DWAIT GWAIT SEMPTY BONG
+invar: TRUE
+trans:
+L: TRUE =C> SEMPTY ; RESET{ Y }; goto 5
+
+state: 5	/* vector state: < 0, 4, 0, 2 > */
+prop: DWAIT GPUT SEMPTY BONG
+invar: Y<=2
+trans:
+L: 1<=Y and Y<=2 =C> GPUT ; RESET{ Y Z }; goto 6
+
+state: 6	/* vector state: < 0, 5, 1, 3 > */
+prop: DWAIT GTURNL SBUSY BONS
+invar: Y<=10 and Z<=10
+trans:
+L: 8<=Y and Y<=10 =C> GTURNL ; RESET{ Y }; goto 7
+L: 8<=Z and Z<=10 =C> SBUSY ; RESET{ Z }; goto 8
+
+state: 7	/* vector state: < 0, 0, 1, 3 > */
+prop: DWAIT GINSPECT SBUSY BONS
+invar: Z<=10
+trans:
+L: 8<=Z and Z<=10 =C> SBUSY ; RESET{ Z }; goto 9
+
+state: 8	/* vector state: < 0, 5, 2, 3 > */
+prop: DWAIT GTURNL SREADY BONS
+invar: Y<=10
+trans:
+L: 8<=Y and Y<=10 =C> GTURNL ; RESET{ Y }; goto 9
+L: TRUE =C> SREADY ; RESET{ X }; goto 10
+
+state: 9	/* vector state: < 0, 0, 2, 3 > */
+prop: DWAIT GINSPECT SREADY BONS
+invar: TRUE
+trans:
+L: TRUE =C> SREADY ; RESET{ X }; goto 11
+
+state: 10	/* vector state: < 1, 5, 2, 3 > */
+prop: DPICK GTURNL SREADY BONS
+invar: X<=2 and Y<=10
+trans:
+L: 8<=Y and Y<=10 =C> GTURNL ; RESET{ Y }; goto 11
+L: 1<=X and X<=2 =C> DPICK ; RESET{ X Z }; goto 12
+
+state: 11	/* vector state: < 1, 0, 2, 3 > */
+prop: DPICK GINSPECT SREADY BONS
+invar: X<=2
+trans:
+L: 1<=X and X<=2 =C> DPICK ; RESET{ X Z }; goto 13
+
+state: 12	/* vector state: < 2, 5, 0, 4 > */
+prop: DTURNR GTURNL SEMPTY BOND
+invar: X<=6 and Y<=10
+trans:
+L: 5<=X and X<=6 =C> DTURNR ; RESET{ X }; goto 14
+L: 8<=Y and Y<=10 =C> GTURNL ; RESET{ Y }; goto 13
+
+state: 13	/* vector state: < 2, 0, 0, 4 > */
+prop: DTURNR GINSPECT SEMPTY BOND
+invar: X<=6
+trans:
+L: 5<=X and X<=6 =C> DTURNR ; RESET{ X }; goto 15
+
+state: 14	/* vector state: < 3, 5, 0, 4 > */
+prop: DPUT GTURNL SEMPTY BOND
+invar: X<=2 and Y<=10
+trans:
+L: 8<=Y and Y<=10 =C> GTURNL ; RESET{ Y }; goto 15
+L: 1<=X and X<=2 =C> DPUT ; RESET{ X B }; goto 16
+
+state: 15	/* vector state: < 3, 0, 0, 4 > */
+prop: DPUT GINSPECT SEMPTY BOND
+invar: X<=2
+trans:
+L: 1<=X and X<=2 =C> DPUT ; RESET{ X B }; goto 17
+
+state: 16	/* vector state: < 4, 5, 0, 0 > */
+prop: DTURNL GTURNL SEMPTY BMOV
+invar: X<=6 and Y<=10 and B<=134
+trans:
+L: 5<=X and X<=6 =C> DTURNL ; RESET{ X }; goto 18
+L: 8<=Y and Y<=10 =C> GTURNL ; RESET{ Y }; goto 17
+L: 133<=B and B<=134 =C> BMOV ; RESET{ B }; goto 19
+
+state: 17	/* vector state: < 4, 0, 0, 0 > */
+prop: DTURNL GINSPECT SEMPTY BMOV
+invar: X<=6 and B<=134
+trans:
+L: 5<=X and X<=6 =C> DTURNL ; RESET{ X }; goto 0
+L: 133<=B and B<=134 =C> BMOV ; RESET{ B }; goto 20
+
+state: 18	/* vector state: < 0, 5, 0, 0 > */
+prop: DWAIT GTURNL SEMPTY BMOV
+invar: Y<=10 and B<=134
+trans:
+L: 8<=Y and Y<=10 =C> GTURNL ; RESET{ Y }; goto 0
+L: 133<=B and B<=134 =C> BMOV ; RESET{ B }; goto 21
+
+state: 19	/* vector state: < 4, 5, 0, 1 > */
+prop: DTURNL GTURNL SEMPTY BINSPECT
+invar: X<=6 and Y<=10 and B<=21
+trans:
+L: 5<=X and X<=6 =C> DTURNL ; RESET{ X }; goto 21
+L: 8<=Y and Y<=10 =C> GTURNL ; RESET{ Y }; goto 20
+
+state: 20	/* vector state: < 4, 0, 0, 1 > */
+prop: DTURNL GINSPECT SEMPTY BINSPECT
+invar: X<=6 and B<=21
+trans:
+L: 5<=X and X<=6 =C> DTURNL ; RESET{ X }; goto 1
+L: B<=21 =C> MIDDLE ; RESET{ Y }; goto 22
+
+state: 21	/* vector state: < 0, 5, 0, 1 > */
+prop: DWAIT GTURNL SEMPTY BINSPECT
+invar: Y<=10 and B<=21
+trans:
+L: 8<=Y and Y<=10 =C> GTURNL ; RESET{ Y }; goto 1
+
+state: 22	/* vector state: < 4, 1, 0, 1 > */
+prop: DTURNL GPICK SEMPTY BINSPECT
+invar: X<=6 and Y<=8 and B<=21
+trans:
+L: 5<=X and X<=6 =C> DTURNL ; RESET{ X }; goto 2
+L: 3<=Y and Y<=8 and B<=21 =C> GPICK ; RESET{ Y }; goto 23
+
+state: 23	/* vector state: < 4, 2, 0, 2 > */
+prop: DTURNL GTURNR SEMPTY BONG
+invar: X<=6 and Y<=10
+trans:
+L: 5<=X and X<=6 =C> DTURNL ; RESET{ X }; goto 3
+L: 6<=Y and Y<=10 =C> GTURNR ; RESET{ Y }; goto 24
+
+state: 24	/* vector state: < 4, 3, 0, 2 > */
+prop: DTURNL GWAIT SEMPTY BONG
+invar: X<=6
+trans:
+L: 5<=X and X<=6 =C> DTURNL ; RESET{ X }; goto 4
+L: TRUE =C> SEMPTY ; RESET{ Y }; goto 25
+
+state: 25	/* vector state: < 4, 4, 0, 2 > */
+prop: DTURNL GPUT SEMPTY BONG
+invar: X<=6 and Y<=2
+trans:
+L: 5<=X and X<=6 =C> DTURNL ; RESET{ X }; goto 5
+L: 1<=Y and Y<=2 =C> GPUT ; RESET{ Y Z }; goto 26
+
+state: 26	/* vector state: < 4, 5, 1, 3 > */
+prop: DTURNL GTURNL SBUSY BONS
+invar: X<=6 and Y<=10 and Z<=10
+trans:
+L: 5<=X and X<=6 =C> DTURNL ; RESET{ X }; goto 6
+L: 8<=Y and Y<=10 =C> GTURNL ; RESET{ Y }; goto 27
+L: 8<=Z and Z<=10 =C> SBUSY ; RESET{ Z }; goto 28
+
+state: 27	/* vector state: < 4, 0, 1, 3 > */
+prop: DTURNL GINSPECT SBUSY BONS
+invar: X<=6 and Z<=10
+trans:
+L: 5<=X and X<=6 =C> DTURNL ; RESET{ X }; goto 7
+L: 8<=Z and Z<=10 =C> SBUSY ; RESET{ Z }; goto 29
+
+state: 28	/* vector state: < 4, 5, 2, 3 > */
+prop: DTURNL GTURNL SREADY BONS
+invar: X<=6 and Y<=10
+trans:
+L: 5<=X and X<=6 =C> DTURNL ; RESET{ X }; goto 8
+L: 8<=Y and Y<=10 =C> GTURNL ; RESET{ Y }; goto 29
+
+state: 29	/* vector state: < 4, 0, 2, 3 > */
+prop: DTURNL GINSPECT SREADY BONS
+invar: X<=6
+trans:
+L: 5<=X and X<=6 =C> DTURNL ; RESET{ X }; goto 9

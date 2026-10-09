@@ -1,0 +1,31 @@
+
+\let\CF=\rm
+% Remember to use the lgrind style
+
+\File{rule\-family\-ex.eln},{17:23},{Jun 21 1996}
+\L{\LB{\K{rules}_\K{for}_\V{bool}}}
+\L{\LB{\K{bodies}}}
+\L{\LB{}}
+\L{\LB{__[\V{not1}]__\V{not}_\V{true}_=\>_\V{false}_\K{end}}}
+\L{\LB{__[\V{not2}]__\V{not}_\V{false}_=\>_\V{true}_\K{end}}}
+\L{\LB{}}
+\L{\LB{__\K{rules}_\K{for}_\V{bool}}}
+\L{\LB{__\K{declare}_\V{P}_:_\V{bool};}}
+\L{\LB{__\K{bodies}}}
+\L{\LB{____[\V{or1}]__\V{P}_\V{or}_\V{true}_=\>_\V{true}_\K{end}}}
+\L{\LB{____[\V{or2}]__\V{P}_\V{or}_\V{false}_=\>_\V{P}__\K{end}}}
+\L{\LB{}}
+\L{\LB{____\K{rule}_\V{and}}}
+\L{\LB{____\K{declare}_\V{Q}_:_\V{bool};}}
+\L{\LB{____\K{body}}}
+\L{\LB{}\Tab{8}{\V{P}_\V{and}_\V{Q}_=\>_\V{not}_(_\V{not}_\V{P}_\V{or}_\V{not}_\V{Q}_)}}
+\L{\LB{____\K{end}}}
+\L{\LB{__\K{end}_\K{of}_\K{rules}}}
+\L{\LB{}}
+\L{\LB{__\K{rule}_\V{inteq}}}
+\L{\LB{__\K{declare}_\V{n1},_\V{n2}_:_\V{int};}}
+\L{\LB{__\K{body}}}
+\L{\LB{____\V{n1}_=_\V{n2}_=\>_\V{inteq}(\V{n1},\V{n2})}}
+\L{\LB{__\K{end}}}
+\L{\LB{}}
+\L{\LB{\K{end}_\K{of}_\K{rules}}}

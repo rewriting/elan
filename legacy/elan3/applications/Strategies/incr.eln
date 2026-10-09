@@ -1,0 +1,18 @@
+module incr[X]
+
+import global int symbol[3,X,list[X],int,int];
+
+op global
+  incr(@,@,@)  : (X list[X] int) int;
+end
+
+rules for int
+ a : X;
+	r : list[X];
+	n : int;
+bodies
+  []	incr(a,r,n) => n+1						end
+end
+
+
+end 

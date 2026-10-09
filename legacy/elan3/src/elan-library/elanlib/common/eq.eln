@@ -1,0 +1,15 @@
+// This file is generated automatically: do not edit it directly. 
+module eq[X]
+        import bool cmp[X];
+        end
+        operators
+          global
+
+            @ == @      : ( X X ) bool          alias @ == @:;
+            @ != @      : ( X X ) bool          alias @ != @:;
+            eq_X(@,@)   : ( X X ) bool          alias @ == @:;
+            neq_X(@,@)  : ( X X ) bool          alias @ != @:;
+
+        end
+end  
+ 

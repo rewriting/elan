@@ -1,0 +1,11 @@
+LPL err description
+
+query		of sort  	lterm
+		result of sort 	lterm
+		import 		err
+		start with 	() repl(one,  
+		la la la (succ(one) ((succ(succ(one)) succ(one)) one)),
+		la la one   )
+
+
+end

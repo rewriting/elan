@@ -1,0 +1,15 @@
+ h(F(a,b),c) end
+
+ h(F(a,c),b) end
+
+ h(F(b,c),a) end
+
+ h(a,F(b,c)) end
+
+ h(b,F(a,c)) end
+
+ h(c,F(a,b)) end
+
+ end end
+end
+

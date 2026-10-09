@@ -1,0 +1,9 @@
+LPL ac4e description
+
+  query 	of sort term
+         	result of sort term
+	 	import ac4e
+//         	start with (s0) query 
+		start with (s0) U(f(a),U(f(b),U(f(c),U(f(d),f(e)))))
+end
+

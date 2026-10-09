@@ -1,0 +1,13 @@
+LPL hie2 description
+
+//  query 	of sort bool
+//         	result of sort bool
+  query 	of sort Set
+         	result of sort Set
+
+
+	 	import hie2 eq[Set]
+         	start with () query 
+
+end
+

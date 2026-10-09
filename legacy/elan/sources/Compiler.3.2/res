@@ -1,0 +1,629 @@
+Flat profile:
+
+Each sample counts as 0.01 seconds.
+  %   cumulative   self              self     total           
+ time   seconds   seconds    calls  ms/call  ms/call  name    
+ 26.86     52.78    52.78                             GC_mark_from
+ 14.93     82.12    29.34 70919159     0.00     0.00  term_notDestructEqual
+ 13.09    107.85    25.73 28731984     0.00     0.00  _setChoicePoint
+ 12.65    132.71    24.86 28731980     0.00     0.00  makeLongJump
+  4.60    141.75     9.04                             GC_reclaim_clear4
+  3.80    149.21     7.46 12912007     0.00     0.00  fun_331
+  3.60    156.28     7.07   810493     0.01     0.13  str_472
+  3.36    162.88     6.60                             GC_malloc
+  2.99    168.75     5.87 426908539     0.00     0.00  hashTerm
+  2.42    173.51     4.76        1  4760.00 123690.00  build_whole_system
+  2.08    177.59     4.08 17777067     0.00     0.00  doobs_hfunction
+  1.75    181.03     3.44  5281230     0.00     0.01  str_494
+  1.13    183.25     2.22 12772007     0.00     0.00  fun_321
+  1.01    185.23     1.98  6311732     0.00     0.00  fun_333
+  0.64    186.49     1.26  6311732     0.00     0.00  fun_320
+  0.49    187.45     0.96  6311732     0.00     0.00  fun_332
+  0.44    188.32     0.87 19223739     0.00     0.00  term_getArray
+  0.40    189.10     0.78 28731980     0.00     0.00  globalFail
+  0.38    189.84     0.74                             GC_add_to_black_list_stack
+  0.33    190.48     0.64                             GC_apply_to_all_blocks
+  0.27    191.01     0.53  6311732     0.00     0.00  fun_343
+  0.27    191.54     0.53                             GC_clear_stack_inner
+  0.26    192.06     0.52 12772007     0.00     0.00  cCut
+  0.23    192.51     0.45 19083767     0.00     0.00  term_getLength
+  0.17    192.84     0.33 12772007     0.00     0.00  cCutMark
+  0.17    193.17     0.33  8180029     0.00     0.00  fun_416
+  0.12    193.41     0.24                             GC_generic_malloc_inner
+  0.12    193.64     0.23                             GC_next_used_block
+  0.11    193.85     0.21                             GC_block_nearly_full1
+  0.10    194.05     0.20                             GC_continue_reclaim
+  0.10    194.24     0.19                             GC_reclaim_small_nonempty_block
+  0.09    194.42     0.18                             GC_build_fl_clear4
+  0.09    194.60     0.18                             GC_find_start
+  0.09    194.77     0.17  5001507     0.00     0.00  fun_360
+  0.09    194.94     0.17                             GC_clear_hdr_marks
+  0.08    195.10     0.16   747545     0.00     0.00  fun_415
+  0.07    195.23     0.13  6451732     0.00     0.00  term_setArray
+  0.07    195.36     0.13                             GC_clear_stack
+  0.06    195.47     0.11                             GC_reclaim_block
+  0.05    195.57     0.10  5001506     0.00     0.00  fun_356
+  0.05    195.67     0.10  4541652     0.00     0.00  term_alloc
+  0.05    195.76     0.09                             GC_invoke_finalizers
+  0.04    195.84     0.08   756669     0.00     0.00  fun_414
+  0.04    195.91     0.07                             GC_block_empty
+  0.04    195.98     0.07                             GC_reclaim_generic
+  0.03    196.04     0.06       28     2.14    13.46  fun_334
+  0.03    196.10     0.06                             GC_generic_malloc
+  0.03    196.15     0.05                             GC_allocobj
+  0.03    196.20     0.05                             GC_noop1
+  0.02    196.24     0.04   810493     0.00     0.00  fun_362
+  0.02    196.28     0.04                             GC_write_hint
+  0.02    196.32     0.04                             clear_marks_for_block
+  0.02    196.35     0.03                             GC_allochblk_nth
+  0.01    196.37     0.02                             GC_allochblk
+  0.01    196.39     0.02                             GC_approx_sp
+  0.01    196.41     0.02                             GC_mark_some
+  0.01    196.43     0.02                             GC_push_next_marked_uncollectable
+  0.01    196.45     0.02                             GC_stopped_mark
+  0.01    196.46     0.01   140000     0.00     0.00  fun_302
+  0.01    196.47     0.01                             GC_adj_words_allocd
+  0.01    196.48     0.01                             GC_never_stop_func
+  0.01    196.49     0.01                             GC_number_stack_black_listed
+  0.01    196.50     0.01                             GC_push_one
+  0.01    196.51     0.01                             GC_push_regs
+  0.01    196.52     0.01                             GC_read_changed
+  0.00    196.52     0.00   279945     0.00     0.00  fun_317
+  0.00    196.52     0.00      581     0.00     0.00  fsym_init
+  0.00    196.52     0.00       28     0.00    13.46  fun_319
+  0.00    196.52     0.00       28     0.00     0.00  fun_323
+  0.00    196.52     0.00        9     0.00     0.00  listTermCreate
+  0.00    196.52     0.00        6     0.00     0.00  getSymbolIndex
+  0.00    196.52     0.00        4     0.00     0.00  addTermListTerm
+  0.00    196.52     0.00        2     0.00     0.00  getStrategyIndex
+  0.00    196.52     0.00        1     0.00     0.00  EarleyParser
+  0.00    196.52     0.00        1     0.00     0.00  EarleyParserInit
+  0.00    196.52     0.00        1     0.00     0.00  EkerTermInit
+  0.00    196.52     0.00        1     0.00     0.00  backTrackInit
+  0.00    196.52     0.00        1     0.00     0.00  choice_init
+  0.00    196.52     0.00        1     0.00     0.00  computeTerm
+  0.00    196.52     0.00        1     0.00     0.00  findTab
+  0.00    196.52     0.00        1     0.00     0.00  fun_318
+  0.00    196.52     0.00        1     0.00     0.00  fun_357
+  0.00    196.52     0.00        1     0.00     0.00  fun_361
+  0.00    196.52     0.00        1     0.00     0.00  initElanLib
+  0.00    196.52     0.00        1     0.00     0.00  initTabRef
+  0.00    196.52     0.00        1     0.00     0.00  normalise
+  0.00    196.52     0.00        1     0.00     0.00  str_127
+  0.00    196.52     0.00        1     0.00     0.00  symbol_init
+  0.00    196.52     0.00        1     0.00     0.00  term_newArray
+
+ %         the percentage of the total running time of the
+time       program used by this function.
+
+cumulative a running sum of the number of seconds accounted
+ seconds   for by this function and those listed above it.
+
+ self      the number of seconds accounted for by this
+seconds    function alone.  This is the major sort for this
+           listing.
+
+calls      the number of times this function was invoked, if
+           this function is profiled, else blank.
+ 
+ self      the average number of milliseconds spent in this
+ms/call    function per call, if this function is profiled,
+	   else blank.
+
+ total     the average number of milliseconds spent in this
+ms/call    function and its descendents per call, if this 
+	   function is profiled, else blank.
+
+name       the name of the function.  This is the minor sort
+           for this listing. The index shows the location of
+	   the function in the gprof listing. If the index is
+	   in parenthesis it shows where it would appear in
+	   the gprof listing if it were to be printed.
+
+		     Call graph (explanation follows)
+
+
+granularity: each sample hit covers 4 byte(s) for 0.01% of 196.52 seconds
+
+index % time    self  children    called     name
+                                                 <spontaneous>
+[1]     62.9    0.00  123.69                 main [1]
+                4.76  118.93       1/1           build_whole_system [2]
+                0.00    0.00       1/28731984     _setChoicePoint [10]
+                0.00    0.00       1/1           initElanLib [85]
+                0.00    0.00       1/1           EarleyParser [75]
+                0.00    0.00       1/1           normalise [87]
+                0.00    0.00       1/2           getStrategyIndex [74]
+                0.00    0.00       1/1           str_127 [88]
+-----------------------------------------------
+                4.76  118.93       1/1           main [1]
+[2]     62.9    4.76  118.93       1         build_whole_system [2]
+                7.07   96.28  810493/810493      str_472 [3]
+                7.26    2.32 17558482/70919159     term_notDestructEqual [5]
+                0.14    4.33 5001505/28731980     globalFail [11]
+                0.73    0.00  810493/28731984     _setChoicePoint [10]
+                0.00    0.38      28/28          fun_319 [26]
+                0.17    0.00 5001507/5001507     fun_360 [38]
+                0.07    0.05 5001506/426908539     hashTerm [14]
+                0.10    0.00 5001506/5001506     fun_356 [44]
+                0.04    0.00  810493/810493      fun_362 [52]
+                0.00    0.00       6/6           getSymbolIndex [72]
+                0.00    0.00       1/2           getStrategyIndex [74]
+                0.00    0.00       1/1           fun_357 [83]
+                0.00    0.00       1/1           fun_361 [84]
+-----------------------------------------------
+                             5649782             str_472 [3]
+                7.07   96.28  810493/810493      build_whole_system [2]
+[3]     52.6    7.07   96.28  810493+5649782 str_472 [3]
+                3.44   23.93 5281230/5281230     str_494 [8]
+                0.53   26.02 6311732/6311732     fun_343 [9]
+                0.50   15.96 18449246/28731980     globalFail [11]
+                1.12   14.76 6460275/12772007     fun_321 [6]
+                5.79    0.00 6461753/28731984     _setChoicePoint [10]
+                2.67    0.86 6460275/70919159     term_notDestructEqual [5]
+                0.33    0.03 8180029/8180029     fun_416 [28]
+                0.08    0.16  756669/756669      fun_414 [30]
+                0.10    0.00 4541652/4541652     term_alloc [45]
+                             5649782             str_472 [3]
+-----------------------------------------------
+                                                 <spontaneous>
+[4]     26.9   52.78    0.00                 GC_mark_from [4]
+-----------------------------------------------
+                             243637989             term_notDestructEqual [5]
+                0.02    0.01   49303/70919159     fun_416 [28]
+                2.67    0.86 6460275/70919159     str_472 [3]
+                4.23    1.35 10233166/70919159     fun_333 [16]
+                7.26    2.32 17558482/70919159     build_whole_system [2]
+               15.15    4.85 36617933/70919159     fun_331 [7]
+[5]     19.7   29.34    9.39 70919159+243637989 term_notDestructEqual [5]
+                5.54    3.85 402823294/426908539     hashTerm [14]
+                             243637989             term_notDestructEqual [5]
+-----------------------------------------------
+                1.10   14.42 6311732/12772007     fun_343 [9]
+                1.12   14.76 6460275/12772007     str_472 [3]
+[6]     16.0    2.22   29.19 12772007         fun_321 [6]
+                7.38   19.78 12772007/12912007     fun_331 [7]
+                0.58    0.00 12772007/19223739     term_getArray [20]
+                0.52    0.00 12772007/12772007     cCut [24]
+                0.33    0.00 12772007/12772007     cCutMark [29]
+                0.30    0.00 12772007/19083767     term_getLength [25]
+                0.18    0.12 12772007/426908539     hashTerm [14]
+-----------------------------------------------
+                             23705926             fun_331 [7]
+                0.08    0.22  140000/12912007     fun_334 [27]
+                7.38   19.78 12772007/12912007     fun_321 [6]
+[7]     14.0    7.46   20.00 12912007+23705926 fun_331 [7]
+               15.15    4.85 36617933/70919159     term_notDestructEqual [5]
+                             23705926             fun_331 [7]
+-----------------------------------------------
+                3.44   23.93 5281230/5281230     str_472 [3]
+[8]     13.9    3.44   23.93 5281230         str_494 [8]
+               19.22    0.00 21459737/28731984     _setChoicePoint [10]
+                0.14    4.57 5281229/28731980     globalFail [11]
+-----------------------------------------------
+                0.53   26.02 6311732/6311732     str_472 [3]
+[9]     13.5    0.53   26.02 6311732         fun_343 [9]
+                1.10   14.42 6311732/12772007     fun_321 [6]
+                1.26    9.24 6311732/6311732     fun_320 [13]
+-----------------------------------------------
+                0.00    0.00       1/28731984     main [1]
+                0.73    0.00  810493/28731984     build_whole_system [2]
+                5.79    0.00 6461753/28731984     str_472 [3]
+               19.22    0.00 21459737/28731984     str_494 [8]
+[10]    13.1   25.73    0.00 28731984         _setChoicePoint [10]
+-----------------------------------------------
+                0.14    4.33 5001505/28731980     build_whole_system [2]
+                0.14    4.57 5281229/28731980     str_494 [8]
+                0.50   15.96 18449246/28731980     str_472 [3]
+[11]    13.0    0.78   24.86 28731980         globalFail [11]
+               24.86    0.00 28731980/28731980     makeLongJump [12]
+-----------------------------------------------
+               24.86    0.00 28731980/28731980     globalFail [11]
+[12]    12.7   24.86    0.00 28731980         makeLongJump [12]
+-----------------------------------------------
+                1.26    9.24 6311732/6311732     fun_343 [9]
+[13]     5.3    1.26    9.24 6311732         fun_320 [13]
+                1.98    6.55 6311732/6311732     fun_333 [16]
+                0.29    0.00 6311732/19223739     term_getArray [20]
+                0.15    0.00 6311732/19083767     term_getLength [25]
+                0.09    0.06 6311732/426908539     hashTerm [14]
+                0.13    0.00 6311732/6451732     term_setArray [41]
+-----------------------------------------------
+                0.07    0.05 5001506/426908539     build_whole_system [2]
+                0.09    0.06 6311732/426908539     fun_320 [13]
+                0.18    0.12 12772007/426908539     fun_321 [6]
+                5.54    3.85 402823294/426908539     term_notDestructEqual [5]
+[14]     5.1    5.87    4.08 426908539         hashTerm [14]
+                4.08    0.00 17777067/17777067     doobs_hfunction [18]
+-----------------------------------------------
+                                                 <spontaneous>
+[15]     4.6    9.04    0.00                 GC_reclaim_clear4 [15]
+-----------------------------------------------
+                             5036862             fun_333 [16]
+                1.98    6.55 6311732/6311732     fun_320 [13]
+[16]     4.3    1.98    6.55 6311732+5036862 fun_333 [16]
+                4.23    1.35 10233166/70919159     term_notDestructEqual [5]
+                0.96    0.00 6311732/6311732     fun_332 [19]
+                             5036862             fun_333 [16]
+-----------------------------------------------
+                                                 <spontaneous>
+[17]     3.4    6.60    0.00                 GC_malloc [17]
+-----------------------------------------------
+                             7527957             doobs_hfunction [18]
+                4.08    0.00 17777067/17777067     hashTerm [14]
+[18]     2.1    4.08    0.00 17777067+7527957 doobs_hfunction [18]
+                             7527957             doobs_hfunction [18]
+-----------------------------------------------
+                             11348594             fun_332 [19]
+                0.96    0.00 6311732/6311732     fun_333 [16]
+[19]     0.5    0.96    0.00 6311732+11348594 fun_332 [19]
+                             11348594             fun_332 [19]
+-----------------------------------------------
+                0.01    0.00  140000/19223739     fun_334 [27]
+                0.29    0.00 6311732/19223739     fun_320 [13]
+                0.58    0.00 12772007/19223739     fun_321 [6]
+[20]     0.4    0.87    0.00 19223739         term_getArray [20]
+-----------------------------------------------
+                                                 <spontaneous>
+[21]     0.4    0.74    0.00                 GC_add_to_black_list_stack [21]
+-----------------------------------------------
+                                                 <spontaneous>
+[22]     0.3    0.64    0.00                 GC_apply_to_all_blocks [22]
+-----------------------------------------------
+                                                 <spontaneous>
+[23]     0.3    0.53    0.00                 GC_clear_stack_inner [23]
+-----------------------------------------------
+                0.52    0.00 12772007/12772007     fun_321 [6]
+[24]     0.3    0.52    0.00 12772007         cCut [24]
+-----------------------------------------------
+                0.00    0.00      28/19083767     fun_323 [68]
+                0.15    0.00 6311732/19083767     fun_320 [13]
+                0.30    0.00 12772007/19083767     fun_321 [6]
+[25]     0.2    0.45    0.00 19083767         term_getLength [25]
+-----------------------------------------------
+                0.00    0.38      28/28          build_whole_system [2]
+[26]     0.2    0.00    0.38      28         fun_319 [26]
+                0.06    0.32      28/28          fun_334 [27]
+                0.00    0.00      28/140000      fun_302 [61]
+                0.00    0.00      28/28          fun_323 [68]
+-----------------------------------------------
+                              139972             fun_334 [27]
+                0.06    0.32      28/28          fun_319 [26]
+[27]     0.2    0.06    0.32      28+139972  fun_334 [27]
+                0.08    0.22  140000/12912007     fun_331 [7]
+                0.01    0.00  139972/140000      fun_302 [61]
+                0.01    0.00  140000/19223739     term_getArray [20]
+                0.00    0.00  140000/6451732     term_setArray [41]
+                0.00    0.00  279944/279945      fun_317 [69]
+                              139972             fun_334 [27]
+-----------------------------------------------
+                0.33    0.03 8180029/8180029     str_472 [3]
+[28]     0.2    0.33    0.03 8180029         fun_416 [28]
+                0.02    0.01   49303/70919159     term_notDestructEqual [5]
+-----------------------------------------------
+                0.33    0.00 12772007/12772007     fun_321 [6]
+[29]     0.2    0.33    0.00 12772007         cCutMark [29]
+-----------------------------------------------
+                0.08    0.16  756669/756669      str_472 [3]
+[30]     0.1    0.08    0.16  756669         fun_414 [30]
+                0.16    0.00  747545/747545      fun_415 [40]
+-----------------------------------------------
+                                                 <spontaneous>
+[31]     0.1    0.24    0.00                 GC_generic_malloc_inner [31]
+-----------------------------------------------
+                                                 <spontaneous>
+[32]     0.1    0.23    0.00                 GC_next_used_block [32]
+-----------------------------------------------
+                                                 <spontaneous>
+[33]     0.1    0.21    0.00                 GC_block_nearly_full1 [33]
+-----------------------------------------------
+                                                 <spontaneous>
+[34]     0.1    0.20    0.00                 GC_continue_reclaim [34]
+-----------------------------------------------
+                                                 <spontaneous>
+[35]     0.1    0.19    0.00                 GC_reclaim_small_nonempty_block [35]
+-----------------------------------------------
+                                                 <spontaneous>
+[36]     0.1    0.18    0.00                 GC_build_fl_clear4 [36]
+-----------------------------------------------
+                                                 <spontaneous>
+[37]     0.1    0.18    0.00                 GC_find_start [37]
+-----------------------------------------------
+                0.17    0.00 5001507/5001507     build_whole_system [2]
+[38]     0.1    0.17    0.00 5001507         fun_360 [38]
+-----------------------------------------------
+                                                 <spontaneous>
+[39]     0.1    0.17    0.00                 GC_clear_hdr_marks [39]
+-----------------------------------------------
+                0.16    0.00  747545/747545      fun_414 [30]
+[40]     0.1    0.16    0.00  747545         fun_415 [40]
+-----------------------------------------------
+                0.00    0.00  140000/6451732     fun_334 [27]
+                0.13    0.00 6311732/6451732     fun_320 [13]
+[41]     0.1    0.13    0.00 6451732         term_setArray [41]
+-----------------------------------------------
+                                                 <spontaneous>
+[42]     0.1    0.13    0.00                 GC_clear_stack [42]
+-----------------------------------------------
+                                                 <spontaneous>
+[43]     0.1    0.11    0.00                 GC_reclaim_block [43]
+-----------------------------------------------
+                0.10    0.00 5001506/5001506     build_whole_system [2]
+[44]     0.1    0.10    0.00 5001506         fun_356 [44]
+-----------------------------------------------
+                0.10    0.00 4541652/4541652     str_472 [3]
+[45]     0.1    0.10    0.00 4541652         term_alloc [45]
+-----------------------------------------------
+                                                 <spontaneous>
+[46]     0.0    0.09    0.00                 GC_invoke_finalizers [46]
+-----------------------------------------------
+                                                 <spontaneous>
+[47]     0.0    0.07    0.00                 GC_block_empty [47]
+-----------------------------------------------
+                                                 <spontaneous>
+[48]     0.0    0.07    0.00                 GC_reclaim_generic [48]
+-----------------------------------------------
+                                                 <spontaneous>
+[49]     0.0    0.06    0.00                 GC_generic_malloc [49]
+-----------------------------------------------
+                                                 <spontaneous>
+[50]     0.0    0.05    0.00                 GC_allocobj [50]
+-----------------------------------------------
+                                                 <spontaneous>
+[51]     0.0    0.05    0.00                 GC_noop1 [51]
+-----------------------------------------------
+                0.04    0.00  810493/810493      build_whole_system [2]
+[52]     0.0    0.04    0.00  810493         fun_362 [52]
+-----------------------------------------------
+                                                 <spontaneous>
+[53]     0.0    0.04    0.00                 GC_write_hint [53]
+-----------------------------------------------
+                                                 <spontaneous>
+[54]     0.0    0.04    0.00                 clear_marks_for_block [54]
+-----------------------------------------------
+                                                 <spontaneous>
+[55]     0.0    0.03    0.00                 GC_allochblk_nth [55]
+-----------------------------------------------
+                                                 <spontaneous>
+[56]     0.0    0.02    0.00                 GC_allochblk [56]
+-----------------------------------------------
+                                                 <spontaneous>
+[57]     0.0    0.02    0.00                 GC_approx_sp [57]
+-----------------------------------------------
+                                                 <spontaneous>
+[58]     0.0    0.02    0.00                 GC_mark_some [58]
+-----------------------------------------------
+                                                 <spontaneous>
+[59]     0.0    0.02    0.00                 GC_push_next_marked_uncollectable [59]
+-----------------------------------------------
+                                                 <spontaneous>
+[60]     0.0    0.02    0.00                 GC_stopped_mark [60]
+-----------------------------------------------
+                0.00    0.00      28/140000      fun_319 [26]
+                0.01    0.00  139972/140000      fun_334 [27]
+[61]     0.0    0.01    0.00  140000         fun_302 [61]
+-----------------------------------------------
+                                                 <spontaneous>
+[62]     0.0    0.01    0.00                 GC_adj_words_allocd [62]
+-----------------------------------------------
+                                                 <spontaneous>
+[63]     0.0    0.01    0.00                 GC_never_stop_func [63]
+-----------------------------------------------
+                                                 <spontaneous>
+[64]     0.0    0.01    0.00                 GC_number_stack_black_listed [64]
+-----------------------------------------------
+                                                 <spontaneous>
+[65]     0.0    0.01    0.00                 GC_push_one [65]
+-----------------------------------------------
+                                                 <spontaneous>
+[66]     0.0    0.01    0.00                 GC_push_regs [66]
+-----------------------------------------------
+                                                 <spontaneous>
+[67]     0.0    0.01    0.00                 GC_read_changed [67]
+-----------------------------------------------
+                0.00    0.00      28/28          fun_319 [26]
+[68]     0.0    0.00    0.00      28         fun_323 [68]
+                0.00    0.00      28/19083767     term_getLength [25]
+-----------------------------------------------
+                0.00    0.00       1/279945      fun_318 [82]
+                0.00    0.00  279944/279945      fun_334 [27]
+[69]     0.0    0.00    0.00  279945         fun_317 [69]
+-----------------------------------------------
+                0.00    0.00     581/581         symbol_init [89]
+[70]     0.0    0.00    0.00     581         fsym_init [70]
+-----------------------------------------------
+                0.00    0.00       9/9           computeTerm [80]
+[71]     0.0    0.00    0.00       9         listTermCreate [71]
+-----------------------------------------------
+                0.00    0.00       6/6           build_whole_system [2]
+[72]     0.0    0.00    0.00       6         getSymbolIndex [72]
+-----------------------------------------------
+                0.00    0.00       4/4           computeTerm [80]
+[73]     0.0    0.00    0.00       4         addTermListTerm [73]
+-----------------------------------------------
+                0.00    0.00       1/2           build_whole_system [2]
+                0.00    0.00       1/2           main [1]
+[74]     0.0    0.00    0.00       2         getStrategyIndex [74]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[75]     0.0    0.00    0.00       1         EarleyParser [75]
+                0.00    0.00       1/1           findTab [81]
+                0.00    0.00       1/1           computeTerm [80]
+-----------------------------------------------
+                0.00    0.00       1/1           initElanLib [85]
+[76]     0.0    0.00    0.00       1         EarleyParserInit [76]
+-----------------------------------------------
+                0.00    0.00       1/1           initElanLib [85]
+[77]     0.0    0.00    0.00       1         EkerTermInit [77]
+-----------------------------------------------
+                0.00    0.00       1/1           initElanLib [85]
+[78]     0.0    0.00    0.00       1         backTrackInit [78]
+-----------------------------------------------
+                0.00    0.00       1/1           initElanLib [85]
+[79]     0.0    0.00    0.00       1         choice_init [79]
+-----------------------------------------------
+                                  13             computeTerm [80]
+                0.00    0.00       1/1           EarleyParser [75]
+[80]     0.0    0.00    0.00       1+13      computeTerm [80]
+                0.00    0.00       9/9           listTermCreate [71]
+                0.00    0.00       4/4           addTermListTerm [73]
+                                  13             computeTerm [80]
+-----------------------------------------------
+                0.00    0.00       1/1           EarleyParser [75]
+[81]     0.0    0.00    0.00       1         findTab [81]
+-----------------------------------------------
+                0.00    0.00       1/1           normalise [87]
+[82]     0.0    0.00    0.00       1         fun_318 [82]
+                0.00    0.00       1/279945      fun_317 [69]
+                0.00    0.00       1/1           term_newArray [90]
+-----------------------------------------------
+                0.00    0.00       1/1           build_whole_system [2]
+[83]     0.0    0.00    0.00       1         fun_357 [83]
+-----------------------------------------------
+                0.00    0.00       1/1           build_whole_system [2]
+[84]     0.0    0.00    0.00       1         fun_361 [84]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[85]     0.0    0.00    0.00       1         initElanLib [85]
+                0.00    0.00       1/1           choice_init [79]
+                0.00    0.00       1/1           symbol_init [89]
+                0.00    0.00       1/1           EkerTermInit [77]
+                0.00    0.00       1/1           initTabRef [86]
+                0.00    0.00       1/1           EarleyParserInit [76]
+                0.00    0.00       1/1           backTrackInit [78]
+-----------------------------------------------
+                0.00    0.00       1/1           initElanLib [85]
+[86]     0.0    0.00    0.00       1         initTabRef [86]
+-----------------------------------------------
+                                  13             normalise [87]
+                0.00    0.00       1/1           main [1]
+[87]     0.0    0.00    0.00       1+13      normalise [87]
+                0.00    0.00       1/1           fun_318 [82]
+                                  13             normalise [87]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[88]     0.0    0.00    0.00       1         str_127 [88]
+-----------------------------------------------
+                0.00    0.00       1/1           initElanLib [85]
+[89]     0.0    0.00    0.00       1         symbol_init [89]
+                0.00    0.00     581/581         fsym_init [70]
+-----------------------------------------------
+                0.00    0.00       1/1           fun_318 [82]
+[90]     0.0    0.00    0.00       1         term_newArray [90]
+-----------------------------------------------
+
+ This table describes the call tree of the program, and was sorted by
+ the total amount of time spent in each function and its children.
+
+ Each entry in this table consists of several lines.  The line with the
+ index number at the left hand margin lists the current function.
+ The lines above it list the functions that called this function,
+ and the lines below it list the functions this one called.
+ This line lists:
+     index	A unique number given to each element of the table.
+		Index numbers are sorted numerically.
+		The index number is printed next to every function name so
+		it is easier to look up where the function in the table.
+
+     % time	This is the percentage of the `total' time that was spent
+		in this function and its children.  Note that due to
+		different viewpoints, functions excluded by options, etc,
+		these numbers will NOT add up to 100%.
+
+     self	This is the total amount of time spent in this function.
+
+     children	This is the total amount of time propagated into this
+		function by its children.
+
+     called	This is the number of times the function was called.
+		If the function called itself recursively, the number
+		only includes non-recursive calls, and is followed by
+		a `+' and the number of recursive calls.
+
+     name	The name of the current function.  The index number is
+		printed after it.  If the function is a member of a
+		cycle, the cycle number is printed between the
+		function's name and the index number.
+
+
+ For the function's parents, the fields have the following meanings:
+
+     self	This is the amount of time that was propagated directly
+		from the function into this parent.
+
+     children	This is the amount of time that was propagated from
+		the function's children into this parent.
+
+     called	This is the number of times this parent called the
+		function `/' the total number of times the function
+		was called.  Recursive calls to the function are not
+		included in the number after the `/'.
+
+     name	This is the name of the parent.  The parent's index
+		number is printed after it.  If the parent is a
+		member of a cycle, the cycle number is printed between
+		the name and the index number.
+
+ If the parents of the function cannot be determined, the word
+ `<spontaneous>' is printed in the `name' field, and all the other
+ fields are blank.
+
+ For the function's children, the fields have the following meanings:
+
+     self	This is the amount of time that was propagated directly
+		from the child into the function.
+
+     children	This is the amount of time that was propagated from the
+		child's children to the function.
+
+     called	This is the number of times the function called
+		this child `/' the total number of times the child
+		was called.  Recursive calls by the child are not
+		listed in the number after the `/'.
+
+     name	This is the name of the child.  The child's index
+		number is printed after it.  If the child is a
+		member of a cycle, the cycle number is printed
+		between the name and the index number.
+
+ If there are any cycles (circles) in the call graph, there is an
+ entry for the cycle-as-a-whole.  This entry shows who called the
+ cycle (as parents) and the members of the cycle (as children.)
+ The `+' recursive calls entry shows the number of function calls that
+ were internal to the cycle, and the calls entry for each member shows,
+ for that member, how many times it was called from other members of
+ the cycle.
+
+
+Index by function name
+
+  [75] EarleyParser           [66] GC_push_regs           [27] fun_334
+  [76] EarleyParserInit       [67] GC_read_changed         [9] fun_343
+  [77] EkerTermInit           [43] GC_reclaim_block       [44] fun_356
+  [21] GC_add_to_black_list_stack [15] GC_reclaim_clear4  [83] fun_357
+  [62] GC_adj_words_allocd    [48] GC_reclaim_generic     [38] fun_360
+  [56] GC_allochblk           [35] GC_reclaim_small_nonempty_block [84] fun_361
+  [55] GC_allochblk_nth       [60] GC_stopped_mark        [52] fun_362
+  [50] GC_allocobj            [53] GC_write_hint          [30] fun_414
+  [22] GC_apply_to_all_blocks [10] _setChoicePoint        [40] fun_415
+  [57] GC_approx_sp           [73] addTermListTerm        [28] fun_416
+  [47] GC_block_empty         [78] backTrackInit          [74] getStrategyIndex
+  [33] GC_block_nearly_full1   [2] build_whole_system     [72] getSymbolIndex
+  [36] GC_build_fl_clear4     [24] cCut                   [11] globalFail
+  [39] GC_clear_hdr_marks     [29] cCutMark               [14] hashTerm
+  [42] GC_clear_stack         [79] choice_init            [85] initElanLib
+  [23] GC_clear_stack_inner   [54] clear_marks_for_block  [86] initTabRef
+  [34] GC_continue_reclaim    [80] computeTerm            [71] listTermCreate
+  [37] GC_find_start          [18] doobs_hfunction        [12] makeLongJump
+  [49] GC_generic_malloc      [81] findTab                [87] normalise
+  [31] GC_generic_malloc_inner [70] fsym_init             [88] str_127
+  [46] GC_invoke_finalizers   [61] fun_302                 [3] str_472
+  [17] GC_malloc              [69] fun_317                 [8] str_494
+   [4] GC_mark_from           [82] fun_318                [89] symbol_init
+  [58] GC_mark_some           [26] fun_319                [45] term_alloc
+  [63] GC_never_stop_func     [13] fun_320                [20] term_getArray
+  [32] GC_next_used_block      [6] fun_321                [25] term_getLength
+  [51] GC_noop1               [68] fun_323                [90] term_newArray
+  [64] GC_number_stack_black_listed [7] fun_331            [5] term_notDestructEqual
+  [59] GC_push_next_marked_uncollectable [19] fun_332     [41] term_setArray
+  [65] GC_push_one            [16] fun_333

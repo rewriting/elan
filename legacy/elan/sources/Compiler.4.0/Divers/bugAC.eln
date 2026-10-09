@@ -1,0 +1,48 @@
+module bugAC
+
+import eq[term];
+end
+
+sort term;
+end
+
+operators global
+	a : term;
+	b : term;
+	f(@,@) : (term term) term (AC);
+	g(@)   : (term) term;
+	h(@,@) : (term term) term;
+
+	and(@,@) : (term term) term (AC);
+	seq(@,@) : (term term) term;
+	imp(@,@) : (term term) term;
+	not(@)   : (term) term;
+
+	go : term;
+end
+
+
+rules for term
+  x,y,z,t : term;
+global
+
+  [] go =>  seq(a, imp(not( and(a,b) ),b))  end
+
+//  [] g(x) => f(x,x) end
+//  [] g(x) => f(y,y) where y:=() x end
+
+//    [] f(g(x),g(y)) => a end
+//    [] f(g(x),g(y)) => h(x,y) end
+
+    [] seq(x, imp(not( and(y,z) ),t)) => a
+    end
+
+
+//  [] f(a,g(a)) => a end
+//  [] f(x,g(b)) => a end
+//  [] f(a,g(x)) => a end
+end
+
+
+end
+

@@ -1,0 +1,61 @@
+module hanoi
+
+import global  int;
+end
+
+sort pair list;
+end
+
+operators
+  global
+
+   nil 		: list;
+   cons(@,@) 	: ( pair list ) list;
+
+   app(@,@)  	: ( list list ) list;
+
+   [@,@]	: ( int int ) pair;
+
+   compl(@,@)	: ( int int ) int;
+
+   curry(@,@,@)	: ( int int int ) list;
+
+   forget(@)	: (list) list;
+
+end
+
+
+rules for list
+          x: pair;
+	y,z : list;
+	n,i,j : int;
+global
+  [] app(nil,y)		=> y					end
+  [] app(cons(x,y),z)	=> cons(x,app(y,z))			end
+
+
+  [] curry(1,i,j)	=> cons([i,j],nil)			end
+  [] curry(n,i,j)	=> app(curry(n-1,i,compl(i,j)),
+			   cons([i,j],curry(n-1,compl(i,j),j))) end
+
+  [] forget(y)		=> nil					end
+
+end
+
+
+rules for int
+          x,y,z : int;
+global
+  [] compl(1,2) => 3		end
+  [] compl(1,3) => 2		end
+  [] compl(2,3) => 1		end
+  [] compl(2,1) => 3		end
+  [] compl(3,1) => 2		end
+  [] compl(3,2) => 1		end
+end
+
+
+end
+
+
+

@@ -1,0 +1,17 @@
+module Foo
+
+import global int;
+
+sort Foo;
+
+op global
+  whot	: Foo;
+  who	: Foo;
+  aa	: Foo;
+  bb	: Foo;
+  [@,@]	: (Foo Foo) Foo;
+  (@,@)	: (Foo int) Foo;
+end
+
+end
+

@@ -1,0 +1,40 @@
+module ww
+
+operators global
+  a	: Foo;
+  b	: Foo;
+  c	: Foo;
+  d 	: Foo;
+  doit(@)	: (Foo) Foo;
+  d(@)	: (Foo) Foo;
+  add(@):(Foo) Foo;
+  p(@,@): (Foo Foo) Foo;
+  @ + @ : (Foo Foo) Foo  (AC);
+end
+
+stratop 
+  global
+  ss		: <Foo> 	builtin;
+  choice	: <Foo>		builtin;
+end
+
+rules for Foo
+ r,t,y, z, x, u , f, g: Foo;
+local
+  [R1]  x  => a  end
+  [R2]  x  => b  end
+  [R3]  x  => c  end
+  [R4]  x  => d  end
+  [QQ]	doit(x) => f 
+		where y:=()x
+		where f:=(choice;dk(R1,R2))y
+  end
+end
+
+strategies for Foo
+implicit
+  [.] ss =>	dk(QQ);choice		end
+  [.] choice => dk(R1, R2, R3, R4)	end
+end
+
+end

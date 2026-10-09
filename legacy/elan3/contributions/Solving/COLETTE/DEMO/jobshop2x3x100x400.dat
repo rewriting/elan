@@ -1,0 +1,13 @@
+[
+task13 (+) 10 <=? finish &
+task23 (+) 15 <=? finish &
+task11 (+) 95 <=? task12 &
+task12 (+) 66 <=? task13 &
+task21 (+) 54 <=? task22 &
+task22 (+) 26 <=? task23 &
+task11 >=? task21 (+) 54 V task21 >=? task11 (+) 95 &
+task12 >=? task22 (+) 26 V task22 >=? task12 (+) 66 &
+task13 >=? task23 (+) 15 V task23 >=? task13 (+) 10 &
+true
+, finish, 0, 400]
+end

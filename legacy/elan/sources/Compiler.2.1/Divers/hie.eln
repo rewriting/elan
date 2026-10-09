@@ -1,0 +1,97 @@
+module hie
+
+import eq[Elt] bool;
+end
+
+sort Set Elt EltList;
+end
+
+
+operators global
+  i(@) : (Set) Elt; //           *** inclusion operator
+  j(@) : (Elt) EltList; //       *** inclusion operator
+  o :  Set;
+  l(@,@) : (EltList EltList) EltList (AC);
+  s(@) : (EltList) Set;
+  U(@,@) : (Set Set) Set (AC);
+  ^(@,@) : (Set Set) Set (AC);
+  -(@,@) : (Set Set) Set;
+  contains(@,@) : (Set Elt) bool;
+  P(@) : (Set) Set;
+  augment(@,@) : (Set Set) Set;
+  a : Elt;
+  b : Elt;
+  c : Elt;
+  d : Elt;
+  e : Elt;
+  u : Set;
+  v : Set;
+  w : Set;
+  x : Set;
+end
+
+rules for Set
+	L,M,N : EltList;
+	E,F,G : Elt;
+	S,T,V : Set;
+global
+//*** equations between constructors to eliminate duplicate elements
+  [] s(l(l(L, L), M)) => s(l(L, M)) end
+  [] s(l(L, L)) => s(L) end
+ 
+//*** set union
+  [] U(S, o) => S end
+  [] U(s(L), s(M)) => s(l(L, M)) end
+ 
+ 
+//*** set intersection
+  [] ^(o, S) => o end
+  [] ^(s(j(E)), S) => s(j(E)) if contains(S, E) end
+  [] ^(s(j(E)), S) => o if not(contains(S, E)) end
+  [] ^(s(l(j(E), L)), S) => U(^(s(j(E)), S), ^(s(L), S)) end
+ 
+//*** asymmetric set difference
+  [] -(o, S) => o end
+  [] -(s(j(E)), S) => o if contains(S, E) end
+  [] -(s(j(E)), S) => s(j(E)) if not(contains(S, E)) end
+  [] -(s(l(j(E), L)), S) => U(-(s(j(E)), S), -(s(L), S)) end
+ 
+//*** power set (defined using auxiliary function "augment")
+  [] P(o) => s(j(i(o))) end
+  [] P(s(j(E))) => s(l(j(i(o)), j(i(s(j(E)))))) end
+  [] P(s(l(j(E), L))) => U(P(s(L)), augment(P(s(L)), s(j(E)))) end
+  [] augment(o, T) => o end
+  [] augment(s(j(i(S))), T) => s(j(i(U(S, T)))) end
+  [] augment(s(l(j(i(S)), L)), T) => U(s(j(i(U(S, T)))), augment(s(L), T)) end
+
+//*** some specific sets
+  [] u => P(P(s(l(l(j(a), j(b)), j(c))))) end
+  [] v => P(P(s(l(j(a), j(b))))) end
+  [] w => P(P(s(l(j(a), j(c))))) end
+  [] x => P(P(s(l(j(b), j(c))))) end
+end
+
+rules for bool
+	L,M,N : EltList;
+	E,F,G : Elt;
+	S,T,V : Set;
+global
+//*** set membership
+  [] contains(o, E) => false end
+  [] contains(s(j(F)), E) => E == F end
+  [] contains(s(l(j(F), L)), E) => true if E == F end
+  [] contains(s(l(j(F), L)), E) => contains(s(L), E) if E != F end
+end
+
+
+end
+
+
+
+
+/*
+Maude> red -(u, U(U(v, w), x)) == ^(^(-(u, v), -(u, w)), -(u, x)) end
+rewrites: 255836 in 5189ms cpu (5209ms real) (49294 rewrites/second)
+
+-(u, U(U(v, w), x)) == ^(^(-(u, v), -(u, w)), -(u, x))
+*/

@@ -1,0 +1,8 @@
+LPL horse description 
+
+query 		of sort list
+      result 	of sort list
+      import    horse
+      start with (horse_strat) query
+
+end

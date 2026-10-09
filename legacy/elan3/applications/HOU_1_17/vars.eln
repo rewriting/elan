@@ -1,0 +1,56 @@
+module vars[VARS,btypes]
+import
+  global 	sigSyntax VARS identifier list[vardefs]
+		types[btypes] ivars[btypes] contexts[btypes]
+		list[obj_VARS] int bool;
+sort obj_VARS;
+op
+  global
+    typeof(@)	: (obj_VARS) type;	
+    V_VARS(@)	: (int)	obj_VARS;
+    @ |- @':'@	: (context obj_VARS type) vardefs;
+
+    FOR EACH X:vardef; Y:identifier SUCH THAT 
+	X:=(listExtract)elem(VARS) AND Y:=()variabla(X) :{
+      Y    : obj_VARS;
+    }
+    list_VARS	: list[obj_VARS];
+    listdefs_VARS: list[vardefs];
+endop
+
+rules for type
+bodies
+   FOR EACH XX:vardef; XS:identifier; YS:type SUCH THAT 
+	XX:=(listExtract)elem(VARS) AND XS:=()variabla(XX) AND 
+	YS:=()rem_par(type(XX)) :{ 
+   []	typeof(XS)	=> YS	end
+    }
+end of rules
+
+rules for list[obj_VARS]
+bodies
+  [] list_VARS => FOR EACH XX:vardef; XS:identifier SUCH THAT 
+	XX:=(listExtract)elem(VARS) AND 
+	XS:=()variabla(XX) :{ XS.} nil
+end
+end of rules
+
+rules for list[vardefs]
+bodies
+  [] listdefs_VARS => 
+	FOR EACH XX:vardef; XS:identifier; TT:type SUCH THAT 
+	XX:=(listExtract)elem(VARS) AND 
+	XS:=()variabla(XX) AND TT:=()rem_par(type(XX)) :{
+	 nil|-XS:TT.} nil
+  end
+end of rules
+
+end of module
+
+
+
+
+
+
+
+

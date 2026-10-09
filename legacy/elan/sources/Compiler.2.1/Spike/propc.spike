@@ -1,0 +1,105 @@
+% Specification fields
+
+constructors :
+t : bool ;
+f : bool ;
+
+a1 : bool ;
+a2 : bool ;
+a3 : bool ;
+a4 : bool ;
+a5 : bool ;
+a6 : bool ;
+a7 : bool ;
+a8 : bool ;
+a9 : bool ;
+a10 : bool ;
+a11 : bool ;
+a12 : bool ;
+a13 : bool ;
+a14 : bool ;
+
+defined functions :
+
+xor__ : bool bool -> bool ; ac ;
+and__ : bool bool -> bool ; ac ;
+
+implies__ : bool bool -> bool ; 
+or__  : bool bool -> bool ; 
+iff__  : bool bool -> bool ; 
+not_  : bool -> bool ; 
+
+q1 : bool;
+q2 : bool;
+q3 : bool;
+
+axioms:
+   and(x, x) = x				;
+   and(y, and(x, x)) = and(y,x)			;
+   and(x, t) = x		 		;
+   and(x, f) = f				;
+   and(x, xor(y, z)) = xor(and(x, y), and(x, z)) ;
+
+   xor(x, x) = f				;
+   xor(y,xor(x, x)) = xor(y,f)			;
+   xor(x, f) = x				;
+
+   not(x) = xor(x, t)			;
+   implies(x, y) = not(xor(x, and(x, y)))	;
+   or(x, y) = xor(and(x, y), xor(x, y))	;
+   iff(x, y) = not(xor(x, y))		;
+
+   q1 = implies(and(iff(iff(or(a1, a2), or(not(a3), iff(xor(a4, a5),
+not(not(not(a6)))))), not(and(and(a7, a8), not(xor(xor(or(a9, and(a10,
+a11)), a2), and(and(a11, xor(a2, iff(a5, a5))), xor(xor(a7, a7),
+iff(a9, a4)))))))), implies(iff(iff(or(a1, a2), or(not(a3),
+iff(xor(a4, a5), not(not(not(a6)))))), not(and(and(a7, a8),
+not(xor(xor(or(a9, and(a10, a11)), a2), and(and(a11, xor(a2, iff(a5,
+a5))), xor(xor(a7, a7), iff(a9, a4)))))))), not(and(implies(and(a1,
+a2), not(xor(or(or(xor(implies(and(a3, a4), implies(a5, a6)), or(a7,
+a8)), xor(iff(a9, a10), a11)), xor(xor(a2, a2), a7)), iff(or(a4, a9),
+xor(not(a6), a6))))), not(iff(not(a11), not(a9))))))),
+not(and(implies(and(a1, a2), not(xor(or(or(xor(implies(and(a3, a4),
+implies(a5, a6)), or(a7, a8)), xor(iff(a9, a10), a11)), xor(xor(a2,
+a2), a7)), iff(or(a4, a9), xor(not(a6), a6))))), not(iff(not(a11),
+not(a9)))))) ;
+
+  q2 = implies(and(not(and(xor(a1, xor(or(a2, a3), a4)), xor(iff(xor(not(a5),
+or(xor(iff(a6, a7), iff(a8, a9)), and(a10, a9))), iff(not(not(a2)),
+implies(or(a9, a6), or(a10, a5)))), not(or(a9, implies(not(a8), or(a4,
+a9))))))), implies(not(and(xor(a1, xor(or(a2, a3), a4)),
+xor(iff(xor(not(a5), or(xor(iff(a6, a7), iff(a8, a9)), and(a10, a9))),
+iff(not(not(a2)), implies(or(a9, a6), or(a10, a5)))), not(or(a9,
+implies(not(a8), or(a4, a9))))))), not(implies(implies(and(or(a1,
+xor(xor(a2, a3), not(a4))), not(xor(a5, and(a6, a7)))),
+implies(xor(implies(a8, a9), a10), xor(and(a4, or(a4, a1)), a2))),
+or(or(xor(or(a4, a7), a2), and(a8, a1)), not(not(not(a6)))))))),
+not(implies(implies(and(or(a1, xor(xor(a2, a3), not(a4))), not(xor(a5,
+and(a6, a7)))), implies(xor(implies(a8, a9), a10), xor(and(a4, or(a4,
+a1)), a2))), or(or(xor(or(a4, a7), a2), and(a8, a1)),
+not(not(not(a6))))))) ;
+
+  q3 = implies(and(not(and(xor(a1, xor(or(a2, a3), a4)),xor(iff(
+       xor(not(a5),or(xor(iff(a6, a7), iff(a8, a9)), and(a10, a11))),
+       implies( or(a4,and(a3, iff(a1, a2))) , not(not(a4)) )),
+          xor(implies(implies(a6, a1),not(a1)), not(a9))))) ,
+    implies(not(and(xor(a1, xor(or(a2, a3), a4)),
+xor(iff(xor(not(a5), or(xor(iff(a6, a7), iff(a8, a9)), and(a10,
+a11))), implies(or(a4, and(a3, iff(a1, a2))), not(not(a4)))),
+xor(implies(implies(a6, a1), not(a1)), not(a9))))),
+not(implies(implies(and(or(a1, xor(xor(a2, a3), not(a4))), not(xor(a5,
+and(a6, a7)))), implies(xor(implies(a8, a9), a10), xor(and(a11,
+implies(a2, a8)), a8))), not(or(implies(or(a5, or(a8, and(a8, a9))),
+not(a2)), not(a7))))))), not(implies(implies(and(or(a1, xor(xor(a2,
+a3), not(a4))), not(xor(a5, and(a6, a7)))), implies(xor(implies(a8,
+a9), a10), xor(and(a11, implies(a2, a8)), a8))), not(or(implies(or(a5,
+or(a8, and(a8, a9))), not(a2)), not(a7)))))) ;
+
+
+status:
+and xor MS ;
+
+norm:
+q1 ;
+%q2 ;
+

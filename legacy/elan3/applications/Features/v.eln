@@ -1,0 +1,34 @@
+module v
+
+import global eq[Foo];
+
+op global
+  a	: Foo;
+  b	: Foo;
+  c	: Foo;
+  d 	: Foo;
+  doit(@)	: (Foo) Foo;
+  d(@)	: (Foo) Foo;
+  add(@):(Foo) Foo;
+  p(@,@): (Foo Foo) Foo;
+end
+
+rules for Foo
+ r,t,y, z, x, u , f, g: Foo;
+bodies
+  [AA]		a => a if a==b						end
+  [CC]		a => a if a==b						end
+  [DD]		a => a if a==b						end
+  [EE]		a => a if a==b						end
+  [BB]		a => a if a==b						end
+end
+
+strategy ss for Foo
+//  dc(AA); repeat+ (dc(CC); dc(DD); dc(EE) ); dc(BB)
+
+
+
+ repeat+(dc(AA);dc(AA))
+end
+
+end

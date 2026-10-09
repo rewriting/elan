@@ -1,0 +1,308 @@
+module IntegerVerification
+
+import
+global	IntegerSignature
+	;
+end
+
+operators
+global	ValueOfx1HasSupportInDx2WRTgte(@,@,@,@,@)	: (var int var domain formule)		bool;
+	ValueOfx1HasSupportInDx2WRTgt(@,@,@,@,@)	: (var int var domain formule)		bool;
+	ValueOfx1HasSupportInDx2WRTlte(@,@,@,@,@)	: (var int var domain formule)		bool;
+	ValueOfx1HasSupportInDx2WRTlt(@,@,@,@,@)	: (var int var domain formule)		bool;
+
+end
+
+
+rules for bool
+
+	x,x1,x2			: var;
+	k1,k2,k3,v,v1,v2,minx2,maxx2	: int;
+	D2			: list[int];
+	t,t1,t2			: term;
+	lt			: list[term];
+	c			: formule;
+
+global 
+
+// Satisfiability of unary constraints
+
+[]	EvaluateGroundFormule(t >=? 0)	
+	=>
+	EvaluateGroundTerm(t) >= 0
+end
+[]	EvaluateGroundFormule(t >? 0)
+	=>
+	EvaluateGroundTerm(t) > 0
+end
+[]	EvaluateGroundFormule(t <=? 0)
+	=>
+	EvaluateGroundTerm(t) <= 0
+end
+[]	EvaluateGroundFormule(t <? 0)
+	=>
+	EvaluateGroundTerm(t) < 0
+end
+[]	EvaluateGroundFormule(t =? 0)
+	=>
+	EvaluateGroundTerm(t) == 0
+end
+[]	EvaluateGroundFormule(t !=? 0)
+	=>
+	EvaluateGroundTerm(t) != 0
+end
+
+
+// Satisfiability of binary constraints
+
+[]	ValueOfx1HasSupportInDx2WRTgte(x1,v1,x2,[minx2,..,maxx2],k1(*)x1 (+) k2(*)x2 (+) k3 >=? 0)
+	=>
+	switch
+	case	k1*v1 + k2*minx2 + k3 >= 0	then
+		true
+	otherwise
+		switch
+		case	minx2 < maxx2	then
+			ValueOfx1HasSupportInDx2WRTgte(x1,v1,x2,[minx2+1,..,maxx2],k1(*)x1 (+) k2(*)x2 (+) k3 >=? 0)
+		otherwise
+			false
+		end
+	end
+end
+
+[]	ValueOfx1HasSupportInDx2WRTgt(x1,v1,x2,[minx2,..,maxx2],k1(*)x1 (+) k2(*)x2 (+) k3 >? 0)
+	=>
+	switch
+	case	k1*v1 + k2*minx2 + k3 > 0	then
+		true
+	otherwise
+		switch
+		case	minx2 < maxx2	then
+			ValueOfx1HasSupportInDx2WRTgt(x1,v1,x2,[minx2+1,..,maxx2],k1(*)x1 (+) k2(*)x2 (+) k3  >? 0)
+		otherwise
+			false
+		end
+	end
+end
+
+[]	ValueOfx1HasSupportInDx2WRTlte(x1,v1,x2,[minx2,..,maxx2],k1(*)x1 (+) k2(*)x2 (+) k3 <=? 0)
+	=>
+	switch
+	case	k1*v1 + k2*minx2 + k3 <= 0	then
+		true
+	otherwise
+		switch
+		case	minx2 < maxx2	then
+			ValueOfx1HasSupportInDx2WRTlte(x1,v1,x2,[minx2+1,..,maxx2],k1(*)x1 (+) k2(*)x2 (+) k3 <=? 0)
+		otherwise
+			false
+		end
+	end
+end
+
+
+[]	ValueOfx1HasSupportInDx2WRTlt(x1,v1,x2,[minx2,..,maxx2],k1(*)x1 (+) k2(*)x2 (+) k3 <? 0)
+	=>
+	switch
+	case	k1*v1 + k2*minx2 + k3 < 0	then
+		true
+	otherwise
+		switch
+		case	minx2 < maxx2	then
+			ValueOfx1HasSupportInDx2WRTlt(x1,v1,x2,[minx2+1,..,maxx2],k1(*)x1 (+) k2(*)x2 (+) k3 <? 0)
+		otherwise
+			false
+		end
+	end
+end
+
+[]	ValueOfx1HasSupportInDx2WRTgte(x1,v1,x2,empty,c)
+	=>
+	false
+end
+[]	ValueOfx1HasSupportInDx2WRTgt(x1,v1,x2,empty,c)
+	=>
+	false
+end
+[]	ValueOfx1HasSupportInDx2WRTlte(x1,v1,x2,empty,c)
+	=>
+	false
+end
+[]	ValueOfx1HasSupportInDx2WRTlt(x1,v1,x2,empty,c)
+	=>
+	false
+end
+
+end
+
+
+rules for domain
+
+	x,x1,x2					: var;
+	k1,k2,k3,min,max,v,minx1,maxx1,minx2,maxx2,newmax: int;
+	D,D1,D2					: domain;
+	t,t1,t2					: term;
+	c					: formule;
+	upbound, lowbound,int_out,newx,support	: int;
+
+global 
+
+// Unary constraints
+
+[]	ReviseDxWRTc(x in? [min,..,max],k1(*)x (+) k2 >=? 0)
+	=>
+	where	lowbound :=() -k2/k1
+	switch
+	case	lowbound <= max		then
+		[lowbound,..,max]
+	otherwise
+		empty
+	end
+end
+
+[]	ReviseDxWRTc(x in? [min,..,max],k1(*)x (+) k2 >? 0)
+	=>
+	where	lowbound :=() (1-k2)/k1
+	switch
+	case	lowbound <= max		then
+		[lowbound,..,max]
+	otherwise
+		empty
+	end
+end
+
+[]	ReviseDxWRTc(x in? [min,..,max],k1(*)x (+) k2 <=? 0)
+	=>
+	where	upbound :=() -k2/k1
+	switch
+	case	upbound >= min		then
+		[min,..,upbound]
+	otherwise
+		empty
+	end
+end
+
+[]	ReviseDxWRTc(x in? [min,..,max],k1(*)x (+) k2 <? 0)
+	=>
+	where	upbound :=() -(k2+1)/k1
+	switch
+	case	upbound >= min		then
+		[min,..,upbound]
+	otherwise
+		empty
+	end
+end
+
+[]	ReviseDxWRTc(x in? [min,..,max],k1(*)x (+) k2 =? 0)
+	=>
+	where	newx :=() -k2/k1
+	switch
+	case	newx >= min and newx <= max	then
+		[newx,..,newx]
+	otherwise
+		empty
+	end
+end
+
+[]	ReviseDxWRTc(x in? empty,c)
+	=>
+	empty
+end
+
+
+// Binary constraints
+
+[]	ReviseDx1WRTDx2(x1 in? [minx1,..,maxx1],x2 in? [minx2,..,maxx2],
+			k1(*)x1 (+) k2(*)x2 (+) k3 >=? 0)
+	=>
+	where	support :=() -(k1*minx1 + k3)/k2
+	switch
+	case	support >= minx2 and support <= maxx2	then
+		[minx1,..,maxx1]
+	otherwise
+		switch
+		case	minx1 < maxx1	then
+			ReviseDx1WRTDx2(x1 in? [minx1+1,..,maxx1],x2 in? [minx2,..,maxx2],
+					k1(*)x1 (+) k2(*)x2 (+) k3 >=? 0)
+		otherwise
+			empty
+		end
+	end
+end
+
+[]	ReviseDx1WRTDx2(x1 in? [minx1,..,maxx1],x2 in? [minx2,..,maxx2],
+			k1(*)x1 (+) k2(*)x2 (+) k3 >? 0)
+	=>
+	where	support :=() (1 - k1*minx1 - k3)/k2
+	switch
+	case	support >= minx2 and support <= maxx2	then
+		[minx1,..,maxx1]
+	otherwise
+		switch
+		case	minx1 < maxx1	then
+			ReviseDx1WRTDx2(x1 in? [minx1+1,..,maxx1],x2 in? [minx2,..,maxx2],
+					k1(*)x1 (+) k2(*)x2 (+) k3 >? 0)
+		otherwise
+			empty
+		end
+	end
+end
+
+[]	ReviseDx1WRTDx2(x1 in? [minx1,..,maxx1],x2 in? [minx2,..,maxx2],
+			k1(*)x1 (+) k2(*)x2 (+) k3 <=? 0)
+	=>
+	where	support :=() -(k1*maxx1 + k3)/k2
+	switch
+	case	support >= minx2 and support <= maxx2	then
+		[minx1,..,maxx1]
+	otherwise
+		switch
+		case	maxx1 > minx1	then
+			ReviseDx1WRTDx2(x1 in? [minx1,..,maxx1-1],x2 in? [minx2,..,maxx2],
+					k1(*)x1 (+) k2(*)x2 (+) k3 <=? 0)
+		otherwise
+			empty
+		end
+	end
+end
+
+[]	ReviseDx1WRTDx2(x1 in? [minx1,..,maxx1],x2 in? [minx2,..,maxx2],
+			k1(*)x1 (+) k2(*)x2 (+) k3 <? 0)
+	=>
+	where	support :=() -(1 + k1*maxx1 + k3)/k2
+	switch
+	case	support >= minx2 and support <= maxx2	then
+		[minx1,..,maxx1]
+	otherwise
+		switch
+		case	maxx1 > minx1	then
+			ReviseDx1WRTDx2(x1 in? [minx1,..,maxx1-1],x2 in? [minx2,..,maxx2],
+					k1(*)x1 (+) k2(*)x2 (+) k3 <? 0)
+		otherwise
+			empty
+		end
+	end
+end
+
+[]	ReviseDx1WRTDx2(x1 in? [minx1,..,maxx1],x2 in? [minx2,..,maxx2],t =? 0)
+	=>
+	ReviseDx1WRTDx2(x1 in? D1,x2 in? [minx2,..,maxx2],t <=? 0)
+	where D1 := ()ReviseDx1WRTDx2(x1 in? [minx1,..,maxx1],x2 in? [minx2,..,maxx2],t >=? 0)
+end
+
+[]	ReviseDx1WRTDx2(x1 in? empty,x2 in? D2,c)
+	=>
+	empty
+end
+
+[]	ReviseDx1WRTDx2(x1 in? D1,x2 in? empty,c)
+	=>
+	empty
+end
+
+end
+
+
+end
+
+

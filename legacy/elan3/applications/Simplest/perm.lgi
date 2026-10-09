@@ -1,0 +1,8 @@
+LPL perm description 
+
+query 		of sort list[int]
+      result 	of sort list[int]
+      modules   perm
+      start with (permute) query
+
+end

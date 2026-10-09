@@ -1,0 +1,31 @@
+/*D-Robot*/
+
+#locs 5
+#trans 5
+#clocks X
+#sync sready dpick dput
+
+loc: 0
+     prop: DWait
+     invar: TRUE
+     trans: TRUE => sready; X:=0; goto 1
+
+loc: 1
+     prop: DPick
+     invar: X<=2
+     trans: X>=1 and X<=2 => dpick; X:=0; goto 2
+
+loc: 2
+     prop: DTurnR
+     invar: X<=6
+     trans: X>=5 and X<=6 => dturnr; X:=0; goto 3
+
+loc: 3
+     prop: DPut
+     invar: X<=2
+     trans: X>=1 and X<=2 => dput; X:=0; goto 4
+
+loc: 4
+     prop: DTurnL
+     invar: X<=6
+     trans: X>=5 and X<=6 => dturnl; X:=0; goto 0

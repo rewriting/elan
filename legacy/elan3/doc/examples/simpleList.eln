@@ -1,0 +1,20 @@
+module list[X]
+sort X list[X];
+op
+  global
+
+    nil		: list[X];
+    @ . @	: ( X list[X] ) list[X];
+    append(@,@)	: ( list[X] list[X] ) list[X];
+
+endop
+
+rules for list[X]
+declare	e 	: X;
+	l,l1,l2	: list[X];
+bodies
+  [] append(nil,l)	=> l				end
+  [] append(e.l1 , l2)	=> e . append(l1,l2)		end
+end of rules
+
+end of module

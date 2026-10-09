@@ -1,0 +1,7 @@
+LPL match12 description
+  query    of sort bool
+  result   of sort bool
+  import   match1 bool
+  start with () and(true,false)
+
+end

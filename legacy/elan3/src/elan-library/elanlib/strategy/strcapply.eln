@@ -1,0 +1,17 @@
+// This file is generated automatically: do not edit it directly. 
+  module strcapply[X]
+          import global strat[X] Meta_capply[X]; end
+
+              operators global
+                setof(@,@)    : (<X> X) list[X];
+              end   
+          rules for list[X]
+                  s       : <X>;
+                  t       : X;
+                  lst     : list[X];
+          global
+            []    setof(s,t) =>  set_of(call("eval"),[s]t)                end
+          end
+  end  
+   
+

@@ -1,0 +1,2582 @@
+Identifiers
+66:"B".
+73:"I".
+74:"J".
+82:"R".
+88:"X".
+97:"a".
+98:"b".
+99:"c".
+100:"d".
+101:"e".
+108:"l".
+110:"n".
+114:"r".
+120:"x".
+121:"y".
+132:"AC".
+143:"IF".
+157:"l1".
+158:"l2".
+159:"n1".
+199:"dc".
+202:"ee".
+205:"id".
+207:"dk".
+211:"AND".
+213:"of".
+214:"eq".
+215:"END".
+220:"th".
+225:"or".
+231:"FOR".
+232:"LPL".
+273:"EACH".
+291:"Nat".
+295:"META".
+305:"THAT".
+307:"SUCH".
+311:"end".
+320:"mod".
+322:"one".
+323:"div".
+324:"neq".
+327:"for".
+331:"pri".
+337:"not".
+351:"try".
+354:"ANDIF".
+379:"Base".
+411:"code".
+412:"fail".
+414:"fact".
+418:"if".
+419:"elem".
+420:"nat10".
+424:"bs".
+426:"self".
+428:"bool".
+430:"btoi".
+431:"then".
+435:"cons".
+437:"dont".
+439:"part".
+441:"umin".
+443:"size".
+444:"with".
+447:"know".
+448:"true".
+450:"mult".
+452:"plus".
+456:"sort".
+489:"dcOne".
+510:"check".
+516:"fib".
+518:"and".
+522:"alias".
+523:"local".
+534:"nil".
+539:"where".
+542:"int".
+552:"first".
+554:"spart".
+555:"rules".
+556:"minus".
+558:"start".
+566:"query".
+593:"mult_0".
+594:"mult_1".
+595:"mult_2".
+596:"mult_3".
+597:"mult_4".
+598:"mult_5".
+599:"mult_6".
+600:"mult_7".
+601:"mult_8".
+602:"mult_9".
+611:"dccall".
+619:"dkcall".
+622:"care".
+623:"call".
+625:"global".
+632:"append".
+637:"prec".
+639:"public".
+640:"eq_int".
+641:"repeat".
+642:"time".
+646:"module".
+650:"less".
+653:"lesseq".
+655:"list".
+657:"source".
+658:"switch".
+667:"import".
+671:"result".
+674:"export".
+719:"defined".
+720:"declare".
+722:"valueOf".
+730:"Epsilon".
+734:"false".
+737:"eq_bool".
+746:"greater".
+750:"iterate".
+751:"size_of".
+759:"builtin".
+763:"private".
+781:"stratop".
+833:"ccat".
+834:"case".
+835:"handline".
+842:"firstOne".
+847:"neq_bool".
+849:"dcconcur".
+850:"inline".
+852:"choose".
+853:"mult_10".
+856:"btoi_int".
+857:"dkconcur".
+859:"implicit".
+865:"less_int".
+866:"explicit".
+877:"queryend".
+883:"strategy".
+899:"definedAs".
+905:"hardAlias".
+932:"assocLeft".
+960:"greatereq".
+961:"neq_int".
+962:"less_bool".
+970:"normalise".
+972:"oneconcur".
+977:"normalize".
+986:"otherwise".
+991:"operators".
+1046:"anyInteger".
+1047:"assocRight".
+1058:"builtinInt".
+1063:"itob".
+1067:"itob_int".
+1079:"lesseq_int".
+1083:"strategies".
+1172:"greater_int".
+1175:"listExtract".
+1176:"lesseq_bool".
+1188:"description".
+1252:"extractrule1".
+1253:"extractrule2".
+1269:"greater_bool".
+1367:"eq_builtinInt".
+1377:"specification".
+1386:"greatereq_int".
+1476:"nil_builtinInt".
+1477:"neq_builtinInt".
+1483:"greatereq_bool".
+1583:"btoi_builtinInt".
+1592:"less_builtinInt".
+1594:"umin_builtinInt".
+1794:"itob_builtinInt".
+1806:"lesseq_builtinInt".
+1899:"greater_builtinInt".
+1904:"size_of_builtinInt".
+2113:"greatereq_builtinInt".
+2443:"size_of_builtinInt_list".
+nil
+end
+
+Sorts
+19:"intern int".
+32:"ident".
+58:"builtinInt".
+163:"string".
+186:"list[builtinInt]".
+220:"intern ident".
+291:"Nat".
+331:"int".
+345:"<builtinInt->builtinInt>".
+351:"intern string".
+428:"bool".
+nil
+end
+
+Modules
+28:"bool".
+46:"anyInteger".
+58:"builtinInt".
+86:"list[builtinInt]".
+101:"nat10[10]".
+131:"int".
+155:"anyIdentifier".
+159:"anyString".
+181:"anyQuotedIdentifier".
+182:"nat10.lgi".
+nil
+end
+
+RuleNames
+289:"extractrule1:builtinInt/list[builtinInt]!LO".
+290:"extractrule2:builtinInt/list[builtinInt]!LO".
+368:"extractrule1:builtinInt".
+369:"extractrule2:builtinInt".
+nil
+end
+
+StrategyNames
+24:"listExtract:builtinInt/list[builtinInt]".
+nil
+end
+
+GrammarForSort 58:1:
+3:3:500:1:3:0:0:Type(58).Char(43).Type(58).nil:nil.
+3:4:600:1:4:0:0:Type(58).Char(45).Type(58).nil:nil.
+3:5:700:1:5:0:0:Type(58).Char(42).Type(58).nil:nil.
+3:6:800:1:6:0:0:Type(58).Char(47).Type(58).nil:nil.
+3:27:800:1:27:0:0:Type(58).Char(37).Type(58).nil:nil.
+3:28:800:1:28:0:0:Type(58).Char(38).Type(58).nil:nil.
+3:29:800:1:29:0:0:Type(58).Char(124).Type(58).nil:nil.
+3:20:900:0:20:0:0:Char(45).Type(58).nil:nil.
+3:3:500:1:3:0:0:Char(40).Type(58).Char(43).Type(58).Char(41).nil:nil.
+3:4:600:1:4:0:0:Char(40).Type(58).Char(45).Type(58).Char(41).nil:nil.
+3:5:700:1:5:0:0:Char(40).Type(58).Char(42).Type(58).Char(41).nil:nil.
+3:6:800:1:6:0:0:Char(40).Type(58).Char(47).Type(58).Char(41).nil:nil.
+3:27:800:1:27:0:0:Char(40).Type(58).Char(37).Type(58).Char(41).nil:nil.
+3:28:800:1:28:0:0:Char(40).Type(58).Char(38).Type(58).Char(41).nil:nil.
+3:29:800:1:29:0:0:Char(40).Type(58).Char(124).Type(58).Char(41).nil:nil.
+3:20:900:0:20:0:0:Char(40).Char(45).Type(58).Char(41).nil:nil.
+3:3:0:8:3:0:0:Ident(452).Char(40).Type(58).Char(44).Type(58).Char(41).nil:nil.
+3:4:0:8:4:0:0:Ident(556).Char(40).Type(58).Char(44).Type(58).Char(41).nil:nil.
+3:5:0:8:5:0:0:Ident(642).Char(40).Type(58).Char(44).Type(58).Char(41).nil:nil.
+3:6:0:8:6:0:0:Ident(323).Char(40).Type(58).Char(44).Type(58).Char(41).nil:nil.
+3:27:0:8:27:0:0:Ident(320).Char(40).Type(58).Char(44).Type(58).Char(41).nil:nil.
+3:28:0:8:28:0:0:Ident(518).Char(40).Type(58).Char(44).Type(58).Char(41).nil:nil.
+3:29:0:8:29:0:0:Ident(225).Char(40).Type(58).Char(44).Type(58).Char(41).nil:nil.
+3:20:0:0:20:0:0:Ident(441).Char(40).Type(58).Char(41).nil:nil.
+3:20:0:8:20:0:0:Ident(1594).Char(40).Type(58).Char(41).nil:nil.
+3:25:900:0:25:0:0:Ident(430).Char(40).Type(428).Char(41).nil:nil.
+3:25:900:8:25:0:0:Ident(1583).Char(40).Type(428).Char(41).nil:nil.
+3:217:900:8:0:0:0:Ident(722).Char(40).Type(331).Char(41).nil:nil.
+nil end
+GrammarForSort 186:0:
+3:254:0:8:0:0:0:Ident(108).nil:nil.
+nil end
+GrammarForSort 291:0:
+3:226:0:8:0:0:0:Ident(100).nil:nil.
+3:227:0:8:0:0:0:Char(40).Type(291).Char(41).Num(0).nil:nil.
+3:228:0:8:0:0:0:Ident(593).Char(40).Type(291).Char(41).nil:nil.
+3:229:0:8:0:0:0:Char(40).Type(291).Char(41).Num(1).nil:nil.
+3:230:0:8:0:0:0:Ident(594).Char(40).Type(291).Char(41).nil:nil.
+3:231:0:8:0:0:0:Char(40).Type(291).Char(41).Num(2).nil:nil.
+3:232:0:8:0:0:0:Ident(595).Char(40).Type(291).Char(41).nil:nil.
+3:233:0:8:0:0:0:Char(40).Type(291).Char(41).Num(3).nil:nil.
+3:234:0:8:0:0:0:Ident(596).Char(40).Type(291).Char(41).nil:nil.
+3:235:0:8:0:0:0:Char(40).Type(291).Char(41).Num(4).nil:nil.
+3:236:0:8:0:0:0:Ident(597).Char(40).Type(291).Char(41).nil:nil.
+3:237:0:8:0:0:0:Char(40).Type(291).Char(41).Num(5).nil:nil.
+3:238:0:8:0:0:0:Ident(598).Char(40).Type(291).Char(41).nil:nil.
+3:239:0:8:0:0:0:Char(40).Type(291).Char(41).Num(6).nil:nil.
+3:240:0:8:0:0:0:Ident(599).Char(40).Type(291).Char(41).nil:nil.
+3:241:0:8:0:0:0:Char(40).Type(291).Char(41).Num(7).nil:nil.
+3:242:0:8:0:0:0:Ident(600).Char(40).Type(291).Char(41).nil:nil.
+3:243:0:8:0:0:0:Char(40).Type(291).Char(41).Num(8).nil:nil.
+3:244:0:8:0:0:0:Ident(601).Char(40).Type(291).Char(41).nil:nil.
+3:245:0:8:0:0:0:Char(40).Type(291).Char(41).Num(9).nil:nil.
+3:246:0:8:0:0:0:Ident(602).Char(40).Type(291).Char(41).nil:nil.
+3:247:0:8:0:0:0:Char(40).Type(291).Char(41).Num(10).nil:nil.
+3:248:0:8:0:0:0:Ident(853).Char(40).Type(291).Char(41).nil:nil.
+3:249:0:10:0:2:0:Type(291).Char(43).Type(291).nil:nil.
+3:250:0:10:0:2:0:Type(291).Char(42).Type(291).nil:nil.
+3:251:0:8:0:0:0:Ident(637).Char(40).Type(291).Char(41).nil:nil.
+3:252:0:8:0:0:0:Ident(414).Char(40).Type(291).Char(41).nil:nil.
+3:253:0:8:0:0:0:Ident(516).Char(40).Type(291).Char(41).nil:nil.
+nil end
+GrammarForSort 331:0:
+3:200:1000:8:0:0:0:Type(58).nil:nil.
+3:201:500:1:0:0:0:Type(331).Char(43).Type(331).nil:nil.
+3:202:600:1:0:0:0:Type(331).Char(45).Type(331).nil:nil.
+3:203:700:1:0:0:0:Type(331).Char(42).Type(331).nil:nil.
+3:204:800:1:0:0:0:Type(331).Char(37).Type(331).nil:nil.
+3:205:800:1:0:0:0:Type(331).Char(38).Type(331).nil:nil.
+3:206:800:1:0:0:0:Type(331).Char(47).Type(331).nil:nil.
+3:207:800:1:0:0:0:Type(331).Char(124).Type(331).nil:nil.
+3:208:900:0:0:0:0:Char(45).Type(331).nil:nil.
+3:201:500:0:0:0:0:Char(40).Type(331).Char(43).Type(331).Char(41).nil:nil.
+3:202:600:0:0:0:0:Char(40).Type(331).Char(45).Type(331).Char(41).nil:nil.
+3:203:700:0:0:0:0:Char(40).Type(331).Char(42).Type(331).Char(41).nil:nil.
+3:206:800:0:0:0:0:Char(40).Type(331).Char(47).Type(331).Char(41).nil:nil.
+3:204:800:0:0:0:0:Char(40).Type(331).Char(37).Type(331).Char(41).nil:nil.
+3:205:800:0:0:0:0:Char(40).Type(331).Char(38).Type(331).Char(41).nil:nil.
+3:207:800:0:0:0:0:Char(40).Type(331).Char(124).Type(331).Char(41).nil:nil.
+3:208:900:0:0:0:0:Char(40).Char(45).Type(331).Char(41).nil:nil.
+3:201:500:8:0:0:0:Ident(452).Char(40).Type(331).Char(44).Type(331).Char(41).nil:nil.
+3:202:600:8:0:0:0:Ident(556).Char(40).Type(331).Char(44).Type(331).Char(41).nil:nil.
+3:203:700:8:0:0:0:Ident(642).Char(40).Type(331).Char(44).Type(331).Char(41).nil:nil.
+3:206:800:8:0:0:0:Ident(323).Char(40).Type(331).Char(44).Type(331).Char(41).nil:nil.
+3:204:800:8:0:0:0:Ident(320).Char(40).Type(331).Char(44).Type(331).Char(41).nil:nil.
+3:205:800:8:0:0:0:Ident(518).Char(40).Type(331).Char(44).Type(331).Char(41).nil:nil.
+3:207:800:8:0:0:0:Ident(225).Char(40).Type(331).Char(44).Type(331).Char(41).nil:nil.
+3:208:900:8:0:0:0:Ident(441).Char(40).Type(331).Char(41).nil:nil.
+3:215:900:0:0:0:0:Ident(430).Char(40).Type(428).Char(41).nil:nil.
+3:215:900:8:0:0:0:Ident(856).Char(40).Type(428).Char(41).nil:nil.
+nil end
+GrammarForSort 345:0:
+nil end
+GrammarForSort 428:1:
+3:1:0:8:0:0:0:Ident(448).nil:nil.
+3:0:0:8:0:0:0:Ident(734).nil:nil.
+3:21:100:1:21:0:0:Type(428).Ident(518).Type(428).nil:nil.
+3:22:100:1:22:0:0:Type(428).Ident(225).Type(428).nil:nil.
+3:21:100:9:21:0:0:Char(40).Type(428).Ident(518).Type(428).Char(41).nil:nil.
+3:22:100:9:22:0:0:Char(40).Type(428).Ident(225).Type(428).Char(41).nil:nil.
+3:24:200:0:24:0:0:Ident(337).Char(40).Type(428).Char(41).nil:nil.
+3:24:200:0:24:0:0:Ident(337).Type(428).nil:nil.
+3:24:200:0:24:0:0:Char(40).Ident(337).Type(428).Char(41).nil:nil.
+3:24:200:8:24:0:0:Char(40).Ident(337).Char(40).Type(428).Char(41).Char(41).nil:nil.
+3:8:200:1:8:0:0:Type(428).Char(61).Char(61).Type(428).nil:nil.
+3:9:200:1:9:0:0:Type(428).Char(33).Char(61).Type(428).nil:nil.
+3:10:200:1:10:0:0:Type(428).Char(60).Type(428).nil:nil.
+3:11:200:1:11:0:0:Type(428).Char(60).Char(61).Type(428).nil:nil.
+3:12:200:1:12:0:0:Type(428).Char(62).Type(428).nil:nil.
+3:13:200:1:13:0:0:Type(428).Char(62).Char(61).Type(428).nil:nil.
+3:8:200:9:8:0:0:Ident(737).Char(40).Type(428).Char(44).Type(428).Char(41).nil:nil.
+3:9:200:9:9:0:0:Ident(847).Char(40).Type(428).Char(44).Type(428).Char(41).nil:nil.
+3:10:200:9:10:0:0:Ident(962).Char(40).Type(428).Char(44).Type(428).Char(41).nil:nil.
+3:11:200:9:11:0:0:Ident(1176).Char(40).Type(428).Char(44).Type(428).Char(41).nil:nil.
+3:12:200:9:12:0:0:Ident(1269).Char(40).Type(428).Char(44).Type(428).Char(41).nil:nil.
+3:13:200:9:13:0:0:Ident(1483).Char(40).Type(428).Char(44).Type(428).Char(41).nil:nil.
+3:8:300:0:8:0:0:Type(58).Char(61).Char(61).Type(58).nil:nil.
+3:9:300:0:9:0:0:Type(58).Char(33).Char(61).Type(58).nil:nil.
+3:10:300:0:10:0:0:Type(58).Char(60).Type(58).nil:nil.
+3:11:300:0:11:0:0:Type(58).Char(60).Char(61).Type(58).nil:nil.
+3:12:300:0:12:0:0:Type(58).Char(62).Type(58).nil:nil.
+3:13:300:0:13:0:0:Type(58).Char(62).Char(61).Type(58).nil:nil.
+3:8:300:0:8:0:0:Ident(1367).Char(40).Type(58).Char(44).Type(58).Char(41).nil:nil.
+3:9:300:0:9:0:0:Ident(1477).Char(40).Type(58).Char(44).Type(58).Char(41).nil:nil.
+3:10:300:0:10:0:0:Ident(1592).Char(40).Type(58).Char(44).Type(58).Char(41).nil:nil.
+3:11:300:0:11:0:0:Ident(1806).Char(40).Type(58).Char(44).Type(58).Char(41).nil:nil.
+3:12:300:0:12:0:0:Ident(1899).Char(40).Type(58).Char(44).Type(58).Char(41).nil:nil.
+3:13:300:0:13:0:0:Ident(2113).Char(40).Type(58).Char(44).Type(58).Char(41).nil:nil.
+3:26:900:0:26:0:0:Ident(1063).Char(40).Type(58).Char(41).nil:nil.
+3:26:900:8:26:0:0:Ident(1794).Char(40).Type(58).Char(41).nil:nil.
+3:209:300:0:0:0:0:Type(331).Char(61).Char(61).Type(331).nil:nil.
+3:210:300:0:0:0:0:Type(331).Char(33).Char(61).Type(331).nil:nil.
+3:211:300:0:0:0:0:Type(331).Char(62).Type(331).nil:nil.
+3:212:300:0:0:0:0:Type(331).Char(62).Char(61).Type(331).nil:nil.
+3:213:300:0:0:0:0:Type(331).Char(60).Char(61).Type(331).nil:nil.
+3:214:300:0:0:0:0:Type(331).Char(60).Type(331).nil:nil.
+3:209:300:8:0:0:0:Ident(640).Char(40).Type(331).Char(44).Type(331).Char(41).nil:nil.
+3:210:300:8:0:0:0:Ident(961).Char(40).Type(331).Char(44).Type(331).Char(41).nil:nil.
+3:214:300:8:0:0:0:Ident(865).Char(40).Type(331).Char(44).Type(331).Char(41).nil:nil.
+3:213:300:8:0:0:0:Ident(1079).Char(40).Type(331).Char(44).Type(331).Char(41).nil:nil.
+3:211:300:8:0:0:0:Ident(1172).Char(40).Type(331).Char(44).Type(331).Char(41).nil:nil.
+3:212:300:8:0:0:0:Ident(1386).Char(40).Type(331).Char(44).Type(331).Char(41).nil:nil.
+3:216:900:0:0:0:0:Ident(1063).Char(40).Type(331).Char(41).nil:nil.
+3:216:900:8:0:0:0:Ident(1067).Char(40).Type(331).Char(41).nil:nil.
+nil end
+EndDef end
+GrammarForSort 58:1:
+2:221:0:8:0:0:0:Ident(419).Char(40).Type(186).Char(41).nil:nil.
+2:222:0:8:0:0:0:Type(331).Char(45).Ident(220).Ident(419).Char(40).Type(186).Char(41).nil:nil.
+nil end
+GrammarForSort 186:0:
+2:218:0:0:0:0:0:Ident(1476).nil:nil.
+2:218:0:8:0:0:0:Ident(534).nil:nil.
+2:219:0:0:0:0:0:Ident(435).Char(40).Type(58).Char(44).Type(186).Char(41).nil:nil.
+2:219:0:0:0:0:0:Type(58).Type(186).nil:nil.
+2:219:0:0:0:0:0:Type(58).Char(44).Type(186).nil:nil.
+2:219:0:8:0:0:0:Type(58).Char(46).Type(186).nil:nil.
+2:220:0:0:0:0:0:Ident(632).Char(40).Type(186).Char(44).Type(186).Char(41).nil:nil.
+2:220:0:8:0:0:0:Type(186).Char(64).Type(186).nil:nil.
+2:224:0:0:0:0:0:Ident(833).Char(40).Type(331).Char(42).Type(186).Char(41).nil:nil.
+2:224:0:8:0:0:0:Ident(833).Char(40).Type(331).Char(44).Type(186).Char(41).nil:nil.
+nil end
+GrammarForSort 291:0:
+nil end
+GrammarForSort 331:0:
+2:200:1000:0:0:0:0:Char(91).Type(58).Char(93).nil:nil.
+2:223:0:0:0:0:0:Ident(443).Char(40).Type(186).Char(41).nil:nil.
+2:223:0:8:0:0:0:Ident(2443).Char(40).Type(186).Char(41).nil:nil.
+nil end
+GrammarForSort 345:0:
+2:225:0:12:0:0:0:Ident(1175).nil:nil.
+nil end
+GrammarForSort 428:1:
+nil end
+EndDef end
+GrammarForSort 19:0:
+nil end
+GrammarForSort 58:1:
+1:67:4000:8:0:0:0:Type(19).nil:nil.
+1:79:4000:8:0:0:0:Char(45).Type(19).nil:nil.
+nil end
+GrammarForSort 186:0:
+nil end
+GrammarForSort 220:0:
+nil end
+GrammarForSort 291:0:
+nil end
+GrammarForSort 331:0:
+nil end
+GrammarForSort 351:0:
+nil end
+GrammarForSort 428:1:
+nil end
+EndDef end
+/*368 extractrule1:builtinInt*/
+RULE(
+289,58,86,2,1,2,FSYM( FSYM(  VAR(0,58). VAR(1,186).nil, 219).nil, 221),
+ VAR(0,58),
+nil)
+
+ end
+/*369 extractrule2:builtinInt*/
+RULE(
+290,58,86,2,1,2,FSYM( FSYM(  VAR(0,58). VAR(1,186).nil, 219).nil, 221),
+FSYM(  VAR(1,186).nil, 221),
+nil)
+
+ end
+
+RULE(
+-1,
+331,131,1,1,3,FSYM( FSYM(  VAR(0,58).nil, 200).FSYM(  VAR(1,58).nil, 200).nil, 201),
+FSYM(  VAR(2,58).nil, 200),
+WHERE(VAR(2,58),-1,FSYM(  VAR(0,58). VAR(1,58).nil, 3)).
+nil)
+
+ end
+
+RULE(
+-1,
+331,131,1,1,3,FSYM( FSYM(  VAR(0,58).nil, 200).FSYM(  VAR(1,58).nil, 200).nil, 202),
+FSYM(  VAR(2,58).nil, 200),
+WHERE(VAR(2,58),-1,FSYM(  VAR(0,58). VAR(1,58).nil, 4)).
+nil)
+
+ end
+
+RULE(
+-1,
+331,131,1,1,3,FSYM( FSYM(  VAR(0,58).nil, 200).FSYM(  VAR(1,58).nil, 200).nil, 203),
+FSYM(  VAR(2,58).nil, 200),
+WHERE(VAR(2,58),-1,FSYM(  VAR(0,58). VAR(1,58).nil, 5)).
+nil)
+
+ end
+
+RULE(
+-1,
+331,131,1,1,3,FSYM( FSYM(  VAR(0,58).nil, 200).FSYM(  VAR(1,58).nil, 200).nil, 204),
+FSYM(  VAR(2,58).nil, 200),
+WHERE(VAR(2,58),-1,FSYM(  VAR(0,58). VAR(1,58).nil, 27)).
+nil)
+
+ end
+
+RULE(
+-1,
+331,131,1,1,3,FSYM( FSYM(  VAR(0,58).nil, 200).FSYM(  VAR(1,58).nil, 200).nil, 205),
+FSYM(  VAR(2,58).nil, 200),
+WHERE(VAR(2,58),-1,FSYM(  VAR(0,58). VAR(1,58).nil, 28)).
+nil)
+
+ end
+
+RULE(
+-1,
+331,131,1,1,3,FSYM( FSYM(  VAR(0,58).nil, 200).FSYM(  VAR(1,58).nil, 200).nil, 206),
+FSYM(  VAR(2,58).nil, 200),
+WHERE(VAR(2,58),-1,FSYM(  VAR(0,58). VAR(1,58).nil, 6)).
+nil)
+
+ end
+
+RULE(
+-1,
+331,131,1,1,3,FSYM( FSYM(  VAR(0,58).nil, 200).FSYM(  VAR(1,58).nil, 200).nil, 207),
+FSYM(  VAR(2,58).nil, 200),
+WHERE(VAR(2,58),-1,FSYM(  VAR(0,58). VAR(1,58).nil, 29)).
+nil)
+
+ end
+
+RULE(
+-1,
+331,131,1,1,2,FSYM( FSYM(  VAR(0,58).nil, 200).nil, 208),
+FSYM(  VAR(1,58).nil, 200),
+WHERE(VAR(1,58),-1,FSYM(  VAR(0,58).nil, 20)).
+nil)
+
+ end
+
+RULE(
+-1,
+428,131,1,1,2,FSYM( FSYM(  VAR(0,58).nil, 200).FSYM(  VAR(1,58).nil, 200).nil, 209),
+FSYM(  VAR(0,58). VAR(1,58).nil, 8),
+nil)
+
+ end
+
+RULE(
+-1,
+428,131,1,1,2,FSYM( FSYM(  VAR(0,58).nil, 200).FSYM(  VAR(1,58).nil, 200).nil, 210),
+FSYM(  VAR(0,58). VAR(1,58).nil, 9),
+nil)
+
+ end
+
+RULE(
+-1,
+428,131,1,1,2,FSYM( FSYM(  VAR(0,58).nil, 200).FSYM(  VAR(1,58).nil, 200).nil, 211),
+FSYM(  VAR(0,58). VAR(1,58).nil, 12),
+nil)
+
+ end
+
+RULE(
+-1,
+428,131,1,1,2,FSYM( FSYM(  VAR(0,58).nil, 200).FSYM(  VAR(1,58).nil, 200).nil, 212),
+FSYM(  VAR(0,58). VAR(1,58).nil, 13),
+nil)
+
+ end
+
+RULE(
+-1,
+428,131,1,1,2,FSYM( FSYM(  VAR(0,58).nil, 200).FSYM(  VAR(1,58).nil, 200).nil, 213),
+FSYM(  VAR(0,58). VAR(1,58).nil, 11),
+nil)
+
+ end
+
+RULE(
+-1,
+428,131,1,1,2,FSYM( FSYM(  VAR(0,58).nil, 200).FSYM(  VAR(1,58).nil, 200).nil, 214),
+FSYM(  VAR(0,58). VAR(1,58).nil, 10),
+nil)
+
+ end
+
+RULE(
+-1,
+331,131,1,1,2,FSYM(  VAR(0,428).nil, 215),
+FSYM(  VAR(1,58).nil, 200),
+WHERE(VAR(1,58),-1,FSYM(  VAR(0,428).nil, 25)).
+nil)
+
+ end
+
+RULE(
+-1,
+428,131,1,1,1,FSYM( FSYM(  VAR(0,58).nil, 200).nil, 216),
+FSYM(  VAR(0,58).nil, 26),
+nil)
+
+ end
+
+RULE(
+-1,
+58,131,1,1,1,FSYM( FSYM(  VAR(0,58).nil, 200).nil, 217),
+ VAR(0,58),
+nil)
+
+ end
+
+RULE(
+-1,
+186,86,1,1,1,FSYM( FSYM( nil, 218). VAR(0,186).nil, 220),
+ VAR(0,186),
+nil)
+
+ end
+
+RULE(
+-1,
+186,86,1,1,3,FSYM( FSYM(  VAR(0,58). VAR(1,186).nil, 219). VAR(2,186).nil, 220),
+FSYM(  VAR(0,58).FSYM(  VAR(1,186). VAR(2,186).nil, 220).nil, 219),
+nil)
+
+ end
+
+RULE(
+-1,
+58,86,1,1,2,FSYM( FSYM( INT(1).nil, 200).FSYM(  VAR(0,58). VAR(1,186).nil, 219).nil, 222),
+ VAR(0,58),
+nil)
+
+ end
+
+RULE(
+-1,
+58,86,1,1,4,FSYM(  VAR(0,331).FSYM(  VAR(1,58). VAR(2,186).nil, 219).nil, 222),
+FSYM(  VAR(3,331). VAR(2,186).nil, 222),
+WHERE(VAR(3,331),-1,FSYM(  VAR(0,331).FSYM( INT(1).nil, 200).nil, 202)).
+nil)
+
+ end
+
+RULE(
+-1,
+331,86,1,1,1,FSYM( FSYM( nil, 218).nil, 223),
+FSYM( INT(0).nil, 200),
+nil)
+
+ end
+
+RULE(
+-1,
+331,86,1,1,2,FSYM( FSYM(  VAR(0,58). VAR(1,186).nil, 219).nil, 223),
+FSYM( FSYM( INT(1).nil, 200).FSYM(  VAR(1,186).nil, 223).nil, 201),
+nil)
+
+ end
+
+RULE(
+-1,
+186,86,1,1,1,FSYM( FSYM( INT(0).nil, 200). VAR(0,186).nil, 224),
+FSYM( nil, 218),
+nil)
+
+ end
+
+RULE(
+-1,
+186,86,1,1,2,FSYM(  VAR(0,331). VAR(1,186).nil, 224),
+FSYM(  VAR(1,186).FSYM( FSYM(  VAR(0,331).FSYM( INT(1).nil, 200).nil, 202). VAR(1,186).nil, 224).nil, 220),
+IFF(FSYM(  VAR(0,331).FSYM( INT(0).nil, 200).nil, 211)).
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM( nil, 226).nil, 227),
+FSYM( nil, 226),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM(  VAR(0,291).nil, 228),
+FSYM( nil, 226),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM(  VAR(0,291).nil, 230),
+ VAR(0,291),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM( nil, 226).nil, 232),
+FSYM( nil, 226),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 227).nil, 232),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 227).FSYM(  VAR(0,291).nil, 232).nil, 249).nil, 227),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 229).nil, 232),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 227).FSYM(  VAR(0,291).nil, 232).nil, 249).nil, 231),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 231).nil, 232),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 227).FSYM(  VAR(0,291).nil, 232).nil, 249).nil, 235),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 233).nil, 232),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 227).FSYM(  VAR(0,291).nil, 232).nil, 249).nil, 239),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 235).nil, 232),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 227).FSYM(  VAR(0,291).nil, 232).nil, 249).nil, 243),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 237).nil, 232),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 229).FSYM(  VAR(0,291).nil, 232).nil, 249).nil, 227),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 239).nil, 232),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 229).FSYM(  VAR(0,291).nil, 232).nil, 249).nil, 231),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 241).nil, 232),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 229).FSYM(  VAR(0,291).nil, 232).nil, 249).nil, 235),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 243).nil, 232),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 229).FSYM(  VAR(0,291).nil, 232).nil, 249).nil, 239),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 245).nil, 232),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 229).FSYM(  VAR(0,291).nil, 232).nil, 249).nil, 243),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM( nil, 226).nil, 234),
+FSYM( nil, 226),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 227).nil, 234),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 227).FSYM(  VAR(0,291).nil, 234).nil, 249).nil, 227),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 229).nil, 234),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 227).FSYM(  VAR(0,291).nil, 234).nil, 249).nil, 233),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 231).nil, 234),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 227).FSYM(  VAR(0,291).nil, 234).nil, 249).nil, 239),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 233).nil, 234),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 227).FSYM(  VAR(0,291).nil, 234).nil, 249).nil, 245),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 235).nil, 234),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 229).FSYM(  VAR(0,291).nil, 234).nil, 249).nil, 231),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 237).nil, 234),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 229).FSYM(  VAR(0,291).nil, 234).nil, 249).nil, 237),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 239).nil, 234),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 229).FSYM(  VAR(0,291).nil, 234).nil, 249).nil, 243),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 241).nil, 234),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 231).FSYM(  VAR(0,291).nil, 234).nil, 249).nil, 229),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 243).nil, 234),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 231).FSYM(  VAR(0,291).nil, 234).nil, 249).nil, 235),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 245).nil, 234),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 231).FSYM(  VAR(0,291).nil, 234).nil, 249).nil, 241),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM( nil, 226).nil, 236),
+FSYM( nil, 226),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 227).nil, 236),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 227).FSYM(  VAR(0,291).nil, 236).nil, 249).nil, 227),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 229).nil, 236),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 227).FSYM(  VAR(0,291).nil, 236).nil, 249).nil, 235),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 231).nil, 236),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 227).FSYM(  VAR(0,291).nil, 236).nil, 249).nil, 243),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 233).nil, 236),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 229).FSYM(  VAR(0,291).nil, 236).nil, 249).nil, 231),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 235).nil, 236),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 229).FSYM(  VAR(0,291).nil, 236).nil, 249).nil, 239),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 237).nil, 236),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 231).FSYM(  VAR(0,291).nil, 236).nil, 249).nil, 227),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 239).nil, 236),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 231).FSYM(  VAR(0,291).nil, 236).nil, 249).nil, 235),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 241).nil, 236),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 231).FSYM(  VAR(0,291).nil, 236).nil, 249).nil, 243),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 243).nil, 236),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 233).FSYM(  VAR(0,291).nil, 236).nil, 249).nil, 231),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 245).nil, 236),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 233).FSYM(  VAR(0,291).nil, 236).nil, 249).nil, 239),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM( nil, 226).nil, 238),
+FSYM( nil, 226),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 227).nil, 238),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 227).FSYM(  VAR(0,291).nil, 238).nil, 249).nil, 227),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 229).nil, 238),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 227).FSYM(  VAR(0,291).nil, 238).nil, 249).nil, 237),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 231).nil, 238),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 229).FSYM(  VAR(0,291).nil, 238).nil, 249).nil, 227),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 233).nil, 238),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 229).FSYM(  VAR(0,291).nil, 238).nil, 249).nil, 237),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 235).nil, 238),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 231).FSYM(  VAR(0,291).nil, 238).nil, 249).nil, 227),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 237).nil, 238),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 231).FSYM(  VAR(0,291).nil, 238).nil, 249).nil, 237),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 239).nil, 238),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 233).FSYM(  VAR(0,291).nil, 238).nil, 249).nil, 227),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 241).nil, 238),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 233).FSYM(  VAR(0,291).nil, 238).nil, 249).nil, 237),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 243).nil, 238),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 235).FSYM(  VAR(0,291).nil, 238).nil, 249).nil, 227),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 245).nil, 238),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 235).FSYM(  VAR(0,291).nil, 238).nil, 249).nil, 237),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM( nil, 226).nil, 240),
+FSYM( nil, 226),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 227).nil, 240),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 227).FSYM(  VAR(0,291).nil, 240).nil, 249).nil, 227),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 229).nil, 240),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 227).FSYM(  VAR(0,291).nil, 240).nil, 249).nil, 239),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 231).nil, 240),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 229).FSYM(  VAR(0,291).nil, 240).nil, 249).nil, 231),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 233).nil, 240),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 229).FSYM(  VAR(0,291).nil, 240).nil, 249).nil, 243),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 235).nil, 240),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 231).FSYM(  VAR(0,291).nil, 240).nil, 249).nil, 235),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 237).nil, 240),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 233).FSYM(  VAR(0,291).nil, 240).nil, 249).nil, 227),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 239).nil, 240),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 233).FSYM(  VAR(0,291).nil, 240).nil, 249).nil, 239),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 241).nil, 240),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 235).FSYM(  VAR(0,291).nil, 240).nil, 249).nil, 231),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 243).nil, 240),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 235).FSYM(  VAR(0,291).nil, 240).nil, 249).nil, 243),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 245).nil, 240),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 237).FSYM(  VAR(0,291).nil, 240).nil, 249).nil, 235),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM( nil, 226).nil, 242),
+FSYM( nil, 226),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 227).nil, 242),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 227).FSYM(  VAR(0,291).nil, 242).nil, 249).nil, 227),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 229).nil, 242),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 227).FSYM(  VAR(0,291).nil, 242).nil, 249).nil, 241),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 231).nil, 242),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 229).FSYM(  VAR(0,291).nil, 242).nil, 249).nil, 235),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 233).nil, 242),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 231).FSYM(  VAR(0,291).nil, 242).nil, 249).nil, 229),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 235).nil, 242),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 231).FSYM(  VAR(0,291).nil, 242).nil, 249).nil, 243),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 237).nil, 242),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 233).FSYM(  VAR(0,291).nil, 242).nil, 249).nil, 237),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 239).nil, 242),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 235).FSYM(  VAR(0,291).nil, 242).nil, 249).nil, 231),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 241).nil, 242),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 235).FSYM(  VAR(0,291).nil, 242).nil, 249).nil, 245),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 243).nil, 242),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 237).FSYM(  VAR(0,291).nil, 242).nil, 249).nil, 239),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 245).nil, 242),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 239).FSYM(  VAR(0,291).nil, 242).nil, 249).nil, 233),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM( nil, 226).nil, 244),
+FSYM( nil, 226),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 227).nil, 244),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 227).FSYM(  VAR(0,291).nil, 244).nil, 249).nil, 227),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 229).nil, 244),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 227).FSYM(  VAR(0,291).nil, 244).nil, 249).nil, 243),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 231).nil, 244),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 229).FSYM(  VAR(0,291).nil, 244).nil, 249).nil, 239),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 233).nil, 244),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 231).FSYM(  VAR(0,291).nil, 244).nil, 249).nil, 235),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 235).nil, 244),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 233).FSYM(  VAR(0,291).nil, 244).nil, 249).nil, 231),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 237).nil, 244),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 235).FSYM(  VAR(0,291).nil, 244).nil, 249).nil, 227),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 239).nil, 244),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 235).FSYM(  VAR(0,291).nil, 244).nil, 249).nil, 243),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 241).nil, 244),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 237).FSYM(  VAR(0,291).nil, 244).nil, 249).nil, 239),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 243).nil, 244),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 239).FSYM(  VAR(0,291).nil, 244).nil, 249).nil, 235),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 245).nil, 244),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 241).FSYM(  VAR(0,291).nil, 244).nil, 249).nil, 231),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM( nil, 226).nil, 246),
+FSYM( nil, 226),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 227).nil, 246),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 227).FSYM(  VAR(0,291).nil, 246).nil, 249).nil, 227),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 229).nil, 246),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 227).FSYM(  VAR(0,291).nil, 246).nil, 249).nil, 245),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 231).nil, 246),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 229).FSYM(  VAR(0,291).nil, 246).nil, 249).nil, 243),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 233).nil, 246),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 231).FSYM(  VAR(0,291).nil, 246).nil, 249).nil, 241),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 235).nil, 246),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 233).FSYM(  VAR(0,291).nil, 246).nil, 249).nil, 239),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 237).nil, 246),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 235).FSYM(  VAR(0,291).nil, 246).nil, 249).nil, 237),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 239).nil, 246),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 237).FSYM(  VAR(0,291).nil, 246).nil, 249).nil, 235),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 241).nil, 246),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 239).FSYM(  VAR(0,291).nil, 246).nil, 249).nil, 233),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 243).nil, 246),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 241).FSYM(  VAR(0,291).nil, 246).nil, 249).nil, 231),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 245).nil, 246),
+FSYM( FSYM( FSYM( FSYM( nil, 226).nil, 243).FSYM(  VAR(0,291).nil, 246).nil, 249).nil, 229),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,1,FSYM(  VAR(0,291).FSYM( nil, 226).nil, 249),
+ VAR(0,291),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM(  VAR(0,291).FSYM( nil, 226).nil, 249).nil, 249),
+FSYM(  EVAR(3,291). VAR(0,291).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,2,FSYM( FSYM(  VAR(0,291).nil, 227).FSYM(  VAR(1,291).nil, 227).nil, 249),
+FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 227).nil, 249).nil, 249).nil, 227),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).nil, 227).FSYM(  VAR(1,291).nil, 227).nil, 249).nil, 249),
+FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 227).nil, 249).nil, 249).nil, 227).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,2,FSYM( FSYM(  VAR(0,291).nil, 227).FSYM(  VAR(1,291).nil, 229).nil, 249),
+FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 227).nil, 249).nil, 249).nil, 229),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).nil, 227).FSYM(  VAR(1,291).nil, 229).nil, 249).nil, 249),
+FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 227).nil, 249).nil, 249).nil, 229).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,2,FSYM( FSYM(  VAR(0,291).nil, 227).FSYM(  VAR(1,291).nil, 231).nil, 249),
+FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 227).nil, 249).nil, 249).nil, 231),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).nil, 227).FSYM(  VAR(1,291).nil, 231).nil, 249).nil, 249),
+FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 227).nil, 249).nil, 249).nil, 231).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,2,FSYM( FSYM(  VAR(0,291).nil, 227).FSYM(  VAR(1,291).nil, 233).nil, 249),
+FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 227).nil, 249).nil, 249).nil, 233),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).nil, 227).FSYM(  VAR(1,291).nil, 233).nil, 249).nil, 249),
+FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 227).nil, 249).nil, 249).nil, 233).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,2,FSYM( FSYM(  VAR(0,291).nil, 227).FSYM(  VAR(1,291).nil, 235).nil, 249),
+FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 227).nil, 249).nil, 249).nil, 235),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).nil, 227).FSYM(  VAR(1,291).nil, 235).nil, 249).nil, 249),
+FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 227).nil, 249).nil, 249).nil, 235).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,2,FSYM( FSYM(  VAR(0,291).nil, 227).FSYM(  VAR(1,291).nil, 237).nil, 249),
+FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 227).nil, 249).nil, 249).nil, 237),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).nil, 227).FSYM(  VAR(1,291).nil, 237).nil, 249).nil, 249),
+FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 227).nil, 249).nil, 249).nil, 237).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,2,FSYM( FSYM(  VAR(0,291).nil, 227).FSYM(  VAR(1,291).nil, 239).nil, 249),
+FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 227).nil, 249).nil, 249).nil, 239),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).nil, 227).FSYM(  VAR(1,291).nil, 239).nil, 249).nil, 249),
+FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 227).nil, 249).nil, 249).nil, 239).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,2,FSYM( FSYM(  VAR(0,291).nil, 227).FSYM(  VAR(1,291).nil, 241).nil, 249),
+FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 227).nil, 249).nil, 249).nil, 241),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).nil, 227).FSYM(  VAR(1,291).nil, 241).nil, 249).nil, 249),
+FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 227).nil, 249).nil, 249).nil, 241).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,2,FSYM( FSYM(  VAR(0,291).nil, 227).FSYM(  VAR(1,291).nil, 243).nil, 249),
+FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 227).nil, 249).nil, 249).nil, 243),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).nil, 227).FSYM(  VAR(1,291).nil, 243).nil, 249).nil, 249),
+FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 227).nil, 249).nil, 249).nil, 243).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,2,FSYM( FSYM(  VAR(0,291).nil, 227).FSYM(  VAR(1,291).nil, 245).nil, 249),
+FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 227).nil, 249).nil, 249).nil, 245),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).nil, 227).FSYM(  VAR(1,291).nil, 245).nil, 249).nil, 249),
+FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 227).nil, 249).nil, 249).nil, 245).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,2,FSYM( FSYM(  VAR(0,291).nil, 229).FSYM(  VAR(1,291).nil, 229).nil, 249),
+FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 227).nil, 249).nil, 249).nil, 231),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).nil, 229).FSYM(  VAR(1,291).nil, 229).nil, 249).nil, 249),
+FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 227).nil, 249).nil, 249).nil, 231).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,2,FSYM( FSYM(  VAR(0,291).nil, 229).FSYM(  VAR(1,291).nil, 231).nil, 249),
+FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 227).nil, 249).nil, 249).nil, 233),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).nil, 229).FSYM(  VAR(1,291).nil, 231).nil, 249).nil, 249),
+FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 227).nil, 249).nil, 249).nil, 233).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,2,FSYM( FSYM(  VAR(0,291).nil, 229).FSYM(  VAR(1,291).nil, 233).nil, 249),
+FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 227).nil, 249).nil, 249).nil, 235),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).nil, 229).FSYM(  VAR(1,291).nil, 233).nil, 249).nil, 249),
+FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 227).nil, 249).nil, 249).nil, 235).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,2,FSYM( FSYM(  VAR(0,291).nil, 229).FSYM(  VAR(1,291).nil, 235).nil, 249),
+FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 227).nil, 249).nil, 249).nil, 237),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).nil, 229).FSYM(  VAR(1,291).nil, 235).nil, 249).nil, 249),
+FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 227).nil, 249).nil, 249).nil, 237).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,2,FSYM( FSYM(  VAR(0,291).nil, 229).FSYM(  VAR(1,291).nil, 237).nil, 249),
+FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 227).nil, 249).nil, 249).nil, 239),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).nil, 229).FSYM(  VAR(1,291).nil, 237).nil, 249).nil, 249),
+FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 227).nil, 249).nil, 249).nil, 239).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,2,FSYM( FSYM(  VAR(0,291).nil, 229).FSYM(  VAR(1,291).nil, 239).nil, 249),
+FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 227).nil, 249).nil, 249).nil, 241),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).nil, 229).FSYM(  VAR(1,291).nil, 239).nil, 249).nil, 249),
+FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 227).nil, 249).nil, 249).nil, 241).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,2,FSYM( FSYM(  VAR(0,291).nil, 229).FSYM(  VAR(1,291).nil, 241).nil, 249),
+FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 227).nil, 249).nil, 249).nil, 243),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).nil, 229).FSYM(  VAR(1,291).nil, 241).nil, 249).nil, 249),
+FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 227).nil, 249).nil, 249).nil, 243).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,2,FSYM( FSYM(  VAR(0,291).nil, 229).FSYM(  VAR(1,291).nil, 243).nil, 249),
+FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 227).nil, 249).nil, 249).nil, 245),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).nil, 229).FSYM(  VAR(1,291).nil, 243).nil, 249).nil, 249),
+FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 227).nil, 249).nil, 249).nil, 245).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,2,FSYM( FSYM(  VAR(0,291).nil, 229).FSYM(  VAR(1,291).nil, 245).nil, 249),
+FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 229).nil, 249).nil, 249).nil, 227),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).nil, 229).FSYM(  VAR(1,291).nil, 245).nil, 249).nil, 249),
+FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 229).nil, 249).nil, 249).nil, 227).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,2,FSYM( FSYM(  VAR(0,291).nil, 231).FSYM(  VAR(1,291).nil, 231).nil, 249),
+FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 227).nil, 249).nil, 249).nil, 235),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).nil, 231).FSYM(  VAR(1,291).nil, 231).nil, 249).nil, 249),
+FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 227).nil, 249).nil, 249).nil, 235).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,2,FSYM( FSYM(  VAR(0,291).nil, 231).FSYM(  VAR(1,291).nil, 233).nil, 249),
+FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 227).nil, 249).nil, 249).nil, 237),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).nil, 231).FSYM(  VAR(1,291).nil, 233).nil, 249).nil, 249),
+FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 227).nil, 249).nil, 249).nil, 237).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,2,FSYM( FSYM(  VAR(0,291).nil, 231).FSYM(  VAR(1,291).nil, 235).nil, 249),
+FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 227).nil, 249).nil, 249).nil, 239),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).nil, 231).FSYM(  VAR(1,291).nil, 235).nil, 249).nil, 249),
+FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 227).nil, 249).nil, 249).nil, 239).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,2,FSYM( FSYM(  VAR(0,291).nil, 231).FSYM(  VAR(1,291).nil, 237).nil, 249),
+FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 227).nil, 249).nil, 249).nil, 241),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).nil, 231).FSYM(  VAR(1,291).nil, 237).nil, 249).nil, 249),
+FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 227).nil, 249).nil, 249).nil, 241).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,2,FSYM( FSYM(  VAR(0,291).nil, 231).FSYM(  VAR(1,291).nil, 239).nil, 249),
+FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 227).nil, 249).nil, 249).nil, 243),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).nil, 231).FSYM(  VAR(1,291).nil, 239).nil, 249).nil, 249),
+FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 227).nil, 249).nil, 249).nil, 243).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,2,FSYM( FSYM(  VAR(0,291).nil, 231).FSYM(  VAR(1,291).nil, 241).nil, 249),
+FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 227).nil, 249).nil, 249).nil, 245),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).nil, 231).FSYM(  VAR(1,291).nil, 241).nil, 249).nil, 249),
+FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 227).nil, 249).nil, 249).nil, 245).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,2,FSYM( FSYM(  VAR(0,291).nil, 231).FSYM(  VAR(1,291).nil, 243).nil, 249),
+FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 229).nil, 249).nil, 249).nil, 227),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).nil, 231).FSYM(  VAR(1,291).nil, 243).nil, 249).nil, 249),
+FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 229).nil, 249).nil, 249).nil, 227).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,2,FSYM( FSYM(  VAR(0,291).nil, 231).FSYM(  VAR(1,291).nil, 245).nil, 249),
+FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 229).nil, 249).nil, 249).nil, 229),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).nil, 231).FSYM(  VAR(1,291).nil, 245).nil, 249).nil, 249),
+FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 229).nil, 249).nil, 249).nil, 229).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,2,FSYM( FSYM(  VAR(0,291).nil, 233).FSYM(  VAR(1,291).nil, 233).nil, 249),
+FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 227).nil, 249).nil, 249).nil, 239),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).nil, 233).FSYM(  VAR(1,291).nil, 233).nil, 249).nil, 249),
+FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 227).nil, 249).nil, 249).nil, 239).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,2,FSYM( FSYM(  VAR(0,291).nil, 233).FSYM(  VAR(1,291).nil, 235).nil, 249),
+FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 227).nil, 249).nil, 249).nil, 241),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).nil, 233).FSYM(  VAR(1,291).nil, 235).nil, 249).nil, 249),
+FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 227).nil, 249).nil, 249).nil, 241).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,2,FSYM( FSYM(  VAR(0,291).nil, 233).FSYM(  VAR(1,291).nil, 237).nil, 249),
+FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 227).nil, 249).nil, 249).nil, 243),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).nil, 233).FSYM(  VAR(1,291).nil, 237).nil, 249).nil, 249),
+FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 227).nil, 249).nil, 249).nil, 243).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,2,FSYM( FSYM(  VAR(0,291).nil, 233).FSYM(  VAR(1,291).nil, 239).nil, 249),
+FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 227).nil, 249).nil, 249).nil, 245),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).nil, 233).FSYM(  VAR(1,291).nil, 239).nil, 249).nil, 249),
+FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 227).nil, 249).nil, 249).nil, 245).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,2,FSYM( FSYM(  VAR(0,291).nil, 233).FSYM(  VAR(1,291).nil, 241).nil, 249),
+FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 229).nil, 249).nil, 249).nil, 227),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).nil, 233).FSYM(  VAR(1,291).nil, 241).nil, 249).nil, 249),
+FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 229).nil, 249).nil, 249).nil, 227).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,2,FSYM( FSYM(  VAR(0,291).nil, 233).FSYM(  VAR(1,291).nil, 243).nil, 249),
+FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 229).nil, 249).nil, 249).nil, 229),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).nil, 233).FSYM(  VAR(1,291).nil, 243).nil, 249).nil, 249),
+FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 229).nil, 249).nil, 249).nil, 229).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,2,FSYM( FSYM(  VAR(0,291).nil, 233).FSYM(  VAR(1,291).nil, 245).nil, 249),
+FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 229).nil, 249).nil, 249).nil, 231),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).nil, 233).FSYM(  VAR(1,291).nil, 245).nil, 249).nil, 249),
+FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 229).nil, 249).nil, 249).nil, 231).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,2,FSYM( FSYM(  VAR(0,291).nil, 235).FSYM(  VAR(1,291).nil, 235).nil, 249),
+FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 227).nil, 249).nil, 249).nil, 243),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).nil, 235).FSYM(  VAR(1,291).nil, 235).nil, 249).nil, 249),
+FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 227).nil, 249).nil, 249).nil, 243).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,2,FSYM( FSYM(  VAR(0,291).nil, 235).FSYM(  VAR(1,291).nil, 237).nil, 249),
+FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 227).nil, 249).nil, 249).nil, 245),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).nil, 235).FSYM(  VAR(1,291).nil, 237).nil, 249).nil, 249),
+FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 227).nil, 249).nil, 249).nil, 245).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,2,FSYM( FSYM(  VAR(0,291).nil, 235).FSYM(  VAR(1,291).nil, 239).nil, 249),
+FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 229).nil, 249).nil, 249).nil, 227),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).nil, 235).FSYM(  VAR(1,291).nil, 239).nil, 249).nil, 249),
+FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 229).nil, 249).nil, 249).nil, 227).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,2,FSYM( FSYM(  VAR(0,291).nil, 235).FSYM(  VAR(1,291).nil, 241).nil, 249),
+FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 229).nil, 249).nil, 249).nil, 229),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).nil, 235).FSYM(  VAR(1,291).nil, 241).nil, 249).nil, 249),
+FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 229).nil, 249).nil, 249).nil, 229).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,2,FSYM( FSYM(  VAR(0,291).nil, 235).FSYM(  VAR(1,291).nil, 243).nil, 249),
+FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 229).nil, 249).nil, 249).nil, 231),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).nil, 235).FSYM(  VAR(1,291).nil, 243).nil, 249).nil, 249),
+FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 229).nil, 249).nil, 249).nil, 231).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,2,FSYM( FSYM(  VAR(0,291).nil, 235).FSYM(  VAR(1,291).nil, 245).nil, 249),
+FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 229).nil, 249).nil, 249).nil, 233),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).nil, 235).FSYM(  VAR(1,291).nil, 245).nil, 249).nil, 249),
+FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 229).nil, 249).nil, 249).nil, 233).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,2,FSYM( FSYM(  VAR(0,291).nil, 237).FSYM(  VAR(1,291).nil, 237).nil, 249),
+FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 229).nil, 249).nil, 249).nil, 227),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).nil, 237).FSYM(  VAR(1,291).nil, 237).nil, 249).nil, 249),
+FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 229).nil, 249).nil, 249).nil, 227).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,2,FSYM( FSYM(  VAR(0,291).nil, 237).FSYM(  VAR(1,291).nil, 239).nil, 249),
+FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 229).nil, 249).nil, 249).nil, 229),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).nil, 237).FSYM(  VAR(1,291).nil, 239).nil, 249).nil, 249),
+FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 229).nil, 249).nil, 249).nil, 229).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,2,FSYM( FSYM(  VAR(0,291).nil, 237).FSYM(  VAR(1,291).nil, 241).nil, 249),
+FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 229).nil, 249).nil, 249).nil, 231),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).nil, 237).FSYM(  VAR(1,291).nil, 241).nil, 249).nil, 249),
+FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 229).nil, 249).nil, 249).nil, 231).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,2,FSYM( FSYM(  VAR(0,291).nil, 237).FSYM(  VAR(1,291).nil, 243).nil, 249),
+FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 229).nil, 249).nil, 249).nil, 233),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).nil, 237).FSYM(  VAR(1,291).nil, 243).nil, 249).nil, 249),
+FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 229).nil, 249).nil, 249).nil, 233).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,2,FSYM( FSYM(  VAR(0,291).nil, 237).FSYM(  VAR(1,291).nil, 245).nil, 249),
+FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 229).nil, 249).nil, 249).nil, 235),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).nil, 237).FSYM(  VAR(1,291).nil, 245).nil, 249).nil, 249),
+FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 229).nil, 249).nil, 249).nil, 235).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,2,FSYM( FSYM(  VAR(0,291).nil, 239).FSYM(  VAR(1,291).nil, 239).nil, 249),
+FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 229).nil, 249).nil, 249).nil, 231),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).nil, 239).FSYM(  VAR(1,291).nil, 239).nil, 249).nil, 249),
+FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 229).nil, 249).nil, 249).nil, 231).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,2,FSYM( FSYM(  VAR(0,291).nil, 239).FSYM(  VAR(1,291).nil, 241).nil, 249),
+FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 229).nil, 249).nil, 249).nil, 233),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).nil, 239).FSYM(  VAR(1,291).nil, 241).nil, 249).nil, 249),
+FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 229).nil, 249).nil, 249).nil, 233).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,2,FSYM( FSYM(  VAR(0,291).nil, 239).FSYM(  VAR(1,291).nil, 243).nil, 249),
+FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 229).nil, 249).nil, 249).nil, 235),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).nil, 239).FSYM(  VAR(1,291).nil, 243).nil, 249).nil, 249),
+FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 229).nil, 249).nil, 249).nil, 235).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,2,FSYM( FSYM(  VAR(0,291).nil, 239).FSYM(  VAR(1,291).nil, 245).nil, 249),
+FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 229).nil, 249).nil, 249).nil, 237),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).nil, 239).FSYM(  VAR(1,291).nil, 245).nil, 249).nil, 249),
+FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 229).nil, 249).nil, 249).nil, 237).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,2,FSYM( FSYM(  VAR(0,291).nil, 241).FSYM(  VAR(1,291).nil, 241).nil, 249),
+FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 229).nil, 249).nil, 249).nil, 235),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).nil, 241).FSYM(  VAR(1,291).nil, 241).nil, 249).nil, 249),
+FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 229).nil, 249).nil, 249).nil, 235).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,2,FSYM( FSYM(  VAR(0,291).nil, 241).FSYM(  VAR(1,291).nil, 243).nil, 249),
+FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 229).nil, 249).nil, 249).nil, 237),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).nil, 241).FSYM(  VAR(1,291).nil, 243).nil, 249).nil, 249),
+FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 229).nil, 249).nil, 249).nil, 237).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,2,FSYM( FSYM(  VAR(0,291).nil, 241).FSYM(  VAR(1,291).nil, 245).nil, 249),
+FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 229).nil, 249).nil, 249).nil, 239),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).nil, 241).FSYM(  VAR(1,291).nil, 245).nil, 249).nil, 249),
+FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 229).nil, 249).nil, 249).nil, 239).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,2,FSYM( FSYM(  VAR(0,291).nil, 243).FSYM(  VAR(1,291).nil, 243).nil, 249),
+FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 229).nil, 249).nil, 249).nil, 239),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).nil, 243).FSYM(  VAR(1,291).nil, 243).nil, 249).nil, 249),
+FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 229).nil, 249).nil, 249).nil, 239).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,2,FSYM( FSYM(  VAR(0,291).nil, 243).FSYM(  VAR(1,291).nil, 245).nil, 249),
+FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 229).nil, 249).nil, 249).nil, 241),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).nil, 243).FSYM(  VAR(1,291).nil, 245).nil, 249).nil, 249),
+FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 229).nil, 249).nil, 249).nil, 241).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,2,FSYM( FSYM(  VAR(0,291).nil, 245).FSYM(  VAR(1,291).nil, 245).nil, 249),
+FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 229).nil, 249).nil, 249).nil, 243),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).nil, 245).FSYM(  VAR(1,291).nil, 245).nil, 249).nil, 249),
+FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).FSYM(  VAR(1,291).FSYM( FSYM( nil, 226).nil, 229).nil, 249).nil, 249).nil, 243).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,1,FSYM(  VAR(0,291).FSYM( nil, 226).nil, 250),
+FSYM( nil, 226),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM(  VAR(0,291).FSYM( nil, 226).nil, 250).nil, 250),
+FSYM(  EVAR(3,291).FSYM( nil, 226).nil, 250),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,2,FSYM( FSYM(  VAR(0,291).nil, 227). VAR(1,291).nil, 250),
+FSYM( FSYM( FSYM(  VAR(0,291). VAR(1,291).nil, 250).nil, 227).FSYM(  VAR(1,291).nil, 228).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).nil, 227). VAR(1,291).nil, 250).nil, 250),
+FSYM(  EVAR(3,291).FSYM( FSYM( FSYM(  VAR(0,291). VAR(1,291).nil, 250).nil, 227).FSYM(  VAR(1,291).nil, 228).nil, 249).nil, 250),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,2,FSYM( FSYM(  VAR(0,291).nil, 229). VAR(1,291).nil, 250),
+FSYM( FSYM( FSYM(  VAR(0,291). VAR(1,291).nil, 250).nil, 227).FSYM(  VAR(1,291).nil, 230).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).nil, 229). VAR(1,291).nil, 250).nil, 250),
+FSYM(  EVAR(3,291).FSYM( FSYM( FSYM(  VAR(0,291). VAR(1,291).nil, 250).nil, 227).FSYM(  VAR(1,291).nil, 230).nil, 249).nil, 250),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,2,FSYM( FSYM(  VAR(0,291).nil, 231). VAR(1,291).nil, 250),
+FSYM( FSYM( FSYM(  VAR(0,291). VAR(1,291).nil, 250).nil, 227).FSYM(  VAR(1,291).nil, 232).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).nil, 231). VAR(1,291).nil, 250).nil, 250),
+FSYM(  EVAR(3,291).FSYM( FSYM( FSYM(  VAR(0,291). VAR(1,291).nil, 250).nil, 227).FSYM(  VAR(1,291).nil, 232).nil, 249).nil, 250),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,2,FSYM( FSYM(  VAR(0,291).nil, 233). VAR(1,291).nil, 250),
+FSYM( FSYM( FSYM(  VAR(0,291). VAR(1,291).nil, 250).nil, 227).FSYM(  VAR(1,291).nil, 234).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).nil, 233). VAR(1,291).nil, 250).nil, 250),
+FSYM(  EVAR(3,291).FSYM( FSYM( FSYM(  VAR(0,291). VAR(1,291).nil, 250).nil, 227).FSYM(  VAR(1,291).nil, 234).nil, 249).nil, 250),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,2,FSYM( FSYM(  VAR(0,291).nil, 235). VAR(1,291).nil, 250),
+FSYM( FSYM( FSYM(  VAR(0,291). VAR(1,291).nil, 250).nil, 227).FSYM(  VAR(1,291).nil, 236).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).nil, 235). VAR(1,291).nil, 250).nil, 250),
+FSYM(  EVAR(3,291).FSYM( FSYM( FSYM(  VAR(0,291). VAR(1,291).nil, 250).nil, 227).FSYM(  VAR(1,291).nil, 236).nil, 249).nil, 250),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,2,FSYM( FSYM(  VAR(0,291).nil, 237). VAR(1,291).nil, 250),
+FSYM( FSYM( FSYM(  VAR(0,291). VAR(1,291).nil, 250).nil, 227).FSYM(  VAR(1,291).nil, 238).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).nil, 237). VAR(1,291).nil, 250).nil, 250),
+FSYM(  EVAR(3,291).FSYM( FSYM( FSYM(  VAR(0,291). VAR(1,291).nil, 250).nil, 227).FSYM(  VAR(1,291).nil, 238).nil, 249).nil, 250),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,2,FSYM( FSYM(  VAR(0,291).nil, 239). VAR(1,291).nil, 250),
+FSYM( FSYM( FSYM(  VAR(0,291). VAR(1,291).nil, 250).nil, 227).FSYM(  VAR(1,291).nil, 240).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).nil, 239). VAR(1,291).nil, 250).nil, 250),
+FSYM(  EVAR(3,291).FSYM( FSYM( FSYM(  VAR(0,291). VAR(1,291).nil, 250).nil, 227).FSYM(  VAR(1,291).nil, 240).nil, 249).nil, 250),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,2,FSYM( FSYM(  VAR(0,291).nil, 241). VAR(1,291).nil, 250),
+FSYM( FSYM( FSYM(  VAR(0,291). VAR(1,291).nil, 250).nil, 227).FSYM(  VAR(1,291).nil, 242).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).nil, 241). VAR(1,291).nil, 250).nil, 250),
+FSYM(  EVAR(3,291).FSYM( FSYM( FSYM(  VAR(0,291). VAR(1,291).nil, 250).nil, 227).FSYM(  VAR(1,291).nil, 242).nil, 249).nil, 250),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,2,FSYM( FSYM(  VAR(0,291).nil, 243). VAR(1,291).nil, 250),
+FSYM( FSYM( FSYM(  VAR(0,291). VAR(1,291).nil, 250).nil, 227).FSYM(  VAR(1,291).nil, 244).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).nil, 243). VAR(1,291).nil, 250).nil, 250),
+FSYM(  EVAR(3,291).FSYM( FSYM( FSYM(  VAR(0,291). VAR(1,291).nil, 250).nil, 227).FSYM(  VAR(1,291).nil, 244).nil, 249).nil, 250),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,2,FSYM( FSYM(  VAR(0,291).nil, 245). VAR(1,291).nil, 250),
+FSYM( FSYM( FSYM(  VAR(0,291). VAR(1,291).nil, 250).nil, 227).FSYM(  VAR(1,291).nil, 246).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,0,4,FSYM(  EVAR(3,291).FSYM( FSYM(  VAR(0,291).nil, 245). VAR(1,291).nil, 250).nil, 250),
+FSYM(  EVAR(3,291).FSYM( FSYM( FSYM(  VAR(0,291). VAR(1,291).nil, 250).nil, 227).FSYM(  VAR(1,291).nil, 246).nil, 249).nil, 250),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 227).nil, 251),
+FSYM( FSYM(  VAR(0,291).nil, 251).nil, 245),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 229).nil, 251),
+FSYM(  VAR(0,291).nil, 227),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 231).nil, 251),
+FSYM(  VAR(0,291).nil, 229),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 233).nil, 251),
+FSYM(  VAR(0,291).nil, 231),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 235).nil, 251),
+FSYM(  VAR(0,291).nil, 233),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 237).nil, 251),
+FSYM(  VAR(0,291).nil, 235),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 239).nil, 251),
+FSYM(  VAR(0,291).nil, 237),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 241).nil, 251),
+FSYM(  VAR(0,291).nil, 239),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 243).nil, 251),
+FSYM(  VAR(0,291).nil, 241),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM(  VAR(0,291).nil, 245).nil, 251),
+FSYM(  VAR(0,291).nil, 243),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM( nil, 226).nil, 252),
+FSYM( FSYM( nil, 226).nil, 229),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM(  VAR(0,291).nil, 252),
+FSYM(  VAR(0,291).FSYM( FSYM(  VAR(0,291).nil, 251).nil, 252).nil, 250),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM( nil, 226).nil, 253),
+FSYM( FSYM( nil, 226).nil, 229),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM( FSYM( FSYM( nil, 226).nil, 229).nil, 253),
+FSYM( FSYM( nil, 226).nil, 229),
+nil)
+
+ end
+
+RULE(
+-1,
+291,101,1,1,1,FSYM(  VAR(0,291).nil, 253),
+FSYM( FSYM( FSYM(  VAR(0,291).nil, 251).nil, 253).FSYM( FSYM( FSYM(  VAR(0,291).nil, 251).nil, 251).nil, 253).nil, 249),
+nil)
+
+ end
+
+RULE(
+-1,
+186,101,1,1,1,FSYM( nil, 254),
+FSYM( INT(0).FSYM( INT(1).FSYM( INT(2).FSYM( INT(3).FSYM( INT(4).FSYM( INT(5).FSYM( INT(6).FSYM( INT(7).FSYM( INT(8).FSYM( INT(9).FSYM( nil, 218).nil, 219).nil, 219).nil, 219).nil, 219).nil, 219).nil, 219).nil, 219).nil, 219).nil, 219).nil, 219),
+nil)
+
+ end
+EndDef end
+STRATEGY(24,58,86,iterate*(one(290.nil)) ; one(289.nil)) 
+end
+EndDef end
+QUERY(291,291,-1, VAR(0,291),FSYM( nil, 1)) end 

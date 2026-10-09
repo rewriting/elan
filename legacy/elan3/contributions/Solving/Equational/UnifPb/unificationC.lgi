@@ -1,0 +1,20 @@
+LPL unificationC description
+
+  specification description
+
+    part Vars	of sort list[identifier]
+	 	import sigSyntax
+    part Ops	of sort list[pair[identifier,int]]
+	 	import sigSyntax
+  end
+
+  query 	of sort unifPb
+         	result of sort unifPb
+	 	import termV[Vars]
+                       termF[Ops]
+                       unificationC[Vars,Ops]
+
+         	start with (unifyC) query 
+
+end
+

@@ -1,0 +1,55 @@
+------------------------------------------------------------
+compiler
+MinelaComp
+interpreter
+primes(s(s(o))) end
+2 runs : moyenne = 1637 rwr/sec
+primes(s(s(s(o)))) end
+2 runs : moyenne = 1824 rwr/sec
+primes(s(s(s(s(o))))) end
+2 runs : moyenne = 1873 rwr/sec
+primes(s(s(s(s(s(o)))))) end
+2 runs : moyenne = 2047 rwr/sec
+------------------------------------------------------------
+Set
+interpreter
+card(P(mkSet(1,2,3,4))) end
+10 runs : moyenne = 1561 rwr/sec
+card(P(mkSet(1,2,3,4,5))) end
+10 runs : moyenne = 882 rwr/sec
+card(P(mkSet(1,2,3,4,5,6))) end
+10 runs : moyenne = 509 rwr/sec
+card(P(mkSet(1,2,3,4,5,6,7))) end
+10 runs : moyenne = 232 rwr/sec
+card(P(mkSet(1,2,3,4,5,6,7,8))) end
+10 runs : moyenne = 101 rwr/sec
+------------------------------------------------------------
+Nat10
+interpreter
+fib(((d)1)0) end
+10 runs : moyenne = 934 rwr/sec
+fib(((d)1)1) end
+10 runs : moyenne = 574 rwr/sec
+fib(((d)1)2) end
+10 runs : moyenne = 368 rwr/sec
+fib(((d)1)3) end
+10 runs : moyenne = 215 rwr/sec
+fib(((d)1)4) end
+10 runs : moyenne = 132 rwr/sec
+fib(((d)1)5) end
+10 runs : moyenne = 74 rwr/sec
+------------------------------------------------------------
+Nat10
+interpreter
+fib(((d)1)0) end
+10 runs : moyenne = 930 rwr/sec
+fib(((d)1)1) end
+10 runs : moyenne = 590 rwr/sec
+fib(((d)1)2) end
+10 runs : moyenne = 366 rwr/sec
+fib(((d)1)3) end
+10 runs : moyenne = 222 rwr/sec
+fib(((d)1)4) end
+10 runs : moyenne = 132 rwr/sec
+fib(((d)1)5) end
+10 runs : moyenne = 76 rwr/sec

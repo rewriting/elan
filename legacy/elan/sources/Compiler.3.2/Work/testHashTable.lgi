@@ -1,0 +1,10 @@
+LPL testHashTable  description
+
+query of sort  Term
+result of sort Term
+	  
+import testHashTable int
+start with () go
+
+end
+

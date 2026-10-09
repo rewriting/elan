@@ -1,0 +1,19 @@
+LPL queen description
+
+query		of sort  	array[6,int]
+		result of sort 	array[6,int]
+		import 		int queens[array[6,int]]
+				strat[array[6,int]]
+				loops[col,array[6,int]]
+				loops[row,array[6,int]]
+				loops[i,array[6,int]]
+		start with 	[first one(for col=0 to 5 do
+				   some row=0 to 5 do
+				     for i=0 to col-1 do
+				       verify(col,row,i)
+				     od;
+				     drop(col,row)
+				   od
+				 od)]new(0)
+
+end

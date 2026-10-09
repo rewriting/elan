@@ -1,0 +1,24 @@
+module verySimple
+	// first define a sort
+sort foo;
+	// then operators that will be exported
+op global
+    a : foo;
+    b : foo;
+    c : foo;
+endop
+	// Then rewrite rules
+rules for foo
+bodies
+	// The name of next rule is ``r1''
+  [r1]	a  	=> b	end
+  [r2]	b  	=> c	end
+end of rules
+
+strategy simpleStrategy
+repeat
+ dont care choose(r1 r2)
+endrepeat
+end of strategy
+
+end of module

@@ -1,0 +1,63 @@
+module robot
+
+import global 	strat[state] strat[list[list[state]]]
+		integ eq[integ] booleg labyrint 
+		state space;
+op global
+  up		: <state>;
+  down		: <state>;
+  left		: <state>;
+  right		: <state>;
+  exitable	: <state>;
+  search	: <list[list[state]]>;
+  allsearch	: <list[list[state]]>;
+end
+
+rules for state
+	x,y,dx,dy,dir	: integ;
+bodies
+  [move(dx,dy,dir)] 
+	state(x,y) => state(x+dx,y+dy)
+		if room(x,y) & dir != 0			
+  end
+end
+
+strategies for <state>
+bodies
+  []	up    ==> move( 1, 0, U)			end
+  []	down  ==> move(-1, 0, D)			end
+  []	left  ==> move( 0,-1, L) 			end
+  []	right ==> move( 0, 1, R)			end
+  []    exitable ==>move(0,0,E)				end
+end
+
+strategies for <state>
+bodies
+  []  moves ==> dk(right, dk(down, dk(left, up)))	end
+end
+
+strategies for <list[list[state]]>
+bodies
+  []  search ==> if call(exitable) then 
+		  narrow
+		orelse if loop then 
+		  	 next;search
+		       orelse 
+			 dc(call(moves);search, next;search)
+                       fi
+		fi
+  end
+  []  allsearch ==> dk( 
+		     call(exitable);narrow,
+		     if loop then 
+		       next 
+ 		     orelse 
+		       dk(call(moves), next)
+                     fi; 
+		     allsearch
+		   )
+  end
+end
+
+end
+

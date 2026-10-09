@@ -1,0 +1,6 @@
+#! /bin/csh -f
+
+if ($1 =~ *I*) then
+Itest fopc  non fopc fopc 
+endif
+

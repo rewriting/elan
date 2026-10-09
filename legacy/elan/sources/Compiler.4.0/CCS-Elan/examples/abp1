@@ -1,0 +1,44 @@
+**********************************************************************
+*  The definition of the specification "Spec"
+**********************************************************************
+def Spec = send.receive.Spec
+**********************************************************************
+*  The definition of the sender
+**********************************************************************
+def S0 = send.S0'
+def S0' = 's0.(rack0.S1 + rack1.S0' + tau.S0')
+def S1 = send.S1'
+def S1' = 's1.(rack1.S0 + rack0.S1' + tau.S1')
+**********************************************************************
+*  The definition of the receiver
+**********************************************************************
+def R0 = r0.receive.'sack0.R1 + r1.'sack1.R0 + tau.'sack1.R0
+def R1 = r1.receive.'sack1.R0 + r0.'sack0.R1 + tau.'sack0.R1
+**********************************************************************
+*  The definition of the reliable medium "Msafe"
+**********************************************************************
+def Msafe = s0.'r0.Msafe + s1.'r1.Msafe + sack0.'rack0.Msafe + sack1.'rack1.Msafe
+**********************************************************************
+*  The definition of the lossy medium "Mlossy"
+**********************************************************************
+def Mlossy = s0.('r0.Mlossy + Mlossy) + s1.('r1.Mlossy + Mlossy) + sack0.('rack0.Mlossy + Mlossy) + sack1.('rack1.Mlossy + Mlossy)
+**********************************************************************
+*  The Internal actions to be hidden
+**********************************************************************
+def Internals = {r0,r1,s0,s1,rack0,rack1,sack0,sack1}
+**********************************************************************
+*  The definition of the safe implementation "ABP-safe"
+**********************************************************************
+def Abp-safe = (R0 | Msafe | S0)\Internals
+**********************************************************************
+*  The definition of the lossy implementation "ABP-lossy"
+**********************************************************************
+def Abp-lossy = (R0 | Mlossy | S0)\Internals
+**********************************************************************
+*  The definition of the "Bx" temporal operator
+**********************************************************************
+prop Bx(P) =      max.Z (P && [-]Z)
+prop Phi = Bx (<<send>>tt || <<receive>>tt)
+
+
+

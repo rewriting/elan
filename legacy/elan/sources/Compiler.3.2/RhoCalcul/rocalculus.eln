@@ -1,0 +1,576 @@
+module rocalculus[Fss,Vars]
+
+import global 
+	int identifier
+	list[term] 
+	list[variable] Alist[variable] cmp[list[variable]]
+	list[int] Alist[int]
+	cmp[eqSystem] cmp[identifier] cmp[term]
+	pair[identifier,int] list[pair[identifier,int]]
+	syntacticUnificationRo[Fss,Vars]
+	definitionsRo[Fss,Vars]
+	Fss Vars
+;end
+
+stratop
+ global
+   reduce            : < term -> term >              bs;
+   one_step          : < term -> term >              bs;
+   reduce_top        : < term -> term >              bs;
+   reduce_app_right  : < term -> term >              bs;
+   reduce_app_left   : < term -> term >              bs;
+   reduce_app	     : < term -> term >              bs;
+   reduce_arr        : < term -> term >              bs;
+   reduce_set        : < term -> term >              bs;
+   reduce_fun        : < term -> term >              bs;
+   reduce_first      : < term -> term >              bs;
+end
+
+//-------------   Fire  ----------------------------------------------
+
+rules for term
+	l,r,t,l1,r1,t1,u,v,w,tt : term;
+	vl, vr, vrf, vt, vlt, vlr, vlrf : list[variable];
+	sol : eqSystem;
+	subs : substitution;
+	w1 : term;
+global
+	[Fire]  [l +> r](t) =>  |u|
+			if functional(t) 			//ConfStratStrict
+			or 
+			(
+			  (w_subsume(l,t) and linear(l)) 	// matchable
+			  and
+			  //   safe(t)				// safe
+			  (
+				( regular(l +> r) or (no_empty($t) and no_failure($t)) )
+				and
+				( strict_linear(l +> r) or no_doubletons($t))
+			   )
+			)
+			where sol := (match) l = t
+			choose
+			try	if eq_eqSystem(sol,false) //sol == false
+				where u:=() |#|
+			try	if neq_eqSystem(sol,false) //sol != false
+				where subs := ()system_to_subst(sol)
+				where u:=() apply(subs,r)
+			end
+	end
+end
+
+//-------------   Congruence  ----------------------------------------------
+
+        FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+        SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS) 
+                AND N:=()second(SS) ANDIF N == 0 :{
+rules for term
+        $t : term;
+global
+	[Congruence] [F](F)  =>  |F|
+	end
+	[CongruenceFail] [F]($t)  =>  |#|
+			if headT($t) == FUN
+			if F != $t
+	end
+end
+	}
+
+        FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+        SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS) 
+                AND N:=()second(SS) ANDIF N > 0 :{
+
+rules for term
+        t_1,...,t_N : term;
+        s_1,...,s_N : term;
+        r_1,...,r_N : term;
+        $t : term;
+global
+	[Congruence] [F(s_1,...,s_N)](F(t_1,...,t_N))  =>  |F(r_1,...,r_N)|
+		{ where r_I := () [s_I](t_I) }_I=1...N
+	end
+	[CongruenceFail] [F(s_1,...,s_N)](t)  =>  |#|
+		if headT($t) == FUN
+		if head(F(s_1,...,s_N)) != head($t)
+	end
+end
+        } 
+
+//-------------   Distrib  ----------------------------------------------
+rules for term
+        $u,$v,$t : term;
+global
+	[Distrib] [|$u|]($t)  =>  |[$u]($t)|
+	end
+	[] [$u.$v]($t)  =>  [$u]($t).[$v]($t)
+	end
+	[] [#]($t)    =>  #
+	end
+end
+
+//-------------   Batch  ----------------------------------------------
+rules for term
+        $u,$v,$t : term;
+global
+	[Batch] [$u](|$t|)  =>  |[$u]($t)|
+	end
+	[] [$t]($u.$v)  =>  [$t]($u).[$t]($v)
+	end
+	[] [$t](#)    =>  #
+	end
+end
+
+//-------------   SwitchL  ----------------------------------------------
+
+rules for term
+        $u,$v,$t : term;
+global
+	[SwitchL] |$u| +> $t    =>  |$u +> $t|
+	end
+	[] $u.$v +> $t  =>  ($u +> $t) . ($v +> $t)
+	end
+	[] # +> $t    =>  #
+	end
+end
+
+//-------------   SwitchR  ----------------------------------------------
+
+rules for term
+        $u,$v,$t : term;
+global
+	[SwitchR] $u +> |$t|    =>  |$u +> $t|
+	end
+	[] $t +> $u.$v  =>  ($t +> $u) . ($t +> $v)
+	end
+	[] $t +> #    =>  #
+	end
+end
+
+//-------------   OpOnSet  ----------------------------------------------
+
+        FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+        SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS)
+                AND N:=()second(SS) ANDIF N > 0 :{
+
+rules for term
+        s_1,...,s_N : term;
+        t_1,...,t_N : term;
+        r_1,...,r_N : term;
+        r,t,u,v : term;
+	w1 : term;
+global
+		{
+	[OpOnSet] F(s_1,...,s_N)  => |F(t_1,...,t_N)|
+                 where (term) |t| :=() s_I
+                 { where t_J := () s_J }_J=1...(I-1)
+                 where t_I := () t
+                 { where t_J := () s_J }_J=(I+1)...N
+	end
+		}_I=1...N
+
+		{
+	[] F(s_1,...,s_N)  => #
+                 where (term) # :=() s_I
+	end
+		}_I=1...N
+
+		{
+	[] F(s_1,...,s_N)  => |F(t_1,...,t_N) . F(r_1,...,r_N)|
+                 where (term) t.r :=() s_I
+                 { where t_J := () s_J }_J=1...(I-1)
+                 { where r_J := () s_J }_J=1...(I-1)
+                 where t_I := () t
+                 where r_I := () r
+                 { where t_J := () s_J }_J=(I+1)...N
+                 { where r_J := () s_J }_J=(I+1)...N
+	end
+		}_I=1...N
+
+end
+        } 
+
+//-------------   Flat  ----------------------------------------------
+
+rules for term
+        u,v,t : term;
+	w1 : term;
+global
+	[Flat] ||#|.v| =>  |v|
+	end
+	[Flat] ||u|.v| =>  |u.v|
+	end
+	[Flat] ||u|| =>  |u|
+	end
+end
+
+//---------------------- FIRSTT --------------------------------------
+
+rules for term
+        u,v,t,tt : term;
+	vl:list[variable];
+	w1 : term;
+global
+	[First] [FIRSTT(u)](t)    =>   <[u](t)>
+	end
+	[] [$u:$v]($t)  =>  [$u]($t):[$v]($t)
+	end
+	[] [#]($t)    =>  #
+	end
+
+	[First_fail] <|#|:v>    =>  <v>
+	end
+
+	[First_success] <u:v>    =>  |u|			// always after First_fail
+			if neq_term(u,|#|)		// => u != |#|
+			where vl := () free_variables_of(u)
+			if eq_list[variable](vl,nil) 
+			if no_redex(u)	
+	end
+	[First_success] <u>    =>  |u|				// always after First_fail
+			if neq_identifier(head(u),SEP)		// => u != t:s
+			where vl := () free_variables_of(u)
+			if eq_list[variable](vl,nil) 
+			if no_redex(u)	
+	end
+
+	[First_single] <|#|>    =>  |#|
+	end
+end
+
+//---------------------- Getting deeper --------------------------------------
+
+rules for term
+        u,v,t : term;
+global
+	[Arrow] u +> v  =>   u +> t
+			where t := (one_step) v
+	end
+
+	[Set] |u.v|     =>   |t.v|
+			if neq_identifier(head(u),COM) //not head(u)==COM
+			where t := (one_step) u
+	end
+	[Set] |u|       =>   |t|
+			if neq_identifier(head(u),COM) //not head(u)==COM
+			where t := (one_step) u
+	end
+
+	[App_Right] [u](v)    =>   [u](t)
+			where t := (one_step) v
+	end
+	[App_Left]  [u](v)    =>   [t](v)
+			where t := (one_step) u
+	end
+
+	[First_deep]  <u:v> =>   <t:v>
+			// if neq_identifier(head(u),SEP) 
+			where t := (one_step) u
+	end
+	[First_deep]  <u> =>   <t>
+			// if neq_identifier(head(u),SEP) 
+			where t := (one_step) u
+	end
+end
+
+            FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+            SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS)
+                AND N:=()second(SS) ANDIF N > 0 :{
+
+rules for term
+        s_1,...,s_N : term;
+        t_1,...,t_N : term;
+	w1,w2 : term;
+global
+		{
+	[Fun] F(s_1,...,s_N)  => F(t_1,...,t_N)
+                 	{ where t_J := () s_J }_J=1...(I-1)
+                 	where t_I := (one_step) s_I
+                 	{ where t_J := () s_J }_J=(I+1)...N
+	end
+		}_I=1...N
+end
+		}
+
+//--------------------------------------------------------------------
+
+rules for term
+             $u : term;
+global
+	[] $u.$u    =>   $u
+	end
+end
+
+//--------------------------------------------------------------------
+//		No-Named rules
+//--------------------------------------------------------------------
+rules for term
+         u,v,r,s,t,tt : term;
+global
+	[] Alam    =>   x +> (y +> [y]([[x](x)](y)))
+	end
+	[] Theta    =>   [Alam](Alam)
+	end
+
+	[] u;v   =>   seqv +> [v]([u](seqv))
+	end
+
+	[] IDD   =>   x +> x
+	end
+
+	/*********  Using the (explicit) named rules ***************************
+
+	[] PHI(u)  =>  FIRSTT(
+        FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+        SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS) 
+                AND N:=()second(SS) ANDIF N > 0 :{
+                        {
+			F(	
+				{IDD, }_J=1...(I-1)
+                		u,
+				{IDD, }_J=(I+1)...N
+			)
+			:
+			}_I=1...N
+	}
+	|#|  )
+	end
+
+	[] PSI(u)  =>  |
+        FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+        SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS) 
+                AND N:=()second(SS) ANDIF N == 0 :{
+			F.
+	}
+        FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+        SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS) 
+                AND N:=()second(SS) ANDIF N > 0 :{
+			F({u,}_I=1...N).
+	}
+	|#|  |
+	end
+	*********  Using the (explicit) named rules ***************************/
+
+
+
+	[] Gsd(t)   =>   y +> (x +> <[PSI(y);t](x)>)
+	end
+	[] SpreadDown(t)   =>   [Theta](Gsd(t))
+	end
+
+	[] Gtd(t)   =>   y +> (x +> [t;PSI(y)](x))
+	end
+	[] TopDown(t)   =>   [Theta](Gtd(t))
+	end
+
+	[] Hbu(t)   =>   y +> (x +> [FIRSTT(PHI(y):t)](x))
+	end
+	[] Oncebu(t)   =>   [Theta](Hbu(t))
+	end
+
+	[] Htd(t)   =>   y +> (x +> [FIRSTT(t:PHI(y))](x))
+	end
+	[] Oncetd(t)   =>   [Theta](Htd(t))
+	end
+
+	[] Jr(t)   =>   y +> (x +> [FIRSTT(t;y : IDD)](x))
+	end
+	[] REPEATT(t)   =>   [Theta](Jr(t))
+	end
+
+	[] im(t)   =>   REPEATT(Oncebu(t))
+	end
+	[] om(t)   =>   REPEATT(Oncetd(t))
+	end
+end
+
+//--------------------------------------------------------------------
+//		Traversal & Fixed-point operators
+//--------------------------------------------------------------------
+//		Named rules
+//--------------------------------------------------------------------
+
+//---------------------- PHI --------------------------------------
+
+        FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+        SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS) 
+                AND N:=()second(SS) ANDIF N == 0 :{
+
+rules for term
+        u : term;
+	w1 : term;
+global
+	[Phi] [PHI(u)](F)  =>  |#|
+	end
+end
+	}
+
+        FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+        SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS) 
+                AND N:=()second(SS) ANDIF N > 0 :{
+
+rules for term
+        t_1,...,t_N : term;
+        s_1,...,s_N : term;
+        {{ r_I_J, }_I=1...N }_J=1...N r : term;
+        u : term;
+	w1 : term;
+global
+	[Phi] [PHI(u)](F(s_1,...,s_N))    =>   < t_1:...:t_N >
+                        {	
+		{ where r_J_I := () s_J }_J=1...(I-1)
+                where r_I_I := () [u](s_I)
+		{ where r_J_I := () s_J }_J=(I+1)...N
+		where t_I :=() |F({ r_J_I, }_J=1...N)|
+			}_I=1...N
+	end 
+end
+        }
+
+//---------------------- PSI --------------------------------------
+
+        FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+        SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS) 
+                AND N:=()second(SS) ANDIF N == 0 :{
+
+rules for term
+        u : term;
+	w1 : term;
+global
+	[Psi] [PSI(u)](F)  =>  |F|
+	end
+end
+	}
+
+        FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+        SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS) 
+                AND N:=()second(SS) ANDIF N > 0 :{
+
+rules for term
+        t_1,...,t_N : term;
+        s_1,...,s_N : term;
+        {{ r_I_J, }_I=1...N }_J=1...N r : term;
+        u : term;
+	w1 : term;
+global
+	[Psi] [PSI(u)](F(s_1,...,s_N))    =>   | F(t_1,...,t_N) |
+             { where t_I :=() [u](s_I) }_I=1...N
+	end
+end
+        }
+
+//------------------------- Fixed-point operators ----------------------------------
+
+rules for term
+             u,v,r,s,t,tt : term;
+global
+
+	[Theta] [Theta](u)    =>   [u]([Theta](u))
+	end
+	[Seq] [u;v](t)   =>   [v]([u](t))
+	end
+end
+
+        FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+        SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS) 
+                AND N:=()second(SS) ANDIF N == 0 :{
+rules for term
+	r : term;
+global
+	[SpreadDown] [SpreadDown(r)](F)  => |[r](F)|
+	end
+end
+}
+            FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+            SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS)
+                AND N:=()second(SS) ANDIF N > 0 :{
+rules for term
+       	t_1,...,t_N : term;
+	r : term;
+global
+	[SpreadDown] [SpreadDown(r)](F(t_1,...,t_N))  => 
+		|[PSI(SpreadDown(r));r](F(t_1,...,t_N))|
+	end
+end
+		}
+
+
+        FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+        SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS)
+                AND N:=()second(SS) ANDIF N == 0 :{
+rules for term
+        r : term;
+global
+	[Oncebu] [Oncebu(r)](F)  =>  |[r](F)|
+	end
+end
+        } 
+
+        FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+        SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS)
+                AND N:=()second(SS) ANDIF N > 0 :{
+rules for term
+        t_1,...,t_N : term;
+        r : term;
+global
+	[Oncebu] [Oncebu(r)](F(t_1,...,t_N))  =>  
+		|[FIRSTT(PHI(Oncebu(r)):r)](F(t_1,...,t_N))|
+	end
+end
+        } 
+
+
+
+
+
+//--------------------------------------------------------------------
+//--------------     STRATEGY    -------------------------------------
+//--------------------------------------------------------------------
+
+
+strategies for term
+implicit
+    [] reduce_top   =>  first one(
+	 	Fire,
+		Distrib,Batch,
+		SwitchL,SwitchR,
+		OpOnSet,
+		Flat,
+		Congruence,CongruenceFail,
+		First,First_fail,First_success,First_single
+		,Phi
+		,Psi
+		//,Theta
+		//,Seq
+		//,SpreadDown
+		//,Oncebu
+		)
+    end
+    [] reduce_arr =>  first one(Arrow)
+    end
+    [] reduce_set =>  first one(Set)
+    end
+    [] reduce_fun =>  first one(Fun)
+    end
+    [] reduce_app_right =>  first one(App_Right)
+    end
+    [] reduce_app_left  =>  first one(App_Left)
+    end
+    [] reduce_first =>  first one(First_deep)
+    end
+    [] one_step =>  first one(
+			reduce_top,reduce_arr,reduce_set,reduce_fun,reduce_first,
+			reduce_app_right,
+			reduce_app_left)
+			//reduce_app_left,
+			//reduce_top,reduce_arr,reduce_set,reduce_fun,
+			//reduce_app_right)
+			//reduce_app_right,
+			//reduce_top,reduce_arr,reduce_set,reduce_fun,
+			//reduce_app_left)
+    end
+			
+    [] reduce =>  repeat*(one_step)
+    end	
+end
+
+end

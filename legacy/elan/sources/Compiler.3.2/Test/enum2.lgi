@@ -1,0 +1,8 @@
+LPL enum2 description
+  query    of sort int
+  result   of sort int
+  import   enum2
+//  start with (s0) query
+  start with (s0) enum(1,10)
+
+end

@@ -1,0 +1,267 @@
+Java Compiler
+  Java Compilation test of bimatch : no.spc
+Reaped pid = 19410, status = 0
+Reaped pid = 19426, status = 0
+  Java Compilation test of bimatch : no.spc  optimiseChoicePoint
+Reaped pid = 19481, status = 0
+Reaped pid = 19498, status = 0
+  Java Compilation test of bool3 : no.spc
+Reaped pid = 19568, status = 0
+Reaped pid = 19584, status = 0
+  Java Compilation test of bool3 : no.spc  optimiseChoicePoint
+Reaped pid = 19639, status = 0
+Reaped pid = 19655, status = 0
+  Java Compilation test of choice1 : no.spc
+Reaped pid = 19724, status = 0
+Reaped pid = 19740, status = 0
+  Java Compilation test of choice1 : no.spc  optimiseChoicePoint
+Reaped pid = 19795, status = 0
+Reaped pid = 19811, status = 0
+  Java Compilation test of choice2 : no.spc
+Reaped pid = 19880, status = 0
+Reaped pid = 19896, status = 0
+  Java Compilation test of choice2 : no.spc  optimiseChoicePoint
+Reaped pid = 19951, status = 0
+Reaped pid = 19967, status = 0
+  Java Compilation test of condac1 : no.spc
+Reaped pid = 20036, status = 0
+Reaped pid = 20052, status = 0
+2c2
+< result = F(,)*+(h()(a2),h()(a1))
+---
+> result = F(,)*(h()(a2),h()(a1))
+  Java Compilation test of condac1 : no.spc  optimiseChoicePoint
+Reaped pid = 20107, status = 0
+Reaped pid = 20123, status = 0
+2c2
+< result = F(,)*+(h()(a2),h()(a1))
+---
+> result = F(,)*(h()(a2),h()(a1))
+  Java Compilation test of condac2 : no.spc
+Reaped pid = 20192, status = 0
+Reaped pid = 20208, status = 0
+2c2
+< result = g(,)(F(,)*+(a4,a3,a2,a1),g(,)(b2,G(,)*(b4,b3,b1)))
+---
+> result = g(,)(F(,)*(a4,a3,a2,a1),g(,)(b2,G(,)*(b4,b3,b1)))
+  Java Compilation test of condac2 : no.spc  optimiseChoicePoint
+Reaped pid = 20263, status = 0
+Reaped pid = 20279, status = 0
+2c2
+< result = g(,)(F(,)*+(a4,a3,a2,a1),g(,)(b2,G(,)*(b4,b3,b1)))
+---
+> result = g(,)(F(,)*(a4,a3,a2,a1),g(,)(b2,G(,)*(b4,b3,b1)))
+  Java Compilation test of cons1 : no.spc
+Reaped pid = 20348, status = 0
+Reaped pid = 20364, status = 0
+  Java Compilation test of cons1 : no.spc  optimiseChoicePoint
+Reaped pid = 20419, status = 0
+Reaped pid = 20435, status = 0
+  Java Compilation test of dcfail1 : no.spc
+Reaped pid = 20507, status = 0
+Reaped pid = 20523, status = 0
+  Java Compilation test of dcfail1 : no.spc  optimiseChoicePoint
+Reaped pid = 20578, status = 0
+Reaped pid = 20594, status = 0
+  Java Compilation test of dcfail2 : no.spc
+Reaped pid = 20663, status = 0
+Reaped pid = 20679, status = 0
+  Java Compilation test of dcfail2 : no.spc  optimiseChoicePoint
+Reaped pid = 20734, status = 0
+Reaped pid = 20750, status = 0
+  Java Compilation test of dcfail3 : no.spc
+Reaped pid = 20819, status = 0
+Reaped pid = 20835, status = 0
+  Java Compilation test of dcfail3 : no.spc  optimiseChoicePoint
+Reaped pid = 20890, status = 0
+Reaped pid = 20906, status = 0
+  Java Compilation test of enum : no.spc
+Reaped pid = 20975, status = 0
+Reaped pid = 20991, status = 0
+  Java Compilation test of enum : no.spc  optimiseChoicePoint
+Reaped pid = 21046, status = 0
+Reaped pid = 21063, status = 0
+  Java Compilation test of enum2 : no.spc
+Reaped pid = 21133, status = 0
+Reaped pid = 21149, status = 0
+  Java Compilation test of enum2 : no.spc  optimiseChoicePoint
+Reaped pid = 21204, status = 0
+Reaped pid = 21221, status = 0
+  Java Compilation test of ident1 : no.spc
+Reaped pid = 21290, status = 0
+Reaped pid = 21306, status = 0
+  Java Compilation test of ident1 : no.spc  optimiseChoicePoint
+Reaped pid = 21361, status = 0
+Reaped pid = 21380, status = 0
+  Java Compilation test of manySortedSet1 : no.spc
+Reaped pid = 21460, status = 0
+Reaped pid = 21477, status = 0
+  Java Compilation test of manySortedSet1 : no.spc  optimiseChoicePoint
+Reaped pid = 21532, status = 0
+Reaped pid = 21548, status = 0
+2,4c2
+< result = true
+< 
+< rewrite_step = 1984
+---
+> rewrite_step = 0
+  Java Compilation test of manySortedSet2 : no.spc
+Reaped pid = 21617, status = 0
+Reaped pid = 21633, status = 0
+  Java Compilation test of manySortedSet2 : no.spc  optimiseChoicePoint
+Reaped pid = 21688, status = 0
+Reaped pid = 21704, status = 0
+2,4c2
+< result = true
+< 
+< rewrite_step = 7575
+---
+> rewrite_step = 0
+  Java Compilation test of manySortedSet3 : no.spc
+Reaped pid = 21779, status = 0
+Reaped pid = 21868, status = 0
+  Java Compilation test of manySortedSet3 : no.spc  optimiseChoicePoint
+Reaped pid = 21938, status = 0
+Reaped pid = 22011, status = 0
+2,4c2
+< result = true
+< 
+< rewrite_step = 11363
+---
+> rewrite_step = 0
+  Java Compilation test of match11 : no.spc
+Reaped pid = 22086, status = 0
+Reaped pid = 22181, status = 0
+  Java Compilation test of match11 : no.spc  optimiseChoicePoint
+Reaped pid = 22236, status = 0
+Reaped pid = 22323, status = 0
+  Java Compilation test of match12 : no.spc
+Reaped pid = 22395, status = 0
+Reaped pid = 22486, status = 0
+  Java Compilation test of match12 : no.spc  optimiseChoicePoint
+Reaped pid = 22548, status = 0
+Reaped pid = 22635, status = 0
+  Java Compilation test of match13 : no.spc
+Reaped pid = 22741, status = 0
+Reaped pid = 22868, status = 0
+  Java Compilation test of match13 : no.spc  optimiseChoicePoint
+Reaped pid = 22965, status = 0
+Reaped pid = 23038, status = 0
+  Java Compilation test of match14 : no.spc
+Reaped pid = 23124, status = 0
+Reaped pid = 23185, status = 0
+  Java Compilation test of match14 : no.spc  optimiseChoicePoint
+Reaped pid = 23280, status = 0
+Reaped pid = 23350, status = 0
+  Java Compilation test of match2 : no.spc
+Reaped pid = 23436, status = 0
+Reaped pid = 23516, status = 0
+  Java Compilation test of match2 : no.spc  optimiseChoicePoint
+Reaped pid = 23592, status = 0
+Reaped pid = 23623, status = 0
+  Java Compilation test of match3 : no.spc
+Reaped pid = 23741, status = 0
+Reaped pid = 23764, status = 0
+  Java Compilation test of match3 : no.spc  optimiseChoicePoint
+Reaped pid = 23887, status = 0
+Reaped pid = 23920, status = 0
+  Java Compilation test of match4 : no.spc
+Reaped pid = 24010, status = 0
+Reaped pid = 24076, status = 0
+  Java Compilation test of match4 : no.spc  optimiseChoicePoint
+Reaped pid = 24131, status = 0
+Reaped pid = 24224, status = 0
+  Java Compilation test of propc1 : no.spc
+Reaped pid = 24293, status = 0
+Reaped pid = 24310, status = 0
+  Java Compilation test of propc1 : no.spc  optimiseChoicePoint
+Reaped pid = 24366, status = 0
+Reaped pid = 24382, status = 0
+  Java Compilation test of propc2 : no.spc
+Reaped pid = 24451, status = 0
+Reaped pid = 24467, status = 0
+  Java Compilation test of propc2 : no.spc  optimiseChoicePoint
+Reaped pid = 24522, status = 0
+Reaped pid = 24538, status = 0
+  Java Compilation test of rep : no.spc
+Reaped pid = 24607, status = 0
+Reaped pid = 24623, status = 0
+  Java Compilation test of rep : no.spc  optimiseChoicePoint
+Reaped pid = 24678, status = 0
+Reaped pid = 24694, status = 0
+  Java Compilation test of testACNumbering : no.spc
+Reaped pid = 24763, status = 0
+Reaped pid = 24781, status = 0
+  Java Compilation test of testACNumbering : no.spc  optimiseChoicePoint
+Reaped pid = 24836, status = 0
+Reaped pid = 24852, status = 0
+  Java Compilation test of testSubstitution : no.spc
+too many variables in the first level
+
+Error: g()(F(,)(var0,var1,var2))
+This pattern cannot be compiled
+Please, apply a program transformation as described in the manual
+2c2
+< result = g()([](1))
+---
+> result = a
+4c4
+< rewrite_step = 2
+---
+> rewrite_step = 1
+  Java Compilation test of testSubstitution : no.spc  optimiseChoicePoint
+too many variables in the first level
+
+Error: g()(F(,)(var0,var1,var2))
+This pattern cannot be compiled
+Please, apply a program transformation as described in the manual
+2c2
+< result = g()([](1))
+---
+> result = a
+4c4
+< rewrite_step = 2
+---
+> rewrite_step = 1
+  Java Compilation test of wpattern : no.spc
+Reaped pid = 25030, status = 0
+Reaped pid = 25046, status = 0
+  Java Compilation test of wpattern : no.spc  optimiseChoicePoint
+Reaped pid = 25101, status = 0
+Reaped pid = 25117, status = 0
+  Java Compilation test of wpatternAC1 : no.spc
+Reaped pid = 25186, status = 0
+Reaped pid = 25202, status = 0
+  Java Compilation test of wpatternAC1 : no.spc  optimiseChoicePoint
+Reaped pid = 25257, status = 0
+Reaped pid = 25273, status = 0
+  Java Compilation test of wpatternAC2 : no.spc
+Reaped pid = 25342, status = 0
+Reaped pid = 25358, status = 0
+  Java Compilation test of wpatternAC2 : no.spc  optimiseChoicePoint
+Reaped pid = 25413, status = 0
+Reaped pid = 25429, status = 0
+  Java Compilation test of wpatternAC3 : no.spc
+Reaped pid = 25498, status = 0
+Reaped pid = 25514, status = 0
+  Java Compilation test of wpatternAC3 : no.spc  optimiseChoicePoint
+Reaped pid = 25569, status = 0
+Reaped pid = 25585, status = 0
+  Java Compilation test of wpatternAC4 : no.spc
+Reaped pid = 25654, status = 0
+Reaped pid = 25670, status = 0
+  Java Compilation test of wpatternAC4 : no.spc  optimiseChoicePoint
+Reaped pid = 25725, status = 0
+Reaped pid = 25741, status = 0
+  Java Compilation test of wpatternAC5 : no.spc
+Reaped pid = 25810, status = 0
+Reaped pid = 25826, status = 0
+  Java Compilation test of wpatternAC5 : no.spc  optimiseChoicePoint
+Reaped pid = 25881, status = 0
+Reaped pid = 25897, status = 0
+  Java Compilation test of wpatternAC6 : no.spc
+Reaped pid = 25966, status = 0
+Reaped pid = 25982, status = 0
+  Java Compilation test of wpatternAC6 : no.spc  optimiseChoicePoint
+Reaped pid = 26037, status = 0
+Reaped pid = 26053, status = 0

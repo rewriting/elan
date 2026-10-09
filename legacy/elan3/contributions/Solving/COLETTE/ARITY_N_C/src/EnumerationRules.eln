@@ -1,0 +1,168 @@
+module EnumerationRules[Variables,Type,Values]
+
+import
+global	IntegerCSP[Variables,Values]
+//	io[var] io[string]
+	;
+end
+
+rules for csp
+
+	x			: var;
+	v			: Type;
+	n, m			: int;
+	D, RD			: domain;
+	c			: constraint;
+	string1			: string;
+	lmc, lec, EC, DC, store	: list[constraint];
+	L, l, newlmc, newlec	: list[constraint];
+
+global 
+
+[InstantiateFirstValueOfDomain]
+
+	CSP[x in? D.lmc,lec,EC,DC,store]
+	=>
+	CSP[lmc,x = v.lec,EC,DC,store]
+	if	D != empty
+	where	v := ()GetFirstValueOfDomain(D)
+end
+
+[InstantiateLastValueOfDomain]
+
+	CSP[x in? D.lmc,lec,EC,DC,store]
+	=>
+	CSP[lmc,x = v.lec,EC,DC,store]
+	if	D != empty
+	where	v := ()GetLastValueOfDomain(D)
+end
+
+[EliminateFirstValueOfDomain]
+
+	CSP[x in? D.lmc,lec,EC,DC,store]
+	=>
+	CSP[x in? RD.lmc,lec,EC,DC,store]
+	if	GetCard(D) > 1
+	where	RD := ()EliminateFirstValueOfDomain(D)
+end
+
+[EliminateLastValueOfDomain]
+
+	CSP[x in? D.lmc,lec,EC,DC,store]
+	=>
+	CSP[x in? RD.lmc,lec,EC,DC,store]
+	if	GetCard(D) > 1
+	where	RD := ()EliminateLastValueOfDomain(D)
+end
+
+[SplitDomainFirstMiddle]
+
+	CSP[x in? D.lmc,lec,EC,DC,store]
+	=>
+	CSP[newlmc,newlec,EC,DC,store]
+	if	D  != empty
+	where	RD := ()GetFirstPartOfDomain(D,GetCard(D)/2)
+	where	n  := ()GetCard(RD)
+	choose
+	try
+		if	n > 1
+		where	newlmc := ()x in? RD.lmc
+		where	newlec := ()lec
+	try
+		if	n == 1
+		where	     v := ()GetFirstValueOfDomain(RD) 
+		where	newlmc := ()lmc
+		where	newlec := ()x = v.lec
+	end
+end
+
+[SplitDomainSecondMiddle]
+
+	CSP[x in? D.lmc,lec,EC,DC,store]
+	=>
+	CSP[newlmc,newlec,EC,DC,store]
+	if	D  != empty
+	where	n  := ()GetCard(D)
+	choose
+	try
+		if	n%2 == 0
+		where	RD := ()GetSecondPartOfDomain(D,n/2)
+	try
+		where	RD := ()GetSecondPartOfDomain(D,(n/2)+1)
+	end
+	where	m  := ()GetCard(RD)
+	choose
+	try
+		if	m  > 1
+		where 	newlmc := ()x in? RD.lmc
+		where 	newlec := ()lec
+	try
+		if	m == 1
+		where      v := ()GetFirstValueOfDomain(RD) 
+		where newlmc := ()lmc
+		where newlec := ()x = v.lec
+	end
+end
+
+[GetVarWithMinimumDomain]
+
+	CSP[x in? D.lmc,lec,EC,DC,store]
+	=>
+	CSP[newlmc,lec,EC,DC,store]
+	where	newlmc	:= ()GetMinimumDomain(x in? D.lmc,nil,GetCard(D))
+end
+
+[GetVarWithMaximumDomain]
+
+	CSP[x in? D.lmc,lec,EC,DC,store]
+	=>
+	CSP[newlmc,lec,EC,DC,store]
+	where	newlmc	:= ()GetMaximumDomain(x in? D.lmc,nil,GetCard(D))
+end
+
+[GetVarWithMaximumDegreeInEC]
+
+	CSP[x in? D.lmc,lec,EC,DC,store]
+	=>
+	CSP[newlmc,lec,EC,DC,store]
+	where	l	:= ()append(EC,store)
+	where	newlmc	:= ()GetMaximumDegree(x in? D.lmc,l,nil,GetDegreeOfConstraint(x,l))
+end
+
+[GetVarWithMaximumDegreeInDC]
+
+	CSP[x in? D.lmc,lec,EC,DC,store]
+	=>
+	CSP[newlmc,lec,EC,DC,store]
+	where	newlmc	:= ()GetMaximumDegree(x in? D.lmc,DC,nil,GetDegreeOfConstraint(x,DC))
+end
+
+[GetVarWithMaximumDegreeInECandDC]
+
+	CSP[x in? D.lmc,lec,EC,DC,store]
+	=>
+	CSP[newlmc,lec,EC,DC,store]
+	where	l	:= ()append(append(EC,store),DC)
+	where	newlmc	:= ()GetMaximumDegree(x in? D.lmc,l,nil,GetDegreeOfConstraint(x,l))
+end
+
+
+/* I/O cannot be compiled
+
+[GetVarSpecifiedByUser]
+	CSP[lmc,lec,EC,DC,store]
+	=>
+	CSP[newlmc,lec,EC,DC,store]
+	if	lmc != nil
+	where	string1	:= ()write(stdout,"Specify the variable to enumerate: \n")
+	where	x	:= ()read(stdin)
+	where	newlmc	:= ()GetVarInHead(x,lmc,nil)
+end
+
+*/
+
+end
+
+
+end
+

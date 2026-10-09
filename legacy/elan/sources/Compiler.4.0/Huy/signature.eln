@@ -1,0 +1,37 @@
+module signature
+
+import global bool eq[term];
+end
+
+sort term;
+end
+
+operators
+  global
+    // rules
+    #neutral(@): (term) term;
+    #Opp_Null: 	term;
+    #Opp_Opp(@):	(term) term;
+    #Opp_Plus(@,@): (term term) term;
+    #invert(@): 	(term) term;
+    
+    // function symbols	
+    (A_Opp @)   : 	(term) term;
+    (A_Mult @ @) : 	(term term) term;
+
+    // constants
+    A_Zero       : 	term;
+    y0      : 	term;
+    y1      : 	term;
+    y2      : 	term;
+    y3      : 	term;
+
+    neutral(@): (term) term;
+    Opp_Null: 	term;
+    Opp_Opp(@):	(term) term;
+    Opp_Plus(@,@): (term term) term;
+    invert(@): 	(term) term;
+
+end
+
+end

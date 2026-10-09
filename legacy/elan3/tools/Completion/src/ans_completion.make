@@ -1,0 +1,5 @@
+SUBDIRS = .elan.ans_completion/
+
+all clean veryclean:
+	@for DIR in $(SUBDIRS); do echo Make $@ in $$DIR; cd $$DIR && $(MAKE) $@; cp -f completion.out ..; cd ..; done
+

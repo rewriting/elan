@@ -1,0 +1,332 @@
+module matchingAC
+import 	global 	term eqSystem ;
+ 	local  	bool 
+		eq[Fsymbol] eq[variable] eq[term] eq[eqSystem]
+		occur[variable,term] occur[variable,eqSystem]
+
+                int list[term] list[variable]
+                occur[term,list[term]] 
+                eq[list[term]]
+                applySubstOn[term]
+	;
+end
+
+operators
+
+    global
+
+    @+@: (term term) term assocLeft ;
+    (@+@): (term term) term alias @+@:;
+
+
+    
+    @ <=AC @: (term term) equation ;
+
+
+
+    local 
+
+    E Vars(@) ':' (@): (int eqSystem) eqSystem ;
+
+    multiSetNullOcc(@): (term) list[term] ;
+
+    setOfTerms(@): (list[term]) list[term] ;
+
+    nbOcc(@,@): (term list[term]) int ;
+
+    testNbOcc(@,@,@): (list[term] list[term] list[term]) bool ;
+    
+    equalAC(@,@): (term term) bool ;
+
+    replaceRHS(@,@,@): (eqSystem variable term) eqSystem;
+    mergeRHS(@,@,@): (eqSystem variable term) eqSystem;
+
+    inclusionSet?(@,@): (list[term] list[term]) bool ;
+
+    equalSet?(@,@): (list[term] list[term]) bool ;
+
+
+end
+
+
+stratop
+  global 
+
+    matchAC	: <eqSystem>		builtin;
+
+end
+
+
+rules for list[term]
+  t1,t2,s:term;
+  l:list[term] ;
+
+global
+
+[] multiSetNullOcc(t1+t2) => multiSetNullOcc(t1) @ multiSetNullOcc(t2) end
+[] multiSetNullOcc(s) => s.nil 
+                         if isvar(s) end
+
+[] multiSetNullOcc(s) => s.nil 
+                         if not isvar(s) 
+                         if eq_int(arity(head(s)),0) end
+
+[] setOfTerms(s.l) => s.setOfTerms(l)
+                      if not occurs(s,l)
+                      end
+[] setOfTerms(s.l) => setOfTerms(l) end
+[] setOfTerms(nil) => nil end
+
+end
+
+rules for int
+
+  l: list[term] ;
+  s,t: term ;
+
+  i: int ;
+  lv: list[variable] ;
+
+global
+
+[] nbOcc(s,s.l) => 1 + nbOcc(s,l) end
+[] nbOcc(s,t.l) => nbOcc(s,l) 
+                  if neq_term(s,t)
+                  end
+[] nbOcc(s,nil) => 0 end
+
+
+end
+
+rules for bool
+
+ l,l1,l2,s1,s2: list[term] ;
+
+ u,t1,t2: term ;
+ 
+
+global
+
+[] testNbOcc(l1,l2,u.l) => eq_int(nbOcc(u,l1),nbOcc(u,l2)) 
+                           and testNbOcc(l1,l2,l) 
+                           end 
+
+[] testNbOcc(l1,l2,nil) => true end
+
+[] inclusionSet?(t1.s1,s2) => occurs(t1,s2) and inclusionSet?(s1,s2)
+                              end
+
+[] inclusionSet?(nil,s2) => true end
+
+[] equalSet?(s1,s2) => inclusionSet?(s1,s2) and inclusionSet?(s2,s1) end
+
+[] equalAC(t1,t2) => equalSet?(s1,s2) and testNbOcc(l1,l2,s1)
+                     where l1:= () multiSetNullOcc(t1)
+                     where l2:= () multiSetNullOcc(t2)
+                     where s1:= () setOfTerms(l1) 
+                     where s2:= () setOfTerms(l2)
+                     end
+end
+
+
+
+
+
+
+
+rules for eqSystem
+	P,Q,R:eqSystem;
+	s,t:term;
+	x,y:variable;
+
+        s1,s2,t1,t2: term ;
+
+
+        Vars: list[variable] ;
+        i,j: int ;
+
+global
+
+
+  [] replaceRHS(P & s1 <=AC t1,x,t) => replaceRHS(P,x,t) & s1 <=AC t2
+                     where t2:=() apply(x -> t,t1) end
+
+  [] replaceRHS(s1 <=AC t1,x,t) => s1 <=AC t2
+                     where t2:=() apply(x -> t,t1) end
+
+
+  [] mergeRHS(Q & x<=AC s,x,t) => Q & x<=AC s
+                            if equalAC(s,t)
+                            end
+
+  [] mergeRHS(Q & x<=AC s,x,t) => false 
+                            if not equalAC(s,t)
+                            end
+
+  [] mergeRHS(Q & y<=AC s,x,t) => R & y<=AC s
+                            where R:=() mergeRHS(Q,x,t)
+                            if neq_eqSystem(R,false)
+                            end
+
+  [] mergeRHS(Q & y<=AC s,x,t) => false
+                            where R:=() mergeRHS(Q,x,t)
+                            if eq_eqSystem(R,false)
+                            end
+
+  [] mergeRHS(x<=AC s,x,t) => x<=AC s
+                            if equalAC(s,t)
+                            end
+
+  [] mergeRHS(x<=AC s,x,t) => false 
+                            if not equalAC(s,t)
+                            end
+
+  [] mergeRHS(y<=AC s,x,t) => x <=AC t & y<=AC s
+                            end
+
+  [] mergeRHS(true,x,t) => x <=AC t end
+
+
+  [initrule] P => E Vars(0) : (true & P) end
+
+
+  [merge] E Vars(i) : (true & (P & x<=AC t)) => E Vars(i) : (x<=AC t & P) end
+
+  [merge] E Vars(i) : (Q & (P & x<=AC t)) => E Vars(i) : (R & P)
+                                 where R:= () mergeRHS(Q,x,t)
+                                 if neq_eqSystem(R,false)
+                                 end
+
+  [merge] E Vars(i) : (Q & (P & x<=AC t)) => false
+                                 where R:= () mergeRHS(Q,x,t)
+                                 if eq_eqSystem(R,false)
+                                 end
+
+  [merge] E Vars(i) : (Q & x<=AC t) => E Vars(i) : (R & true)
+                                 where R:= () mergeRHS(Q,x,t)
+                                 if neq_eqSystem(R,false)
+                                 end
+
+  [merge] E Vars(i) : (Q & x<=AC t) => false
+                                 where R:= () mergeRHS(Q,x,t)
+                                 if eq_eqSystem(R,false)
+                                 end
+
+  [replace] E Vars(i) : (Q & (P & var(j)<=AC t)) => E Vars(i) : (Q & R)
+                       where R:= () replaceRHS(P,var(j),t)
+                       end
+
+  [greater] E Vars(i) : (Q & (P & s1+s2 <=AC t)) => false
+                         if isvar(t) end
+
+  [greater] E Vars(i) : (Q & s1+s2 <=AC t) => false
+                         if isvar(t) end
+
+
+  [greater] E Vars(i) : (Q & (P & s1+s2 <=AC t)) => false
+                         if not isvar(t) 
+                         if eq_int(arity(head(t)),0) end
+
+  [greater] E Vars(i) : (Q & s1+s2 <=AC t) => false
+                         if not isvar(t) 
+                         if eq_int(arity(head(t)),0) end
+
+
+  [decomposeAC] E Vars(i) : (Q & (P & s1+s2 <=AC t1+t2)) =>
+                E Vars(i) : (Q & ((P & s1 <=AC t1) & s2 <=AC t2))
+                end
+
+  [decomposeAC] E Vars(i) : (Q & (P & s1+s2 <=AC t1+t2)) =>
+                E Vars(i) : (Q & ((P & s1 <=AC t2) & s2 <=AC t1))
+                end
+
+
+  [decomposeAC] E Vars(i) : (Q & (P & s1+s2 <=AC t1+t2)) =>
+                E Vars(i+1) : (Q & 
+                 ((P & s2 <=AC var(i+1) + t2) & s1 + var(i+1) <=AC t1))
+                end
+
+  [decomposeAC] E Vars(i) : (Q & (P & s1+s2 <=AC t1+t2)) =>
+                E Vars(i+1) : (Q & 
+                 ((P & s1 <=AC var(i+1) + t1) & s2 + var(i+1) <=AC t2))
+                end
+
+  [decomposeAC] E Vars(i) : (Q & (P & s1+s2 <=AC t1+t2)) =>
+                E Vars(i+1) : (Q & 
+                 ((P & s1 <=AC var(i+1) + t2) & s2 + var(i+1) <=AC t1))
+                end
+
+  [decomposeAC] E Vars(i) : (Q & (P & s1+s2 <=AC t1+t2)) =>
+                E Vars(i+1) : (Q & 
+                 ((P & s2 <=AC var(i+1) + t1) & s1 + var(i+1) <=AC t2))
+                end
+
+  [decomposeAC] E Vars(i) : (Q & (P & s1+s2 <=AC t1+t2)) =>
+                E Vars(i+4) : (Q & 
+                 ((((P 
+                 & s1 <=AC var(i+1)+var(i+3)) & s2 <=AC var(i+2)+var(i+4))
+                 & var(i+1)+var(i+2) <=AC t1) & var(i+3)+var(i+4) <=AC t2))
+                end
+
+// if P is empty
+
+  [decomposeAC] E Vars(i) : (Q & s1+s2 <=AC t1+t2) =>
+                E Vars(i) : (Q & (s1 <=AC t1 & s2 <=AC t2))
+                end
+
+  [decomposeAC] E Vars(i) : (Q & s1+s2 <=AC t1+t2) =>
+                E Vars(i) : (Q & (s1 <=AC t2 & s2 <=AC t1))
+                end
+
+
+  [decomposeAC] E Vars(i) : (Q & s1+s2 <=AC t1+t2) =>
+                E Vars(i+1) : (Q & 
+                 (s2 <=AC var(i+1) + t2 & s1 + var(i+1) <=AC t1))
+                end
+
+  [decomposeAC] E Vars(i) : (Q & s1+s2 <=AC t1+t2) =>
+                E Vars(i+1) : (Q & 
+                 (s1 <=AC var(i+1) + t1 & s2 + var(i+1) <=AC t2))
+                end
+
+  [decomposeAC] E Vars(i) : (Q & s1+s2 <=AC t1+t2) =>
+                E Vars(i+1) : (Q & 
+                 (s1 <=AC var(i+1) + t2 & s2 + var(i+1) <=AC t1))
+                end
+
+  [decomposeAC] E Vars(i) : (Q & s1+s2 <=AC t1+t2) =>
+                E Vars(i+1) : (Q & 
+                 (s2 <=AC var(i+1) + t1 & s1 + var(i+1) <=AC t2))
+                end
+
+  [decomposeAC] E Vars(i) : (Q & s1+s2 <=AC t1+t2) =>
+                E Vars(i+4) : (Q & 
+                 (((s1 <=AC var(i+1)+var(i+3) & s2 <=AC var(i+2)+var(i+4))
+                 & var(i+1)+var(i+2) <=AC t1) & var(i+3)+var(i+4) <=AC t2))
+                end
+
+
+
+
+  [finalrule] E Vars(i) : (Q & true) => Q end
+  [finalrule] P => P if neq_eqSystem(P,false) end
+
+end
+
+
+ 
+
+strategies for eqSystem
+implicit
+
+
+
+  [.] matchAC => one(initrule);
+  repeat*(  
+          dc(dc(replace),dc(merge),dk(decomposeAC),dc(greater))) ;
+  one(finalrule)
+  end
+
+end
+
+end

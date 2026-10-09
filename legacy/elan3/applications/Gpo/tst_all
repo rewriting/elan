@@ -1,0 +1,24 @@
+#! /bin/csh -f
+#        LGI         SPC        INP        OUT
+
+if ($1 =~ *I*) then
+echo "Interpreter"
+itest     gpo        append    gpo         append
+itest     gpo        reverse    gpo        reverse
+itest     gpo        echec    gpo          echec
+itest     gpo        gdiv    gpo           gdiv
+itest     gpo        sample    gpo         sample
+#itest     gpo        sort    gpo           sort      # 60.000 sec !!!
+#itest     gpo        test1    gpo          test1
+#itest     gpo        test2    gpo          test2     # 2000 sec
+#itest     gpo        test3    gpo          test3
+#itest     gpo        derive    gpo         derive
+#itest     gpo        sample2    gpo        sample2
+#itest     gpo        test     gpo        test
+#itest     gpo        test10    gpo        test10
+if ($1 =~ *L*) then
+  itest     gpo        fib    gpo            fib
+endif
+
+endif
+

@@ -1,0 +1,356 @@
+module termCommonsRo[Fss,Vars]
+
+import 	global  eq[term] eq[variable] substitution;
+	local   int bool identifier cmp[eqSystem]
+		list[int] list[variable] Alist[variable] list[identifier] 
+		cmp[list[variable]]
+		Fss Vars 
+		pair[identifier,int] list[pair[identifier,int]]
+;end  
+
+sort variable term;
+end 
+
+operators global
+          var(@)                : ( int ) variable;
+          @!                    : ( variable ) variable;
+          seqv                  : variable;
+          @                     : ( variable ) term             pri 1000;
+
+          head(@)               : ( term ) identifier;
+          headT(@)              : ( term ) identifier;
+          @-th subterm(@)       : ( int term ) term;
+
+          term_of(@,@)		: ( term term ) bool;
+
+          isvar(@)              : ( term ) bool;
+          isfun(@)              : ( term ) bool;
+
+          variables_of(@)	: ( term ) list[variable];
+          variables_of(@)	: ( substitution ) list[variable];
+          free_variables_of(@)	: ( term ) list[variable];
+          present_variables_of(@)	: ( term ) list[variable];
+
+          free(@,@)             : ( variable term ) bool;
+
+          rename_subst(@,@)     : ( list[variable] int ) substitution; 
+
+          max_var(@)		: ( list[variable] ) int;
+          max(@,@)		: ( int int ) int;
+
+          [@](@) : (term term)  term    pri 200;
+          @ +> @ : (term term)  term    pri 200;
+          (@ +> @) : (term term)  term    pri 200 alias @ +> @:;
+          @.@ 	 : (term term)  term	pri 300	 (AC); // or not AC
+          # 	 : term;
+          |@| 	 : (term)  term;
+
+          FIRSTT(@)	: (term)  term;
+          <@> 	 	: (term)  term;
+          @':'@ 	: (term term)  term assocRight	pri 100;
+          (@':'@) 	: (term term)  term assocRight	pri 100 alias @':'@:;
+
+          @ PP @	: (term term)  term;
+          @ OP @	: (term term)  term;
+          
+          PHI(@)	: (term)  term;
+          PSI(@)	: (term)  term;
+
+          @';'@ 	: (term term)  term assocRight  pri 200;
+          IDD	 	: term;
+
+          Alam		:  term;
+          Theta		:  term;
+
+	  Gsd(@) 	: (term) term;
+	  SpreadDown(@) : (term) term;
+	  Gtd(@) 	: (term) term;
+	  TopDown(@) 	: (term) term;
+
+	  Hbu(@) 	: (term) term;
+	  Oncebu(@) 	: (term) term;
+	  Htd(@) 	: (term) term;
+	  Oncetd(@) 	: (term) term;
+
+	  Jr(@) 	: (term) term;
+	  REPEATT(@) 	: (term) term;
+
+	  im(@) 	: (term) term;
+	  om(@) 	: (term) term;
+
+
+        FOR EACH SS:pair[identifier,int]; F:identifier; N:int 
+        SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS)
+                AND N:=()second(SS) ANDIF N==0 :{
+              F()       : term;
+              F : term                          alias F():;
+            }
+        FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+        SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS) 
+                AND N:=()second(SS) ANDIF N > 0 :{
+
+             F({,@}~N)  : ({term}~N)term;
+
+             F({@,}~N)          : ({term}~N)term        alias F({,@}~N):;
+             F(,{@,}~N) : ({term}~N)term        alias F({,@}~N):;
+             F(@ {,@}~(N-1))    :({term}~N) term        alias F({,@}~N):;
+
+            }
+
+        FOR EACH SS:identifier
+        SUCH THAT SS:=(listExtract) elem(Vars) :{
+              SS     : variable;
+        }
+
+          varlist_Vars        : list[variable];
+          varnum_Vars         : int;  
+end //operators
+
+rules for list[variable]
+global
+          [] varlist_Vars => 
+		FOR EACH SS:identifier
+		SUCH THAT SS:=(listExtract) elem(Vars) :{ 
+				SS.} nil
+          end
+end
+
+        FOR EACH N:int 
+	SUCH THAT N:=() size_of_variable_list(
+		FOR EACH SS:identifier 
+		SUCH THAT SS:=(listExtract) elem(Vars) :{ 
+			SS.} nil ) 
+        :{
+rules for int 
+global
+          [] varnum_Vars => N end
+end
+        }
+
+
+        FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+        SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS) 
+                AND N:=()second(SS) ANDIF N == 0 :{
+rules for identifier
+global  
+	[] head(F)  => F   end
+	[] headT(F) => FUN end
+end
+
+rules for list[variable]
+global
+	[] variables_of(F) =>  nil
+	end
+	[] free_variables_of(F) =>  nil
+	end
+	[] present_variables_of(F) =>  nil
+	end
+end
+	}
+
+        FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+        SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS) 
+                AND N:=()second(SS) ANDIF N > 0 :{
+rules for identifier
+t_1,...,t_N : term;
+global  
+	[] head(F(t_1,...,t_N)) => F end
+	[] headT(F(t_1,...,t_N)) => FUN end
+end
+
+rules for list[variable]
+	t_1,...,t_N : term;
+global
+	[] variables_of(F(t_1,...,t_N)) =>  
+		{ append(variables_of(t_I), }_I=1...N  nil {) }_I=1...N
+	end
+	[] free_variables_of(F(t_1,...,t_N)) =>  
+		{ append(free_variables_of(t_I), }_I=1...N  nil {) }_I=1...N
+	end
+	[] present_variables_of(F(t_1,...,t_N)) =>  
+		{ append(present_variables_of(t_I), }_I=1...N  nil {) }_I=1...N
+	end
+end
+        }
+
+rules for identifier
+	$t :  term;
+global  
+	[] headT($t) => NFUN end
+end
+
+rules for identifier
+	$u,$v : term;
+global  
+	[] head([$u]($v)) =>  APP		end
+	[] head($u +> $v) =>  ARR		end
+	[] head(|$u|) 	  =>  SET		end
+	[] head($u.$v) 	  =>  COM		end
+	[] head(FIRSTT($u)) =>  FST		end
+	[] head(<$u>)  =>  BRA		end
+	[] head($u:$v) =>  SEP		end
+	[] head(PHI($u))  =>  PHH		end
+	[] head(PSI($u))  =>  PSS		end
+
+	[] head($u;$v) 	=>  SEQ		end
+	[] head(IDD) 	=>  IDT		end
+
+	[] head(Alam) 	=>  ALA		end
+	[] head(Theta) 	=>  THT		end
+
+	[] head(SpreadDown($u))	=>  SDW		end
+	[] head(TopDown($u))	=>  TDW		end
+	[] head(Oncebu($u))	=>  OBU		end
+	[] head(Oncetd($u))	=>  OTD		end
+	[] head(REPEATT($u))	=>  RPT		end
+	[] head(im($u))		=>  IMR		end
+	[] head(om($u))		=>  OMR		end
+end
+
+rules for identifier
+	$v:variable;
+global
+	[] head($v)   =>  var       end
+end
+
+rules for bool
+	$v:variable;
+	$t:term;
+global
+	[] isvar($v)   => true          end
+	[] isvar($t)   => false         end
+
+	[] isfun($v)   => false         end
+	[] isfun($t)   => true
+			if headT($t)==FUN		end
+	[] isfun($t)   => false
+			if headT($t)!=FUN		end
+end
+
+rules for list[variable]
+	$v : variable;
+global
+	[] variables_of($v) =>  $v.nil
+	end
+	[] free_variables_of($v) =>  $v.nil
+	end
+	[] present_variables_of($v) =>  $v.nil
+	end
+end
+
+rules for list[variable]
+	$u,$v : term;
+global
+	[] present_variables_of([$u]($v)) =>  
+			present_variables_of($u) @ present_variables_of($v)
+	end
+	[] present_variables_of(|$u|) =>  present_variables_of($u)
+	end
+	[] present_variables_of($u.$v) =>  
+			intersect(present_variables_of($u),present_variables_of($v))
+	end
+	[] present_variables_of(#) =>  nil
+	end
+	[] present_variables_of(FIRSTT($u)) => present_variables_of($u)
+	end
+	[] present_variables_of(<$u>) => present_variables_of($u)
+	end
+	[] present_variables_of($u:$v) =>  present_variables_of($u)
+			if neq_identifier(head(u),SEP) //not(head(u)==SEP)
+	end
+	[] present_variables_of($u +> $v) =>  
+			elimList(free_variables_of($u),present_variables_of($v))
+	end
+	[] present_variables_of(PHI($u)) =>  present_variables_of($u)
+	end
+	[] present_variables_of(PSI($u)) => present_variables_of($u)
+	end
+
+	[] present_variables_of($u;$v) =>  
+			present_variables_of($u) @ present_variables_of($v)
+	end
+end
+
+rules for list[variable]
+ $u,$v : term;
+global
+	[] free_variables_of([$u]($v)) =>  
+			free_variables_of($u) @ free_variables_of($v)
+	end
+	[] free_variables_of(|$u|) =>  free_variables_of($u)
+	end
+	[] free_variables_of($u.$v) =>  
+			free_variables_of($u) @ free_variables_of($v)
+	end
+	[] free_variables_of(#) =>  nil
+	end
+	[] free_variables_of(FIRSTT($u)) =>  free_variables_of($u)
+	end
+	[] free_variables_of(<$u>) =>  free_variables_of($u)
+	end
+	[] free_variables_of($u:$v) =>  
+			union(free_variables_of($u),free_variables_of($v))
+	end
+	[] free_variables_of($u +> $v) =>  
+			elimList(free_variables_of($u),free_variables_of($v))
+	end
+	[] free_variables_of(PHI($u)) =>  free_variables_of($u)
+	end
+	[] free_variables_of(PSI($u)) => free_variables_of($u)
+	end
+end
+
+rules for list[variable]
+     $u,$v : term;
+     $w : variable;
+     $s : substitution;
+global
+	[] variables_of([$u]($v)) =>  
+			variables_of($u) @ variables_of($v)
+	end
+	[] variables_of(|$u|) =>  variables_of($u)
+	end
+	[] variables_of($u.$v) =>  
+			variables_of($u) @ variables_of($v)
+	end
+	[] variables_of(#) =>  nil
+	end
+	[] variables_of(FIRSTT($u)) =>  variables_of($u)
+	end
+	[] variables_of(<$u>) =>  variables_of($u)
+	end
+	[] variables_of($u:$v) =>  
+			variables_of($u) @ variables_of($v)
+	end
+	[] variables_of($u +> $v) =>  
+			variables_of($u) @ variables_of($v)
+	end
+	[] variables_of(PHI($u)) =>  variables_of($u)
+	end
+	[] variables_of(PSI($u)) => variables_of($u)
+	end
+
+	[] variables_of(identity) => nil
+	end
+	[] variables_of($w->$u) => append($w.nil,variables_of($u))
+	end
+	[] variables_of($w->$u o $s) => append($w.nil,variables_of($u)) @ variables_of($s)
+	end
+end
+
+rules for bool
+	$v:variable;
+	$t:term;
+global
+	[] free($v,$t) =>  member($v,free_variables_of($t))   end
+end
+
+rules for substitution
+	i:int; $v:variable; lv:list[variable];
+global
+	[] rename_subst(nil,i)    => identity      end
+	[] rename_subst($v.lv,i)  => $v->var(i) o rename_subst(elim($v,lv), i+1) end
+end
+
+end  
+

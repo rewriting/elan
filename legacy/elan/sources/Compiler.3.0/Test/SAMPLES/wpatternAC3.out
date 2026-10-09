@@ -1,0 +1,6 @@
+
+result = h(,)(b,c)
+
+result = h(,)(a,b)
+
+rewrite_step = 3

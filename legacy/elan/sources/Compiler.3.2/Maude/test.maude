@@ -1,0 +1,39 @@
+obj TEST is sort Foo .
+  ops a b c : -> Foo .
+  ops a1 a2 a3 a4 a5 a6 a7 a8 a9 a0 : -> Foo .
+  ops b1 b2 b3 b4 b5 b6 b7 b8 b9 b0 : -> Foo .
+  op _+_    : Foo Foo -> Foo [assoc comm] .
+  op g      : Foo -> Foo .
+  op f      : -> Foo .
+
+vars X Y Z : Foo .
+
+  ceq X + g(Y) = f if X == Y .
+***  eq X + g(X) = f .
+
+endo
+
+red a + b + c .
+
+red   a + b + c 
+    + a + a + a + a + a + a
+*** + g(a + b) + g(a + b) + g(a + b) + g(a + b) + g(a + b) + g(a + b) + g(a + b) 
+    + g(b) + g(b) + g(b) + g(b) + g(b) + g(b) + g(b) 
+.
+
+red
+  g(b) + g(b) + g(b) + g(b) + g(b) + g(b) + g(b) + g(b) + g(b) + g(b) +
+  g(a) + g(a) + g(a) + g(a) + g(a) + g(a) + g(a) + g(a) + g(a) + g(a)
+.
+  
+red
+g(a1) + g(a2) + g(a3) + g(a4) + g(a5) + g(a6) + g(a7) + g(a8) + g(a9) + g(a0) +
+g(b1) + g(b2) + g(b3) + g(b4) + g(b5) + g(b6) + g(b7) + g(b8) + g(b9) + g(b0)
+.
+
+
+red
+  g(a1) + g(a2) + g(a3) + g(a4) + g(a5) + g(a6) + g(a7) + g(a8) + g(a9) + g(a0) +
+  g(b1) + g(b2) + g(b3)) + g(b4) + g(b5) + g(b6) + g(b7) + g(b8) + g(b9) + g(b0)
+
+.

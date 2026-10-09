@@ -1,0 +1,31 @@
+module strlist
+
+import global string int list[int];
+end
+operators global
+  explode(@)	: (string) list[int];
+  implode(@)	: (list[int]) string;
+local 
+  explode(@,@,@)	: (string int list[int]) list[int];
+end
+
+
+rules for list[int]
+s	: string;
+ls	: list[int];
+i	: int;
+local
+  []	explode(s) => explode(s,strlen(s),nil)			end
+  []	explode(s,0,ls) => ls					end
+  []	explode(s,i,ls) => explode(s,i-1,s[i-1].ls)		end
+end
+
+rules for string
+ls	: list[int];
+i	: int;
+local
+  []	implode(nil) => ""					end
+  []	implode(i.ls) => string(i)+implode(ls)			end
+end
+
+end 

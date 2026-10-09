@@ -1,0 +1,6 @@
+LPL fibm description
+  query    of sort int
+  result   of sort int
+  import   fibm
+ start with () max( 4 0 ) 
+end

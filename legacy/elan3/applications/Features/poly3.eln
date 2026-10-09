@@ -1,0 +1,60 @@
+module poly3[Vars]
+
+import global int Vars eq[variable] identifier list[identifier];
+sort variable poly;
+
+op global
+  FOR EACH Id:identifier SUCH THAT Id:=(listExtract) elem(Vars) :
+ { Id : variable; } 
+
+  @		: ( variable ) poly;
+  @		: ( int ) poly;
+  @ + @ 	: ( poly poly ) poly  assocRight pri 1 (AC);
+  @ * @		: ( poly  poly) poly  assocRight pri 2 (AC);
+  deriv(@,@) 	: ( poly variable) poly;
+end
+
+rules local for poly
+p, r, p1, p2, p3, p4 , e1, e2, e3, e4: poly; 
+p11,p12, p21,p22 : poly; 
+x, y : variable;
+n, n1, n2, n3 : int;
+bodies
+  [R3]  0+p+p1		=> p+p1				end
+  [R3]  0*p+p1		=> 0+p1				end
+  [R3]  1*p+p1		=> p+p1				end
+/*
+  [R]  p1+p2 => p11+p21 where p11:=(simplify)p1
+			where p21:=(simplify)p2		end
+  [R]  p1*p2 => p11*p21 where p11:=(simplify)p1
+			where p21:=(simplify)p2		end
+*/
+  []  n1*p + n2*p	=> n3*p where n3:=()n1+n2	end
+
+  []  p*r => e1+e2+e3+e4
+		where e1:=() p1*p3
+		where e2:=() p1*p4
+		where e3:=() p2*p3
+		where e4:=() p2*p4
+		where (poly)p1+p2:=()p
+		where (poly)p3+p4:=()r
+  end
+  []  deriv(x,x) 	=> 1				end
+  []  deriv(y,x) 	=> 0    if x != y		end
+  []  deriv(n,x)   	=> 0				end
+  []  deriv(p1+p2,x)  	=> deriv(p1,x)+deriv(p2,x) 		end
+  []  deriv(p1*p2,x)  	=> p11+p21
+	where p11:=() deriv(p1,x)*p2
+	where p21:=() p1*deriv(p2,x)	end
+end
+
+//strategy global simplify for poly
+	//repeat*(dc( R2 , R3))
+//end
+
+end
+
+//deriv(X*X+X+7,X) end Segmentation fault
+// deriv(X*X+5,X)
+// deriv(X*X+5*Y+7,X) end Segmentation fault
+

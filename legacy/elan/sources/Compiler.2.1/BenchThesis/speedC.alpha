@@ -1,0 +1,105 @@
+------------------------------------------------------------
+fib_builtin
+compiler
+fib(21)
+20 runs : moyenne = 16824975 rwr/sec
+fib(22)
+20 runs : moyenne = 16238683 rwr/sec
+fib(23)
+20 runs : moyenne = 17078695 rwr/sec
+fib(24)
+20 runs : moyenne = 16785243 rwr/sec
+fib(25)
+20 runs : moyenne = 17435163 rwr/sec
+fib(26)
+20 runs : moyenne = 17599754 rwr/sec
+fib(27)
+20 runs : moyenne = 17566045 rwr/sec
+fib(28)
+20 runs : moyenne = 17598328 rwr/sec
+------------------------------------------------------------
+nqueensAC
+compiler
+nqueens(7)
+20 runs : moyenne = 1405473 rwr/sec
+nqueens(8)
+20 runs : moyenne = 1748146 rwr/sec
+nqueens(9)
+20 runs : moyenne = 1921002 rwr/sec
+nqueens(10)
+20 runs : moyenne = 1365246 rwr/sec
+nqueens(11)
+20 runs : moyenne = 1388083 rwr/sec
+------------------------------------------------------------
+Bool3
+compiler
+q3
+20 runs : moyenne = 57355 rwr/sec
+q4
+20 runs : moyenne = 50373 rwr/sec
+q5
+20 runs : moyenne = 43133 rwr/sec
+q6
+20 runs : moyenne = 32567 rwr/sec
+q8
+20 runs : moyenne = 17184 rwr/sec
+------------------------------------------------------------
+compiler
+FastCompletion
+p1
+20 runs : moyenne = 1084816 rwr/sec
+p2
+20 runs : moyenne = 1157292 rwr/sec
+p3
+20 runs : moyenne = 900631 rwr/sec
+p4
+20 runs : moyenne = 929026 rwr/sec
+p5
+20 runs : moyenne = 971864 rwr/sec
+------------------------------------------------------------
+compiler
+MinelaComp
+primes(2)
+20 runs : moyenne = 591312 rwr/sec
+primes(3)
+20 runs : moyenne = 664670 rwr/sec
+primes(4)
+20 runs : moyenne = 641697 rwr/sec
+primes(5)
+20 runs : moyenne = 540142 rwr/sec
+primes(6)
+20 runs : moyenne = 555517 rwr/sec
+primes(7)
+20 runs : moyenne = 544489 rwr/sec
+primes(8)
+20 runs : moyenne = 540266 rwr/sec
+------------------------------------------------------------
+Set
+compiler
+powerSet(4)
+20 runs : moyenne = 26125 rwr/sec
+powerSet(5)
+20 runs : moyenne = 46977 rwr/sec
+powerSet(6)
+20 runs : moyenne = 68211 rwr/sec
+powerSet(7)
+20 runs : moyenne = 73416 rwr/sec
+powerSet(8)
+20 runs : moyenne = 59090 rwr/sec
+------------------------------------------------------------
+Nat10
+compiler
+fib(10)
+20 runs : moyenne = 185378 rwr/sec
+fib(11)
+20 runs : moyenne = 207202 rwr/sec
+fib(12)
+20 runs : moyenne = 210629 rwr/sec
+fib(13)
+20 runs : moyenne = 226198 rwr/sec
+fib(14)
+20 runs : moyenne = 220683 rwr/sec
+fib(15)
+20 runs : moyenne = 221032 rwr/sec
+fib(16)
+20 runs : moyenne = 226972 rwr/sec

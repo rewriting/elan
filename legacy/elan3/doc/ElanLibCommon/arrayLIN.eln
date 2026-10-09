@@ -1,0 +1,49 @@
+module arrayLIN[X]
+
+import global int X;
+end
+sort arrayLIN[X];
+end
+operators global
+	new(@)			: (X) arrayLIN[X];
+	set(@, @, @)		: (arrayLIN[X] int X) arrayLIN[X];
+	@[@<-@]			: (arrayLIN[X] int X) arrayLIN[X] alias set(@, @, @):;
+	get(@,@)		: (arrayLIN[X] int) X;
+	@[@]			: (arrayLIN[X] int) X alias get(@,@):;
+	remove(@,@)		: (arrayLIN[X] int) arrayLIN[X];
+//local
+	(@, @). @		: (int X arrayLIN[X]) arrayLIN[X];
+	get_init(@)		: (arrayLIN[X]) X;
+end
+
+rules for X
+ i,j: int;
+	t: arrayLIN[X];
+	elt: X;
+local
+[] get_init((i, elt).t) => get_init(t)				end
+[] get_init(new(elt)) => elt					end
+[] get((i, elt).t, j) => elt		if i==j			end 
+[] get((i, elt).t, j) => get(t, j)	if i<j			end
+[] get((i, elt).t, j) => get_init(t)	if i>j			end
+[] get(new(elt), i) => elt					end
+end
+
+
+rules for arrayLIN[X]
+ i,j: int;
+	t: arrayLIN[X];
+	elt1, elt2: X;
+local
+[] set(new(elt2), i, elt1) => (i, elt1).new(elt2)			end
+[] set((i,elt1).t, j, elt2) => (i, elt2).t		    if i==j	end
+[] set((i, elt1).t, j, elt2) => (i, elt1).set(t, j, elt2) if i<j	end
+[] set((i, elt1).t, j, elt2) => (j,elt2).(i, elt1).t if i>j		end
+
+[] remove(new(elt1), i) => new(elt1)					end
+[] remove((i,elt1).t, j) => t				if i==j		end
+[] remove((i, elt1).t, j) => (i, elt1).remove(t, j) 	if i<j		end
+[] remove((i, elt1).t, j) => (i, elt1).t	      	if i>j		end
+end
+
+end

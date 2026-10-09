@@ -1,0 +1,62 @@
+module IntegerSignature
+
+import
+global	GenericSignature[Variables,int]
+	;
+end
+
+operators
+global	@ (*) @ : (term term)	term	assocRight	pri 40;
+	@ (/) @ : (term term)	term	assocRight	pri 30;
+	@ (+) @ : (term term)	term	assocRight	pri 20;
+	@ (-) @ : (term term)	term	assocRight	pri 10;
+
+	@  =? @ : (term term)	formule;
+	@ !=? @ : (term term)	formule;
+	@ >=? @ : (term term)	formule;
+	@  >? @ : (term term)	formule;
+	@ <=? @ : (term term)	formule;
+	@  <? @ : (term term)	formule;
+
+	[@,..,@]: (int int)	domain;
+
+end
+
+
+rules for formule
+
+	t1,t2	: term;
+
+global 
+
+[]	Negation(t1 =? t2)
+	=>
+	t1 !=? t2
+end
+[]	Negation(t1 !=? t2)
+	=>
+	t1 =? t2
+end
+[]	Negation(t1 >=? t2)
+	=>
+	t1 <? t2
+end
+[]	Negation(t1 >? t2)
+	=>
+	t1 <=? t2
+end
+[]	Negation(t1 <=? t2)
+	=>
+	t1 >? t2
+end
+[]	Negation(t1 <? t2)
+	=>
+	t1 >=? t2
+end
+
+end
+
+
+end
+
+

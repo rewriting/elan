@@ -1,0 +1,18 @@
+module rndLOG[N,X]
+
+import global arrayLOG[N,X]; end
+
+operators global
+	rnd(@)		: (int) arrayLOG[N,X];
+end
+
+rules for arrayLOG[N,X]
+ e	: X;
+	a	: arrayLOG[N,X];
+	i: int;
+global
+  [] rnd(i) => ([4 5 2 3 4  5 3 2 7 8]) if i < 10			end
+  [] rnd(i) => [[a a a a a  a a a a a]] where a:=()rnd(i/10) 		end
+end
+
+end

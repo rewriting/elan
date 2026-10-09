@@ -1,0 +1,54 @@
+module bug
+
+import eq[Foo];
+end
+
+sort  	Foo; 
+end
+
+operators global
+	
+	rule0 : Foo;
+	rule1 : Foo;
+	rule2 : Foo;
+	rule3 : Foo;
+	go    : Foo;
+
+	tt     : Foo;
+        a      : Foo;
+        b      : Foo;
+        c      : Foo;
+        d      : Foo;
+
+
+	F(@,@) : (Foo Foo) Foo (AC);
+	G(@,@) : (Foo Foo) Foo (AC);
+	f(@)   : (Foo) Foo;
+	g(@)   : (Foo) Foo;
+
+end
+
+
+rules for Foo
+	x,y,z,t : Foo;
+	n : Foo;
+	x1,x2,x3,x4,x5 : Foo;
+global
+
+    [] go => F(a, G(g(b),g(c))) end
+
+    [] F(x,G(f(y),f(y))) => rule0 end
+    [] F(x,G(g(y),g(y))) => rule1 end
+// ET BOOM !!!
+//    [] F(x,G(y,y))       => rule2 end
+    [] F(x,F(y,y))       => rule2 end
+    [] F(x,tt)           => tt    end
+
+end
+
+end
+				
+
+
+
+

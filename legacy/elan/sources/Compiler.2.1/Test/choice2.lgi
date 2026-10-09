@@ -1,0 +1,11 @@
+LPL choice2  description
+
+query of sort  Foo
+result of sort Foo
+	  
+          import choice2
+//          start with (s0) go
+          start with () go
+
+end
+

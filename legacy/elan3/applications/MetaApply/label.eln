@@ -1,0 +1,70 @@
+module label
+
+/* Definition of the sort label */ 
+/* A label of an edge is C, I or S */
+
+import
+	global
+		int
+		bool;	
+end
+
+
+sort label;
+end
+
+
+operators
+  global
+
+	/* Label of the edges */
+	C		: label;
+	I		: label;
+	S		: label;
+
+	/* Test if a label can be followed by another label. */
+	/* An I label connot be followed by a C label */
+	/* A C label cannot be followed by a C label */
+	suiv(@,@)	: (label label) bool;
+	eqlabel(@,@)	: (label label) bool;
+
+end
+
+
+/* suiv */
+
+rules for bool
+	lab1, lab2 : label;
+global
+	[] suiv(I,C)		=> false
+	end
+
+	[] suiv(C,C)		=> false
+	end
+
+	[] suiv(lab1,lab2)	=> true
+	end
+end
+
+
+/* eqlabel */
+
+rules for bool
+	lab1, lab2 : label;
+global
+	[] eqlabel(I,I)		=> true
+	end
+
+	[] eqlabel(C,C)		=> true
+	end
+
+	[] eqlabel(S,S)		=> true
+	end
+
+	[] eqlabel(lab1,lab2)	=> false
+	end
+end
+
+end
+
+

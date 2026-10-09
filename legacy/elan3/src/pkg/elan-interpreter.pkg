@@ -1,0 +1,13 @@
+package
+identification
+         name=elan-interpreter
+      version=3.6g
+     location=http://www.loria.fr/ELAN/Soft
+         info=http://www.loria.fr/ELAN
+  description='An interpreter for the ELAN language.'
+     keywords=interpreter, rewrite rules, strategies
+
+interface
+
+requires
+  elan-library 1.0b

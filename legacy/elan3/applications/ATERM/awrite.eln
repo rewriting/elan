@@ -1,0 +1,145 @@
+module awrite
+
+import global 
+	REF list[GrammarRules]
+	string io[string]
+	eq[GrammarRules] eq[RuleStatement] eq[StrategyStatement]
+	io[RuleStatement] 	io[list[RuleStatement]] 
+	io[Tab]  	prompt[Tab]
+	io[GrammarRules]	prompt[list[GrammarRules]] io[list[GrammarRules]]
+	io[StrategyStatement]  
+	io[list[StrategyStatement]] prompt[list[StrategyStatement]]
+	io[QueryStatement]
+	;
+end
+
+operators global
+  write_ref_file(@,@)	: (string Program) Program;
+  write_rules(@,@)	: (Pid list[RuleStatement]) list[RuleStatement];
+  write_symtab(@,@) 	: (Pid list[GrammarRules]) list[GrammarRules];
+  write_strat(@,@)	: (Pid list[StrategyStatement]) list[StrategyStatement];
+end
+
+rules for Program
+pid, pid1 		: Pid;
+ref_file_name		: string;
+void0, void1, void2, void3, 
+void4, void5, void6, void7, 
+void8, void9, void10, void11,
+void12			: string;
+end0, end1, end2, end3, 
+end4, end5, end6, end7, 
+end8, end9, end10, end11,
+end12			: string;
+program			: Program;
+
+r   			: RuleStatement;
+rs	 		: list[RuleStatement];
+strats			: list[StrategyStatement];
+idtab,
+sorttab,
+Modules,
+rnamestab,
+snamestab		: Tab;
+TopGlobalGrammar, TopGrammar,
+GlobalGrammar			: list[GrammarRules];
+Query			: QueryStatement;
+global
+  []	write_ref_file(ref_file_name,program) => program
+		//--- how to do it ---
+			where pid  := ()open(ref_file_name+".ref","w")
+
+			where idtab := ()write(pid,program.Identifiers)
+			where end0  := ()write(pid,"\nend\n\n")
+			where void0 := ()write(stdout,"--- Identifiers is written\n")
+
+			where sorttab := ()write(pid,program.Sorts)
+			where end1  := ()write(pid,"\nend\n\n")
+			where void1 := ()write(stdout,"--- Sorts is written\n")
+
+			where Modules := ()write(pid,program.Modules)
+			where end2  := ()write(pid,"\nend\n\n")
+			where void2 := ()write(stdout,"--- Modules is written\n")
+
+			where rnamestab := ()write(pid,program.RuleNames)
+			where end5  := ()write(pid,"\nend\n\n")
+			where void5 := ()write(stdout,"--- RuleNames tab is written\n")
+
+			where snamestab := ()write(pid,program.StrategyNames)
+			where end6  := ()write(pid,"\nend\n\n")
+			where void6 := ()write(stdout,"--- StrategyNames tab is written\n")
+
+			where TopGlobalGrammar := ()write_symtab(pid,program.TopGlobalGrammar)
+			where void4 := ()write(stdout,"--- TopGlobalGrammar is written\n")
+
+			where TopGrammar := ()write_symtab(pid,program.TopGrammar)
+			where void10 := ()write(stdout,"--- TopGrammar is written\n")
+
+			where GlobalGrammar := ()write_symtab(pid,program.GlobalGrammar)
+			where void11 := ()write(stdout,"--- GlobalGrammar is written\n")
+
+			where rs := ()write_rules(pid,program.AllRules)
+			where void7 := ()write(stdout,"--- AllRules is written\n")
+
+			where strats := ()write_strat(pid,program.AllStrategies)
+			where void8 := ()write(stdout,"--- AllStrategies is written\n")
+
+			where Query := ()write(pid,program.Query)
+			where end9  := ()write(pid,"\nend\n\n")
+			where void9 := ()write(stdout,"--- query is written\n")
+
+			where pid1 := ()close(pid) end
+end
+
+
+rules for list[RuleStatement]
+pid		: Pid;
+void		: string;
+r, r1  		: RuleStatement;
+rs, rs1 	: list[RuleStatement];
+global
+  []	write_rules(pid,nil) => nil
+			where void := ()write(pid,"\nEndDef end\n\n")
+  end
+  []	write_rules(pid,r.rs) => nil
+			where r1 := ()write(pid,r)
+			where void := ()write(pid,"\nend\n\n")
+			where rs1 := ()write_rules(pid,rs)
+  end
+end
+
+rules for list[GrammarRules]
+pid		: Pid;
+void		: string;
+fs, fs1		: GrammarRules;
+fss, fss1	: list[GrammarRules];
+global
+  []	write_symtab(pid,nil) => nil
+			where void := ()write(pid,"\nEndDef end\n\n")
+  end
+  []	write_symtab(pid,fs.fss) => nil
+			where fs1 := ()write(pid,fs)
+			where void := ()write(pid,"\nend\n\n")
+			where fss1 := ()write_symtab(pid,fss)
+  end
+end
+
+rules for list[StrategyStatement]
+pid		: Pid;
+void		: string;
+fs, fs1		: StrategyStatement;
+fss, fss1	: list[StrategyStatement];
+global
+  []	write_strat(pid,nil) => nil
+			where void := ()write(pid,"\nEndDef end\n\n")
+  end
+  []	write_strat(pid,fs.fss) => nil
+			where fs1 := ()write(pid,fs)
+			where void := ()write(pid,"\nend\n\n")
+			where fss1 := ()write_strat(pid,fss)
+  end
+end
+
+end
+
+

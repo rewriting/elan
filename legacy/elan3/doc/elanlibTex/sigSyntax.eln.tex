@@ -1,0 +1,47 @@
+
+\let\CF=\rm
+% Remember to use the lgrind style
+
+\File{sigSyntax.eln},{17:23},{Jun 21 1996}
+\L{\LB{\C{}\1\1}}
+}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{16}{(c)}\Tab{24}{INRIA-Lorraine \& CRIN}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{24}{615, rue du Jardin Botanique, BP 101}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{16}{        54602 Villers-les-Nancy}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{24}{France}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{24}{email: elan@loria.fr}}
+\CE{}\L{\LB{\C{}\1\1}}
+}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{8}{\$Source: /CVS/aircube/elan3/doc/elanlibTex/sigSyntax.eln.tex,v $}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{8}{\$Revision: 1.2 $}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{8}{\$Date: 1996/08/05 20:24:17 $}}
+\CE{}\L{\LB{\C{}\1\1}\Tab{8}{}\Tab{8}{\$Author: ckirchne $}}
+\CE{}\L{\LB{\C{}\1\1}}
+}}
+\CE{}\L{\LB{}}
+\L{\LB{\K{module}_\V{sigSyntax}}}
+\L{\LB{}}
+\L{\LB{}\Tab{8}{\C{}\1\1_ This module describes a possible syntax for the user specification}}
+\CE{}\L{\LB{}}
+\L{\LB{\K{import}_}}
+\L{\LB{}\Tab{8}{\K{global}}\Tab{16}{\V{anyIdentifier}_\V{anyInteger};}}
+\L{\LB{}\Tab{8}{\K{local}}\Tab{16}{\V{identifier}_\V{list}[\V{identifier}]_\V{pair}[\V{identifier},\V{int}]_}}
+\L{\LB{}\Tab{16}{\V{list}[\V{pair}[\V{identifier},\V{int}]];}}
+\L{\LB{\K{op}_}}
+\L{\LB{_\K{global}}}
+\L{\LB{}}
+\L{\LB{__@}\Tab{8}{__:_(_\V{ident}_)_\V{identifier}}\Tab{56}{\K{alias}_@:;}}
+\L{\LB{}}
+\L{\LB{__@_\':\'_@_:_(_\V{identifier}_\V{int}_)_\V{pair}[\V{identifier},\V{int}]}\Tab{56}{\K{alias}_[@,@]:;}}
+\L{\LB{}}
+\L{\LB{__\V{Epsilon}_:_\V{list}[\V{identifier}]}\Tab{40}{______}\Tab{56}{\K{alias}_\V{nil}:;}}
+\L{\LB{__@__@}\Tab{8}{__:_(_\V{identifier}_\V{list}[\V{identifier}]_)_\V{list}[\V{identifier}]___}}
+\L{\LB{}\Tab{56}{\K{alias}_\V{cons}(@,@):;}}
+\L{\LB{}}
+\L{\LB{__\V{Epsilon}_:_\V{list}[\V{pair}[\V{identifier},\V{int}]]}\Tab{56}{\K{alias}_\V{nil}:;}}
+\L{\LB{__@__@}\Tab{8}{__:_(_\V{pair}[\V{identifier},\V{int}]_\V{list}[\V{pair}[\V{identifier},\V{int}]]_)_}}
+\L{\LB{}\Tab{24}{__\V{list}[\V{pair}[\V{identifier},\V{int}]]}\Tab{56}{\K{alias}_\V{cons}(@,@):;}}
+\L{\LB{}}
+\L{\LB{\K{endop}}}
+\L{\LB{}}
+\L{\LB{\K{end}_\K{of}_\K{module}}}

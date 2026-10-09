@@ -1,0 +1,51 @@
+module Unif[Vars,Fss]
+import 	global 	term varabst varUnif[Vars] termUnif[Fss] ;
+ 	local  	int identifier bool pair[identifier,int]
+		list[int] list[identifier] list[pair[identifier,int]] 
+                eq[variable] eq[term] 
+		eqSystem callUnif[Vars,Fss] eqMulti 
+                occur[variable,term] occur[variable,eqSystem] ;
+end
+
+operators
+
+local
+
+	@ '\10'     	: ( eqSystem ) eqSystem;
+        @ newline       : ( eqSystem ) eqSystem alias @ '\10': ;
+        @ '\10' @ '\10' :(term term) equation ;
+        @ newline @ newline: (term term) equation alias @ '\10' @ '\10' : ;
+  	@ @		  :(eqSystem eqSystem ) eqSystem assocLeft ;
+        convert(@)      : (eqSystem) eqSystem ;
+end
+
+
+rules for eqSystem
+// declare 
+	t1,t2 : term;
+	P,Q : eqSystem;
+global
+  [addnewline]   P => P newline end
+  []             convert(P & t1 = t2) => convert(P) t1 newline t2 newline end
+  []             convert(t1 = t2) => t1 newline t2 newline end
+  [conversion]	 P => Q where Q := (strataddnl) convert(P) end
+  [solve]        P => Q where Q := (callunif) P end
+end
+
+
+strategies for eqSystem 
+ global
+
+    [strataddnl]
+    dont care choose(addnewline)
+    end
+    
+    [unify]
+    dont care choose(conversion) ;
+    dont know choose(solve) ;
+    dont care choose(nettoie)
+    end
+end
+
+
+end

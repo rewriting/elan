@@ -1,0 +1,8 @@
+LPL tail description
+  query    of sort int
+  result   of sort int
+  import   tail
+  start with () query
+
+end
+

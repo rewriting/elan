@@ -1,0 +1,8 @@
+1 s/##END#/\
+EOS\
+end/g
+s/##1\*\*/ /g
+s/##[0-9]*\*\*/end/g
+s/##END#/end\
+EOS\
+end/g

@@ -1,0 +1,507 @@
+module prod_rules[vars,ops,faits,regles]
+
+import	local	ops
+		faits
+		regles
+		sigSyntax
+		int
+		bool
+		fact[vars,ops]
+		rule[vars,ops]
+		list[fact]
+		list[term]
+		list[variable]
+		list[pair[term,term]]
+		pair[int,identifier]
+		list[pair[int,identifier]]
+		pair[identifier,int]
+		list[pair[identifier,int]]
+		list[symbole]
+		list[list[symbole]]
+		pair[symbole,list[list[symbole]]]
+		list[pair[symbole,list[list[symbole]]]]
+		list[lm_symbole]
+		pair[symbole,list[lm_symbole]]
+		list[pair[symbole,list[lm_symbole]]]
+		pair[symbole,list[lm_symbole]]
+		set[lm_symbole]
+		pair[symbole,set[lm_symbole]]
+		set[pair[symbole,set[lm_symbole]]]
+		eq[identifier]
+		eq[list[symbole]];
+end
+
+operators	global
+
+// Structures de donnees internes
+	kb		: list[fact];
+	srules		: list[pair[term,term]];
+	liste_operateurs: list[pair[int,identifier]];
+	liste_constantes: list[pair[int,identifier]];
+// Construction de memoire1
+	memoire1	: list[pair[symbole,list[list[symbole]]]];
+// Construction de memoire2
+	memoire2		: list[pair[symbole,list[lm_symbole]]];
+	trans_mem(@)		: (list[pair[symbole,list[list[symbole]]]]) list[pair[symbole,list[lm_symbole]]];
+	transform1(@)		: (list[symbole]) list[list[symbole]];
+	transform2(@,@,@,@,@)	: (int list[list[symbole]] list[list[symbole]] list[symbole] list[symbole]) list[list[symbole]];
+	ajout_neg(@)		: (list[list[symbole]]) list[lm_symbole];
+// Construction de la memoire
+	memoire(@,@)		: (list[pair[symbole,list[lm_symbole]]] list[fact]) set[pair[symbole,set[lm_symbole]]];
+	transf_set(@)		: (list[pair[symbole,list[lm_symbole]]]) set[pair[symbole,set[lm_symbole]]];
+	transf_list_set(@)	: (list[lm_symbole]) set[lm_symbole];
+	modifier_fact(@,@,@)	: (list[pair[symbole,list[lm_symbole]]] symbole list[term]) list[pair[symbole,list[lm_symbole]]];
+	lot_to_los(@)		: (list[term]) list[symbole];
+	modifier_liste(@,@)	: (list[lm_symbole] list[symbole]) list[lm_symbole];
+	eq_lsymb(@,@)		: (list[symbole] list[symbole]) bool;
+// saturation de la memoire
+	fermeture		: set[pair[symbole,set[lm_symbole]]];
+end
+
+stratop
+global
+
+	init	: <set[pair[symbole,set[lm_symbole]]] -> set[pair[symbole,set[lm_symbole]]]> builtin;
+end
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////               CONSTRUCTION DE CERTAINES STRUCTURES DE DONNEES INTERNES                  //////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+rules for list[fact]
+global
+
+// Transformation de la liste des faits donnee dans la specifcation en une base de 
+// connaissances (kb) : c'est un ensemble de faits positifs.
+
+[] kb => FOR EACH X:term SUCH THAT X:=(listExtract)elem(faits):{+ X.} nil
+end
+end
+
+
+rules for list[pair[term,term]]
+global
+
+// Transformation de la liste des regles en une liste de paire de termes.
+
+[] srules => FOR EACH X:pair[term,term] SUCH THAT X:=(listExtract)elem(regles):{X.} nil
+end
+end
+
+
+
+// Reecriture des regles en interne en regles ELAN.
+
+FOR EACH X1:pair[term,term]; L1:list[term]; N1:int; L2:list[term]; N2:int
+SUCH THAT X1:=(listExtract)elem(regles) 
+AND L1:=()regle_to_condition(X1) 
+AND N1:=()size(L1)
+AND L2:=()regle_to_conclusion(X1)
+AND N2:=()size(L2):{
+
+rules for set[pair[symbole,set[lm_symbole]]]
+
+	W		: set[pair[symbole,set[lm_symbole]]];
+	W1_1,...,W1_N1	: set[lm_symbole];
+	W2_1,...,W2_N2	: set[lm_symbole];
+	A1_1,...,A1_N1  : set[lm_symbole];
+	A2_1,...,A2_N2  : set[lm_symbole];
+	FOR EACH X:variable SUCH THAT X:=(listExtract)elem(varlist_Vars):{X : symbole;}
+
+global
+
+[base] 	{FOR EACH T1:term; I1:identifier; LL1:list[term]
+	SUCH THAT T1:=()K-th elem(L1) AND I1:=()head(T1) AND LL1:=()list_subterm(T1):{
+	[|I1|, A1_K] U }}_K=1...N1
+
+ 	{FOR EACH T2:term; I2:identifier; LL2:list[term]
+	SUCH THAT T2:=()K-th elem(L2) AND I2:=()head(T2) AND LL2:=()list_subterm(T2):{
+	[|I2|, A2_K] U }}_K=1...N2 
+
+	W
+
+=>  	{FOR EACH T1:term; I1:identifier; LL1:list[term]
+	SUCH THAT T1:=()K-th elem(L1) AND I1:=()head(T1) AND LL1:=()list_subterm(T1):{
+	[|I1|,	FOR EACH Y1:term
+		SUCH THAT Y1:=(listExtract)elem(LL1):{
+			FOR EACH Y2:term; Y3:identifier
+			SUCH THAT Y2:=()Y1 AND Y3:=()head(Y2) ANDIF isvar(Y2)==false:{|Y3|.}
+			FOR EACH Y2:term
+			SUCH THAT Y2:=()Y1 ANDIF isvar(Y2)==true:{Y2.}} nil+ U W1_K] U }}_K=1...N1
+ 	{FOR EACH T2:term; I2:identifier; LL2:list[term]
+	SUCH THAT T2:=()K-th elem(L2) AND I2:=()head(T2) AND LL2:=()list_subterm(T2):{
+	[|I2|,	FOR EACH Y1:term
+		SUCH THAT Y1:=(listExtract)elem(LL2):{
+			FOR EACH Y2:term; Y3:identifier
+			SUCH THAT Y2:=()Y1 AND Y3:=()head(Y2) ANDIF isvar(Y2)==false:{|Y3|.}
+			FOR EACH Y2:term
+			SUCH THAT Y2:=()Y1 ANDIF isvar(Y2)==true:{Y2.}} nil+ U W2_K] U }}_K=1...N2 W
+
+ //where (set[lm_symbole]) |Titi| :=() X
+
+/*
+ * Il y a un bug dans le parser : {|Y3|.} n'est pas accepte !!!
+ */
+	{
+	where (set[lm_symbole]) 
+	FOR EACH T1:term; I1:identifier; LL1:list[term]
+    	SUCH THAT T1:=()K-th elem(L1) AND I1:=()head(T1) AND LL1:=()list_subterm(T1):{
+		FOR EACH Y1:term
+		SUCH THAT Y1:=(listExtract)elem(LL1):{
+			FOR EACH Y2:term; Y3:identifier
+			SUCH THAT Y2:=()Y1 AND Y3:=()head(Y2) ANDIF isvar(Y2)==false:{|head(Y2)|.}
+			FOR EACH Y2:term
+			SUCH THAT Y2:=()Y1 ANDIF isvar(Y2)==true:{Y2.}}
+
+	nil+ U W1_K :=() A1_K }}_K=1...N1
+
+	{
+	where (set[lm_symbole]) 
+	FOR EACH T2:term; I2:identifier; LL2:list[term]
+	SUCH THAT T2:=()K-th elem(L2) AND I2:=()head(T2) AND LL2:=()list_subterm(T2):{
+	FOR EACH Y1:term
+		SUCH THAT Y1:=(listExtract)elem(LL2):{
+			FOR EACH Y2:term; Y3:identifier
+			SUCH THAT Y2:=()Y1 AND Y3:=()head(Y2) ANDIF isvar(Y2)==false:{|head(Y2)|.}
+			FOR EACH Y2:term
+			SUCH THAT Y2:=()Y1 ANDIF isvar(Y2)==true:{Y2.}}
+	
+	nil- U W2_K :=() A2_K }}_K=1...N2
+
+
+end
+end}
+
+
+rules for list[pair[int,identifier]]
+global
+
+// On reprend la liste des operateurs et on la transforme en deux listes de paires [arite,identificateur] : 
+// une pour les constantes et une pour les operateurs d'arite >= 1.
+
+[] liste_operateurs => 	FOR EACH X:pair[identifier,int]; N:int; F:identifier
+	 		SUCH THAT X:=(listExtract)elem(ops) AND F:=()first(X) AND N:=()second(X) ANDIF N != 0:{[N,F].} nil
+end
+
+[] liste_constantes => 	FOR EACH X:pair[identifier,int]; N:int; F:identifier
+	 		SUCH THAT X:=(listExtract)elem(ops) AND F:=()first(X) AND N:=()second(X) ANDIF N == 0:{[N,F].} nil
+end
+end
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////  CONSTRUCTION DE LA MEMOIRE = CLOTURE PAR HYPOTHESE DU MONDE CLOS DE LA BASE DE FAITS   //////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// La construction de la memoire se fait en trois etapes avec leurs operations specifiques
+
+
+// memoire1 est la 1ere mouture de la memoire que l'on souhaite. Elle sera peu a peu modifiee.
+//////////////////////////////////////////////////////////////////////////////////////////////
+
+rules for list[pair[symbole,list[list[symbole]]]]
+global
+
+[] memoire1 => 	FOR EACH X:pair[int,identifier]; F:identifier; N:int
+		SUCH THAT X:=(listExtract)elem(liste_operateurs) AND N:=()first(X) AND F:=()second(X):
+		{[|F|,	{FOR EACH X1:pair[int,identifier]; F1:identifier; N1:int
+			SUCH THAT X1:=(listExtract)elem(liste_constantes) AND N1:=()first(X1) AND F1:=()second(X1):
+			{|F1|.} nil.}_I=1...N nil]. } nil
+end
+end
+
+
+// memoire2 est la 2nde mouture de la memoire : elle contient tous les faits possibles mais en litteraux negatifs.
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+rules for list[pair[symbole,list[lm_symbole]]]
+
+	n	: int;
+	S	: symbole;
+	LS	: list[list[symbole]];
+	LS1	: list[pair[symbole,list[list[symbole]]]];
+	LS2	: list[symbole];
+	LS3,LS4	: list[list[symbole]];
+	LS5	: list[lm_symbole];
+	LS6	: list[pair[symbole,list[lm_symbole]]];
+
+global
+
+// memoire2 est le resultat de la transformation de memoire1.
+
+[] memoire2 => trans_mem(memoire1)
+end
+
+
+// trans_mem est le systeme qui gere cette transformation :
+// Exemple (cas1): [(Elegant),(Cadillac).(Corvette).nil.nil] devient : [(Elegant),(Cadillac).nil-.(Corvette).nil-.nil]
+// Exemple (cas2):[(P2),(Corvette).(Honda_Civic).nil.(Corvette).(Honda_Civic).nil.nil] devient :
+// [(P2),(Corvette).(Corvette).nil-.(Corvette).(Honda_Civic).nil-.(Honda_Civic).(Corvette).nil-.(Honda_Civic).(Honda_Civic).nil-.nil]
+
+[] trans_mem(nil) => nil
+end
+[] trans_mem([S,LS].LS1) => [S,LS5].LS6
+	where n:=() size(LS)
+		if n == 1
+	where LS2 :=() 1-th elem(LS)
+	where LS3 :=() transform1(LS2)
+	where LS5 :=() ajout_neg(LS3)
+	where LS6 :=() trans_mem(LS1)
+end
+[] trans_mem([S,LS].LS1) => [S,LS5].LS6
+	where n:=() size(LS)
+		if n != 1
+	where LS2 :=() 1-th elem(LS)
+	where LS3 :=() transform1(LS2)
+	where LS4 :=() transform2(n-1,LS3,nil,LS2,nil)
+	where LS5 :=() ajout_neg(LS4)
+	where LS6 :=() trans_mem(LS1)
+end
+end
+
+
+rules for list[list[symbole]]
+
+	s	: symbole;
+	LS	: list[symbole];
+	LS1	: list[list[symbole]];
+
+global
+
+// Exemple : (Cadillac).(Corvette).nil devient : (Cadillac).nil.(Corvette).nil.nil
+
+[] transform1(nil) => nil
+end
+[] transform1(s.LS) => cons(s,nil).LS1
+	where LS1 :=() transform1(LS)
+end
+end
+
+
+rules for list[list[symbole]]
+
+	n 		: int;
+	s		: symbole;
+	LS,LS3,LS4	: list[symbole];
+	LS1,LS2		: list[list[symbole]];
+
+global
+
+// transform2 nous permet d'obtenir des termes de la forme : 
+// (Cadillac).(Cadillac).nil.(Cadillac).(Corvette).nil.(Corvette).(Cadillac).nil.(Corvette).(Corvette).nil.nil
+
+[] transform2(0,LS1,LS2,LS3,LS4) => LS1
+end
+[] transform2(n,nil,LS2,LS3,LS4) => transform2(n-1,LS2,nil,LS3,nil)
+	if n != 0
+end
+[] transform2(n,LS.LS1,LS2,nil,LS4) => transform2(n,LS1,LS2,LS4,nil)
+	if n != 0
+end
+[] transform2(n,LS.LS1,LS2,s.LS3,LS4) => transform2(n,LS.LS1,append(LS2,append(LS,s.nil).nil),LS3,append(LS4,s.nil))
+	if n != 0
+end
+end
+
+
+rules for list[lm_symbole]
+
+	LS	: list[symbole];
+	LS1	: list[list[symbole]];
+	LS2	: list[lm_symbole];
+
+global
+
+// ajout_neg rend negatif chaque litteral de memoire2.
+
+[] ajout_neg(nil) => nil
+end
+[] ajout_neg(LS.LS1) => LS -.LS2
+	where LS2 :=() ajout_neg(LS1)
+end
+end
+
+
+// memoire est la derniere version de la memoire : elle indique aussi les litteraux positifs deduits 
+// de la base de faits initiale.
+////////////////////////////////
+
+
+rules for set[pair[symbole,set[lm_symbole]]]
+
+	f	: fact;
+	LF	: list[fact];
+	t	: term;
+	lt	: list[term];
+	s	: symbole;
+	M,M1	: list[pair[symbole,list[lm_symbole]]];
+	S	: symbole;
+	LS	: list[lm_symbole];
+	LS1	: set[lm_symbole];
+	LP	: list[pair[symbole,list[lm_symbole]]];
+	EP,M2	: set[pair[symbole,set[lm_symbole]]];
+
+global
+
+// memoire permet d'entrer les litteraux positifs de la base de faits dans le memoire close de litteraux negatifs.
+
+[] memoire(M,nil) => transf_set(M)
+end
+[] memoire(M,f.LF) => M2
+	where t :=() fact_to_term(f)
+	where s :=() id_to_symb(head(t))
+	where lt :=() list_subterm(t)
+	where M1 :=() modifier_fact(M,s,lt)
+	where M2 :=() memoire(M1,LF)
+end
+
+// transf_set reecrit la liste composant la memoire en un ensemble AC.
+
+[] transf_set(nil) => empty
+end
+[] transf_set([S,LS].LP) => [S,LS1] U EP
+	where LS1 :=() transf_list_set(LS)
+	where EP :=() transf_set(LP)
+end
+end
+
+
+rules for set[lm_symbole]
+
+	ls	: lm_symbole;
+	lm_s	: list[lm_symbole];
+	L1	: set[lm_symbole];
+
+global
+
+[] transf_list_set(nil) => empty
+end
+[] transf_list_set(ls.lm_s) => ls U L1
+	where L1 :=() transf_list_set(lm_s)
+end
+end
+
+
+rules for list[pair[symbole,list[lm_symbole]]]
+
+	lt	: list[term];
+	s,s1	: symbole;
+	ls	: list[symbole];
+	LS1,LS2	: list[lm_symbole];
+	M,M1	: list[pair[symbole,list[lm_symbole]]];
+
+global
+
+// modifier_fact cherche le fait ayant comme symbole de tete s et comme liste d'arguments lt dans la memoire.
+
+[] modifier_fact([s,LS1].M,s,lt) => [s,LS2].M
+	where ls :=() lot_to_los(lt)
+	where LS2 :=() modifier_liste(LS1,ls)
+end
+[] modifier_fact([s1,LS1].M,s,lt) => [s1,LS1].M1
+	where M1 :=() modifier_fact(M,s,lt)
+end
+end
+
+
+rules for list[symbole]
+
+	t	: term;
+	lt	: list[term];
+	s	: symbole;
+	LS1	: list[symbole];
+
+global
+
+// lot_to_los transforme une liste de termes en une liste de symboles
+
+[] lot_to_los(nil) => nil
+end
+[] lot_to_los(t.lt) => s.LS1
+	where s :=() id_to_symb(head(t))
+	where LS1 :=() lot_to_los(lt)
+end
+end
+
+
+rules for list[lm_symbole]
+
+	b	: bool;
+	ls,ls1	: list[symbole];
+	LS1	: lm_symbole;
+	LS2,LS3	: list[lm_symbole];
+	
+global
+
+// modifier_liste cherche la bonne liste d'arguments a mettre a +
+
+[] modifier_liste(LS1.LS2,ls) => ls1+.LS2
+	where ls1 :=() lm_to_lsymb(LS1)
+		if eq_lsymb(ls1,ls) == true
+end
+[] modifier_liste(LS1.LS2,ls) => LS1.LS3
+	where ls1 :=() lm_to_lsymb(LS1)
+		if eq_lsymb(ls1,ls) == false
+	where LS3 :=() modifier_liste(LS2,ls)
+end
+end
+
+
+rules for bool
+
+	s,s1,s2		: symbole;
+	LS,LS1,LS2	: list[symbole];
+
+global
+
+[] eq_lsymb(nil,nil) => true
+end
+[] eq_lsymb(nil,LS) => false
+	if $LS != nil_symbole
+end
+[] eq_lsymb(LS,nil) => false
+	if $LS != nil_symbole
+end
+[] eq_lsymb(s.LS1,s.LS2) => eq_lsymb(LS1,LS2)
+end
+[] eq_lsymb(s1.LS1,s2.LS2) => false
+	if symb_to_id(s1) != symb_to_id(s2)
+end
+end
+
+
+//////////////////////////////////////////////////////////////////////////
+////////  		CLOTURE DE LA MEMOIRE  			//////////
+//////////////////////////////////////////////////////////////////////////
+
+
+rules for set[pair[symbole,set[lm_symbole]]]
+
+	mem,Mem	: set[pair[symbole,set[lm_symbole]]];
+
+global
+
+[Init] fermeture => Mem
+		where mem :=() memoire(memoire2,kb)
+		where Mem :=(repeat*(first(first(base), fail))) mem
+end
+end
+
+
+//////////////////////////////////////////////////////////////////////////
+////////  		    STRATEGIES      			//////////
+//////////////////////////////////////////////////////////////////////////
+
+
+strategies for set[pair[symbole,set[lm_symbole]]]
+
+implicit
+
+[] init => first(Init)
+end
+end
+
+end

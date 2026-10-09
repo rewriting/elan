@@ -1,0 +1,86 @@
+# $Id: configure.in,v 1.4 2004/03/04 18:11:35 moreau Exp $
+
+#
+#    CPL - The Nancy ChoicePoint Library
+#
+
+AC_INIT
+AC_CONFIG_SRCDIR([configure])
+AM_INIT_AUTOMAKE(cpl,0.6)
+AC_PREREQ(2.59)
+
+dnl Default values
+CC_GCC=gcc
+CFLAGS_GCC="-Wall -O2"
+LFLAGS_GCC=""
+DEFS_GCC="\$(DEFS)"
+INCL_GCC=""
+
+CC_DBG=gcc
+CFLAGS_DBG="-Wall -g"
+LFLAGS_DBG="-g"
+DEFS_DBG="\$(DEFS) -DDEBUG"
+INCL_DBG=""
+
+CC_PROF=gcc
+CFLAGS_PROF="-Wall -pg"
+LFLAGS_PROF="-pg"
+DEFS_PROF="\$(DEFS)"
+INCL_PROF=""
+
+
+AC_ARG_WITH(aterm, [  --with-aterm            Specify location of aterm library, default: \$prefix], ATERM=$withval, ATERM="$prefix")
+
+AC_REVISION($Id: configure.in,v 1.4 2004/03/04 18:11:35 moreau Exp $)
+
+AC_SUBST(ATERM)
+
+dnl Checks for programs
+AC_PROG_CC
+AC_PROG_RANLIB
+AR=ar
+AC_SUBST(AR)
+AC_PROG_INSTALL
+AR=ar
+AC_SUBST(AR)
+
+CHOICE_LIB_GCC=libchoice-gcc.a
+CHOICE_LIB_DBG=libchoice-dbg.a
+CHOICE_LIB_PROF=libchoice-prof.a
+
+dnl Checks for library functions
+dnl AC_FUNC_ALLOCA
+AC_CHECK_FUNCS([alloca])
+
+AC_SUBST(CHOICE_LIB_GCC)
+AC_SUBST(CHOICE_LIB_DBG)
+AC_SUBST(CHOICE_LIB_PROF)
+
+AC_SUBST(CC_GCC)
+AC_SUBST(CC_DBG)
+AC_SUBST(CC_PROF)
+
+AC_SUBST(CFLAGS_GCC)
+AC_SUBST(CFLAGS_DBG)
+AC_SUBST(CFLAGS_PROF)
+
+AC_SUBST(DEFS_GCC)
+AC_SUBST(DEFS_DBG)
+AC_SUBST(DEFS_PROF)
+
+AC_SUBST(INCL_GCC)
+AC_SUBST(INCL_DBG)
+AC_SUBST(INCL_PROF)
+
+AC_SUBST(LFLAGS_GCC)
+AC_SUBST(LFLAGS_DBG)
+AC_SUBST(LFLAGS_PROF)
+
+AC_CONFIG_FILES([\
+	Makefile \
+	README \
+	test/Makefile \
+	src/Makefile
+	doc/Makefile \
+])
+AC_OUTPUT

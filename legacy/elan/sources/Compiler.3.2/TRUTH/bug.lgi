@@ -1,0 +1,11 @@
+LPL bug  description
+
+query of sort  Tuple
+result of sort Tuple
+	  
+import bug
+//start with (SR1) [query,nil]
+start with (SR1) [f(a,f(b,c)),nil]
+
+end
+

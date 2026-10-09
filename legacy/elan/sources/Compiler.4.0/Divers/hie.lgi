@@ -1,0 +1,14 @@
+LPL hie description
+
+  query 	of sort Set
+         	result of sort Set
+ 
+//  query 	of sort bool
+//         	result of sort bool
+
+	 	import hie eq[Elt]
+//         	start with () query 
+         	start with () -(u, U(U(v, w), x))
+
+end
+

@@ -1,0 +1,35 @@
+//
+//		(c)	INRIA-Lorraine & CRIN
+//			615, rue du Jardin Botanique, BP 101
+//		        54602 Villers-les-Nancy
+//			France
+//			email: elan@loria.fr
+//
+//	$Source: /CVS/aircube/elan3/doc/ElanLibNoquote/atom.eln,v $
+//	$Revision: 1.1 $
+//	$Date: 1997/03/25 16:46:58 $
+//	$Author: moreau $
+//
+
+module atom[Fss,Vars]
+/*
+   this module define some notions commons for all first order atoms
+   this is for the case, that you use two kinds of atoms built on different
+   signatures, but defined both by the module atomP
+*/
+import	global	eq[atom];
+	local	int termCommons[Fss,Vars] list[atom];
+end
+
+sort atom;
+end
+
+operators
+  global
+
+  head(@)		: ( atom ) identifier;
+  @-th subterm(@) 	: ( int atom ) term;
+
+end
+
+end

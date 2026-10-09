@@ -1,0 +1,58 @@
+module list
+
+sort Bool List ;
+end
+
+operators global
+
+  del(@)	: (List) List;
+  f(@,@,@,@)	: (Bool List List List) List;
+  cons(@,@)	: (List List) List;
+
+  equiv(@,@)	: (List List) Bool (AC);
+  and(@,@)	: (Bool Bool) Bool (AC);
+  true		: Bool;
+  false		: Bool;
+
+  nil		: List;
+  a1		: List;
+  a2		: List;
+  a3		: List;
+  a4		: List;
+  a5		: List;
+ 
+end
+
+rules for List
+	x,y,z : List;
+global
+[] del(cons(x,cons(y,z)))	=> f(equiv(x,y),x,y,z) end
+[] del(x)			=> x end
+[] f(true,x,y,z)		=> del(cons(y,z)) end
+[] f(false,x,y,z)		=> cons(x,del(cons(y,z))) end
+end 
+
+rules for Bool
+	b : Bool;
+	x,y,u,v : List;
+global
+[] and(b,true)			=> b end
+[] and(b,false)			=> false end
+[] and(b,b)			=> b end
+
+[] equiv(nil,nil)		=> true end
+[] equiv(cons(x,y),nil)		=> false end
+[] equiv(cons(x,y),cons(u,v))	=> and(equiv(x,u),equiv(y,v)) end
+[] equiv(x,x)			=> true end
+[] equiv(x,y)			=> false end
+end
+
+end
+
+/*
+
+del( cons(a1,cons(a2,cons(a3,nil))) )
+del( cons(a2,cons(a2,cons(a3,nil))) )
+del( cons(a3,cons(a2,cons(a3,nil))) )
+
+*/

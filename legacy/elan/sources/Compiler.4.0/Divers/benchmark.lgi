@@ -1,0 +1,15 @@
+LPL benchmark description
+  query    of sort Bool
+  result   of sort Bool
+  import   benchmark
+//  start with ()  bench-evalsym17(ten)
+  start with ()  bench-evalexp17(ten)
+//  start with ()  bench-evaltree17(ten)
+
+end
+
+/*
+bench-evalsym17(twenty)
+bench-evalexp17(twenty)
+bench-evaltree17(twenty)
+*/

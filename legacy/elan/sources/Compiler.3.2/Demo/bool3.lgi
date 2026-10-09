@@ -1,0 +1,11 @@
+LPL bool3 description
+
+
+
+  query 	of sort bool
+         	result of sort bool
+	 	import bool3 eq[Bool3]
+         	start with () start
+
+end
+

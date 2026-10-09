@@ -1,0 +1,57 @@
+module try3
+
+import global bool eq[Foo]; end
+
+sort Foo; end
+
+operators global
+  a	: Foo;
+  b	: Foo;
+  c	: Foo;
+  d	: Foo;
+  f(@)	: (Foo) Foo;
+  @(@)	: (Foo Foo) Foo;
+end
+
+stratop global
+  AB	: <Foo> builtin;
+  BC	: <Foo> builtin;
+  ABC	: <Foo> builtin;
+  ALLSOL	: <Foo> builtin;
+end
+
+rules for Foo
+x, y, z, u, uu, m	: Foo;
+global
+  [all]	f(x) => z(y(uu(x)))
+		where z:=(AB)x
+		try
+		  chooce where y:=()b if false
+		  chooce where y:=(AB)x
+		  chooce where y:=(ABC)x
+		end
+		where uu:=(AB)d
+  end 
+  [LA]  x => a end
+  [LB]  x => b end
+  [LC]  x => c end
+end 
+
+strategies for Foo
+implicit
+  [.] AB => dk(LA,LB)  end
+  [.] ABC => dk(LA,LB,LC)  end
+  [.] BC => dk(LB,LC)  end
+end
+
+strategies for Foo
+implicit
+  [.] ALLSOL => dc(all) end
+end
+
+end
+
+
+
+
+

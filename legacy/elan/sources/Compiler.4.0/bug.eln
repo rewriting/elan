@@ -1,0 +1,25 @@
+module bug
+
+import global eq[term];
+end
+
+sort term;
+end
+
+// symbols AC
+operators
+global
+    (A_Plus @ @) : 	(term term) term (AC); 
+A_Zero: term;
+a: term;
+go: term;
+end
+
+rules for term
+    x,y    : term;
+  global
+  [] go => (A_Plus a a) end
+  [] (A_Plus x y)  => A_Zero end
+end
+
+end

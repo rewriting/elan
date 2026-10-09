@@ -1,0 +1,49 @@
+DT(b_mov,D_Wait.G_Inspect.S_Empty.B_Mov.nil/true) end
+
+DT(g_pick,D_Wait.G_Inspect.S_Empty.B_Mov.nil/true) end
+
+
+
+
+try_all_DT(D_Wait.G_Inspect.S_Empty.B_Mov.nil/true) end
+try_all_DT(D_Wait.G_Inspect.S_Empty.B_Inspect.nil/true) end
+
+
+
+convert(effective_labels(possible_labels(D_Wait.G_Inspect.S_Ready.B_Mov.nil,Automata),nil)) end
+
+
+lst_trans(nil,D_Wait.G_Inspect.S_Empty.B_Mov.nil/true,D_Wait.G_Inspect.S_Empty.B_Mov.nil/true) end
+lst_trans(new(150),D_Wait.G_Inspect.S_Empty.B_Mov.nil/true,D_Wait.G_Inspect.S_Empty.B_Mov.nil/true,nil) end
+go(D_Wait.G_Inspect.S_Empty.B_Mov.nil/true,D_Wait.G_Inspect.S_Empty.B_Mov.nil/true) end
+
+lst_trans(nil,D_Wait.G_Inspect.S_Empty.B_Mov.nil/true,D_Turn_R.G_Turn_L.S_Empty.B_On_S.nil/true) end
+lst_trans(new(150),D_Wait.G_Inspect.S_Empty.B_Mov.nil/true,D_Turn_R.G_Turn_L.S_Empty.B_On_S.nil/true,nil) end
+go(D_Wait.G_Inspect.S_Empty.B_Mov.nil/true,D_Turn_R.G_Turn_L.S_Empty.B_On_S.nil/true) end
+
+
+lst_trans(nil,Far.Up.u0.nil/true,In.Down.u0.nil/true) end
+lst_trans(new(100),Far.Up.u0.nil/true,In.Down.u0.nil/true,nil) end
+go(Far.Up.u0.nil/true,In.Down.u0.nil/true) end
+
+lst_trans(nil,Far.Up.u0.nil/true,Far.Up.u0.nil/true) end
+lst_trans(new(100),Far.Up.u0.nil/true,Far.Up.u0.nil/true,nil) end
+go(Far.Up.u0.nil/true,Far.Up.u0.nil/true) end
+
+lst_trans(nil,Far.Up.u0.nil/true,In.Up.u0.nil/true) end
+lst_trans(new(100),Far.Up.u0.nil/true,In.Up.u0.nil/true,nil) end
+go(Far.Up.u0.nil/true,In.Up.u0.nil/true) end
+
+Floyd(init_DBM(size(Clocks)),0) end
+
+init_DBM(size(Clocks))[0,0] end
+
+cons_DBM(X<0^Y<=1^Y-Z<0^true,init_DBM(3))[0,0] end
+
+indexed_form([X<0^Y<=1^Y-Z<0^true,Y<0^Z-Y<=1^Y-Z<0^true]) end 
+
+init_DBM(3).set(1,1,[1,0]).get(1,1) end
+
+cons_DBM(X(0)<0^true,init_DBM(3))[0,0] end
+
+Floyd(cons_DBM(X(0)<0^X(1)<=1^X(1)-X(2)<0^true,init_DBM(3)),0)[0,0] end 

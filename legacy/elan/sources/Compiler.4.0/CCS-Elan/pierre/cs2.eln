@@ -1,0 +1,22 @@
+module cs2
+
+import identifier eq[identifier];
+end
+
+sort label equation;
+end
+
+operators 
+global
+  @: (identifier) label;
+  @ = @ : (label label) equation;
+  success : equation;
+end
+
+rules for equation
+ x,y:identifier;
+global
+  [] $x = $y => success  if $x == $y end
+end
+
+end
