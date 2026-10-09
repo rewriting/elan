@@ -464,9 +464,6 @@ transrule *newtrrule;
 struct tseq *rhs;
 termset pat1, pat2, tset_help;
 Patterms *pate1, *pate2;
-  #ifdef DEBUG3
-  if (!batch) { stout << "\n-----------------------------\nRESTRICT_STRATEGY\n"; s_in->dump(); stout << "\n"; }
-  #endif
   ss = NULL; p_ss = &ss;
   pat_in.copy(pat1);    //    pat1.setlst(pat_in.getlst());
   //stout << "PAT1 = "; pat1.dump();
@@ -487,24 +484,15 @@ Patterms *pate1, *pate2;
 	  if (s_help) {
 	    AALLOS(*p_ssl,struct strlist);
 	    if (is_restricted) {
-	      #ifdef DEBUG3
-	      if (!batch) { stout << "Add \n"; s_help->dump(); stout << "\n"; }
-	      #endif
               (*p_ssl)->str = s_help; 
 	      pat2.unione(tset_help); }  // ------ c'est pas bien
 	    else {
-              #ifdef DEBUG3
-              if (!batch) { stout << "add \n"; slist->str->dump(); stout << "\n"; }
-              #endif
 	      (*p_ssl)->str = slist->str; }
 	    p_ssl = &((*p_ssl)->next);
           }
 	}
 	*p_ssl = NULL;
         // ***
-        #ifdef DEBUG2
-        if (!batch) { stout << " AFTER "; s->dump(); stout << "\n"; }
-        #endif
 
 // stout << ":::\n ";
 //        if ( (s_changed && ssl) || ((!s_changed) && s->substrlist()) ) {
@@ -548,9 +536,6 @@ Patterms *pate1, *pate2;
 	    tr->rule->getr(varn, l, r, name, wh,
 			   rhs,
 			   whichmatch, rlabel);
-            #ifdef DEBUG2
-            if (!batch) { stout << "ORIG RULE "<< tr->rule << "\n" ; tr->rule->dump(0); stout << "........................\n"; }
-            #endif
 	    //tr->rule->dump(5);
 	    NNEW(cpattrn,term);
 	    pattrn->copy(*cpattrn);
@@ -558,30 +543,15 @@ Patterms *pate1, *pate2;
 //            stout << "PATTERN + CPATTRN "; pattrn->write(stout); cpattrn->write(stout); stout << "\n"; pattrn->dump(); cpattrn->dump(); stout << "\n";
 //            #endif
 
-            #ifdef DEBUG3
-            if (!batch) { stout << "PATTRN++ "; pattrn->write(stout); stout << "\n"; }
-            #endif
 
 	    cpattrn->shift_vars(varn);
 
-            #ifdef DEBUG3
-            if (!batch) { stout << "CPATTRN++ "; cpattrn->write(stout); stout << "\n";}
-
-            if (!batch) { stout << "substarray LEN = " << varn << "+" 
-                  << pattrn_varn << " = " << varn+pattrn_varn 
-                  << "\n"; }
-            #endif
 
 
 
 	    AALLOSS(substarray, varn+pattrn_varn, term); vis = NULL;
 	    for(j=0; j < varn+pattrn_varn; j++) substarray[j] = nullterm;
 
-            #ifdef BLABLA
-            if (!batch) { stout << "UNIFY(" << varn+pattrn_varn << ")\n"; 
-            l.write(stout); 
-            stout << "::"; cpattrn->write(stout); stout << "\n"; }
-            #endif
 
 	    if (
 		(ok1 = l.unify(*cpattrn,substarray,varn+pattrn_varn,vis)) 
@@ -589,26 +559,13 @@ Patterms *pate1, *pate2;
 //		&& nofalse(wh)
 //
 		) {
-              #ifdef DEBUG3
-	      if (!batch) { stout << "\n"; l.write(stout); stout << "::"; cpattrn->write(stout); stout << "==";
-	      stout << "UNIFY " << ok1 << "\n"; }
-              #endif
 	      // rhs
 	      NNEW(new_rhs,term); NNEW(new_rhs1,term);
-              #ifdef DEBUG3
-	      if (!batch) { stout << "RHS1 = "; // r.write(stout); stout << "\n"; r.dump();}
-              #endif
                           //toto------------->              
               r.copy(*new_rhs1);
 	      new_rhs1->copyinstall(true,*new_rhs,substarray);
 
-	      #ifdef DEBUG3
-              if (!batch) { stout << "RHS2 = "; new_rhs->write(stout); stout << "\n"; }
-              #endif
               new_rhs->leave_constructors(new_rhs->varnumbers()+1);
-              #ifdef DEBUG3
-	      if (!batch) { stout << "RHS3 = "; new_rhs->write(stout); stout << "\n"; new_rhs->dump();}
-              #endif
 
 	      //stout << "before add: "; pat2.dump();
               //new_rhs->write(stout); stout << ".." << varn+pattrn_varn << "\n";
@@ -630,9 +587,6 @@ Patterms *pate1, *pate2;
 		//stout << "S_CHANGED = " << s_changed << "\n";
 		// stout << "\nREDEX[" << phase << "] "; cpattrn->write(stout);  stout << "\n";
 		AALLOS(newtrrule,transrule);
-                #ifdef DEBUG2
-                if (!batch) { stout << "BEFORE COPY-INSTALL "<< tr->rule << " \n" ; tr->rule->dump(0); stout << "........................\n";}
-                #endif
 		tr->rule->copyinstall(newtrrule,substarray,varn+pattrn_varn
                 , pate1
                 );
@@ -642,9 +596,6 @@ Patterms *pate1, *pate2;
                                    /*varn+pattrn_varn,*/
                                    new_rhs->termtype().typeval()); }
 
-                #ifdef DEBUG2
-                if (!batch) { stout << "AFTER COPY-INSTALL "<< newtrrule  << "\n" ; newtrrule->dump(0); stout << "........................\n";}
-                #endif
 		rindex = newtrrule->addpartrule(f,partial_index);
 		if (!flowcheckrule(f,newtrrule)) {
 		  f->owarn("\nint.error in search_matchable_rule\n",NULL);
@@ -665,9 +616,6 @@ Patterms *pate1, *pate2;
 
                 rule_comes_from[rindex] = orig_rule;
 
-                #ifdef DEBUG2
-                if (!batch) { stout << "ORIG AFTER COPY-INSTALL "<< tr->rule << " \n" ; tr->rule->dump(0); stout << "........................\n";}
-                #endif
 //{int jj; for (jj = 0; jj < varn+pattrn_varn; jj++) {
 //    stout << "sarray " << &(substarray[jj]) << " "; substarray[jj].write(stout); 
 //    stout << "\n"; }
@@ -813,9 +761,6 @@ strategy *fail_strategy;
       tr->rule->getr(varn, l, r, name, wh,
 	       rhs,
 	       whichmatch, rlabel);
-      #ifdef BLABLA
-      if (!batch) { stout << "\n\nCONSIDERED RULE "; tr->rule->dump(1); }
-      #endif
       if (tr->rule->no_false()) {
 	for(; wh; wh=wh->next) {
 	  if (wh->leftvarn != IFVARN && wh->strateg != NULL &&
@@ -842,15 +787,6 @@ strategy *fail_strategy;
 
 	    t_in.single(cwhterm,/*varn,*/-1);  // deleted by ~tset()
 
-            #ifdef BLABLA
-	    if (!batch) {
-	    stout << "---------------------------------------------------\n";
-	    stout << "REDEX in the rule\n"; tr->rule->dump(0); stout <<"\n";
-	    stout << "STRAT_IN:"; (*(wh->strateg))->dump();  stout << "\n";
- 	    stout << "TSET_IN : "; t_in.dump(); stout << "\n";
-	    stout << "---------------------------------------------------\n";
-            }
-	    #endif
 
 	    if (peval_compression) {
 	      Pate_in.init(); Pate_out.init();

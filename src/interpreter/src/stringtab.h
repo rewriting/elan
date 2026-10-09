@@ -45,19 +45,11 @@
 #endif
 */
 
-#ifdef GCMEM
-#include "gc_cpp.h"
-#endif
 
-#ifdef EARLEY
 class ochstream;
-#endif
 
 
 class stringtab
-#ifdef GCMEM
-: public gc
-#endif
  {
  private:
   int tsize,strin;          // size  of table, actual number of strings in it
@@ -77,9 +69,7 @@ class stringtab
 
   char *ide(int n);                   // give string of number n
   void stringtab::dump(char *name); //dump of tab with name
-#ifdef EARLEY
   void stringtab::earleyDump(ochstream&,char *name); //dump of tab with name
-#endif
   void stringtab::write(char *,char *); //write table values
   int stringtab::addstr(char *s);   // add string s into the table and return 
                                     // his number

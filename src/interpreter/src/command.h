@@ -29,7 +29,6 @@
 #ifndef __command_h
 #define __command_h
 
-#ifndef RUNTIME // begin RUNTIME
 #include "commondefs.h"
 #include "acmatchdefs.h"
 #include "codes.h"
@@ -39,9 +38,6 @@
 #define BATCHSIZE 10
 
 class stck
-#ifdef GCMEM
-: public gc
-#endif
 {
   private:
   int topp;
@@ -99,7 +95,6 @@ extern struct sgrammrule *ax1added;
 extern lexem Squery,Sresult;
 extern int is_printterm;
 
-#endif // end RUNTIME
 extern char *SPEC_I;
 extern int SPEC_N;
 

@@ -29,9 +29,7 @@
 #include "module.h"
 #include "compiledefs.h"
 #include "strategy.h"
-#ifdef EARLEY
 extern lexem sourcetype;
-#endif
 
 void genFail(FILE *ff,int deep)
 {
@@ -74,7 +72,6 @@ void genfsymtab(FILE *ff)
   }
   fprintf(ff,"{0}};\n\n");
 
-#ifdef EARLEY
   if(earley_analyser) {
     // arity
     fprintf(ff,"int arity[] = {");
@@ -91,7 +88,6 @@ void genfsymtab(FILE *ff)
     }
     fprintf(ff,"0};\n\n");
   }
-#endif
 
 }
 
@@ -193,7 +189,6 @@ static void genfreelist(FILE *ff,char *prefix,int a)
   fprintf(ff,"TERMSTR(term%d,%d);\n",a,a);
 }
 
-#ifdef EARLEY
 
 //extern int earleyPrettyDumpGrammarRule(ochstream &stout,struct sgrammrule *gr);
 void genFunTab(FILE *ff)
@@ -259,7 +254,6 @@ void genFunTab(FILE *ff)
     }
   fprintf(ff,"0};\n\n");
 }
-#endif
 
 #define HEADER1(f) \
   fprintf(ff,"\nstruct term *fun%d(\n#ifdef __cplusplus\n",f); \
@@ -397,10 +391,8 @@ void genpreambule(FILE *ff)
   genstratdeclar(ff);
   geninlines(ff);
   genlabelswitch(ff);
-#ifdef EARLEY
   if(earley_analyser)
     genFunTab(ff);
-#endif
 }
 
 
@@ -423,14 +415,10 @@ void genmaintfile(FILE *ff,term maint,int mainstrategy)
   if (Bins) fprintf(ff,"\n#define BINS %d\n",Bins);
 
   fprintf(ff,"#include\"RTCommons.h\"\n\n");
-#ifdef EARLEY
   if(earley_analyser)
     fprintf(ff,"#include\"runtimeInit.h\"\n\n");
   else
     genconstants(ff,"extern ");
-#else
-  genconstants(ff,"extern ");
-#endif
   genstratdeclar(ff);
   fprintf(ff,"extern int nofreductions,nofsreductions,nonamed_tried,nofr2,named_tried,number_of_fail;\n"); //nofrt,nofr2,nofsrt,noff
 
@@ -472,31 +460,23 @@ void genmaintfile(FILE *ff,term maint,int mainstrategy)
   if (!determLink)
     fprintf(ff,"  backTrackInit();\n");
 
-#ifdef EARLEY
   if(earley_analyser) {
     fprintf(ff,"  tabofidentInit(char_tabofident,char_tabofident_size);\n");
     fprintf(ff,"  typetInit(char_typet,char_typet_size);\n");
     fprintf(ff,"  grammarInit(grammar,GRAMMAR_SIZE);\n");
   }
-#endif
 
   fprintf(ff,"  timestart();\n");
   if (!batch) {
-#ifdef EARLEY
     if(earley_analyser)
       fprintf(ff,"  fprintf(%s,\"Query: \\n\");\n",OUTPUTS);
     else {
       fprintf(ff,"  fprintf(%s,\"\\176 [main] start:\\176\");\n",OUTPUTS);
       fprintf(ff,"  fflush(%s);\n",OUTPUTS);
   }
-#else
-  fprintf(ff,"  fprintf(%s,\"\\176 [main] start:\\176\");\n",OUTPUTS);
-  fprintf(ff,"  fflush(%s);\n",OUTPUTS);
-#endif
   }
   if (!determLink)
     fprintf(ff,"  if (! setChoicePoint()) {\n");
-#ifdef EARLEY
   if(earley_analyser) {
     fprintf(ff,"  if(!earleyCall(stdin,SOURCETYPE))\n");
     fprintf(ff,"  {fprintf(%s,\"Earley Error\\n\") ; exit(1);}\n",OUTPUTS);
@@ -504,9 +484,6 @@ void genmaintfile(FILE *ff,term maint,int mainstrategy)
   }
   else
     fprintf(ff,"  pp=mainterm();\n");
-#else
-  fprintf(ff,"  pp=mainterm();\n");
-#endif
   if ( ss == NULL) {
     if (mainstrategy != -1) {
       fprintf(stderr,"[warning] main strategy was not defined \t!\n");
@@ -519,7 +496,6 @@ void genmaintfile(FILE *ff,term maint,int mainstrategy)
   }
   if(!earley_analyser)
     bis = maint.isofbuiltintype();
-#ifdef EARLEY
   if(earley_analyser)
     {
       //stout << " builin?=" << ISBUILTIN(sourcetype) << "\n";
@@ -533,11 +509,6 @@ void genmaintfile(FILE *ff,term maint,int mainstrategy)
       fprintf(ff,"  fprintf(stdout,\"\\176\");\n");
       fprintf(ff,"  fflush(stdout);\n");
     }
-#else
-  fprintf(ff,"  termwrite(pp,%d);\n",bis);
-  fprintf(ff,"  fprintf(stdout,\"\\176\");\n");
-  fprintf(ff,"  fflush(stdout);\n");
-#endif
   if (!bis) fprintf(ff,"  freeterm(pp);\n");
   if (!determLink) {
   if (trace && !batch) {

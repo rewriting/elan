@@ -41,34 +41,6 @@
 
 class transrule;
 
-#ifdef MARIANS ////////////////////////////// JUNK
-class matchtree;
-struct matchfslist {
-  unsigned fsym;
-  term *rightside;          // assigned iff tree == NULL
-  matchtree *tree;
-  struct matchfslist *next;
-};
-
-class matchtree {
-#ifdef GCMEM
-: public gc
-#endif
- private:
-  unsigned maxvar,fathervar,fathersubi;
-//  unsigned vartoswitch;
-  struct matchfslist *sub;
-
-  merge(unsigned skipUntilFather, matchtree *mt);
- public:
-  matchtree();
-  matchtree(unsigned oldmaxvar, unsigned fath, unsigned subti, term t);
-  addterm(term t);
-  closure();
-  gen(FILE *f);
-  dump();
-};
-#endif
 
 /*
    something imported from my many-to-one matching code (file modrtu.c)
@@ -135,9 +107,7 @@ extern void genfunbody(FILE *ff,struct rtnode *rrt,int isrecursive);
 extern void genStratAppBody(FILE *ff,struct rtnode *rrt,int lab,int dontcare,
 	int nofree);
 
-#ifdef EARLEY
 extern void genFunTab(FILE *ff);
-#endif
 
 extern void genfsymtab(FILE *ff);
 extern void genpreambule(FILE *ff);

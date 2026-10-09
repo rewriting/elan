@@ -100,12 +100,7 @@ void ichstream::commonopen(char *name,int ftype)
 #include <errno.h>
 #include <sys/errno.h>
 
-#ifdef SUN
-#include <errno.h>
 #include <sys/errno.h>
-#else
-#include <sys/errno.h>
-#endif
 
 char *ichstream::readstring()
 {

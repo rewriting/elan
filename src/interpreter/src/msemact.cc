@@ -34,9 +34,6 @@
 #include "commondefs.h"
 #include "termdefs.h"
 #include "module.h"
-#ifdef VISIGRAPH
-#include "visigraph.h"
-#endif
 #include "strategy.h"
 #include "codes.h"
  
@@ -61,10 +58,8 @@ extern lexem Sif,Swhere,Send,Sstart;            // some usefull reserved words
  struct nvlist *nestedvartabi=NULL;                          // a stack of var declarations (for the case of nested declarations using 
 						//				nested "rules" construction)
  struct sgrammrule *vartab[MAXNOFVAR];    // grammar rules for variables
-#ifdef PEM
  struct sgrammrule *dollar_vartab[MAXNOFVAR];// copie de vartab pour les
                                      //regles de variable avec un dollar
-#endif
  lexem actvtab[MAXNOFVAR];                // names of variables
  int actvarrename[MAXNOFVAR];             // table used during the renaming of variables inside RW-rules
  int actvarnum;                           // the real number of variables inside an RW-rule
@@ -96,7 +91,6 @@ extern lexem Sif,Swhere,Send,Sstart;            // some usefull reserved words
  int stratmoduli_fromi = -1;              // X of str* module
  int stratmoduli_toi = -1;                // Y
  term dstr_rs;                            // right-hand side of a dstr rule
-#ifdef ANYS
  int is_explimpl = 0;            // explode-implode module should be loaded
  int ignore = 0;                 // ignore deeper levels
  int explimpl_index = 0;         //  file counter
@@ -106,14 +100,11 @@ extern lexem Sif,Swhere,Send,Sstart;            // some usefull reserved words
  int in_strategies = 0;
  int in_stratop = 0;
  int strattype = -1;
-#endif
-#ifdef SYMBS 
  int is_symbappl = 0;
  #define MAXSYMBAPPL             100
  int symbappli = 0;
  struct ilist *symbappl[MAXSYMBAPPL];
  int symbappl_index = 0;         // file counter; 
-#endif
 int withrhs = 0;
 struct tseq *act_rhs;
 int  pattype = 0;
@@ -139,21 +130,6 @@ int wherecount = 0;
 extern int msyntan(lstream &,int,void (*ltol)(lexem l1,lexem &l2));    // parser for an elan (.eln) module
 extern struct WHEREbranches *parse_try(lstream *f);
 
-#ifdef VISIGRAPH
-void add_depend();
-
-void
-add_depend(char *impmodule)
-{
-  strcpy(importeur,actmodname[stacki]);
-  strcpy(calledmod,impmodule);
-  if(!import.member(impmodule))
-    node_exist=0;
-  else
-    node_exist=1;
-  add_dependance();
-}
-#endif
 
 int stratmoduli(int x, int y)
 {
@@ -709,47 +685,6 @@ struct tseq *ts;
    f->fulex(le);
    brlist = NULL; brl = &brlist;
    AALLOS(ts, struct tseq);
-#ifdef NO_MORE_SWITCH
-   if (le == Sswitch || le == Swhere || le == Sif) {
-     ts->is_case = 1;
-
-     ts->seq = parse_seq(f);
-     f->fulex(le); 
-     if (le != Sswitch) { 
-       f->owarn(" [fatal] switch expected\n",NULL); failexit(); }
-     ILEX(le);
-
-     while (le == Scase) {
-       while (*brl) brl = &((*brl)->next);  // 2x
-       AALLOS(*brl, struct branch); br = *brl; br->next = NULL;
-       ILEX(le);
-//CSBug       esemactinit();
-       resan = grstack[stacki].earleycall(f,booltype,endofinco);
-       if (! resan) { 
-         f->owarn(" [fatal] error in parse_tseq expected\n",NULL); failexit(); }
-       br->test.popt();
-       f->fulex(le);
-
-       if (le != Sthen) { 
-         f->owarn(" [fatal] then expected\n",NULL); failexit(); }
-       ILEX(le);
-       br->tseq = parse_tseq(f);
-       f->fulex(le);
-     } 
-     if (le == Sotherwise) {
-       while (*brl) brl = &((*brl)->next);  // 2x
-       AALLOS(*brl, struct branch); br = *brl; br->next = NULL;
-       ILEX(le);
-       br->test = trueterm;
-       br->tseq = parse_tseq(f);
-       f->fulex(le);
-     }
-     if (le != Send) { 
-       f->owarn(" [fatal] end expected\n",NULL); failexit(); }
-     ILEX(le);
-     ts->more_branches.brlist = brlist;
-   } else 
-#endif   //NO_MORE_SWITCH
      {
      ts->is_case = 0;
      NNEW(ts->u.one_branch.result, term);
@@ -937,7 +872,6 @@ int var_was_renamed(int v)
   return(actvarrename[v] != NORENAME);
 }
 
-#ifdef SYMBS
 int int_arg(struct chlist *actarglst)
 {
  char *p;
@@ -948,7 +882,6 @@ int int_arg(struct chlist *actarglst)
    else p++;
  return 1;
 }
-#endif
 
 void printargs(struct chlist *args)
 {
@@ -1009,7 +942,6 @@ int impmod, in_stratmod;
    divideonargs(name,actargmodname,&actarglist);
    // printargs(actarglist);
    in_stratmoduli = ISSTRATSIG(actargmodname); //(ISSTRAT1MOD(actargmodname) || ISSTRAT2MOD(actargmodname));
-#ifdef SYMBS
    if ISSYMBOLMOD(actargmodname) {
      struct ilist **rr;
      struct chlist *arglist = actarglist;
@@ -1022,11 +954,8 @@ int impmod, in_stratmod;
        arglist = arglist->next; }
      *rr = NULL; symbappli++;
    }
-#endif
-#ifdef ANYS
    if ISANYMOD(actargmodname) {
      anys[anysi++] = typet.addstr(actarglist->s); }
-#endif
    if (ISSTRAT1MOD(actargmodname) || ISSTRAT2MOD(actargmodname)) { 
      struct chlist *p;
      addit = 1;
@@ -1069,9 +998,6 @@ void importmod_inf(char *impmodule,lstream *f, int supermodule, int rinf)
 {
   int xx=0; /* initialised to avoid warning */
   if (supermodule != -1) { xx = impmoduli; impmoduli= supermodule; }
-#ifdef VISIGRAPH
-	  add_depend(impmodule);
-#endif
 	if (! import.member(impmodule)) {
             stacki++;
             readmodules(f,impmodule);
@@ -1101,7 +1027,6 @@ void importmod_inf(char *impmodule,lstream *f, int supermodule, int rinf)
 		  *importglobgr[import.posid],RGLOP,
 		  rinf|RIMPORTBIT); 
 	  // grstack[stacki].dump();
-#ifdef ANYS
 	    if (is_explimpl) {
 	      char mname[STRLEN];
 	      is_explimpl = 0;
@@ -1109,8 +1034,6 @@ void importmod_inf(char *impmodule,lstream *f, int supermodule, int rinf)
 	      importmod(mname,f,-1);
 	      system("/bin/rm -f explimpl*.eln");
 	    }
-#endif
-#ifdef SYMBS
 	    if (is_symbappl) {
 	      char mname[STRLEN];
 	      is_symbappl = 0;
@@ -1118,7 +1041,6 @@ void importmod_inf(char *impmodule,lstream *f, int supermodule, int rinf)
 	      importmod(mname,f,-1);
 	      system("/bin/rm -f symbappl*.eln");
 	    }
-#endif
 	  }
   if (supermodule != -1) { impmoduli = xx; }
 }
@@ -1630,10 +1552,8 @@ int semact1(int n,lexem l,lstream *f)
 //          grstack[stacki].addrw(actvtab[vartabi]);
           vartab[vartabi]= grstack[stacki].addvarrule(actvartype,
                                  actvtab[vartabi],VARSPRI,RVAR,-vartabi-1);
-#ifdef PEM
 	  dollar_vartab[vartabi] = grstack[stacki].adddollarvarrule(actvartype,
                                  actvtab[vartabi],VARSPRI,RVAR,-vartabi-1);
-#endif
        }
        break;
   case 151:          // end of strategy rule
@@ -1655,9 +1575,7 @@ int semact1(int n,lexem l,lstream *f)
        while( actvtabi > nestedvartabi->i) {
           actvtabi--;
           grstack[stacki].deleterule(vartab[actvtabi]);
-#ifdef PEM
           grstack[stacki].deleterule(dollar_vartab[actvtabi]);
-#endif
          }
        actvtabi = vartabi = nestedvartabi->i;
        actruletype = nestedvartabi->ruletype;
@@ -1754,7 +1672,6 @@ int semact1(int n,lexem l,lstream *f)
 	    graphout << "\n";
 	  graphout.flush(); }
 	}
-#ifdef ANYS
 	if (ignore == 0 && grstack[stacki].anysymbol_exists()) {
 	  char mname[STRLEN], fname[STRLEN];
 	  is_explimpl = 1;
@@ -1764,8 +1681,6 @@ int semact1(int n,lexem l,lstream *f)
 	  grstack[stacki].any_code(mname,fname, actmodname[stacki]); 
 	  ignore--;
 	}
-#endif
-#ifdef SYMBS
 	if (grstack[stacki].symbappl_exists()) {
 	  char mname[STRLEN], fname[STRLEN];
 	  is_symbappl = 1;
@@ -1773,7 +1688,6 @@ int semact1(int n,lexem l,lstream *f)
 	  sprintf(fname,"symbappl%d.eln",symbappl_index);
 	  grstack[stacki].symbappl_code(mname,fname, actmodname[stacki]); 
 	}
-#endif
 	break;
   case 145:				// code handl
         actcode=l.numval();
@@ -2185,15 +2099,12 @@ int semact1(int n,lexem l,lstream *f)
 	     actmodname[stacki]," doesn't correspond\n",NULL);
 	     return(HANDERRORIM);
           }
-#ifdef SYMBS
           if (int_arg(actarglist)) {
             // stout << "passujem " << atoi(actarglist->s) << " ako int argument \n";
 	    le.crnumlex( atoi(actarglist->s) );
 	    bf.put(le);
           } else 
-#endif
            {
-#ifdef ANYS         // cutting args into list of lexems.... idiotic code
           char ss[STRLEN];
             int  ii, jj;
             int chr;
@@ -2213,10 +2124,6 @@ int semact1(int n,lexem l,lstream *f)
              ii++;
             }
             if (jj) { ss[jj++] = 0; le.cridlex(&(ss[0])); bf.put(le); jj = 0; }
-#else
-	  le.cridlex(actarglist->s);
-	  bf.put(le);
-#endif
           }
 	  f->addmac(l.idval(),bf);
           actarglist=actarglist->next; 
@@ -2388,51 +2295,5 @@ int r;
 
 
 
-#ifdef HISTORY
-       int locvarrename[MAXNOFVAR];
-       int intersectionvarrename[MAXNOFVAR];
-       int intersectionvarrename1[MAXNOFVAR];
-       int i;
-
-       struct WHEREbranches *brlist = whs->wherebranch_list;
-       for(i=0; i<MAXNOFVAR; i++)  {
-         intersectionvarrename1[i] = locvarrename[i] = actvarrename[i];
-         intersectionvarrename[i] = 1; }
-
-       while (brlist) {
-       if (fcheck_wlist(f,trrule,brlist->wherebranch,r) != NORMCONT) return(ERRORIM);
-       for(i=0; i<MAXNOFVAR; i++) {
-         if (actvarrename[i] != NORENAME) {
-           intersectionvarrename[i] = intersectionvarrename[i]; 
-           intersectionvarrename1[i] = actvarrename[i]; 
-         }
-         else
-           intersectionvarrename[i] = 0; }
-         for(i=0; i<MAXNOFVAR; i++) actvarrename[i] = locvarrename[i];        
-         brlist=brlist->next;
-       }
-       for(i=0; i<MAXNOFVAR; i++) {
-         if (intersectionvarrename[i]) {
-          // stout << " COMMON VARIABLE VAR " << i << "\n";
-          actvarrename[i] = intersectionvarrename1[i]; }
-       }
---HISTORY
-#endif
 
 
-#ifdef WASDONE
-      actvarnum = save_actvarnum;
-
-       save_RENAME_ALL_VARS_MODE = RENAME_ALL_VARS; // global programming :-)))
-       RENAME_ALL_VARS = 1;
-       for(brlist = whs->wherebranch_list; brlist; brlist=brlist->next) {
-        if (fcheck_wlist(f,trrule,brlist->wherebranch,noterm) != NORMCONT) return(ERRORIM);
-        if (fcheck_wlist(f,trrule,whs->next,r) != NORMCONT) return(ERRORIM);
-       }
-       RENAME_ALL_VARS = save_RENAME_ALL_VARS_MODE;
-
-for(i=0; i<MAXNOFVAR; i++)  { stout << actvarrename[i];} stout <<"\n";
-stout << "\nAFTER \n";
-trrule->dump(0);
-
-#endif

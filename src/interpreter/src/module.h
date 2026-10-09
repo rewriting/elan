@@ -33,7 +33,6 @@
 
 extern stringtab processtab;
 extern struct processdatalist *processlists[];
-#ifndef RUNTIME
 #include "rtdatas.h"
 
 #define SIZE_rulecashstrings  1024
@@ -89,5 +88,4 @@ extern void modinit();
 extern int all_modules_loaded;
 extern char *specsource,*specname,*modname;
 
-#endif
 #endif

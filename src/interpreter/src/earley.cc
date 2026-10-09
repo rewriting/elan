@@ -35,10 +35,8 @@ Parser is realised by two main procedures  "earley" for the first pass and
 
 
 #include "commondefs.h"
-#ifndef RUNTIME // begin RUNTIME
 #include "termdefs.h"	// because of earleycall(...)
 #include "module.h"	// because of prety conflict warning message
-#endif // end RUNTIME
 
 int memnew = 0;
 int memallo = 0;
@@ -206,7 +204,6 @@ int grammar::addtosit(struct sgrammrule *rule, int position, int i)
 
 }
 
-#ifndef RUNTIME // begin RUNTIME
 void grammar::pretysitldump(stringtab *types,struct sitlist *p)
                                               // pretty dump of list of situations
 {
@@ -269,7 +266,6 @@ void grammar::dumpsitset( int i)
   stout << "\n[sitsetdump] end of dump\n\n";
 }
 
-#endif // end RUNTIME
 
 static unsigned isadded[NNONTERMINALS],addedt[NNONTERMINALS];
 
@@ -287,10 +283,8 @@ void grammar::completesit()
     while (p!=NULL) {
       l= p->rule->rside[p->pos];
       if (l.nonterminal()) {
-#ifdef PEM
 	//	sterr <<"completesit : l.typeval="<<l.typeval()<<"\n";
 	//	sterr <<"\t l.typeval="<<typet.ide(l.typeval())<<"\n";
-#endif 
 	i=l.typeval();
 	j=isadded[i];
 	if (j>=addedti || addedt[j] != i) { //not yet added, I have to do it
@@ -360,9 +354,7 @@ void grammar::solveconflicts(struct sitlist *&sis)
   lexem ll1,ll2;
 
   s1 = &sis;
-#ifdef PEM
   //  sterr << "solve conflicts\n";
-#endif
   while (*s1!=NULL) {
 cont1:
     n1 = (*s1)->rule; p1 = ((*s1)->rule->priority & RPRIORITYMSK);
@@ -371,7 +363,6 @@ cont1:
       n2 = (*s2)->rule;
       p2 = (*s2)->rule->priority & RPRIORITYMSK;
       if ( (*s1)->i == (*s2)->i ) {
-#ifdef PEM
 // Il faut comparer les profils des operateurs
 // on suppose qu ils sont egaux
      ok=1;
@@ -412,13 +403,6 @@ cont1:
 	  ss = *s2; *s2 = ss->next; CFRE(ss); 
 	  continue;
 	}
-#else
-        if ( n1->rulenumber == n2->rulenumber ) {
-	  ss = *s2; *s2 = ss->next; CFRE(ss); 
-	  continue;
-	}
-#endif
-#ifdef PEM
 	//cout << "p1=" << p1 << "\t" << "p2=" << p2 << "\n";
 	//dumpgrrule(n1);
 	//dumpgrrule(n2);
@@ -426,7 +410,6 @@ cont1:
 	//sterr << "\t";writegrrule(sterr,n1,&typet);
 	//sterr << "\t";writegrrule(sterr,n2,&typet);
 	//sterr << "end compare\n";
-#endif
 // Marian's version
         if ( p1 != RNOPRIOR && p2 != RNOPRIOR ) {
 // I think this is a mistake (PEM)

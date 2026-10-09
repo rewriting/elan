@@ -90,11 +90,7 @@ int stringtab::addstr(char *s)
     if (strin+1 >= tsize) {
       sterr << "[addstr] ERROR, string tab overflowed over " << tsize
            << "!!! \t !!!!!!!!!\n";
-#ifdef RUNTIME
-      exit(0);
-#else
       failexit();
-#endif
     }
   strin++;
   id[posid] = mstrdup(s);
@@ -128,7 +124,6 @@ void stringtab::dump(char *name)
   stout << ");\n";
 }
 
-#ifdef EARLEY
 void stringtab::earleyDump(ochstream &stout,char *name)
 {
   int i;
@@ -146,7 +141,6 @@ void stringtab::earleyDump(ochstream &stout,char *name)
   // #define toto_size 500
   stout << "#define " << name << "_" << "size " << tsize << "\n"; 
 }
-#endif
 
 void stringtab::forinit()
 {

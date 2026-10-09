@@ -353,13 +353,6 @@ void transrule::Adump(ochstream &af,int ods)
   if (rhs) {
     Aswitchdump(af,rhs);
   } else {
-#ifdef HISTORY
-    af << "NOSWITCH(";
-    wl = wheres; Awherelisdump(af,wl);
-    af << ",\n";
-    rightside.Awrite(af);
-    af << ")\n\n";
-#endif
     rightside.Awrite(af);
     af << ",\n";
     wl = wheres; Awherelisdump(af,wl);
@@ -369,21 +362,6 @@ void transrule::Adump(ochstream &af,int ods)
 
 void trsystem::Adump_tabs(ochstream &af)
 {
-#ifdef JUNK_1006 
-  af << "RuleNames" << "\n";
-  for(rulenames->forinit(); rulenames->forcond(); rulenames->fornext()) {
-    if (getrules(rulenames->forindex()) != NULL) {
-      af << rulenames->forindex() << ":" 
-	 << "\"" << rulenames->ide(rulenames->forindex())
-	 << "\"" << ".\n"; }
-    else {
-      stout << "NO RULES for rulename " << rulenames->forindex() << " "
-	    << rulenames->ide(rulenames->forindex()) << "\n";
-    }
-  }
-  af << "nil\n";
-  af << "end\n\n";
-#endif
   rulenames->Adump(af,"RuleNames");
   strategynames_defs->Adump(af,"StrategyNames");
 //  strategynames_refs->Adump(af,"strategynames");
@@ -413,23 +391,19 @@ void trsystem::Adump(ochstream &af)
   strategy *sl;
   struct tseq *rhs;
   int i;
-#ifdef COMMAND
   int n,nameind;
   term l,r;
   struct wherelist *wh;
   int whichmatch;
     term rlabel;
-#endif
 
   for (i=0; i<MAXNOFTRN; i++) {
     tl= rules[i];
     while (tl!=NULL) {
 
-#ifdef COMMAND
     tl->rule->getr(n,l,r,nameind,wh,
 		   rhs,
 		   whichmatch,rlabel);
-#endif
       af << "/*" << i << " " << rulenames->ide(i) << "*/";
       tl->rule->Adump(af,0);
       af << " end\n"; // af << ".\n";
@@ -440,11 +414,9 @@ void trsystem::Adump(ochstream &af)
   for (i=0; i<MAXNFSYM; i++) {
     tl= nnrules[i]; 
     while (tl!=NULL) {
-#ifdef COMMAND
     tl->rule->getr(n,l,r,nameind,wh,
 		   rhs,
 		   whichmatch,rlabel);
-#endif
       tl->rule->Adump(af,0);
       af << " end\n"; // af << ".\n";
       tl=tl->next;

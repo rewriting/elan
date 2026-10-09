@@ -30,21 +30,14 @@
 #include "module.h"
 #include "compiledefs.h"
 #include "strategy.h"
-#ifdef COMMAND
 #include <string.h>
 #include "command.h"
-#endif
 
 static transrule *actcompiledrule;
-#ifdef STORM
-extern int acmatch_with_storm;
-#endif
 int nomalisation_index = 0;
 
-#ifdef PEM
 // Pour afficher un message une seule fois
 static int flag_warning=0;
-#endif
 
 int builtintype(int typeofstr)
 { lexem lle;
@@ -118,13 +111,7 @@ transrule::transrule(int varn,term left,term right, int module, int info,
 /* in Marian's original version the following line was missing BUG-3 */
   nameindex = nameindx;
 /* end of BUG-3 */
-#ifdef COMMAND
   breaked = 0;
-#endif
-#ifdef STORM
-  if(acmatch_with_storm)
-    leftside.netInsert();
-#endif
 }
 
 transrule::~transrule()
@@ -403,9 +390,7 @@ strategy::strategy()
   typeofstrategy = -1; // unknown
   next = NULL;
   u.cr.nm = NULL;
-#ifdef COMMAND
   breaked = 0;
-#endif
 }
 
 void strategy::appendrname(int nam)
@@ -708,28 +693,6 @@ void strategy::compile(FILE *ff,int deep, int typeofstr)
     switch (st->strname) {
     case STRNAMEDONTCARE : case STRNAMEDONTKNOW :
       // avec many-to-one matching
-#ifdef OLDHISTORY //------------------------
-      if (Bins && builtintype(typeofst)) {
-         fprintf(ff,"if(isTagged(v1)) {\n");
-         fprintf(ff, "/* RULES 1=>1 */\n"); 
- 	 genRulesAppInStrat
-	   (ff,deep,st->u.cr.nm,st->strname==STRNAMEDONTCARE,lab,typeofstr,false,getmodule());
-         fprintf(ff,"} else {\n");
-         fprintf(ff, "/* END OF RULES 1=>1 */\n"); 
-	 //stout << "-------\n"; 
-          fflush(ff);
-         fprintf(ff, "/* RULES fffffffff 1=>1 */\n"); 
-	 genRulesAppInStrat
-	   (ff,deep,st->u.cr.nm,st->strname==STRNAMEDONTCARE,lab,typeofstr,true,getmodule());
-         fprintf(ff,"}\n");
-	 fprintf(ff,"/* END OF RULES fffffffff 1=>1 */\n");
-          fflush(ff);
-       } else { // classical rules
-	genRulesAppInStrat
-	  (ff,deep,st->u.cr.nm,st->strname==STRNAMEDONTCARE,
-	   lab,typeofstr,0,getmodule());
-       }
-#endif
       /*
        * Filtrage des regles nommees
        */
@@ -1163,19 +1126,6 @@ int strategy::simpleconform(int n, int warn, int typ)
 	  //stout << "RULE = " << ss;
 	  //rindx = trrules.trruleindex(ss);
 	  rindx = trrules.trruleindex(attach_type(ss,typ));
-#ifdef ONE_HISTORY
-	  if (n == 0) {
-            detach_name_type(ss,&name,&type);
-	    if (!batch) {
-            sterr << "\n[warning] there is a dk/dc ambiguity due to a rule " << name
-		  << " for " << type << " in module " << import.ide(getmodule())
-		  << " (by default it is dk)\n"; } }
-	  if (n == -1) {
-	    strname = STRNAMEDONTCARE;
-	  } else {
-	    strname = STRNAMEDONTKNOW;
-	  }
-#endif
 	  strname = STRNAMEDONTKNOW;
 
 	  NNEW(np ,struct namelist);
@@ -1780,7 +1730,6 @@ int addRuleToCompile(FILE *ff,transrule *rule, struct rtnode *&rrt,int isdet,
   }
   right.marknoshares();
   left.searchpfshares(right,1);
-#ifdef PEM
   /*
    * Pour eviter un bug
    */
@@ -1793,9 +1742,6 @@ int addRuleToCompile(FILE *ff,transrule *rule, struct rtnode *&rrt,int isdet,
       }
       flag_warning=1;
     }
-#else
-  if (isfunction) lastrec = left.lastrecursion(right);
-#endif
   if (optimize && isdet) 
     left.searchshares(right,FIRSTSTRSHARE);
   right.affrsidevars();                 // set variables of right hand side
@@ -2167,18 +2113,15 @@ void trsystem::dump()
   struct tseq *rhs;
   int i,j,k;
   k=0;
-#ifdef COMMAND
   int n,nameind;
   term l,r;
   struct wherelist *wh;
   int whichmatch;
     term rlabel;
-#endif
   for (i=0; i<MAXNOFTRN; i++) {
     tl= rules[i]; j=0;
     while (tl!=NULL) {
 
-#ifdef COMMAND
     tl->rule->getr(n,l,r,nameind,wh,
 		   rhs,
 		   whichmatch,rlabel);
@@ -2189,7 +2132,6 @@ void trsystem::dump()
          SPEC_I != NULL && 
           (0==is_prefix_of_name(SPEC_I,rulenames->ide(i)) ||
            0==strcmp(SPEC_I,fsymtab[l.head()].textform()->rside[0].alfsy()))))){
-#endif
       j++; k++;
       //dumpout << "\n[" << k << "]\n";
       dumpout << "\n" 
@@ -2203,16 +2145,13 @@ void trsystem::dump()
       tl->rule->dump(0);
 //      dumpout << "\nend of rule";
       dumpout << "\n";
-#ifdef COMMAND
   }
-#endif
       tl=tl->next;
     }
   }
   for (i=0; i<MAXNFSYM; i++) {
     tl= nnrules[i]; j=0;
     while (tl!=NULL) {
-#ifdef COMMAND
     tl->rule->getr(n,l,r,nameind,wh,
 		   rhs,
 		   whichmatch,rlabel);
@@ -2221,7 +2160,6 @@ void trsystem::dump()
       !BREAKSS && (SPEC_I == NULL ||
                    SPEC_I != NULL && 
            0==strcmp(SPEC_I,fsymtab[l.head()].textform()->rside[0].alfsy())))) {
-#endif
       j++; k++;
 //      dumpout << "\n[" << k << "]\n";
       if (!batch) {
@@ -2235,9 +2173,7 @@ void trsystem::dump()
       tl->rule->dump(0);
 //      dumpout << "\nend of rule";
       dumpout << "\n"; }
-#ifdef COMMAND
   }
-#endif
       tl=tl->next;
     }
   }
@@ -2245,13 +2181,11 @@ void trsystem::dump()
   for (i=0; i<MAXNOFSTRAT; i++) {
     sl= strategies_defs[i];
     if (sl!=NULL) {
-#ifdef COMMAND
   if (//commands && 
       (BREAKSS && sl->breaked ||
        !BREAKSS && (
            SPEC_I == NULL ||
 	   SPEC_I != NULL && 0==is_prefix_of_name(SPEC_I,strategyname_defs(i))))) {
-#endif
     dumpout << "\nstrategy " 
 	    << ((strategyinfos_defs[i] == RGLOP)?"global ":"local ")
 	    << strategyname_defs(i) ;
@@ -2259,9 +2193,7 @@ void trsystem::dump()
       sl->dump();
 //      dumpout<< "\nend of strategy\n";
       dumpout<< "\n";
-#ifdef COMMAND
   }
-#endif
     }
   }
 }
@@ -2275,18 +2207,15 @@ void trsystem::consistency()
   struct tseq *rhs;
   int i,j,k;
   k=0;
-#ifdef COMMAND
   int n,nameind;
   term l,r;
   struct wherelist *wh;
   int whichmatch;
     term rlabel;
-#endif
   for (i=0; i<MAXNOFTRN; i++) {
     tl= rules[i]; j=0;
     while (tl!=NULL) {
 
-#ifdef COMMAND
     tl->rule->getr(n,l,r,nameind,wh,
 		   rhs,
 		   whichmatch,rlabel);
@@ -2297,19 +2226,15 @@ void trsystem::consistency()
          SPEC_I != NULL && 
           (0==is_prefix_of_name(SPEC_I,rulenames->ide(i)) ||
            0==strcmp(SPEC_I,fsymtab[l.head()].textform()->rside[0].alfsy()))))){
-#endif
       j++; k++;
       tl->rule->consistency();
-#ifdef COMMAND
   }
-#endif
       tl=tl->next;
     }
   }
   for (i=0; i<MAXNFSYM; i++) {
     tl= nnrules[i]; j=0;
     while (tl!=NULL) {
-#ifdef COMMAND
     tl->rule->getr(n,l,r,nameind,wh,
 		   rhs,
 		   whichmatch,rlabel);
@@ -2318,18 +2243,14 @@ void trsystem::consistency()
       !BREAKSS && (SPEC_I == NULL ||
                    SPEC_I != NULL && 
            0==strcmp(SPEC_I,fsymtab[l.head()].textform()->rside[0].alfsy())))) {
-#endif
       j++; k++;
       tl->rule->consistency();
-#ifdef COMMAND
   }
-#endif
       tl=tl->next;
     }
   }
 }
 
-#ifdef COMMAND
 void trsystem::breakk(int breaked)
 { struct transrulelist *tl;
   strategy *sl;
@@ -2355,16 +2276,13 @@ void trsystem::breakk(int breaked)
           (0==is_prefix_of_name(SPEC_I,rulenames->ide(i))||
            0==strcmp(SPEC_I,fsymtab[l.head()].textform()->rside[0].alfsy())))) {
         tl->rule->breaked = breaked;
-#ifdef COMMAND
   }
-#endif
       tl=tl->next;
     }
   }
   for (i=0; i<MAXNFSYM; i++) {
     tl= nnrules[i]; j=0;
     while (tl!=NULL) {
-#ifdef COMMAND
     tl->rule->getr(n,l,r,nameind,wh,
 		   rhs,
 		   whichmatch,rlabel);
@@ -2373,11 +2291,8 @@ void trsystem::breakk(int breaked)
       SPEC_I == NULL ||
       SPEC_I != NULL && 
       0==strcmp(SPEC_I,fsymtab[l.head()].textform()->rside[0].alfsy()))) {
-#endif
       tl->rule->breaked = breaked;
-#ifdef COMMAND
   }
-#endif
       tl=tl->next;
     }
   }
@@ -2393,7 +2308,6 @@ void trsystem::breakk(int breaked)
     }
   }
 }
-#endif
 
 void dump_seq(ochstream &f, int deep, struct wherelist *seq)
 {

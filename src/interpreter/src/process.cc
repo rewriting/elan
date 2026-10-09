@@ -277,7 +277,6 @@ void kilproc(struct  processdata *pd)
 { killprocess(pd); }
 
 
-#ifndef RUNTIME
 
 struct processdata *newsubprocess(stateofexecution *stexec,
 			       int maxcount, int noblock)
@@ -411,5 +410,4 @@ int nextsolsubprocess(struct processdata *pd,grammar *gr,int s,term &res)
     return(r);
 }
 
-#endif
 

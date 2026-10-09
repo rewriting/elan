@@ -92,11 +92,6 @@ strategy *gen_normalisation1(int norm_index,int modu, int sort,
 
   NNEW(rlab1,term);
   nolexem.crendofstreamlex();
-#ifdef BLABLA
-  if (!batch) {
-   stout << "normalise of " << sort << " in module " << modu << "\n"; 
-   stout << "normalise of " << typet.ide(sort) << " in module " << import.ide(modu) << "\n"; }
-#endif
 
   // compute transitive closure
   for(k=0; k< NNONTERMINALS; k++) { closure[k]=0; constant[k]=-1; }
@@ -121,9 +116,6 @@ strategy *gen_normalisation1(int norm_index,int modu, int sort,
       }
     }
   }
-#ifdef BLABLA
-  if (!batch) { stout << "\nNormalised types: "; for(k=0; k< NNONTERMINALS; k++) if (closure[k]) stout << typet.ide(k) << " "; stout << "\n"; }
-#endif
  // compute constant types
   for(i=0; i < NNONTERMINALS; i++) {
     if (closure[i]) {
@@ -149,18 +141,12 @@ strategy *gen_normalisation1(int norm_index,int modu, int sort,
 	  }
 	}
       }
-#ifdef OLD_HISTORY
-    constant[i] = (work[sort] == 0);
-#endif
     constant[i] = 1;
     for(ii=0; ii < NNONTERMINALS; ii++)  
       if (type_in_list(ii, normlist, &normstrat)) {
 	constant[i] &= (work[ii] == 0); }
     }
   }
-#ifdef BLABLA
-  if (!batch) { stout << "\nConstant types: "; for(k=0; k< NNONTERMINALS; k++) if (constant[k]==1) stout << typet.ide(k) << " "; stout << "\n"; }
-#endif
 //----------------------------------------------------------
   for(typ=0; typ< NNONTERMINALS; typ++) {
     if (closure[typ] && (!(constant[typ]))) {
@@ -185,23 +171,6 @@ strategy *gen_normalisation1(int norm_index,int modu, int sort,
 
      if (typ == sort) rep_strat = nstrat;
 
-#ifdef OLD_HISTORY
-     if (typ == sort) {
-       sprintf(tmp,"%s%d",NORM_STRAT,norm_index);
-       norm_strat_name = attach_type_mod(tmp,typ,modu);
-       norm_strat_defs = trrules.strategyindex_defs(norm_strat_name,RGLOP);
-       trrules.settypeofstrategy_defs(norm_strat_defs,typ);
-       if (trrules.setstrategy_defs(norm_strat_defs,normstr)) {
-	 if (!batch) sterr << "[warning] double definition of strategy " << norm_strat_name << "\n"; } 
-       norm_strat_refs = trrules.strategyindex_refs(norm_strat_name);
-       trrules.assign_one_ref(1,norm_strat_refs);
-       norm_strat_refss[typ] = norm_strat_refs;
-       //stout << typ << ":" << typet.ide(typ) << ":" << norm_strat_refss[typ] << "\n";
-       #ifdef BLABLA
-         if (!batch) { stout << NORM_STRAT << "\n"; normstr->dump(); }
-       #endif
-     }
-#endif
 
      if (type_in_list(typ, normlist, &normstrat)) {
        sprintf(tmp,"%s%d",NORM_STRAT,norm_index);
@@ -214,9 +183,6 @@ strategy *gen_normalisation1(int norm_index,int modu, int sort,
        trrules.assign_one_ref(1,norm_strat_refs);
        norm_strat_refss[typ] = norm_strat_refs;
        //stout << typ << ":" << typet.ide(typ) << ":" << norm_strat_refss[typ] << "\n";
-#ifdef BLABLA
-       if (!batch) { stout << NORM_STRAT << "\n"; normstrat->dump(); }
-#endif
      }
     }
   }
@@ -226,9 +192,6 @@ strategy *gen_normalisation1(int norm_index,int modu, int sort,
        slist = NULL;
 
        if (lis_norm) {       // -------- LEFT_MOST_INNER_MOST
-#ifdef OLD_HISTORY
-         if (typ == sort) {
-#endif
 	 if (type_in_list(typ, normlist, &normstrat)) {
 	 // M => M rule
 	 sprintf(tmp,"%s%d",NORM_RULE,norm_index); typle.crtypelex(typ);
@@ -241,9 +204,6 @@ strategy *gen_normalisation1(int norm_index,int modu, int sort,
 				  NORMMATCH,*rlab1,NULL);  
 	 whstr = trrules.getstrategyadr_refs(norm_strat_refss[typ]);
 	 rwrule->addwhere(reverse_wheres,1,whstr,xxx,typle);
-         #ifdef BLABLA
-	 if (!batch) rwrule->dump(0); 
-         #endif
 	 // default rule
 	 NNEW(lstrat, strategy); 
 	 // lstrat->setname(STRNAMEDONTCARE,modu);
@@ -270,12 +230,6 @@ strategy *gen_normalisation1(int norm_index,int modu, int sort,
 	   fsym_map[actr->rulenumber] = 1;
 
 	   for(ar=0; ar < arity; ar++) {
-#ifdef BLABLA
-	     if (!batch) {
-	       stout << "\nRuleNumber " << actr->rulenumber << "/" << ar << "\n";
-	       dumpgrrule(actr);
-	       stout << "\n....\n "; }
-#endif	     
 	     for(lvars=0,k=kmax-1;k>=0;k--) 
 	       if (actr->rside[k].nonterminal()) {
 		 if (ar == lvars) whtypelex = actr->rside[k]; 
@@ -319,9 +273,6 @@ strategy *gen_normalisation1(int norm_index,int modu, int sort,
 	       NNEW(nm, struct namelist); nm->next = nplist; 
 	       nm->strname = nrulei;
 	       nplist= nm; }
-#ifdef BLABLA
-	     if (!batch) rwrule->dump(0); 
-#endif
 	   }
 	   if (nplist) {
 	     NNEW(lstrat, strategy); 
@@ -333,9 +284,6 @@ strategy *gen_normalisation1(int norm_index,int modu, int sort,
 	 }
        }
        if (!lis_norm)    {       //---------#ifdef LEFT_MOST_OUTER_MOST
-#ifdef OLD_HISTORY
-         if (typ == sort) {
-#endif
 	 if (type_in_list(typ, normlist, &normstrat)) {
 	 // M => M rule
 	 sprintf(tmp,"%s%d",NORM_RULE,norm_index); typle.crtypelex(typ);
@@ -348,9 +296,6 @@ strategy *gen_normalisation1(int norm_index,int modu, int sort,
 				  NORMMATCH,*rlab1,NULL);  
 	 whstr = trrules.getstrategyadr_refs(norm_strat_refss[typ]);
 	 rwrule->addwhere(reverse_wheres,1,whstr,xxx,typle);
-         #ifdef BLABLA
-	 if (!batch) rwrule->dump(0); 
-         #endif
 	 // default rule
 	 NNEW(lstrat, strategy); 
 //	 lstrat->setname(STRNAMEDONTCARE,modu);
@@ -364,11 +309,6 @@ strategy *gen_normalisation1(int norm_index,int modu, int sort,
      }
   }
 
-#ifdef BLABLA
-  if (!batch) {
-    stout << "Norm.rules = " << normrules2 << "+" << normrules1 << "\n";
-  }
-#endif
 
   return rep_strat;
 }
@@ -420,10 +360,6 @@ struct namelist *gen_normalisation2(int norm_index,int sort, strategy *normstr)
 
   NNEW(rlab1,term);
   nolexem.crendofstreamlex();
-#ifdef BLABLA
-  stout << "normalise of " << typet.ide(sort) << " in module " 
-	<< import.ide(modu) << "\n"; 
-#endif
 
   // compute transitive closure
   for(k=0; k< NNONTERMINALS; k++) { closure[k]=0; constant[k]=-1; }
@@ -447,9 +383,6 @@ struct namelist *gen_normalisation2(int norm_index,int sort, strategy *normstr)
       }
     }
   }
-#ifdef BLABLA
-  if (!batch) { stout << "\nNormalised types: "; for(k=0; k< NNONTERMINALS; k++) if (closure[k]) stout << typet.ide(k) << " "; stout << "\n"; }
-#endif
  // compute constant types
   for(i=0; i < NNONTERMINALS; i++) {
     if (closure[i]) {
@@ -477,9 +410,6 @@ struct namelist *gen_normalisation2(int norm_index,int sort, strategy *normstr)
     constant[i] = (work[sort] == 0);
     }
   }
-#ifdef BLABLA
-  if (!batch) { stout << "\nConstant types: "; for(k=0; k< NNONTERMINALS; k++) if (constant[k]==1) stout << typet.ide(k) << " "; stout << "\n"; }
-#endif
 //----------------------------------------------------------
   for(typ=0; typ< NNONTERMINALS; typ++) {
     if (closure[typ]) {
@@ -500,9 +430,6 @@ struct namelist *gen_normalisation2(int norm_index,int sort, strategy *normstr)
      nstrat_refs = trrules.strategyindex_refs(nstrat_name);
      trrules.assign_one_ref(1,nstrat_refs);
      nstrat_refss[typ] = nstrat_refs;
-#ifdef BLABLA
-     if (!batch) { stout << "nstrat\n"; nstrat->dump(); }
-#endif
      sprintf(tmp,"%s%d",NORM_STRAT,norm_index);
      norm_strat_name = attach_type_mod(tmp,typ,modu);
      norm_strat_defs = trrules.strategyindex_defs(norm_strat_name,RGLOP);
@@ -512,9 +439,6 @@ struct namelist *gen_normalisation2(int norm_index,int sort, strategy *normstr)
      norm_strat_refs = trrules.strategyindex_refs(norm_strat_name);
      trrules.assign_one_ref(1,norm_strat_refs);
      norm_strat_refss[typ] = norm_strat_refs;
-#ifdef BLABLA
-     if (!batch) { stout << "norm_strat\n"; normstr->dump(); }
-#endif
     }
   }
   for (j=0; j<NNONTERMINALS; j++) 

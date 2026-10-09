@@ -47,14 +47,8 @@
 
 #define NOINT -1
 
-#ifdef GCMEM
-#include "gc_cpp.h"
-#endif
 
 class mitab
-#ifdef GCMEM
-: public gc
-#endif
   {
  private:
   int tsize,nin;          // size  of table, actual number of numbers in it

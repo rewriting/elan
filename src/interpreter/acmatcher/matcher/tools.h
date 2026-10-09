@@ -7,23 +7,9 @@
 #define strndup(dest,source,n) strncpy(dest=(char*)Valloc(1+n),source,n)
 #endif
 
-#ifdef DEBUG
-#define Debug(nom,msg)\
-if(nom) printf("\t " #nom " : %s",msg)
-#else
 #define Debug(nom,msg)
-#endif
 
-#ifdef DEBUG
-#define Verif_void(objet,chaine)\
-  if(objet==0)\
-    {\
-      printf("%s est a void\n",chaine);\
-      exit(1);\
-    }
-#else
 #define Verif_void(objet,chaine)
-#endif
 
 #ifndef NULL
 #define NULL 0

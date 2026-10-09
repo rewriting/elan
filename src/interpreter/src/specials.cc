@@ -30,9 +30,6 @@
 
 void failexit()
 {
-#ifdef DEBUG
-  fprintf(stderr,"failexit\n");
-#endif
   exit(EXIT_FAILURE);
 }
 

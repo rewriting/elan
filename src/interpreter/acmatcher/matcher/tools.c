@@ -26,12 +26,6 @@ static char *actchunkend = NULL;
 #define FREELIST_SIZE 100
 #define MAX_SIZE_STRUCT (scale*FREELIST_SIZE)
 
-#ifdef DEBUG
-#define MAXALLOCPLACE 100000
-static long *alloc_table[MAXALLOCPLACE];
-static int alloc_table_index = 0;
-static int position;
-#endif
 
 /*
  * Statistics
@@ -55,13 +49,8 @@ static int  length_freelist[FREELIST_SIZE];
 /* the available lists */
 static long *freelist[FREELIST_SIZE];
 
-#ifdef DEBUG
-#define ADDDEBUG(n) (n)++;
-#define SUBDEBUG(n) (n)--;
-#else
 #define ADDDEBUG(n) 
 #define SUBDEBUG(n) 
-#endif
 
 #define TRUEADR(adr) ((long*)(((char*)adr)-scale))
 #define SIZE(adr)    (*(TRUEADR(adr)))
@@ -81,23 +70,12 @@ void init_alloc()
       length_freelist[i]=0;
       freelist[i]=NULL;
     }
-#ifdef DEBUG
-  for(i=0 ; i<MAXALLOCPLACE ; i++)
-    alloc_table[i]=NULL;
-#endif
 }
 
 char *Valloc(int taille)
 {
   char *zone;
   ADDDEBUG(malloc_calls);
-#ifdef DEBUG
-  if(taille <= 0)
-    {
-      printf("taille = %d\n",taille);
-      exit(1);
-    }
-#endif
 
   //fprintf(stderr,"debut malloc(%d)\n",taille);
   zone=(char*) malloc(taille);
@@ -161,12 +139,6 @@ char *intern_alloc(int size)
   char *res;
   int indice;
 
-#ifdef PURIFY
-  //ADDDEBUG(malloc_calls);
-  res=(char*)Valloc(size);
-  testalloc((long*)res);
-  return res;
-#endif
 
   memoround(size);
   indice=size/scale;
@@ -192,16 +164,6 @@ char *intern_alloc(int size)
   res=(char*)freelist[indice];
   freelist[indice]= (long*) *(freelist[indice]);
 fin:
-#ifdef DEBUG
-  if(SIZE(res)!=size)
-    {
-      fprintf(stderr,"\n\n[intern alloc] error \n\n");
-      fprintf(stderr,"size=%d\tmysize=%d\n",size,SIZE(res));
-      exit(1);
-    }
-  //printf("[intern_alloc] (%d)\tsize=%d\n",res,SIZE(res));
-  testalloc((long*)res);
-#endif
   return res;
 }
 
@@ -209,18 +171,8 @@ void intern_free(long *p)
 {
   int size;
 
-#ifdef PURIFY
-  ADDDEBUG(free_calls);
-  testfree(p);
-  free(p);
-  return;
-#endif
   size=SIZE(p);
 
-#ifdef DEBUG
-  testfree(p);
-  //printf("[intern_free] (%d)\tmysize=%d\n",p,size);
-#endif
   // on suppose MAGICNUMBER > MAX_SIZE_STRUCT
   if(size >= MAX_SIZE_STRUCT)
     {
@@ -271,48 +223,3 @@ void print_space_usage()
 /*       allocations debugging     */
 /* ******************************* */
 
-#ifdef DEBUG
-int alloc_member(long *t)
-{
-  int i;
-  for(i=0 ; i<alloc_table_index ; i++)
-    if(alloc_table[i] == t)
-      {
-	position = i;
-	return(1);
-      }
-  return(0);
-}
-
-void testalloc(long *t)
-{ 
-  if (alloc_member(t))
-    {
-      fprintf(stderr,"two times allocated place t==%d\n\n",t); 
-      exit(1);
-    }
-  if (alloc_table_index >= MAXALLOCPLACE)
-    {
-      fprintf(stderr,"sorry alloc_table overflowed\n\n"); 
-      exit(1);
-    }
-  alloc_table[alloc_table_index++] = t;
-}
-
-void testfree(long *t)
-{
-  int i;
-  if (!alloc_member(t))
-    {
-      fprintf(stderr,"two times freed the same place !!!\nt==%d\n",t); 
-      exit(1);
-    }
-  /*
-   * on decale tout d'un cran a gauche
-   */
-  for(i=position ; i<alloc_table_index-1 ; i++ )
-    alloc_table[i] = alloc_table[i+1];
-
-  alloc_table_index--;
-}
-#endif

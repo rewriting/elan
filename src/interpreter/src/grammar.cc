@@ -28,19 +28,15 @@
 
 #include "commondefs.h"
 
-#ifdef COMMAND
 #include <string.h>
 #include "command.h"
 #include "codes.h"
-#endif
 
-#ifndef RUNTIME // begin RUNTIME
 #include "module.h"
 #include "compiledefs.h"
 
 #define FREERULE(rule) { CFRE(rule->rside);  CFRE(rule);}
 static unsigned usedtype[NTYPES/NBITS+1];
-#endif // end RUNTIME
 
 grammar::grammar()
 { int i;
@@ -133,7 +129,6 @@ void grammar::addnont_(lexem *ebuff,int *ebuffi,lexem &l)
 }
 
 
-#ifndef RUNTIME // begin RUNTIME
 // Pour ELAN seul
 #include "strategy.h"
 void grammar::combine()
@@ -163,39 +158,6 @@ void grammar::combine()
      }
 }
 
-#ifdef HISTORY
-struct sgrammrule *grammar::addrule(lexem &leftside, int priority, 
-                                  int infos, int num)
-{ int i;
-  lexem *rs;  
-  if (num<0) {
-    sterr <<"[grammar.c] adding variable by addrule";interr();
-  }
-  AALLOSS(rs ,buffi+1,lexem);
-  for (i=0; i<=buffi; i++) rs[i]=buff[i];
-  buffi=ntbuffi=0;
-  return(addrul(leftside,rs,priority,infos,num));
-}
-
-void grammar::addsymbol(lexem &l)
-{
-  if (buffi+2 >= MLENGRRULE) {
-     sterr << "length of rule is overflow over MLENGRRULE="
-          << MLENGRRULE << "\n\t FATAL !!!\n";
-     failexit();
-  }
-  buff[buffi++]=l; buff[buffi].crendofstreamlex();
-}
- 
-void grammar::addnont(lexem &l)
-{
-  while (ntbuffi<buffi && buff[ntbuffi].isnotendofstream()) ntbuffi++;
-  if (buff[ntbuffi].isnotendofstream()) 
-     sterr<<"[grammar::addnont] something is wrong, int.err.\n";
-  buff[ntbuffi++]=l;
-  if (ntbuffi>buffi) { buffi=ntbuffi; buff[buffi].crendofstreamlex(); }
-}
-#endif
 
 /*
 void grammar::addrw(lexem l) 
@@ -208,14 +170,12 @@ void grammar::removerw(lexem l)
   reswtab->removen(l.idval());
 }
 */
-#ifdef PEM
 struct sgrammrule * grammar::adddollarvarrule(lexem &leftside,lexem &l,int priority, int infos ,int num)
 { lexem *rs;  
   AALLOSS(rs ,3,lexem);
   rs[0].crcharlex('$'); rs[1] = l; rs[2].crendofstreamlex();
   return(addrul(leftside,rs,priority,infos,num));
 }
-#endif
 
 struct sgrammrule * grammar::addvarrule(lexem &leftside,lexem &l,int priority, int infos ,int num)
 { lexem *rs;  
@@ -243,7 +203,6 @@ void grammar::deleterule(struct sgrammrule *rule)
     sterr << "[deleterule] deleting of nonexist rule, internal error !!";
 }
 
-#ifdef PEM
 void grammar::preprocdeleterule(struct sgrammrule *rule)
 {
   struct grammrulelist **gr,*dr;
@@ -278,7 +237,6 @@ void grammar::preprocdeleterule(struct sgrammrule *rule)
   sterr << "FIN grammar::deleterule\n";
 
 }
-#endif
 
 int grammar::rbodyeq(lexem *b)
 {
@@ -446,7 +404,6 @@ nolexem.crendofstreamlex();
 }
 
 
-#ifdef ANYS
 int is_any_type(int t)
 {
 int i;
@@ -573,9 +530,7 @@ void grammar::any_code(char *anymodstr, char *anymodfname, char *name)
   anycode_rules(anymod);
   anymod << "\nend\n";
 }
-#endif
 
-#ifdef SYMBS
 int symbappl_equal(struct ilist *lst, struct sgrammrule *actr)
 {
   lexem nolexem;
@@ -687,7 +642,6 @@ void grammar::symbappl_code(char *symbapplmodstr, char *symbapplmodfname, char *
   symbapplcode_rules(symbapplmod);
   symbapplmod << "\nend\n";
 }
-#endif
 
 void grammar::add_apply_code(int x, int y)
 {
@@ -909,17 +863,14 @@ void grammar::dump()
   stout << "[end of grammar dump]\n";
 }
 
-#endif // end RUNTIME
 
 void writegrrule(ochstream &cou,struct sgrammrule *gr,stringtab *typet)
 { int j,wast;
   lexem ll;
   j=0;
-#ifndef RUNTIME // begin RUNTIME
   if (//commands && 
       (SPEC_N == 0 || (SPEC_N > 0 && SPEC_N == gr->rulenumber)) &&
       (SPEC_I == NULL || (SPEC_I != NULL && 0==strcmp(SPEC_I,gr->rside[0].alfsy())))) {
-#endif // end RUNTIME
   while (gr->rside[j].isnotendofstream()) {
     ll=gr->rside[j];
     if (ll.nonterminal()) cou << " @ ";
@@ -947,28 +898,21 @@ void writegrrule(ochstream &cou,struct sgrammrule *gr,stringtab *typet)
       cou << "\t pri " << (gr ->priority & RPRIORITYMSK);
       cou << " code " << gr->rulenumber;
       if ( gr->semantic) { cou << " sem " << gr->semantic; }
-      #ifndef RUNTIME // begin RUNTIME
       if (fsymtab[gr->rulenumber].get_locstratlen()) {
 	  int ii;
 	  cou << " strategy ";
 	  for (ii=0; ii < fsymtab[gr->rulenumber].get_locstratlen(); ii++)
 	      cou << fsymtab[gr->rulenumber].get_locstrat(ii) << " "; }
-      #endif
     }
   else
     {
       cou << "\t VAR(" << -gr->rulenumber << ")";
-#ifdef PEM
       cou << "\t (pri " << (gr ->priority & RPRIORITYMSK)<<")";
-#endif
     }
     cou << ";\n";
-#ifndef RUNTIME // begin RUNTIME
   }
-#endif // end RUNTIME
 }
 
-#ifdef EARLEY
 void earleyPrettyDumpGrammarRule(ochstream &stout,struct sgrammrule *gr)
 {
   int j;
@@ -976,12 +920,9 @@ void earleyPrettyDumpGrammarRule(ochstream &stout,struct sgrammrule *gr)
   stout << gr ->priority << " "; 
   stout << "rulenumber ";
   stout << gr->rulenumber << " ";
-#ifdef RUNTIME
-#else
   stout << ", arity=" <<  fsymtab[gr->rulenumber].arity()
 	<< ", isconstructor=" <<  ISCONSTRUCTOR(gr->rulenumber)
 	<< "\n";
-#endif
 
   if (gr->leftside.nonterminal())
     {
@@ -1120,9 +1061,7 @@ void grammar::earleyDump(ochstream &stout)
   stout << "#define GRAMMAR_SIZE " << size << "\n";
 }
 
-#endif
 
-#ifndef RUNTIME // begin RUNTIME
 void grammar::gr_rule_mapp(int nothing, void (*fun)(struct sgrammrule *))
 { struct grammrulelist *gr;
   int i;
@@ -1170,4 +1109,3 @@ void grammar::write(ochstream &sout, int winfo,stringtab *tyt,char *bef, char *a
     }
   if (j) sout << aft;
 }
-#endif // end RUNTIME

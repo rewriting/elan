@@ -17,7 +17,6 @@ target_compile_definitions(match PRIVATE ${ELAN_DEFINITIONS})
 
 # --- options shared by every C++ target of src/ ------------------------------
 set(ELAN_INTERP_DEFINITIONS ${ELAN_DEFINITIONS}
-    ALPHA COMMAND PEM BORO ANYS SYMBS EARLEY TO_BE_DISTRIBUTED META PEVAL
     PREFIX="${CMAKE_INSTALL_PREFIX}")
 set(ELAN_COMMON_SOURCES
   src/commondefs.cc src/ochstream.cc src/ichstream.cc src/lstream.cc

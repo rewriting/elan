@@ -32,9 +32,6 @@
 #include "commondefs.h"
 
 class lstream {    // stream of lexems (input for parser)
-#ifdef GCMEM
-: public gc
-#endif
  private:  
   lexem flex;
   ichstream *istr;
@@ -53,7 +50,6 @@ class lstream {    // stream of lexems (input for parser)
   void oerr(char *);
   void owarn();
   void owarn(char *);
-#ifndef RUNTIME // begin RUNTIME
   void oerr(char *,char * ...);
   void owarn(char *,char * ...);
   lbuffer *getlastinlineAndinit();
@@ -72,7 +68,6 @@ class lstream {    // stream of lexems (input for parser)
   virtual void deletemac(int ) {};
   virtual void prepend(lbuffer &) {};
 */
-#endif // end RUNTIME
 };   
 
 #endif

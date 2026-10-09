@@ -31,17 +31,10 @@
 
 #include <unistd.h> // pour pid_t
 
-#ifndef RUNTIME // begin RUNTIME
 #include "acmatchdefs.h"
 #include "codes.h"
 #include <math.h>
 
-#ifdef STORM
-#include "storm_term.h"
-#include "interface.h"
-#include "types.h"
-#endif
-#endif // end RUNTIME
 
 /* ------------------------------------------------------------- */
 
@@ -84,12 +77,8 @@ struct processdatalist {
   struct processdatalist *next;
 };
 
-#ifndef RUNTIME // begin RUNTIME
 
 class fsym
-#ifdef GCMEM
-: public gc
-#endif
  {
  private:
   int arit;
@@ -103,9 +92,7 @@ class fsym
  public:
   int apply;
   int ttry;
-#ifdef COMMAND
   int breaked;
-#endif
   fsym();
   fsym(int arity, struct sgrammrule *,int inf);
   void set_aliased();  
@@ -135,16 +122,12 @@ inline  int  fsym::add_sort() { return (semantic<0); }
 
 inline fsym::fsym() {aliased=0; textf=NULL;definedas=0; 
 semantic = 0;locstrattable = NULL; locstratlen= 0;
-#ifdef COMMAND
 breaked=0;
-#endif
 };
 inline fsym::fsym(int a, struct sgrammrule *g,int i) 
                 {arit=a;textf=g;inf=i;aliased=0;definedas=0;
 semantic = 0; locstrattable = NULL; locstratlen= 0;
-#ifdef COMMAND
 breaked=0;
-#endif
 };
 inline void fsym::set_aliased() {aliased=1;};
 inline void fsym::set_definedas() {definedas=1;};
@@ -164,9 +147,7 @@ inline void fsym::operator =(fsym &s)
                    semantic = s.semantic;
 		   locstratlen = s.locstratlen;
 		   locstrattable = s.locstrattable;
-#ifdef COMMAND
 	breaked=s.breaked;
-#endif
 		   };
 inline void fsym::dump() {stout << "[fsym:"<<arit<<","<<textf<<","<<inf<<"] ";}
 
@@ -207,15 +188,9 @@ struct hterm {
 };
 
 class term
-#ifdef GCMEM
-: public gc
-#endif
  {
  private:
   struct hterm *t;
-#ifdef STORM
-  NetNode *Net;
-#endif
 
   void dumprec();
   void addterm(int fsi,int inf,int count, term *st);
@@ -251,10 +226,6 @@ class term
 
  public:
   term();
-#ifdef VISIGRAPH
-  void writeinfile();
-  void writehtml();
-#endif
    // builtin syntactic matching
    void syntacticMatching(int unify,term &dest,term subject, term listVar, term fail);
   int  isvalidterm();
@@ -405,12 +376,6 @@ void decrcount(term *substarray);
 
     TERM * toacform();        // conversion to Eker ac form
     void tomyform(TERM * tt); // inverse conversion, result obtained by popt()
-#ifdef STORM
-    STORM_TERM * tostormform();        // conversion to Eker ac form
-    void fromstormform(STORM_TERM * tt); // inverse conversion, result obtained by popt()
-  void netInsert();
-  NetNode *getNet();
-#endif
 
 };
 
@@ -423,9 +388,6 @@ struct vilist {                  // list of instantiated variables
 extern void initAssignment();
 
 class match_state
-#ifdef GCMEM
-: public gc
-#endif
  {          //      bodies in match.c
 private:
   int whichmatch,varnum;
@@ -435,11 +397,6 @@ private:
     void *match_state;              // data for ac matching
     int state;                      // data for synt. matching
   } u;
-#ifdef STORM
-  STORM_TERM *subject;
-  int net_match_flag;
-  int net_exist_solution;
-#endif  
   void expect(char c);
   int handnum(char *s);
   int handvar();
@@ -479,6 +436,5 @@ extern void conform_strategies(int warn);
 
 
   extern int withrhs;	
-#endif
 #endif // end RUNTIME
 

@@ -32,9 +32,7 @@
 #include "module.h"
 #include "rtdatas.h"
 #include "meta.h"
-#ifdef COMMAND
 #include "command.h"
-#endif
 extern int writewasident;
 extern int no_more_switch;
 
@@ -240,22 +238,10 @@ void statistics::write(int level,int big)
       }
     fprintf(stdout,"\n");
   }
-#ifdef MEMORY
-  stout << "\tnew blocks: " << NEW_BLOCKS << " bytes (" <<
-    ((double)NEW_BLOCKS)/(1024*1024) << " Mb)\n";
-  stout << "\talloc blocks " << ALLOS_BLOCKS << " bytes (" <<
-    ((double)ALLOS_BLOCKS)/(1024*1024) << " Mb)\t" <<
-    "total: " << ((double)NEW_BLOCKS+ALLOS_BLOCKS)/(1024*1024) << " Mb)\n";
-  stout << "\tchoice points(max): " << total_num_of_cpoints << "(" << max_of_cpoints << ")" << "\t\t" 
-        << "many points(max): " << total_num_of_mpoints << "(" << max_of_mpoints << ")"; 
-#endif
   stout << "\n\tnumberOfAllocTerm = " << numberOfAllocTerm << "\n";
 //  stout << "\n\tcpt = " << ((double)cpt)/(1024*1024) << "\n";
   fprintf(stdout,"\nend of statistics\n");
 
-#ifdef DEBUG
- print_space_usage(); 
-#endif
 }
 
 int integer_or_bool_constant(term *t)
@@ -273,9 +259,6 @@ int integer_or_bool_constant(term *t)
 	   integer_or_bool_constant(t.subterm(1))) X; \
        else return 0; 
 
-#ifdef PICALC
-extern void picalc_io(term, term *);
-#endif
 
 #include "files.cc"
 
@@ -315,13 +298,6 @@ static int standardreduction(term &t)
 
   tt.stinit();
   switch ((nn=t.semantic())) {
-#ifdef PICALC
-      case PIO :  // external input/output
-//fprintf(stderr, "[rtmisc] picalc_io()...\n");
-        picalc_io(tt, t.subterm(0));
-//fprintf(stderr, "[rtmisc] ...picalc_io()\n");
-        break;   
-#endif
       case PLUS :			//	PLUS
         two_int_args(
           tt.crstterm(t.subterm(0)->head()+t.subterm(1)->head(),TNUMBER))
@@ -1019,20 +995,14 @@ int handlecondition(term c, term *substarray)
 
 void reduce(term &mt,int trace)		// main reduce loop; 
 {
-#ifdef GCMEM
-  struct rstackel *rstack = new (GC) struct rstackel[MAXTERMDEEP];
-#else
   struct rstackel *rstack = new struct rstackel[MAXTERMDEEP];
-#endif
   struct rstackel *rstacki;	// *rstacki == top;
   term actt;
   int acti;
   int estrat_len = 0;
   int ith_strat = 0;
   int nred;
-#ifdef COMMAND
   int breaked = 0;
-#endif
 
   if (trace) {
    traceind+=3;
@@ -1077,21 +1047,17 @@ void reduce(term &mt,int trace)		// main reduce loop;
 	  POP();
       } else if (
 		 fsymtab[actt.head()].get_locstrat(acti)== 0) {
-        #ifdef COMMAND
 	if (commands && fsymtab[actt.head()].breaked) { 
           breaked = 1;
           indent(); traceout << "[" << nred << "] ";
           actt.write(traceout); traceout << "\n";	}
 	else breaked = 0;
-        #endif
 	if (trrules.nnrewrited(actt) || standardreduction(actt)) {
 	    nred++;
-        #ifdef COMMAND
 	if (commands && breaked) { 
 	  breaked = 0;
           indent(); traceout << "[" << nred << "] ";
           actt.write(traceout); traceout << "\n";	}
-        #endif
 	if (trace) {
 	    indent(); traceout << "[" << nred << "] ";
 	    rstack[0].t.write(traceout); traceout << "\n"; 
@@ -1108,21 +1074,17 @@ void reduce(term &mt,int trace)		// main reduce loop;
                && actt.head()==TOP1().t.head()){
       POP();
     } else {
-      #ifdef COMMAND
 	if (commands && fsymtab[actt.head()].breaked) { 
           breaked = 1;
           indent(); traceout << "[" << nred << "] ";
           actt.write(traceout); traceout << "\n";	}
 	else breaked = 0;
-      #endif
       if (trrules.nnrewrited(actt) || standardreduction(actt)) {
         nred++;
-        #ifdef COMMAND
 	if (commands && breaked) { 
 	  breaked = 0;
           indent(); traceout << "[" << nred << "] ";
           actt.write(traceout); traceout << "\n";	}
-        #endif
 	if (trace) {
            indent(); traceout << "[" << nred << "] ";
            rstack[0].t.write(traceout); traceout << "\n"; 
@@ -1161,16 +1123,11 @@ void transred(int stratindex, term mt, int big)
   statistic.init();
   statistic.timestart();
     //statistic.timestop();
-#ifdef MEMORY
-  NEW_BLOCKS = 0;
-  ALLOS_BLOCKS = 0;
-#endif
   reduce(mt,trace);
   stateofexecution execst(mt,p);
 //execst.dump();
   while (execst.nextsolution(rt)) {
     statistic.timestop();
-#ifdef COMMAND 
    if (commands) {
       term *axterm;
       NNEW(axterm ,term);
@@ -1197,16 +1154,6 @@ void transred(int stratindex, term mt, int big)
 	traceout << "\n";
 	if (!commands) rt.tdelete();
     }  ///////////// copy -- see bellow
-#else
-    if (!quiet) traceout << "\n\n";
-    if (!batch) traceout << "\n[] result term:\n   ";
-//execst.dump(10);
-    traceout.flush(); rt.write(stout);
-    if (batch) { /*WWW*/ stout << " end\n"; stout.flush(); }
-    if (!quiet) traceout << "\n\n\n";
-    traceout << "\n";
-    rt.tdelete();
-#endif
   }
   if (!batch) traceout << "\n\n[] ";
 

@@ -30,19 +30,9 @@
 #include "codes.h"
 #include "compiledefs.h"
 #include "strategy.h"
-#ifdef VISIGRAPH
-#include "writehtml.h"
-#endif
 
-#ifdef COMMAND
 #include "command.h"
-#endif
 
-#ifdef STORM
-#include "storm_term.h"
-#include "storm_proto.h"
-extern int acmatch_with_storm;
-#endif
 #include "strategy.h"
 
 /* ------------ building term from R-derivation output -------------------*/
@@ -52,10 +42,6 @@ static int tstacki = 0;
 int writewasident = 1;
 int equal_non_ground = 0;     // local hack
 
-#ifdef VISIGRAPH
-int wrwasident=1;
-#define TERMWRBLANK() (wrwasident?" ":"")
-#endif
 
 #define TERMWRITEBLANK() (writewasident?" ":"")
 
@@ -68,10 +54,6 @@ int fsyminfo(int fsi)
 term::term()
 {
   t=NULL;
-#ifdef STORM
-  if(acmatch_with_storm)
-    Net=0;
-#endif
 }
 
 int term::semantic()
@@ -589,132 +571,6 @@ void term::tomyform(TERM * tt)
   }
 }
 
-#ifdef STORM
-STORM_TERM * term::tostormform()
-{
-  int i,arity;
-  STORM_TERM *res;
-  STORM_TERM *subterm;
-
-  if (t==NULL) {
-    sterr << "[term.cc] tostormform: "; interr();
-  }
-
-  switch (t->infos) {
-  case TIDENT: 	
-    res=create_flatterm(MAXNFSYM+t->fsymi);
-    storm_tab_infos[res->symb]=TIDENT;
-    break;
-  case TSTRING: sterr << "\nTSTRING in tostromform not implemented yet\n"; interr();
-  case TNUMBER:
-    res=create_flatterm(MAXNFSYM+MAXNOFIDENT+t->fsymi);
-    storm_tab_infos[res->symb]=TNUMBER;
-    break;
-  case TVAR:
-    res=create_flatterm(-(t->fsymi+1));
-    break;
-  case TNORMFS:
-	  	arity = headarity();
-		res=create_flatterm(t->fsymi);
-		storm_tab_infos[res->symb]=TNORMFS;
-          	if (arity!=0)
-		  {
-		    for(subterm=t->subt[0].tostormform(),i=1 ; i<arity ; i++)
-		      subterm=concat(subterm,t->subt[i].tostormform());
-		    res=heading(res,subterm);
-		  }
-		break;
-  default :     interr();
-  }
-  return res;
-}
-
-void term::fromstormform(STORM_TERM * tt)
-{ STORM_TERM *l;
-  int a;
-  int storm_infos;
-  
-  if(tt == NULL){
-    fprintf(stderr,"[term.c] (null ptr)"); interr();
-  }
-  
-  if(tt->symb<0)
-    storm_infos=TVAR;
-  else
-    storm_infos=storm_tab_infos[tt->symb];
-  //printf("storm_infos=%d\n",storm_infos);
-
-  switch(storm_infos){
-  case TSTRING: sterr << "\nTSTRING in fromstormform not implemented yet\n"; interr();
-  case TIDENT: 	
-  case TNUMBER:
-    if (tt->symb < MAXNFSYM+MAXNOFIDENT) 
-      crstterm(tt->symb-MAXNFSYM,TIDENT);
-    else
-      crstterm(tt->symb-MAXNFSYM-MAXNOFIDENT,TNUMBER);
-    break;
-  case TVAR:
-    crvar(-(tt->symb+1));
-    break;
-  case TNORMFS:
-    if(fsymtab[tt->symb].infos()==FSASSOCCOM)
-      {
-	l=tt->next; // 1st subterm
-	fromstormform(l);
-	l=l->end->next;
-	for( ; l!=tt->end->next ; l=l->end->next) // next subterm
-	  {
-	    fromstormform(l);
-	    crterm(tt->symb);	    
-	  }
-      }
-    else
-      {
-	l=tt->next; // 1st subterm
-	for(a=0 ; l!=tt->end->next ; l=l->end->next,a++) // next subterm
-	  fromstormform(l);
-	if (a!=fsymtab[tt->symb].arity())
-	  {
-	    sterr<<"[term::fromstormform] arity problem";
-	    interr();
-	  }
-	crterm(tt->symb);
-      }
-    break;
-  default :
-    fprintf(stderr,"\n[term.c] non expected case in fromstormform"); 
-    interr();
-  }
-}
-
-void term::netInsert()
-{
-  STORM_TERM *storm_t;
-  //printf("net_init()");
-  if(Net==0)
-    {
-      Net=net_init();
-      storm_t= flatten_flatterm(this->tostormform());
-      printf("\ttransrule::Insertion de : ");
-      print_flatterm_nl(stdout,storm_t);
-      net_insert(storm_t,Net,0);
-    }
-  else
-    {
-      printf("term::netInsert() ERREUR\n");
-      exit(1);
-    }
-}
-
-NetNode *term::getNet()
-{
-  if(Net)
-    return (Net);
-
-  printf("term::getNet ERREUR : Net is void !\n");
-  exit(1);
-}
-#endif
 
 
 /* ------------------------------------------------------------------*/
@@ -1135,10 +991,6 @@ term *term::subterm(int i)
 void term::operator =(term tt)
 {
   t = tt.t;
-#ifdef STORM
-  if(acmatch_with_storm)
-    Net=tt.Net;
-#endif
 }
 
 int max(int a, int b)
@@ -1615,10 +1467,8 @@ void term::writerec(ochstream &gout)
 	    } else  {
 	      if (p->isident()) {
 		gout << TERMWRITEBLANK() << p->alfsy();
-#ifdef COMMAND
 		if (commands && displaylevel) {
 		    gout << "_" << (int)(t->fsymi); }
-#endif
 		writewasident = 1;
 	      } else if (!p->isblankk()) {
 		writewasident = 0;
@@ -2168,43 +2018,21 @@ term *term::deref(term *substarray, int &varn)
 int term::unifyrec(term with,term *substarray)
 { int i,a,res, varnx, varny;
   term *termx, *termy;
-  #ifdef BLABLA
-  stout << "  UNIFYREC "; write(stout); stout << "=?="; 
-  with.write(stout); stout << "\n";
-  #endif
   termx = this->deref(substarray, varnx);
-  #ifdef BLABLA
-  stout << "    DEREFERED-X " << varnx << "\n"; termx->write(stout); stout << "\n";
-  #endif
   termy = with.deref(substarray, varny);
-  #ifdef BLABLA
-  stout << "    DEREFERED-Y " << varny << "\n";  termy->write(stout); stout << "\n";
-  #endif
   if (varnx != -1 && varny != -1) {
     if (varnx < varny) substarray[varnx] = *termy;
     else if (varny < varnx) substarray[varny] = *termx;
     // else, elle sont ==
     return(1); }
   else if (varnx != -1 && varny == -1) {
-    #ifdef BLABLA
-    stout << varnx << "::="; termy->write(stout); stout << "\n";
-    #endif
     substarray[varnx] = *termy; return(1); }
   else if (varnx == -1 && varny != -1) {
-    #ifdef BLABLA
-    stout << varny << "::="; termx->write(stout); stout << "\n";
-    #endif
     substarray[varny] = *termx; return(1); }
   else if (varnx != -1 && varny != -1) {
     if (varnx < varny) {
-      #ifdef BLABLA
-      stout << varnx << "::="; termy->write(stout); stout << "\n";
-      #endif
       substarray[varnx] = *termy; }
     else {
-      #ifdef BLABLA
-      stout << varny << "::="; termx->write(stout); stout << "\n";
-      #endif
       substarray[varny] = *termx; }
     return 1; }
   else if (varnx == -1 && varny == -1) {
@@ -2241,9 +2069,6 @@ int term::unify(term with,term *substarray,int varnum,struct vilist *&iv)
       return(1);
     } else {
       uni=unifyrec(with,substarray);
-      #ifdef BLABLA
-      stout << " UNIFY " << uni << "\n";
-      #endif
       return uni; }
 }
 

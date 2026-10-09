@@ -33,17 +33,6 @@
 
 #include "module.h"
 
-#ifdef STORM
-#define ST_JUST_TEST          0x0
-#define ST_WANT_PATN          0x1
-#define ST_WANT_APPL          0x2
-#include "interface.h"
-#include "types.h"
-#include "storm_proto.h"
-extern NetNode *Net_Root;
-extern Binding bind;
-extern int acmatch_with_storm;
-#endif
 
 /*static int RWidentity;*/
 extern lexem SEND;  
@@ -115,63 +104,6 @@ struct processdata *pd = pid2processdata(pid);
   return 0;
 }
 
-#ifdef ONLY_FOR_DEBUG
-//**** from matchdir/main.c
-void print_aclist(AC_LIST *l);
-void print_tlist(TERM_LIST *l);
-print_term(TERM *t)
-{
-  if(t == NULL){
-    printf("(null ptr)");
-    return;
-  }
-  switch(t->type){
-  case VARIABLE:
-    printf("VAR(%d)", t->sym);
-    break;
-  case CONSTANT:
-    printf("CONST(%d)", t->sym);
-    break;
-  case FUNCTION:
-    printf("FUN(%d,", t->sym);
-    print_tlist(t->rest.f.arg_list);
-    printf(")");
-    break;
-  case AC_NORMAL:
-    printf("AC_NORMAL(%d,", t->sym);
-    print_tlist(t->rest.f.arg_list);
-    printf(")");
-    break;
-  case AC_COMPRESSED:
-    printf("AC_COMPRESSED(%d,", t->sym);
-    print_aclist(t->rest.a.ac_list);
-    printf(")");
-    break;
-  }
-}
-
-void print_tlist(TERM_LIST *l)
-{
-  while(l){
-    print_term(l->arg);
-    l = l->next_arg;
-    if(l != NULL)
-      printf(", ");
-  }
-}
-
-void print_aclist(AC_LIST *l)
-{
-  while(l){
-    printf("%d*", l->mult);
-    print_term(l->arg);
-    l = l->next_ac;
-    if(l != NULL)
-      printf(", ");
-  }
-}
-//**** from matchdir/main.c
-#endif
 
 match_state::match_state(term grterm, term vterm, int whichm, int varn)
 {
@@ -202,42 +134,6 @@ match_state::match_state(term grterm, term vterm, int whichm, int varn)
       //sterr << "between terms "; vterm.write(sterr); 
       //sterr << "  and  "; grterm.write(sterr); sterr << "\n";
       
-#ifdef STORM
-      term test_vterm;
-      term test_grterm;
-      STORM_TERM *st_vterm; 
-      STORM_TERM *st_grterm;
-      STORM_TERM *flatten_v;
-      STORM_TERM *flatten_gr;
-      
-      int usage;
-      int *appl;
-      int result_match;
-      int i;
-      STORM_TERM *pattern;
-    
-      if(acmatch_with_storm)
-	{
-	  st_grterm=grterm.tostormform();
-	  flatten_gr=flatten_flatterm(st_grterm);
-	  
-	  // ***********
-	  // match STORM
-	  // ***********
-	  //printf("net_match : ");
-	  //print_flatterm_nl(stdout,flatten_gr);
-	  usage = ST_WANT_APPL | ST_WANT_PATN;
-	  
-	  // juste pour tester
-	  //result_match=net_match(flatten_gr, vterm.getNet(), usage, &pattern, &appl); 
-	  
-	  //printf("Creation du match_state\n");
-	  subject=flatten_gr;
-	  // on n'a pas encore fait de net_match
-	  net_match_flag=0;
-	}
-      else
-#endif
 	{
 	  //stout << "vterm -----------------\n";
 	  TERM *vterm2=vterm.toacform();
@@ -300,68 +196,6 @@ int match_state::isnextsol(term *substarray)
     }
 
   //  sterr << "sol?" << " ";
-#ifdef STORM
-  int usage;
-  int *appl;
-  STORM_TERM *pattern;
-
-  if(acmatch_with_storm)
-    {
-      usage = ST_WANT_APPL | ST_WANT_PATN;
-      
-      // premiere tentative de match
-      if(net_match_flag==0)
-	{
-	  //print_flatterm_nl(stdout,subject);
-	  //printf("Recherche de la premiere solution\n");
-	  net_exist_solution=net_match(subject, vt.getNet(), usage, &pattern, &appl);
-	  // il faudra appeler net_next_answer la prochaine fois
-	  net_match_flag=1;
-	}
-      else
-	if(net_exist_solution)
-	  {
-	    //printf("Recherche des solutions suivantes\n");
-	    net_exist_solution=net_next_answer(subject, vt.getNet(), usage, &pattern, &appl);
-	  }
-      
-      if(net_exist_solution==0)
-	{
-	  // pas de solution
-	  //printf("Pas de solution\n");
-	  return(0);
-	}
-      else
-	{
-	  //printf("Au moins une solution\n");
-	  //print_flatterm_nl(stdout,pattern);
-	}
-      
-      // exploitation des resultats
-      //  for(j = 0; j < varnum; j++)
-      //printf("varnum=%d\n",varnum);
-      //  for(j = 0; j < MAX_VARS-1 ; j++)
-      for(j = 0; j < varnum ; j++)
-	if(bind[j+1])
-	  {
-	    //printf("\t VAR[%d] = ", -(j+1));
-	    //print_flatterm_nl(stdout,bind[j+1]);	
-	    
-	    tt.fromstormform(bind[j+1]);
-	    tt.popt();
-	    substarray[j] = tt;
-	    tt.incrcount();
-	    NNEW(vit,struct vilist);
-	    vit->tt = tt;  vit->next = vis;  vis = vit; 	
-
-	    //free_flatterm(bind[j]);
-	    //bind[j] = NULL;
-	  }
-      return(1);
-    }
-  else
-    {
-#endif     
       if (extract_match(u.match_state, assignment))
 	//    Extract a match
 	{
@@ -385,9 +219,6 @@ int match_state::isnextsol(term *substarray)
 	  //sterr << "no time : " << after-before << "\n";
 	  return(0);
 	}
-#ifdef STORM
-    }
-#endif
 
 }
 
@@ -404,9 +235,6 @@ match_state::~match_state()
     //    sterr << "end of match request\n";
     //    after=clock();
     //    statistic.add_acmatch_time(after-before);
-#ifdef STORM
-    if(!acmatch_with_storm)
-#endif
       destroy_match(u.match_state);
     //    destroy object and free storage
   }

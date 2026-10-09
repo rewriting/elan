@@ -34,10 +34,8 @@
 
 extern int handlestrategydefinition(lstream *f);
 
-#ifdef PEM
 extern struct sgrammrule *dollar_vartab[MAXNOFVAR];
 // copie de vartab pour les regles de variable avec un dollar
-#endif
 
  int profistck[MAXPROFISTCK];           // stack of profiles
  int profistcki =       -1;             // top-pointer to the profistck
@@ -348,49 +346,6 @@ int semact3(int n,lexem l,lstream *f)
      ACTIMP2POS;
      pos_l = pos;
      break;
-#ifdef JUNK_CODE
-  case 322: // ( __ ) __ :: (sprofillist,imodule2) sprofil2
-    {struct ilist *ilistptr = NULL;
-     struct ilist *pom = NULL;
-     char profilstr[STRLEN];
-     int found;
-
-     while (top_profistck() != NOPROFIL) {
-       NNEW(pom, struct ilist);
-       pom->next = ilistptr;
-       pom->i = pop_profistck();
-       ilistptr = pom; };
-     pop_profistck(); //... NOPROFIL
-     profit.profil2str(ilistptr,profilstr);
-     //stout << " add profil[" << &ilistptr << "]\n";
-     pos = profit.add_profil(&ilistptr,&found);
-//????????? preco to nechyba     pos = typet.addstr(profilstr);
-
-     push_profistck(pos);
-     profi_level--;
-     if (profi_level == 1 /*only topmost level*/) {
-       le.crtypelex(pos);
-       grstack[stacki].addnont(le);
-       actprofis++;  }
-     break;
-   }
-  case 327: //  __ :: (imodule2) sprofil2
-    {struct ilist *ilistptr;
-     char profilstr[STRLEN];
-     int found;
-       NNEW(ilistptr, struct ilist);
-       ilistptr->next = NULL;
-       ilistptr->i = pop_profistck();
-
-     profit.profil2str(ilistptr,profilstr);
-     //stout << " add profil{" << &ilistptr << "}\n";
-     pos = profit.add_profil(&ilistptr,&found);
-//??????????? preco to nechyba     pos = typet.addstr(profilstr);
-
-     push_profistck(pos);
-     break;
-   }
-#endif
   case 329: 
     numb_selectors = 0; sel_poss = 0;
     break;
@@ -512,10 +467,8 @@ int semact3(int n,lexem l,lstream *f)
      lle.cridlex("self"); actvtab[actvtabi] = lle;
      vartab[actvtabi]=grstack[stacki].addvarrule(actruletype_l,// self : s
                       actvtab[actvtabi],VARSPRI,RVAR,-actvtabi-1);
-#ifdef PEM
      dollar_vartab[vartabi]=grstack[stacki].adddollarvarrule(actruletype_l,
 			    actvtab[vartabi],VARSPRI,RVAR,-vartabi-1);
-#endif
      actvtabi++;
     vartabi++;
      break; 
@@ -612,10 +565,8 @@ int semact3(int n,lexem l,lstream *f)
      lle.cridlex("self"); actvtab[actvtabi] = lle;
      vartab[actvtabi]=grstack[stacki].addvarrule(actruletype_l,// self : s
                       actvtab[actvtabi],VARSPRI,RVAR,-actvtabi-1);
-#ifdef PEM
      dollar_vartab[vartabi]=grstack[stacki].adddollarvarrule(actruletype_l,
 			    actvtab[vartabi],VARSPRI,RVAR,-vartabi-1);
-#endif
      actvtabi++;
     vartabi++;
     break; 

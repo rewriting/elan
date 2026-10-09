@@ -34,9 +34,6 @@
 #include <sys/wait.h>
 #include <errno.h>
 
-#ifdef VISIGRAPH
-#include "writehtml.h"
-#endif
 #include "command.h"
 #include "meta.h"
 
@@ -65,19 +62,13 @@ static void tryapptrace(contrule *cr,term tt)
 {
   char *trname;
   int appflag;
-#ifdef COMMAND
   int breakflag = 0;
-#endif
   cr->gettraceinfo(trname,appflag
-#ifdef COMMAND
 		   ,breakflag
-#endif
 );
   if (
       trname!=NULL && (
-#ifdef COMMAND
       breakflag ||
-#endif
       trace || (traceind+1 <= tracelevel && !quiet))) {
     indent(); traceout << "    "<< (appflag!= APPFBEFFIRST?"still ":"")  
                     << "trying  '" 
@@ -89,25 +80,17 @@ static void rulesucctrace(contrule *cr,term mtt)
 {
   char *trname;
   int appflag;
-#ifdef COMMAND
   int breakflag = 0;
-#endif
   cr->gettraceinfo(trname,appflag
-#ifdef COMMAND
 		   ,breakflag
-#endif
       );
    if (
        trname !=NULL && (
-#ifdef COMMAND
        breakflag ||
-#endif
        trace || (traceind <= tracelevel && ! quiet))) {
       indent(); traceout << "    '" << trname << "' :\t";
       if (
-#ifdef COMMAND
 	  breakflag ||
-#endif
 	  trace) { mtt.write(traceout);traceout<<"\n"; }
    }
    
@@ -115,22 +98,16 @@ static void rulesucctrace(contrule *cr,term mtt)
 
 static void ruleredtrace(contrule *cr,term res)
 {
-#ifdef COMMAND
   char *trname;
   int appflag;
   int breakflag = 0;
   if (commands)
     cr->gettraceinfo(trname,appflag,breakflag);
-#endif
    if (
-#ifdef COMMAND
        breakflag ||
-#endif
        trace || (traceind <= tracelevel && ! quiet)) {
       if (
-#ifdef COMMAND
 	  breakflag ||
-#endif
 	  trace) {traceout << "\n"; indent();  traceout << "    [red] :\t";}
       res.write(traceout);traceout<<"\n";
    }
@@ -141,19 +118,13 @@ static void rulefinishedtrace(contrule *cr)
 {
   char *trname;
   int appflag;
-#ifdef COMMAND
   int breakflag;
-#endif
   cr->gettraceinfo(trname,appflag
-#ifdef COMMAND
 		   ,breakflag
-#endif
 );
     if (
 	trname !=NULL && (
-#ifdef COMMAND
 	breakflag ||
-#endif
 	trace || (traceind+1 <= tracelevel && ! quiet))) {
       indent(); traceout << "    fail of '" << trname << "' \n";
     }
@@ -162,9 +133,7 @@ static void rulefinishedtrace(contrule *cr)
 static void wheresettrace(int vn, term t,strategy **st)
 {
   if (
-#ifdef COMMAND
      (commands && st && *st && (*st)->breaked)||// HACK-I DO NOT UNDERSTAND 
-#endif
       trace || (traceind-1 <= tracelevel && !quiet)) {
     indent(); traceout << "setting VAR("<<vn<<") on ";
                  t.write(traceout);traceout<<"\n";
@@ -174,9 +143,7 @@ static void wheresettrace(int vn, term t,strategy **st)
 static void wherepatternsettrace(term pat, term t,strategy **st)
 {
   if (
-#ifdef COMMAND
      (commands && st && *st && (*st)->breaked)||// HACK-I DO NOT UNDERSTAND 
-#endif
      trace || (traceind-1 <= tracelevel && !quiet)) {
     indent(); traceout << "setting "; pat.write(traceout);
 	      traceout << " on "; t.write(traceout);traceout<<"\n";
@@ -186,9 +153,7 @@ static void wherepatternsettrace(term pat, term t,strategy **st)
 static void wherepatternfailtrace(term pat, strategy **st)
 {
   if (
-#ifdef COMMAND
       (commands && st && *st && (*st)->breaked)||// HACK-I DO NOT UNDERSTAND
-#endif
       trace || (traceind-1 <= tracelevel && !quiet)) {
     indent(); traceout << "affectation of "; pat.write(traceout);
     traceout <<" failed\n";
@@ -198,9 +163,7 @@ static void wherepatternfailtrace(term pat, strategy **st)
 static void wherefailtrace(int vn,strategy **st)
 {
   if (
-#ifdef COMMAND
       (commands && st && *st && (*st)->breaked)||// HACK-I DO NOT UNDERSTAND
-#endif
       trace || (traceind-1 <= tracelevel && !quiet)) {
     indent(); traceout << "affectation of VAR("<<vn<<") failed\n";
   }
@@ -216,9 +179,7 @@ static void whereiftrace(term wt)
 static void wherestarttrace(term t,strategy **st)
 {
   if (
-#ifdef COMMAND
       (commands && st && *st && (*st)->breaked)|| // HACK-I DO NOT UNDERSTAND
-#endif
       trace || (traceind <= tracelevel && !quiet)) {
     indent(); traceout << "  applying strategy '" << 
 		trrules.strategyname_refs(st) << "' on\t";
@@ -820,18 +781,12 @@ incrnextrule:
               pool_min = pool_stat[nr]; nr_min = nr; }
 	if (nr_min == -1) return(0); // unfound... all are finished
 	nr = nr_min;
-	#ifdef CONCUR_BLABLA
-	stout << "READING from " << nr << " PROCES of type " << actsl->u->processes.stsym  << "\n";	
-	#endif
 	r=nextsolsubprocess(actsl->u->processes.subprocesses[nr],
 			   actsl->u->processes.gr,
 			   actsl->u->processes.stsym,
 			   res);
 
 	if (r == 1) {
-          #ifdef CONCUR_BLABLA
-	  stout << "RESULT from " << nr << " PROCES IS "; res.write(stout); stout << "\n";
-	  #endif
 	  if (actsl->actst->strnam() == STRNAMEONECON2) {
 
     for(r=0; r<actsl->u->processes.nofsubprocesses; r++) 
@@ -855,9 +810,6 @@ incrnextrule:
 	  sleep(1); 
 	}
 	else { // -1
-	  #ifdef CONCUR_BLABLA
-	  stout << "NO_MORE SOLUTION from " << nr << " PROCES\n";
-	  #endif
 	actsl->u->processes.subprocesses[nr]->counter = -1;
 	freeprocess(actsl->u->processes.subprocesses[nr]);
 	actsl->u->processes.subprocesses[nr] = NULL; }
@@ -1143,9 +1095,7 @@ void freeWhereBacktrack(int varn, struct wheress * &lastws,term *substarray)
 }
 
 void contrule::gettraceinfo(char *&name,int &appfl
-#ifdef COMMAND
 			    , int &breakflag
-#endif
 )
 { term l,r;
   term rlabel;
@@ -1157,9 +1107,7 @@ void contrule::gettraceinfo(char *&name,int &appfl
 	      whichmatch,rlabel);
   name = trrules.rulename(nameind);
   appfl = appflag;
-#ifdef COMMAND
   breakflag = trule->breaked;
-#endif
 }
 
   /**********
@@ -1271,12 +1219,7 @@ res.incrcount(); // ???
       }      
       if (cres) { // found
         // *** stout << "found ...\n";
-#ifdef GCMEM
-	freeBacktrack(lastws); 
-	lastws = NULL;
-#else
         freeBacktrack(lastws);       //???? HACK ... lastws = NULL;
-#endif
         // *** stout << "install ...\n";
 	return 
           isTseqBacktrackNextSol(res,br->tseq,substarray,lastws,
@@ -1302,222 +1245,8 @@ res.incrcount(); // ???
   }
 }
 
-#ifdef VRSION1901
-int isTseqBacktrackNextSol(term &res, struct tseq *rhs, term *substarray,
-                   struct wheress * &lastws, int notbatch, int nback,
-	           struct wherelist *&lastwheres, struct term *&lastresult,
-	           int varn)
-{
-struct branch *br = NULL;
-int    cres = 0;
-term   tst;
-   // *** stout << "isTseqBacktrackNextSol " << nback << "\n";
-  if (nback) { // redo
-    // *** stout << "redo ... \n";
-    // *** wherelisdump(stout,lastwheres,5);
-    if (isWhereBacktrackNextSol(lastwheres,substarray,lastws,notbatch,varn)) {
-      lastresult->copyinstall(false,res,substarray);
-
-//1901
- res.incrcount(); // ???
-
-      return 1; }
-    else
-      return 0;
-  }
-  if (rhs->is_case) {
-    // *** stout << "more branches ... \n";
-    // *** wherelisdump(stout,rhs->seq,5);
-    if (rhs->seq == NULL ||
-	isWhereBacktrackNextSol(rhs->seq,substarray,lastws,notbatch,varn)) {
-      // *** stout << "search true case ... \n";
-      for(cres = 0,br = rhs->more_branches.brlist; br; br=br->next) {
-	br->test.copyinstall(false,tst,substarray);
-        reduce(tst,trace);
-	cres = istrueterm(tst);
-//1901	tst.tdelete(); //1901
-	if (cres) break;
-      }      
-      if (cres) { // found
-        // *** stout << "found ...\n";
 
 
-//1901        
-      freeBacktrack(lastws);       //???? HACK ... lastws = NULL;
-//stout << "FREE IN SWITCH \n";
-//freeWhereBacktrack1(varn,lastws,substarray);
-//stout << "DONE \n";
-
-        // *** stout << "install ...\n";
-	{
-	    //struct wheress *loc_lastws = NULL;
-        cres =  isTseqBacktrackNextSol(res,br->tseq,substarray,
-	    //			       loc_lastws,
-	    			       lastws,
-				 notbatch,nback,lastwheres,lastresult,varn); 
-//stout << "FREE IN SWITCH \n";
-//        freeWhereBacktrack1(varn,lastws,substarray);
-//	lastws = loc_lastws;
-//	freeWhereBacktrack1(varn,loc_lastws,substarray);
-//stout << "DONE \n";
- 
-        return cres;
-	}
-      }
-      else
-	return 0; }
-    else
-      return 0; } 
-  else {
-    // *** stout << "one branch ... \n";
-    lastwheres = rhs->seq;
-    lastresult = rhs->one_branch.result;
-    // *** wherelisdump(stout,lastwheres,5);
-    if (rhs->seq == NULL ||
-	isWhereBacktrackNextSol(rhs->seq,substarray,lastws,notbatch,varn)) {
-      rhs->one_branch.result->copyinstall(false,res,substarray);
-
-//1901 
-res.incrcount(); // 
-
-      return 1; }
-    else
-      return 0;
-  }
-}
-#endif
-
-
-#ifdef RSWITCH
-int isNewTseqBacktrackNextSol(term &res, struct tseq *rhs, term *substarray,
-             struct wheress * &lastws, int notbatch, int varn)
-{
-  if (rhs->is_case) {
-    if (rhs->seq == NULL ||
-	isWhereBacktrackNextSol(rhs->seq,substarray,lastws,notbatch,varn)) {
-	struct wherelist *p;
-	NNEW(p, struct wherelist);
-	p->next = NULL; p->leftvarn = SWITCHCASEEND;
-	p->branch_list = rhs->more_branches.brlist;
-	return isWhereBacktrackNextSol(p,substarray,lastws,notbatch,varn);
-    } else
-	return 0;
-  }
-  else {
-      if (rhs->seq == NULL ||
-	  isWhereBacktrackNextSol(rhs->seq,substarray,lastws,notbatch,varn)) {
-	  rhs->one_branch.result->copyinstall(false,res,substarray);
-      reduce(res,trace);
-      return 1;
-      }
-      else
-	  return 0;
-  }
-}
-
-int isTseqBacktrackNextSol(term &res, struct tseq *rhs, term *substarray,
-                   struct wheress * &lastws, int notbatch, int nback,
-	           struct wherelist *&lastwheres, struct term *&lastresult,
-	           int varn)
-{
-struct branch *br = NULL;
-int    cres = 0;
-term   tst;
-int RET;
-
-// printvars("Tseq entry",varn,substarray);
-
-
-   // *** stout << "isTseqBacktrackNextSol " << nback << "\n";
-  if (nback) { // redo
-    // *** stout << "redo ... \n";
-    // *** wherelisdump(stout,lastwheres,5);
-    if (isWhereBacktrackNextSol(lastwheres,substarray,lastws,notbatch,varn)) {
-      lastresult->copyinstall(false,res,substarray);
-
-      reduce(res,trace);
-
-//res.incrcount(); // ???
-
-//stout << "##################\n";
-//res.write(stout); stout << "\n";
-//stout << res.getcount() << "\n\n";
-
-      RET=1; goto ret; }
-    else {
-	RET=0; goto ret; }
-  }
-  if (rhs->is_case) {
-
-    // *** stout << "more branches ... \n";
-    // *** wherelisdump(stout,rhs->seq,5);
-    if (rhs->seq == NULL ||
-	isWhereBacktrackNextSol(rhs->seq,substarray,lastws,notbatch,varn)) {
-      // *** stout << "search true case ... \n";
-
-// printvars("before switching",varn,substarray);
-
-      for(cres = 0,br = rhs->more_branches.brlist; br; br=br->next) {
-	br->test.copyinstall(false,tst,substarray);
-
-// printvars("before cond",varn,substarray);
-
-        reduce(tst,trace);
-	cres = istrueterm(tst);
-	tst.tdelete();
-
-// printvars("after cond",varn,substarray);
-
-	if (cres) break;
-      }      
-      if (cres) { // found
-
-struct wheress *loc_lastws = lastws; lastws = NULL; //2301
-
-      cres =  isTseqBacktrackNextSol(res,br->tseq,substarray,lastws,
-				 notbatch,nback,lastwheres,lastresult,varn); 
-
-      freeWhereBacktrack(varn,loc_lastws,substarray); //2301
-      freeWhereBacktrack(varn,lastws,substarray); //2301
-
-//      printvars("before RETurning",varn,substarray);
-
-      RET = cres; goto ret;
-      }
-      else {
-	  RET = 0; goto ret; } }
-    else {
-     RET = 0; goto ret;} }
-  else {
-    // *** stout << "one branch ... \n";
-    lastwheres = rhs->seq;
-    lastresult = rhs->one_branch.result;
-    // *** wherelisdump(stout,lastwheres,5);
-    if (rhs->seq == NULL ||
-	isWhereBacktrackNextSol(rhs->seq,substarray,lastws,notbatch,varn)) {
-      rhs->one_branch.result->copyinstall(false,res,substarray);
-      
-      reduce(res,trace);
-
-//res.incrcount(); // ???
-//res.write(stout); stout << "\n";
-//stout << res.getcount() << "\n\n";
-
-      freeWhereBacktrack(varn,lastws,substarray); //2301
-
-//      printvars("before returning",varn,substarray);
-
-
-      RET = 1; goto ret; }
-    else {
-	RET = 0; goto ret; }
-  }
-
-ret:
-freeWhereBacktrack(varn,lastws,substarray); //2301
-  return RET;
-}
-#endif
 
 
 int contrule::nextapp(term &mtt,int notbatch)
@@ -1652,15 +1381,6 @@ forward0:
     goto forward0;
   }
 
-#ifdef RSWITCH
-  if (actwh->leftvarn == SWITCHCASEEND) {
-      struct wheress *p;
-      NNEW(p, struct wheress);
-      p->prev = lastws; p->branch_list = actwh->branch_list;
-      lastws = p;
-      goto backward;
-  }
-#endif
   ws->mstate=NULL;
   // stout << "##9\n"; //HORA
   // actwh->whereterm.write(stout); stout << "\n"; // HORA
@@ -1735,31 +1455,6 @@ forward0:
     goto backward;
   }
 backward:
-#ifdef RSWITCH
-  if(lastws->actwh->leftvarn == SWITCHCASEEND) {
-      struct branch *brlist;
-      if (lastws->branch_list != NULL) {
-	  struct branch *br = lastws->branch_list;
-	  lastws->branch_list = lastws->branch_list->next;
-	  // test condition
-        if (1) {
-          if (isNewTseqBacktrackNextSol(
-	    res, br->tseq, substarray, lastws,notbatch, varn))
-	      return 1;
-	  else
-	      goto backward;
-	} else goto backward;  
-      } else {
-	  struct wheress *pp = lastws;
-	  DELETE1(lastws);
-	  lastws = pp;
-	  if (lastws) 
-	      goto backward;
-	  else
-	      return 0;
-      }
-  }
-#endif
   if (lastws->TRYCHOICE) {
     int len;
 

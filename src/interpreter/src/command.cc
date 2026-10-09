@@ -34,7 +34,6 @@
 #include "string.h"
 #include "compiledefs.h"
 
-#ifdef COMMAND
 
 stck::stck(char *pref,char *s)
 {
@@ -346,4 +345,3 @@ sterr << "mainstream - " << mainstream << "..." << lstri << "\n"; sterr.flush();
   return(1);
 }
 
-#endif

@@ -29,11 +29,9 @@
 #include "commondefs.h"
 #include "termdefs.h"
 
-#ifndef RUNTIME // begin RUNTIME
 #include "module.h"
 
 static term te;
-#endif // end RUNTIME
 
 int strategywasapplied = 0;
 static int lastIdentVal,lastNumVal;
@@ -48,7 +46,6 @@ void esemactinit()
 }
 
 
-#ifndef RUNTIME // begin RUNTIME
 // Pour libearley : esemact est redefinie dans runtimeInit.c
 int esemact(lstream *f,int rulenum,lexem lex,lexem sort)
 {
@@ -157,4 +154,3 @@ int esemact(lstream *f,int rulenum,lexem lex,lexem sort)
   }
   return(NORMCONT);
 }
-#endif // end RUNTIME

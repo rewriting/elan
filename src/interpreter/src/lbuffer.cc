@@ -68,7 +68,6 @@ void lbuffer::clear()
   lastch->b = lastch->e = 0;
 }
 
-#ifndef RUNTIME // begin RUNTIME
 int lbuffer::isempty()
 {
   return(lastch == &firstch && firstch.b==firstch.e);
@@ -170,5 +169,4 @@ void lbuffer::dump()
   }
   sterr << "[lbuffer::dump] end\n";
 }
-#endif // end RUNTIME
 

@@ -110,9 +110,6 @@ struct termlist {
 };
 
 class termset
-#ifdef GCMEM
-: public gc
-#endif
  {
   private:
     struct termlist *tlist;
@@ -140,9 +137,6 @@ struct patterms {
 #define MAXNOFPATTERNS  50      // maximum of all patterns
 
 class Patterms
-#ifdef GCMEM
-: public gc
-#endif
  {
   public:
    int Pattermsi;
@@ -158,9 +152,6 @@ class Patterms
 };
 
 class transrule
-#ifdef GCMEM
-: public gc
-#endif
  {
 private:
   int varnum;// nb de variables dans la regle
@@ -177,9 +168,7 @@ private:
   int infos;
   int rule_counter;
 public:
-#ifdef COMMAND
   int breaked;                  // break point;
-#endif
   transrule(int varnum, term lefts, term rights,
 	    int modul, int infos,
 	    struct tseq *rhs,
@@ -273,9 +262,6 @@ struct namelist {
 };
 
 class strategy
-#ifdef GCMEM
-: public gc
-#endif
  {			// bodies in trsystem.c
 private:
   int strname;          // name of strategy
@@ -298,9 +284,7 @@ private:
   } u;
 
 public:
-#ifdef COMMAND
     int  breaked;
-#endif
   strategy();
 //  strategy(int n,strategy *sub);
   void appendrname(int nam);
@@ -355,9 +339,6 @@ extern void addtrywheretolist(int rev, struct WHEREbranches *whbrs,
             struct wherelist **p);
 
 class trsystem
-#ifdef GCMEM
-: public gc
-#endif
  {
 private:
   // indexed by definition index:
@@ -455,9 +436,6 @@ class stateofexecution;
 
 // run time
 class contrule
-#ifdef GCMEM
-: public gc
-#endif
  {
 private:
     int appflag,       // flag before first match <-> inside matchings
@@ -476,9 +454,7 @@ public:
 //  void deletematch();                            //  !!!!!!!!!!!! just to debug
 //  void getactrule(int &n,term &l,term &r,term &c,char *&name);
   void gettraceinfo(char *&name,int &appflag
-#ifdef COMMAND
 , int &breakflag
-#endif
 );
   int nextapp(term &mtt,int trace);
   contrule *copy();
@@ -521,9 +497,6 @@ union simple_str_state {
  
 
 class locstatistics
-#ifdef GCMEM
-: public gc
-#endif
  {
   int succNodes,totalNodes;
   int nonCountednodes,wasSucces;
@@ -549,9 +522,6 @@ struct strstatelist {
 
 
 class stateofexecution
-#ifdef GCMEM
-: public gc
-#endif
  {
 private:
 
@@ -583,9 +553,6 @@ struct wheress {                        // wheres evaluation state
 };
 
 class statistics
-#ifdef GCMEM
-: public gc
-#endif
  {
   int total_num_of_cpoints;
   int num_of_cpoints;

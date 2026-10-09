@@ -25,10 +25,6 @@
 
 */
 
-#ifdef VISIGRAPH
-#include "visigraph.h"
-//#include "writehtml.h"
-#endif
 #include "module.h"
 #include <signal.h>
 #include <setjmp.h>
@@ -44,10 +40,6 @@
 #include "strategy.h"
 int lis_norm = 0;
 int alg_normalisation = 1;
-#ifdef STORM
-extern void storm_connect(trsystem trrules);
-#include "storm_proto.h"
-#endif
 
 extern void conform_strategies(int warn);
 extern stringtab ldrwt;
@@ -99,9 +91,6 @@ int earley_analyser=0;
 int lgi_imports = 0;
 int reverse_wheres=1;
 int generate_code=0; // pour ne pas effacer les *.[cho]
-#ifdef STORM
-int acmatch_with_storm=0;
-#endif
 // -- for partial evaluation
 int peval_switch = 0;
 int extend_strategies = 0;
@@ -129,12 +118,6 @@ static int mtendofin(lexem le)
   return(le==RWmtfin || le.isendofstream());
 }
 
-#ifdef HISTORY
-static int endofin(lexem le)
-{
-  return(le.isendofstream());
-}
-#endif
 
 static int axchendofin(lexem le)
 {
@@ -560,11 +543,6 @@ int ldsemact(int n,lexem l,lstream *f)
 	break;
 
   case 4:
-#ifdef VISIGRAPH
-       strcpy(calledmod,actmn->s);
-       strcpy(importeur,principal);
-       add_dependance();
-#endif        
                                  // a module to import
 
 	//if (! import.member(actmn->s)) readmodules(f,actmn->s); // if ! imported, read it
@@ -787,19 +765,9 @@ void interrupt(int sig)
   int c;
 
   while(1) {
-#ifdef VISIGRAPH
-  stout <<
-    "\n\n[ executionAbort Continue Dump Exit Graphmodule Statistics\n" <<
-    "  changeTrace changeQuiet (ACDEGSTQ|acdegstq) ] ? ";
-#else
   stout << "\n\n[ executionAbort Continue Dump Exit Statistics\n" 
 	<< "  changeTrace changeQuiet "
-#ifdef TO_BE_DISTRIBUTED
 	<< "(ACDESTQ|acdestq)] ?";
-#else
-  << "Input Output stRategy (ACDESTQIOR|acdestqior)] ?";
-#endif
-#endif
 
   stout.flush();
   switch (c=getchar()) {
@@ -850,10 +818,6 @@ void interrupt(int sig)
     } else {trac=1; trace=1;}
     break;
     
-#ifdef VISIGRAPH    
-  case 'G': case 'g':  graphmod();  //body in visigraph.c
-    break;
-#endif
   case 'E': case 'e':
     exit(0);                   // exit
     
@@ -902,9 +866,7 @@ int main(int argc, char **argv)
   nsoptstr="";
   optimize=0;
 
-#ifdef PEM
     //init_alloc();
-#endif
   initAssignment();  
 
   elanlib = getenv("ELANLIB");                      // get environemt variable ELANLIB
@@ -1019,17 +981,8 @@ int main(int argc, char **argv)
       // command language
       else if(!strcmp(argv[i],"-C") || !strcmp(argv[i],"--command"))
 	commands = 1;
-#ifdef STORM
-      // AC-matching with Storm
-      else if(!strcmp(argv[i],"--storm"))
-	acmatch_with_storm=1;
-#endif
       else if(!strcmp(argv[i],"--earley") || !strcmp(argv[i],"--exe"))
 	{
-#ifndef EARLEY
-	  printf("recompile ELAN with EARLEY flag\n");
-	  failexit();
-#endif
 	  earley_analyser=1;
 	  compile = 1;  
 	  nsoptstr=addsuffix(nsoptstr," -EARLEY");
@@ -1098,18 +1051,7 @@ int main(int argc, char **argv)
   init_visi(impmoduli);
 
 
-#ifdef VISIGRAPH
-  strcpy(principal,modsource);
-  inittabmodule();
-#endif       
  
-#ifdef STORM
-  if(acmatch_with_storm)
-     {
-       sig_init();
-       STORM_init(); 
-     }
-#endif
   // get the .spc filename
   specname=argv[i+1];
   // init the value of trueterm on true
@@ -1234,11 +1176,9 @@ int main(int argc, char **argv)
   // init some values to compile strategies
   modinit(); 
 
-#ifdef EARLEY
 
   //globtermgr.earleyPrettyDump(stout);
   //topgrammar->earleyPrettyDump(stout);
-#endif
   // recover the user defined execution switches
   trace = trac;
   quiet = qui;
@@ -1262,7 +1202,6 @@ int main(int argc, char **argv)
       //   set rsff static variable for the code generator
       setrsff(genof_c); 
 
-#ifdef EARLEY
       if(earley_analyser)
 	{
 	  moddest_h = strdup(modsource);
@@ -1288,7 +1227,6 @@ int main(int argc, char **argv)
 	  // generate the construction of the given term
 	  genmaintfile(genof_c,maint,mainstrategy); 
 	}
-#endif
       //   generate the preambule of the code
       genpreambule(genof_c);
       //   compile the rewriting rules
@@ -1298,7 +1236,6 @@ int main(int argc, char **argv)
       //   close output file        
       fclose(genof_c);        
 
-#ifdef EARLEY
       if(earley_analyser)
 	{
 	  if(outputName==0) outputName = addsuffixs("a.out",NULL);
@@ -1335,14 +1272,6 @@ int main(int argc, char **argv)
 	  //  call cElanScript to call C-compiler
 	  system(callcompilstr);  
 	}
-#else
-      //   set arguments strings to call the cElanScript
-      callcompilstr = addsuffixs("$ELANLIB/Compiled/`uname -m`/cElanScript -c ",nsoptstr," ",moddest,NULL); 
-      calllinkstr = addsuffixs("$ELANLIB/Compiled/`uname -m`/cElanScript -l ",nsoptstr," ",moddest,NULL);
-      if (!batch) {fprintf(stderr,"[.c->.o]: %s\n",callcompilstr);}
-      //  call cElanScript to call C-compiler
-      system(callcompilstr);  
-#endif
     }
 
   {
@@ -1422,10 +1351,6 @@ int main(int argc, char **argv)
 	    fprintf(OUTS,"\n[kill]:\n");
 	    //       delete the pipe (and kill the subprocess)
 	    delete pip;                                      
-#ifndef PEM
-	    //       remove the core (one never knows)
-	    system("/bin/rm -f core ");                     
-#endif
           } else {
             in_runtime++;
 	    // IF INTERPRETER

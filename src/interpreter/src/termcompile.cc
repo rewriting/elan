@@ -766,11 +766,6 @@ void term::genSaveUnsavePF(FILE *ff,int deep)
 		    if (sht == PERFSHARE) {
 
     // stout << "VAR compif.varsor " <<t->compif.varsort.typeval() << "\n";
-#ifdef TO_BE_REMOVED
-                    fprintf(ff,"/* VAR compif.varsor %d,%d */\n", 
-			    t->compif.varsort.typeval(),
-                            isofbuiltintype());
-#endif
 		    if (isofbuiltintype()) {
 		       if (Bins) {
 			 intend(ff,deep); 

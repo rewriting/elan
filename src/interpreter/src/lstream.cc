@@ -173,9 +173,6 @@ void lstream::ilex(lexem &l)
     }  
     strconst[i] = 0;
     flex.crstringlex(strconst);   
-#ifdef LEX_BLABLABLA
- if (!batch) l.dump();
-#endif
     return;
   }
   if (c == '`') {
@@ -188,9 +185,6 @@ void lstream::ilex(lexem &l)
     istr->ich(c); istr->fuch(fc);
     if (c != '`') { sterr << "\nwrong string constant\n"; failexit(); }
     flex.crnumlex(n);
-#ifdef LEX_BLABLABLA
- if (!batch) l.dump();
-#endif
     return;
   }
 //--- BORO's hacks
@@ -214,9 +208,6 @@ void lstream::ilex(lexem &l)
       flex.craidlex(ide);
     else
       flex.cridlex(ide);
-#ifdef LEX_BLABLABLA
- if (!batch) l.dump();
-#endif
     return;
   }
 // number
@@ -227,9 +218,6 @@ void lstream::ilex(lexem &l)
       n=n*10+c-'0';
     }
     flex.crnumlex(n);
-#ifdef LEX_BLABLABLA
- if (!batch) l.dump();
-#endif
     return;
   }
   if (c==EOFICHSTR) {
@@ -238,16 +226,10 @@ void lstream::ilex(lexem &l)
 //      return; }
 //    else {
       flex.crendofstreamlex(); 
-#ifdef LEX_BLABLABLA
- if (!batch) l.dump();
-#endif
       return; 
 //}
   }
   flex.crcharlex(c);
-#ifdef LEX_BLABLABLA
- if (!batch) l.dump();
-#endif
   return;
 }
 
@@ -281,7 +263,6 @@ void lstream::owarn(char *ch )
   }
 }
 
-#ifndef RUNTIME // begin RUNTIME
 void lstream::oerr(char *ch, char *s ... )
 { va_list ap;
   oerr();
@@ -330,7 +311,6 @@ lbuffer *lstream::getlastinlineAndinit()
   lastinline = NULL;
   return(ll);
 }
-#endif // end RUNTIME
 
 /* ----------- here is moreover the lexem ------------*/
 

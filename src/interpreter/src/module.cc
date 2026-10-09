@@ -39,19 +39,12 @@ stringtab builtinmodules(64,"bool","builtinInt","ident","double",
 		"doubleConstants","common",
 		"cmp","replace","occur","builtinSyntacticMatching",
 		"builtinIO","builtinStdio", // ELAN's ios
-#ifdef PICALC
-                "picalc",     // Patric IO's
-#endif
-#ifdef COMMAND
                 "Query",          // description of command language
-#endif
                 "builtinString",
-#ifdef PEM
                  "test",// Modules ajoutes pour faire des tests
                  "pem1",// Modules ajoutes pour faire des tests
                  "pem2",// Modules ajoutes pour faire des tests
                  "fac",// Modules ajoutes pour faire des tests
-#endif
                  "Meta_apply",    // meta_apply and set_of for interepreter 
                  "Meta_capply",   // meta_apply and set_of for compiler
                  "Meta_strat",    // description of Marian's strategies in ELN 
@@ -120,9 +113,6 @@ void settrueterm()
 
 void failexit()
 {
-#ifdef DEBUG
-  fprintf(stderr,"failexit\n");
-#endif
   stout.flush(); sterr.flush();
   kill_all_processus();
   exit(EXIT_FAILURE);

@@ -43,10 +43,8 @@ static lexem varnames[MAXNOFVAR];
 static struct sgrammrule *vartab[MAXNOFVAR];
 extern char *attach_type(char *s,int t);
 
-#ifdef PEM
 //static struct sgrammrule *dollar_vartab[MAXNOFVAR];// copie de vartab pour les
 //                                     //regles de variable avec un dollar
-#endif
 static char wasaffected[MAXNOFVAR];
 static int vartabi=0;
 static int varnamesi=0;
@@ -586,12 +584,10 @@ int mlstream::macroexp()
 //	  actgram()->addrw(varnames[i]);
 	  vartab[i]= actgram()->addvarrule(
 		     vartypetab[i],varnames[i],VARSPRI,RVAR,-i-1+bvarnamesi);
-#ifdef PEM
 	  //	  dollar_vartab[vartabi] =  actgram()->adddollarvarrule(
 	  //   vartypetab[i],varnames[i],VARSPRI,RVAR,-i-1+bvarnamesi);
 	  //	  writegrrule(sterr,vartab[vartabi],&typet);
 	  //	  cout<<"actvartype="<< typet.ide(vartypetab[i].typeval())<<"\n";
-#endif
  
         }
         if ( mflex != RWSUCH ) {
@@ -669,15 +665,11 @@ int mlstream::macroexp()
 		beforemess(mflex);
 		failexit();
 	    }
-#ifdef PEM
 	    //	    writegrrule(stout,vartab[i],&typet);
 	    actgram()->deleterule(vartab[i]);
 	    //	    sterr << "PREPROC DOLLAR delete\n";
 	    //writegrrule(stout,dollar_vartab[i],&typet);
 	    //	    actgram()->preprocdeleterule(dollar_vartab[i]);
-#else
-	    actgram()->deleterule(vartab[i]);
-#endif
 //	    actgram()->removerw(varnames[i]);
 	  }
           expect(':'); pilex(fl);

@@ -41,14 +41,10 @@ struct nvlist {
 };                          // a stack of var declarations (for the case of nested declarations using 
 						//				nested "rules" construction)
 
-#ifdef ANYS
 extern int anysi;
 extern int anys[];
-#endif
-#ifdef SYMBS
 extern int symbappli;
 extern struct ilist *symbappl[];
-#endif
 
 
 #define AUXRULES 2
@@ -116,9 +112,6 @@ struct Any_if {
     term *cond; };
 
 class Any
-#ifdef GCMEM
-: public gc
-#endif
  {
 public:
   int any_kind;
@@ -132,9 +125,6 @@ public:
 };
 
 class Alist
-#ifdef GCMEM
-: public gc
-#endif
  {
     public:
     Any    *any;
@@ -144,9 +134,6 @@ class Alist
 };
 
 class Slist
-#ifdef GCMEM
-: public gc
-#endif
  {
     public:
   struct strat *s;
@@ -161,9 +148,6 @@ struct List_k {
     Slist *subs; };
 
 class Appl
-#ifdef GCMEM
-: public gc
-#endif
  {
     public:
   term *t;
@@ -200,9 +184,6 @@ struct Term_k {
     term *t; };
 
 class strat
-#ifdef GCMEM
-: public gc
-#endif
  {
   public:
     int kind;                 // kind of record
@@ -367,9 +348,6 @@ struct ilist {
 
 #define PROFITABSIZE  1000
 class profitab
-#ifdef GCMEM
-: public gc
-#endif
  {
   //private:
   public:

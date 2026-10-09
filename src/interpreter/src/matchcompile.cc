@@ -93,11 +93,7 @@ static void addnotmembertohash(unsigned long ok,struct rtna **st,int sti,int lab
   hashtab[hashind].okset = ok;
   hashtab[hashind].label = lab;
   hashtab[hashind].stacki = sti;
-#ifdef GCMEM
-  hashtab[hashind].stack = new (GC)struct rtna *[sti];
-#else
   hashtab[hashind].stack = new struct rtna *[sti];
-#endif
   for(i=0;i<sti;i++) hashtab[hashind].stack[i] = st[i];
 }
 
@@ -451,7 +447,6 @@ static int selectSubtreeFromStack
   }\
 }
 
-#ifdef PEM
 static void gen_dump_noruleapp(FILE *ff,int deep)
 {  int a,i;
 if (!batch) {
@@ -503,9 +498,7 @@ if (!batch) {
      }
 }
 }
-#endif
 
-#ifdef PEM
 #define GENNORULEAPP() {\
     if (!(actisfun)) {\
       if (actdontcare && (!actisbuiltin))\
@@ -524,27 +517,7 @@ if (!batch) {
       actnoruleapp =1;\
     }\
 }
-#else
-#define GENNORULEAPP() {\
-    if (!(actisfun)) {\
-      if (actdontcare && (!actisbuiltin))\
-        fprintf(ff,"freeterm(v1);; ");\
-      if (trace && !batch) { \
-        fprintf(ff,"fprintf(%s,\"[trace] no-rule-fail ::\\n\");",OUTPUTS); \
-	    fprintf(ff,"fprintf(%s,\"\176\");\n",OUTPUTS);\
-	    fprintf(ff,"fflush(%s);\n",OUTPUTS); } \
-      genFail(ff,0);\
-    }\
-    else if (actisbuiltin) \
-      fprintf(ff,"exitnorule(%d);\n",actfunction);\
-    else {\
-      fprintf(ff,"goto norulelab;\n");\
-      actnoruleapp =1;\
-    }\
-}
-#endif
 
-#ifdef PEM
 #define GENCASE(fsym) \
 	intend(ff,deep);\
 	if (fsymtab[fsym].textform())\
@@ -556,7 +529,6 @@ if (!batch) {
 		    (fsymtab[fsym].textform()->rside[0]).alfsy());\
 	else\
 	  fprintf(ff,"case %d:\n",fsym);
-#endif
 
 /* call genexpmatch(...,rrt,0xffffffff,0) */
 
@@ -625,11 +597,7 @@ nextpattern:
       savestacki=stacki;
       l = p->setrt.tail;
       while (l!=NULL) {
-#ifdef PEM
 	GENCASE(l->head->fsym);
-#else
-	intend(ff,deep); fprintf(ff,"case %d:\n",l->head->fsym);
-#endif
 	genexpmatch(ff,l->head,ok);
 	stacki = savestacki;
 	for(i=0;i<stacki;i++) stack[i] = savestack[i];
@@ -722,11 +690,7 @@ static int genreclinmatch
 	    l = p->setrt.tail;
 	    while (l!=NULL) {
 	      if (l->head->infos != TNORMFS) {
-#ifdef PEM
 		GENCASE(l->head->fsym);
-#else
-		intend(ff,deep); fprintf(ff,"case %d:\n",l->head->fsym);
-#endif
 		genreclinmatch(ff,l->head,ok);
 		intend(ff,deep); fprintf(ff,"  break;\n"); }
 	      l=l->tail;
@@ -753,11 +717,7 @@ static int genreclinmatch
 	    l = p->setrt.tail;
 	    while (l!=NULL) {
 	      if (l->head->infos == TNORMFS) {
-#ifdef PEM
 		GENCASE(l->head->fsym);
-#else
-		intend(ff,deep); fprintf(ff,"case %d:\n",l->head->fsym);
-#endif
 		genreclinmatch(ff,l->head,ok);
 		intend(ff,deep); fprintf(ff,"  break;\n"); }
 	      l=l->tail;
@@ -779,11 +739,7 @@ static int genreclinmatch
 	   intend(ff,deep);fprintf(ff,"/*BL3*/\n");
 	   l = p->setrt.tail;
 	   while (l!=NULL) {
-#ifdef PEM
 	     GENCASE(l->head->fsym);
-#else
-	     intend(ff,deep); fprintf(ff,"case %d:\n",l->head->fsym);
-#endif
 	     genreclinmatch(ff,l->head,ok);
 	     intend(ff,deep); fprintf(ff,"  break;\n");
 	     l=l->tail;
@@ -828,77 +784,6 @@ static void gencopyrsides(FILE *ff,unsigned long numr,unsigned long firrm,unsign
   }
 }
 
-#ifdef ORIGINAL_VERSION
-/* call genreclinmatch(...,rrt,0xffffffff,0) */
-
-static genreclinmatch
-(FILE *ff,struct rtnode *rrt,unsigned long ok);
-//--------------- COPY
-{ int a,i,iii,f,j,tl;
-  struct rtlistn * l;
-  struct rtna *p,*ppp;
-  unsigned long hok;
-
-  intend(ff,deep);fprintf(ff,"/*genreclinmatch*/\n");
-//--------------- COPY
-
-  deep++;
-  f = rrt->fsym; 
-  if (rrt->infos != TNORMFS) a=0;
-  else a=fsymtab[f].arity();
-  ok = rrt->OKset;
-  for(i=0; i<a; i++) {
-    p = &(rrt->subrt[i]);
-    if (p->father != 0) {
-     intend(ff,deep);fprintf(ff,"v%d = v%d->sub[%d];\n",p->affvar,p->father,p->fatheri);
-//--------------- COPY
-    }
-  }
-  if (ok==0) {
-    intend(ff,deep); 
-    GENNORULEAPP();
-  } else {
-    intend(ff,deep); 
-    fprintf(ff,"ok &= 0%o;\n",ok);
-    for(i=0; i<a; i++) {
-//--------------- COPY
-      p = &(rrt->subrt[i]);
-      if (p->ELIMset != 0 ) {
-	if (p->ELIMset != MAXOK) {
-	  intend(ff,deep); fprintf(ff,"if (ok& 0%o) \n",p->ELIMset); }
-	intend(ff,deep); 
-        if (p->isbuiltins) {
-          if (Bins)
-//--------------- COPY
-            fprintf(ff,"switch(((int) v%d)/2){\n",p->affvar,p->father,p->fatheri);
-          else
-	    fprintf(ff,"switch(getInt(v%d)){\n",p->affvar,p->father,p->fatheri);
-	} else fprintf(ff,"switch(v%d->fs){\n",p->affvar,p->father,p->fatheri);
-	l = p->setrt.tail;
-	while (l!=NULL) {
-#ifdef PEM
-	  GENCASE(l->head->fsym);
-#else
-	  intend(ff,deep); fprintf(ff,"case %d:\n",l->head->fsym);
-#endif
-//--------------- COPY
-	  genreclinmatch(ff,l->head,ok);
-	  intend(ff,deep); fprintf(ff,"  break;\n");
-	  l=l->tail;
-	}
-	intend(ff,deep); fprintf(ff,"default:\n");
-	genreclinmatch(ff,p->setrt.head,ok);
-	intend(ff,deep);fprintf(ff,"}\n");      
-//--------------- COPY
-      }
-    }
-  }
-  deep--;
-
-  intend(ff,deep);fprintf(ff,"/*end-genreclinmatch*/\n");
-
-}
-#endif
 
 
 /* call genlinmatch(...,rrt,0xffffffff,0) */
