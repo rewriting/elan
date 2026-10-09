@@ -89,6 +89,32 @@ else
   fail "generated_makefile_uses_elan_sanitize"
 fi
 
+# 5. integers print as the 2004 compiled code (and the interpreter) did: the
+#    low 32 bits (65536*65536 -> 0), not as a 64-bit value
+mkdir -p "$WORK/int32"
+cat > "$WORK/int32/sq.eln" <<'ELN'
+module sq
+import global int; end
+operators global sq(@) : (int) int; end
+rules for int
+  n : int;
+global
+  [] sq(n) => n*n end
+end
+end
+ELN
+cat > "$WORK/int32/sq.lgi" <<'LGI'
+LPL sq description
+  query of sort int
+  result of sort int
+  import sq
+  start with () sq(65536)
+end
+LGI
+out=$( cd "$WORK/int32" && elanc -nosplit -quiet sq >/dev/null 2>&1 && make -f sq.make >/dev/null 2>&1 && ./a.out -noInput -quiet )
+if echo "$out" | grep -q '^result = 0$'; then ok "compiled_int_prints_low_32_bits"
+else fail "compiled_int_prints_low_32_bits (got: $(echo "$out" | grep result))"; fi
+
 rm -rf "$WORK"
 echo "$fails failed"
 [ "$fails" -eq 0 ]

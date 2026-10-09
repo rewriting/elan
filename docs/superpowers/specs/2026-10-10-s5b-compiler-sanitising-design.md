@@ -23,10 +23,14 @@ Decisions and deviations found while implementing:
   with UBSan only, also on Linux: cpl copies the C stack, which ASan's
   redzones forbid (D2 keeps cpl). elanc bakes the options in (`ELAN_SANITIZE`
   in the generated Makefile).
-- `fail()` (cpl) expands to two statements: in `if (c) fail();` only its
-  first statement is conditional. Three such uses in `str_eval2` are kept as
-  parsed (spelled out, `S5b-TODO(fail)`); fixing them would change the
-  semantics of the run-time DC/ONE and IFTOE strategies.
+- `str_eval2` DC/ONE and IFTOE (strategies evaluated at run time): in 3.6 they
+  crashed (an index used as a pointer); once that was fixed, `fail()`
+  expanding to two statements made them fail unconditionally. They now stop
+  with an explicit "not supported by the compiler" error (review finding);
+  implementing them is in docs/followups.md.
+- Integers print their low 32 bits (`%d` of `(int)GgetInt`), as in 3.6 and the
+  interpreter (review finding: `%ld` had changed the output above 2^31;
+  test `compiled_int_prints_low_32_bits`).
 - REM: the mechanical `javac -Xlint` warnings of the hand-written code are
   fixed; the 325 raw-type warnings and those of the JavaCC-generated parser
   are left.

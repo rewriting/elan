@@ -136,7 +136,7 @@ void printTextFormTerm(FILE *fich, int pos, Gterm *t) {
 void termOut(FILE *fich,Gterm *t) {
 
   if(GisIntegerTagged(t)) {
-    fprintf(fich,"%ld",GgetInt(t));
+    fprintf(fich,"%d",(int)GgetInt(t));   /* low 32 bits, as in 2004 and the interpreter */
     //printf("termOut GisIntegerTagged\n");
     return;
   } else if(GisIdentifierTagged(t)) {

@@ -69,7 +69,7 @@ void term_print(FILE *fich,Gterm *t)
 static void print_f_prefix(FILE *fich,Gterm *t) {
   if(GisIntegerTagged(t)) {
       // fprintf(fich,"integer\n");
-    fprintf(fich,"%ld",GgetInt(t));
+    fprintf(fich,"%d",(int)GgetInt(t));   /* low 32 bits, as in 2004 */
     return;
   } else if(GisIdentifierTagged(t)) {
       //fprintf(fich,"identifier\n");
@@ -154,7 +154,7 @@ void term_printREF(FILE *fich,Gterm *t)
 {
   Verif_void(t,"term_printREF(fich,t)");
   if(GisIntegerTagged(t)) {
-    fprintf(fich,"INT(%ld)",GgetInt(t));
+    fprintf(fich,"INT(%d)",(int)GgetInt(t));
     return;
   } else if(GisIdentifierTagged(t)) {
     fprintf(fich,"IDENT(%lu)",GgetIdentifier(t));

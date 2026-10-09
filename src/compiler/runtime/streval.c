@@ -127,14 +127,20 @@ int ts;
     exit(1); }
 }
 
-/* S5b-TODO(fail): fail() (choice.h) expands to two statements, so in
-   `if (c) fail();` only its "no more choices" check depends on c: the
-   failure itself is unconditional, and the next alternative of DC/ONE and
-   the else branch of IFTOE are never tried. This is the parse of the 2004
-   code, spelled out; the intent was evidently to fail only when c holds. */
-#define FAIL_CHECKED_THEN_FAIL(c) \
-  if (c) { if(stack_ptr<0) { printf("Error: no more choices.\n"); exit(0); } } \
-  if((tab_pile[stack_ptr].size) == (-1)) { localFail(); } else { globalFail(); }
+/* DC/ONE and IFTOE strategies evaluated at run time (str_eval2) are not
+   supported. In ELAN 3.6 this code wrote through an index taken for a pointer
+   and crashed before trying any alternative; once that write was fixed (S5b),
+   the alternatives still did not work: fail() (choice.h) expands to two
+   statements, so `if (c) fail();` failed unconditionally, and DC/ONE never
+   tried their next alternative nor IFTOE its else branch. Rather than return
+   wrong results silently, stop with an explicit message. Implementing these
+   strategies needs tests against the interpreter (see docs/followups). */
+static void unsupported_runtime_strategy(const char *name)
+{
+  fprintf(stderr, "elan runtime: the %s strategy evaluated at run time is not "
+          "supported by the compiler; use the interpreter (elan)\n", name);
+  exit(1);
+}
 
 Gterm *str_eval2(Gterm *s, Gterm *t)
 {
@@ -188,8 +194,10 @@ int is_one = 0;
       case DS_DC:
 	{
 	  Gterm *strlist, *res;
-	  long wasr_index = allocStable(sizeof(int));
+	  long wasr_index;
 	  int is_last = 0;
+	  unsupported_runtime_strategy(is_one ? "one" : "dc");
+	  wasr_index = allocStable(sizeof(int));
 	  *((int*)getStablePointer(wasr_index)) = 0;
 
 	  for(strlist = GgetArgument(s,0);
@@ -208,8 +216,7 @@ int is_one = 0;
 		if (*((int*)getStablePointer(wasr_index)) == 0) *((int*)getStablePointer(wasr_index)) = 1;
 		goto lab_dc;
 	      }
-	      /* S5b-TODO(fail): see FAIL_CHECKED_THEN_FAIL */
-	      FAIL_CHECKED_THEN_FAIL(*((int*)getStablePointer(wasr_index)) != 0);
+	      fail();   /* unreachable (see unsupported_runtime_strategy) */
 	    } else // is_last
 	      res = str_eval2(GgetArgument(strlist,0),t);
 	  }
@@ -230,7 +237,9 @@ int is_one = 0;
       case DS_IFTOE:
 	{
 	  Gterm *res, *cond, *s1, *s2;
-	  long wasr_index = allocStable(sizeof(int));
+	  long wasr_index;
+	  unsupported_runtime_strategy("if then else");
+	  wasr_index = allocStable(sizeof(int));
 	  *((int*)getStablePointer(wasr_index)) = 0;
 	  cond = GgetArgument(s,0);
           s1 = GgetArgument(s,1);
@@ -240,8 +249,7 @@ int is_one = 0;
 	    if (*((int*)getStablePointer(wasr_index)) == 0) *((int*)getStablePointer(wasr_index)) = 1;
 	    return str_eval2(s1,res);
 	  }
-	  /* S5b-TODO(fail): see FAIL_CHECKED_THEN_FAIL */
-	  FAIL_CHECKED_THEN_FAIL(*((int*)getStablePointer(wasr_index)) != 0);
+	  fail();   /* unreachable (see unsupported_runtime_strategy) */
 	  return str_eval2(s2,t);
 	}
       default:
