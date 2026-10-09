@@ -61,8 +61,6 @@ public class REM {
     System.out.println("\t-O2");
     System.out.println("\t-fast");
     System.out.println("\t-lib");
-    System.out.println("\t-aterm");
-    System.out.println("\t-atermns");
     System.out.println("\t-coq");
     System.out.println("\t-proofterm");
     //    System.out.println("\t-noColor [default]");
@@ -129,10 +127,10 @@ public class REM {
             Flags.coq = true;
           } else if(args[i].equals("-lib")) {
             Flags.lib = true;
-          } else if(args[i].equals("-aterm")) {
-            Flags.aterm = true;
-          } else if(args[i].equals("-atermns")) {
-            Flags.atermns = true;
+          } else if(args[i].equals("-aterm") || args[i].equals("-atermns")) {
+            // 2026: the ATerm runtime variant is not built any more
+            System.err.println("REM: " + args[i] + ": the ATerm runtime is not supported (removed in this version)");
+            System.exit(1);
           } else if(args[i].equals("-proofterm")) {// [NGUYEN: Apr  6 01] to trsnform named rules
             Flags.proofterm = true;
           } else if(args[i].equals("-strategy")) {
@@ -360,9 +358,10 @@ public class REM {
       subMakefile.write("ifneq ($(ARCH),Darwin)\n");
       subMakefile.write("ELAN_CC ?= gcc\n");
       subMakefile.write("ELAN_CXX ?= g++\n");
+      subMakefile.write("GC_PREFIX ?= /usr\n");
       subMakefile.write("endif\n");
-      subMakefile.write("CC = $(ELAN_CC) -pipe -std=gnu89 -w -fcommon -fsigned-char\n");
-      subMakefile.write("CXX = $(ELAN_CXX)\n");
+      subMakefile.write("CC = $(ELAN_CC) -pipe -std=gnu89 -w -fcommon -fsigned-char -I$(GC_PREFIX)/include\n");
+      subMakefile.write("CXX = $(ELAN_CXX) -L$(GC_PREFIX)/lib\n");
       //subMakefile.write("CXX = g++ \n");
       if(Flags.choicePointDebug) {
         if(Flags.onlyC) {

@@ -48,8 +48,11 @@ configure: toolchain
 	  echo "$(ELAN_CONFIG)" > $(BUILD)/.elan-configure; \
 	fi
 
+# Files removed from the sources must not linger in PREFIX: the library, the
+# compiler's classes and elanc are reinstalled from scratch (elanc only when the
+# compiler is built, -DELAN_COMPILER=ON, the default).
 install: all
-	rm -rf "$(PREFIX)/share/elanlib"   # library files removed from the sources must not linger
+	rm -rf "$(PREFIX)/share/elanlib" "$(PREFIX)/classes" "$(PREFIX)/bin/elanc"
 	cmake --install $(BUILD)
 
 test-runner:
@@ -75,13 +78,17 @@ check-unit: all
 # Compiled tests of the bench (spec S5a, D4): elanc -> make -> a.out, against
 # the installed compiler (the generated programs are built with the
 # compilers of this build, see src/compiler/CMakeLists.txt).
-CHECK_COMPILER = $(BENCH) --prefix $(PREFIX) --kinds J,JO
+# The compiled tests run only when the compiler is installed (not with
+# -DELAN_COMPILER=OFF).
+CHECK_COMPILER = if [ -x "$(PREFIX)/bin/elanc" ]; then \
+	  tests/compiler/test_elanc.sh "$(PREFIX)" && $(BENCH) --prefix $(PREFIX) --kinds J,JO; \
+	else echo "compiler not built (-DELAN_COMPILER=OFF): compiled tests (J, JO) skipped"; fi
 check-compiler: install
 	$(CHECK_COMPILER)
 
 check: smoke test-runner check-arch check-unit
 	$(BENCH) --prefix $(PREFIX) --kinds I,A
-	$(CHECK_COMPILER)
+	@$(CHECK_COMPILER)
 
 # Interpreter tests under sanitizers (build-san/): AddressSanitizer + UBSan.
 # The compiled tests (J, JO) run too: `elan --cexport` runs under the

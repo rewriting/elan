@@ -104,7 +104,9 @@ if [ $# -gt 0 ]; then
   if [ -n "$verb" ]; then
     show $ELAN --cexport $LGIFILE.ref $ELANOPTION $LGIDIR/$LGIFILE.lgi $SPCNAME
   fi
-  "$ELAN" --cexport "$LGIFILE.ref" $ELANOPTION "$LGIDIR/$LGIFILE.lgi" ${SPCNAME:+"$SPCNAME"}
+  # a stale .ref must not be compiled if the export fails
+  rm -f "$LGIFILE.ref"
+  "$ELAN" --cexport "$LGIFILE.ref" $ELANOPTION "$LGIDIR/$LGIFILE.lgi" ${SPCNAME:+"$SPCNAME"} || exit $?
 
   if [ -n "$verb" ]; then
     show $JAVA $PROPERTIES -cp $CLASSES rem.REM $LGIFILE.ref $REMOPTION
