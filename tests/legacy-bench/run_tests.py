@@ -47,6 +47,7 @@ BASELINE = HERE / "baseline.tsv"
 SNAPDIR = HERE / "snapshots"
 WORK = HERE / "work"   # scratch copies of the application directories
 REGRESSION = REPO / "tests" / "regression"
+EXAMPLES = REPO / "examples"
 EXCEPTIONS = HERE / "platform-exceptions.tsv"
 
 # Directories whose tst_all files are harvested
@@ -128,6 +129,16 @@ def discover_regression(root=REGRESSION):
                               kind="I", lgi="prog", spc="no", inp="input", out="expected",
                               flags=[], long=False))
     return tests
+
+
+def discover_examples(root=EXAMPLES):
+    """examples/<name>/{<name>.lgi,*.eln,input.inp,expected.out}: one I test each."""
+    if not root.is_dir():
+        return []
+    return [dict(id=f"examples/{d.name}::I::{d.name}:no:input:expected", dir=d, kind="I",
+                 lgi=d.name, spc="no", inp="input", out="expected", flags=[], long=False)
+            for d in sorted(p for p in root.iterdir() if p.is_dir())
+            if (d / f"{d.name}.lgi").exists()]
 
 
 def load_exceptions(path=EXCEPTIONS, platform=None):
@@ -292,7 +303,7 @@ def judge(statuses, base, exceptions):
             continue
         if tid in exceptions:
             continue
-        if tid.startswith("regression/"):
+        if tid.startswith(("regression/", "examples/")):
             if new != "PASS":
                 regress.append((tid, "PASS", new))
             continue
@@ -346,7 +357,7 @@ def main():
     if a.elanlib:
         os.environ["ELAN_TEST_LIB"] = str(Path(a.elanlib).resolve())
     kinds = set(a.kinds.split(","))
-    tests = [t for t in discover() + discover_regression()
+    tests = [t for t in discover() + discover_regression() + discover_examples()
              if t["kind"] in kinds and (a.long or not t["long"]) and re.search(a.filter, t["id"])]
     if a.list:
         for t in tests:

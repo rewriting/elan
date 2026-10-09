@@ -43,6 +43,27 @@ class RegressionDiscoveryTest(unittest.TestCase):
         self.assertEqual(rt.discover_regression(rt.HERE / "does-not-exist"), [])
 
 
+class ExamplesDiscoveryTest(unittest.TestCase):
+    def test_finds_examples_named_after_their_directory(self):
+        with tempfile.TemporaryDirectory(dir=rt.HERE) as d:
+            ex = Path(d) / "queens"
+            ex.mkdir()
+            for f in ("queens.lgi", "input.inp", "expected.out"):
+                (ex / f).write_text("")
+            (Path(d) / "README.md").write_text("")
+            tests = rt.discover_examples(Path(d))
+            self.assertEqual(len(tests), 1)
+            t = tests[0]
+            self.assertEqual(t["id"], "examples/queens::I::queens:no:input:expected")
+            self.assertEqual((t["kind"], t["lgi"], t["inp"], t["out"], t["dir"]),
+                             ("I", "queens", "input", "expected", ex))
+
+    def test_ignores_directories_without_their_lgi(self):
+        with tempfile.TemporaryDirectory(dir=rt.HERE) as d:
+            (Path(d) / "notes").mkdir()
+            self.assertEqual(rt.discover_examples(Path(d)), [])
+
+
 class ExceptionsTest(unittest.TestCase):
     def test_filters_by_platform(self):
         with tempfile.TemporaryDirectory(dir=rt.HERE) as d:
