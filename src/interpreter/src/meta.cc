@@ -139,23 +139,23 @@ void term::term2refstring(char *buff)
     failexit(); }
   switch (t->infos) {
   case TVAR:	
-    sprintf(tempbuff,"VAR(%d,%d)",t->fsymi,t->compif.varsort.typeval());
+    snprintf(tempbuff,sizeof(tempbuff),"VAR(%d,%d)",t->fsymi,t->compif.varsort.typeval());
     strcat(buff,tempbuff);
     break;
   case TNUMBER:
-    sprintf(tempbuff,"INT(%d)",(int) t->fsymi);
+    snprintf(tempbuff,sizeof(tempbuff),"INT(%d)",(int) t->fsymi);
     strcat(buff,tempbuff);
     break;
   case TSTRING: 
     ch = (char*)(t->subt);
     strcat(buff,"STRING(");
     for(i=0; ch[i]; i++) {
-      sprintf(tempbuff,"%d.",(int)(ch[i]));
+      snprintf(tempbuff,sizeof(tempbuff),"%d.",(int)(ch[i]));
       strcat(buff,tempbuff); }
     strcat(buff,"nil");
     break;
   case TIDENT: 
-    sprintf(tempbuff,"IDENT(%s)",tabofident.ide(t->fsymi));
+    snprintf(tempbuff,sizeof(tempbuff),"IDENT(%s)",tabofident.ide(t->fsymi));
     strcat(buff,tempbuff);
     break;
   case TNORMFS: 
@@ -163,7 +163,7 @@ void term::term2refstring(char *buff)
     for(i=0; i < headarity(); i++) {
       t->subt[i].term2refstring(buff); 
       strcat(buff,".");}
-    sprintf(tempbuff,"nil, %d)",t->fsymi); 
+    snprintf(tempbuff,sizeof(tempbuff),"nil, %d)",t->fsymi); 
     strcat(buff,tempbuff); 
     break;
   default :     interr();
@@ -183,7 +183,7 @@ char *buff, *s;
 
 #define  MAKE_REF_FILE \
 if (spc) {  \
-    sprintf(buff,"elan -b --export %s %s %s",aux_file_name,prog,spc); \
+    snprintf(buff,sizeof(buff),"elan -b --export %s %s %s",aux_file_name,prog,spc); \
     system(buff); } \
   else if (strlen(prog) < STRLEN) \
     strcpy(aux_file_name,prog); \

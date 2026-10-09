@@ -337,7 +337,7 @@ extern int pos_l;                         // index of type X, when parsing <X->Y
 extern term dstr_rs;                     // right-hand side of a dstr rule
 
 //#define make_new_nonts(x,y,z,u) { sprintf(x,"%s[%s,%s]",y,z,u); }
-#define make_new_nonts(x,y,z,u) { sprintf(x,"<%s->%s>",z,u); }
+#define make_new_nonts(x,y,z,u) { snprintf(x,sizeof(x),"<%s->%s>",z,u); }
 
 extern void add_to_fsymtab(int actarityy,struct sgrammrule *gr, int defstrat);
 extern int add_strat_nont(int pos1,int pos2);

@@ -624,7 +624,7 @@ char strnam[STRLEN];
 		 for (k=0; k<inlinecodesi; k++)
 		     if (inlinecodes[j].to == inlinecodes[k].from && 
 			 inlinecodes[i].from == inlinecodes[k].to) {
-			 sprintf(strnam,"%s[%s,%s,%s]",STRAT_MODNAME3,
+			 snprintf(strnam,sizeof(strnam),"%s[%s,%s,%s]",STRAT_MODNAME3,
 			                       typet.ide(inlinecodes[i].from),
 			                       typet.ide(inlinecodes[j].from),
 			                       typet.ide(inlinecodes[k].from));

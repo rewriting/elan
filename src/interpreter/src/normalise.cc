@@ -157,7 +157,7 @@ strategy *gen_normalisation1(int norm_index,int modu, int sort,
      //nstrat->setname(STRNAMEDONTCARE2,modu);
      nstrat->setname(STRNAMEONE2,modu);
      nstrat->settypeof(typ);
-     sprintf(tmp,"%s%d",NSTRAT,norm_index); /*,typ);*/
+     snprintf(tmp,sizeof(tmp),"%s%d",NSTRAT,norm_index); /*,typ);*/
      nstrat_name = attach_type_mod(tmp,typ,modu);
      nstrat_defs = trrules.strategyindex_defs(nstrat_name,RGLOP);
      trrules.settypeofstrategy_defs(nstrat_defs,typ);
@@ -172,7 +172,7 @@ strategy *gen_normalisation1(int norm_index,int modu, int sort,
 
 
      if (type_in_list(typ, normlist, &normstrat)) {
-       sprintf(tmp,"%s%d",NORM_STRAT,norm_index);
+       snprintf(tmp,sizeof(tmp),"%s%d",NORM_STRAT,norm_index);
        norm_strat_name = attach_type_mod(tmp,typ,modu);
        norm_strat_defs = trrules.strategyindex_defs(norm_strat_name,RGLOP);
        trrules.settypeofstrategy_defs(norm_strat_defs,typ);
@@ -193,7 +193,7 @@ strategy *gen_normalisation1(int norm_index,int modu, int sort,
        if (lis_norm) {       // -------- LEFT_MOST_INNER_MOST
 	 if (type_in_list(typ, normlist, &normstrat)) {
 	 // M => M rule
-	 sprintf(tmp,"%s%d",NORM_RULE,norm_index); typle.crtypelex(typ);
+	 snprintf(tmp,sizeof(tmp),"%s%d",NORM_RULE,norm_index); typle.crtypelex(typ);
 	 nrule= attach_type(tmp,typ); nrulei = trrules.trruleindex(nrule);
 	 xxx.stinit(); xxx.crvar(0,typle); xxx.popt();
 	 yyy.stinit(); yyy.crvar(1,typle); yyy.popt();
@@ -257,7 +257,7 @@ strategy *gen_normalisation1(int norm_index,int modu, int sort,
 	     //rhs.write(stout);  
 
 	     NNEW(rlab,term);
-	     sprintf(tmp,"%s%d_%d",NORM_RULE,norm_index,actr->rulenumber);
+	     snprintf(tmp,sizeof(tmp),"%s%d_%d",NORM_RULE,norm_index,actr->rulenumber);
 	     nrule= attach_type(tmp,typ); nrulei = trrules.trruleindex(nrule);
 	     rwrule = trrules.addrule(nrule,arity+1,lhs,rhs,modu,RGLOP,
 				      NULL,
@@ -283,7 +283,7 @@ strategy *gen_normalisation1(int norm_index,int modu, int sort,
        if (!lis_norm)    {       //---------#ifdef LEFT_MOST_OUTER_MOST
 	 if (type_in_list(typ, normlist, &normstrat)) {
 	 // M => M rule
-	 sprintf(tmp,"%s%d",NORM_RULE,norm_index); typle.crtypelex(typ);
+	 snprintf(tmp,sizeof(tmp),"%s%d",NORM_RULE,norm_index); typle.crtypelex(typ);
 	 nrule= attach_type(tmp,typ); nrulei = trrules.trruleindex(nrule);
 	 xxx.stinit(); xxx.crvar(0,typle); xxx.popt();
 	 yyy.stinit(); yyy.crvar(1,typle); yyy.popt();
@@ -410,14 +410,14 @@ struct namelist *gen_normalisation2(int norm_index,int sort, strategy *normstr)
   for(typ=0; typ< NNONTERMINALS; typ++) {
     if (closure[typ]) {
      // name of norm rule
-     sprintf(tmp,"%s%d",NORM_RULE,norm_index);
+     snprintf(tmp,sizeof(tmp),"%s%d",NORM_RULE,norm_index);
      nrule= attach_type(tmp,typ); nrulei = trrules.trruleindex(nrule);
 
      // construction of substrategy dc(NORM_RULE)
      NNEW(nstrat, strategy); nstrat->setname(STRNAMEDONTCARE,modu);
      NNEW(nm, struct namelist); nm->next = NULL; nm->strname = nrulei;
      nstrat->setnamelist(nm); nstrat->settypeof(typ);
-     sprintf(tmp,"%s%d",NSTRAT,norm_index);
+     snprintf(tmp,sizeof(tmp),"%s%d",NSTRAT,norm_index);
      nstrat_name = attach_type_mod(tmp,typ,modu);
      nstrat_defs = trrules.strategyindex_defs(nstrat_name,RGLOP);
      trrules.settypeofstrategy_defs(nstrat_defs,typ);
@@ -426,7 +426,7 @@ struct namelist *gen_normalisation2(int norm_index,int sort, strategy *normstr)
      nstrat_refs = trrules.strategyindex_refs(nstrat_name);
      trrules.assign_one_ref(1,nstrat_refs);
      nstrat_refss[typ] = nstrat_refs;
-     sprintf(tmp,"%s%d",NORM_STRAT,norm_index);
+     snprintf(tmp,sizeof(tmp),"%s%d",NORM_STRAT,norm_index);
      norm_strat_name = attach_type_mod(tmp,typ,modu);
      norm_strat_defs = trrules.strategyindex_defs(norm_strat_name,RGLOP);
      trrules.settypeofstrategy_defs(norm_strat_defs,typ);
@@ -483,7 +483,7 @@ struct namelist *gen_normalisation2(int norm_index,int sort, strategy *normstr)
 	  //-- addrule
           NNEW(rlab,term);
 
-	  sprintf(tmp,"%s%d",NORM_RULE,norm_index);
+	  snprintf(tmp,sizeof(tmp),"%s%d",NORM_RULE,norm_index);
 	  nrule= attach_type(tmp,actr->leftside.typeval()); 
 	  rwrule = trrules.addrule(nrule,resvari+2,lhs,resvar1,modu,RGLOP,
 				   NULL,
@@ -523,7 +523,7 @@ struct namelist *gen_normalisation2(int norm_index,int sort, strategy *normstr)
       }
       if (!(constant[j])) {
 	// M => M rule
-        sprintf(tmp,"%s%d",NORM_RULE,norm_index); typle.crtypelex(j);
+        snprintf(tmp,sizeof(tmp),"%s%d",NORM_RULE,norm_index); typle.crtypelex(j);
 	nrule= attach_type(tmp,j); 
 	xxx.stinit(); xxx.crvar(0,typle); xxx.popt();
 	yyy.stinit(); yyy.crvar(0,typle); yyy.popt();
@@ -535,7 +535,7 @@ struct namelist *gen_normalisation2(int norm_index,int sort, strategy *normstr)
   
    // name of norm rule
    NNEW(nm, struct namelist); 
-   sprintf(tmp,"%s%d",NORM_RULE,norm_index);
+   snprintf(tmp,sizeof(tmp),"%s%d",NORM_RULE,norm_index);
    nm->next = NULL; nm->strname = trrules.trruleindex(attach_type(tmp,sort));
    return nm;
 }

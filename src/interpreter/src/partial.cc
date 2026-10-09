@@ -268,8 +268,8 @@ struct sgrammrule *gr;
     // create new fsymbol
     fsymi = fsymtabi;
     if (fsym_reduced > 1) {
-      if (common_size) sprintf(new_fsym,"FOO_%d(",fsymi);
-      else sprintf(new_fsym,"FOO_%d",fsymi);
+      if (common_size) snprintf(new_fsym,sizeof(new_fsym),"FOO_%d(",fsymi);
+      else snprintf(new_fsym,sizeof(new_fsym),"FOO_%d",fsymi);
       le.cridlex(new_fsym); globtermgr.addsymbol(le); //importglobgr[module]->addsymbol(le);
       for(j=0; j < common_size; j++) {
 	Patterm[0].terms_compared.ith_term(j,&tt,&varn, &typ);
@@ -717,7 +717,7 @@ char sss[STRLEN], *strname;
 int strindex_defs, strindex_refs, type, modu;
   type = str->typeofstr(); modu = str->getmodule();
 //  sprintf(sss,"%s%d",PARTSTR,partcount++);
-  sprintf(sss,"%s#%d",PARTSTR,partcount++);
+  snprintf(sss,sizeof(sss),"%s#%d",PARTSTR,partcount++);
   strname = attach_type_mod(sss,type,modu);
 
   //stout << strname << " = "; str->dump(); stout << "\n"; 
@@ -856,7 +856,7 @@ char newname[STRLEN];
 int rindex;
   if (nameindex < 0) { sterr << "addpartrule intern.error"; failexit(); }
 //  sprintf(newname,"%d%s%s",partindex,PEVALSTRING,trrules.rulename(nameindex));
-  sprintf(newname,"%s%s%d",trrules.rulename(nameindex),PEVALSTRING,partindex);
+  snprintf(newname,sizeof(newname),"%s%s%d",trrules.rulename(nameindex),PEVALSTRING,partindex);
   rindex = trrules.trruleindex(newname);
   trrules.addrule(newname,leftside.head(),this);
   rule_was_added = 1;
@@ -1029,7 +1029,7 @@ char newname[STRLEN];
 int rindex;
   if (nameindex < 0) { stout << "indexrule intern.error"; failexit(); }
 //  sprintf(newname,"%d%s",indx,trrules.rulename(nameindex));
-  sprintf(newname,"%s%d",trrules.rulename(nameindex),indx);
+  snprintf(newname,sizeof(newname),"%s%d",trrules.rulename(nameindex),indx);
   rindex = trrules.trruleindex(newname);
   trrules.addrule(newname,leftside.head(),this);
   return rindex;
@@ -1046,7 +1046,7 @@ struct transrulelist **tlp;
 
 
   if (nameindex < 0) { stout << "renamerule intern.error"; failexit(); }
-  sprintf(newname,"%s%d",trrules.rulename(nameindex),indx);
+  snprintf(newname,sizeof(newname),"%s%d",trrules.rulename(nameindex),indx);
   rindex = trrules.trruleindex(newname);
   rr->setnameindex(rindex);
 

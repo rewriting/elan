@@ -124,7 +124,7 @@ void stck::addax(grammar *topgrammar, int min)
   lexem resw;
   char idd[STRLEN];
   for (i=0; i<topp; i++) {
-    if (i == 0) sprintf(idd,"%s",prefix); else sprintf(idd,"%s%i",prefix,i); 
+    if (i == 0) snprintf(idd,sizeof(idd),"%s",prefix); else snprintf(idd,sizeof(idd),"%s%i",prefix,i); 
     resw.cridlex(idd);
     tab[topp-i-1].axadded = topgrammar->addvarrule(tab[topp-i-1].typ,resw,VARSPRI,RVAR,-i-min-1); }
 }
@@ -182,7 +182,7 @@ void load_query_mod(lstream *f)
   if (axadded) { topgrammar->deleterule(axadded); axadded = NULL; }
   if (ax1added) { topgrammar->deleterule(ax1added); ax1added = NULL; }
 
-  sprintf(querymod,"Query[%s,%s,%s]",
+  snprintf(querymod,sizeof(querymod),"Query[%s,%s,%s]",
 	  typet.ide(sourcetypei),typet.ide(qresulttypei),
 	  typet.ide(printtypei));
   if (! import.member(querymod)) readmodules(f,querymod); 
@@ -288,7 +288,7 @@ int n = t.head();
   case HELP: {
       char sss[STRLEN];
       stout << "\nHelp from the file $ELANLIB/help.txt\n";
-      sprintf(sss,"/bin/cat %shelp.txt",elanlib);
+      snprintf(sss,sizeof(sss),"/bin/cat %shelp.txt",elanlib);
       system(sss); }
       break;
   case BREAK_N:

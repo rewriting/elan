@@ -321,7 +321,7 @@ static char alfs2[100];
 const char *lexem::alfsy()
 {
  if (nonterminal()) {
-   sprintf(alfs2,"sort(%d)",BOFTYPES-lex);return(alfs2);
+   snprintf(alfs2,sizeof(alfs2),"sort(%d)",BOFTYPES-lex);return(alfs2);
  }
  else if (lex == BLANKLEXEM) return("BLANKLEXEM");
  else if (lex == NOLEXEM) return("ENDOFLSTREAM");
@@ -331,7 +331,7 @@ const char *lexem::alfsy()
    return "???";
  else if ((lex <= BOFSTRING && lex > BOFSTRING-MAXNOFSTRING )) {
    return stringconstants[BOFSTRING-lex]; }
- else if (lex >= 0) {sprintf(alfs2,"%d",lex);return(alfs2);}
+ else if (lex >= 0) {snprintf(alfs2,sizeof(alfs2),"%d",lex);return(alfs2);}
  else if (lex <= BOFIDENT) return(tabofident.ide(BOFIDENT-lex));
  else {
    alfs[0]= -lex; return(alfs);
@@ -341,7 +341,7 @@ const char *lexem::alfsy()
 const char *lexem::erralfsy()
 { 
  if (lex <= 0 && lex >= -32) {
-   sprintf(alfs2,"\'\\%d\'",-lex);return(alfs2);
+   snprintf(alfs2,sizeof(alfs2),"\'\\%d\'",-lex);return(alfs2);
  } else return(alfsy());
 }
 

@@ -1556,7 +1556,7 @@ struct transrulelist *trcash(int ruleindex, int modul)
 char foo[STRLEN];
 int i;
 if (all_modules_loaded) {
-  sprintf(foo,"%d,%d",ruleindex,modul);
+  snprintf(foo,sizeof(foo),"%d,%d",ruleindex,modul);
   i = rulecashstrings.member(foo);
   //stout << "GETCASH rules from module " << ruleindex << "." <<import.ide(modul) << i << "\n";
   if (i>=0) {
@@ -1573,7 +1573,7 @@ void add_to_cash(int ruleindex,int modul,struct transrulelist *ntr)
 char foo[STRLEN];
 int i;
 if (all_modules_loaded) {
-  sprintf(foo,"%d,%d",ruleindex,modul);
+  snprintf(foo,sizeof(foo),"%d,%d",ruleindex,modul);
   i = rulecashstrings.addstr(foo);
   //stout << "ADDCASH rules from module " << ruleindex << "." <<import.ide(modul) << i << "\n";
   if (i>=0) {

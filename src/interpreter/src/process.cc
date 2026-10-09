@@ -54,12 +54,12 @@ struct processdatalist *pdl;
 
 void pipe_names(char *pipe1_name, char *pipe2_name)
 {
-  sprintf(pipe1_name,"/bin/rm -f .internal.pipe1.%d.%d",getpid(),pipe_index);
-  sprintf(pipe2_name,"/bin/rm -f .internal.pipe2.%d.%d",getpid(),pipe_index);
+  snprintf(pipe1_name,STRLEN,"/bin/rm -f .internal.pipe1.%d.%d",getpid(),pipe_index);
+  snprintf(pipe2_name,STRLEN,"/bin/rm -f .internal.pipe2.%d.%d",getpid(),pipe_index);
   system(pipe1_name);
   system(pipe2_name);
-  sprintf(pipe1_name,".internal.pipe1.%d.%d",getpid(),pipe_index);
-  sprintf(pipe2_name,".internal.pipe2.%d.%d",getpid(),pipe_index);
+  snprintf(pipe1_name,STRLEN,".internal.pipe1.%d.%d",getpid(),pipe_index);
+  snprintf(pipe2_name,STRLEN,".internal.pipe2.%d.%d",getpid(),pipe_index);
 
   pipe_index++;
     if (mknod(pipe1_name,S_IFIFO|0777,0)) {
@@ -294,7 +294,7 @@ struct processdata *newsubprocess(stateofexecution *stexec,
   term resultterm;
   int ch;
 
-  sprintf(command,"DKCON%d",pipe_index);
+  snprintf(command,STRLEN,"DKCON%d",pipe_index);
 
   pli = command2pli(command);
 

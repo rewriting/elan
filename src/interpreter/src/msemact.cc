@@ -135,9 +135,9 @@ int stratmoduli(int x, int y)
 {
 char modnam[STRLEN];
   if (x==y)
-    sprintf(modnam,"%s[%s]",STRAT_MODNAME1,typet.ide(x));
+    snprintf(modnam,sizeof(modnam),"%s[%s]",STRAT_MODNAME1,typet.ide(x));
   else
-    sprintf(modnam,"%s[%s,%s]",STRAT_MODNAME2,typet.ide(x),typet.ide(y));
+    snprintf(modnam,sizeof(modnam),"%s[%s,%s]",STRAT_MODNAME2,typet.ide(x),typet.ide(y));
   if (!import.member(modnam)) { 
     sterr << "\nmissing file " << modnam << "\n";
     sterr << "\n[fatal] internal error\n"; failexit(); }
@@ -148,9 +148,9 @@ int evalmoduli(int x, int y)
 {
 char modnam[STRLEN];
   if (x == y) 
-    sprintf(modnam,"%s[%s]",STRAT_MODNAME1,typet.ide(x)); 
+    snprintf(modnam,sizeof(modnam),"%s[%s]",STRAT_MODNAME1,typet.ide(x)); 
   else {
-    sprintf(modnam,"%s[%s,%s]",STRAT_MODNAME2,typet.ide(x),typet.ide(y)); }
+    snprintf(modnam,sizeof(modnam),"%s[%s,%s]",STRAT_MODNAME2,typet.ide(x),typet.ide(y)); }
 
   if (!import.member(modnam)) { 
     if (!batch) {
@@ -164,7 +164,7 @@ char *attach_type(const char *s,int t)
 {
 char full_name[STRLEN];
   if (s == NULL || strlen(s) == 0) return NULL; /////// exception for nonamed rules
-  sprintf(full_name,"%s%s%s",s,TYPE_SEPARATOR,typet.ide(t));
+  snprintf(full_name,sizeof(full_name),"%s%s%s",s,TYPE_SEPARATOR,typet.ide(t));
   return strdup(full_name);
 }
 
@@ -172,7 +172,7 @@ char *attach_mod(const char *s,int modu)
 {
 char full_name[STRLEN];
   if (s == NULL || strlen(s) == 0) return NULL; /////// exception for nonamed rules
-  sprintf(full_name,"%s%s%s",s,MODULE_SEPARATOR,import.ide(modu));
+  snprintf(full_name,sizeof(full_name),"%s%s%s",s,MODULE_SEPARATOR,import.ide(modu));
   return strdup(full_name);
 }
 
@@ -197,7 +197,7 @@ static char *attach_modu_loc(const char *s, char *modu, const char *loc)
 {
 char full_name[STRLEN];
   if (s == NULL || strlen(s) == 0) return NULL; /////// exception for nonamed rules
-  sprintf(full_name,"%s%s%s%s%s",s,
+  snprintf(full_name,sizeof(full_name),"%s%s%s%s%s",s,
 	  MODULE_SEPARATOR, modu,
 	  LOC_SEPARATOR,loc);
   return strdup(full_name);
@@ -243,7 +243,7 @@ int is_prefix_of_name(const char *s1, const char *s2)
 {
 char sss[STRLEN];
 const char *s;
-  sprintf(sss,"%s%s",s1,TYPE_SEPARATOR);
+  snprintf(sss,sizeof(sss),"%s%s",s1,TYPE_SEPARATOR);
   s = strstr(s2,sss);
   if (s == s2) return 0; else return -1;
 }
@@ -1036,14 +1036,14 @@ void importmod_inf(const char *impmodule,lstream *f, int supermodule, int rinf)
 	    if (is_explimpl) {
 	      char mname[STRLEN];
 	      is_explimpl = 0;
-	      sprintf(mname,"explimpl%d",explimpl_index++);
+	      snprintf(mname,sizeof(mname),"explimpl%d",explimpl_index++);
 	      importmod(mname,f,-1);
 	      system("/bin/rm -f explimpl*.eln");
 	    }
 	    if (is_symbappl) {
 	      char mname[STRLEN];
 	      is_symbappl = 0;
-	      sprintf(mname,"symbappl%d",symbappl_index++);
+	      snprintf(mname,sizeof(mname),"symbappl%d",symbappl_index++);
 	      importmod(mname,f,-1);
 	      system("/bin/rm -f symbappl*.eln");
 	    }
@@ -1598,7 +1598,7 @@ int semact1(int n,lexem l,lstream *f)
       //actwhstrategy = actstratindex;
        pattype = 0;
       rrr = sem_action_137(f,l);
-      sprintf(sss,"WHERE%d",wherecount);
+      snprintf(sss,sizeof(sss),"WHERE%d",wherecount);
       actstratindex = trrules.strategyindex_refs(             // like in case 158
 		attach_type_mod(sss,actwheretype.typeval(),impmoduli));  
       return rrr;
@@ -1621,7 +1621,7 @@ int semact1(int n,lexem l,lstream *f)
       return sem_action_138(f);
       }
     else {
-      sprintf(sss,"WHERE%d",wherecount);
+      snprintf(sss,sizeof(sss),"WHERE%d",wherecount);
       sem_action_167(f,trrules.strategyindex_defs(
 		attach_type_mod(sss,actwheretype.typeval(),impmoduli),RLOCOOP),
 		     actwheretype.typeval());
@@ -1681,8 +1681,8 @@ int semact1(int n,lexem l,lstream *f)
 	if (ignore == 0 && grstack[stacki].anysymbol_exists()) {
 	  char mname[STRLEN], fname[STRLEN];
 	  is_explimpl = 1;
-	  sprintf(mname,"explimpl%d",explimpl_index);
-	  sprintf(fname,"explimpl%d.eln",explimpl_index);
+	  snprintf(mname,sizeof(mname),"explimpl%d",explimpl_index);
+	  snprintf(fname,sizeof(fname),"explimpl%d.eln",explimpl_index);
 	  ignore++;
 	  grstack[stacki].any_code(mname,fname, actmodname[stacki]); 
 	  ignore--;
@@ -1690,8 +1690,8 @@ int semact1(int n,lexem l,lstream *f)
 	if (grstack[stacki].symbappl_exists()) {
 	  char mname[STRLEN], fname[STRLEN];
 	  is_symbappl = 1;
-	  sprintf(mname,"symbappl%d",symbappl_index);
-	  sprintf(fname,"symbappl%d.eln",symbappl_index);
+	  snprintf(mname,sizeof(mname),"symbappl%d",symbappl_index);
+	  snprintf(fname,sizeof(fname),"symbappl%d.eln",symbappl_index);
 	  grstack[stacki].symbappl_code(mname,fname, actmodname[stacki]); 
 	}
 	break;

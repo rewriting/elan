@@ -833,7 +833,7 @@ static int standardreduction(term &t)
           // shit - hopely temporary - because of ChR's shitty parser
         { char commandline[STRLEN];
           //   sprintf(commandline,"jolifier.sh %s",fname);
-        sprintf(commandline,"jolifieur.sh %s",fname);
+        snprintf(commandline,sizeof(commandline),"jolifieur.sh %s",fname);
         system(commandline);
         }
 
@@ -870,7 +870,7 @@ static int standardreduction(term &t)
           // shit - hopely temporary - because of ChR's shitty parser
         { char commandline[STRLEN];
           //   sprintf(commandline,"jolifier.sh %s",fname);
-        sprintf(commandline,"jolifieur.sh %s",fname);
+        snprintf(commandline,sizeof(commandline),"jolifieur.sh %s",fname);
         system(commandline);
         }
 
@@ -929,7 +929,7 @@ static int standardreduction(term &t)
 
         //*** stout << "SPEC2REF <<"; t.write(stout); stout << "\n";
 
-      sprintf(commandline,"elan -b --export TMP.ref %s %s",
+      snprintf(commandline,sizeof(commandline),"elan -b --export TMP.ref %s %s",
               t.subterm(0)->getstring(),
               t.subterm(1)->getstring());
       system(commandline);

@@ -1163,7 +1163,7 @@ char *strnam;
 //char strnam[STRLEN];
 
   this->stinit(); 
-  sprintf(sss,"INLINE%d",++ninlines);
+  snprintf(sss,sizeof(sss),"INLINE%d",++ninlines);
   inle.cridlex(sss); grstack[stacki].addsymbol(inle);
   le.crcharlex('('); grstack[stacki].addsymbol(le);
   for(i=0, arty=0; i<actvtabi; i++) {
@@ -1275,7 +1275,7 @@ char *strnam;
 
   naffected = 0;
   this->stinit(); 
-  sprintf(sss,"INLINE%d",++ninlines);
+  snprintf(sss,sizeof(sss),"INLINE%d",++ninlines);
   inle.cridlex(sss); grstack[stacki].addsymbol(inle);
   le.crcharlex('('); grstack[stacki].addsymbol(le);
   for(i=0, arty=0; i<actvtabi; i++) {
@@ -2094,7 +2094,7 @@ void term::writerectostring(char *strin)
   char tempstr[STRLEN];
   switch (t->infos) {
   case TVAR:	
-    sprintf(tempstr," VAR(%d)",t->fsymi);
+    snprintf(tempstr,sizeof(tempstr)," VAR(%d)",t->fsymi);
     strcat(strin,tempstr);
     writewasident = 0;
     break;
@@ -2102,7 +2102,7 @@ void term::writerectostring(char *strin)
     p = (fsymtab[NUMTOTERM].textform())->rside;
     goto write;
   case TSTRING: 
-    sprintf(tempstr,"\"%s\"",(char*)(t->subt));
+    snprintf(tempstr,sizeof(tempstr),"\"%s\"",(char*)(t->subt));
     strcat(strin,tempstr);
     break;
   case TIDENT: 
@@ -2116,13 +2116,13 @@ void term::writerectostring(char *strin)
 	    if (p->nonterminal()) {
 	      if ((*p)==internIdentType) {
 		if (t->infos == TIDENT) {
-		  sprintf(tempstr,"%s%s",TERMWRITEBLANK(),tabofident.ide(t->fsymi));
+		  snprintf(tempstr,sizeof(tempstr),"%s%s",TERMWRITEBLANK(),tabofident.ide(t->fsymi));
 		  strcat(strin,tempstr); 
 		} else strcat(strin,"IDENT");
 		writewasident = 1;
 	      } else if ((*p)==internIntType) {
 		if (t->infos == TNUMBER) {
-		  sprintf(tempstr,"%s%d",TERMWRITEBLANK(),(int) t->fsymi);
+		  snprintf(tempstr,sizeof(tempstr),"%s%d",TERMWRITEBLANK(),(int) t->fsymi);
 		  strcat(strin,tempstr); }
 		else strcat(strin,"0000");
 		writewasident = 0;
@@ -2130,12 +2130,12 @@ void term::writerectostring(char *strin)
 		t->subt[i++].writerectostring(strin);
 	    } else  {
 	      if (p->isident()) {
-		sprintf(tempstr,"%s%s",TERMWRITEBLANK(),p->alfsy());
+		snprintf(tempstr,sizeof(tempstr),"%s%s",TERMWRITEBLANK(),p->alfsy());
 		strcat(strin,tempstr);
 		writewasident = 1;
 	      } else if (!p->isblankk()) {
 		writewasident = 0;
-		sprintf(tempstr,"%s",p->alfsy());
+		snprintf(tempstr,sizeof(tempstr),"%s",p->alfsy());
 		strcat(strin,tempstr);
 	      }
 	    }

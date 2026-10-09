@@ -208,10 +208,10 @@ int Appl::dump(ochstream &och)
 void load_strat_mod(lstream *f, int sou, int res)
 { char stratmod[IDLEN];
   if (sou == res)
-    sprintf(&(stratmod[0]),"%s[%s]",STRAT_MODNAME1,typet.ide(sou));/*,
+    snprintf(&(stratmod[0]),sizeof(stratmod),"%s[%s]",STRAT_MODNAME1,typet.ide(sou));/*,
 								     typet.ide(res));  */
   else
-    sprintf(&(stratmod[0]),"%s[%s,%s]",STRAT_MODNAME2,typet.ide(sou),
+    snprintf(&(stratmod[0]),sizeof(stratmod),"%s[%s,%s]",STRAT_MODNAME2,typet.ide(sou),
 	    typet.ide(res));
   if (! import.member(stratmod)) readmodules(f,stratmod); 
   if (! import.member(stratmod)) {
