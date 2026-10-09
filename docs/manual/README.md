@@ -1,7 +1,7 @@
 # ELAN 3.6 user manual
 
 LaTeX sources of the ELAN user manual (V3.6, 2003), copied from
-`legacy/elan3/doc`, and the rebuilt `manual.pdf`. Rebuild with `make manual`
+`legacy/elan3/doc`, and the rebuilt `manual.pdf`. Rebuild with `make manual` (output in `build-manual/manual.pdf`; `make manual-update` refreshes this copy)
 (needs `latex` and `dvipdf`, e.g. MacTeX or TeX Live + Ghostscript).
 
 The text is unchanged. Only the tooling that no longer exists was replaced:

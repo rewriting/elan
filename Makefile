@@ -21,7 +21,7 @@ else
   ELAN_CXX ?= g++
 endif
 
-.PHONY: manual all configure install check check-sanitize check-arch check-unit test-runner smoke reference check-reference clean toolchain
+.PHONY: manual manual-update all configure install check check-sanitize check-arch check-unit test-runner smoke reference check-reference clean toolchain
 
 all: configure
 	cmake --build $(BUILD) -j
@@ -92,14 +92,18 @@ check-sanitize:
 	  CMAKE_FLAGS="-DELAN_SANITIZE=ON -DELAN_SANITIZERS=$(SANITIZERS)" check
 
 # The ELAN 3.6 user manual (docs/manual, LaTeX from 2003): latex x3 + dvipdf
-# (figures are MetaPost/EPS). Built in build-manual/, result in docs/manual/.
+# (figures are MetaPost/EPS). Built in build-manual/manual.pdf; `make
+# manual-update` copies it over the committed docs/manual/manual.pdf (the PDF
+# bytes differ between builds: Ghostscript stamps the build time).
 manual:
 	rm -rf build-manual && cp -R docs/manual build-manual
 	cd build-manual && for i in 1 2 3; do latex -interaction=nonstopmode manual.tex > latex.log 2>&1 || true; done
 	@if grep -q '^! ' build-manual/latex.log; then grep -A3 '^! ' build-manual/latex.log; echo "ERROR: LaTeX errors (build-manual/latex.log)"; exit 1; fi
 	cd build-manual && dvipdf manual.dvi manual.pdf
-	cp build-manual/manual.pdf docs/manual/manual.pdf
 	@grep -o 'Output written on [^(]*([0-9]* pages' build-manual/latex.log
+
+manual-update: manual
+	cp build-manual/manual.pdf docs/manual/manual.pdf
 
 reference:
 	reference/build.sh
