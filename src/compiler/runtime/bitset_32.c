@@ -32,8 +32,7 @@ bitSet32 *intern_bitSet32_create(int size)
   return res;
 }
 
-bitSet32 *bitSet32_copy(b)
-  bitSet32 *b;
+bitSet32 *bitSet32_copy(bitSet32 *b)
 {
   bitSet32 *res;
   Verif_void(b,"bitSet32_copy(b)");
@@ -42,8 +41,7 @@ bitSet32 *bitSet32_copy(b)
   return res;
 }
 
-void bitSet32_print(b)
-  bitSet32 *b;
+void bitSet32_print(bitSet32 *b)
 {
   int i;
   int res=0;

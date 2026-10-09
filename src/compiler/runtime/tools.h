@@ -101,10 +101,10 @@ extern int allocatedBug;
 
 //#define MREALLOC(p,n) GC_REALLOC(p,n)
 
-extern void MsgErreur();
+extern void MsgErreur(char *message);
 extern void indent(int deep);
 extern void init_alloc();
-extern char* Valloc();
+extern char* Valloc(int taille);
 extern char *allocator(int n);
 extern char *intern_alloc(int size);
 extern void intern_free(long *p);

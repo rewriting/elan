@@ -51,6 +51,8 @@ typedef Gterm* (*funTabType)();
 #endif       
 extern funTabType funTab[];
 extern funTabType strTab[];
+/* the strategies of strTab are Gterm *str(Gterm *) */
+typedef Gterm* (*strTabFunType)(Gterm *);
 extern char *tabIdent[];
 
 /*

@@ -39,21 +39,20 @@
 #include "state_types.h"
 #include "functions.h"
 
-static void free_index_list();
-static int pure_list_len();
-static BOOL delete_bound();
-static BOOL delete_binding();
-static void delete_dead_vars();
-static void delete_dead_terms();
-static void build_assign();
-static int var_cmp();
-static void compute_index_lists();
+static void free_index_list(INDEX_LIST *list);
+static int pure_list_len(PURE_LIST *r);
+static BOOL delete_bound(PURE_PROBLEM *prob, BINDING bind_tab[]);
+static BOOL delete_binding(PURE_PROBLEM *prob, int vmult[], TERM *b);
+static void delete_dead_vars(PURE_PROBLEM *prob);
+static void delete_dead_terms(PURE_PROBLEM *prob);
+static void build_assign(PURE_PROBLEM *prob);
+static int var_cmp(const void *pi, const void *pj);
+static void compute_index_lists(PURE_PROBLEM *prob);
 
 /*
  *	Free index list
  */
-static void free_index_list(list)
-INDEX_LIST *list;
+static void free_index_list(INDEX_LIST *list)
 {
   INDEX_LIST *p;
 
@@ -73,8 +72,7 @@ INDEX_LIST *list;
  *	(2) Delete any bound variables together with their bindings.
  *	(3) Build structures for assignments and shared variables.
  */
-BOOL build_pure(obj)
-MATCH_OBJECT *obj;
+BOOL build_pure(MATCH_OBJECT *obj)
 {
   PURE_LIST *pure_stack = obj->pure_stack;
   int i, j, term_tab_size, *vmult;
@@ -167,8 +165,7 @@ term_found:;
 /*
  *	Return length of list of pure AC equations
  */
-static int pure_list_len(r)
-PURE_LIST *r;
+static int pure_list_len(PURE_LIST *r)
 {
   int c;
 
@@ -181,9 +178,7 @@ PURE_LIST *r;
  *	Delete bound variables and their bindings from var_tab and
  *	term_tab tables.
  */
-static BOOL delete_bound(prob, bind_tab)
-PURE_PROBLEM *prob;
-BINDING bind_tab[];
+static BOOL delete_bound(PURE_PROBLEM *prob, BINDING bind_tab[])
 {
   VAR_HEADER *var_tab = prob->var_tab;
   int n_var = prob->n_var;
@@ -214,10 +209,7 @@ BINDING bind_tab[];
 /*
  *	Delete terms bound to eleminated variable from term_tab
  */
-static BOOL delete_binding(prob, vmult, b)
-PURE_PROBLEM *prob;
-int vmult[];
-TERM *b;
+static BOOL delete_binding(PURE_PROBLEM *prob, int vmult[], TERM *b)
 {
   TERM_HEADER *term_tab = prob->term_tab;
   int *top_sym = prob->top_sym;
@@ -271,8 +263,7 @@ got_subterm:
 /*
  *	Remove dead columns from var_tab
  */
-static void delete_dead_vars(prob)
-PURE_PROBLEM *prob;
+static void delete_dead_vars(PURE_PROBLEM *prob)
 {
   VAR_HEADER *var_tab = prob->var_tab;
   int n_var = prob->n_var;
@@ -293,8 +284,7 @@ PURE_PROBLEM *prob;
 /*
  *	Remove dead columns from term_tab
  */
-static void delete_dead_terms(prob)
-PURE_PROBLEM *prob;
+static void delete_dead_terms(PURE_PROBLEM *prob)
 {
   TERM_HEADER *term_tab = prob->term_tab;
   int n_pure = prob->n_pure;
@@ -322,8 +312,7 @@ not_dead:;
  *	assignment arrays for uniquely owned variables. If there
  *	are any shared variables compute index lists
  */
-static void build_assign(prob)
-PURE_PROBLEM *prob;
+static void build_assign(PURE_PROBLEM *prob)
 {
   VAR_HEADER *var_tab = prob->var_tab;
   int *top_sym = prob->top_sym;
@@ -384,9 +373,9 @@ PURE_PROBLEM *prob;
  *	Return -ve if we think variable *i is harder to satisfy than
  *	variable *j; +ve for vicervera and 0 for don't know.
  */
-static int var_cmp(i, j)
-VAR_HEADER *i, *j;
+static int var_cmp(const void *pi, const void *pj)
 {
+  const VAR_HEADER *i = pi, *j = pj;
   if(i->owner == SHARED){
     if(j->owner != SHARED)
       return(-1);
@@ -406,8 +395,7 @@ VAR_HEADER *i, *j;
  *	in an AC equation with AC symbol foo if it gets bound to a term
  *	with top symbol foo in another AC equation with AC symbol bar.
  */
-static void compute_index_lists(prob)
-PURE_PROBLEM *prob;
+static void compute_index_lists(PURE_PROBLEM *prob)
 {
   TERM_HEADER *term_tab = prob->term_tab;
   int n_term = prob->n_term;
@@ -441,8 +429,7 @@ got_subterm:
 /*
  *	Free all storage allocted to pure problem structure
  */
-void destroy_pure(prob)
-PURE_PROBLEM *prob;
+void destroy_pure(PURE_PROBLEM *prob)
 {
   VAR_HEADER *var_tab;
   TERM_HEADER *term_tab;

@@ -38,10 +38,10 @@
 #define INITIAL_BACKCTRAIL_SIZE   8
 #define INITIAL_JMPBUF_STACK_SIZE 4
 
-extern void CPL_init_malloc_protect(void* (*f)());
-extern void CPL_init_malloc(void* (*f)());
-extern void CPL_init_realloc_protect(void* (*f)());
-extern void CPL_init_realloc(void* (*f)());
+extern void CPL_init_malloc_protect(void* (*f)(size_t));
+extern void CPL_init_malloc(void* (*f)(size_t));
+extern void CPL_init_realloc_protect(void* (*f)(void *, size_t));
+extern void CPL_init_realloc(void* (*f)(void *, size_t));
 
 extern int setChoicePoint();
 extern void globalFail();

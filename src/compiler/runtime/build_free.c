@@ -39,15 +39,15 @@
 #include "state_types.h"
 #include "functions.h"
 
-static BOOL simplify();
-static BOOL simplify_ac();
-static int count_same();
-static void free_bind_list();
-static void free_subprob_list();
-static void free_variables();
-static void free_unused();
-static void free_graphs();
-static void free_msub_list();
+static BOOL simplify(MATCH_OBJECT *obj, FREE_PROBLEM *fp, TERM *p, TERM *s);
+static BOOL simplify_ac(MATCH_OBJECT *obj, FREE_PROBLEM *fp, int top, AC_LIST *pp, AC_LIST *ss);
+static int count_same(AC_LIST *pp);
+static void free_bind_list(BIND_LIST *l);
+static void free_subprob_list(AC_PROB_LIST *l);
+static void free_variables(VAR_LIST *l);
+static void free_unused(AC_LIST *l);
+static void free_graphs(GRAPH_LIST *l);
+static void free_msub_list(MSUB_LIST *l);
 
 /*
  *	Build structure for free AC problem by:
@@ -136,10 +136,7 @@ clean_up2:
  *			problems, top level variables and unmatchable
  *			(except by variables) subject terms.
  */
-static BOOL simplify(obj, fp, p, s)
-MATCH_OBJECT *obj;
-FREE_PROBLEM *fp;
-TERM *p, *s;
+static BOOL simplify(MATCH_OBJECT *obj, FREE_PROBLEM *fp, TERM *p, TERM *s)
 {
   int t;
   BIND_LIST *q, *qf;
@@ -214,11 +211,7 @@ TERM *p, *s;
 /*
  *	Simplify subproblem with AC top symbol
  */
-static BOOL simplify_ac(obj, fp, top, pp, ss)
-MATCH_OBJECT *obj;
-FREE_PROBLEM *fp;
-int top;
-AC_LIST *pp, *ss;
+static BOOL simplify_ac(MATCH_OBJECT *obj, FREE_PROBLEM *fp, int top, AC_LIST *pp, AC_LIST *ss)
 {
   int i, diff, np, ns, g_left_overs, g_diff;
   TERM *p, *s;
@@ -349,8 +342,7 @@ clean_up:
  *	Count number of subterms with the same top symbol as the first
  *	on the list.
  */
-static int count_same(pp)
-AC_LIST *pp;
+static int count_same(AC_LIST *pp)
 {
   int count = 1;
   int sym = pp->arg->sym;
@@ -364,9 +356,7 @@ AC_LIST *pp;
   return(count);
 }
 
-void assert_bindings(bind_tab, b)
-BINDING bind_tab[];
-BIND_LIST *b;
+void assert_bindings(BINDING bind_tab[], BIND_LIST *b)
 {
   int i;
 
@@ -381,9 +371,7 @@ BIND_LIST *b;
   }
 }
 
-void retract_bindings(bind_tab, b)
-BINDING bind_tab[];
-BIND_LIST *b;
+void retract_bindings(BINDING bind_tab[], BIND_LIST *b)
 {
   int i;
 
@@ -394,8 +382,7 @@ BIND_LIST *b;
   }
 }
 
-void destroy_free(fp)
-FREE_PROBLEM *fp;
+void destroy_free(FREE_PROBLEM *fp)
 {
   /* 
    * 17/08/98 : modif de PEM
@@ -410,8 +397,7 @@ FREE_PROBLEM *fp;
   EFREE(fp);
 }
 
-static void free_bind_list(l)
-BIND_LIST *l;
+static void free_bind_list(BIND_LIST *l)
 {
   BIND_LIST *next;
 
@@ -421,8 +407,7 @@ BIND_LIST *l;
   }
 }
 
-static void free_subprob_list(l)
-AC_PROB_LIST *l;
+static void free_subprob_list(AC_PROB_LIST *l)
 {
   AC_PROB_LIST *next;
 
@@ -435,8 +420,7 @@ AC_PROB_LIST *l;
   }
 }
 
-static void free_variables(l)
-VAR_LIST *l;
+static void free_variables(VAR_LIST *l)
 {
   VAR_LIST *next;
 
@@ -446,8 +430,7 @@ VAR_LIST *l;
   }
 }
 
-static void free_unused(l)
-AC_LIST *l;
+static void free_unused(AC_LIST *l)
 {
   AC_LIST *next;
 
@@ -457,8 +440,7 @@ AC_LIST *l;
   }
 }
 
-static void free_graphs(l)
-GRAPH_LIST *l;
+static void free_graphs(GRAPH_LIST *l)
 {
   GRAPH_LIST *next;
   int i, np;
@@ -475,8 +457,7 @@ GRAPH_LIST *l;
   }
 }
 
-static void free_msub_list(l)
-MSUB_LIST *l;
+static void free_msub_list(MSUB_LIST *l)
 {
   MSUB_LIST *next;
 

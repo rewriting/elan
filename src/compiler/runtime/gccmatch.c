@@ -39,12 +39,14 @@
 #include "sym_types.h"
 #include "defs.h"
 #include "term_types.h"
+#include "free_types.h"
+#include "pure_types.h"
+#include "state_types.h"
 #include "functions.h"
 #include <stdio.h>
 #include <stdlib.h>
 
-void *salloc(n)
-unsigned n;
+void *salloc(unsigned n)
 {
   char *t = (char*) malloc(n);
   //printf("salloc size = %d\n",n);
@@ -59,9 +61,7 @@ unsigned n;
   return((void *) t);
 }
 
-void *srealloc(old, size)
-void *old;
-unsigned size;
+void *srealloc(void *old, unsigned size)
 {
   char *t = realloc((char *) old, size);
 
@@ -75,8 +75,7 @@ unsigned size;
   return((void *) t);
 }
 
-void sfree(p)
-void *p;
+void sfree(void *p)
 {
   printf("sfree should not be used\n");
   exit(1);
@@ -85,8 +84,7 @@ void *p;
 }
 
 
-void fatal(s,a)
-char *s, *a;
+void fatal(char *s, char *a)
 {
   fprintf(stderr,"[error] ACmatch error ");
   if(*a)

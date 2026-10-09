@@ -50,7 +50,7 @@ extern void extract_minimal_identical_element(struct termac *t,
 extern void substitution_build(struct termac *t, match_state *ms,
                                int nb_variable, Gterm *substitution[],
                                int nb_variable_ac,
-                               void (*variable_extract)(),
+                               void (*variable_extract)(Gterm *v0, int id_pattern, Gterm *extract_substitution[], int *indice, struct match_state *ms, int no_arg_subject, int no_pattern, int base_id_pattern),
                                int base_id_pattern);
 
 extern void substitution_build_without_context(struct termac *t,
@@ -58,7 +58,7 @@ extern void substitution_build_without_context(struct termac *t,
                                                int nb_variable,
                                                Gterm *substitution[],
                                                int nb_variable_ac,
-                                               void (*variable_extract)(),
+                                               void (*variable_extract)(Gterm *v0, int id_pattern, Gterm *extract_substitution[], int *indice, struct match_state *ms, int no_arg_subject, int no_pattern, int base_id_pattern),
                                                int base_id_pattern);
 
 extern struct termac *rest_extract(struct termac *t, match_state *ms);
@@ -90,7 +90,7 @@ extern int match_subterm_AC(int base_id_pattern,
                             int no_arg_subject,
                             int *mask,
                             BG *cbg,
-                            int (*my_match_subterm)(),
+                            int (*my_match_subterm)(Gterm *v0, int no_arg_subject, int *mask, BG *cbg),
                             int nb_rule,
                             int **pattern_list,
                             int nb_pattern_in_cbg,

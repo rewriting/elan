@@ -99,21 +99,21 @@ inline void * __memcpy_by8(void * to, const void * from, size_t n) {
 #define AT_REALLOC_PROTECT(x,y) func_realloc_protect(x,y)
 #define AT_REALLOC(x,y)         func_realloc(x,y)
 
-static void* (*func_malloc_protect)();
-static void* (*func_malloc)();
-static void* (*func_realloc_protect)();
-static void* (*func_realloc)();
+static void* (*func_malloc_protect)(size_t);
+static void* (*func_malloc)(size_t);
+static void* (*func_realloc_protect)(void *, size_t);
+static void* (*func_realloc)(void *, size_t);
 
-void CPL_init_malloc_protect(void* (*f)()) {
+void CPL_init_malloc_protect(void* (*f)(size_t)) {
   func_malloc_protect = f;
 }
-void CPL_init_malloc(void* (*f)()) {
+void CPL_init_malloc(void* (*f)(size_t)) {
   func_malloc = f;
 }
-void CPL_init_realloc_protect(void* (*f)()) {
+void CPL_init_realloc_protect(void* (*f)(void *, size_t)) {
   func_realloc_protect = f;
 }
-void CPL_init_realloc(void* (*f)()) {
+void CPL_init_realloc(void* (*f)(void *, size_t)) {
   func_realloc = f;
 }
 

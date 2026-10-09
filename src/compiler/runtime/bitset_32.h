@@ -37,7 +37,7 @@ typedef bitSet32_type bitSet32;
 
 extern bitSet32 *intern_bitSet32_create(int size);
 extern bitSet32 *bitSet32_copy(bitSet32 *b);
-extern void bitSet32_print();
+extern void bitSet32_print(bitSet32 *b);
 
 
 extern bitSet32 *intern_bitSet32_create(int size);
@@ -57,9 +57,9 @@ extern bitSet32 *intern_bitSet32_create(int size);
 /*
 void bitSet32_not(bitSet32 *b1);
 int bitSet32_isclear(bitSet32 *b);
-extern void bitSet32_and();
-extern void bitSet32_or();
-extern int  bitSet32_equals();
+extern void bitSet32_and(bitSet32 *b1, bitSet32 *b2);
+extern void bitSet32_or(bitSet32 *b1, bitSet32 *b2);
+extern int  bitSet32_equals(bitSet32 *b1, bitSet32 *b2);
 */
 
 #endif

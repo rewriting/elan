@@ -639,6 +639,26 @@ static struct termac *merge_sorted_term(struct termac *tac1,
 
 
 
+/* funTab holds functions of every arity: each call goes through the
+   prototype of its arity, Gterm *f(Gterm *, ..., Gterm *) */
+#define funTabType0 Gterm *(*)(void)
+#define funTabType1 Gterm *(*)(Gterm *)
+#define funTabType2 Gterm *(*)(Gterm *, Gterm *)
+#define funTabType3 Gterm *(*)(Gterm *, Gterm *, Gterm *)
+#define funTabType4 Gterm *(*)(Gterm *, Gterm *, Gterm *, Gterm *)
+#define funTabType5 Gterm *(*)(Gterm *, Gterm *, Gterm *, Gterm *, Gterm *)
+#define funTabType6 Gterm *(*)(Gterm *, Gterm *, Gterm *, Gterm *, Gterm *, Gterm *)
+#define funTabType7 Gterm *(*)(Gterm *, Gterm *, Gterm *, Gterm *, Gterm *, Gterm *, Gterm *)
+#define funTabType8 Gterm *(*)(Gterm *, Gterm *, Gterm *, Gterm *, Gterm *, Gterm *, Gterm *, Gterm *)
+#define funTabType9 Gterm *(*)(Gterm *, Gterm *, Gterm *, Gterm *, Gterm *, Gterm *, Gterm *, Gterm *, Gterm *)
+#define funTabType10 Gterm *(*)(Gterm *, Gterm *, Gterm *, Gterm *, Gterm *, Gterm *, Gterm *, Gterm *, Gterm *, Gterm *)
+#define funTabType11 Gterm *(*)(Gterm *, Gterm *, Gterm *, Gterm *, Gterm *, Gterm *, Gterm *, Gterm *, Gterm *, Gterm *, Gterm *)
+#define funTabType12 Gterm *(*)(Gterm *, Gterm *, Gterm *, Gterm *, Gterm *, Gterm *, Gterm *, Gterm *, Gterm *, Gterm *, Gterm *, Gterm *)
+#define funTabType13 Gterm *(*)(Gterm *, Gterm *, Gterm *, Gterm *, Gterm *, Gterm *, Gterm *, Gterm *, Gterm *, Gterm *, Gterm *, Gterm *, Gterm *)
+#define funTabType14 Gterm *(*)(Gterm *, Gterm *, Gterm *, Gterm *, Gterm *, Gterm *, Gterm *, Gterm *, Gterm *, Gterm *, Gterm *, Gterm *, Gterm *, Gterm *)
+#define funTabType15 Gterm *(*)(Gterm *, Gterm *, Gterm *, Gterm *, Gterm *, Gterm *, Gterm *, Gterm *, Gterm *, Gterm *, Gterm *, Gterm *, Gterm *, Gterm *, Gterm *)
+#define funTabType16 Gterm *(*)(Gterm *, Gterm *, Gterm *, Gterm *, Gterm *, Gterm *, Gterm *, Gterm *, Gterm *, Gterm *, Gterm *, Gterm *, Gterm *, Gterm *, Gterm *, Gterm *)
+
 #define funTabCall0
 #define funTabCall1 arg[0]
 #define funTabCall2  funTabCall1,arg[1]
@@ -674,24 +694,24 @@ Gterm* specialApply(Gterm *res) {
 
   switch(term_arity(res)) {
       // pour le cas AC
-      case -1: return funTab[fsym](res);
-      case 0:  return funTab[fsym](funTabCall0);
-      case 1:  return funTab[fsym](funTabCall1);
-      case 2:  return funTab[fsym](funTabCall2);
-      case 3:  return funTab[fsym](funTabCall3);
-      case 4:  return funTab[fsym](funTabCall4);
-      case 5:  return funTab[fsym](funTabCall5);
-      case 6:  return funTab[fsym](funTabCall6);
-      case 7:  return funTab[fsym](funTabCall7);
-      case 8:  return funTab[fsym](funTabCall8);
-      case 9:  return funTab[fsym](funTabCall9);
-      case 10: return funTab[fsym](funTabCall10);
-      case 11: return funTab[fsym](funTabCall11);
-      case 12: return funTab[fsym](funTabCall12);
-      case 13: return funTab[fsym](funTabCall13);
-      case 14: return funTab[fsym](funTabCall14);
-      case 15: return funTab[fsym](funTabCall15);
-      case 16: return funTab[fsym](funTabCall16);
+      case -1: return ((funTabType1)funTab[fsym])(res);
+      case 0:  return ((funTabType0)funTab[fsym])(funTabCall0);
+      case 1:  return ((funTabType1)funTab[fsym])(funTabCall1);
+      case 2:  return ((funTabType2)funTab[fsym])(funTabCall2);
+      case 3:  return ((funTabType3)funTab[fsym])(funTabCall3);
+      case 4:  return ((funTabType4)funTab[fsym])(funTabCall4);
+      case 5:  return ((funTabType5)funTab[fsym])(funTabCall5);
+      case 6:  return ((funTabType6)funTab[fsym])(funTabCall6);
+      case 7:  return ((funTabType7)funTab[fsym])(funTabCall7);
+      case 8:  return ((funTabType8)funTab[fsym])(funTabCall8);
+      case 9:  return ((funTabType9)funTab[fsym])(funTabCall9);
+      case 10: return ((funTabType10)funTab[fsym])(funTabCall10);
+      case 11: return ((funTabType11)funTab[fsym])(funTabCall11);
+      case 12: return ((funTabType12)funTab[fsym])(funTabCall12);
+      case 13: return ((funTabType13)funTab[fsym])(funTabCall13);
+      case 14: return ((funTabType14)funTab[fsym])(funTabCall14);
+      case 15: return ((funTabType15)funTab[fsym])(funTabCall15);
+      case 16: return ((funTabType16)funTab[fsym])(funTabCall16);
       default:
         printf("increase maxArity=16 in term.c::specialApply\n");
         exit(1);
@@ -1132,7 +1152,7 @@ Gterm *term_metaApply(Gterm *t) {
           CUTOPEN();
             //printf("**********\n");
 
-          (*ptr_array)[*counter] = strTab[index](mainTerm);
+          (*ptr_array)[*counter] = ((strTabFunType)strTab[index])(mainTerm);
             //printf("*ptr_array[%d] = ",*counter); term_printnl(stdout,(*ptr_array)[*counter]);
           
           (*counter)++;
@@ -1196,7 +1216,7 @@ Gterm *term_rewriteStep(int strIndex,Gterm *t) {
     
   if(setChoicePoint()==0) {
       // set a choice point
-    newTerm = strTab[strIndex](t);
+    newTerm = ((strTabFunType)strTab[strIndex])(t);
       //printf("top step: "); internal_term_println(stdout,newTerm,ELAN_IO);
     return newTerm;
   } else {

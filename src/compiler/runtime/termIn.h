@@ -59,17 +59,17 @@ extern char *tabSort[TABOFSORT_SIZE] ;
 
 
 extern Gterm *termParser(int queryMode, int evaluationMode);
-extern Gterm *EarleyParser();
+extern Gterm *EarleyParser(char *querySortName);
 extern void EarleyParserInit();
 extern int findTab(char *s[],int n,char *str);
 extern void addstandards(void);
 
 extern void esemactinit();
-extern void tabofidentInit();
-extern void typetInit();
-extern void grammarInit();
+extern void tabofidentInit(char *tab[],int max);
+extern void typetInit(char *tab[],int max);
+extern void grammarInit(int gram[],int max);
 extern void earleyInit();
-extern int earleyCall();
+extern int earleyCall(FILE *fp,int sort);
 extern void prefixParser(char *s1, char *s2);
 
 extern char *tabIdentStr[];

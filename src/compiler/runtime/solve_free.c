@@ -40,20 +40,17 @@
 #include "state_types.h"
 #include "functions.h"
 
-static BOOL advance_prob();
-static BOOL clash_bindings();
-static AC_LIST *find_unused();
-static void delete_unused();
-static BOOL advance_graph();
+static BOOL advance_prob(MATCH_OBJECT *obj, AC_PROB_LIST *p, BOOL reset);
+static BOOL clash_bindings(BINDING bind_tab[], BIND_LIST *b);
+static AC_LIST *find_unused(AC_PROB_LIST *p);
+static void delete_unused(AC_LIST *temp, AC_LIST *unused);
+static BOOL advance_graph(MATCH_OBJECT *obj, GRAPH_LIST *g, BOOL reset);
 
 /*
  *	Find all solutions to free AC problem by iteratively backtracking
  *	over all solutions to AC subproblems.
  */
-BOOL solve_free(obj, fp, reset)
-MATCH_OBJECT *obj;
-FREE_PROBLEM *fp;
-BOOL reset;
+BOOL solve_free(MATCH_OBJECT *obj, FREE_PROBLEM *fp, BOOL reset)
 {
   AC_PROB_LIST *p;
 
@@ -88,9 +85,7 @@ backtrack:
   }
 }
 
-static BOOL clash_bindings(bind_tab, b)
-BINDING bind_tab[];
-BIND_LIST *b;
+static BOOL clash_bindings(BINDING bind_tab[], BIND_LIST *b)
 {
   TERM *t;
 
@@ -109,10 +104,7 @@ BIND_LIST *b;
  *	left over subject terms are gathered and forma pure AC equation
  *	which is pushed on the pure stack.
  */
-static BOOL advance_prob(obj, p, reset)
-MATCH_OBJECT *obj;
-AC_PROB_LIST *p;
-BOOL reset;
+static BOOL advance_prob(MATCH_OBJECT *obj, AC_PROB_LIST *p, BOOL reset)
 {
   GRAPH_LIST *g;
   PURE_LIST *t;
@@ -159,8 +151,7 @@ backtrack:
  *	Gather up unused subject terms from graph problems and tack them
  *	on to the list of unused subject terms from the AC subproblem.
  */
-static AC_LIST *find_unused(p)
-AC_PROB_LIST *p;
+static AC_LIST *find_unused(AC_PROB_LIST *p)
 {
   AC_LIST *head = p->unused, *t;
   int i, ns;
@@ -188,8 +179,7 @@ AC_PROB_LIST *p;
  *	leave original list of unused subject terms from the AC subproblem
  *	untouched. Assumes pointer comparisions to heap objects are valid.
  */
-static void delete_unused(temp, unused)
-AC_LIST *temp, *unused;
+static void delete_unused(AC_LIST *temp, AC_LIST *unused)
 {
    AC_LIST *q;
 
@@ -213,10 +203,7 @@ AC_LIST *temp, *unused;
  *	algorithm in the case where all pattern nodes have
  *	multiplicity 1.
  */
-static BOOL advance_graph(obj, g, reset)
-MATCH_OBJECT *obj;
-GRAPH_LIST *g;
-BOOL reset;
+static BOOL advance_graph(MATCH_OBJECT *obj, GRAPH_LIST *g, BOOL reset)
 {
   int i, pmult;
   MSUB_LIST *ms;

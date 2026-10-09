@@ -312,7 +312,7 @@ Gterm *termParser(int queryMode, int evaluationMode) {
 
         res=(Gterm*)normalise(query);
         if(earleyQueryStrategy!=0) {
-          res = strTab[earleyQueryStrategy](res);
+          res = ((strTabFunType)strTab[earleyQueryStrategy])(res);
         }
         break;
       case 2: /* Elan Form */
@@ -357,7 +357,7 @@ Gterm *termParser(int queryMode, int evaluationMode) {
               //res=normalise(EarleyParser(""));
 	      
               if(earleyQueryStrategy!=0) {
-                res = strTab[earleyQueryStrategy](res);
+                res = ((strTabFunType)strTab[earleyQueryStrategy])(res);
               }
 
 	      /*--------------------- for trace AC only -------------------*/
@@ -398,7 +398,7 @@ Gterm *termParser(int queryMode, int evaluationMode) {
               strCall = strIndex; // [Huy: May 22 00] 
               printf("\ncase 2 sort = %s\n ",sort);
               res=(Gterm*)normalise(EarleyParser(sort));
-              res=strTab[strIndex](res);
+              res=((strTabFunType)strTab[strIndex])(res);
               break;
             }
         }
@@ -441,9 +441,9 @@ Gterm *termParser(int queryMode, int evaluationMode) {
 		}
 	    }
 	    strCall = strIndex;                     // [Huy: May 22 00]
-	    res = strTab[strIndex](res);
+	    res = ((strTabFunType)strTab[strIndex])(res);
         } else if (strlen(sort)==0 && earleyQueryStrategy!=0) {
-	    res = strTab[earleyQueryStrategy](res);
+	    res = ((strTabFunType)strTab[earleyQueryStrategy])(res);
         }
         break;
       }

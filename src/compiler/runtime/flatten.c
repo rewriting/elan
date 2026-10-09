@@ -34,15 +34,17 @@
  */
 #include "defs.h"
 #include "term_types.h"
+#include "free_types.h"
+#include "pure_types.h"
+#include "state_types.h"
 #include "functions.h"
 
-static TERM_LIST *merge_sort();
+static TERM_LIST *merge_sort(TERM_LIST *p, int len);
 
 /*
  *	flatten a term
  */
-void flatten(t)
-TERM *t;
+void flatten(TERM *t)
 {
   TERM_LIST *p, *active;
   int count;
@@ -78,8 +80,7 @@ TERM *t;
   t->rest.f.list_len = count;
 }
 
-void ac_compress(t)
-TERM *t;
+void ac_compress(TERM *t)
 {
   BOOL ac=FALSE;
   TERM_LIST *p, *p2;
@@ -135,9 +136,7 @@ TERM *t;
 /*
  *	Sort argument lists in descending order
  */
-static TERM_LIST *merge_sort(p, len)
-TERM_LIST *p;
-int len;
+static TERM_LIST *merge_sort(TERM_LIST *p, int len)
 {
   TERM_LIST *p2, *q, *base;
   int i, l;
@@ -194,8 +193,7 @@ int len;
  *	argument list of free function symbols and multiset order for
  *	argument lists of AC function symbols.
  */
-int eker_term_cmp(t, t2)
-TERM *t, *t2;
+int eker_term_cmp(TERM *t, TERM *t2)
 {
   TERM_TYPE type = t->type, type2 = t2->type;
   TERM_LIST *p, *p2;
@@ -242,8 +240,7 @@ TERM *t, *t2;
   }
 }
 
-void destroy_term(t)
-TERM *t;
+void destroy_term(TERM *t)
 {
   TERM_LIST *p, *p2;
   AC_LIST *q, *q2;
@@ -283,9 +280,7 @@ TERM *t;
 /*
  *	Sort argument lists in descending order
  */
-static AC_LIST *ac_merge_sort(p, len)
-AC_LIST *p;
-int len;
+static AC_LIST *ac_merge_sort(AC_LIST *p, int len)
 {
   AC_LIST *p2, *q, *base;
   int i, l;

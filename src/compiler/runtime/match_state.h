@@ -60,7 +60,7 @@ typedef struct match_state {
 extern match_state *MS_create();
 extern void MS_delete(match_state *ms);
 extern int MS_reinit(match_state *ms,struct termac *subject, int no_rule);
-extern int MS_init(match_state **ms,int (*match_subterm)(),
+extern int MS_init(match_state **ms,int (*match_subterm)(Gterm *v0, int no_arg_subject, int *mask, BG *cbg),
 		    int nb_pattern, int **pattern_list,
 		    int nb_pattern_in_cbg,struct termac *subject,
 		    int necessary_link, int max_nb_pattern_under_AC);

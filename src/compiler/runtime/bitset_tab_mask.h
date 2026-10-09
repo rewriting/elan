@@ -76,14 +76,14 @@ extern bitSet *intern_bitSet_GC_create(int size);
   int i; for(i=1 ; i <= bitSet_tab_size(b) ; i++) b[i] = 0; }
 
 extern bitSet *bitSet_copy(bitSet *b);
-extern void bitSet_print();
+extern void bitSet_print(bitSet *b);
 
 /*
 void bitSet_not(bitSet *b1);
 int bitSet_isclear(bitSet *b);
-extern void bitSet_and();
-extern void bitSet_or();
-extern int  bitSet_equals();
+extern void bitSet_and(bitSet *b1, bitSet *b2);
+extern void bitSet_or(bitSet *b1, bitSet *b2);
+extern int  bitSet_equals(bitSet *b1, bitSet *b2);
 */
 
 extern void bitSet_or(bitSet *b1,bitSet *b2);

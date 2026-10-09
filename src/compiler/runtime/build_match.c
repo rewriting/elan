@@ -39,8 +39,8 @@
 #include "state_types.h"
 #include "functions.h"
 
-static BOOL find_match();
-static TERM *ac_uncompress();
+static BOOL find_match(MATCH_OBJECT *m);
+static TERM *ac_uncompress(TERM *t);
 
 /*
  *	Build a match object
@@ -80,8 +80,7 @@ void *build_match(TERM *p, TERM *s, int tot_var) {
 /*
  *	Extract a match
  */
-static BOOL find_match(m)
-MATCH_OBJECT *m;
+static BOOL find_match(MATCH_OBJECT *m)
 {
   if(m == NULL)
     return(FALSE);
@@ -116,9 +115,7 @@ MATCH_OBJECT *m;
   return(FALSE);
 }
 
-BOOL extract_match(vm, assignment)
-void *vm;
-TERM *assignment[];
+BOOL extract_match(void *vm, TERM *assignment[])
 {
   MATCH_OBJECT *m = (MATCH_OBJECT *) vm;
   int i, j, t, n_var, n_term, a;
@@ -186,8 +183,7 @@ TERM *assignment[];
   return(TRUE);
 }
    
-static TERM *ac_uncompress(t)
-TERM *t;
+static TERM *ac_uncompress(TERM *t)
 {
   TERM *p = EMALLOC(TERM);
   TERM_LIST *q, *head, *tail;
@@ -242,8 +238,7 @@ TERM *t;
 /*
  *	destroy object and free storage
  */
-void destroy_match(vm)
-void *vm;
+void destroy_match(void *vm)
 {
   MATCH_OBJECT *m = (MATCH_OBJECT *) vm;
 

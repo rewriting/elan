@@ -89,7 +89,7 @@ void MS_delete(match_state *ms) {
 // [pem: Oct 20 00]
 //static int match_mask[MAX_CBG_SIZE];
 int MS_init(match_state **ptr_ms,
-	     int (*match_subterm)(),
+	     int (*match_subterm)(Gterm *v0, int no_arg_subject, int *mask, BG *cbg),
 	     int nb_rule,
 	     int **pattern_list,
 	     int nb_pattern_in_cbg,

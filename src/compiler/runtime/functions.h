@@ -32,42 +32,42 @@
 /*
  *	Interface functions
  */
-extern void *salloc();
-extern void *srealloc();
-extern void sfree();
-extern void fatal();
+extern void *salloc(unsigned n);
+extern void *srealloc(void *old, unsigned size);
+extern void sfree(void *p);
+extern void fatal(char *s, char *a);
 /*
  *	flatten.c functions
  */
-extern void flatten();
-extern void ac_compress();
-extern int eker_term_cmp();
-extern void destroy_term();
-extern void ac_sort();
+extern void flatten(TERM *t);
+extern void ac_compress(TERM *t);
+extern int eker_term_cmp(TERM *t, TERM *t2);
+extern void destroy_term(TERM *t);
+extern void ac_sort(TERM *t);
 /*
  *	build_match.c
  */
-extern void *build_match();
-extern BOOL extract_match();
-extern void destroy_match();
-extern void assert_bindings();
-extern void retract_bindings();
+extern void *build_match(TERM *p, TERM *s, int tot_var);
+extern BOOL extract_match(void *vm, TERM *assignment[]);
+extern void destroy_match(void *vm);
+extern void assert_bindings(BINDING bind_tab[], BIND_LIST *b);
+extern void retract_bindings(BINDING bind_tab[], BIND_LIST *b);
 /*
  *	build_free.c
  */
-extern BOOL build_free();
-extern void destroy_free();
+extern BOOL build_free(MATCH_OBJECT *obj,TERM *p,TERM *s,FREE_PROBLEM **dest);
+extern void destroy_free(FREE_PROBLEM *fp);
 /*
  *	solve_free.c
  */
-extern BOOL solve_free();
+extern BOOL solve_free(MATCH_OBJECT *obj, FREE_PROBLEM *fp, BOOL reset);
 /*
  *	build_pure.c
  */
-extern BOOL build_pure();
-extern void destroy_pure();
+extern BOOL build_pure(MATCH_OBJECT *obj);
+extern void destroy_pure(PURE_PROBLEM *prob);
 /*
  *	solve_pure.c
  */
-extern BOOL solve_pure();
+extern BOOL solve_pure(PURE_PROBLEM *prob, BOOL reset);
 

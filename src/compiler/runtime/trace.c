@@ -501,7 +501,7 @@ Gterm * norm_1(Gterm *t) {
     }
     t = norm_0(t);
     //fprintf(stderr,"%d %d\n",strTabSize,strCall);
-    t = strTab[(strTabSize-1)/2+strCall](t); // str_xxx 
+    t = ((strTabFunType)strTab[(strTabSize-1)/2+strCall])(t); // str_xxx 
       //GsetReduced(t); // [Huy: Apr 30 00]
 
     return t;
@@ -565,7 +565,7 @@ Gterm * norm_3(Gterm *t) {
       
     }
     t = norm_0(t);
-    t = strTab[(strTabSize-1)/2+strCall](t); // str_xxx 
+    t = ((strTabFunType)strTab[(strTabSize-1)/2+strCall])(t); // str_xxx 
     GsetReduced(t); // [Huy: Apr 30 00] 
     return t;
 }
@@ -586,7 +586,7 @@ Gterm * norm_4(Gterm *t) {
 	while (1){ //eager au top
 	    t = (Gterm*)normalise(t);                  /*normalise by unlabelled rules*/
 	    r1 = rewrite_real_step;
-	    t = strTab[(strTabSize-1)/2+strCall](t);//str_xxx
+	    t = ((strTabFunType)strTab[(strTabSize-1)/2+strCall])(t);//str_xxx
 	    r2 = rewrite_real_step;
 	    printf("");
 	    if (r1 == r2) break;                /*no more rule can be applied*/
@@ -594,7 +594,7 @@ Gterm * norm_4(Gterm *t) {
 	T = t; // save the current top     
     } else {
 	r1 = rewrite_real_step;
-	t = strTab[(strTabSize-1)/2+strCall](t);/*one step on subterm*/
+	t = ((strTabFunType)strTab[(strTabSize-1)/2+strCall])(t);/*one step on subterm*/
 	r2 = rewrite_real_step;
 	if (r1 != r2){
 	    GsetReduced(t);   /*normalise par rapport aux regles non-nommes*/

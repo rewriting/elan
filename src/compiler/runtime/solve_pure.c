@@ -36,13 +36,13 @@
 #include "term_types.h"
 #include "pure_types.h"
 
-static BOOL advance_shared();
-static void update_shared();
-static BOOL shared_last();
-static BOOL in_index_list();
-static BOOL advance_owned();
-static BOOL advance_select();
-static BOOL owned_last();
+static BOOL advance_shared(PURE_PROBLEM *prob, int v, BOOL reset);
+static void update_shared(PURE_PROBLEM *prob, int v, int t, int d);
+static BOOL shared_last(PURE_PROBLEM *prob, int v);
+static BOOL in_index_list(INDEX_LIST *l, int i);
+static BOOL advance_owned(PURE_PROBLEM *prob, int v, BOOL reset);
+static BOOL advance_select(PURE_PROBLEM *prob, int v, int r, BOOL reset);
+static BOOL owned_last(PURE_PROBLEM *prob, int v);
 
 /*
  *	Find all matching assignments to pure AC system by iterative
@@ -84,10 +84,7 @@ backtrack:
 /*
  *	Try to find assignment for shared variable v.
  */
-static BOOL advance_shared(prob, v, reset)
-PURE_PROBLEM *prob;
-int v;
-BOOL reset;
+static BOOL advance_shared(PURE_PROBLEM *prob, int v, BOOL reset)
 {
   VAR_HEADER *var_tab = prob->var_tab;
   TERM_HEADER *term_tab = prob->term_tab;
@@ -139,9 +136,7 @@ fail:;
  *	Update term_tab multiplicities after assignment to shared variable
  *	made or retracted.
  */
-static void update_shared(prob, v, t, d)
-PURE_PROBLEM *prob;
-int t, v, d;
+static void update_shared(PURE_PROBLEM *prob, int v, int t, int d)
 {
   TERM_HEADER *term_tab = prob->term_tab;
   int *top_sym = prob->top_sym;
@@ -172,9 +167,7 @@ int t, v, d;
  *	Used up terms are never subtracted from term_tab for last last
  *	variable as there is no need.
  */
-static BOOL shared_last(prob, v)
-PURE_PROBLEM *prob;
-int v;
+static BOOL shared_last(PURE_PROBLEM *prob, int v)
 {
   TERM_HEADER *term_tab = prob->term_tab;
   VAR_HEADER *var_tab = prob->var_tab;
@@ -232,9 +225,7 @@ fail:;
 /*
  *	Check to see if index i occurs in list l.
  */
-static BOOL in_index_list(l, i)
-INDEX_LIST *l;
-int i;
+static BOOL in_index_list(INDEX_LIST *l, int i)
 {
   for(; l; l = l->next_index){
     if(l->index == i)
@@ -248,10 +239,7 @@ int i;
 /*
  *	Try to find assignment for owned variable v.
  */
-static BOOL advance_owned(prob, v, reset)
-PURE_PROBLEM *prob;
-int v;
-BOOL reset;
+static BOOL advance_owned(PURE_PROBLEM *prob, int v, BOOL reset)
 {
   VAR_HEADER *var_tab = prob->var_tab;
   TERM_HEADER *term_tab = prob->term_tab;
@@ -312,10 +300,7 @@ BOOL reset;
  *	the multiset of terms in prob->var_tab[v].assign[].max
  *	We use a nonrecursive selection from multiset algorithm.
  */
-static BOOL advance_select(prob, v, r, reset)
-PURE_PROBLEM *prob;
-int v, r;
-BOOL reset;
+static BOOL advance_select(PURE_PROBLEM *prob, int v, int r, BOOL reset)
 {
   VAR_HEADER *var_tab = prob->var_tab;
   TERM_HEADER *term_tab = prob->term_tab;
@@ -361,9 +346,7 @@ forward:
  *	which happen to be owned (most usual case). Used up terms are
  *	not subtracted from term_tab.
  */
-static BOOL owned_last(prob, v)
-PURE_PROBLEM *prob;
-int v;
+static BOOL owned_last(PURE_PROBLEM *prob, int v)
 {
   VAR_HEADER *var_tab = prob->var_tab;
   TERM_HEADER *term_tab = prob->term_tab;

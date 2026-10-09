@@ -34,8 +34,7 @@ bitSet *intern_bitSet_create(int size)
 }
 
 
-void bitSet_and(b1,b2)
-  bitSet *b1,*b2;
+void bitSet_and(bitSet *b1, bitSet *b2)
 {
   int i;
   Verif_void(b1,"bitSet_and(b1)");
@@ -55,8 +54,7 @@ void bitSet_and(b1,b2)
     }
 }
 
-void bitSet_or(b1,b2)
-  bitSet *b1,*b2;
+void bitSet_or(bitSet *b1, bitSet *b2)
 {
   int i;
   Verif_void(b1,"bitSet_or(b1)");
@@ -71,8 +69,7 @@ void bitSet_or(b1,b2)
 }
 
 
-int bitSet_equals(b1,b2)
-  bitSet *b1,*b2;
+int bitSet_equals(bitSet *b1, bitSet *b2)
 {
   int i,res=1;
   Verif_void(b1,"bitSet_equals(b1)");
@@ -84,8 +81,7 @@ int bitSet_equals(b1,b2)
   return res;
 }
 
-void bitSet_print(b)
-  bitSet *b;
+void bitSet_print(bitSet *b)
 {
   int i;
   int res=0;
@@ -100,8 +96,7 @@ void bitSet_print(b)
     printf("null");
 }
 
-bitSet *bitSet_copy(b)
-  bitSet *b;
+bitSet *bitSet_copy(bitSet *b)
 {
   int i;
   bitSet *res;

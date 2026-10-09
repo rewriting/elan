@@ -41,8 +41,7 @@ bitSet *intern_bitSet_GC_create(int size)
   return res;
 }
 
-bitSet *bitSet_copy(b)
-  bitSet *b;
+bitSet *bitSet_copy(bitSet *b)
 {
   int i;
   bitSet *res;
@@ -54,8 +53,7 @@ bitSet *bitSet_copy(b)
 }
 
 
-void bitSet_print(b)
-  bitSet *b;
+void bitSet_print(bitSet *b)
 {
   int i;
   int res=0;
@@ -71,8 +69,7 @@ void bitSet_print(b)
     printf("null");
 }
 
-void bitSet_or(b1,b2)
-  bitSet *b1,*b2;
+void bitSet_or(bitSet *b1, bitSet *b2)
 {
   int i;
   Verif_void(b1,"bitSet_or(b1)");

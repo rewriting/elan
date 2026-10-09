@@ -29,8 +29,7 @@
 #define scale sizeof(long)
 #define memoround(n) if((n)%scale) (n)+=(scale-((n)%scale));
 
-void MsgErreur(message)
- char *message;
+void MsgErreur(char *message)
 {
   printf("%s",message);
 }
