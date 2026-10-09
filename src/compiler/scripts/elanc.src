@@ -1,6 +1,6 @@
-#!/bin/tcsh -f
+#!/bin/sh
 
-#  
+#
 #    REM - Reduce ELAN Machine
 #
 #    Copyright (C) 2000-2001  LORIA (CNRS, INPL, INRIA, UHP, U-Nancy 2)
@@ -22,150 +22,96 @@
 #
 #    Pierre-Etienne Moreau	e-mail: Pierre-Etienne.Moreau@loria.fr
 #
+#  POSIX sh translation (2026) of the tcsh script of 2003: same options,
+#  same calls (elan --cexport, then REM). The options are split on blanks as
+#  in the tcsh version, but not globbed.
 
+set -f
 
+echo
 
-echo 
+ELAN="__PREFIX__/bin/elan"
+JAVA="__JAVA__"
+CLASSES="__PREFIX__/classes"
+# The installation and its tools (defaults of the generated Makefile)
+PROPERTIES="-DPREFIX=__PREFIX__ -DELAN_CC=__ELAN_CC__ -DELAN_CXX=__ELAN_CXX__ -DGC_PREFIX=__GC_PREFIX__"
 
-########################################################
-#                                                      #
-# Modify the following values according to your system #
-#                                                      #
-########################################################
-set ARCH = `uname -m`
-set ELAN = "__PREFIX__/bin/elan"
-set JAVA = "__JAVA__"
+REMOPTION=""
+ELANOPTION="-b "
+LGIFILE=""
+LGIDIR=""
+SPCFILE=""
+SPCDIR=""
+SPCNAME=""
 
-########################################################
-#                                                      #
-# Do not modify                                        #
-#                                                      #
-########################################################
-set CLASSES    = "__PREFIX__/classes"
-set REMOPTION  = ""
-set ELANOPTION = "-b "
-set LGIFILE    = ""
-set LGIDIR     = ""
-set SPCFILE    = ""
-set SPCDIR     = ""
-set SPCNAME    = ""
+# print a command as the tcsh `echo` did (one blank between words)
+show() { printf '%s\n' "$*"; }
 
-
-set verb
-if($#argv>0) then
-  @ j=1
-  foreach i ($argv)
-#    echo $i
-    switch ($i) 	
-      case -O:
-      case -O2:
-      case -fast:
-      case -aterm:
-      case -atermns:
-      case -nocode:
-      case -nosplit:
-      case -split:
-      case -lib:
-      case -choicePointDebug:
-      case -noOptimiseChoicePoint:
-      case -optimiseChoicePoint:
-      case -verbose:
-      case -debug:
-      case -coq:
-      case -proofterm:
-      case -color:
-      case -noColor:
-      case -withGoto:
-      case -oldVariableAffectation:
-      case -onlyC:
-      case -noC:
-        set REMOPTION = "${REMOPTION} $i"
-        breaksw
-      case -quiet:
-        set REMOPTION = "${REMOPTION} $i"
-	unset verb
-        breaksw
-      case -ba*:
-        set REMOPTION = "${REMOPTION} $i"
-        breaksw
-# option with argument
-      case -strategy:
-      case -output:
-	set remarg
-        set REMOPTION = "${REMOPTION} $i"
-        breaksw
-# option with argument
-      case --trace: 
-      case -t:
-      case --elanlib:
-      case --secondlib:
-      case -l:
-      case --output:
-        set elanarg
-        set ELANOPTION = "${ELANOPTION} $i"
-        breaksw
-      case -*:
-        set ELANOPTION = "${ELANOPTION} $i"
-        breaksw
-      default:
-	if($?remarg) then
-          unset remarg
-          set REMOPTION = "${REMOPTION} $i"
+if [ $# -gt 0 ]; then
+  verb=1
+  remarg=""
+  elanarg=""
+  argc=$#
+  j=1
+  for i in "$@"; do
+    case "$i" in
+      -aterm|-atermns)
+        echo "elanc: the ATerm runtime is not supported (removed in this version)" >&2
+        exit 1 ;;
+      -O|-O2|-fast|-nocode|-nosplit|-split|-lib|-choicePointDebug|\
+      -noOptimiseChoicePoint|-optimiseChoicePoint|-verbose|-debug|-coq|\
+      -proofterm|-color|-noColor|-withGoto|-oldVariableAffectation|-onlyC|-noC)
+        REMOPTION="$REMOPTION $i" ;;
+      -quiet)
+        REMOPTION="$REMOPTION $i"
+        verb="" ;;
+      -ba*)
+        REMOPTION="$REMOPTION $i" ;;
+      # options with argument (REM)
+      -strategy|-output)
+        remarg=1
+        REMOPTION="$REMOPTION $i" ;;
+      # options with argument (elan)
+      --trace|-t|--elanlib|--secondlib|-l|--output)
+        elanarg=1
+        ELANOPTION="$ELANOPTION $i" ;;
+      -*)
+        ELANOPTION="$ELANOPTION $i" ;;
+      *)
+        if [ -n "$remarg" ]; then
+          remarg=""
+          REMOPTION="$REMOPTION $i"
+        elif [ -n "$elanarg" ]; then
+          elanarg=""
+          ELANOPTION="$ELANOPTION $i"
+        elif [ "$j" -lt "$argc" ]; then
+          # not the last argument: the program
+          LGIFILE=`basename "$i" .lgi`
+          LGIDIR=`dirname "$i"`
+        elif [ -n "$LGIFILE" ]; then
+          # the last argument, after a program: its specification
+          SPCFILE=`basename "$i" .spc`
+          SPCDIR=`dirname "$i"`
+          SPCNAME="$SPCDIR/$SPCFILE.spc"
         else
-  	  if($?elanarg) then
-            unset elanarg
-            set ELANOPTION = "${ELANOPTION} $i"
-          else
-            if($j < $#argv) then
-              set LGIFILE = `basename $i .lgi`
-              set LGIDIR  = `dirname $i`
-            else
-              if(${LGIFILE} != "") then
-                set SPCFILE = `basename $i .spc`
-                set SPCDIR  = `dirname $i`
-	        set SPCNAME = ${SPCDIR}/${SPCFILE}.spc 
-              else
-                set LGIFILE = `basename $i .lgi`
-                set LGIDIR  = `dirname $i`
-              endif
-            endif
-          endif
-        endif
-     endsw
-     @ j++
-  end
+          LGIFILE=`basename "$i" .lgi`
+          LGIDIR=`dirname "$i"`
+        fi ;;
+    esac
+    j=`expr $j + 1`
+  done
 
-  #echo "REMOPTION  = ${REMOPTION}"
-  #echo "ELANOPTION = ${ELANOPTION}"
-  #echo "LGIFILE    = ${LGIFILE}"
-  #echo "SPCFILE    = ${SPCFILE}"
+  if [ -n "$verb" ]; then
+    show $ELAN --cexport $LGIFILE.ref $ELANOPTION $LGIDIR/$LGIFILE.lgi $SPCNAME
+  fi
+  "$ELAN" --cexport "$LGIFILE.ref" $ELANOPTION "$LGIDIR/$LGIFILE.lgi" ${SPCNAME:+"$SPCNAME"}
 
-if($?verb) then
-  echo ${ELAN} --cexport ${LGIFILE}.ref ${ELANOPTION} ${LGIDIR}/${LGIFILE}.lgi ${SPCNAME}
-endif
-
-  ${ELAN} --cexport ${LGIFILE}.ref ${ELANOPTION} ${LGIDIR}/${LGIFILE}.lgi ${SPCNAME}
-
-#if($?verb) then
-#  echo ${JAVA} -jar ${CLASSES}/rem.jar ${LGIFILE}.ref ${REMOPTION}
-#endif
-#  ${JAVA} -jar ${CLASSES}/rem.jar ${LGIFILE}.ref ${REMOPTION}
-
-if($?verb) then
-  echo ${JAVA} -DPREFIX=__PREFIX__ -DELAN_CC=__ELAN_CC__ -DELAN_CXX=__ELAN_CXX__ -DGC_PREFIX=__GC_PREFIX__ -cp ${CLASSES} rem.REM ${LGIFILE}.ref ${REMOPTION}
-endif
-  ${JAVA} -DPREFIX=__PREFIX__ -DELAN_CC=__ELAN_CC__ -DELAN_CXX=__ELAN_CXX__ -DGC_PREFIX=__GC_PREFIX__ -cp ${CLASSES} rem.REM ${LGIFILE}.ref ${REMOPTION}
-
+  if [ -n "$verb" ]; then
+    show $JAVA $PROPERTIES -cp $CLASSES rem.REM $LGIFILE.ref $REMOPTION
+  fi
+  "$JAVA" $PROPERTIES -cp "$CLASSES" rem.REM "$LGIFILE.ref" $REMOPTION
 
 else
   echo "elanc [[elan options][compiler options]] file[.lgi] [file.[spc]]"
-  ${JAVA} -cp ${CLASSES} rem.REM
-
-#  echo "elanc [[elan options][-nosplit][-nocode][-quiet]] file[.lgi] [file.[spc]]"
-#  echo "  [-nosplit]                  to produce only 2 files"
-#  echo "  [-nocode]                   to erase generated files"
-#  echo "  [-choicePointDebug]         to print choicePoints statistics"
-#  echo "  [-noOptimiseChoicePoint]    to remove optimisation"
-#  echo "  [-quiet]"
-endif
-
+  "$JAVA" -cp "$CLASSES" rem.REM
+fi
