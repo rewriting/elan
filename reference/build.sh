@@ -97,7 +97,9 @@ build_prepare() {
     for f in config.guess config.sub; do [ -f "$SRC/$d/$f" ] && cp "$AUX/$f" "$SRC/$d/$f"; done
   done
   # Objects/archives of the 2003 builds (i386 ELF) and stale configure caches
-  find "$SRC" \( -name '*.o' -o -name '*.a' -o -name config.cache -o -name config.status \) -delete
+  # and the Java classes compiled in 2003 (REM must be rebuilt from the patched sources)
+  find "$SRC" \( -name '*.o' -o -name '*.a' -o -name config.cache -o -name config.status \
+                 -o -name '*.class' -o -name 'classjava.stamp' \) -delete
   rm -f "$SRC/elan-compiler/scripts/elanc"   # generated in 2003 for another prefix
 }
 
