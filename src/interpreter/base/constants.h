@@ -129,4 +129,62 @@ extern  int MAXLENNTERMv;
 #define NNONTERMINALS (NTYPES+4) // max. number of nonterminals in the 
                           // term grammar 
 
+/* ------------ encoding of lexems (lex/lexem.h) ------------------------
+   A lexem is one int:
+       >= 0                          a number (its value)
+       -1 .. -255                    a character (minus its code)
+       NOLEXEM, BLANKLEXEM, IDENT    end of stream, blank, any identifier
+       BOFIDENT-i                    identifier i (position in tabofident)
+       STRING                        any string
+       BOFSTRING-i                   string constant i (stringconstants)
+       JUSTNUMBER                    any number
+       BOFTYPES-i                    sort i (position in typet), nonterminal
+   The parser tables use DEFAULTSYM for their default action. */
+#define NOLEXEM -256     // no lexem, label for end of string of lexems
+#define BLANKLEXEM -257	 // blank lexem, with special use in mlstream
+                         // and as epsilon rule for parser
+#define IDENT -259       // just an identifier
+#define BOFIDENT -260       // BOFIDENT ... JUSTBUMBER    identifiers
+#define MAXNOFSTRING       10000  // max. number of string constants (range of lexems)
+#define STRING     (BOFIDENT-MAXNOFIDENT)
+#define BOFSTRING  (BOFIDENT-MAXNOFIDENT-1)
+#define JUSTNUMBER (BOFSTRING-MAXNOFSTRING)
+//#define JUSTNUMBER (BOFIDENT-MAXNOFIDENT)
+                            // just a number
+#define BOFTYPES (JUSTNUMBER-1)
+                            // BOFTYPES ... user's sortes
+
+/* ------------ other fixed tables of the loader ------------------------ */
+#define MAXANYS 100             // max. number of any[X] imports (load/msemact.cc)
+#define MAXSYMBAPPL 100         // max. number of Symbol[n,...] imports (load/msemact.cc)
+#define MAXNOFPATTERNS  50      // maximum of all patterns (rewrite/rtdatas.h)
+
+/* ------------ contract guards -----------------------------------------
+   These values are part of the REF contract (docs/ref-format.md): the
+   codes of identifiers, sorts, modules, rule and strategy names are hash
+   positions in tables of these sizes, and they appear in .ref files, in REM
+   and in the compiled runtime (src/compiler keeps copies of MAXNOFIDENT and
+   NTYPES, checked by tests/architecture/check_limits.py). */
+static_assert(MAXNOFIDENT == 3000 && NTYPES == 500 && MAXNFSYM == 2000,
+              "hashed table sizes are part of the REF contract");
+static_assert(MAXNOFIMPORTS == 200 && MAXNOFTRN == 2000 && MAXNOFSTRAT == 500 &&
+              MRWTSIZE == 300 && MAXNOFMAC == 50,
+              "hashed table sizes are part of the REF contract");
+static_assert(FSYMCODESBEG == 300, "user symbol codes start at FSYMCODESBEG");
+static_assert(IDLEN == 50, "identifiers are truncated to IDLEN-1 = 49 characters");
+static_assert(MAXLENNTERM == 50000, "the default printed by elan --help");
+// defstrat words (term/codes.h) pack two symbol codes in 12 bits each
+static_assert(FSYMTABSIZE - 1 < 4096 && FSYMTABSIZE == MAXNFSYM + 5,
+              "every symbol code, up to RULECONSTRULE1 = MAXNFSYM+4, fits in 12 bits");
+static_assert(NNONTERMINALS == NTYPES + 4 && STRATTYPE < NNONTERMINALS,
+              "the built-in sorts STARTTYPE..STRATTYPE follow the NTYPES user sorts");
+// lexem ranges: no overlap, sorts above the parser's DEFAULTSYM
+static_assert(BLANKLEXEM < -255 && IDENT < BLANKLEXEM && BOFIDENT < IDENT,
+              "special lexems lie below the characters");
+static_assert(STRING == BOFIDENT - MAXNOFIDENT && BOFSTRING == STRING - 1 &&
+              JUSTNUMBER == BOFSTRING - MAXNOFSTRING && BOFTYPES == JUSTNUMBER - 1,
+              "identifier, string and number ranges are contiguous");
+static_assert(BOFTYPES - (NNONTERMINALS - 1) > DEFAULTSYM,
+              "every sort lexem lies above DEFAULTSYM");
+
 #endif

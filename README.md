@@ -17,7 +17,8 @@ backtracking. This repository preserves the original system and revives it.
 | `src/lib/elanlib/` | the standard library |
 | `examples/` | runnable examples of the manual (checked by `make check`) |
 | `docs/manual/` | the ELAN 3.6 user manual (LaTeX sources, PDF) |
-| `tests/unit/`, `tests/architecture/` | C++ unit tests of the modules; module dependency rules |
+| `docs/ref-format.md` | the `.ref` export format and the constants it depends on (REF contract) |
+| `tests/unit/`, `tests/architecture/` | C++ unit tests of the modules; module dependency rules, compiler copies of the limits |
 | `tests/regression/` | targeted regression tests (one directory per case) |
 | `tests/golden/` | golden tests: exported `.ref` files, `-d` dump, statistics, error messages and exit status |
 | `ci/`, `.github/workflows/` | Linux image for local checks, CI on Ubuntu and macOS |

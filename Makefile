@@ -68,10 +68,12 @@ smoke: install
 	if grep -q 's(o)' $$d/out; then echo "smoke: elan finds its library without ELANLIB"; rm -rf $$d; \
 	else cat $$d/out; rm -rf $$d; exit 1; fi
 
-# Module dependency rules (tests/architecture, S3a spec D2)
+# Module dependency rules (tests/architecture, S3a spec D2), and the
+# compiler's copies of the interpreter's limits and codes (REF contract)
 check-arch:
-	cd tests/architecture && python3 test_check_deps.py
+	cd tests/architecture && python3 test_check_deps.py && python3 test_check_limits.py
 	python3 tests/architecture/check_deps.py
+	python3 tests/architecture/check_limits.py
 
 # C++ unit tests of the interpreter modules (tests/unit, CTest)
 check-unit: all

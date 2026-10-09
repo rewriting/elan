@@ -133,7 +133,6 @@ struct patterms {
   termset terms_to_compare;
   termset terms_compared; };
 
-#define MAXNOFPATTERNS  50      // maximum of all patterns
 
 class Patterms
  {

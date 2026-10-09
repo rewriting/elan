@@ -54,6 +54,7 @@ extern void esemactinit();
 
 //static stringtab tabofident(3000);
 //static stringtab typet(500);
+// sizes = MAXNOFIDENT, NTYPES of the interpreter (tests/architecture/check_limits.py)
 stringtab tabofident(3000);
 stringtab atabofident(3000);
 stringtab typet(500);

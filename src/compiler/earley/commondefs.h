@@ -77,6 +77,8 @@
 #define RBINSTR      040000     // built in strategy
 
 #define IDLEN 50          // max. length of dist. character in identifier
+// MAXNOFIDENT, NTYPES and the lexem ranges are copies of the interpreter's
+// (REF contract, docs/ref-format.md; checked by tests/architecture/check_limits.py)
 #define MAXNOFIDENT 3000  // max number of identifier used in all prog.
 #define MLENGRRULE 200    // max. size of term grammar rule
 
@@ -91,6 +93,9 @@ extern  int MAXLENNTERMv;
 #define NTYPES 500        // max. number of types in ELAN
 #define CHUNKSIZE 10    // size of chunk for lbuffer
 
+// STALE COPY, UNUSED: the interpreter has FSYMCODESBEG = 300 (base/constants.h),
+// the codes it exports are read as they are. Nothing in src/compiler may use
+// this value (checked by tests/architecture/check_limits.py).
 #define FSYMCODESBEG 200	  // begin of codes of symbols
 			// codes less then FSYMCODESBEG are for built-ins
 #define RULECONSTRULE  (MAXNFSYM+1)   // sem. actions for standard rules

@@ -41,6 +41,8 @@
 
 #define TABOFGRAM_SIZE  50000
 #define TABOFARITY_SIZE 50000
+/* = MAXNOFIDENT and NTYPES of the interpreter: identifier and sort codes are
+   hash positions in tables of these sizes (tests/architecture/check_limits.py) */
 #define TABOFIDENT_SIZE 3000
 #define TABOFSORT_SIZE  500
 

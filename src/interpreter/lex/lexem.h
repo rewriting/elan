@@ -43,21 +43,8 @@ class lexem
 
  public:
 
-			// 00 .. 0 reserved for constants
-                        // -1 .. -255 lexem for characters
-#define NOLEXEM -256     // no lexem, label for end of string of lexems
-#define BLANKLEXEM -257	 // blank lexem, with special use in mlstream
-                         // and as epsilon rule for parser
-#define IDENT -259       // just an identifier
-#define BOFIDENT -260       // BOFIDENT ... JUSTBUMBER    identifiers
-#define MAXNOFSTRING       10000
-#define STRING     (BOFIDENT-MAXNOFIDENT)
-#define BOFSTRING  (BOFIDENT-MAXNOFIDENT-1)
-#define JUSTNUMBER (BOFSTRING-MAXNOFSTRING)
-//#define JUSTNUMBER (BOFIDENT-MAXNOFIDENT)
-                            // just a number
-#define BOFTYPES (JUSTNUMBER-1)
-                            // BOFTYPES ... user's sortes
+			// the ranges of lex (characters, identifiers, strings,
+			// numbers, sorts) are defined in base/constants.h
 
   lexem();
   lexem(lexem &);

@@ -94,14 +94,12 @@ extern lexem Sif,Swhere,Send,Sstart;            // some usefull reserved words
  int is_explimpl = 0;            // explode-implode module should be loaded
  int ignore = 0;                 // ignore deeper levels
  int explimpl_index = 0;         //  file counter
- #define MAXANYS 100             // limit (not tested!!!)
  int     anysi = 0;              // pointer to anys
  int     anys[MAXANYS];          // modules for which any[X] has been imported
  int in_strategies = 0;
  int in_stratop = 0;
  int strattype = -1;
  int is_symbappl = 0;
- #define MAXSYMBAPPL             100
  int symbappli = 0;
  struct ilist *symbappl[MAXSYMBAPPL];
  int symbappl_index = 0;         // file counter; 
