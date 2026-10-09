@@ -73,6 +73,14 @@ build_prepare() {
     echo "  applying $(basename "$p")"
     run prepare patch -p1 -d "$BUILD" -i "$p"
   done
+  # A patched grammar must be regenerated: the shipped y.tab.c/lex.yy.c have
+  # the same timestamp as the copied sources and make would keep them.
+  sed -n 's|^+++ b/||p' "$HERE"/patches/*.patch | while read -r f; do
+    case "$f" in
+      *.y|*.yacc) rm -f "$BUILD/$(dirname "$f")"/y.tab.[ch] ;;
+      *.l|*.lex)  rm -f "$BUILD/$(dirname "$f")"/lex.yy.c ;;
+    esac
+  done
   # cpl: the CVS checkout lacks the generated Makefile.in; take them from the
   # cpl-0.6 distribution shipped next to it (same configure.in).
   (cd "$SRC/cpl" && tar xzf cpl-0.6.tar.gz --strip-components=1 \
