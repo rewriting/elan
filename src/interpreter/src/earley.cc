@@ -159,7 +159,7 @@ void grammar::inisitset()       // initialize set of situations sitset[sitseti]
 
 int grammar::addtosit(struct sgrammrule *rule, int position, int i)
 //                 append situation [(rule, position),i] into sitset[sitseti]
-{ struct sitlist *s,**ss;
+{ struct sitlist *s; /*,**ss;*/
   struct psymlist **pp,*p;
   lexem sy;
 //stout << "\n[addtosi] try to add rule :";  dumpgrrule(rule);
@@ -178,7 +178,7 @@ int grammar::addtosit(struct sgrammrule *rule, int position, int i)
      if (s!=NULL) return(0);
   }
 
-  ss = sitset[sitseti].aoflastsits;
+//  ss = sitset[sitseti].aoflastsits;
               // memallo += sizeof(struct sitlist); stout << " #1=" << memallo;
   AALLOS(s,struct sitlist);
   s->rule=rule; s->pos=position; s->i=i;

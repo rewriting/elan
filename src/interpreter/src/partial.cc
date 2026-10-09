@@ -94,7 +94,7 @@ int i;
     Patterm[i].terms_compared.copy(p->Patterm[i].terms_compared); }
 }
 
-void Patterms::add(int redex, term *t, /*int varn, */ int typ)
+void Patterms::add(int /*redex*/, term *t, /*int varn, */ int typ)
 {
   /*int varn = t->varnumbers()+1;*/
 
@@ -116,7 +116,7 @@ int i;
   }
 }
 
-int ith_subtype(int ith, int typ, int module, int fsym)
+int ith_subtype(int ith, int typ, int /*module*/, int fsym)
 {
 struct grammrulelist *gr;
 struct sgrammrule *actr;
@@ -848,7 +848,7 @@ strategy *fail_strategy;
  }
 }
 
-int transrule::addpartrule(lstream *f,int partindex)
+int transrule::addpartrule(lstream * /*f*/,int partindex)
 {
 char newname[STRLEN];
 /*strategy *str;*/
@@ -887,7 +887,7 @@ void strategy::expand_strategy()
 }
 
 void strategy::count_rul()
-{ struct namelist *np, **npp;
+{ struct namelist *np; /*, **npp;*/
  struct strlist *sl; /*, *sl1;*/
  /* char   *ss;*/
   struct transrulelist *trlist;
@@ -909,13 +909,13 @@ void strategy::count_rul()
 	sl->str->count_rules();
       break;
     case STRNAMEDONTCARE: case STRNAMEDONTKNOW: case STRNAMEONE:
-      for(np = u.cr.nm, npp = &(u.cr.nm); np!=NULL; np=np->next) {
+      for(np = u.cr.nm; np!=NULL; np=np->next) {
 	struct transrulelist *trlst;
 	/*struct namelist *np_f, *np_h;*/
-	int  cnt, rcnt; /* i, */
+	/* int  cnt, rcnt; i, */
 	trlist = trrules.getrules(np->strname,getmodule());
 	//stout << "Try to Unfold " << trrules.rulename(np->strname) << " in " << import.ide(getmodule()) << "\n";
-	for(cnt=0, rcnt=0, trlst = trlist; trlst; trlst=trlst->next) {
+	for(trlst = trlist; trlst; trlst=trlst->next) {
 	  trlst->rule->add_rule_counter();
 	}
       }
@@ -935,7 +935,7 @@ void strategy::expand_str()
  /*char   *ss;*/
   struct transrulelist *trlist;
   /*transrule *rule;*/
-  int    runame; /* r, aa, res, typ, refs, */
+  /* int    runame; r, aa, res, typ, refs, */
   transrule *new_trrule;
   int  cnt, rcnt; /* i */
   switch (strname) {
@@ -996,7 +996,7 @@ void strategy::expand_str()
 		  (*npp)->strname = new_trrule->
 		    indexrule(extend_index++);
 		} else {
-		  runame = trlst->rule->get_nameindex();
+		  // runame = trlst->rule->get_nameindex();
 		 // stout << "DELETE RULE = " << runame << "\n";
 		  (*npp)->strname = trrules.renamerule(
 				   trlst->rule->get_nameindex(),
@@ -1139,7 +1139,7 @@ int term::leave_constructors(int varn)
 }
 
 // make a instacaited copy of a rule
-void transrule::copyinstall(transrule *intothis, term *substarray, int varn, Patterms *pate1)
+void transrule::copyinstall(transrule *intothis, term *substarray, int varn, Patterms * /*pate1*/)
 {
 struct wherelist *wh,**pwheres;
  term left, right, whtrm; /*, varnt, varnt1;*/

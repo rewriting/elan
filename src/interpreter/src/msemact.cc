@@ -685,9 +685,9 @@ struct tseq *parse_tseq(lstream *f)
   lexem  le; /* clex,*/
 int resan;   
 struct tseq *ts;
- struct branch  *brlist, **brl; /* *br,*/
+ /* struct branch  *brlist, **brl; *br,*/
    f->fulex(le);
-   brlist = NULL; brl = &brlist;
+   /* brlist = NULL; brl = &brlist; */
    AALLOS(ts, struct tseq);
      {
      ts->is_case = 0;
@@ -1098,14 +1098,14 @@ int fcheck_rename_tseq(lstream *f,transrule *trrule, struct tseq *tseq)
 int fcheck_rename_rule(lstream *f,transrule *trrule, 
                      term l, term r, struct wherelist *whs, struct tseq *tseq)
 {
-      int locvarrename[MAXNOFVAR];
-      int i, save_RENAME_ALL_VARS_MODE; /*, save_RENAME_IDENTITY_MODE;*/
+      /*int locvarrename[MAXNOFVAR];*/
+      int save_RENAME_ALL_VARS_MODE; /* i, save_RENAME_IDENTITY_MODE;*/
       /*struct WHEREbranches *brlist;*/
       /*term noterm;*/
 
       var_renameinit();
       //save_actvarnum = actvarnum;
-      for(i=0; i<MAXNOFVAR; i++)  { locvarrename[i] = actvarrename[i]; }
+      //for(i=0; i<MAXNOFVAR; i++)  { locvarrename[i] = actvarrename[i]; }
        save_RENAME_ALL_VARS_MODE = RENAME_ALL_VARS; // global programming :-)))
        RENAME_ALL_VARS = 1;
          l.ren_vars((ADDRENAME));
@@ -1664,10 +1664,10 @@ int semact1(int n,lexem l,lstream *f)
         globtermgr.addgrammar(grstack[stacki],RGLOP,RGLOP);
         globtermgr.addgrammar(grstack[stacki],RLOCOOP,RGLOP);
 	{
-	  char *visi;
+	  /* char *visi; */
           /* int i;*/
 	  import.member(actmodname[stacki]);
-	  visi = visibilities[import.posid];
+	  /* visi = visibilities[import.posid]; */
 	  if (! batch) {
 	    odsek(graphout,stacki<<1);
 	    graphout << "end of " << actmodname[stacki];
@@ -1728,7 +1728,7 @@ int semact1(int n,lexem l,lstream *f)
      acttrrulename = l.alfsy();
      break; 
   case 155:                                  // body of the transition rule
-     {int i,j,pom,rindex, rindex_orig, app_code;
+     {int i,j,pom, app_code; /* rindex, rindex_orig, */
      char *rname;
      struct sgrammrule *gr;
      lexem strlex,le,lle;
@@ -1771,8 +1771,8 @@ int semact1(int n,lexem l,lstream *f)
      gr = grstack[stacki].addrule(strlex,RNOPRIOR,rinfos,fsymtabi);
 
      rname = attach_type("LAB",actruletypeindex);
-     rindex = trrules.trruleindex(rname);
-     rindex_orig = trrules.trruleindex(
+     trrules.trruleindex(rname);
+     trrules.trruleindex(
 		attach_mod_loc(
 		  attach_type(acttrrulename,actruletypeindex_l),
 		  impmoduli,

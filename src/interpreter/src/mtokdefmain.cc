@@ -31,7 +31,7 @@ stringtab tabofident(MAXNOFIDENT);
 stringtab atabofident(MAXNOFIDENT);
 
 int main()
-{ int i;
+{ /* int i; */
   ichstream mainin(stdin,"stdin");
   lstream ff(&mainin);
   lexem lex;
@@ -39,7 +39,7 @@ int main()
   //init_alloc();
 
   ff.ilex(lex);
-  i=0;
+  /* i=0; */
   while (! lex.isendofstream()) {
     if (! lex.isident()) {
        sterr << "[mtokmain] identifier expected, int. err.\n";

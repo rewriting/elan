@@ -505,7 +505,6 @@ int ldsemact(int n,lexem l,lstream *f)
 { int ind;
 /*int res;*/
   lexem strlex, le;
-  struct sgrammrule *rightsrule;
   int resan,whstrategy;
   term strateg,lt,rt,rlabel,ter;
   transrule *tr;
@@ -608,7 +607,7 @@ int ldsemact(int n,lexem l,lstream *f)
         topgrammar->addsymbol(strlex);
     ///    topgrammar->addnont(strlex);
         le.crtypelex(RIGHTSTYPE);
-        rightsrule=topgrammar->addrule(le,RNOPRIOR,RNOINFO,RIGHTSRULE);
+        topgrammar->addrule(le,RNOPRIOR,RNOINFO,RIGHTSRULE);
         esemactinit();
 	resan = topgrammar->earleycall(f,le,sendofin);
 	if (! resan) {
@@ -760,7 +759,7 @@ void interrupt_d()
                "Function symbols\n","\n");
 }
 
-void interrupt(int sig)
+void interrupt(int /*sig*/)
 {
   int c;
 

@@ -90,7 +90,7 @@ void locstatistics::topBackFrom(locstatistics *st)
 }
 */
 
-void locstatistics::forwardFrom(locstatistics *st)
+void locstatistics::forwardFrom(locstatistics * /*st*/)
 {
   nonCountednodes = 1;
 }
@@ -178,9 +178,9 @@ void statistics::transruletry(int ri, term l)
 
 extern unsigned long cpt;
 
-void statistics::write(int level,int big)
+void statistics::write(int /*level*/,int big)
 {
-  int i,j;
+  int i; /*,j;*/
   int diff_time_self,diff_time_children;
   stout << "\n Statistics:\n";
 //  fprintf(stdout," total %d rules applied, %d tried;",transrules,transrtried);
@@ -220,7 +220,7 @@ void statistics::write(int level,int big)
 
   fprintf(stdout," named rules");
   fprintf(stdout,"\n%10s%8s%8s    %s\n","","applied","tried","rule for symbol");
-  for(i=1,j=1; i<MAXNOFTRN; i++) {
+  for(i=1; i<MAXNOFTRN; i++) {
     if (trrules.rulename(i-1)!=NULL && rulesapp[i]+rulestried[i] > 0) {
       fprintf(stdout,"%10s%8d%8d    %s\n","",
 	      rulesapp[i],rulestried[i],trrules.rulename(i-1)); }
@@ -278,7 +278,7 @@ void result(int constructor, int val, term &res) {
 
 void INT_result(int num, term &res) { res.stinit(); res.crstterm(num,TNUMBER); }
 
-int GET_LSTREAM(lstream *XXX, int pid, lexem rtype, term *res) 
+int GET_LSTREAM(lstream *XXX, int /*pid*/, lexem rtype, term *res) 
 {
   /*lexem le;*/
   if (topgrammar->earleycall(XXX,rtype,qendofin)){

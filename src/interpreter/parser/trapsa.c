@@ -64,10 +64,10 @@ int *aar,*mmodn;
 }
 
 static void huse(int tt)
-{ int sy,n;
+{ int sy;
 /* struct flist *pp,**p; */
   do {
-    sy=sast(rwt,uit,&inf); n=enviradd(tt,amacb);
+    sy=sast(rwt,uit,&inf); enviradd(tt,amacb);
     if (sy!=',' && sy!=';') oferr(&inf,"\t, or ; expected");
   } while (sy==',');
 }
@@ -92,13 +92,12 @@ int nnop,oop;
   }*/
 
 static void hop(void)
-{ int t,begr,huleari;
-  unsigned hulemsk;
+{ int t,begr;
   rinf= &inf;
   inruleb=1; inimport=0;
   t=nsym();
   while (t!=DBOD) {
-    t=hruleb(t,1); begr=begru; huleari=hruleari; hulemsk=hrulemsk;
+    t=hruleb(t,1); begr=begru;
     if (rbody[begr+2]<=BOOLT && amodn>LASTSTMOD) {
       oferr(&inf,"\t incorrect term type");
     };
@@ -122,7 +121,7 @@ static void hop(void)
 
 void trapsa(name)
 char *name;
-{ int sy,ar,modn,bgo,ego,blo,axtyp;
+{ int sy,ar,modn,axtyp;
 /* struct flist *pppp; */
 /* FILE *off,*oflinf,*ofc,*offtid; */
   FILE *off,*offtid;
@@ -142,10 +141,8 @@ char *name;
   offtid=fopen("idtab.tid","w ");
   sy=nl();
   if (sy==STtypeimport) { typeimp(); sy=nl(); }
-  bgo=ego=irbody;
-  if (sy==STop) {hop(); ego=irbody; sy=nl();}
+  if (sy==STop) {hop(); sy=nl();}
 			     /* generovanie glob. gramatiky */
-  blo=irbody;
 /*  if (sy==STvar) {vars(); sy=nl(); } */
   if (sy==STaxiom) {
     sy=lexan(prwt,uit,&inf);

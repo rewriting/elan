@@ -110,10 +110,10 @@ labellex.crtypelex(typet.addstr("Label"));
 }
 
 int cross_refs(FILE *ff,char *ss)
-{ int i,j,k; /*,a;*/
+{ int i,j; /*,k,a;*/
   lexem *p;
   j=0;
- j=0; k=0;
+ j=0;
   fprintf(ff,"unsigned *%ssprofil[] = {",ss);
   for (i=0; i<fsymtabi; i++) {
     if (!(i%5)) fprintf(ff,"\n");
@@ -136,9 +136,8 @@ int cross_refs(FILE *ff,char *ss)
 
 
 void genppfs(FILE *ff,char *ss)
-{ int i,j; /*,k,a;*/
+{ int i; /*,j,k,a;*/
   lexem *p,lf;
-  j=0;
   fprintf(ff,"static unsigned %sppfs[] = {",ss);
   for (i=0; i<fsymtabi; i++) {
 //    if (ISCONSTRUCTOR(i)) {
@@ -153,12 +152,11 @@ void genppfs(FILE *ff,char *ss)
 //          if (!(j%20)) fprintf(ff,"\n");
           fprintf(ff,"%d,",
 		  (!strlen(ss))?ISBUILTIN(*p):p->typeval());
-	  j++;
 	}
 	p++;
       }
     }
-     fprintf(ff,"EPM,"); j++;
+     fprintf(ff,"EPM,");
 //    }
   }
   fprintf(ff,"0};\n\n");
@@ -396,7 +394,7 @@ void genpreambule(FILE *ff)
 }
 
 
-void genepilog(FILE *ff)
+void genepilog(FILE * /*ff*/)
 {
   // Elan est mort, vive Elan !!!
   // qui est l'auteur ???

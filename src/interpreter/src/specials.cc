@@ -60,7 +60,7 @@ void mlstream::addiditer(int , int , int , lbuffer &)
 void mlstream::addsimiter(int , lbuffer &)
 { sterr << "error \n"; failexit();
 }
-void mlstream::beforemess(lexem s)
+void mlstream::beforemess(lexem /*s*/)
 { sterr << "error \n"; failexit();
 }
 void lbuffer::put(lexem )

@@ -422,7 +422,7 @@ void term2strategy(int typ,term *t, strategy **s)
 }
 
 
-int Strategyname_to_ref_index(char *strname, int typ)
+int Strategyname_to_ref_index(char *strname, int /*typ*/)
 {
     char   *new_ss, *ss, *name, *type, *modul;
     int iref, good_type;
@@ -532,7 +532,7 @@ void term2labels(int typ,term *t, struct namelist **s)
 }
 
 
-void SSambiguity1(int warn, char *name, char *type, char *modu)
+void SSambiguity1(int /*warn*/, char *name, char *type, char *modu)
 {
   if (!batch) { 
     sterr << "\nthere is an strategy/strategy ambiguity because of a reference " << name 

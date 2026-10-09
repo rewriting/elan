@@ -47,7 +47,7 @@ void esemactinit()
 
 
 // Pour libearley : esemact est redefinie dans runtimeInit.c
-int esemact(lstream *f,int rulenum,lexem lex,lexem sort)
+int esemact(lstream * /*f*/,int rulenum,lexem lex,lexem sort)
 {
   if (rulenum < 0) {
     te.crvar(-rulenum-1,sort);

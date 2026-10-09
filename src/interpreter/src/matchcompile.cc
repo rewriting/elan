@@ -409,7 +409,7 @@ static unsigned long headbit(unsigned long a)
 
 
 static int selectSubtreeFromStack
-(struct rtna **stack,int stacki,unsigned long ok,int dontcare,int *j,unsigned long *okk)
+(struct rtna **stack,int stacki,unsigned long ok,int /*dontcare*/,int *j,unsigned long *okk)
 { /*unsigned long condpref,elimm;*/
   int mini,minval,i;
   ok = headbit(ok);

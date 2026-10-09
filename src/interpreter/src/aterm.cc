@@ -334,7 +334,7 @@ void Abranchlistdump(ochstream &f, struct branch *brlist)
   f << "nil";
 }
 
-void transrule::Adump(ochstream &af,int ods)
+void transrule::Adump(ochstream &af,int /*ods*/)
 { struct wherelist *wl;
   if (rhs) 
     af << "\nSWRULE(\n";
@@ -382,7 +382,7 @@ void trsystem::joinrdefs()
     strategies_refs[ii] = strategies_defs[ii]; }
 }
 
-void trsystem::Aread(lstream *f)
+void trsystem::Aread(lstream * /*f*/)
 {
 }
 

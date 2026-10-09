@@ -87,8 +87,6 @@ strategy *gen_normalisation1(int norm_index,int modu, int sort,
   int lvars = 0; int ar,arity; /*,kk;*/
   int rvars = 0;
   struct strlist *slist, *sl;
-  int normrules1 = 0;
-  int normrules2 = 0;
 
   NNEW(rlab1,term);
   nolexem.crendofstreamlex();
@@ -199,7 +197,6 @@ strategy *gen_normalisation1(int norm_index,int modu, int sort,
 	 nrule= attach_type(tmp,typ); nrulei = trrules.trruleindex(nrule);
 	 xxx.stinit(); xxx.crvar(0,typle); xxx.popt();
 	 yyy.stinit(); yyy.crvar(1,typle); yyy.popt();
-	 normrules1++;
 	 rwrule = trrules.addrule(nrule,2,xxx,yyy,modu,RGLOP,
 				  NULL,
 				  NORMMATCH,*rlab1,NULL);  
@@ -262,7 +259,6 @@ strategy *gen_normalisation1(int norm_index,int modu, int sort,
 	     NNEW(rlab,term);
 	     sprintf(tmp,"%s%d_%d",NORM_RULE,norm_index,actr->rulenumber);
 	     nrule= attach_type(tmp,typ); nrulei = trrules.trruleindex(nrule);
-	     normrules2++;
 	     rwrule = trrules.addrule(nrule,arity+1,lhs,rhs,modu,RGLOP,
 				      NULL,
 				      NORMMATCH,*rlab,NULL);  
@@ -291,7 +287,6 @@ strategy *gen_normalisation1(int norm_index,int modu, int sort,
 	 nrule= attach_type(tmp,typ); nrulei = trrules.trruleindex(nrule);
 	 xxx.stinit(); xxx.crvar(0,typle); xxx.popt();
 	 yyy.stinit(); yyy.crvar(1,typle); yyy.popt();
-	 normrules1++;
 	 rwrule = trrules.addrule(nrule,2,xxx,yyy,modu,RGLOP,
 				  NULL,
 				  NORMMATCH,*rlab1,NULL);  

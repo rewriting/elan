@@ -691,7 +691,7 @@ struct RPair *p;
 }
 
 struct sgrammrule *add_fsymrule(struct sgrammrule *gr1,struct sgrammrule *gr2,
-				int infos)
+				int /*infos*/)
 {
   lexem *rs1,*rs2,lle;
   struct sgrammrule *gr;
@@ -732,7 +732,7 @@ void add_frule(struct sgrammrule *gr,
   int varc,j1,j2,j3;
   char *strnam;
   int whstr;
-  lexem *rsid0, *rsid1,*rsid2, lle, whtype, strlex;
+  lexem *rsid1,*rsid2, lle, whtype, strlex; /* *rsid0, */
   transrule *tr;
 
   varc = 0;
@@ -766,7 +766,7 @@ void add_frule(struct sgrammrule *gr,
 		     NULL,
 		     (acsymbolinleftside?ACMATCH:NORMMATCH), *rlab,NULL);  
   //tr->dump(5);
-  rsid0 = gr->rside; rsid1 = gr1->rside; rsid2 = gr2->rside; 
+  /* rsid0 = gr->rside; */ rsid1 = gr1->rside; rsid2 = gr2->rside; 
   j1 = varc/3; j2 = 2*j1; j3 = varc;
   while (rsid1->isnotendofstream()) { 
     if (rsid1->nonterminal()) {
@@ -786,7 +786,7 @@ void add_frule(struct sgrammrule *gr,
       tr->addwhere(0,j3,(whstr==-1)?((strategy**)NULL):
 		       trrules.getstrategyadr_refs(whstr),ter,whtype);
     }
-    rsid0++; rsid1++; rsid2++;
+    /* rsid0++; */ rsid1++; rsid2++;
   }
 }
 

@@ -1688,8 +1688,8 @@ void actcruleerror()
   actcompiledrule->dump(2);
 }
 
-int addRuleToCompile(FILE *ff,transrule *rule, struct rtnode *&rrt,int isdet,
-		     int isfunction)
+int addRuleToCompile(FILE * /*ff*/,transrule *rule, struct rtnode *&rrt,int isdet,
+		     int /*isfunction*/)
 {
   /*term wvart;*/
   term rlabel;
@@ -1781,12 +1781,11 @@ void trsystem::compilerules(FILE *ff)  // for no-name rules
   /*term wvart;*/
   term  rlabel;
   /*strategy *sl;*/
-  int i,varn,name,match,rulestype,nrules;
+  int i,varn,name,match; /*,rulestype,nrules;*/
   struct wherelist *wh; /*,*wwh,*whh;*/
   struct tseq *rhs;
   term left,right;
   struct rtnode * rrt;
-  rulestype = 0;
   for (i=0; i<MAXNFSYM; i++) {
     tl= nnrules[i]; 
     islastrec[i] = 0; 
@@ -1794,14 +1793,14 @@ void trsystem::compilerules(FILE *ff)  // for no-name rules
     rrt=emptyrt();
     mask=1; 
     if (tl != NULL) {
-      for(ttl=tl,nrules = 0; ttl != NULL; nrules++)
+      for(ttl=tl; ttl != NULL; )
 	ttl=ttl->next;
       //stout << nrules << " of no-named rules for symbol " << i << "\n";
       while (tl!=NULL) {
 	tl->rule->getr(varn,left,right,name,wh,
 		       rhs,
 		       match,rlabel);
-        rulestype = left.termtype().typeval();
+        left.termtype(); // rulestype = left.termtype().typeval();
 //stout << "compile rule \n --------------------\n" ;
 //tl->rule->dump(0);
 //stout << "----------------------------\n";
@@ -1979,7 +1978,7 @@ void gennnappcode(FILE *ff,
 {
   int detWheres;
   int varn,name,match; /* i */
-  struct wherelist *wh,*wwh; /*,*wwwh;*/
+  struct wherelist *wwh; /*,*wh,*wwwh;*/
   term left,right;
   term rlabel;
   /*  char *preff;*/
@@ -2000,7 +1999,7 @@ void gennnappcode(FILE *ff,
 //fprintf(stderr,"==>\n");
 //right.dump();
 //for(wh=wwh;wh!=NULL;wh=wh->next) wh->whereterm.dump();
-  wh = wwh;
+  /* wh = wwh; */
   detWheres = areAllDet(wwh);
   if(isdet) {
     if(!detWheres) {intend(ff,deep+1); fprintf(ff,"CUTOPEN();\n");} 
@@ -2207,15 +2206,14 @@ void trsystem::consistency()
 { struct transrulelist *tl;
   /*strategy *sl;*/
   struct tseq *rhs;
-  int i,j,k;
-  k=0;
+  int i; /*,j,k;*/
   int n,nameind;
   term l,r;
   struct wherelist *wh;
   int whichmatch;
     term rlabel;
   for (i=0; i<MAXNOFTRN; i++) {
-    tl= rules[i]; j=0;
+    tl= rules[i];
     while (tl!=NULL) {
 
     tl->rule->getr(n,l,r,nameind,wh,
@@ -2228,14 +2226,13 @@ void trsystem::consistency()
          (SPEC_I != NULL && 
           (0==is_prefix_of_name(SPEC_I,rulenames->ide(i)) ||
            0==strcmp(SPEC_I,fsymtab[l.head()].textform()->rside[0].alfsy()))))))){
-      j++; k++;
       tl->rule->consistency();
   }
       tl=tl->next;
     }
   }
   for (i=0; i<MAXNFSYM; i++) {
-    tl= nnrules[i]; j=0;
+    tl= nnrules[i];
     while (tl!=NULL) {
     tl->rule->getr(n,l,r,nameind,wh,
 		   rhs,
@@ -2245,7 +2242,6 @@ void trsystem::consistency()
       (!BREAKSS && (SPEC_I == NULL ||
                    (SPEC_I != NULL && 
            0==strcmp(SPEC_I,fsymtab[l.head()].textform()->rside[0].alfsy())))))) {
-      j++; k++;
       tl->rule->consistency();
   }
       tl=tl->next;
@@ -2256,8 +2252,7 @@ void trsystem::consistency()
 void trsystem::breakk(int breaked)
 { struct transrulelist *tl;
   strategy *sl;
-  int i,j,k;
-  k=0;
+  int i; /*,j,k;*/
   int n,nameind;
   term l,r;
   struct wherelist *wh;
@@ -2265,7 +2260,7 @@ void trsystem::breakk(int breaked)
   int whichmatch;
     term rlabel;
   for (i=0; i<MAXNOFTRN; i++) {
-    tl= rules[i]; j=0;
+    tl= rules[i];
     while (tl!=NULL) {
 
     tl->rule->getr(n,l,r,nameind,wh,
@@ -2283,7 +2278,7 @@ void trsystem::breakk(int breaked)
     }
   }
   for (i=0; i<MAXNFSYM; i++) {
-    tl= nnrules[i]; j=0;
+    tl= nnrules[i];
     while (tl!=NULL) {
     tl->rule->getr(n,l,r,nameind,wh,
 		   rhs,

@@ -1062,7 +1062,7 @@ void grammar::earleyDump(ochstream &stout)
 }
 
 
-void grammar::gr_rule_mapp(int nothing, void (*fun)(struct sgrammrule *))
+void grammar::gr_rule_mapp(int /*nothing*/, void (*fun)(struct sgrammrule *))
 { struct grammrulelist *gr;
   int i;
   for (i=0; i<NNONTERMINALS; i++) 

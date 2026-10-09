@@ -199,6 +199,7 @@ static BOOL simplify_ac(MATCH_OBJECT *obj, FREE_PROBLEM *fp, int top, AC_LIST *p
   VAR_LIST *v_head = NULL, *v_tail = NULL; /* list of variables */
   GRAPH_LIST *g_temp;
 
+  (void)obj;
   g_left_overs = 0;
   while(pp){
     p = pp->arg;

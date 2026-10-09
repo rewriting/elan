@@ -104,7 +104,7 @@ void lbuffer::get(lexem &le)
 		unused, it was added  because of bug in gnu C++ compiler
 */
 
-void lbuffer::applyflush(int nothing,void (*f)(lexem))
+void lbuffer::applyflush(int /*nothing*/,void (*f)(lexem))
 { struct lbufchunk *lb;
   int i;
 //sterr << "[lbuffer::applyflush]flushing \n";
@@ -120,7 +120,7 @@ void lbuffer::applyflush(int nothing,void (*f)(lexem))
   }
 }
 
-void lbuffer::flush(int nothing,void (*f)(lexem))
+void lbuffer::flush(int /*nothing*/,void (*f)(lexem))
 {
   applyflush(0,f);					//!!!!!!!!!!!!!!!!!!!!!
   clear();
