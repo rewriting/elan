@@ -70,7 +70,7 @@ void pipe_names(char *pipe1_name, char *pipe2_name)
 	  failexit(); }
 }
 
-int command2pli(char *command)
+int command2pli(const char *command)
 {
 int pli;
   if (! processtab.member(command)) {
@@ -121,15 +121,15 @@ void open_masterprocess_pipes(int noblock, char *pipe1_name, char *pipe2_name, i
 }
 
 
-struct processdata *newprocess(char *command, 
-			       char *arg1,  
-			       char *arg2,
-			       char *arg3,
-			       char *arg4,
-			       char *arg5,
-			       char *arg6,
-			       char *arg7,
-			       char *arg8,
+struct processdata *newprocess(const char *command, 
+			       const char *arg1,  
+			       const char *arg2,
+			       const char *arg3,
+			       const char *arg4,
+			       const char *arg5,
+			       const char *arg6,
+			       const char *arg7,
+			       const char *arg8,
 			       int maxcount, int noblock)
 { struct processdatalist  *pdl; /**pl,*/
   int pli;

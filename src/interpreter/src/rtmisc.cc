@@ -933,7 +933,7 @@ static int standardreduction(term &t)
               t.subterm(0)->getstring(),
               t.subterm(1)->getstring());
       system(commandline);
-      tt.crststring("TMP.ref"); tt.incrcount();
+      tt.crststring((char*)"TMP.ref"); tt.incrcount(); // S2: stored without copy, as in 2004
       t.rewrite(tt);
       tt.tdelete();
 

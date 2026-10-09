@@ -145,12 +145,13 @@ void  mlstream::collident()
 { lbuffer tmpb;
  lexem fl; /*,fl1;*/
   char *colide,*cc;
+  const char *ca;
   int coll;
   if (mflex.isident())  {
     coll=0;
     pilex(fl); tmpb.put(fl);
-    cc = fl.alfsy();
-    AALLOSS(colide ,strlen(cc)+1,char); strcpy(colide,cc);
+    ca = fl.alfsy();
+    AALLOSS(colide ,strlen(ca)+1,char); strcpy(colide,ca);
     while (mflex == '_') {     // merge the underscore ident
       coll=1;
       cc = addsuffix(colide,"_");
@@ -438,7 +439,7 @@ void mlstream::addvarid(lexem l)
 }
 
 
-void mlstream::addvars(char* type)
+void mlstream::addvars(const char* type)
 { lexem actvartype;
    if (! (typet.member(type))) {
      oerr("[preprocessor] unknown type ",type," used",NULL);
@@ -491,8 +492,8 @@ void mlstream::fillmacbuf(lbuffer &tmpb)
   }
 }
 
-void mlstream::parsetype(char *&tn)
-{ char *n,*nn;
+void mlstream::parsetype(const char *&tn)
+{ const char *n,*nn;
   lexem fl;
   expectident();
   collpilex(fl);
@@ -515,7 +516,7 @@ int mlstream::macroexp()
 { lbuffer tmpb,andbuf;
  lexem fl; /*,fl1;*/
   struct wherelist *ssnm;
-  char *tn;
+  const char *tn;
   int iffirst = false;
   int tmpi;
 

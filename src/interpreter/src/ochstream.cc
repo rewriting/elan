@@ -28,7 +28,7 @@
 #include "commondefs.h"
 
 
-ochstream::ochstream(char *name)
+ochstream::ochstream(const char *name)
 {
   file = fopen(name,"w");
 }

@@ -41,16 +41,16 @@ stringtab::stringtab(int size)
   stinit(size);
 }
 
-stringtab::stringtab(int size, char *strs ... )
+stringtab::stringtab(int size, const char *strs ... )
 { 
   va_list ap;
   va_start (ap,strs);
-  char *p;
+  const char *p;
   stinit(size);
   p=strs;
   while (p!=NULL) {
    addstr(p);
-   p=va_arg(ap,char *);
+   p=va_arg(ap,const char *);
   }
   va_end(ap);
 }
@@ -66,8 +66,8 @@ void stringtab::init()
   strin=0;
 }
 
-int stringtab::member(char *s)
-{ char *p;
+int stringtab::member(const char *s)
+{ const char *p;
   p=s; posid=0;
   while (*p) posid=posid+ *(p++);
   posid=posid % tsize;
@@ -78,13 +78,13 @@ int stringtab::member(char *s)
   return(0);
 }
 
-int stringtab::index(char *s)
+int stringtab::index(const char *s)
 { 
   if (member(s)) return posid;
   else return -1;
 }
 
-int stringtab::addstr(char *s)
+int stringtab::addstr(const char *s)
 {
   if (!member(s)) {
     if (strin+1 >= tsize) {
@@ -106,14 +106,14 @@ void stringtab::removestr(int n)
   strin--;
 }
 
-void stringtab::write(char *bef, char *aft)
+void stringtab::write(const char *bef, const char *aft)
 { int i;
   for (i=0; i<tsize; i++)
     if (id[i]!=NULL) 
        stout <<"\n#define RW" << id[i] << " " << bef << i << aft;
 }
 
-void stringtab::dump(char *name)
+void stringtab::dump(const char *name)
 { int i;
   stout << "stringtab " << name <<  "(" << tsize << "," << strin << "\n"; 
   for (i=0; i<tsize; i++) {
@@ -124,7 +124,7 @@ void stringtab::dump(char *name)
   stout << ");\n";
 }
 
-void stringtab::earleyDump(ochstream &stout,char *name)
+void stringtab::earleyDump(ochstream &stout,const char *name)
 {
   int i;
   stout << "char *"<< name<<"[" <<tsize <<"] = {\n";

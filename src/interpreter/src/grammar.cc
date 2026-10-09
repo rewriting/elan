@@ -515,7 +515,7 @@ int grammar::anysymbol_exists()
   return 0;
 }
 
-void grammar::any_code(char *anymodstr, char *anymodfname, char *name)
+void grammar::any_code(char *anymodstr, char *anymodfname, const char *name)
 {int i;
   ochstream anymod(anymodfname);
 
@@ -621,7 +621,7 @@ int grammar::symbappl_exists()
   return 0;
 }
 
-void grammar::symbappl_code(char *symbapplmodstr, char *symbapplmodfname, char *name)
+void grammar::symbappl_code(char *symbapplmodstr, char *symbapplmodfname, const char *name)
 {int i,j;
  struct ilist *lst;
   ochstream symbapplmod(symbapplmodfname);
@@ -1092,7 +1092,7 @@ void grammar::pretydump(stringtab *tyt)
   stout << "[end of grammar dump]\n";
 }
 
-void grammar::write(ochstream &sout, int winfo,stringtab *tyt,char *bef, char *aft)
+void grammar::write(ochstream &sout, int winfo,stringtab *tyt,const char *bef, const char *aft)
 { int i,j;
   struct grammrulelist *gr;
   j=0;

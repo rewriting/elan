@@ -169,10 +169,10 @@ class ichstream
 
 #define EOFICHSTR EOF
 
-  ichstream(char *name);
-  ichstream(FILE *file,char *name);
-  ichstream(FILE *file,char *name, int block);
-  ichstream(char *command,char *name);
+  ichstream(const char *name);
+  ichstream(FILE *file,const char *name);
+  ichstream(FILE *file,const char *name, int block);
+  ichstream(const char *command,const char *name);
   
   ~ichstream();
 
@@ -196,7 +196,7 @@ class ochstream
 private:
   FILE *file;
 public:
-  ochstream(char *name);
+  ochstream(const char *name);
   ochstream(FILE *);
   ~ochstream();
 
@@ -245,8 +245,8 @@ class lexem
   void crtypelex(int );
   int typeval();
 
-  void cridlex(char *ide);
-  void craidlex(char *ide);
+  void cridlex(const char *ide);
+  void craidlex(const char *ide);
   void cridlex();
   void crnumlex(int n);
   
@@ -274,8 +274,8 @@ class lexem
   void crstringlex();
   void crstringlex(char *s);
   int notendoftermlex(); // true if not a lexem for end of term
-  char *alfsy(); // body is in the 'lstream.c'
-  char *erralfsy(); // body is in the 'lstream.c'
+  const char *alfsy(); // body is in the 'lstream.c'
+  const char *erralfsy(); // body is in the 'lstream.c'
   void operator =(lexem );
   int operator ==(char );
   int operator !=(char );
@@ -324,8 +324,8 @@ inline int lexem::ischar() {return(lex<0 && lex >= -255);}
 inline int lexem::charval() {return(-lex);}
 
 inline int lexem::notendoftermlex() {return (lex!=NOLEXEM);}
-inline void lexem::cridlex(char *ide){ lex = BOFIDENT-tabofident.addstr(ide);}
-inline void lexem::craidlex(char *ide){ lex = BOFIDENT-atabofident.addstr(ide);}
+inline void lexem::cridlex(const char *ide){ lex = BOFIDENT-tabofident.addstr(ide);}
+inline void lexem::craidlex(const char *ide){ lex = BOFIDENT-atabofident.addstr(ide);}
 inline void lexem::crnumlex(int n){ lex = n;}
 inline void lexem::cridlex(){ lex = IDENT;}
 inline void lexem::crnumlex(){ lex = JUSTNUMBER;}
@@ -376,23 +376,23 @@ class lstream
   lbuffer *lastinline;
   int block;
  public:
-  lstream(char *name);
-  lstream(char *name,int idtype);
+  lstream(const char *name);
+  lstream(const char *name,int idtype);
   lstream(ichstream *file);
   lstream(ichstream *file,char c);
   lstream(ichstream *file,char c, int block);
-  lstream(char *command,char *name);
+  lstream(const char *command,const char *name);
   virtual ~lstream();
   virtual void fulex(lexem &l);
   virtual void ilex(lexem &l);
   void oerr();
-  void oerr(char *);
+  void oerr(const char *);
   void owarn();
-  void owarn(char *);
+  void owarn(const char *);
   int isready();
   int isblock();
-  void oerr(char *,char * ...);
-  void owarn(char *,char * ...);
+  void oerr(const char *,const char * ...);
+  void owarn(const char *,const char * ...);
   lbuffer *getlastinlineAndinit();
   virtual void beforemess(lexem s);
   void setposition(int actl,int actp);
@@ -480,12 +480,12 @@ and then the rest of lexems from superclass lstream.
   void fillmacbuf(lbuffer &tmpb);
   int macroexp();
   void collident(); 
-  void addvars(char *tn);
+  void addvars(const char *tn);
   void addvarid(lexem l);
   void addsimplecopy(lbuffer &b);
   void deleteforeachmacs(int *names, int n);
   void addforeachmacs(int *names, int n, term *inst);
-  void parsetype(char *&tn);
+  void parsetype(const char *&tn);
 public:
   mlstream(char *name);
   virtual ~mlstream();
@@ -638,27 +638,27 @@ class grammar
   void  anycode_ops(ochstream &anymod);
   void  anycode_rules(ochstream &anymod);
   int  anysymbol_exists();
-  void  any_code(char *anymodstr, char *anymodfname, char *name);
+  void  any_code(char *anymodstr, char *anymodfname, const char *name);
   void  symbapplcode_ops(ochstream &symbapplmod);
   void  symbapplcode_rules(ochstream &symbapplmod);
   int  symbappl_exists();
-  void  symbappl_code(char *symbapplmodstr, char *symbapplmodfname, char *name);
+  void  symbappl_code(char *symbapplmodstr, char *symbapplmodfname, const char *name);
   void  lookinlinecode(int x, int y);
   int   lookbuiltincode(int x, int y, lexem le, int *infos);
   void   add_apply_code(int x, int y);
   void write(ochstream &,int winfos,
-             stringtab *typt,char *before ,char *after);
+             stringtab *typt,const char *before ,const char *after);
 
 };
 
 // ELAN + LIBEARLEY
-extern char *mstrdup(char *s);         // body in 'misc.c'
+extern char *mstrdup(const char *s);         // body in 'misc.c'
 
 extern void *allo(unsigned n, unsigned s);// body in 'mallo.c'
 extern void  fre(void *p);
 
-extern char *addsuffix (char *,char *); // body in 'misc.c'
-extern char *addsuffixs (char * ... ); // body in 'misc.c'
+extern char *addsuffix (const char *,const char *); // body in 'misc.c'
+extern char *addsuffixs (const char * ... ); // body in 'misc.c'
 extern void writegrrule(ochstream &,struct sgrammrule *,
                         stringtab*types);
 
@@ -667,7 +667,7 @@ extern int esemact (lstream *f,int n,lexem l,lexem type);//semaction for buildin
 [[noreturn]] extern void failexit(); // body in specials.c and module.c
 [[noreturn]] extern void interr();   // body in commondefs.c
 extern ochstream stout,sterr,graphout,dumpout,traceout;
-extern char *elanlib,*perslib;   // bodies in commondefs.c
+extern const char *elanlib,*perslib;   // bodies in commondefs.c
 
 extern int  quote;
 extern char elanlibqnq[];

@@ -648,7 +648,7 @@ void term::genfreeleft(FILE *ff,int deep)
   for(i=0;i<a;i++) t->subt[i].genfreeleft1(ff,deep,*this,i);
 }
 
-static char* genrsidedeclFirstString;
+static const char* genrsidedeclFirstString;
 
 void term::rgenrsidedecl(FILE *ff,int deep)
 { int i,a;

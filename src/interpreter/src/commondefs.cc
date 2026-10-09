@@ -33,8 +33,8 @@ int MAXLENNTERMv = MAXLENNTERM; // max. number of lexems in term
 ochstream stout(stdout), sterr(stderr), graphout(stdout), traceout(stdout),
           dumpout(stdout);
 
-char *elanlib = NULL;
-char *perslib = NULL;
+const char *elanlib = NULL;
+const char *perslib = NULL;
 
 int  quote = 0; // par defaut
 char elanlibqnq[STRLEN];

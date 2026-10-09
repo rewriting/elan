@@ -67,7 +67,7 @@ extern lexem Sif,Swhere,Send,Sstart;            // some usefull reserved words
  int actvtabi,vartabi;                    // numbers of variables (two values differ during parsing variable declarations
 						//			 for the same type)
  term lside,rside,condition;              // left hand side, right hand side and the condition of the CP RW rule
- char *actmodname[MAXINCLDEEP];           // stack of the names of CP modules 
+ const char *actmodname[MAXINCLDEEP];           // stack of the names of CP modules 
  char *actfilemodname[MAXINCLDEEP];       // stack of the files where the CP modules are placed
 // int newmodule[MAXINCLDEEP];
  grammar grstack[MAXINCLDEEP];            // stack of the grammars of CP modules
@@ -79,8 +79,8 @@ extern lexem Sif,Swhere,Send,Sstart;            // some usefull reserved words
  int strlstacki=0;                        // index to strlstack
  term ter1;                               // a temporary term variable
  term ter2;                               // a temporary term variable
- char *acttrrulename;                     // the name of the CP RW rule
- char *actstrategyname;                   // the name of MV strategy
+ const char *acttrrulename;                     // the name of the CP RW rule
+ const char *actstrategyname;                   // the name of MV strategy
  transrule *acttrrule;                    // the CP RW rule
  strategy *actstrategy;                   // the CP strategy
  char *actargmodname;                     // the name of the CP module
@@ -160,7 +160,7 @@ char modnam[STRLEN];
   return import.posid;
 }
 
-char *attach_type(char *s,int t)
+char *attach_type(const char *s,int t)
 {
 char full_name[STRLEN];
   if (s == NULL || strlen(s) == 0) return NULL; /////// exception for nonamed rules
@@ -168,7 +168,7 @@ char full_name[STRLEN];
   return strdup(full_name);
 }
 
-char *attach_mod(char *s,int modu)
+char *attach_mod(const char *s,int modu)
 {
 char full_name[STRLEN];
   if (s == NULL || strlen(s) == 0) return NULL; /////// exception for nonamed rules
@@ -176,7 +176,7 @@ char full_name[STRLEN];
   return strdup(full_name);
 }
 
-static char *attach_type_modu(char *s,int t,char *modu)
+static char *attach_type_modu(const char *s,int t,char *modu)
 {
 char full_name[STRLEN];
   if (s == NULL || strlen(s) == 0) return NULL; /////// exception for nonamed rules
@@ -187,13 +187,13 @@ char full_name[STRLEN];
   return strdup(full_name);
 }
 
-char *attach_type_mod(char *s,int t,int modul)
+char *attach_type_mod(const char *s,int t,int modul)
 {
   return attach_type_modu(s,t,import.ide(modul));
 }
 
 
-static char *attach_modu_loc(char *s, char *modu, const char *loc)
+static char *attach_modu_loc(const char *s, char *modu, const char *loc)
 {
 char full_name[STRLEN];
   if (s == NULL || strlen(s) == 0) return NULL; /////// exception for nonamed rules
@@ -203,12 +203,12 @@ char full_name[STRLEN];
   return strdup(full_name);
 }
 
-char *attach_mod_loc(char *s, int modul, int infos)
+char *attach_mod_loc(const char *s, int modul, int infos)
 {
   return attach_modu_loc(s,import.ide(modul), ((infos & RGLOP)?"GL":"LO"));
 }
 
-int detach_s1_s2(char *separator, char *s,char **name, char **type)
+int detach_s1_s2(const char *separator, const char *s,char **name, char **type)
 {
 char full_name[STRLEN];
 char *p;
@@ -224,24 +224,25 @@ char *p;
     return 0;
 }
 
-int detach_name_type(char *s,char **name, char **type)
+int detach_name_type(const char *s,char **name, char **type)
 {
   return(detach_s1_s2(TYPE_SEPARATOR,s,name,type));
 }
-int detach_name_module(char *s,char **name, char **type)
+int detach_name_module(const char *s,char **name, char **type)
 {
   return(detach_s1_s2(MODULE_SEPARATOR,s,name,type));
 }
-int detach_name_type_module(char *s, char **name, char **type, char **modu)
+int detach_name_type_module(const char *s, char **name, char **type, char **modu)
 {
 char *ww;
   return (detach_s1_s2(TYPE_SEPARATOR,s,name,&ww) &&
 	  detach_s1_s2(MODULE_SEPARATOR,ww,type,modu) );
 }
 
-int is_prefix_of_name(char *s1, char *s2)
+int is_prefix_of_name(const char *s1, const char *s2)
 {
-char sss[STRLEN], *s;
+char sss[STRLEN];
+const char *s;
   sprintf(sss,"%s%s",s1,TYPE_SEPARATOR);
   s = strstr(s2,sss);
   if (s == s2) return 0; else return -1;
@@ -387,7 +388,7 @@ grammar *actgram()
 { return(& grstack[stacki]);
 }
 
-void setmodname(char *s, char *ss)
+void setmodname(const char *s, char *ss)
 {
   actmodname[stacki]=s; actfilemodname[stacki] = ss;
 }
@@ -897,11 +898,11 @@ void printargs(struct chlist *args)
   }
 }
 
- void divideonargs(char *name,char *&modn, struct chlist **args)
+ void divideonargs(const char *cname,char *&modn, struct chlist **args)
 { int c;
-  char *p;
-  AALLOSS(p ,strlen(name)+1,char);
-  strcpy(p,name);
+  char *p, *name;
+  AALLOSS(p ,strlen(cname)+1,char);
+  strcpy(p,cname);
   name = p;
   c=0; p=name; modn=name; *args = NULL;
   while (*p) {
@@ -931,7 +932,7 @@ void printargs(struct chlist *args)
 }
 
 
-void readmodules(lstream *f, char *name)
+void readmodules(lstream *f, const char *name)
 {
 int addit = 0;
 int impmod, in_stratmod;
@@ -999,7 +1000,7 @@ void importmod(char *impmodule,lstream *f, int supermodule)
   importmod_inf( impmodule, f, supermodule,  importrinfos[stacki]);
 }
 
-void importmod_inf(char *impmodule,lstream *f, int supermodule, int rinf)
+void importmod_inf(const char *impmodule,lstream *f, int supermodule, int rinf)
 {
   int xx=0; /* initialised to avoid warning */
   if (supermodule != -1) { xx = impmoduli; impmoduli= supermodule; }

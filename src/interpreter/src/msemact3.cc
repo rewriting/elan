@@ -791,7 +791,7 @@ void add_frule(struct sgrammrule *gr,
 }
 
 
-char *remove_underscores(char *s)
+char *remove_underscores(const char *s)
 {
   char *r,*rr;
   AALLOSS(r ,strlen(s)+1,char);

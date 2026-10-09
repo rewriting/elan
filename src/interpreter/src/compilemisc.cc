@@ -109,7 +109,7 @@ labellex.crtypelex(typet.addstr("Label"));
   fprintf(ff,"}\n");
 }
 
-int cross_refs(FILE *ff,char *ss)
+int cross_refs(FILE *ff,const char *ss)
 { int i,j; /*,k,a;*/
   lexem *p;
   j=0;
@@ -135,7 +135,7 @@ int cross_refs(FILE *ff,char *ss)
 }
 
 
-void genppfs(FILE *ff,char *ss)
+void genppfs(FILE *ff,const char *ss)
 { int i; /*,j,k,a;*/
   lexem *p,lf;
   fprintf(ff,"static unsigned %sppfs[] = {",ss);
@@ -176,7 +176,7 @@ void genprofils(FILE *ff)
 static int arities[MAXNOFARITIES];
 static int aritiesi=0;
 
-static void genfreelist(FILE *ff,char *prefix,int a)
+static void genfreelist(FILE *ff,const char *prefix,int a)
 { int i;
   for (i=0;i<aritiesi;i++) if (arities[i]==a) return;
   arities[aritiesi++] = a;
@@ -272,7 +272,7 @@ void genFunTab(FILE *ff)
     fprintf(ff,"v%d",j); } \
   fprintf(ff,");"); 
 
-void genfsym(FILE *ff,char *prefix,int i)
+void genfsym(FILE *ff,const char *prefix,int i)
 {
     int j,a;
     a = fsymtab[i].arity();
@@ -311,11 +311,11 @@ void genfsym(FILE *ff,char *prefix,int i)
     }
 }
 
-void genconstants(FILE *ff,char *prefix)
+void genconstants(FILE *ff,const char *prefix)
 { 
   int i;
   struct definedaslist *ddt;
-  char *fn;
+  const char *fn;
   aritiesi = 0;
 
 // I will probably need free list for arities 1,2 and 3 for some builtins

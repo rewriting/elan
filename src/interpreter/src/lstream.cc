@@ -28,7 +28,7 @@
 #include "commondefs.h"
 #include <ctype.h>
 
-lstream::lstream(char *name)
+lstream::lstream(const char *name)
 {
   NNEW(istr ,ichstream (name));
   type = OWNAME | UNDERID;
@@ -36,7 +36,7 @@ lstream::lstream(char *name)
   ilex(flex);
 }
 
-lstream::lstream(char *name,int typ)
+lstream::lstream(const char *name,int typ)
 {
   NNEW(istr ,ichstream (name));
   type = OWNAME | typ;
@@ -68,7 +68,7 @@ lstream::lstream(ichstream *fil,char c, int bloque)
   flex.crcharlex(c);
 }
 
-lstream::lstream(char *command,char *name)
+lstream::lstream(const char *command,const char *name)
 {
   NNEW(istr ,ichstream (command,name));
   type=OWNAME | UNDERID;
@@ -249,13 +249,13 @@ void lstream::owarn()
   }
 }
 
-void lstream::oerr(char *ch )
+void lstream::oerr(const char *ch )
 {
   oerr();
   sterr<<ch;
 }
 
-void lstream::owarn(char *ch )
+void lstream::owarn(const char *ch )
 {
   if (warnings) {
     owarn();
@@ -263,19 +263,19 @@ void lstream::owarn(char *ch )
   }
 }
 
-void lstream::oerr(char *ch, char *s ... )
+void lstream::oerr(const char *ch, const char *s ... )
 { va_list ap;
   oerr();
   va_start (ap,s);
   sterr << ch;
   while (s!=NULL) {
     sterr << s;
-    s=va_arg(ap,char *);
+    s=va_arg(ap,const char *);
   }
   va_end(ap);
 }
 
-void lstream::owarn(char *ch, char *s ... )
+void lstream::owarn(const char *ch, const char *s ... )
 {  va_list ap;
    if (warnings) {
     owarn();
@@ -283,7 +283,7 @@ void lstream::owarn(char *ch, char *s ... )
     sterr << ch;
     while (s!=NULL) {
       sterr << s;
-      s=va_arg(ap,char *);
+      s=va_arg(ap,const char *);
     }
     va_end(ap);
   }
@@ -318,7 +318,7 @@ lbuffer *lstream::getlastinlineAndinit()
 static char alfs[]=" ";
 static char alfs2[100];
 
-char *lexem::alfsy()
+const char *lexem::alfsy()
 {
  if (nonterminal()) {
    sprintf(alfs2,"sort(%d)",BOFTYPES-lex);return(alfs2);
@@ -338,7 +338,7 @@ char *lexem::alfsy()
  }
 }
 
-char *lexem::erralfsy()
+const char *lexem::erralfsy()
 { 
  if (lex <= 0 && lex >= -32) {
    sprintf(alfs2,"\'\\%d\'",-lex);return(alfs2);

@@ -62,7 +62,8 @@ extern void addstandards(grammar &gr);          // text in semact.cc
 extern void crStandModules();                   // text in semact.cc
 extern char *linkdate;                          // text in linkdate.c
 #include "banner.cc" 
-static char * sortname,*axiomname,*oldaxiomname;
+static char * sortname;
+static const char *axiomname,*oldaxiomname;
        char *specsource,*specname,*modname;
 static char *outputName=0; // nom du a.out
 static lstream *specstream;
@@ -150,7 +151,7 @@ static int sendofin(lexem le)
 //            axname -- the name of the specification part
 //            sort   -- the type of the specification part
 //
-void genaxiommodule(term &axt,char * axname, char *sort)
+void genaxiommodule(term &axt,const char * axname, char *sort)
 { int pi; lexem an,sn; term tt;
   term rlabel;
   struct sgrammrule *gr;
@@ -346,7 +347,7 @@ void replace_check(term &sw,term &checkt, term *readedt)
 //                       specification or the "end" for the last Part)
 //         tables    <- returns the earleys initialised tables
 //
-static int starttbuildinit(int usage, lstream *ls,char *finalsym,struct earleystables *&tables)
+static int starttbuildinit(int usage, lstream *ls,const char *finalsym,struct earleystables *&tables)
 {
   if (commands && usage) {
      RWmtfin.crcharlex(';');		// !! will be not deleted !!
@@ -415,7 +416,7 @@ static void  starttbuildfin(int usage,term &maint,term *readedt)
 //                  (obviously it is the name of the following part of the 
 //                  specification or the "end" for the last Part)
 //
-static int selectstartwithterm(int usage, term &maint,lstream *ls,char *finalsym)
+static int selectstartwithterm(int usage, term &maint,lstream *ls,const char *finalsym)
 { term *readedt;
   struct earleystables *etables;
   if (! starttbuildinit(usage,ls,finalsym,etables)) {  // the term is synt. correct?
@@ -855,7 +856,8 @@ void conform_strategies(int warn)
 
 int main(int argc, char **argv)
 {
-  char *modsource,*moddest_c,*callcompilstr,*calllinkstr=NULL,*nsoptstr; /* ,*includef*/
+  char *modsource,*moddest_c,*callcompilstr,*calllinkstr=NULL; /* ,*includef*/
+  const char *nsoptstr;
   char *moddest_h=NULL,*moddest;
 
   FILE *genof_c,*genmof;

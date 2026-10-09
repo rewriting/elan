@@ -152,7 +152,7 @@ void grammar::Adump(ochstream &af,int flag)
   af << "EndDef end\n";
 }
 
-void stringtab::Adump(ochstream &gout, char *heading)
+void stringtab::Adump(ochstream &gout, const char *heading)
 {
   gout << heading << "\n";
   for(forinit(); forcond(); fornext()) {
@@ -172,7 +172,7 @@ void term::Awrite(ochstream &gout)
 void term::Awriterec(ochstream &gout)
 { int i;
 /* lexem *p;*/
-  char *ch;
+  const char *ch;
   switch (t->infos) {
   case TVAR:
     if(cexport && t->compif.isVarExt)

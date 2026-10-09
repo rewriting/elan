@@ -303,7 +303,7 @@ void writert(struct rtnode * rrt)
 };
 
 
-static char *genmatchvarprefix;
+static const char *genmatchvarprefix;
 //static char *prefix;
 
 void genmatchvarrec(FILE *ff,struct rtnode * rrt)

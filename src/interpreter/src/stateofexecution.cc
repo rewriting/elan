@@ -187,7 +187,7 @@ static void wherestarttrace(term t,strategy **st)
   }
 }
 
-static void processrestrace(term res,char *pname)
+static void processrestrace(term res,const char *pname)
 {
   if (trace || (traceind <= tracelevel && !quiet)) {
     indent(); traceout << "    process '" << pname << "' : "; 
@@ -197,7 +197,7 @@ static void processrestrace(term res,char *pname)
 
 
 
-static void callprtrace(char *p,term t)
+static void callprtrace(const char *p,term t)
 {
   if (trace || (traceind+1 <= tracelevel && !quiet)) {
     indent(); traceout << "    calling processus '" << p << "' with argument:\t";

@@ -424,7 +424,8 @@ void term2strategy(int typ,term *t, strategy **s)
 
 int Strategyname_to_ref_index(char *strname, int /*typ*/)
 {
-    char   *new_ss, *ss, *name, *type, *modul;
+    char   *new_ss, *name, *type, *modul;
+    const char *ss;
     int iref, good_type;
     // BAD SOL     s->setprocmaxn(trrules.searchmatch_defs(strname,typ,-1));
 

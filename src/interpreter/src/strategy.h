@@ -285,7 +285,7 @@ extern struct selector selectors[];
 extern int actvtabi,vartabi;                    // numbers of variables (two values differ during parsing variable declarations
 extern int big;						//			 for the same type)
 extern term lside,rside,condition;              // left hand side, right hand side and the condition of the CP RW rule
-extern char *actmodname[MAXINCLDEEP];           // stack of the names of CP modules 
+extern const char *actmodname[MAXINCLDEEP];           // stack of the names of CP modules 
 extern char *actfilemodname[MAXINCLDEEP];       // stack of the files where the CP modules are placed
 //extern int newmodule[MAXINCLDEEP];
 extern grammar grstack[MAXINCLDEEP];            // stack of the grammars of CP modules
@@ -296,7 +296,7 @@ extern int strstacki;                         // index to strstack
 extern struct strlist *strlstack[MAXINCLSTRAT]; // stack used while parsing nested list of strategies (DONT CARE/KNOW CHOOSE)
 extern int strlstacki;                        // index to strlstack
 extern term ter1, ter2;                         // a temporary term variable
-extern char *acttrrulename;                     // the name of the CP RW rule
+extern const char *acttrrulename;                     // the name of the CP RW rule
 extern transrule *acttrrule;                    // the CP RW rule
 extern strategy *actstrategy;                   // the CP strategy
 extern char *actargmodname;                     // the name of the CP module
@@ -432,7 +432,7 @@ extern int calledstr;
 extern void appactstrat();
 
 void importmod(char *impmodule,lstream *f,int supermodule);
-void importmod_inf(char *impmodule,lstream *f,int supermodule, int rinf);
+void importmod_inf(const char *impmodule,lstream *f,int supermodule, int rinf);
 
 void trclos(lstream *f);
 int gr_compatible(struct sgrammrule *r1, struct sgrammrule *r2);
@@ -441,7 +441,7 @@ struct sgrammrule *add_fsymrule(struct sgrammrule *gr1,struct sgrammrule *gr2,
 void add_frule(struct sgrammrule *gr, 
 	       struct sgrammrule *gr1,
 	       struct sgrammrule *gr2);
-char *remove_underscores(char *s);
+char *remove_underscores(const char *s);
 void load_strat_mod(lstream *f, int sou, int res);
 extern int flowcheckrule(lstream *f,transrule *trrule);
 extern int equal_non_ground;

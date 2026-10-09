@@ -27,7 +27,7 @@
 
 #include "commondefs.h"
 
-ichstream::ichstream(char *name)              // to open elan file in lib or .
+ichstream::ichstream(const char *name)              // to open elan file in lib or .
 { char *fn;
 
   if ((file=fopen(name,"r"))) { fn = mstrdup(name); commonopen(fn,NFILE); return; }
@@ -56,20 +56,20 @@ ichstream::ichstream(char *name)              // to open elan file in lib or .
 }
 
 
-ichstream::ichstream(FILE *fil,char *name)
+ichstream::ichstream(FILE *fil,const char *name)
 { 
   file = fil;
   commonopen(mstrdup(name),NFILE);
 }
 
-ichstream::ichstream(FILE *fil,char *name, int block)
+ichstream::ichstream(FILE *fil,const char *name, int block)
 { 
   file = fil;
   commonopen(mstrdup(name),NFILE);
   read_block = block;
 }
 
-ichstream::ichstream(char *pcommand, char *name)
+ichstream::ichstream(const char *pcommand, const char *name)
 { 
   file = popen(pcommand,"r");
   commonopen(mstrdup(name),PIPE);

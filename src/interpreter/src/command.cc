@@ -35,7 +35,7 @@
 #include "compiledefs.h"
 
 
-stck::stck(char *pref,char *s)
+stck::stck(const char *pref,const char *s)
 {
   topp = 0;
   headline = s; prefix = pref;

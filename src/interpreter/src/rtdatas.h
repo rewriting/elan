@@ -274,7 +274,7 @@ private:
     } cr;
     strategy *substrategy;
     struct {
-      char *pname;
+      const char *pname;
       int maxn;
       grammar *locgr;
       int restype;
@@ -297,7 +297,7 @@ public:
   void setstl_no_test(struct strlist *);
   void setnamelist(struct namelist *);
   void setcalledstr(strategy **);
-  void setprocname(char *);
+  void setprocname(const char *);
   void setprocmaxn(int n);
   void setprocgr(grammar *);
   void setproctype(int l);
@@ -309,7 +309,7 @@ public:
   struct namelist *rulenamelist() {return(u.cr.nm);}
   strategy *substrateg() {return(u.substrategy);}
   struct strlist *substrlist() {return(u.stl);}
-  char *subprocname() {return(u.procc.pname);}
+  const char *subprocname() {return(u.procc.pname);}
   int subprocmaxn() {return(u.procc.maxn);}
   int subproctype() {return(u.procc.restype);}
   grammar * subprocgr() {return(u.procc.locgr);}
@@ -384,20 +384,20 @@ public:
   void assign_one_ref(int warn, int ref);                       
   int searchmatch_defs(char *name, int typ, int modu);
   // ------------- DEFS:
-  char *strategyname_defs(int n);              
+  const char *strategyname_defs(int n);              
   int strategyindex_defs(char *name, int infos);   
   int strategymember_defs(char *name);             
-  char *strategyname_defs(strategy **);        
+  const char *strategyname_defs(strategy **);        
   int setstrategy_defs(int n, strategy *st);        // return 0=O.K.; 1=error
   void settypeofstrategy_defs(int n, int typ);
   int  typeofstrategy_defs(int n);
   strategy *getstrategy_defs(int stratindex);
   strategy **getstrategyadr_defs(int stratindex);
   // ------------- REFS:
-  char *strategyname_refs(strategy **);
+  const char *strategyname_refs(strategy **);
   int strategymember_refs(char *name);
-  int strategyindex_refs(char *name);
-  char *strategyname_refs(int n);
+  int strategyindex_refs(const char *name);
+  const char *strategyname_refs(int n);
   int strategyremove_refs(int n);
   strategy *getstrategy_refs(int stratindex);
   strategy **getstrategyadr_refs(int stratindex);
@@ -595,9 +595,9 @@ extern void wherelidump(ochstream &f,struct wherelist *wh,int ods);
 extern int handlecondition(term c, term *substarray);	// body in rtmisc.c
 extern void transred(int,term,int);		// body in rtmisc.c
 
-extern struct processdata *newprocess(char *command,
-	char *arg1, char *arg2, char *arg3, char *arg4, char *arg5,
-        char *arg6, char *arg7, char *arg8, int maxn, int noblock);
+extern struct processdata *newprocess(const char *command,
+	const char *arg1, const char *arg2, const char *arg3, const char *arg4, const char *arg5,
+        const char *arg6, const char *arg7, const char *arg8, int maxn, int noblock);
 extern void freeprocess(struct processdata *);
 extern int isNextSolInProcess(struct processdata *pd);
 extern int nextsolprocess(struct processdata *pd,grammar *gr,int stsym,term &res);
@@ -610,14 +610,14 @@ extern void wherelisdump(ochstream &f,struct wherelist *wl,int deep);
 extern int qendofin(lexem le);
 extern void out_symbol(ochstream &anymod, struct sgrammrule *actr, int kind);
 extern void conform_strategies(int warn);
-extern char *attach_type(char *s,int t);
-extern char *attach_mod(char *s,int modu);
-extern char *attach_type_mod(char *s,int t, int modu);
-extern char *attach_mod_loc(char *s, int modul, int infos);
-extern int detach_name_type(char *s,char **name, char **type);
-extern int detach_name_module(char *s,char **name, char **type);
-extern int detach_name_type_module(char *s, char **name, char **type, char **modu);
-extern int is_prefix_of_name(char *s1, char *s2);
+extern char *attach_type(const char *s,int t);
+extern char *attach_mod(const char *s,int modu);
+extern char *attach_type_mod(const char *s,int t, int modu);
+extern char *attach_mod_loc(const char *s, int modul, int infos);
+extern int detach_name_type(const char *s,char **name, char **type);
+extern int detach_name_module(const char *s,char **name, char **type);
+extern int detach_name_type_module(const char *s, char **name, char **type, char **modu);
+extern int is_prefix_of_name(const char *s1, const char *s2);
 extern int impmoduli;
 extern void init_visi(int modul);
 extern int stratmoduli(int x, int y);

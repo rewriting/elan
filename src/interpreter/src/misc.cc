@@ -28,7 +28,7 @@
 #include "commondefs.h"
 #include <stdarg.h>
 
-char *addsuffix(char *str,char *suff)
+char *addsuffix(const char *str,const char *suff)
 { char *s;
   AALLOSS(s,strlen(str)+strlen(suff)+1,char);
   strcpy(s,str);
@@ -36,15 +36,16 @@ char *addsuffix(char *str,char *suff)
   return(s);
 }
 
-char *addsuffixs(char *str ... )
+char *addsuffixs(const char *str ... )
 { int len;
   va_list ap;
-  char *p,*s;
+  const char *p;
+  char *s;
   va_start (ap,str);
   p=str; len = 0;
   while (p!=NULL) {
    len = len+strlen(p);
-   p=va_arg(ap,char *);
+   p=va_arg(ap,const char *);
   }
   va_end(ap);
   AALLOSS(s,len+1,char);
@@ -52,13 +53,13 @@ char *addsuffixs(char *str ... )
   p=str; len = 0;
   while (p!=NULL) {
    strcpy(s+len,p); len = len+strlen(p);
-   p=va_arg(ap,char *);
+   p=va_arg(ap,const char *);
   }
   va_end(ap);
   return(s);
 }
 
-char *mstrdup(char *s)
+char *mstrdup(const char *s)
 { char *ss;
   AALLOSS(ss ,strlen(s)+1,char);
   strcpy(ss,s);

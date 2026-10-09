@@ -432,7 +432,7 @@ extern int early1call(lstream *f,grammar *gr,
                  int (*end)(lexem));	// body in earley.c
 extern int earlycall(lstream *f,grammar *gr,
                  int (*end)(lexem));	// body in earley.c
-extern void readmodules(lstream *f, char *name);           // body in semact.c
+extern void readmodules(lstream *f, const char *name);           // body in semact.c
 extern void fsymtab_remakealias(grammar *gr); // body in tmisc.c
 extern void conform_strategies(int warn);
 

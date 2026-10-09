@@ -64,20 +64,20 @@ class stringtab
                             // (sets as side effect of addstr and member)
 
   stringtab(int size);
-  stringtab(int size, char * ...);
+  stringtab(int size, const char * ...);
   ~stringtab();
 
   char *ide(int n);                   // give string of number n
-  void dump(char *name); //dump of tab with name
-  void earleyDump(ochstream&,char *name); //dump of tab with name
-  void write(char *,char *); //write table values
-  int addstr(char *s);   // add string s into the table and return 
+  void dump(const char *name); //dump of tab with name
+  void earleyDump(ochstream&,const char *name); //dump of tab with name
+  void write(const char *,const char *); //write table values
+  int addstr(const char *s);   // add string s into the table and return 
                                     // his number
   void removestr(int n);   // remove string of #n from table !!!!!!!
                                       // remove must be done in reversed 
                                       // order than add !!!!!!!!!!!!!!!!!!!!!!
-  int member(char *s);   // is s a member of the table ?
-  int index(char *s);   // is s a member of the table ?
+  int member(const char *s);   // is s a member of the table ?
+  int index(const char *s);   // is s a member of the table ?
 
 		// following functions for list the strings in for-cycle
   void forinit();
@@ -85,7 +85,7 @@ class stringtab
   void fornext();
   int  forindex();
   char *foractval();
-  void Adump(ochstream &gout,char *heading);
+  void Adump(ochstream &gout,const char *heading);
   void Aread(void *f, int skip); // should be (lstream *f);
 };
 

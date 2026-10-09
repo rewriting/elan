@@ -448,7 +448,7 @@ void strategy::setname(int n, int modu)
 { strname = n; strmod = modu;
 }
 
-void strategy::setprocname(char *n)
+void strategy::setprocname(const char *n)
 { u.procc.pname = n;
 }
 
@@ -1445,10 +1445,10 @@ int r = strategynames_defs->addstr(name);
   return r;
 }
 
-char * trsystem::strategyname_defs(int n)
+const char * trsystem::strategyname_defs(int n)
 { return(strategynames_defs->ide(n)); }
 
-char * trsystem::strategyname_defs(strategy **s)
+const char * trsystem::strategyname_defs(strategy **s)
 { int n;
   if (s==NULL) return("");
   n = s-strategies_defs;
@@ -1510,14 +1510,14 @@ int defs = -1;
 int trsystem::strategymember_refs(char *name)
 { return(strategynames_refs->index(name)); }
 
-int trsystem::strategyindex_refs(char *name)
+int trsystem::strategyindex_refs(const char *name)
 { 
 int r = strategynames_refs->addstr(name); 
   //stout << "Reference  " << name << " = " << r << "\n";
   return r;
 }
 
-char * trsystem::strategyname_refs(int n)
+const char * trsystem::strategyname_refs(int n)
 { return(strategynames_refs->ide(n)); }
 
 int trsystem::strategyremove_refs(int n)
@@ -1527,7 +1527,7 @@ int trsystem::strategyremove_refs(int n)
   return 0;
 }
 
-char * trsystem::strategyname_refs(strategy **s)
+const char * trsystem::strategyname_refs(strategy **s)
 { int n;
   if (s==NULL) return("");
   n = s-strategies_refs;
@@ -1818,7 +1818,7 @@ void trsystem::compilerules(FILE *ff)  // for no-name rules
 
 
 static void genwherevars(FILE *ff,int deep,struct wherelist *wh)
-{ char *preff;
+{ const char *preff;
   intend(ff,deep);
   preff = "struct term ";
   for(;wh!=NULL;wh=wh->next) {

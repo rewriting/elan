@@ -41,15 +41,15 @@ class stck
 {
   private:
   int topp;
-  char *headline;
-  char *prefix;
+  const char *headline;
+  const char *prefix;
   struct { lexem typ; 
            term *t; 
            struct sgrammrule *axadded;
       } tab[STCKSIZE+1];
   public:
     //- basics
-    stck(char *prefix,char *headline);
+    stck(const char *prefix,const char *headline);
     //~stck();
     void push(lexem typ, term *t);
     void pop();
