@@ -834,7 +834,7 @@ static int standardreduction(term &t)
         { char commandline[STRLEN];
           //   sprintf(commandline,"jolifier.sh %s",fname);
         snprintf(commandline,sizeof(commandline),"jolifieur.sh %s",fname);
-        system(commandline);
+        (void)!system(commandline);
         }
 
         pd = newprocess(REF2STRINGBOXNAME,fname,NULL,NULL,NULL,NULL,NULL,NULL,NULL,1,0);
@@ -871,7 +871,7 @@ static int standardreduction(term &t)
         { char commandline[STRLEN];
           //   sprintf(commandline,"jolifier.sh %s",fname);
         snprintf(commandline,sizeof(commandline),"jolifieur.sh %s",fname);
-        system(commandline);
+        (void)!system(commandline);
         }
 
         pd = newprocess(STRING2REFBOXNAME,fname,"-b",NULL,NULL,NULL,NULL,NULL,NULL,1,0);
@@ -932,7 +932,7 @@ static int standardreduction(term &t)
       snprintf(commandline,sizeof(commandline),"elan -b --export TMP.ref %s %s",
               t.subterm(0)->getstring(),
               t.subterm(1)->getstring());
-      system(commandline);
+      (void)!system(commandline);
       tt.crststring((char*)"TMP.ref"); tt.incrcount(); // S2: stored without copy, as in 2004
       t.rewrite(tt);
       tt.tdelete();

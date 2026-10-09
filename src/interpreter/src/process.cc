@@ -56,8 +56,8 @@ void pipe_names(char *pipe1_name, char *pipe2_name)
 {
   snprintf(pipe1_name,STRLEN,"/bin/rm -f .internal.pipe1.%d.%d",getpid(),pipe_index);
   snprintf(pipe2_name,STRLEN,"/bin/rm -f .internal.pipe2.%d.%d",getpid(),pipe_index);
-  system(pipe1_name);
-  system(pipe2_name);
+  (void)!system(pipe1_name);
+  (void)!system(pipe2_name);
   snprintf(pipe1_name,STRLEN,".internal.pipe1.%d.%d",getpid(),pipe_index);
   snprintf(pipe2_name,STRLEN,".internal.pipe2.%d.%d",getpid(),pipe_index);
 

@@ -780,7 +780,7 @@ void interrupt(int /*sig*/)
     {
       char strname[IDLEN];
       stout << "enter strategy name\n";
-      scanf("%s",strname);
+      (void)!scanf("%s",strname);
       interrupt_r(strname);
     }
   break;
@@ -788,7 +788,7 @@ void interrupt(int /*sig*/)
     {
       char isortname[IDLEN];
       stout << "enter input sort name\n";
-      scanf("%s",isortname);
+      (void)!scanf("%s",isortname);
       interrupt_i(isortname);
     }
   break;
@@ -796,7 +796,7 @@ void interrupt(int /*sig*/)
     {
       char osortname[IDLEN];
       stout << "enter output sort name\n";
-      scanf("%s",osortname);
+      (void)!scanf("%s",osortname);
       interrupt_i(osortname);
     }
   break;
@@ -814,7 +814,7 @@ void interrupt(int /*sig*/)
     while (getchar()!='\n');
     sterr << "\nenter new level: ";stout.flush();
     if (isdigit(c=getchar())) {
-      ungetc(c,stdin); fscanf(stdin,"%d",&tracelevel);
+      ungetc(c,stdin); (void)!fscanf(stdin,"%d",&tracelevel);
     } else {trac=1; trace=1;}
     break;
     
@@ -1251,14 +1251,14 @@ int main(int argc, char **argv)
            moddest_c," -o ",outputName," -lelan -learley -lm",NULL);
           if (!batch) 
 	    fprintf(stderr,"[.c->%s]: %s\n",outputName,callcompilstr);
-	  system(callcompilstr);
+	  (void)!system(callcompilstr);
 	  if(!generate_code)
 	    {
 	      // on efface moddest_c et moddest_h
 	      char * callremovefile;
               callremovefile= addsuffixs("/bin/rm -f ",moddest_c," ",moddest_h,NULL);
 	      if (!batch) { fprintf(stderr,"%s\n",callremovefile);}
-              system(callremovefile);
+              (void)!system(callremovefile);
 	      CFRE(callremovefile);
 	    }
 	}
@@ -1271,7 +1271,7 @@ int main(int argc, char **argv)
 //	  calllinkstr = addsuffixs("$ELANLIB/Compiled/`uname -m`/cElanScript -l ",nsoptstr," ",moddest,NULL);
 	  if (!batch) {fprintf(stderr,"[.c->.o]: %s\n",callcompilstr);}
 	  //  call cElanScript to call C-compiler
-	  system(callcompilstr);  
+	  (void)!system(callcompilstr);  
 	}
     }
 
@@ -1325,7 +1325,7 @@ int main(int argc, char **argv)
 	  fclose(genmof);
 	  if (!batch) {fprintf(stderr,"[.o->a.out]: %s\n",calllinkstr);}
 	  //     call cElanScript link the executable
-	  system(calllinkstr);                              
+	  (void)!system(calllinkstr);                              
         }  
 	// recover the user defined execution switches
         trace = trac;

@@ -105,7 +105,7 @@ void ichstream::commonopen(char *name,int ftype)
 char *ichstream::readstring()
 {
 char buffer[30000];
-  fscanf(file,"%s",buffer);
+  (void)!fscanf(file,"%s",buffer);
   return strdup(buffer);
 }
 

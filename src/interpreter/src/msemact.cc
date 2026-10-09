@@ -1038,14 +1038,14 @@ void importmod_inf(const char *impmodule,lstream *f, int supermodule, int rinf)
 	      is_explimpl = 0;
 	      snprintf(mname,sizeof(mname),"explimpl%d",explimpl_index++);
 	      importmod(mname,f,-1);
-	      system("/bin/rm -f explimpl*.eln");
+	      (void)!system("/bin/rm -f explimpl*.eln");
 	    }
 	    if (is_symbappl) {
 	      char mname[STRLEN];
 	      is_symbappl = 0;
 	      snprintf(mname,sizeof(mname),"symbappl%d",symbappl_index++);
 	      importmod(mname,f,-1);
-	      system("/bin/rm -f symbappl*.eln");
+	      (void)!system("/bin/rm -f symbappl*.eln");
 	    }
 	  }
   if (supermodule != -1) { impmoduli = xx; }

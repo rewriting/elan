@@ -155,9 +155,9 @@ void term2string(term *t, char *buff)
   (*t).write(hack);
   hack.flush();
   hackk = fopen("/tmp/hack.tmp","r");
-  fscanf(hackk,"%s",buff);
+  (void)!fscanf(hackk,"%s",buff);
   fclose(hackk);
-  system("/bin/rm -f /tmp/hack.tmp");
+  (void)!system("/bin/rm -f /tmp/hack.tmp");
 }
 
 void interrupt_run(term &t)
@@ -289,7 +289,7 @@ int n = t.head();
       char sss[STRLEN];
       stout << "\nHelp from the file $ELANLIB/help.txt\n";
       snprintf(sss,sizeof(sss),"/bin/cat %shelp.txt",elanlib);
-      system(sss); }
+      (void)!system(sss); }
       break;
   case BREAK_N:
   case UNBREAK_N:

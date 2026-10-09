@@ -184,7 +184,7 @@ char *buff, *s;
 #define  MAKE_REF_FILE \
 if (spc) {  \
     snprintf(buff,sizeof(buff),"elan -b --export %s %s %s",aux_file_name,prog,spc); \
-    system(buff); } \
+    (void)!system(buff); } \
   else if (strlen(prog) < STRLEN) \
     strcpy(aux_file_name,prog); \
   else { \
