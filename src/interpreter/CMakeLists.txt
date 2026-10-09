@@ -40,7 +40,7 @@ set(ELAN_GEN_DIR ${CMAKE_CURRENT_BINARY_DIR}/generated)
 set(ELAN_GENERATED
   ${ELAN_GEN_DIR}/ppexparser.cc ${ELAN_GEN_DIR}/mparser.cc ${ELAN_GEN_DIR}/atermparser.cc
   ${ELAN_GEN_DIR}/reduceparser.cc ${ELAN_GEN_DIR}/ldparser.cc ${ELAN_GEN_DIR}/tabofident.cc
-  ${ELAN_GEN_DIR}/atabofident.cc ${ELAN_GEN_DIR}/rtabofident.cc ${ELAN_GEN_DIR}/commtokens.h)
+  ${ELAN_GEN_DIR}/atabofident.cc ${ELAN_GEN_DIR}/commtokens.h)
 set(S ${CMAKE_CURRENT_SOURCE_DIR}/src)
 add_custom_command(
   OUTPUT ${ELAN_GENERATED}

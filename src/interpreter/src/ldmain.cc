@@ -867,7 +867,6 @@ int main(int argc, char **argv)
   nsoptstr="";
   optimize=0;
 
-    //init_alloc();
   initAssignment();  
 
   elanlib = getenv("ELANLIB");                      // get environemt variable ELANLIB

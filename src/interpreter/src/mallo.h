@@ -30,16 +30,7 @@
 #define _mallo_h
 #include <stdio.h>
 
-extern void init_alloc();
-extern char* Valloc();
-extern char *allocator(long n);
-extern char *intern_alloc(long size);
-extern void intern_free(long *p);
-extern void print_space_usage();
-
-extern int alloc_member(void *t);
-extern void testalloc(long *t);
-extern void testfree(void *t);
-
+extern void *allo(unsigned n, unsigned s); // malloc, exits when out of memory
+extern void  fre(void *p);                 // free
 
 #endif

@@ -20,7 +20,6 @@ cat ldrw modrw ppexrw | "$MABIDENT" > tabofident.cc
 "$MTOKDEF"  < atermrw  | sed -f "$S/toaterm" > acommtokens.h
 "$MABIDENT" < atermrw  | sed -f "$S/toaterm" > atabofident.cc
 "$MTOKDEF"  < reducerw | sed -f "$S/toaterm" > rcommtokens.h
-"$MABIDENT" < reducerw | sed -f "$S/toaterm" > rtabofident.cc
 
 cat "$S/ppexparser.h"   commtokens.h  ppexparsertab.cc   "$S/include.parser" > ppexparser.cc
 cat "$S/mparser.h"      commtokens.h  mparsertab.cc      "$S/include.parser" > mparser.cc

@@ -85,38 +85,3 @@ TERM_LIST *make_term_list(TERM *new_t, TERM_LIST *rest)
   l->next_arg = rest;
   return(l);
 }
-
-
-
-void *build_match__FP11term_structT0i(TERM *p,TERM *s,int n)
-{
-  return(build_match(p,s,n));
-}
-
-BOOL extract_match__FPvPP11term_struct(void *m,TERM **a)
-{
-  return(extract_match(m, a));
-}
-
-void destroy_match__FPv(void *m)
-{ destroy_match(m);
-}
-
-void destroy_term__FP11term_struct(TERM *t)
-{ destroy_term(t);
-}
-
-
-TERM *make_term__FiP16term_list_struct8SYM_TYPEiT1
-(int id,
- TERM_LIST *args,
- SYM_TYPE type,
- int len,      /* lenght of args */
- TERM_LIST *p    /* tail of args   */)
-{ return(make_term(id, args,type,len,p));
-}
-
-TERM_LIST *make_term_list__FP11term_structP16term_list_struct(TERM *n,TERM_LIST *rest)
-{return(make_term_list(n, rest));
-}
-

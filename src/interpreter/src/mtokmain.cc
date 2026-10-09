@@ -42,7 +42,6 @@ int main()
   lstream ff(&mainin);
   lexem lex;
 
-  //init_alloc();
 
   ff.ilex(lex);
   i=0;
