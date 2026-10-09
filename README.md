@@ -45,7 +45,7 @@ After a reboot, only the `hdiutil attach` line is needed.
 ```sh
 make                 # build the interpreter (CMake, into build/)
 make check           # runner unit tests + 368 interpreter tests of the bench
-make install PREFIX=$HOME/.local
+make install PREFIX=/Volumes/elan-tools   # PREFIX must be case-sensitive (see above)
 make reference       # build the 2004 reference system (interpreter + compiler)
 make check-reference # full bench (778 tests) against the reference
 ```

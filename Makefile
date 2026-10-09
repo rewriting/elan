@@ -18,7 +18,7 @@ else
 endif
 export ELAN_CC ELAN_CXX
 
-.PHONY: all configure install check test-runner reference check-reference clean toolchain
+.PHONY: all configure install check test-runner smoke reference check-reference clean toolchain
 
 all: configure
 	cmake --build $(BUILD) -j
@@ -28,18 +28,34 @@ toolchain:
 	@command -v $(ELAN_CXX) >/dev/null || { echo "ERROR: C++ compiler '$(ELAN_CXX)' not found (set ELAN_CXX, see README)"; exit 1; }
 	@command -v cmake >/dev/null || { echo "ERROR: cmake not found (see README)"; exit 1; }
 
+# The install prefix is compiled into elan (default library location), so the
+# build is reconfigured whenever PREFIX differs from the configured one.
 configure: toolchain
-	@test -f $(BUILD)/CMakeCache.txt || \
+	@cached=$$(sed -n 's/^CMAKE_INSTALL_PREFIX:PATH=//p' $(BUILD)/CMakeCache.txt 2>/dev/null); \
+	if [ "$$cached" != "$(PREFIX)" ]; then \
 	  cmake -S . -B $(BUILD) -DCMAKE_C_COMPILER=$(ELAN_CC) -DCMAKE_CXX_COMPILER=$(ELAN_CXX) \
-	        -DCMAKE_INSTALL_PREFIX=$(PREFIX)
+	        -DCMAKE_INSTALL_PREFIX=$(PREFIX); \
+	fi
 
+# The library contains files differing only by case (strategy/any.eln, Any.eln).
 install: all
-	cmake --install $(BUILD) --prefix $(PREFIX)
+	@mkdir -p $(PREFIX); p=$$(mktemp -d $(PREFIX)/.case.XXXX); touch $$p/a $$p/A; \
+	n=$$(ls $$p | wc -l); rm -rf $$p; \
+	if [ $$n -ne 2 ]; then echo "ERROR: $(PREFIX) is on a case-insensitive file system; the ELAN library has files differing only by case (see README)"; exit 1; fi
+	cmake --install $(BUILD)
 
 test-runner:
 	cd tests/legacy-bench && python3 test_run_tests.py
 
-check: install test-runner
+# elan must find its library without ELANLIB (default = install prefix)
+smoke: install
+	@mkdir -p tests/legacy-bench/work; d=$$(mktemp -d tests/legacy-bench/work/smoke.XXXX); \
+	cp legacy/elan/sources/Compiler.4.0/Test/enum.* $$d/; \
+	echo 'enum(o,fac(s(s(o)))) end' | (cd $$d && env -u ELANLIB $(PREFIX)/bin/elan -b enum.lgi) > $$d/out 2>&1; \
+	if grep -q 's(o)' $$d/out; then echo "smoke: elan finds its library without ELANLIB"; rm -rf $$d; \
+	else cat $$d/out; rm -rf $$d; exit 1; fi
+
+check: smoke test-runner
 	$(BENCH) --prefix $(PREFIX) --kinds I,A
 
 reference:
