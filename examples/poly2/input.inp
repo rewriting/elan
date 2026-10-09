@@ -1,0 +1,1 @@
+deriv(3*X*X + 2*X + 7 , X) end

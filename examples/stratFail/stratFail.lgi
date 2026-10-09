@@ -1,0 +1,8 @@
+LPL stratFail description 
+
+query 		of sort foo
+      result 	of sort foo
+      import    stratFail
+      start with (repeatS) query
+
+end

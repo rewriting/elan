@@ -1,0 +1,21 @@
+ cons_int(2,cons_int(2,nil)) end
+
+ cons_int(2,cons_int(4,nil)) end
+
+ cons_int(2,cons_int(0,nil)) end
+
+ cons_int(3,cons_int(2,nil)) end
+
+ cons_int(3,cons_int(4,nil)) end
+
+ cons_int(3,cons_int(0,nil)) end
+
+ cons_int(-1,cons_int(2,nil)) end
+
+ cons_int(-1,cons_int(4,nil)) end
+
+ cons_int(-1,cons_int(0,nil)) end
+
+ end end
+end
+

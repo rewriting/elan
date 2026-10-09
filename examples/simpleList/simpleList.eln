@@ -1,0 +1,17 @@
+module simpleList[X]
+  sort X simpleList[X]; end
+  operators
+	global
+	nil		: 					simpleList[X];
+	@ . @		: ( X simpleList[X] ) 			simpleList[X];
+	append(@,@)	: ( simpleList[X] simpleList[X] ) 	simpleList[X];
+   end
+
+  rules for simpleList[X]
+	e 	: X;
+	l,l1,l2	: simpleList[X];
+	global
+	[] append(nil, l)	=> l				end
+	[] append(e.l1, l2)	=> e . append(l1,l2)		end
+   end
+end

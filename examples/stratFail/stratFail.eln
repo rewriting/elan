@@ -1,0 +1,25 @@
+module stratFail
+import global int bool;
+  end
+sort foo ; end
+operators 
+  global
+    a : foo ;  	b : foo ;
+  end
+stratop
+  global
+    tryIt    : <foo -> foo> 	bs ;
+    repeatS : <foo -> foo> 	bs ;
+    repeatP : <foo -> foo> 	bs ;
+  end
+rules for foo
+  global
+    [a2b]  a => b 	      end
+  end
+strategies for foo
+  implicit
+    [] tryIt    => dc(a2b)        	end
+    [] repeatS => repeat*(dc(a2b))	end
+    [] repeatP => repeat+(dc(a2b)) 	end
+  end
+end

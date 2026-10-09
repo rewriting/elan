@@ -1,0 +1,6 @@
+LPL simpleList description
+	query  of sort	simpleList[int]
+	result of sort	simpleList[int]
+	import		int simpleList[int]
+	start with	()query
+end

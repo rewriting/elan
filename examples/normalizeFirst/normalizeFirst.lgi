@@ -1,0 +1,6 @@
+LPL normalizeFirst description
+	query    of sort	term
+	result of sort		term
+	import			normalizeFirst
+	start with		(s1)query
+end

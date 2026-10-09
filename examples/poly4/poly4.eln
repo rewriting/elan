@@ -1,0 +1,65 @@
+module poly4[Vars]
+
+import global int Vars eq[variable] identifier list[identifier];
+end
+sort variable poly;
+end
+operators global
+  FOR EACH Id:identifier SUCH THAT Id:=(listExtract) elem(Vars) :
+ { Id : variable; } 
+
+  @		: ( variable ) poly;
+  @		: ( int ) poly;
+  @ + @ 	: ( poly poly ) poly  assocRight pri 1 (AC);
+  (@ + @) 	: ( poly poly ) poly  alias @ + @:;
+  @ * @		: ( poly  poly) poly  assocRight pri 2 (AC);
+  (@ * @)	: ( poly  poly) poly  alias @ * @:;
+  deriv(@,@) 	: ( poly variable) poly;
+
+  pp(@)		: (poly) poly;
+end
+
+stratop global
+  simplify      : <poly>        bs;
+end
+
+rules for poly
+  P			: poly;
+  p1, p2, p3, p4 	: poly;
+  x, y			: variable;
+  n, n1, n2, n3		: int;
+global
+
+  []  P+0		=> P				end
+  []  P*0		=> 0				end
+  []  P*1		=> P				end
+  []  n1*n2		=> n where n:=() n1*n2		end
+
+  [factorize]  P + p1+p1	 => P + 2*p1		end
+
+  [factorize]  P + n1*p1 + n2*p1 => P + n3*p1
+		where n3:=()n1+n2			end
+
+  [factorize]  P + (p1*p2) + (p1*p3) => P + p1*(p2+p3)	end
+
+  [expand]  P + (p1+p2)*(p3+p4) => P + p2*p4 + p2*p3
+				     + p1*p4 + p1*p3	end
+
+  [expand]  P + (p1+p2)*p3 => P + p2*p3 + p1*p3		end
+
+  []  deriv(x,x) 	=> 1				end
+  []  deriv(y,x) 	=> 0    if $x != $y		end
+  []  deriv(n,x)   	=> 0				end
+  []  deriv(p1+p2,x)  	=> deriv(p1,x) + deriv(p2,x)	end
+  []  deriv(p1*p2,x)  	=> p1*deriv(p2,x) + deriv(p1,x)*p2
+  end
+end
+
+strategies for poly
+implicit
+  [.] simplify => normalise( dc one(expand) ) ; normalise( dc one(factorize) )
+  end
+end
+
+end
+
