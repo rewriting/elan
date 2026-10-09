@@ -40,7 +40,7 @@
 struct term {
   unsigned short int symb;   // info | symb
   unsigned short int hcode;  // hcode
-  struct term *(sub[2]);     // array of subterms 
+  struct term *sub[];        // array of subterms (allocated as a struct termN)
 };
 
 #define TERMSTR(strname,arity)\
