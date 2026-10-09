@@ -27,7 +27,9 @@
 
 
 #include "mitab.h"
-#include "commondefs.h"
+#include <stdio.h>
+#include "alloc.h"
+#include "streams.h"
 #include <stdarg.h>
 
 void mitab::stinit(int size)

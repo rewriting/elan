@@ -27,7 +27,11 @@
 
 #include "stringtab.h"
 #include <stdarg.h>
-#include "commondefs.h"
+#include <string.h>
+#include <stdio.h>
+#include "alloc.h"
+#include "streams.h"
+#include "misc.h"
 
 void stringtab::stinit(int size)
 {

@@ -25,7 +25,14 @@
 
 */
 
-#include "commondefs.h"
+#include <string.h>
+#include <stdlib.h>
+#include <stdarg.h>
+#include "constants.h"
+#include "options.h"
+#include "alloc.h"
+#include "misc.h"
+#include "lstream.h"
 #include <ctype.h>
 
 lstream::lstream(const char *name)

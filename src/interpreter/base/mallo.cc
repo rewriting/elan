@@ -25,7 +25,9 @@
 
 */
 
-#include "commondefs.h"
+#include <stdlib.h>
+#include "mallo.h"
+#include "streams.h"
 
 
 void *allo(unsigned n, unsigned s)

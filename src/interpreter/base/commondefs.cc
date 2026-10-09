@@ -26,7 +26,10 @@
 */
 
 
-#include "commondefs.h"
+#include <stdlib.h>
+#include "constants.h"
+#include "streams.h"
+#include "options.h"
 
 int MAXLENNTERMv = MAXLENNTERM; // max. number of lexems in term 
 

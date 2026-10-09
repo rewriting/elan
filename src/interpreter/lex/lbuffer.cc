@@ -26,7 +26,8 @@
 */
 
 
-#include "commondefs.h"
+#include "lstream.h"
+#include "alloc.h"
 
 
 lbuffer::lbuffer()

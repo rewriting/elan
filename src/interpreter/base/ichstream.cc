@@ -25,7 +25,14 @@
 
 */
 
-#include "commondefs.h"
+#include <string.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include "constants.h"
+#include "streams.h"
+#include "alloc.h"
+#include "misc.h"
+#include "options.h"
 
 ichstream::ichstream(const char *name)              // to open elan file in lib or .
 { char *fn;

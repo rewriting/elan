@@ -25,7 +25,7 @@
 
 */
 
-#include "commondefs.h"
+#include "streams.h"
 
 
 ochstream::ochstream(const char *name)

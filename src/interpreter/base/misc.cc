@@ -25,7 +25,9 @@
 
 */
 
-#include "commondefs.h"
+#include <string.h>
+#include "misc.h"
+#include "alloc.h"
 #include <stdarg.h>
 
 char *addsuffix(const char *str,const char *suff)

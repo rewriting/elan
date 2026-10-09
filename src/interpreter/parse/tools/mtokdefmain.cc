@@ -25,7 +25,8 @@
 
 */
 
-#include "commondefs.h"
+#include "lstream.h"
+#include "streams.h"
 
 stringtab tabofident(MAXNOFIDENT);
 stringtab atabofident(MAXNOFIDENT);

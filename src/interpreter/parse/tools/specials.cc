@@ -25,7 +25,9 @@
 
 */
 
-#include "commondefs.h"
+#include <stdlib.h>
+#include "mlstream.h"
+#include "streams.h"
 
 
 void failexit()
