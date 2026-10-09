@@ -158,8 +158,11 @@ def case_sensitive(directory):
 # ---------------------------------------------------------------- execution
 def run(cmd, cwd, stdin=None, timeout=60):
     with open(stdin, "rb") if stdin else open(os.devnull, "rb") as fin:
-        p = subprocess.run(cmd, cwd=cwd, stdin=fin, stdout=subprocess.PIPE,
-                           stderr=subprocess.PIPE, env=env(), timeout=timeout)
+        try:
+            p = subprocess.run(cmd, cwd=cwd, stdin=fin, stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE, env=env(), timeout=timeout)
+        except OSError as e:   # program (or its #! interpreter) missing: one failed test
+            return 127, "", f"cannot run {cmd[0]}: {e}"
     return p.returncode, p.stdout.decode("latin-1"), p.stderr.decode("latin-1")
 
 

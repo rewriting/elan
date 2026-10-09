@@ -85,6 +85,14 @@ class JudgeTest(unittest.TestCase):
         self.assertEqual(regress, [])
 
 
+class RunTest(unittest.TestCase):
+    def test_unrunnable_program_is_reported_not_raised(self):
+        # e.g. elanc is a #!/bin/tcsh script and tcsh is not installed
+        rc, out, err = rt.run(["elan-no-such-program"], rt.HERE)
+        self.assertEqual(rc, 127)
+        self.assertIn("elan-no-such-program", err)
+
+
 class CaseSensitivityTest(unittest.TestCase):
     def test_repository_volume_is_case_sensitive(self):
         self.assertTrue(rt.case_sensitive(rt.HERE / "work"))

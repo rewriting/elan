@@ -52,7 +52,7 @@ make check-reference # full bench (778 tests) against the reference
 
 On macOS the default compilers are Homebrew's `gcc-16`/`g++-16`; override
 with `make ELAN_CC=gcc-17 ELAN_CXX=g++-17`. Linux needs
-`build-essential cmake bison flex libfl-dev default-jdk-headless libgc-dev automake python3`;
+`build-essential cmake bison flex libfl-dev default-jdk-headless libgc-dev automake tcsh python3`;
 `ci/Dockerfile.linux` reproduces the Linux CI job locally. See
 `CONTRIBUTING.md` for the rules every change follows.
 

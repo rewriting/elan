@@ -16,7 +16,7 @@ elanc -nosplit queens && make -f queens.make && ./a.out -noInput   # compiler
 ```
 
 Requirements: `brew install gcc openjdk bdw-gc bison flex libtool` (macOS), or
-`apt install build-essential cmake bison flex libfl-dev default-jdk-headless libgc-dev automake python3`
+`apt install build-essential cmake bison flex libfl-dev default-jdk-headless libgc-dev automake tcsh python3`
 (Linux, Ubuntu 24.04), and a **case-sensitive** file system (see the top-level
 README). `build.sh` picks its defaults from `uname -s`; `ELAN_CC`, `ELAN_CXX`,
 `GC_PREFIX`, `JAVA_HOME` and `AUX` override them.
