@@ -483,6 +483,9 @@ char *term_getString(Gterm *t) {
 
 
 
+/* the switches of the hash functions fall through on purpose */
+#define FALLTHROUGH __attribute__((fallthrough))
+
 #define mix(a,b,c) \
 { \
   a -= b; a -= c; a ^= (c>>13); \
@@ -556,17 +559,17 @@ int doobs_hfunction(Gterm *t) {
     c += arity;
     switch(len)              /* all the case statements fall through */
     {
-        case 11: c+=(hashTerm(GgetArgument(k+t,10)))<<24;
-        case 10: c+=(hashTerm(GgetArgument(k+t,9)))<<16;
-        case 9 : c+=(hashTerm(GgetArgument(k+t,8)))<<8;
+        case 11: c+=(hashTerm(GgetArgument(k+t,10)))<<24; FALLTHROUGH;
+        case 10: c+=(hashTerm(GgetArgument(k+t,9)))<<16; FALLTHROUGH;
+        case 9 : c+=(hashTerm(GgetArgument(k+t,8)))<<8; FALLTHROUGH;
             // the first byte of c is reserved for the length 
-        case 8 : b+=(hashTerm(GgetArgument(k+t,7)))<<24;
-        case 7 : b+=(hashTerm(GgetArgument(k+t,6)))<<16;
-        case 6 : b+=(hashTerm(GgetArgument(k+t,5)))<<8;
-        case 5 : b+=hashTerm(GgetArgument(k+t,4));
-        case 4 : a+=(hashTerm(GgetArgument(k+t,3)))<<24;
-        case 3 : a+=(hashTerm(GgetArgument(k+t,2)))<<16;
-        case 2 : a+=(hashTerm(GgetArgument(k+t,1)))<<8;
+        case 8 : b+=(hashTerm(GgetArgument(k+t,7)))<<24; FALLTHROUGH;
+        case 7 : b+=(hashTerm(GgetArgument(k+t,6)))<<16; FALLTHROUGH;
+        case 6 : b+=(hashTerm(GgetArgument(k+t,5)))<<8; FALLTHROUGH;
+        case 5 : b+=hashTerm(GgetArgument(k+t,4)); FALLTHROUGH;
+        case 4 : a+=(hashTerm(GgetArgument(k+t,3)))<<24; FALLTHROUGH;
+        case 3 : a+=(hashTerm(GgetArgument(k+t,2)))<<16; FALLTHROUGH;
+        case 2 : a+=(hashTerm(GgetArgument(k+t,1)))<<8; FALLTHROUGH;
         case 1 : a+=hashTerm(GgetArgument(k+t,0));
             // case 0: nothing left to add
     }
@@ -602,17 +605,17 @@ int doobs_hfunction(Gterm *t) {
     c += arity;
     switch(len)              /* all the case statements fall through */
     {
-        case 11: c+=(hashTerm(getSubterm(tac,k+10)))<<24;
-        case 10: c+=(hashTerm(getSubterm(tac,k+9)))<<16;
-        case 9 : c+=(hashTerm(getSubterm(tac,k+8)))<<8;
+        case 11: c+=(hashTerm(getSubterm(tac,k+10)))<<24; FALLTHROUGH;
+        case 10: c+=(hashTerm(getSubterm(tac,k+9)))<<16; FALLTHROUGH;
+        case 9 : c+=(hashTerm(getSubterm(tac,k+8)))<<8; FALLTHROUGH;
             /* the first byte of c is reserved for the length */
-        case 8 : b+=(hashTerm(getSubterm(tac,k+7)))<<24;
-        case 7 : b+=(hashTerm(getSubterm(tac,k+6)))<<16;
-        case 6 : b+=(hashTerm(getSubterm(tac,k+5)))<<8;
-        case 5 : b+=hashTerm(getSubterm(tac,k+4));
-        case 4 : a+=(hashTerm(getSubterm(tac,k+3)))<<24;
-        case 3 : a+=(hashTerm(getSubterm(tac,k+2)))<<16;
-        case 2 : a+=(hashTerm(getSubterm(tac,k+1)))<<8;
+        case 8 : b+=(hashTerm(getSubterm(tac,k+7)))<<24; FALLTHROUGH;
+        case 7 : b+=(hashTerm(getSubterm(tac,k+6)))<<16; FALLTHROUGH;
+        case 6 : b+=(hashTerm(getSubterm(tac,k+5)))<<8; FALLTHROUGH;
+        case 5 : b+=hashTerm(getSubterm(tac,k+4)); FALLTHROUGH;
+        case 4 : a+=(hashTerm(getSubterm(tac,k+3)))<<24; FALLTHROUGH;
+        case 3 : a+=(hashTerm(getSubterm(tac,k+2)))<<16; FALLTHROUGH;
+        case 2 : a+=(hashTerm(getSubterm(tac,k+1)))<<8; FALLTHROUGH;
         case 1 : a+=hashTerm(getSubterm(tac,k+0));
             /* case 0: nothing left to add */
     }

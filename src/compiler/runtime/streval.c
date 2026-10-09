@@ -179,6 +179,7 @@ int is_one = 0;
 	  break; }
       case DS_ONE:
         is_one = 1;  // THIS SHOULD FOLLOW 
+        __attribute__((fallthrough));
       case DS_DC:
 	{
 	  Gterm *strlist, *res;
