@@ -18,10 +18,15 @@ backtracking. This repository preserves the original system and revives it.
 
 ## Requirements
 
-macOS on Apple Silicon (other Unix systems should only need path changes):
+macOS on Apple Silicon (other Unix systems should only need path changes).
+The modern interpreter only needs the Xcode command line tools (system Clang)
+and CMake; the 2004 reference system (`make reference`) is built with
+Homebrew GCC:
 
 ```sh
-brew install gcc openjdk bdw-gc bison flex libtool cmake
+xcode-select --install   # system Clang (cc/c++)
+brew install cmake       # modern interpreter: make, make check
+brew install gcc openjdk bdw-gc bison flex libtool   # reference system
 ```
 
 ### Case-sensitive file system
@@ -50,8 +55,13 @@ make reference       # build the 2004 reference system (interpreter + compiler)
 make check-reference # full bench (778 tests) against the reference
 ```
 
-On macOS the default compilers are Homebrew's `gcc-16`/`g++-16`; override
-with `make ELAN_CC=gcc-17 ELAN_CXX=g++-17`. Linux needs
+The modern interpreter builds with GCC and Clang (`-Wall -Wextra -Werror`);
+the default compilers are the system Clang (`cc`/`c++`) on macOS and
+`gcc`/`g++` on Linux. Override them with, e.g.,
+`make BUILD=build-gcc ELAN_CC=gcc-16 ELAN_CXX=g++-16 PREFIX=$PWD/build-gcc/install check`
+(a build directory keeps the compiler it was configured with: use another
+`BUILD`, or `make clean`, to switch). `make reference` uses Homebrew's
+`gcc-16`/`g++-16` on macOS unless `ELAN_CC`/`ELAN_CXX` are set. Linux needs
 `build-essential cmake bison flex libfl-dev default-jdk-headless libgc-dev automake tcsh python3`;
 `ci/Dockerfile.linux` reproduces the Linux CI job locally. See
 `CONTRIBUTING.md` for the rules every change follows.

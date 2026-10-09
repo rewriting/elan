@@ -8,15 +8,18 @@ BUILD   ?= build
 PREFIX  ?= $(CURDIR)/$(BUILD)/install
 BENCH    = tests/legacy-bench/run_tests.py
 
+# Compilers of the modern interpreter: the system Clang on macOS, GCC
+# elsewhere.  They are not exported: reference/build.sh chooses its own
+# defaults (Homebrew GCC on macOS) unless ELAN_CC/ELAN_CXX are set by the
+# caller.
 UNAME := $(shell uname -s)
 ifeq ($(UNAME),Darwin)
-  ELAN_CC  ?= gcc-16
-  ELAN_CXX ?= g++-16
+  ELAN_CC  ?= cc
+  ELAN_CXX ?= c++
 else
   ELAN_CC  ?= gcc
   ELAN_CXX ?= g++
 endif
-export ELAN_CC ELAN_CXX
 
 .PHONY: all configure install check test-runner smoke reference check-reference clean toolchain
 

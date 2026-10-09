@@ -20,7 +20,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-            build-essential cmake bison flex libfl-dev default-jdk-headless libgc-dev automake tcsh python3
+            build-essential clang cmake bison flex libfl-dev default-jdk-headless libgc-dev automake tcsh python3
           echo "ELAN_WS=$RUNNER_TEMP/elan" >> "$GITHUB_ENV"
 
       - name: Dependencies and case-sensitive volume (macOS)
@@ -48,8 +48,24 @@ jobs:
       - name: Full bench against the reference
         run: make -C "$ELAN_WS" check-reference
 
-      - name: Modern interpreter, make check
+      # Linux: default compilers gcc/g++.  macOS: default is the system
+      # Clang; ELAN_CC/ELAN_CXX (Homebrew GCC, for the reference build) are
+      # in the environment, so the system Clang is named explicitly.
+      - name: Modern interpreter, make check (Linux GCC)
+        if: runner.os == 'Linux'
         run: make -C "$ELAN_WS" check
+
+      - name: Modern interpreter, make check (Linux Clang)
+        if: runner.os == 'Linux'
+        run: make -C "$ELAN_WS" BUILD=build-clang ELAN_CC=clang ELAN_CXX=clang++ PREFIX="$ELAN_WS/build-clang/install" check
+
+      - name: Modern interpreter, make check (macOS system Clang)
+        if: runner.os == 'macOS'
+        run: make -C "$ELAN_WS" ELAN_CC=cc ELAN_CXX=c++ check
+
+      - name: Modern interpreter, make check (macOS Homebrew GCC)
+        if: runner.os == 'macOS'
+        run: make -C "$ELAN_WS" BUILD=build-gcc ELAN_CC="$ELAN_CC" ELAN_CXX="$ELAN_CXX" PREFIX="$ELAN_WS/build-gcc/install" check
 
       - name: Bench results
         if: failure()
