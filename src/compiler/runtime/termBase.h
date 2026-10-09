@@ -267,7 +267,7 @@ extern int doobs_hfunction(struct term *t);
 
 #define genericTermAlloc(res,arity,symb) (!symb_isAC(symb))?(GmakeApplArity(res,arity,symb)):(TERMAC_ALLOC(res,arity,symb))
 
-#define genericGetSubterm(t,i) (!term_isAC(t))?(GgetArgument(t,i)):(getSubterm(TERMAC(t),i))
+#define genericGetSubterm(t,i) ((!term_isAC(t))?(GgetArgument(t,i)):(getSubterm(TERMAC(t),i)))
 
 #define genericSetSubterm(t,i,st) if(!term_isAC(t)) { GsetArgument(t,i,st); } else \
 { term_add_onf_term_color(TERMAC(t),GgetSymb(t),(st),bicolor); }

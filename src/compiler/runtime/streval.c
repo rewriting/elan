@@ -182,9 +182,9 @@ int is_one = 0;
       case DS_DC:
 	{
 	  Gterm *strlist, *res;
-	  int *wasr = (int*)(allocStable(sizeof(int)));
+	  long wasr_index = allocStable(sizeof(int));
 	  int is_last = 0;
-	  *wasr = 0;
+	  *((int*)getStablePointer(wasr_index)) = 0;
 
 	  for(strlist = GgetArgument(s,0);
 	      -term_semantic(strlist) != DS_EPSILON;
@@ -199,10 +199,10 @@ int is_one = 0;
 		if (is_one) { CUTOPEN(); }
 		res = str_eval2(GgetArgument(strlist,0),t);
 		if (is_one) { CUTCLOSE(); }
-		if (*wasr == 0) *wasr = 1;
+		if (*((int*)getStablePointer(wasr_index)) == 0) *((int*)getStablePointer(wasr_index)) = 1;
 		goto lab_dc;
 	      }
-	      if (*wasr != 0) fail();
+	      if (*((int*)getStablePointer(wasr_index)) != 0) fail();
 	    } else // is_last
 	      res = str_eval2(GgetArgument(strlist,0),t);
 	  }
@@ -223,17 +223,17 @@ int is_one = 0;
       case DS_IFTOE:
 	{
 	  Gterm *res, *cond, *s1, *s2;
-	  int *wasr = (int*)(allocStable(sizeof(int)));
-	  *wasr = 0;
+	  long wasr_index = allocStable(sizeof(int));
+	  *((int*)getStablePointer(wasr_index)) = 0;
 	  cond = GgetArgument(s,0);
           s1 = GgetArgument(s,1);
           s2 = GgetArgument(s,2);
 	  if(!setChoicePoint()) {
 	    res = str_eval2(cond,t);
-	    if (*wasr == 0) *wasr = 1;
+	    if (*((int*)getStablePointer(wasr_index)) == 0) *((int*)getStablePointer(wasr_index)) = 1;
 	    return str_eval2(s1,res);
 	  }
-	  if (*wasr != 0) fail();
+	  if (*((int*)getStablePointer(wasr_index)) != 0) fail();
 	  return str_eval2(s2,t);
 	}
       default:

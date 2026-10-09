@@ -22,6 +22,7 @@
     Pierre-Etienne Moreau	e-mail: Pierre-Etienne.Moreau@loria.fr
 
 */
+#include <stdint.h>
 #include "termBase.h"
 #include "builtin.h"
 #include "termIn.h"
@@ -405,7 +406,7 @@ Gterm *term_newArray(int n, Gterm *t) {
   int i;
   array = (Gterm**) MALLOC(n * sizeof(Gterm*));
 
-  GmakeAppl2(res,CODE_ARRAY,((Gterm*)n), ((Gterm*)array)); 
+  GmakeAppl2(res,CODE_ARRAY,((Gterm*)(intptr_t)n), ((Gterm*)array)); 
   for(i=0 ; i<n ; i++) {
     array[i] = t;
   }
@@ -420,7 +421,7 @@ Gterm *term_getArray(Gterm *t, int n) {
     exit(1);
   }
   
-  size  = (int) GgetArgument(t,0);
+  size  = (int)(intptr_t) GgetArgument(t,0);
   array = (Gterm**) GgetArgument(t,1);
   if(n<0 || n>=size) {
     printf("getArray error: size = %d\tn = %d\n",size,n);
@@ -437,7 +438,7 @@ Gterm *term_setArray(Gterm *t, int n, Gterm *subterm) {
     exit(1);
   }
 
-  size  = (int) GgetArgument(t,0);
+  size  = (int)(intptr_t) GgetArgument(t,0);
   array = (Gterm**) GgetArgument(t,1);
   if(n<0 || n>=size) {
     printf("setArray error: size = %d\tn = %d\n",size,n);
@@ -452,7 +453,7 @@ int term_getLength(Gterm *t) {
     printf("getLength error: symb = %d\n",GgetSymb(t));
     exit(1);
   }
-  return (int) GgetArgument(t,0);
+  return (int)(intptr_t) GgetArgument(t,0);
 }
 
 /*
@@ -463,7 +464,7 @@ Gterm *term_newString(char *string) {
   int n;
   n = strlen(string);
   TERM_ALLOC(res,term2,CODE_STRING);
-  setFreeSubterm(res,0,(struct term*) n);
+  setFreeSubterm(res,0,(struct term*)(intptr_t) n);
   setFreeSubterm(res,1,(struct term*) string);
   return res;
 }
@@ -471,7 +472,7 @@ Gterm *term_newString(char *string) {
 char *term_getString(Gterm *t) {
   char *string;
   int size;
-  size = (int) getFreeSubterm(t,0);
+  size = (int)(intptr_t) getFreeSubterm(t,0);
   string = (char *) MALLOC((size+1)*sizeof(char));
   strcpy(string,(char *)getFreeSubterm(t,1));
     //printf("%s",string);
@@ -499,7 +500,7 @@ int hashTerm(Gterm *t) {
   int hash;
 
   if(GisTagged(t)) {
-    return (int)t & HASHMASK;
+    return (int)(intptr_t)t & HASHMASK;
   }
 
   hash = getHcode(t);

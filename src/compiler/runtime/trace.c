@@ -749,10 +749,23 @@ int getArityByNamePrefix(char * sym_name){
   return -1;
 }
 
+/* 2026: the generated code keeps the backup of *T_addr in an int
+   (RewriteRule.java), too small for a pointer: the pointer is saved in
+   T_backups (scanned by the GC) and the int is its index. Backups and
+   recoveries are nested; a recovery discards the backups made after it. */
+static Gterm **T_backups = NULL;
+static int T_backups_size = 0;
+static int T_backups_top = 0;
+
 void trace_backup(Gterm *res,int *pt_backup, int *MAXPOS_tmp, POS position_tmp){	
     int i;
 
-    *pt_backup=(int) *T_addr;
+    if (T_backups_top == T_backups_size) {
+	T_backups_size = T_backups_size ? 2*T_backups_size : 16;
+	T_backups = (Gterm **) GC_realloc(T_backups, T_backups_size*sizeof(Gterm *));
+    }
+    T_backups[T_backups_top] = *T_addr;
+    *pt_backup=T_backups_top++;
     //fprintf(stderr,"Backup tmp:%d T: %d\n",*T_addr,T);
     *MAXPOS_tmp=MAXPOS;
     for(i=0;i<MAXPOS;i++){
@@ -771,7 +784,8 @@ void trace_backup(Gterm *res,int *pt_backup, int *MAXPOS_tmp, POS position_tmp){
 void trace_recover(int pt_backup, int MAXPOS_tmp,POS position_tmp){
     int i;
 
-    *T_addr=(Gterm *)pt_backup;
+    *T_addr=T_backups[pt_backup];
+    T_backups_top=pt_backup;
     //fprintf(stderr,"Recover tmp:%d T:%d\n",*T_addr,T);
     MAXPOS=MAXPOS_tmp;
     for(i=0;i<MAXPOS;i++){
