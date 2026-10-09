@@ -29,11 +29,6 @@
 #define __commondefs_h
 
 
-#ifdef HP
-#include <string.h>
-#include <iostream.h>
-#include <fstream.h>
-#endif
 
 
 #include <string.h>

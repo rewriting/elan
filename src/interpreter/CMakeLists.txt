@@ -26,7 +26,7 @@ function(elan_cxx_target target)
   target_compile_options(${target} PRIVATE ${ELAN_CXX_COMPAT_OPTIONS} -pipe -O2)
   target_compile_definitions(${target} PRIVATE ${ELAN_INTERP_DEFINITIONS})
   target_include_directories(${target} PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/compat ${CMAKE_CURRENT_SOURCE_DIR}/src)
+    ${CMAKE_CURRENT_SOURCE_DIR}/src)
 endfunction()
 
 # --- mtokdef / mabident: keyword-table generators (host tools) ------------
