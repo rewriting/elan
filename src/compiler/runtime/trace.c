@@ -805,8 +805,7 @@ void rhoproofterm_print_AC(Gterm *pi){
     Gterm *t=globalT;
     Gterm * tmp_subterm;
     Gterm * tmpt;
-    struct termac *tac;
-    struct termac * tmptac=tac;
+    struct termac * tmptac;
 
     //    fprintf(stderr,"Term:");
     //termOut(stderr,term_unflatten(t));

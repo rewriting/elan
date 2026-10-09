@@ -1078,9 +1078,9 @@ Gterm *term_metaApply(Gterm *t) {
   Gterm *strategy;
   Gterm *list;
   Gterm *mainTerm;
-  Gterm *nil;
-  Gterm *strategyNumber;
-  int index, start, end, nbSol;
+  Gterm *nil = NULL;      /* 2026: cases 129 and 130 left nil and start */
+  Gterm *strategyNumber;  /* undefined; they now return NULL */
+  int index, start = 0, end, nbSol;
   int all=0;
 
   int *counter=(int*) MALLOC(sizeof(int));
