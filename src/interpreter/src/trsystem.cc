@@ -2128,12 +2128,12 @@ void trsystem::dump()
 		   rhs,
 		   whichmatch,rlabel);
   if (//commands && 
-     (BREAKSS && tl->rule->breaked ||
-      !BREAKSS && 
+     ((BREAKSS && tl->rule->breaked) ||
+      (!BREAKSS && 
         (SPEC_I == NULL || 
-         SPEC_I != NULL && 
+         (SPEC_I != NULL && 
           (0==is_prefix_of_name(SPEC_I,rulenames->ide(i)) ||
-           0==strcmp(SPEC_I,fsymtab[l.head()].textform()->rside[0].alfsy()))))){
+           0==strcmp(SPEC_I,fsymtab[l.head()].textform()->rside[0].alfsy()))))))){
       j++; k++;
       //dumpout << "\n[" << k << "]\n";
       dumpout << "\n" 
@@ -2158,10 +2158,10 @@ void trsystem::dump()
 		   rhs,
 		   whichmatch,rlabel);
   if (//commands && 
-     (BREAKSS && tl->rule->breaked ||
-      !BREAKSS && (SPEC_I == NULL ||
-                   SPEC_I != NULL && 
-           0==strcmp(SPEC_I,fsymtab[l.head()].textform()->rside[0].alfsy())))) {
+     ((BREAKSS && tl->rule->breaked) ||
+      (!BREAKSS && (SPEC_I == NULL ||
+                   (SPEC_I != NULL && 
+           0==strcmp(SPEC_I,fsymtab[l.head()].textform()->rside[0].alfsy())))))) {
       j++; k++;
 //      dumpout << "\n[" << k << "]\n";
       if (!batch) {
@@ -2184,10 +2184,10 @@ void trsystem::dump()
     sl= strategies_defs[i];
     if (sl!=NULL) {
   if (//commands && 
-      (BREAKSS && sl->breaked ||
-       !BREAKSS && (
+      ((BREAKSS && sl->breaked) ||
+       (!BREAKSS && (
            SPEC_I == NULL ||
-	   SPEC_I != NULL && 0==is_prefix_of_name(SPEC_I,strategyname_defs(i))))) {
+	   (SPEC_I != NULL && 0==is_prefix_of_name(SPEC_I,strategyname_defs(i))))))) {
     dumpout << "\nstrategy " 
 	    << ((strategyinfos_defs[i] == RGLOP)?"global ":"local ")
 	    << strategyname_defs(i) ;
@@ -2222,12 +2222,12 @@ void trsystem::consistency()
 		   rhs,
 		   whichmatch,rlabel);
   if (//commands && 
-     (BREAKSS && tl->rule->breaked ||
-      !BREAKSS && 
+     ((BREAKSS && tl->rule->breaked) ||
+      (!BREAKSS && 
         (SPEC_I == NULL || 
-         SPEC_I != NULL && 
+         (SPEC_I != NULL && 
           (0==is_prefix_of_name(SPEC_I,rulenames->ide(i)) ||
-           0==strcmp(SPEC_I,fsymtab[l.head()].textform()->rside[0].alfsy()))))){
+           0==strcmp(SPEC_I,fsymtab[l.head()].textform()->rside[0].alfsy()))))))){
       j++; k++;
       tl->rule->consistency();
   }
@@ -2241,10 +2241,10 @@ void trsystem::consistency()
 		   rhs,
 		   whichmatch,rlabel);
   if (//commands && 
-     (BREAKSS && tl->rule->breaked ||
-      !BREAKSS && (SPEC_I == NULL ||
-                   SPEC_I != NULL && 
-           0==strcmp(SPEC_I,fsymtab[l.head()].textform()->rside[0].alfsy())))) {
+     ((BREAKSS && tl->rule->breaked) ||
+      (!BREAKSS && (SPEC_I == NULL ||
+                   (SPEC_I != NULL && 
+           0==strcmp(SPEC_I,fsymtab[l.head()].textform()->rside[0].alfsy())))))) {
       j++; k++;
       tl->rule->consistency();
   }
@@ -2274,9 +2274,9 @@ void trsystem::breakk(int breaked)
   if (commands && 
      (  
         SPEC_I == NULL ||
-        SPEC_I != NULL && 
+        (SPEC_I != NULL && 
           (0==is_prefix_of_name(SPEC_I,rulenames->ide(i))||
-           0==strcmp(SPEC_I,fsymtab[l.head()].textform()->rside[0].alfsy())))) {
+           0==strcmp(SPEC_I,fsymtab[l.head()].textform()->rside[0].alfsy()))))) {
         tl->rule->breaked = breaked;
   }
       tl=tl->next;
@@ -2291,8 +2291,8 @@ void trsystem::breakk(int breaked)
   if (commands && 
      (
       SPEC_I == NULL ||
-      SPEC_I != NULL && 
-      0==strcmp(SPEC_I,fsymtab[l.head()].textform()->rside[0].alfsy()))) {
+      (SPEC_I != NULL && 
+      0==strcmp(SPEC_I,fsymtab[l.head()].textform()->rside[0].alfsy())))) {
       tl->rule->breaked = breaked;
   }
       tl=tl->next;
@@ -2304,8 +2304,8 @@ void trsystem::breakk(int breaked)
     if (sl!=NULL) {
   if (commands && 
       (
-       SPEC_I == NULL ||SPEC_I != NULL && 
-       0==is_prefix_of_name(SPEC_I,strategyname_defs(i))))
+       SPEC_I == NULL ||(SPEC_I != NULL && 
+       0==is_prefix_of_name(SPEC_I,strategyname_defs(i)))))
       sl->breaked = breaked;
     }
   }

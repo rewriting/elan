@@ -88,7 +88,7 @@ void lstream::fulex(lexem &l)
 }
 
 char strconst[STRLEN];
-char *(stringconstants[MAXNOFSTRING]);
+char *stringconstants[MAXNOFSTRING];
 int  stringconstantsi = 0;
 
 char *lexem::stringval() 

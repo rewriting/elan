@@ -244,7 +244,7 @@ char *envirgetname(s)
 int s;
 {
   if (s<1023) return(envtypt->id[envindt[s]]);
-              return("STAND");
+  return("STAND");  /* parse kept as in 2004 */
 }
 
 void envirsetal(i,gt)

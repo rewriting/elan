@@ -1151,7 +1151,7 @@ void freeWhereBacktrack1(int varn, struct wheress * &lastws,term *substarray)
 	if (ws->trail[j]) { ws->trail[j] = 0;
 	  substarray[j].decrcount(); substarray[j].tdelete(); 
 	  substarray[j] = nullterm; }
-        CFRE(ws->trail);
+      CFRE(ws->trail);  /* parse kept as in 2004: after the loop */
     }
     else 
     if (lastws->actwh->leftvarn != IFVARN) { // ???

@@ -676,12 +676,12 @@ int acsymbol = 0;
 int ssyntactic = 0;
 int varn = 0;
 struct wherelist *wlist = NULL;
-struct wherelist *(wliststack[50]);  int wliststacki = 0;
+struct wherelist *wliststack[50];  int wliststacki = 0;
 term bcondstack[50];  int bcondstacki = 0;
-struct branch *(listbranchstack[50]); int listbranchstacki = 0; 
-struct tseq *(switchstack[50]); int switchstacki = 0;
-struct branch *(branchstack[50]); int branchstacki = 0;       
-struct WHEREbranches *(WHEREbranchesstack[50]); int WHEREbranchesstacki = 0;
+struct branch *listbranchstack[50]; int listbranchstacki = 0; 
+struct tseq *switchstack[50]; int switchstacki = 0;
+struct branch *branchstack[50]; int branchstacki = 0;       
+struct WHEREbranches *WHEREbranchesstack[50]; int WHEREbranchesstacki = 0;
 lexem whtype;
 
 

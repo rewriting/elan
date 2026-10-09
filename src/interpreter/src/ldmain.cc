@@ -679,7 +679,7 @@ int ldsemact(int n,lexem l,lstream *f)
 	      ind=i+1;
 	      for(i=0;specname[ind+i]!=0;i++)
 		specname[i]=specname[ind+i];
-		specname[i]=0;
+	      specname[i]=0;  /* parse kept as in 2004: after the loop */
 	    }
 	}
 
@@ -1283,19 +1283,19 @@ int main(int argc, char **argv)
     // enable ^C - interrupt    
     signal(SIGINT,interrupt);                       
 
-    if (!batch) 
+    if (!batch) {
 	if (commands) {
 	    stout << "\nenter command finished by ';':\n"; }
 	else {
-	    stout << "\nenter query term finished by the key word 'end':\n"; }
+	    stout << "\nenter query term finished by the key word 'end':\n"; } }
     stout.flush();
     // init input char stream from standard input
     ichstream mainin(stdin,"query source");
     // init input lexem stream from standard input   
     lstream mainstreamo(&mainin);  
     mainstream = &mainstreamo;
-   if (commands)
-    lstr[lstri++] = mainstream;
+   if (commands) {
+    lstr[lstri++] = mainstream; }  /* parse kept as in 2004 */
     do {
       // get future lexem
       mainstream->fulex(lex);                        

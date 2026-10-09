@@ -557,7 +557,7 @@ int mlstream::macroexp()
      addsimiter(tmpi,tmpb);
      return(1);
   }
-  if (fl == RWFOR && mflex == RWEACH || fl == RWIF) { 	// FOR EACH
+  if ((fl == RWFOR && mflex == RWEACH) || fl == RWIF) { 	// FOR EACH
 	int bvartabi,bvarnamesi;
 	bvarnamesi = varnamesi;            // for the case of nested FOR EACH
         bvartabi = varnamesi = vartabi;

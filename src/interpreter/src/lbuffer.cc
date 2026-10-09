@@ -82,7 +82,7 @@ void lbuffer::get(lexem &le)
     failexit();
   }
   le = firstch.l[(firstch.b)++];
-  if (firstch.b == firstch.e )
+  if (firstch.b == firstch.e ) {
    if (firstch.next ==NULL )  		// buffer is empty
      firstch.b = firstch.e = 0;
    else {	
@@ -95,6 +95,7 @@ void lbuffer::get(lexem &le)
     firstch.next = lb->next;
     if (firstch.next == NULL) lastch = &firstch;
     CFRE((lb));
+  }
   }
 }
 

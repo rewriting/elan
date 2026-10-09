@@ -203,9 +203,9 @@ void fsymtabbreakk(int breaked)
 { int i;
   for (i=FSYMCODESBEG; i<fsymtabi; i++) {
     if (commands && 
-    (SPEC_N > 0 && SPEC_N == i ||
-     SPEC_I != NULL && 
-       0==strcmp(SPEC_I,fsymtab[i].textform()->rside[0].alfsy()))) {
+    ((SPEC_N > 0 && SPEC_N == i) ||
+     (SPEC_I != NULL && 
+       0==strcmp(SPEC_I,fsymtab[i].textform()->rside[0].alfsy())))) {
 	fsymtab[i].breaked = breaked; }
   }
 }

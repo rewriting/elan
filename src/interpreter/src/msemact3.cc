@@ -308,7 +308,7 @@ int semact3(int n,lexem l,lstream *f)
        numb_selectors++; }
      sel_poss++;
      push_profistck(pos);
-     if (profi_level <= 1 /*only topmost level*/)
+     if (profi_level <= 1 /*only topmost level*/) {
        if (profi_lev == 1 /*arg type*/) {
          actprofis++;
          le.crtypelex(pos);
@@ -319,7 +319,7 @@ int semact3(int n,lexem l,lstream *f)
            sterr <<
 	   "\n[semact] arity of definition is not compatible with the profil";
            return(ERRORIM); }
-       }
+       } }
      break;
   case 321: case 323: // <__> :: (imodule1) imodule2;  -- strategy profile
 		      // <__ -> __> :: (imodule1 imodule1) imodule2;

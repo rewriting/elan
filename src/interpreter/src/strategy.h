@@ -351,7 +351,7 @@ class profitab
  {
   //private:
   public:
-    struct ilist *(tab[PROFITABSIZE]); 
+    struct ilist *tab[PROFITABSIZE]; 
     int profinum; 
   public:
     int add_profil(struct ilist **ilistptr, int *found);
