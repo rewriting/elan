@@ -55,7 +55,9 @@ compilers and 32-bit machines of 2003 and is now rejected or miscompiled.
 These are documented by the test bench rather than fixed here (fixing them is
 the job of the modern port):
 
-* builtin codes 200–215 (`builtinArray`, `builtinHashTerm`, ...) collide with
-  symbols of large programs compiled with REM (`Compiler.2.1/BenchThesis`);
+* the `Compiler.2.1/BenchThesis` programs (ELAN 2.1 syntax: they import a
+  module `rewrite`, a keyword in ELAN 3) do not parse; the 2004 `elanc`
+  ignored the failed export and compiled an incomplete `.ref`, which shows up
+  as builtin code clashes (`fun_202` ...) when the C code is compiled;
 * some reference outputs (`SAMPLES/*.out`) were produced with older libraries
   and printers; see `../tests/legacy-bench/README.md`.

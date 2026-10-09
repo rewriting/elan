@@ -14,8 +14,12 @@ sub-project (S1–S5b). Each item says where it comes from.
 - **`robot` example** (`legacy/elan3/doc/ElanExamples/robot`,
   `applications/Robot`): no result with either interpreter, although the 1997
   reference output shows paths (S4).
-- **Builtin codes 200–215 collide with symbols of large programs compiled
-  with REM** (`Compiler.2.1/BenchThesis`, 30 bench cases ERROR) (S1).
+- **`Compiler.2.1/BenchThesis` (30 J/JO cases ERROR)**: these programs (ELAN
+  2.1, 2000) do not parse in ELAN 3 (`import ... rewrite[...]`: `rewrite`
+  became a keyword). S1 attributed the failure to builtin codes 200–215
+  colliding with program symbols: that was an artefact of the 2004 `elanc`,
+  which compiled the incomplete `.ref` left by the failed export. Porting
+  them to ELAN 3 syntax would turn them into real compiler tests.
 - **The rtmisc.cc `STRSUBSTR` builtin falls through into `STRSPN`** for other
   argument sorts — kept as in 2004, probably unintended (S2).
 - **`trace_backup`/`trace_recover`** (`-coq -proofterm` compiled programs)
