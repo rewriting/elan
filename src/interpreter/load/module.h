@@ -88,4 +88,7 @@ extern void modinit();
 extern int all_modules_loaded;
 extern char *specsource,*specname,*modname;
 
+// body in msemact.cc (moved from commondefs.h)
+extern int semact(int, lexem ,lstream *);  //semaction for compiling module
+
 #endif

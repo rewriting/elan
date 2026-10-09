@@ -651,6 +651,16 @@ extern void Sundefined(int warn, char *name, char *type, char *modu);
 extern void RSundefined(int warn, char *name, char *type, char *modu);
 extern void SSambiguity(int warn, char *name, char *type, char *modu);
 
+// backtracking of where clauses and rule right-hand sides, bodies in
+// stateofexecution.cc (moved from commondefs.h)
+extern void freeWhereBacktrack(int varn,struct wheress * &lastws,term *substarray);
+extern int isWhereBacktrackNextSol(struct wherelist *wheres,term *substarray,
+                   struct wheress * &lastws, int trace, int varn);
+extern int isTseqBacktrackNextSol(term &res, struct tseq *rhs, term *substarray,
+                   struct wheress * &lastws, int notbatch, int nback,
+	           struct wherelist *&lastwheres, class term *&lastresult,
+	           int varn);
+
 #endif
 extern struct wherelist *appendwherelists(struct wherelist *a,
 				   struct wherelist *b, int *len);

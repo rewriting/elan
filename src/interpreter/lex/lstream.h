@@ -25,33 +25,78 @@
 
 */
 
+// Lexem buffers (lbuffer.cc) and streams of lexems: the lexer (lstream.cc)
+// (split from commondefs.h).
 
 #ifndef __lstream_h
 #define __lstream_h
 
-#include "commondefs.h"
+#include "constants.h"
+#include "streams.h"
+#include "lexem.h"
 
-class lstream {    // stream of lexems (input for parser)
+class lbuffer
+ {
+private:
+  struct lbufchunk {
+    lexem *l;                   // l[CHUNKSIZE];
+    int b,e;			// begin and end index of valid lexems
+    struct lbufchunk *next;
+  } firstch, *lastch;
+
+public:
+  lbuffer();
+  ~lbuffer();
+  void put(lexem);
+  void clear();
+  int isempty();
+  void put(char );
+  void get(lexem &);
+  void flush(int i,void (*f)(lexem)); // apply f on each lexem and clear buff. 
+  void applyflush(int i,void (*f)(lexem)); // just apply f on each lexem
+		// argument i in both cases is not used !!!!!!!!!!!!!!!!!!!!!!
+		// it was added, because of a bug in the gnu C++ compiler !!!!
+  void copy(lbuffer &into);
+  void append(lbuffer &appendto);
+  void dump();
+};
+
+
+#define OWNAME 00		// flags for lstream;
+#define OWSTREAM 01		// bit 0 :type of stream file/pipe
+#define OWTYPEMSK 01
+#define UNDERID 00		// bit 1 :uderscore is part of
+#define NONUNDERID 02           //        identifier yes/no
+#define IDMSK 02
+
+//#include "lstream.h"
+
+class lstream
+ {    // stream of lexems (input for parser)
  private:  
   lexem flex;
   ichstream *istr;
   int type;
   lbuffer *lastinline;
+  int block;
  public:
-  lstream(char *name);
-  lstream(char *name,int idtype);
+  lstream(const char *name);
+  lstream(const char *name,int idtype);
   lstream(ichstream *file);
   lstream(ichstream *file,char c);
-  lstream(char *command,char *name);
-  ~lstream();
+  lstream(ichstream *file,char c, int block);
+  lstream(const char *command,const char *name);
+  virtual ~lstream();
   virtual void fulex(lexem &l);
   virtual void ilex(lexem &l);
   void oerr();
-  void oerr(char *);
+  void oerr(const char *);
   void owarn();
-  void owarn(char *);
-  void oerr(char *,char * ...);
-  void owarn(char *,char * ...);
+  void owarn(const char *);
+  int isready();
+  int isblock();
+  void oerr(const char *,const char * ...);
+  void owarn(const char *,const char * ...);
   lbuffer *getlastinlineAndinit();
   virtual void beforemess(lexem s);
   void setposition(int actl,int actp);
@@ -69,5 +114,10 @@ class lstream {    // stream of lexems (input for parser)
   virtual void prepend(lbuffer &) {};
 */
 };   
+
+inline void lbuffer::put(char ch) {lexem l; l.crcharlex(ch); put(l);}
+
+inline int lstream::actline() { return istr->actline();}
+inline int lstream::actpos()  { return istr->actpos();}
 
 #endif

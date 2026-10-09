@@ -25,32 +25,23 @@
 
 */
 
-// Umbrella header (S3a): the declarations of the former god header are now
-// in module headers; files that include commondefs.h still get all of them.
-// New code includes the specific headers instead.
+// String helpers (misc.cc), string lists and bit arrays (split from
+// commondefs.h).
 
-#ifndef __commondefs_h
-#define __commondefs_h
+#ifndef __misc_h
+#define __misc_h
 
-#include <string.h>
-#include <unistd.h>
-#include <ctype.h>
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
+struct chlist{
+  char *s;
+  struct chlist*next;
+};
 
-#include "mitab.h"
-#include "stringtab.h"
-#include "mallo.h"
+extern char *mstrdup(const char *s);         // body in 'misc.c'
+extern char *addsuffix (const char *,const char *); // body in 'misc.c'
+extern char *addsuffixs (const char * ... ); // body in 'misc.c'
 
-#include "constants.h"
-#include "misc.h"
-#include "streams.h"
-#include "options.h"
-#include "alloc.h"
-#include "lexem.h"
-#include "lstream.h"
-#include "mlstream.h"
-#include "grammar.h"
+#define ISSETBIT(bitarr,s) ((bitarr[s/NBITS]>>(s%NBITS))&1)
+#define SETBIT(bitarr,s) {bitarr[s/NBITS]|= 1<<(s%NBITS);}
+#define NULLBIT(bitarr,s) {bitarr[s/NBITS]&= ~(1<<(s%NBITS));}
 
 #endif

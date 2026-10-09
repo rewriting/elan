@@ -25,32 +25,31 @@
 
 */
 
-// Umbrella header (S3a): the declarations of the former god header are now
-// in module headers; files that include commondefs.h still get all of them.
-// New code includes the specific headers instead.
+// Allocation and list macros (split from commondefs.h); allo/fre are in
+// mallo.h.
 
-#ifndef __commondefs_h
-#define __commondefs_h
+#ifndef __alloc_h
+#define __alloc_h
 
-#include <string.h>
-#include <unistd.h>
-#include <ctype.h>
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
-
-#include "mitab.h"
-#include "stringtab.h"
 #include "mallo.h"
-
-#include "constants.h"
-#include "misc.h"
 #include "streams.h"
-#include "options.h"
-#include "alloc.h"
-#include "lexem.h"
-#include "lstream.h"
-#include "mlstream.h"
-#include "grammar.h"
+
+#define PLACE(ss,sy) {while((*ss!=NULL)&&(sy>(*ss)->symbol))ss= &((*ss)->next);}
+#define FOUND(p,s) {while (p!=NULL && s>p->symbol) p= p->next;}
+#define FREELIST(p,pp) while(p!=NULL){pp= p;p= p->next;CFRE(pp);}
+#define APPEND(fst,snd,pp) {pp= &(fst);while(*pp!=NULL)pp= &((*pp)->next);*pp=snd;}
+
+#define strfree(s) { CFRE(s);}
+
+#define NNEW(p,t) {p= (new t); if(p==NULL){sterr << "\n\n[new] sorry, no memory\n"; failexit();}}
+#define DELETE1(p)  DELETE2(p)
+
+#define DELETE2(p) { delete p; }
+
+
+#define CFRE(p) { fre(p);}
+
+#define AALLOSS(p,n,t) {p= (t*) allo(n,sizeof(t)); /*allotest1(p);*/}
+#define AALLOS(p,t) AALLOSS(p,1,t)
 
 #endif

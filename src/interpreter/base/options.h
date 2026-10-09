@@ -25,32 +25,30 @@
 
 */
 
-// Umbrella header (S3a): the declarations of the former god header are now
-// in module headers; files that include commondefs.h still get all of them.
-// New code includes the specific headers instead.
+// Command-line options, library paths and trace state (mostly defined in
+// commondefs.cc) (split from commondefs.h).
 
-#ifndef __commondefs_h
-#define __commondefs_h
+#ifndef __options_h
+#define __options_h
 
-#include <string.h>
-#include <unistd.h>
-#include <ctype.h>
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
-
-#include "mitab.h"
-#include "stringtab.h"
-#include "mallo.h"
-
-#include "constants.h"
-#include "misc.h"
 #include "streams.h"
-#include "options.h"
-#include "alloc.h"
-#include "lexem.h"
-#include "lstream.h"
-#include "mlstream.h"
-#include "grammar.h"
+
+extern const char *elanlib,*perslib;   // bodies in commondefs.c
+
+extern int  quote;
+extern char elanlibqnq[];
+extern char elanlibcommon[];
+extern char elanlibstrat[];
+extern char elanlibref[];
+// ......
+extern int warnings,trace,dump,quiet,batch,statis;
+extern int in_runtime;
+extern int adump;        // export to aterm form
+extern int aimport;      // import from  aterm form
+extern int aterm_parse;
+extern int reduceimport;      // import from  reduce
+extern int traceind,tracelevel;
+
+#define indent() odsek(traceout,traceind*2)
 
 #endif
