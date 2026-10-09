@@ -58,6 +58,16 @@ class ExamplesDiscoveryTest(unittest.TestCase):
             self.assertEqual((t["kind"], t["lgi"], t["inp"], t["out"], t["dir"]),
                              ("I", "queens", "input", "expected", ex))
 
+    def test_passes_the_specification_file_if_there_is_one(self):
+        with tempfile.TemporaryDirectory(dir=rt.HERE) as d:
+            ex = Path(d) / "poly2"
+            ex.mkdir()
+            for f in ("poly2.lgi", "someVariables.spc", "input.inp", "expected.out"):
+                (ex / f).write_text("")
+            t, = rt.discover_examples(Path(d))
+            self.assertEqual(t["spc"], "someVariables")
+            self.assertEqual(t["id"], "examples/poly2::I::poly2:someVariables:input:expected")
+
     def test_ignores_directories_without_their_lgi(self):
         with tempfile.TemporaryDirectory(dir=rt.HERE) as d:
             (Path(d) / "notes").mkdir()

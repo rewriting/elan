@@ -132,13 +132,22 @@ def discover_regression(root=REGRESSION):
 
 
 def discover_examples(root=EXAMPLES):
-    """examples/<name>/{<name>.lgi,*.eln,input.inp,expected.out}: one I test each."""
+    """examples/<name>/{<name>.lgi,*.eln,[one *.spc,]input.inp,expected.out}: one I test
+    each; the specification, if any, is passed as `elan -b <name>.lgi <spec>.spc`."""
     if not root.is_dir():
         return []
-    return [dict(id=f"examples/{d.name}::I::{d.name}:no:input:expected", dir=d, kind="I",
-                 lgi=d.name, spc="no", inp="input", out="expected", flags=[], long=False)
-            for d in sorted(p for p in root.iterdir() if p.is_dir())
-            if (d / f"{d.name}.lgi").exists()]
+    tests = []
+    for d in sorted(p for p in root.iterdir() if p.is_dir()):
+        if not (d / f"{d.name}.lgi").exists():
+            continue
+        specs = sorted(p.stem for p in d.glob("*.spc"))
+        if len(specs) > 1:
+            raise SystemExit(f"{d}: more than one .spc file")
+        spc = specs[0] if specs else "no"
+        tests.append(dict(id=f"examples/{d.name}::I::{d.name}:{spc}:input:expected", dir=d,
+                          kind="I", lgi=d.name, spc=spc, inp="input", out="expected",
+                          flags=[], long=False))
+    return tests
 
 
 def load_exceptions(path=EXCEPTIONS, platform=None):
