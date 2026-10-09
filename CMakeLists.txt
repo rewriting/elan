@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.20)
 project(elan VERSION 3.6 LANGUAGES C CXX)
 
-# S1: the 1998-2004 sources are built unchanged, in pre-standard modes.
-# Removing these options is sub-project S2.
+# Strict C17/C++17, warnings are errors (S2). The *_COMPAT_OPTIONS names are
+# historical (S1 built the sources in pre-standard modes).
 # -fsigned-char: the code stores -1 in `char` (e.g. module visibilities); char
 # is unsigned on Linux/aarch64, where local rules then become visible.
 set(ELAN_C_COMPAT_OPTIONS   -std=c17 -fsigned-char -Wall -Wextra -Werror)

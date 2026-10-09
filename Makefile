@@ -31,13 +31,18 @@ toolchain:
 	@command -v $(ELAN_CXX) >/dev/null || { echo "ERROR: C++ compiler '$(ELAN_CXX)' not found (set ELAN_CXX, see README)"; exit 1; }
 	@command -v cmake >/dev/null || { echo "ERROR: cmake not found (see README)"; exit 1; }
 
-# The install prefix is compiled into elan (default library location), so the
-# build is reconfigured whenever PREFIX differs from the configured one.
+# The configuration (compilers, install prefix compiled into elan, CMake
+# options such as the sanitizers) is recorded in $(BUILD)/.elan-configure; when
+# it changes, the build directory is recreated (CMake cannot switch compilers
+# in place, and a stale sanitizer build would give misleading results).
+ELAN_CONFIG = $(ELAN_CC)|$(ELAN_CXX)|$(PREFIX)|$(CMAKE_FLAGS)
 configure: toolchain
-	@cached=$$(sed -n 's/^CMAKE_INSTALL_PREFIX:PATH=//p' $(BUILD)/CMakeCache.txt 2>/dev/null); \
-	if [ "$$cached" != "$(PREFIX)" ]; then \
+	@case "$(BUILD)" in ""|.|..|/|"$(CURDIR)") echo "ERROR: refusing BUILD='$(BUILD)'"; exit 1;; esac
+	@if [ "$$(cat $(BUILD)/.elan-configure 2>/dev/null)" != "$(ELAN_CONFIG)" ]; then \
+	  rm -rf $(BUILD); \
 	  cmake -S . -B $(BUILD) -DCMAKE_C_COMPILER=$(ELAN_CC) -DCMAKE_CXX_COMPILER=$(ELAN_CXX) \
-	        -DCMAKE_INSTALL_PREFIX=$(PREFIX) $(CMAKE_FLAGS); \
+	        -DCMAKE_INSTALL_PREFIX=$(PREFIX) $(CMAKE_FLAGS) && \
+	  echo "$(ELAN_CONFIG)" > $(BUILD)/.elan-configure; \
 	fi
 
 # The library contains files differing only by case (strategy/any.eln, Any.eln).

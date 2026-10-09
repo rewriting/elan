@@ -60,8 +60,8 @@ The modern interpreter builds with GCC and Clang (`-Wall -Wextra -Werror`);
 the default compilers are the system Clang (`cc`/`c++`) on macOS and
 `gcc`/`g++` on Linux. Override them with, e.g.,
 `make BUILD=build-gcc ELAN_CC=gcc-16 ELAN_CXX=g++-16 PREFIX=$PWD/build-gcc/install check`
-(a build directory keeps the compiler it was configured with: use another
-`BUILD`, or `make clean`, to switch). `make reference` uses Homebrew's
+(changing the compilers, `PREFIX` or the CMake options recreates the build
+directory automatically). `make reference` uses Homebrew's
 `gcc-16`/`g++-16` on macOS unless `ELAN_CC`/`ELAN_CXX` are set. Linux needs
 `build-essential clang libclang-rt-18-dev cmake bison flex libfl-dev default-jdk-headless libgc-dev automake tcsh python3`;
 `ci/Dockerfile.linux` reproduces the Linux CI job locally. See
