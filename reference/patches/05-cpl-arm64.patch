@@ -1,0 +1,46 @@
+--- a/elan3/src/cpl/src/choice.c
++++ b/elan3/src/cpl/src/choice.c
+@@ -126,8 +126,11 @@
+ #define memoround(n) if((n)%scale) (n)+=(scale-((n)%scale));
+ #define compute_size(old_size,size) ((size>=old_size)?(old_size+size+1):(2*old_size))
+ 
+-char *get_sp(long dummy) {
+-  return (char*)(&dummy);
++/* noinline + empty asm: modern GCC folds "return &local" to NULL */
++__attribute__((noinline)) char *get_sp(long dummy) {
++  char *p = (char*)(&dummy);
++  __asm__ __volatile__("" : "+r" (p));
++  return p;
+ }
+ 
+ /*
+@@ -227,7 +230,7 @@
+ 
+ /* --- Le Fail() ---------------------------------------------------- */
+ 
+-static void makeLongJump() {
++static __attribute__((noinline)) void makeLongJump() {
+   memcpy(d, s, global_size);
+   backTraili -= global_size;
+   backCTraili = tab_pile[stack_ptr].backCTraili;
+@@ -251,7 +254,9 @@
+   sp=get_sp(0);
+ #endif
+   if(sp > d) { // [pem: Oct 20 00] was: (sp >= d)
+-    alloca(sp - d);
++    /* keep the alloca alive so the stack really grows below d */
++    volatile char *pad = alloca(sp - d);
++    pad[0] = 0;
+   }
+     
+ #ifdef __sparc__
+@@ -313,6 +318,9 @@
+ }
+ 
+ inline int allocStablePointer(int size) {
++  /* keep backTraili word-aligned: the conservative GC only sees aligned
++     pointers in the stack copies stored after this block (64-bit) */
++  memoround(size);
+     //check_size_long("backCTrail",&backCTrail, backCTraili, &backCTrail_size, 2);
+   increment_backCTrail(2);
+   backCTraili += 2;

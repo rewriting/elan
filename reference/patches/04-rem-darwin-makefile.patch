@@ -1,0 +1,19 @@
+--- a/elan3/src/elan-compiler/src/rem/REM.java
++++ b/elan3/src/elan-compiler/src/rem/REM.java
+@@ -371,6 +371,16 @@
+       }
+       subMakefile.write("YLIB = -lfl\n");
+       subMakefile.write("DLLIB = -ldl\n");
++      subMakefile.write("endif\n");
++      // macOS (arm64): Homebrew GCC + Boehm GC; overridable from the environment
++      subMakefile.write("ifeq ($(ARCH),Darwin)\n");
++      subMakefile.write("ELAN_CC ?= gcc-16\n");
++      subMakefile.write("ELAN_CXX ?= g++-16\n");
++      subMakefile.write("GC_PREFIX ?= /opt/homebrew/opt/bdw-gc\n");
++      subMakefile.write("CC = $(ELAN_CC) -pipe -std=gnu89 -w -fcommon -I$(GC_PREFIX)/include\n");
++      subMakefile.write("CXX = $(ELAN_CXX) -L$(GC_PREFIX)/lib\n");
++      subMakefile.write("YLIB = -ll\n");
++      subMakefile.write("DLLIB = \n");
+       subMakefile.write("endif\n");
+ 
+       String prefix = System.getProperty("PREFIX");

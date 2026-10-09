@@ -1,0 +1,35 @@
+ cons_bool(true,cons_bool(true,cons_bool(true,cons_bool(true,nil)))) end
+
+ cons_bool(false,cons_bool(true,cons_bool(true,cons_bool(true,nil)))) end
+
+ cons_bool(true,cons_bool(false,cons_bool(true,cons_bool(true,nil)))) end
+
+ cons_bool(false,cons_bool(false,cons_bool(true,cons_bool(true,nil)))) end
+
+ cons_bool(true,cons_bool(true,cons_bool(false,cons_bool(true,nil)))) end
+
+ cons_bool(false,cons_bool(true,cons_bool(false,cons_bool(true,nil)))) end
+
+ cons_bool(true,cons_bool(false,cons_bool(false,cons_bool(true,nil)))) end
+
+ cons_bool(false,cons_bool(false,cons_bool(false,cons_bool(true,nil)))) end
+
+ cons_bool(true,cons_bool(true,cons_bool(true,cons_bool(false,nil)))) end
+
+ cons_bool(false,cons_bool(true,cons_bool(true,cons_bool(false,nil)))) end
+
+ cons_bool(true,cons_bool(false,cons_bool(true,cons_bool(false,nil)))) end
+
+ cons_bool(false,cons_bool(false,cons_bool(true,cons_bool(false,nil)))) end
+
+ cons_bool(true,cons_bool(true,cons_bool(false,cons_bool(false,nil)))) end
+
+ cons_bool(false,cons_bool(true,cons_bool(false,cons_bool(false,nil)))) end
+
+ cons_bool(true,cons_bool(false,cons_bool(false,cons_bool(false,nil)))) end
+
+ cons_bool(false,cons_bool(false,cons_bool(false,cons_bool(false,nil)))) end
+
+ end end
+end
+

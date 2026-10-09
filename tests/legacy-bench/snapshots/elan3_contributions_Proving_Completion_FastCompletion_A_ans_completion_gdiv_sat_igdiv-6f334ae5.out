@@ -1,0 +1,5 @@
+ cons_equation(div(var(0),var(0))->E,cons_equation(div(E,var(0))->var(0),cons_equation(I(I(var(0)))->var(0),cons_equation(div(I(var(0)),div(var(0),var(1)))->var(1),cons_equation(m(var(0),var(1))->div(I(var(0)),var(1)),cons_equation(div(var(0),div(I(var(0)),var(1)))->var(1),cons_equation(I(E)->E,cons_equation(div(var(0),E)->I(var(0)),cons_equation(I(div(var(0),var(1)))->div(var(1),var(0)),cons_equation(div(div(var(0),var(1)),var(2))->div(var(1),div(I(var(0)),var(2))),nil)))))))))) end
+
+ end end
+end
+

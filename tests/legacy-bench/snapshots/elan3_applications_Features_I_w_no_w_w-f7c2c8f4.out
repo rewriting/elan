@@ -1,0 +1,61 @@
+ p(b,p(b,b)) end
+
+ p(c,p(b,b)) end
+
+ p(a,p(b,b)) end
+
+ p(b,p(c,c)) end
+
+ p(c,p(c,c)) end
+
+ p(a,p(c,c)) end
+
+ p(b,p(a,a)) end
+
+ p(c,p(a,a)) end
+
+ p(a,p(a,a)) end
+
+ p(p(a,b),p(a,b)) end
+
+ p(p(a,b),p(b,a)) end
+
+ p(p(b,a),p(a,b)) end
+
+ p(p(b,a),p(b,a)) end
+
+ a end
+
+ p(a,b) end
+
+ p(b,a) end
+
+ p(b,c) end
+
+ p(c,b) end
+
+ p(a,b) end
+
+ p(b,a) end
+
+ p(p(a,b),p(a,b)) end
+
+ p(p(b,a),p(a,b)) end
+
+ p(p(a,b),p(b,a)) end
+
+ p(p(b,a),p(b,a)) end
+
+ a end
+
+ p(p(b,c),p(p(b,a),p(a,b))) end
+
+ p(p(b,c),p(p(a,b),p(b,a))) end
+
+ p(b,p(b,b)) end
+
+ doit(a) end
+
+ end end
+end
+

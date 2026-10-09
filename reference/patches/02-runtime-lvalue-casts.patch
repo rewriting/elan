@@ -1,0 +1,133 @@
+--- a/elan3/src/elan-compiler/runtime/termCommon.h
++++ b/elan3/src/elan-compiler/runtime/termCommon.h
+@@ -63,7 +63,7 @@
+ HHHHHHHHHHHHHHHHHHHHHHHHHHH DUPLICATION HHHHHHHHHHHHHHHHHHHHHH
+ HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH
+ */
+-extern struct Gfsym  fsymtab[];
++/* fsymtab is declared after struct Gfsym (termBase.h / termATerm.h) */
+ 
+ /************************************************************
+  * Symbol Definition
+@@ -147,23 +147,23 @@
+ #define getInternColor(t)   (((t) & COLORMASK) >> COLORSHIFT)
+ #define setInternColor(t,n) ((t)  = ((t) & ~COLORMASK) | ((n) << COLORSHIFT))
+ 
+-#define getMult(t,i)        getInternMult((unsigned int)((t)->subterm[(i)<<1]))
+-#define setMult(t,i,m)      setInternMult((unsigned int)((t)->subterm[(i)<<1]),(unsigned int)(m))
++#define getMult(t,i)        getInternMult((unsigned long)((t)->subterm[(i)<<1]))
++#define setMult(t,i,m)      setInternMult(*(unsigned long *)&((t)->subterm[(i)<<1]),(unsigned int)(m))
+ #define getSubterm(t,i)     (t->subterm[((i)<<1)+1])
+ #define setSubterm(t,i,st)  ((t->subterm[((i)<<1)+1]) = (st))
+ 
+-#define setColorMult(t,i,c,m) (((unsigned int)((t)->subterm[(i)<<1])) = (((c)<<16) | (m)))
++#define setColorMult(t,i,c,m) ((*(unsigned long *)&((t)->subterm[(i)<<1])) = (((c)<<16) | (m)))
+ 
+ #ifdef COLOR
+-#define getColor(t,i)       getInternColor((unsigned int)((t)->subterm[(i)<<1]))
+-#define setColor(t,i,c)     setInternColor((unsigned int)((t)->subterm[(i)<<1]),(unsigned int)(c))
++#define getColor(t,i)       getInternColor((unsigned long)((t)->subterm[(i)<<1]))
++#define setColor(t,i,c)     setInternColor(*(unsigned long *)&((t)->subterm[(i)<<1]),(unsigned int)(c))
+ #else
+ #define getColor(t,i)
+ #define setColor(t,i,c)
+ #endif
+ 
+ #define TERMAC_ALLOC(dest,size,funsym)\
+-         termac_alloc(((struct termac **)&dest),size,funsym)
++         termac_alloc(((struct termac **)&(dest)),size,funsym)
+ 
+ extern void termac_alloc(struct termac **ptr_dest,
+                          int size,
+--- a/elan3/src/elan-compiler/runtime/termATerm.h
++++ b/elan3/src/elan-compiler/runtime/termATerm.h
+@@ -57,6 +57,7 @@
+   Gterm * (*semact)(Gterm *); // for Peter
+   int prec; //[QUANG: Sep 19 01] precedence used in Gterm_cmp
+ } Gfsym;
++extern struct Gfsym  fsymtab[];
+ //#define term_arity(t)    (fsymtab[GgetSymb(t)].arity)
+ //#define code_arity(t)    (fsymtab[t].arity)
+ void intern_Gmake_const(Gterm **ptr_dest,int code);
+@@ -146,7 +147,7 @@
+ 
+ #define GgetSymb(t)                     tab_bijection[ATgetAFun(((ATermAppl)t))]
+ #define GgetSymbAC(t) GgetSymb((Gterm*)t)
+-#define GsetSymb(dest,code)             intern_GsetSymb(&((Gterm*)dest),code)
++#define GsetSymb(dest,code)             intern_GsetSymb((Gterm**)&(dest),code)
+ #define GsetSymbAC(dest,code)
+ 
+ #define MAX_CBG_SIZE  100  /* nb max de patterns dans un CBG */
+--- a/elan3/src/elan-compiler/runtime/termBase.h
++++ b/elan3/src/elan-compiler/runtime/termBase.h
+@@ -206,6 +206,7 @@
+   Gterm * (*semact)(Gterm *); // for Peter
+   int prec; //[QUANG: Sep 19 01] precedence used in Gterm_cmp
+ } Gfsym;
++extern struct Gfsym  fsymtab[];
+ 
+ /*
+  * General macro for MASK
+--- a/elan3/src/elan-compiler/runtime/ref.yacc
++++ b/elan3/src/elan-compiler/runtime/ref.yacc
+@@ -241,15 +241,15 @@
+ 
+ LIST_TERM : LIST_TERM c_dot TERM
+           {
+-            (GtermList *)$$=GaddTermListTerm((GtermList *)$1,$3);
++            *(GtermList **)&$$=GaddTermListTerm((GtermList *)$1,$3);
+           }
+           | LIST_TERM c_comma TERM
+           {
+-            (GtermList *)$$=GaddTermListTerm((GtermList *)$1,$3);
++            *(GtermList **)&$$=GaddTermListTerm((GtermList *)$1,$3);
+           }
+           | TERM
+           {
+-            (GtermList *)$$=GlistTermCreate($1);
++            *(GtermList **)&$$=GlistTermCreate($1);
+           }
+ 	  ;
+ 
+--- a/elan3/src/elan-compiler/runtime/ac_tools.c
++++ b/elan3/src/elan-compiler/runtime/ac_tools.c
+@@ -70,8 +70,8 @@
+   struct termac *list_y;
+   int i;
+   
+-  TERMAC_ALLOC(((struct termac*)*ptr_list_x),getArity(t),GgetSymb((Gterm *)t));
+-  TERMAC_ALLOC(((struct termac*)*ptr_list_y),getArity(t),GgetSymb((Gterm *)t));
++  TERMAC_ALLOC((*ptr_list_x),getArity(t),GgetSymb((Gterm *)t));
++  TERMAC_ALLOC((*ptr_list_y),getArity(t),GgetSymb((Gterm *)t));
+   list_x=(*ptr_list_x);
+   list_y=(*ptr_list_y);
+ 
+@@ -102,8 +102,8 @@
+   int found=0;
+   int i;
+   
+-  TERMAC_ALLOC(((struct termac*)*ptr_list_x),getArity(t),GgetSymb((Gterm *)t));
+-  TERMAC_ALLOC(((struct termac*)*ptr_list_y),getArity(t),GgetSymb((Gterm *)t));
++  TERMAC_ALLOC((*ptr_list_x),getArity(t),GgetSymb((Gterm *)t));
++  TERMAC_ALLOC((*ptr_list_y),getArity(t),GgetSymb((Gterm *)t));
+   list_x=(*ptr_list_x);
+   list_y=(*ptr_list_y);
+ 
+@@ -331,7 +331,7 @@
+   
+   if((*ptr_list_x) == NULL) {
+       //printf("Alloc list_x [ptr_list_x=%d]\n",ptr_list_x);
+-    TERMAC_ALLOC(((struct termac*)*ptr_list_x),getArity(t),GgetSymb((Gterm *)t));
++    TERMAC_ALLOC((*ptr_list_x),getArity(t),GgetSymb((Gterm *)t));
+   } else {
+       //printf("size_list_x=%d arity_t=%d\n",getSize(*ptr_list_x),getArity(t));
+     if(getArity(t) > getSize(*ptr_list_x)) {
+@@ -341,7 +341,7 @@
+     
+   }
+   if(*ptr_list_y == NULL) {
+-    TERMAC_ALLOC(((struct termac*)*ptr_list_y),getArity(t),GgetSymb((Gterm *)t));
++    TERMAC_ALLOC((*ptr_list_y),getArity(t),GgetSymb((Gterm *)t));
+   } else {
+       //printf("size_list_y=%d arity_t=%d\n",getSize(*ptr_list_y),getArity(t));
+     if(getArity(t) > getSize(*ptr_list_y)) {

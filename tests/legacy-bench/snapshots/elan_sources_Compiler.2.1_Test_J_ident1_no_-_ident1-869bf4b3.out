@@ -1,0 +1,4 @@
+
+result = IDENT(454)
+
+rewrite_step = 1

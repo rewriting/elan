@@ -1,0 +1,74 @@
+--- a/elan3/src/elan-interpreter/src/aterm.cc
++++ b/elan3/src/elan-interpreter/src/aterm.cc
+@@ -82,6 +82,7 @@
+     dump(); 
+     stout << "\n"; }
+   af << ".";
++  return 0;
+ }
+ 
+ void grammar::rmark(int set, int flag)
+--- a/elan3/src/elan-interpreter/src/compilemisc.cc
++++ b/elan3/src/elan-interpreter/src/compilemisc.cc
+@@ -135,6 +135,7 @@
+       // }
+   }
+   fprintf(ff,"NULL};\n\n");
++  return 0;
+ }
+ 
+ 
+--- a/elan3/src/elan-interpreter/src/matchcompile.cc
++++ b/elan3/src/elan-interpreter/src/matchcompile.cc
+@@ -798,6 +798,7 @@
+   }
+   deep--;
+   intend(ff,deep);fprintf(ff,"/*end-genreclinmatch*/\n");
++  return 0;
+ }
+ 
+ static void gencopyrsides(FILE *ff,unsigned long numr,unsigned long firrm,unsigned long maxnr)
+@@ -921,6 +922,7 @@
+ 
+   intend(ff,deep);fprintf(ff,"/*end-genlinmatch*/\n");
+ 
++  return 0;
+ }
+ 
+ 
+--- a/elan3/src/elan-interpreter/src/strategy.cc
++++ b/elan3/src/elan-interpreter/src/strategy.cc
+@@ -201,6 +201,7 @@
+   s->dump(och);
+   och << ")";
+   t->write(och);
++  return 0;
+ }
+ 
+ // import strat[intype,outtype]
+--- a/elan3/src/elan-interpreter/src/trsystem.cc
++++ b/elan3/src/elan-interpreter/src/trsystem.cc
+@@ -594,6 +594,7 @@
+     fprintf(ff,"if(!setChoicePoint()) {v1->counter++;break;}\n");
+   sub->compile(ff,deep+1,typeofstr);
+   intend(ff,deep);fprintf(ff,"}\n");
++  return 0;
+ }
+ 
+ 
+@@ -619,6 +620,7 @@
+   else
+     fprintf(ff,"  if (*wr==0) {*wr = 1;freeterm(tmp);}\n");
+   intend(ff,deep);fprintf(ff,"}}\n");
++  return 0;
+ }
+ 
+ 
+@@ -1570,6 +1572,7 @@
+ { 
+   //stout << "Remove  " << strategynames_refs->ide(n) << "\n";
+   strategynames_refs->removestr(n);
++  return 0;
+ }
+ 
+ char * trsystem::strategyname_refs(strategy **s)

@@ -1,0 +1,5 @@
+ cons_equation(imp(I,var(0))->var(0),cons_equation(m(I,var(0))->var(0),cons_equation(m(var(0),I)->var(0),cons_equation(imp(var(0),I)->I,cons_equation(imp(m(var(0),var(1)),var(2))->imp(var(0),imp(var(1),var(2))),cons_equation(m(m(var(0),var(1)),var(2))->m(var(0),m(var(1),var(2))),cons_equation(imp(var(0),m(var(1),var(2)))->m(imp(var(0),var(1)),imp(var(0),var(2))),nil))))))) end
+
+ end end
+end
+

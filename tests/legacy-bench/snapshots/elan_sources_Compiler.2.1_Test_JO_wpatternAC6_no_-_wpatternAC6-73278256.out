@@ -1,0 +1,4 @@
+
+result = h(f(a,b),f(c,d))
+
+rewrite_step = 2
