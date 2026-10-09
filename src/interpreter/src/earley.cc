@@ -67,7 +67,7 @@ static  lexem startsymbol;
     s=ps->sit;\
     while (s!=NULL) {\
       if (CONDITION) {\
-        NNEW(sls,struct sitlist);\
+        AALLOS(sls,struct sitlist);\
         sls->rule=s->rule; sls->pos=s->pos; sls->i=s->i;\
         sls->next=endsit; endsit=sls;\
       }\
@@ -123,7 +123,7 @@ void grammar::earleyreturn(struct earleystables *&table)
   actchoose = top->actchoose ;
   ambig_disabled = top->ambig_disabled ;
   startsymbol = top->startsymbol ;
-   tt = top->next; CFRE(top); 
+   tt = top->next; DELETE1(top); 
    top = tt;
 }
 
@@ -566,7 +566,7 @@ int grammar::earley(lstream &f,lexem starts,struct earleystables *&tables,int (*
     } while (! (*isendofstream)(lex));
                          // situations were created, now found a startrules
     //  stout << "$4 ";
-    NNEW(chooselist,struct actchooselist);
+    AALLOS(chooselist,struct actchooselist);
     chooselist->next=NULL;
     SEARCHENDSIT((chooselist->sits),sitseti,firsttestcond(s));
     solveconflicts(chooselist->sits);
@@ -578,7 +578,7 @@ int grammar::earley(lstream &f,lexem starts,struct earleystables *&tables,int (*
                          // add one fictive sits (will be deleted by incrchoose
   struct sitlist *sl;
   // stout << "$5 ";
-  NNEW(sl,struct sitlist);
+  AALLOS(sl,struct sitlist);
   sl->next = chooselist->sits; chooselist->sits = sl;
   earleyreturn(tables);  return(1);
 }
@@ -622,7 +622,7 @@ void grammar::earleysecprec(lstream *f,struct sitlist *si,int j)
 	solveconflict2(ss,si->rule);
 	if (ss==NULL) {sterr << "[earleysecprec] int.err\n";failexit();}
         // stout << "$6 ";
-	NNEW(*actchoose ,struct actchooselist);
+	AALLOS(*actchoose ,struct actchooselist);
 	(*actchoose)->sits = ss;
 	actchoose = &((*actchoose)->next);
 	*actchoose = NULL;
@@ -698,7 +698,7 @@ void grammar::earleyfree(struct earleystables *&table)
   // sitset = NULL;
 
   earleyreturn(table);
-  CFRE(table);
+  DELETE1(table);
   table = NULL;  
 }
 
