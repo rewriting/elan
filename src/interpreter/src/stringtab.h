@@ -89,7 +89,7 @@ class stringtab
   void Aread(void *f, int skip); // should be (lstream *f);
 };
 
-extern void failexit();          // body in specials.c and module.c
+[[noreturn]] extern void failexit(); // body in specials.c and module.c
 
 inline char *stringtab::ide(int i) {return (id[i]);}
 

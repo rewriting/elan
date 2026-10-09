@@ -664,8 +664,8 @@ extern void writegrrule(ochstream &,struct sgrammrule *,
 
 extern int esemact (lstream *f,int n,lexem l,lexem type);//semaction for building term
 
-extern void failexit();          // body in specials.c and module.c
-extern void interr();            // body in commondefs.c
+[[noreturn]] extern void failexit(); // body in specials.c and module.c
+[[noreturn]] extern void interr();   // body in commondefs.c
 extern ochstream stout,sterr,graphout,dumpout,traceout;
 extern char *elanlib,*perslib;   // bodies in commondefs.c
 

@@ -87,7 +87,7 @@ class mitab
   int foractval();
 };
 
-extern void failexit();          // body in specials.c and module.c
+[[noreturn]] extern void failexit(); // body in specials.c and module.c
 //inline char *mitab::ide(int i) {return (id[i]);}
 
 
