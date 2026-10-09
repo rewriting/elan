@@ -950,6 +950,10 @@ int impmod, in_stratmod;
      struct ilist **rr;
      struct chlist *arglist = actarglist;
      if (arglist) arglist = arglist->next; // skip the arity
+     if (symbappli >= MAXSYMBAPPL) {
+       sterr << "\n[readmodules] too many imports of Symbol modules, more than MAXSYMBAPPL="
+             << MAXSYMBAPPL << "\n\t fatal\n";
+       failexit(); }
      rr = &(symbappl[symbappli]);
      while (arglist) {
        NNEW(*rr, struct ilist);
@@ -959,6 +963,10 @@ int impmod, in_stratmod;
      *rr = NULL; symbappli++;
    }
    if ISANYMOD(actargmodname) {
+     if (anysi >= MAXANYS) {
+       sterr << "\n[readmodules] too many imports of any modules, more than MAXANYS="
+             << MAXANYS << "\n\t fatal\n";
+       failexit(); }
      anys[anysi++] = typet.addstr(actarglist->s); }
    if (ISSTRAT1MOD(actargmodname) || ISSTRAT2MOD(actargmodname)) { 
      struct chlist *p;
@@ -2042,6 +2050,9 @@ int semact1(int n,lexem l,lstream *f)
             ss->str->settypeof(sntype.typeval());
 	  strstack[strstacki-1]=strstack[strstacki]=NULL;
 //	  NNEW(actstrategy ,strategy);
+	  if (strlstacki+2 > MAXINCLSTRAT) {
+	    sterr << "\n[semact] strlstacki overflowed over MAXINCLSTRAT\n\t fatal\n";
+	    failexit(); }
 	  strlstack[strlstacki++] = ss;
 	  strlstack[strlstacki++] = ss;
 	}

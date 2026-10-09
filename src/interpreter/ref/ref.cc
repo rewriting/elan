@@ -684,6 +684,18 @@ struct branch *branchstack[50]; int branchstacki = 0;
 struct WHEREbranches *WHEREbranchesstack[50]; int WHEREbranchesstacki = 0;
 lexem whtype;
 
+// The stacks of the .ref parser have fixed sizes: a .ref file nested more
+// deeply fails with a message instead of overflowing them.
+[[noreturn]] static void ref_stack_overflow(const char *stack)
+{
+  sterr << "\n[import] " << stack << " overflowed: the .ref file is nested too deeply"
+        << "\n\t fatal\n";
+  failexit();
+}
+#define REFPUSH(stack, top, value) do { \
+    if ((top) >= (int)(sizeof(stack) / sizeof((stack)[0]))) ref_stack_overflow(#stack); \
+    (stack)[(top)++] = (value); } while (0)
+
 
 int atermsemact(int n,lexem l,lstream *f)
 {
@@ -897,17 +909,17 @@ int atermsemact(int n,lexem l,lstream *f)
 	globtermgr.addsymbol(lex);
       break;
     case 126:
-      wliststack[wliststacki++] = wlist; wlist = NULL;
+      REFPUSH(wliststack, wliststacki, wlist); wlist = NULL;
       break;
     case 127:
-      WHEREbranchesstack[WHEREbranchesstacki++] = NULL;
+      REFPUSH(WHEREbranchesstack, WHEREbranchesstacki, NULL);
       break;
     case 128:
         { struct WHEREbranches *brlist;
 	NNEW(brlist, struct WHEREbranches);
 	brlist->wherebranch = wliststack[--wliststacki];
 	brlist->next = WHEREbranchesstack[--WHEREbranchesstacki];
-	WHEREbranchesstack[WHEREbranchesstacki++] = brlist;
+	REFPUSH(WHEREbranchesstack, WHEREbranchesstacki, brlist);
 	}
       break;
     case 129:  // TRY
@@ -929,19 +941,19 @@ int atermsemact(int n,lexem l,lstream *f)
       } else {
 	tseq->u.more_branches.brlist = listbranchstack[--listbranchstacki];
       }
-      switchstack[switchstacki++] = tseq; 
+      REFPUSH(switchstack, switchstacki, tseq); 
      }
       break;
     case 134:
       bcond.popt();
-      bcondstack[bcondstacki++] = bcond; bcond.stinit();
+      REFPUSH(bcondstack, bcondstacki, bcond); bcond.stinit();
       break;
     case 135:
       { struct branch *sbranch; /*,**p;*/
         AALLOS(sbranch, struct branch);
 	sbranch->tseq = switchstack[--switchstacki];
 	sbranch->test = bcondstack[--bcondstacki];
-	branchstack[branchstacki++] = sbranch;
+	REFPUSH(branchstack, branchstacki, sbranch);
       }
      break;
     case 133:
@@ -973,10 +985,10 @@ int atermsemact(int n,lexem l,lstream *f)
 	}
       break;
     case 137 :
-      wliststack[wliststacki++] =  wlist; wlist = NULL;
+      REFPUSH(wliststack, wliststacki, wlist); wlist = NULL;
       break;
     case 138:
-      listbranchstack[listbranchstacki++] = NULL;
+      REFPUSH(listbranchstack, listbranchstacki, NULL);
       break;
    case 139: 
         { struct branch *branchlist = NULL;
@@ -987,7 +999,7 @@ int atermsemact(int n,lexem l,lstream *f)
 	br->next = branchlist;
 	branchlist = br;
 
-	listbranchstack[listbranchstacki++] = branchlist;
+	REFPUSH(listbranchstack, listbranchstacki, branchlist);
 
 	/***
 	p = &branchlist;
@@ -996,7 +1008,7 @@ int atermsemact(int n,lexem l,lstream *f)
 	}
 	*p = branchstack[--branchstacki];
 	(*p)->next = NULL;
-	listbranchstack[listbranchstacki++] = branchlist; 
+	REFPUSH(listbranchstack, listbranchstacki, branchlist); 
 	***/
 	}
       break;
@@ -1086,6 +1098,7 @@ int atermsemact(int n,lexem l,lstream *f)
       ss->str = strstack[strstacki-1];
       strstack[strstacki-1]=strstack[strstacki]=NULL;
       //	  NNEW(actstrategy ,strategy);
+      if (strlstacki+2 > MAXINCLSTRAT) ref_stack_overflow("strlstack");
       strlstack[strlstacki++] = ss;
       strlstack[strlstacki++] = ss;
       }
@@ -1156,6 +1169,7 @@ int atermsemact(int n,lexem l,lstream *f)
      rlst = nl;
      break;
    case 192:
+     if (rstacktop+1 >= 64) ref_stack_overflow("rstack");
      rstack[++rstacktop] = rlab;
      break;
    case 195:  // strategy fail

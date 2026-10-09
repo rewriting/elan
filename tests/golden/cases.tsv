@@ -61,6 +61,7 @@ run	err-symbol-table-overflow	tests/golden/programs/symbol-table-overflow	-	prog
 run	err-string-constants-overflow	tests/golden/programs/string-constants-overflow	-	prog.lgi
 run	err-deep-import	tests/golden/programs/deep-import	input	prog.lgi
 run	err-nested-strategies	tests/golden/programs/nested-strategies	input	prog.lgi
+run	err-too-many-any-imports	tests/golden/programs/too-many-any-imports	input	prog.lgi
 #
 # a term deeper than the 2004 limit MAXTERMDEEP = 20000
 run	deep-term	tests/golden/programs/deep-term	input	-b prog.lgi

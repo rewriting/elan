@@ -63,7 +63,7 @@ extern struct sgrammrule *dollar_vartab[MAXNOFVAR];
 int spairi = 0;
 struct Spair spair[MAXSPAIR];
 
-int Gtypestack[50];
+int Gtypestack[MAXGTYPESTACK];
 int Gtypestacki = 0;
 
 int    inlinecodesi = 0;
@@ -519,6 +519,10 @@ int semact3(int n,lexem l,lstream *f)
   case 361:
   {
     ACTIMP2POS;
+    if (Gtypestacki >= MAXGTYPESTACK) {
+      sterr << "\n[semact] sorts nested too deeply, more than MAXGTYPESTACK="
+            << MAXGTYPESTACK << "\n\t fatal\n";
+      failexit(); }
     Gtypestack[Gtypestacki++] = pos;
     break;
   }

@@ -158,6 +158,7 @@ extern  int MAXLENNTERMv;
 #define MAXANYS 100             // max. number of any[X] imports (load/msemact.cc)
 #define MAXSYMBAPPL 100         // max. number of Symbol[n,...] imports (load/msemact.cc)
 #define MAXNOFPATTERNS  50      // maximum of all patterns (rewrite/rtdatas.h)
+#define MAXGTYPESTACK 50        // max. nesting of sorts in a stratop profile (load/msemact3.cc)
 
 /* ------------ contract guards -----------------------------------------
    These values are part of the REF contract (docs/ref-format.md): the

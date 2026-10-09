@@ -99,6 +99,10 @@ void Patterms::add(int /*redex*/, term *t, /*int varn, */ int typ)
   /*int varn = t->varnumbers()+1;*/
 
   //stout << "patterms_add redex=" << redex << " "; t->write(stout); stout << "::" << typet.ide(typ) << "\n";
+  if (Pattermsi >= MAXNOFPATTERNS) {
+    sterr << "\n[peval] too many patterns, more than MAXNOFPATTERNS="
+          << MAXNOFPATTERNS << "\n\t fatal\n";
+    failexit(); }
   Patterm[Pattermsi].terms_to_compare.single(t,/*varn,*/typ);
   Patterm[Pattermsi].terms_compared.empty(); 
   where_to_replace[Pattermsi] = t;

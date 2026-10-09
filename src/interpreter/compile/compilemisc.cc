@@ -179,6 +179,10 @@ static int aritiesi=0;
 static void genfreelist(FILE *ff,const char *prefix,int a)
 { int i;
   for (i=0;i<aritiesi;i++) if (arities[i]==a) return;
+  if (aritiesi >= MAXNOFARITIES) {
+    sterr << "\n[compile] too many different arities, more than MAXNOFARITIES="
+          << MAXNOFARITIES << "\n\t fatal\n";
+    failexit(); }
   arities[aritiesi++] = a;
   fprintf(ff,"%s struct term *f%dlist",prefix,a);
   if (!(*prefix)) fprintf(ff," = NULL");
