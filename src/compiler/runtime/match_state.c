@@ -71,7 +71,6 @@ void MS_delete(match_state *ms) {
 
     {
     //MS_pattern_list_free(ms->pattern_list,ms->nb_rule);
-#ifdef BGSHARE
     if(ms->bg->link_tab != NULL) {
       for(i=0 ; i<ms->bg->size ; i++) {
 	if(ms->bg->link_tab[i]!=NULL)
@@ -81,9 +80,6 @@ void MS_delete(match_state *ms) {
     }
     IFREE(ms->bg->bs_tab);
     IFREE(ms->bg);
-#else
-    BG_delete(ms->bg);
-#endif
     }
   IFREE(ms->bg_solution);
   IFREE(ms->bg_multiplicity);
@@ -315,30 +311,12 @@ int MS_solve(match_state *ms, int mode) {
 				 BG_size(ms->bg)-1);
   }
   
-#ifdef AFFICHAGE    
-  //printf("BG_solve_one=%d\n",indice_solution);
-#endif
   if(indice_solution >= 0) {
-#ifdef AFFICHAGE
-      printf("\t*** Solution : ");
-      for(i=0 ; i<BG_size(ms->bg) ; i++)
-      printf("%d ",ms->bg_solution[i]);
-      printf("\n");
-#endif
   } else {
-#ifdef AFFICHAGE
-      //printf("\ton passe au pattern suivant\n");
-#endif
     next_bg:
       // On passe au prochain BG non greedy
     ms->no_rule++;
     if(ms->no_rule < ms->nb_rule) {
-#ifndef BGSHARE
-        /* destruction de l'ancien bg */
-      for(i=0 ; i<BG_size(ms->bg) ; i++) {
-        bitSet_delete( BG_get(ms->bg,i) );
-      }
-#endif
       BG_set_size(ms->bg,MS_pattern_list_size(ms,ms->no_rule));
       if(!BG_cbg2bg(MS_get_pattern_list(ms,ms->no_rule),ms->cbg,ms->bg)) {
           /* there is no solution */
@@ -352,14 +330,8 @@ int MS_solve(match_state *ms, int mode) {
       goto begin_MS_solve;
     } else {
         //indice_solution=-1;
-#ifdef AFFICHAGE
-        //printf("\tPlus de solution\n");
-#endif
     }
   }
-#ifdef AFFICHAGE
-    //printf("fin du solve : indice_solution=%d\n",indice_solution);
-#endif
   return indice_solution;
 }
 

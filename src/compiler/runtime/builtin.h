@@ -58,7 +58,6 @@ extern Gterm *con_0,*con_1;
  */
 
 
-#ifdef BASETERM
 
 #define TAG_MASK ((unsigned long)7)
 #define INTEGER_MASK ((unsigned long)1)
@@ -77,28 +76,7 @@ extern Gterm *con_0,*con_1;
 
 #define STRING_MASK 0x0000000000000004
 
-#endif
 
-#ifdef ATERM
-extern AFun AFUN_IDENTIFIER;
-extern AFun AFUN_ARRAY;
-extern AFun AFUN_STRING;
-extern AFun AFUN_EMPTY_SUBTERM;
-
-int GgetIdentifier(Gterm *);
-void Ginit_builtin();
-#define GisTagged(n)           (GisIntegerTagged(n)) || (GisIdentifierTagged(n)) || (GisStringTagged(n))
-
-#define GgetInt(n)             ATgetInt((ATermInt)n)
-#define GisIntegerTagged(n)    (AT_INT==ATgetType(n))
-#define GsetIntegerTag(n)      (Gterm*)ATmakeInt(n)
-
-#define GisIdentifierTagged(n) ((AT_APPL==ATgetType(n))&&(ATisEqualAFun(ATgetAFun(n),AFUN_IDENTIFIER)))
-#define GsetIdentifierTag(n)   (Gterm *)(ATmakeAppl1(AFUN_IDENTIFIER,(Gterm *)ATmakeInt(n)))
-
-//#define GisStringTagged(t)     ((AT_APPL==ATgetType(t))&&(ATgetAFun(t)==AFUN_STRING))
-//#define isArrayTagged(t)       ((AT_APPL==ATgetType(t))&&(ATgetAFun(t)==AFUN_ARRAY))
-#endif
 
 #define CODE_STRING 249
 #define GisStringTagged(t) (GgetSymb(t)==CODE_STRING)

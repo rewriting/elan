@@ -37,17 +37,6 @@ typedef struct LINK
   struct match_state **ms_tab;
 } LINK;
 
-#ifdef NOTMACRO
-extern LINK *LINK_create(int size);
-extern void LINK_delete(LINK *link);
-extern void LINK_set(LINK *link, int pos, struct match_state *ms);
-extern struct match_state *LINK_get(LINK *link, int pos);
-extern void LINK_clear(LINK *link, int pos);
-extern void LINK_print(LINK *link);
-extern int LINK_size(LINK *link);
-extern void LINK_set_size(LINK *link, int size);
-
-#else
 
 extern LINK *LINK_create(int size);
 
@@ -61,7 +50,6 @@ extern void LINK_print(LINK *link);
 #define LINK_size(link) ((link)->size)
 #define LINK_set_size(link,s) (link)->size=(s);
 
-#endif
 #endif
 
 

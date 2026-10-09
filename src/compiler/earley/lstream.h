@@ -30,9 +30,6 @@
 #include "commondefs.h"
 
 class lstream {    // stream of lexems (input for parser)
-#ifdef GCMEM
-: public gc
-#endif
  private:  
   lexem flex;
   ichstream *istr;
@@ -51,26 +48,6 @@ class lstream {    // stream of lexems (input for parser)
   void oerr(char *);
   void owarn();
   void owarn(char *);
-#ifndef RUNTIME // begin RUNTIME
-  void oerr(char *,char * ...);
-  void owarn(char *,char * ...);
-  lbuffer *getlastinlineAndinit();
-  virtual void beforemess(lexem s);
-  void setposition(int actl,int actp);
-  int actline();
-  int actpos();
-				// follows functions active only in macro p.
-  virtual void pilex(lexem &) {};
-  virtual void addmac(int ,lbuffer &) {};
-/*
-  virtual void addsimiter(int , lbuffer &) {};
-  virtual void addincriter(int , int , int , lbuffer &) {};
-  virtual void addforeach(lbuffer &) {};
-  virtual void addmac(int ,lbuffer &) {};
-  virtual void deletemac(int ) {};
-  virtual void prepend(lbuffer &) {};
-*/
-#endif // end RUNTIME
 };   
 
 #endif

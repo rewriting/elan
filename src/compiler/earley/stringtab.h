@@ -40,37 +40,16 @@
 #ifndef __stringtab_h
 #define __stringtab_h
 
-#ifdef SUN
-#include "stream.h"
-#endif
 
-#ifdef HP
-#include <iostream.h>
-#include <fstream.h>
-#endif
 
-#ifdef ALPHA
-#include <iostream.h>
-#include <fstream.h>
-#endif
 
-#ifdef ATERM
 //#include "lstream.h"
-#endif
 
-#ifdef GCMEM
-#include "gc_cpp.h"
-#endif
 
-#ifdef EARLEY
 class ochstream;
-#endif
 
 
 class stringtab
-#ifdef GCMEM
-: public gc
-#endif
  {
  private:
   int tsize,strin;          // size  of table, actual number of strings in it
@@ -90,9 +69,7 @@ class stringtab
 
   char *ide(int n);                   // give string of number n
   void dump(char *name); //dump of tab with name
-#ifdef EARLEY
   void earleyDump(ochstream&,char *name); //dump of tab with name
-#endif
   void write(char *,char *); //write table values
   int addstr(char *s);   // add string s into the table and return 
                                     // his number
@@ -108,10 +85,8 @@ class stringtab
   void fornext();
   int  forindex();
   char *foractval();
-#ifdef ATERM
   void Adump(ochstream &gout,char *heading);
   void Aread(void *f, int skip); // should be (lstream *f);
-#endif
 };
 
 extern void failexit();          // body in specials.c and module.c

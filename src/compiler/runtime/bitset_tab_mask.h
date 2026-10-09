@@ -45,34 +45,6 @@ typedef bitSet_type bitSet;
 #define HALFBITALL 0x0000ffff
 //#define HALFBITALL 0x00000000ffffffff
 
-#ifdef NOTMACRO
-extern bitSet *intern_bitSet_create(int size);
-extern bitSet *intern_bitSet_GC_create(int size);
-#define bitSet_create(dest,size) dest=intern_bitSet_create(size);
-#define bitSet_GC_create(dest,size) dest=intern_bitSet_GC_create(size);
-#define bitSet_stack_create(dest,size) dest=intern_bitSet_create(size);
-extern void bitSet_init_size(bitSet *b,int size);
-extern void bitSet_delete();
-extern void bitSet_GC_delete();
-#define bitSet_stack_delete(b) bitSet_delete(b)
-extern void bitSet_set();
-extern void bitSet_clear();
-
-extern bitSet *bitSet_copy(bitSet *b);
-extern void bitSet_print();
-
-extern int  bitSet_get();
-extern void bitSet_and();
-extern void bitSet_or();
-extern int  bitSet_size();
-extern int  bitSet_tab_size();
-extern int  bitSet_equals();
-extern void bitSet_init_set();
-extern void bitSet_init_clear();
-void bitSet_not(bitSet *b1);
-int bitSet_isclear(bitSet *b);
-
-#else
 
 extern bitSet *intern_bitSet_create(int size);
 extern bitSet *intern_bitSet_GC_create(int size);
@@ -113,7 +85,6 @@ extern void bitSet_and();
 extern void bitSet_or();
 extern int  bitSet_equals();
 */
-#endif
 
 extern void bitSet_or(bitSet *b1,bitSet *b2);
 extern int bitSet_nb_bit(bitSet *b);

@@ -62,33 +62,6 @@ printHelp() {
   exit(1);
 }
 
-#ifdef ATERM
-void *at_malloc_protect(int size) {
-  void *start = malloc(size);
-  ATprotectMemory(start,size);
-  return start;
-}
-
-void *at_realloc(char *old,int size) {
-  void *start = realloc(old,size);
-  if(!start) {
-    printf("at_realloc: out of memory\n");
-    exit(1);
-  }
-  return start;
-}
-
-void *at_realloc_protect(char *old,int size) {
-  void *start = realloc(old,size);
-  if(!start) {
-    printf("at_realloc_protect: out of memory\n");
-    exit(1);
-  }
-  ATunprotectMemory(old);
-  ATprotectMemory(start,size);
-  return start;
-}
-#endif
 
 /* Procedure principale */
 long *bp_main;
@@ -105,17 +78,10 @@ int main(int argc,char **argv) {
   Gterm_init(argc,argv,&bp);
   //Ginit_builtin();
 
-#ifdef ATERM
-  CPL_init_malloc_protect(at_malloc_protect);
-  CPL_init_malloc(malloc);
-  CPL_init_realloc_protect(at_realloc_protect);
-  CPL_init_realloc(at_realloc);
-#else
   CPL_init_malloc_protect(GC_malloc);
   CPL_init_malloc(GC_malloc_atomic);
   CPL_init_realloc_protect(GC_realloc);
   CPL_init_realloc(GC_realloc);
-#endif
   
   choice_init(&bp);
   bp_main=&bp;
@@ -195,9 +161,6 @@ int main(int argc,char **argv) {
 
   symbol_init();
   Ginit_builtin(); // should be done before tab_bijection_init
-#ifdef ATERM
-  tab_bijection_init();
-#endif
 
   if(queryMode==1) {
     yyparse();

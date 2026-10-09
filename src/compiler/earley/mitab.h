@@ -40,30 +40,13 @@
 #ifndef __mitab_h
 #define __mitab_h
 
-#ifdef SUN
-#include "stream.h"
-#endif
 
-#ifdef HP
-#include <iostream.h>
-#include <fstream.h>
-#endif
 
-#ifdef ALPHA
-#include <iostream.h>
-#include <fstream.h>
-#endif
 
 #define NOINT -1
 
-#ifdef GCMEM
-#include "gc_cpp.h"
-#endif
 
 class mitab
-#ifdef GCMEM
-: public gc
-#endif
   {
  private:
   int tsize,nin;          // size  of table, actual number of numbers in it

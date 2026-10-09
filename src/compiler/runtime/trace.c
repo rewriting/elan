@@ -477,12 +477,6 @@ Gterm * norm_1(Gterm *t) {
 	    }
 	}
 	//fprintf(stderr,")");
-#ifdef HCODE
-	setHcode(tac,GgetSymb(tac));
-	for(i=0 ; i<getArity(tac) ; i++) {
-	    setHcode(tac,INTERN_HFUNCTION(tac,getSubterm(tac,i)));
-	}
-#endif // HCODE
 	
 	// il faut trier les sous-termes de t
 	if(1) { //computeONF) {
@@ -549,12 +543,6 @@ Gterm * norm_3(Gterm *t) {
 	    //computeONF |= (nt!=getSubterm(tac,i));
 	    setSubterm(tac,i,nt);
 	}
-#ifdef HCODE
-	setHcode(tac,GgetSymb(tac));
-	for(i=0 ; i<getArity(tac) ; i++) {
-	    setHcode(tac,INTERN_HFUNCTION(tac,getSubterm(tac,i)));
-	}
-#endif // HCODE
 	
 	// il faut trier les sous-termes de t
 	if(1) { //computeONF) {

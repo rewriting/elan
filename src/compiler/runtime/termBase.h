@@ -27,35 +27,10 @@
 
 #include <stdarg.h>
 
-#ifdef UPDATE_HCODE
+
 #undef HASHCODE
 #define HASHCODE
-#endif
 
-#ifdef COMPUTE_HCODE
-#undef HASHCODE
-#define HASHCODE
-#endif
-
-#ifndef HASHCODE
-
-#define ACMASK     0x20000000
-#define REDUCEMASK 0x40000000
-#define SYMBMASK   0x00000fff
-
-struct term {
-  unsigned int symb;       // info | hcode | symb
-  struct term *(sub[2]);   // array of subterms 
-};
-
-#define TERMSTR(strname,arity)\
-struct strname {\
-  unsigned int symb;\
-  struct term *(sub[arity]);\
-}
-#define getHcode(t)
-#define setHcode(t,h)
-#else // HASHCODE
 
 #define ACMASK     0x2000
 #define REDUCEMASK 0x4000
@@ -76,7 +51,6 @@ struct strname {\
 }
 #define getHcode(t)            ((unsigned int)t->hcode)
 #define setHcode(t,h)          ((t)->hcode= (h&HASHMASK))
-#endif // HASHCODE
 
 TERMSTR(term1,1);
 TERMSTR(term2,2);
@@ -140,21 +114,6 @@ int Gterm_cmp(register Gterm *t1, register Gterm *t2);
 #define GgetFirst(list) (list)->term
 #define GgetNext(list) (list)->next
 
-#ifdef NOTMACRO
-#define Gmake_const(dest,code)                  intern_Gmake_const(&(dest),code)
-#define GmakeAppl0(dest,code)                   intern_GmakeAppl0(&(dest),code)
-#define GmakeAppl1(dest,code,s0)                intern_GmakeAppl1(&(dest),code,s0)
-#define GmakeAppl2(dest,code,s0,s1)             intern_GmakeAppl2(&(dest),code,s0,s1)
-#define GmakeAppl3(dest,code,s0,s1,s2)          intern_GmakeAppl3(&(dest),code,s0,s1,s2)
-#define GmakeAppl4(dest,code,s0,s1,s2,s3)       intern_GmakeAppl4(&(dest),code,s0,s1,s2,s3)
-#define GmakeAppl5(dest,code,s0,s1,s2,s3,s4)    intern_GmakeAppl5(&(dest),code,s0,s1,s2,s3,s4)
-#define GmakeAppl6(dest,code,s0,s1,s2,s3,s4,s5) intern_GmakeAppl6(&(dest),code,s0,s1,s2,s3,s4,s5)
-#define GmakeApplArity(dest,arity,code)         intern_GmakeAppl_Arity(&(dest),arity,code)
-#define GsetArgument(dest,pos,t)                intern_GsetArgument((&(dest)),pos,t)
-#define GgetArgument(term,pos)                  intern_GgetArgument(term,pos)
-#define GgetSymb(term)                          intern_GgetSymb(term)
-#define GsetSymb(term,symb)                     intern_GsetSymb((Gterm*)term,symb)
-#else
 #define GgetSymb(t)                             getSymb(t)
 #define GsetSymb(t,symb)                        setSymb(t,symb)
 #define GsetArgument(dest,pos,t)                setFreeSubterm(dest,pos,t)
@@ -192,7 +151,6 @@ int Gterm_cmp(register Gterm *t1, register Gterm *t2);
                                                   GsetArgument(dest,4,s4);\
                                                   GsetArgument(dest,5,s5);\
                                                  }
-#endif
 
 #define GsetSymbAC(dest,code) GsetSymb(dest,code)
 
@@ -218,24 +176,6 @@ extern struct Gfsym  fsymtab[];
 #define setValue(t,v,MASK,SHIFT) ((t) = ((t) & (~MASK)) | ((v)<<SHIFT))
 
 
-#ifdef UPDATE_HCODE
-
-#define setAC(t)   ((t)->symb |= ACMASK)
-#define isAC(t)    ((t)->symb &  ACMASK) 
-
-#define HNUMBER                65599
-#define INTERN_HFUNCTION(t,st) ( getHcode(t) + getHcode(st) )
-#define COMPUTE_HFUNCTION(t) 0
-#define HFUNCTION(t,st)        (isTagged(st)?getHcode(t):(INTERN_HFUNCTION(t,st)% HNUMBER))
-
-#define getSymb(t)             ((t)->symb & SYMBMASK)
-#define setSymb(t,s)           { (t)->symb = (s); setHcode(t,s); }
-
-#define getFreeSubterm(t,i)    ((t)->sub[i])
-#define setFreeSubterm(t,i,st) { ((t)->sub[i]=(st)); setHcode(t,HFUNCTION(t,st)); }
-
-#else
-#ifdef COMPUTE_HCODE
               
 #define setAC(t)   ((t)->symb |= ACMASK)
 #define isAC(t)    ((t)->symb &  ACMASK) 
@@ -249,22 +189,6 @@ extern struct Gfsym  fsymtab[];
 #define INTERN_HFUNCTION(t,st) 0
 #define COMPUTE_HFUNCTION(t) hashTerm(t)
 
-#else 
-
-#define setAC(t)   ((t)->symb |= ACMASK)
-#define isAC(t)    ((t)->symb &  ACMASK) 
-
-#define getSymb(t)             ((t)->symb & SYMBMASK)
-#define setSymb(t,s)           ((t)->symb = (s))
-
-#define getFreeSubterm(t,i)    ((t)->sub[i])
-#define setFreeSubterm(t,i,st) ((t)->sub[i]=(st))
-
-#define INTERN_HFUNCTION(t,st) 0
-#define COMPUTE_HFUNCTION(t) 0
-
-#endif // UPDATE_HCODE
-#endif // COMPUTE_HCODE
 
 #define GsetAC(t)   (setAC(t))
 

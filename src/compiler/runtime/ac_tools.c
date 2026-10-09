@@ -151,10 +151,6 @@ void substitution_build(struct termac *t, match_state *ms,
        * les elements non completement capture sont copie dans le contexte
        */
     if(nb_variable_ac >= 1 && ms->bg_multiplicity[i] != 0) {
-#ifdef AFFICHAGE
-      term_print(stdout,getSubterm(t,i));
-      printf("\t[mult=%d] --> copier dans list_x\n", ms->bg_multiplicity[i]);
-#endif
       termac_add_lastColor(list_x,getSubterm(t,i),ms->bg_multiplicity[i],getColor(t,i));
     }
   }
@@ -299,10 +295,6 @@ struct termac *rest_extract(struct termac *t, match_state *ms) {
 
   for(i=0 ; i<getArity(t) ; i++) {
     if(ms->bg_multiplicity[i] != 0) {
-#ifdef AFFICHAGE
-      term_print(stdout,getSubterm(t,i));
-      printf("\t--> copier dans list_x\n");
-#endif
       termac_add_lastColor(list_x,getSubterm(t,i),ms->bg_multiplicity[i],getColor(t,i));
     }
   }

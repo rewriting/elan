@@ -40,13 +40,8 @@
 #define term_arity(t)    (fsymtab[GgetSymb(t)].arity)
 #define code_arity(t)    (fsymtab[(t)].arity)
 
-#ifdef BASETERM
 #include "termBase.h"
-#endif
 
-#ifdef ATERM
-#include "termATerm.h"
-#endif
 
 
 #ifdef __cplusplus
@@ -112,20 +107,12 @@ extern Gterm *term_build(int nbArg, int code, ...);
 //#define MAX_TERM_SIZE 1000 /* nb max du sous-termes d'un symbole AC */
 #define MAX_CBG_SIZE  100  /* nb max de patterns dans un CBG */
 
-#ifndef HASHCODE
-struct termac {
-  unsigned int symb;     // info | hcode | symb
-  unsigned int sizeinfo; // max nb of subterms | effective nb of subterms 
-  Gterm **subterm; // array of [color|mult] subterms
-};
-#else // HCODE
 struct termac {
   unsigned short int symb;  // info | symb
   unsigned short int hcode; // hcode
   unsigned int sizeinfo; // max nb of subterms | effective nb of subterms 
   Gterm **subterm; // array of [color|mult] subterms
 };
-#endif // HCODE
 
 
 #define SIZEMASK  0xffff0000
@@ -154,13 +141,8 @@ struct termac {
 
 #define setColorMult(t,i,c,m) ((*(unsigned long *)&((t)->subterm[(i)<<1])) = (((c)<<16) | (m)))
 
-#ifdef COLOR
 #define getColor(t,i)       getInternColor((unsigned long)((t)->subterm[(i)<<1]))
 #define setColor(t,i,c)     setInternColor(*(unsigned long *)&((t)->subterm[(i)<<1]),(unsigned int)(c))
-#else
-#define getColor(t,i)
-#define setColor(t,i,c)
-#endif
 
 #define TERMAC_ALLOC(dest,size,funsym)\
          termac_alloc(((struct termac **)&(dest)),size,funsym)
@@ -169,11 +151,6 @@ extern void termac_alloc(struct termac **ptr_dest,
                          int size,
                          unsigned int funsym);
 
-#ifdef NOTMACRO
-extern int term_isAC(Gterm *t);
-extern void termac_add_lastColor(struct termac *t,Gterm *subterm,
-                                 int mult, int color);
-#else
 #define term_isAC(t) isAC(t)
 // TO BE IMPLEMENTED
 //(isAC(t))
@@ -189,7 +166,6 @@ extern void termac_add_lastColor(struct termac *t,Gterm *subterm,
 
 //  setHcode(tac,INTERN_HFUNCTION(tac,subterm));\
 
-#endif
 
 #define termac_add_last(t,st,m) termac_add_lastColor(t,st,m,0)
 
@@ -217,7 +193,6 @@ extern Gterm *term_rec_replace(Gterm *t1,Gterm *t2,Gterm *t3);
 //#define setMult(c,m)        ((c)->mult = ((c)->mult & COLORMASK) | (m))
 //#define getColor(c)         ((c)->mult >> 4)
 //#define setColor(c,color)   ((c)->mult = ( ((c)->mult & MULTMASK) | ((color)<<4) ))
-#ifdef COLOR
 //#define getColor(c)          ((int)(c)->color)
 //#define setColor(c,m)        ((c)->color=((int)m))
 extern int isMonoColor(Gterm *t);
@@ -232,18 +207,6 @@ extern struct termac *intern_term_add_onf_term(int isAC,
                                                unsigned int fsym,
 					       Gterm *subterm,
                                                int color);
-#else
-//#define getColor(c)
-//#define setColor(c,m)
-#define isMonoColor(t) 0
-#define term_add_onf_term_color(t1,fsym,t2,c) intern_term_add_onf_term(1,t1,fsym,t2)
-#define term_add_onf_term(t1,fsym,t2) intern_term_add_onf_term(1,t1,fsym,t2)
-#define term_add_list_term(t1,fsym,t2) intern_term_add_onf_term(0,t1,fsymt2)
-extern struct termac *intern_term_add_onf_term(int isAC,
-					       struct termac *tac,
-                                               unsigned int fsym,
-					       Gterm *subterm);
-#endif
 
 extern Gterm *specialApply(Gterm *res);
 extern Gterm *term_metaApply(Gterm *t);

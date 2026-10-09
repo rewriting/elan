@@ -77,10 +77,12 @@ set(RUNTIME_SOURCES
   build_free.c build_pure.c flatten.c solve_free.c build_match.c eker_tools.c
   gccmatch.c solve_pure.c termBase.c)
 list(TRANSFORM RUNTIME_SOURCES PREPEND ${RT}/ REGEX "^[^/]")
-# runtime/Makefile.am: CC_OPT, the -base rules (-DBASETERM)
-set(RUNTIME_DEFINITIONS PACKAGE="elan-compiler" VERSION="4.3f"
-    COMPUTE_HCODE CSETCHP BITSET32 HASHCODE BORO BGSHARE NONUNDERSCORED
-    BITSETMASK GCMEM COLOR BASETERM)
+# runtime/Makefile.am: CC_OPT, the -base rules (-DBASETERM). The other options
+# of the base variant (COMPUTE_HCODE BITSET32 HASHCODE BORO BGSHARE
+# NONUNDERSCORED BITSETMASK GCMEM COLOR BASETERM) were resolved in the sources
+# with unifdef (S5b). CSETCHP stays: the installed headers are also included by
+# the generated programs, which define it unless REM runs with -noC.
+set(RUNTIME_DEFINITIONS CSETCHP)
 set(RUNTIME_INCLUDES ${RT} ${RT_GEN} ${CMAKE_CURRENT_SOURCE_DIR}/cpl ${ELAN_GC_PREFIX}/include)
 
 # libruntime-base (no optimisation, as in the reference) and
@@ -102,9 +104,9 @@ add_library(earley STATIC
   earley/esemact.cc earley/ichstream.cc earley/mallo.cc earley/runtimeInit.cc)
 # earley/Makefile.am: AM_CXXFLAGS = -O2 -w $(CFLAGSPERSO), CXXFLAGS = -g -O2
 target_compile_options(earley PRIVATE ${ELAN_RT_CXX_OPTIONS} -O2 -g)
-target_compile_definitions(earley PRIVATE PACKAGE="elan-compiler" VERSION="4.3f"
-  COMMAND BINS PEM BORO ANYS SYMBS SELECT CAPAT LIN EARLEY STRINGS META SEMANTIC
-  IOS NORM EXTEND ATERM CSTRAT PARTE COMPRIM RUNTIME)
+# Its configuration (COMMAND BINS PEM BORO ANYS SYMBS SELECT CAPAT LIN EARLEY
+# STRINGS META SEMANTIC IOS NORM EXTEND ATERM CSTRAT PARTE COMPRIM RUNTIME) was
+# resolved in the sources with unifdef (S5b).
 target_include_directories(earley PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/earley
   ${CMAKE_CURRENT_SOURCE_DIR}/compat ${ELAN_GC_PREFIX}/include)
 
@@ -113,8 +115,6 @@ target_include_directories(earley PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/earley
 foreach(v choice choice-dbg)
   add_library(${v} STATIC cpl/choice.c)
   target_compile_options(${v} PRIVATE ${ELAN_RT_C_OPTIONS})
-  target_compile_definitions(${v} PRIVATE PACKAGE_NAME="" PACKAGE_TARNAME=""
-    PACKAGE_VERSION="" PACKAGE_STRING="" PACKAGE_BUGREPORT="" PACKAGE="cpl" VERSION="0.6")
 endforeach()
 target_compile_options(choice PRIVATE -Wall -O2)
 target_compile_options(choice-dbg PRIVATE -Wall -g)

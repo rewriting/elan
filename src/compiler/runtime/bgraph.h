@@ -51,18 +51,6 @@ typedef struct BG
   LINK **link_tab;
 } BG;
 
-#ifdef NOTMACRO
-extern void BG_delete(BG *bg);
-extern void BG_set(BG *bg, int no_pattern, bitSet *bs);
-extern bitSet *BG_get(BG *bg, int no_pattern);
-extern void BG_clear(BG *bg, int no_pattern);
-extern int BG_size(BG *bg);
-extern void BG_set_size(BG *bg, int size);
-extern int BG_link_size(BG *bg);
-extern void BG_link_set(BG *bg, int no_pattern, LINK *link);
-extern LINK *BG_link_get(BG *bg, int no_pattern);
-
-#else
 
 #define BG_delete(bg) {\
   int i;\
@@ -91,7 +79,6 @@ extern LINK *BG_link_get(BG *bg, int no_pattern);
 #define BG_link_get(bg,no_pattern) ((bg->link_tab==NULL)?NULL:(bg->link_tab[no_pattern]))
 //extern LINK *BG_link_get(BG *bg, int no_pattern);
 
-#endif
 
 extern BG *BG_create(int size, int necessary_link);
 extern void BG_print(BG *bg);

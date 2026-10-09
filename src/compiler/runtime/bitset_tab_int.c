@@ -33,66 +33,6 @@ bitSet *intern_bitSet_create(int size)
   return res;
 }
 
-#ifdef NOTMACRO
-extern void bitSet_init_size(bitSet *b,int size)
-{
-  Verif_void(b,"bitSet_init_size(b)");
-  b[0]=size;
-}
-
-void bitSet_delete(b)
-  bitSet *b;
-{
-  Verif_void(b,"bitSet_delete(b)");
-  IFREE(b);
-}
-
-
-void bitSet_set(b,bit)
-  bitSet *b;
-  int bit;
-{
-  Verif_void(b,"bitSet_set(b)");
-#ifdef DEBUG
-  if(bit<0 || bit>bitSet_size(b))
-    {
-      fprintf(stderr,"bitSet_set error : bit<0 || bit>size\n");
-      exit(0);
-    }
-#endif
-  b[1+bit]=1;
-}
-
-void bitSet_clear(b,bit)
-  bitSet *b;
-  int bit;
-{
-  Verif_void(b,"bitSet_clear(b)");
-#ifdef DEBUG
-  if(bit<0 || bit>bitSet_size(b))
-    {
-      fprintf(stderr,"bitSet_clear error : bit<0 || bit>size\n");
-      exit(0);
-    }
-#endif
-  b[1+bit]=0;
-}
-
-int bitSet_get(b,bit)
-  bitSet *b;
-  int bit;
-{
-  Verif_void(b,"bitSet_get(b)");
-#ifdef DEBUG
-  if(bit<0 || bit>bitSet_size(b))
-    {
-      fprintf(stderr,"bitSet_get error : bit<0 || bit>size\n");
-      exit(0);
-    }
-#endif
-  return b[1+bit];
-}
-#endif
 
 void bitSet_and(b1,b2)
   bitSet *b1,*b2;
@@ -130,14 +70,6 @@ void bitSet_or(b1,b2)
       b1[1+i] |= b2[1+i];
 }
 
-#ifdef NOTMACRO
-int bitSet_size(b)
-  bitSet *b;
-{
-  Verif_void(b,"bitSet_size(b)");
-  return b[0];
-}
-#endif
 
 int bitSet_equals(b1,b2)
   bitSet *b1,*b2;
@@ -180,25 +112,6 @@ bitSet *bitSet_copy(b)
   return res;
 }
 
-#ifdef NOTMACRO
-void bitSet_init_set(b)
-  bitSet *b;
-{
-  int i;
-  Verif_void(b,"bitSet_init_set(b)");
-  for(i=0 ; i < bitSet_size(b) ; i++)
-    b[1+i] = 1;
-}
-
-void bitSet_init_clear(b)
-  bitSet *b;
-{
-  int i;
-  Verif_void(b,"bitSet_init_clear(b)");
-  for(i=0 ; i < bitSet_size(b) ; i++)
-    b[1+i] = 0;
-}
-#endif
 
 void bitSet_not(bitSet *b1)
 {

@@ -29,63 +29,6 @@
 
 #define META
 
-#ifndef RUNTIME 
-// begin RUNTIME
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-#include <malloc.h>
-#include <sys/time.h>
-#include <sys/resource.h>
-
-#ifdef GCMEM
-#include "gc.h"
-#endif
-/*
-// suppose to use C++ only to link with SOLVER
-
-// Here you need to include All solver files
-*/
-
-#ifdef SOLVER
-#include <ilsolver/control.h>
-#include <ilsolver/ilcint.h>
-#include <ilsolver/ilcfloat.h>
-
-extern IlcFloatExpI * ElanDeriveI(IlcFloatExpI* fun, IlcFloatExpI* var);
-extern IlcFloatExpI * ElanSimplifyI(IlcFloatExpI* fun);
-
-#define ElanDerive(ftext,xtext) ElanDeriveI((ftext).getImpl(), (xtext).getImpl())
-#define ElanSimplify(ftext) ElanSimplifyI((ftext).getImpl())
-
-#endif
-
-#ifdef CSCP
-#include "choice.h"
-#include "Back.h"
-//#define allocStable(x) malloc(x)
-#else
-#include "Back.h"
-#endif
-
-#ifdef PDEBUGG
-#define DD(XX) testpointer(XX)
-#else
-#define DD(XX) XX
-#endif
-
-
-#define MEMCHUNKSIZE 100000    /* size of chunks allocated by malloc */
-#define MAXABORTED 100         /* maximal space left free in chunk */
-#define MAXARITY 500
-
-#define DOUBLECONSTLIST f2list
-#define DOUBLECONST 49
-
-#define BUILTINTERM   1
-#define EPM 32000             /* ENDFPROFILMARK */
-
-#endif 
 // end RUNTIME
 
 #define STANDARDTERM 0
@@ -105,22 +48,7 @@ struct term {
   struct term *(sub[2]);
 };
 
-#ifndef RUNTIME 
-// begin RUNTIME
 
-
-struct fsym {
-  int arity;
-};
-
-#endif // RUNTIME
-
-#ifdef GCMEM
-#define ALLOC0(dest,sname,freelist,funsym) {\
-	      dest = GC_malloc(sizeof(struct sname)); }
-#define ALLOCaS0(dest,sou,arity) {\
-      dest = GC_malloc(sizeof(struct term)+(arity-2)*sizeof(struct term*)); }
-#else
 #define ALLOC0(dest,sname,freelist,funsym) {\
   if (freelist==NULL) {\
     dest = allocator(sizeof(struct sname),&(freelist));\
@@ -142,173 +70,23 @@ struct fsym {
     dest = *(sou->myfreelist); *(sou->myfreelist) = dest->sub[0];\
   }\
 }
-#endif
 
-#ifdef GCMEM
-#define FREE0
-#else
 #define FREE0(packet) {\
   register struct term **tmp;\
   tmp = packet->myfreelist;\
   packet->sub[0] = *tmp; *tmp = packet;\
 }
-#endif
 
-#ifdef PDEBUGG
-#define ALLOC(dest,sname,freelist,funsym) {ALLOC0(dest,sname,freelist,funsym);testalloc(dest);}
-#define ALLOCaS(dest,sou,arity) {ALLOCaS0(dest,sou,arity);testalloc(dest);}
-#define FREE(packet) {testfree(packet); FREE0(packet);}
-#else
 #define ALLOC(dest,sname,freelist,funsym) ALLOC0(dest,sname,freelist,funsym)
 #define ALLOCaS(dest,sou,arity) ALLOCaS0(dest,sou,arity)
 #define FREE(packet) FREE0(packet)
-#endif
 
-#ifndef RUNTIME 
-// begin RUNTIME
-
-#define INTDIFF(a,b) (((int) a)-((int) b))
-
-#ifdef BINS
-#define getInt(n) (((int) n)/2)
-#define setTag(n) ((struct term*)((n)*2+1))
-/* REDOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOo */
-#define fun3(a,b) ((struct term*)(((((int) a)/2)+(((int) b)/2))*2+1))
-#define fun4(a,b) ((struct term*)(((((int) a)/2)-(((int) b)/2))*2+1))
-#define fun5(a,b) ((struct term*)(((((int) a)/2)*(((int) b)/2))*2+1))
-#define fun6(a,b) ((struct term*)(((((int) a)/2)/(((int) b)/2))*2+1))
-/* ......#define fun7(a,b) ((struct term*)(((int) a)+((int) b))) */
-#define fun8(a,b) ((struct term*)((((int) a) == ((int) b))*2+1))
-#define fun9(a,b) ((struct term*)((((int) a) != ((int) b))*2+1))
-
-#define fun10(a,b) ((struct term*)(((int) a) < ((int) b)))
-#define fun11(a,b) ((struct term*)(((int) a) <= ((int) b)))
-#define fun12(a,b) ((struct term*)(((int) a) >  ((int) b)))
-#define fun13(a,b) ((struct term*)(((int) a) >= ((int) b)))
-
-/*** IDENT ??? */
-#define fun15(a,b) ((struct term*)(((int) a) != ((int) b)))
-#define fun16(a,b,c) (replace(c,a,b,0))
-#define fun17(a,b) ((struct term*) (occur(b,a,0)))
-#define fun18(a,b) ((struct term*) (tcmp(a,b,0,0)==0))
-#define fun19(a,b) ((struct term*) (tcmp(a,b,0,0)!=0))
-
-#define fun20(a) ((struct term*)(((-(((int) a)/2)))*2+1))
-#define fun21(a,b) ((struct term*)((((int) a) && ((int) b))*2+1))
-#define fun22(a,b) ((struct term*)((((int) a) || ((int) b))*2+1))
-
-#define fun24(a) ((struct term*)(((!(((int) a)/2)))*2+1))
-#define fun25(a) (a)
-#define fun26(a) (a)
-
-#define fun27(a,b) ((struct term*)((((int) a) % ((int) b))*2+1))
-#define fun28(a,b) ((struct term*)((((int) a) & ((int) b))*2+1))
-#define fun29(a,b) ((struct term*)((((int) a) | ((int) b))*2+1))
-
-#define fun30(a,b) ((struct term*) (tcmp(a,b,0,0)<0))
-#define fun31(a,b) ((struct term*) (tcmp(a,b,0,0)<=0))
-#define fun32(a,b) ((struct term*) (tcmp(a,b,0,0)>0))
-#define fun33(a,b) ((struct term*) (tcmp(a,b,0,0)>=0))
-#else //---------------------------------------------------- Bins = 0
-
-#define getInt(n) ((int)(n))
-#define setTag(n) ((struct term*)(n))
-#define isTagged(n) (1)
-
-//#define getInt(n) (((int)(n))/2)
-//#define setTag(n) ((struct term*)((n)*2+1))
-//#define isTagged(n) (((int)n)&1)
-
-#define fun3(a,b) setTag(getInt(a) + getInt(b))
-#define fun4(a,b) setTag(getInt(a) - getInt(b))
-#define fun5(a,b) setTag(getInt(a) * getInt(b))
-#define fun6(a,b) setTag(getInt(a) / getInt(b))
-/* #define fun7(a,b) ... */
-#define fun8(a,b) setTag(getInt(a) == getInt(b)) 
-#define fun9(a,b) setTag(getInt(a) != getInt(b))
-#define fun10(a,b) setTag(getInt(a) <  getInt(b))
-#define fun11(a,b) setTag(getInt(a) <= getInt(b))
-#define fun12(a,b) setTag(getInt(a) >  getInt(b))
-#define fun13(a,b) setTag(getInt(a) >= getInt(b))
-
-/*** IDENT ??? */
-#define fun15(a,b) setTag(getInt(a) != getInt(b))
-#define fun16(a,b,c) (replace(c,a,b,0))
-
-#define fun17(a,b) setTag(occur(b,a,0))
-#define fun18(a,b) setTag(tcmp(a,b,0,0)==0)
-#define fun19(a,b) setTag(tcmp(a,b,0,0)!=0)
-
-#define fun20(a) setTag(-getInt(a))
-#define fun21(a,b) setTag(getInt(a) && getInt(b))
-#define fun22(a,b) setTag(getInt(a) || getInt(b))
-
-#define fun24(a) setTag(!getInt(a))
-#define fun25(a) (a)
-#define fun26(a) (a)
-
-#define fun27(a,b) setTag(getInt(a) % getInt(b))
-#define fun28(a,b) setTag(getInt(a) & getInt(b))
-#define fun29(a,b) setTag(getInt(a) | getInt(b))
-
-#define fun30(a,b) setTag(tcmp(a,b,0,0)<0)
-#define fun31(a,b) setTag(tcmp(a,b,0,0)<=0)
-#define fun32(a,b) setTag(tcmp(a,b,0,0)>0)
-#define fun33(a,b) setTag(tcmp(a,b,0,0)>=0)
- 
-/*
-#define fun3(a,b) setTag(getInt(a) + getInt(b))
-//#define fun3(a,b) ((struct term*)(((int) a)+((int) b)))
-
-#define fun4(a,b) setTag(getInt(a) - getInt(b))
-//#define fun4(a,b) ((struct term*)(((int) a)-((int) b)))
-
-#define fun5(a,b) ((struct term*)(((int) a)*((int) b)))
-#define fun6(a,b) ((struct term*)(((int) a)/((int) b)))
-// #define fun7(a,b) ((struct term*)(((int) a)+((int) b))) 
-#define fun8(a,b) ((struct term*)(((int) a) == ((int) b)))
-#define fun9(a,b) ((struct term*)(((int) a) != ((int) b)))
-#define fun10(a,b) ((struct term*)(((int) a) < ((int) b)))
-#define fun11(a,b) ((struct term*)(((int) a) <= ((int) b)))
-
-#define fun12(a,b) setTag(getInt(a) > getInt(b))
-//#define fun12(a,b) ((struct term*)(((int) a) >  ((int) b)))
-
-#define fun13(a,b) ((struct term*)(((int) a) >= ((int) b)))
-
-#define fun15(a,b) ((struct term*)(((int) a) != ((int) b)))
-#define fun16(a,b,c) (replace(c,a,b,0))
-#define fun17(a,b) ((struct term*) (occur(b,a,0)))
-#define fun18(a,b) ((struct term*) (tcmp(a,b,0,0)==0))
-#define fun19(a,b) ((struct term*) (tcmp(a,b,0,0)!=0))
-
-#define fun20(a) ((struct term*)(-((int) a)))
-#define fun21(a,b) ((struct term*)(((int) a) && ((int) b)))
-#define fun22(a,b) ((struct term*)(((int) a) || ((int) b)))
-
-#define fun24(a) ((struct term*)(! ((int) a)))
-#define fun25(a) (a)
-#define fun26(a) (a)
-#define fun27(a,b) ((struct term*)(((int) a) % ((int) b)))
-#define fun28(a,b) ((struct term*)(((int) a) & ((int) b)))
-#define fun29(a,b) ((struct term*)(((int) a) | ((int) b)))
-
-#define fun30(a,b) ((struct term*) (tcmp(a,b,0,0)<0))
-#define fun31(a,b) ((struct term*) (tcmp(a,b,0,0)<=0))
-#define fun32(a,b) ((struct term*) (tcmp(a,b,0,0)>0))
-#define fun33(a,b) ((struct term*) (tcmp(a,b,0,0)>=0))
-*/
-
-#endif //----------------------------------------------------
-
-#endif RUNTIME 
 // end RUNTIME
 #ifdef __cplusplus
 
 extern "C" struct term * crDouble(double);
 extern "C" double getDouble(struct term*vv);
 
-#ifdef EARLEY
 extern "C" struct term * earley_fun3(struct term*,struct term*);
 extern "C" struct term * earley_fun4(struct term*,struct term*);
 extern "C" struct term * earley_fun5(struct term*,struct term*);
@@ -340,7 +118,6 @@ extern "C" struct term * earley_fun30(struct term*,struct term*);
 extern "C" struct term * earley_fun31(struct term*,struct term*);
 extern "C" struct term * earley_fun32(struct term*,struct term*);
 extern "C" struct term * earley_fun33(struct term*,struct term*);
-#endif
 
 extern "C" struct term * fun38(struct term*,struct term*);
 extern "C" struct term * fun39(struct term*,struct term*);
@@ -410,10 +187,8 @@ extern "C" void timestart();
 extern "C" void timestop();
 
 extern "C" struct term *testpointer(struct term*);
-#ifdef META
 extern "C" struct term * fun129(struct term*, struct term*);   /* Meta_apply*/
 extern "C" struct term * fun130(struct term*, struct term*, int);  /* Meta_a*/
-#endif
 
 extern "C"  struct term *fun180(int code, struct term *s, struct term *t);
 extern "C"  struct term *fun181(int code, struct term *s);
@@ -431,7 +206,6 @@ extern "C"  struct term *fun188(int code, struct term *s, struct term *t);
 extern struct term * crDouble();
 extern double getDouble();
 
-#ifdef EARLEY
 extern  struct term * earley_fun3();
 extern  struct term * earley_fun4();
 extern  struct term * earley_fun5();
@@ -463,7 +237,6 @@ extern  struct term * earley_fun30();
 extern  struct term * earley_fun31();
 extern  struct term * earley_fun32();
 extern  struct term * earley_fun33();
-#endif
 
 
 extern struct term * fun38();
@@ -535,10 +308,8 @@ extern struct term *testpointer();
 extern statistics();
 extern void timestart();
 extern void timestop();
-#ifdef META
 extern struct term * fun129();
 extern struct term * fun130();
-#endif
 
 extern struct term *fun180();
 extern struct term *fun181();
@@ -551,29 +322,6 @@ extern struct term *fun187();
 extern struct term *fun188();
 
 #endif
-#ifndef RUNTIME 
-// begin RUNTIME
-/* statistics */
-extern int  anofreduction[];
-extern int  anofsreduction[];
-extern int  anofrt[];
-extern int  anofr2[];
-extern int  anofsrt[];
-extern void rulestatistics();/* int level */
-extern char *RNAMES[];
-extern int FSYMTABSIZE;
-extern int RTABSIZE;
-
-extern void timestart();
-extern void timestop();
-extern struct rusage before;
-extern struct rusage after;
-/* statistics */
-
-/* table des arites */
-extern struct fsym fsymtab[];
-
-#endif 
 // end RUNTIME
 
 /* pour chaque fsym,
@@ -582,25 +330,6 @@ extern struct fsym fsymtab[];
 extern unsigned *sprofil[];
 extern unsigned *real_sprofil[];
 
-#ifndef RUNTIME 
-// begin RUNTIME
-
-extern struct term * DOUBLECONSTLIST;
-extern int Bins;
-
- /* for Meta_applies */
-#ifdef META
-#define META0LIST f1list
-#define META1LIST f1list
-#define META2LIST f2list
-#define META3LIST f3list
-extern struct term *META0LIST;
-extern struct term *META1LIST;
-extern struct term *META2LIST;
-extern struct term *META3LIST;
-#endif
-
-#endif 
 // end RUNTIME
 
 #endif

@@ -129,10 +129,6 @@ Gterm *computeTerm(int *ppos) {
           }
         } else {
           if(symb_isAC(code)) {
-#ifdef ATERM
-            printf("AC not supported by ATerms\n");
-            exit(1);
-#endif
             TERMAC_ALLOC(t,arity[code],code);
           } else {
             GmakeApplArity(t,arity[code],code);

@@ -32,13 +32,8 @@
 #include "gc.h"
 
 // [pem: Sep  6 00]: 2*x pour corriger un bug du GC
-#ifdef ATERM
-//#define allocStable(x) AT_allocate(2*x)
-#define allocStable(x) allocStablePointer(x)
-#else
 //#define allocStable(x) MALLOC(2*x)
 #define allocStable(x) allocStablePointer(x)
-#endif
 
 #define GnotYetImplemented(s) {\
     fprintf(stderr,"%s: not yet implemented\n",s); exit(1); }
@@ -64,13 +59,7 @@ if(nom) printf("\t " #nom " : %s",msg)
  */
 
 extern int allocatedBug;
-#ifdef DEBUG_STRANGE
-extern int *STRANGE_ADDRESS;
-
-#define VERIF_STRANGE_ADDRESS(x) if(allocatedBug==1) if((*(int*)STRANGE_ADDRESS)==(x)) { printf("STRANGE\n"); assert(0); } 
-#else
 #define VERIF_STRANGE_ADDRESS(x)
-#endif
 
 #ifdef DEBUG
 #define Verif_void(objet,chaine) {\
@@ -97,10 +86,6 @@ extern int *STRANGE_ADDRESS;
 
 #define IMALLOC(n) MALLOC(n)
 
-#ifdef NOTMACRO
-extern char* MALLOC(int n);
-extern char* AMALLOC(int n);
-#else
 #ifdef DEBUG
 #define MALLOC(n)  GC_malloc(n)
 #define AMALLOC(n) GC_malloc(n)
@@ -108,13 +93,8 @@ extern char* AMALLOC(int n);
 #define MALLOC(n)  GC_malloc(n)
 #define AMALLOC(n) GC_malloc_atomic(n)
 #endif
-#endif
 
-#ifdef NOTMACRO
-extern void FREE(char *t);
-#else
 #define FREE(p) /* do nothing */
-#endif
 
 #define IFREE(p) FREE((char*)p)
 #define AFREE(p) FREE((char*)p)
@@ -138,11 +118,6 @@ extern unsigned long cptCmpEqual;
 extern unsigned long cptCmpTotal;
 extern void globalStatistics();
 
-#ifdef MEMORY_VERIFY
-extern int alloc_member(long *t);
-extern void testalloc(long *t);
-extern void testfree(long *t);
-#endif
 
 extern char *intern_alloc2(int size, int mode);
 

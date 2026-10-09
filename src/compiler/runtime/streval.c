@@ -27,9 +27,7 @@
 #include "tools.h"
 #include "streval.h"
 //#include "Back.h"
-#ifdef CSETCHP
 #include "choice.h"
-#endif
 
 //TERMSTR(term0,1);
 //TERMSTR(term3,3);
@@ -119,19 +117,11 @@ int ts;
     if (IS_LAB_FLAG(ts)) {
       int apply_code = LAB_F(ts);   
       int dstr_code = LAB_LAB(ts);
-#ifdef DBG
-      printf("apply_symbol=%d, rule=%d\n", apply_code, dstr_code);
-      term_printnl(stdout, T);
-#endif
       semact = term_semact(s);
       return (*semact)(T);} 
     else if (IS_DSTR_FLAG(ts)) {
       int apply_code = DSTR_F(ts);
       int dstr_code = DSTR_LAB(ts);
-#ifdef DBG
-      printf("apply_symbol=%d, rule=%d\n", apply_code, dstr_code);
-      term_printnl(stdout, T);
-#endif
       semact = term_semact(s);
       return (*semact)(T); }
     else
@@ -145,23 +135,7 @@ Gterm *str_eval2(Gterm *s, Gterm *t)
 {
 int defstrat = term_defstrat(s);
 int is_one = 0;
-#ifdef DBG
-printf("str_eval2 entry, fymb = %d, sem=%d, defstr=%d,(%d,%d,%d)\n",
-                    GgetSymb(s),
-                    -term_semantic(s),defstrat,
-                    IS_FSYM_FLAG(defstrat),
-                    IS_LAB_FLAG(defstrat),
-                    IS_DSTR_FLAG(defstrat));
-		   
-//if (IS_FSYM_FLAG(defstrat) + IS_LAB_FLAG(defstrat) + IS_DSTR_FLAG(defstrat) == 0) 
-#endif
 {
-#ifdef DBG
-printf("strategy =");
-  term_printnl(stdout,s);
-printf("term =");
-  term_printnl(stdout,t);
-#endif
 }
 
     switch (-term_semantic(s)) {
@@ -269,10 +243,6 @@ printf("term =");
 	  Gterm *sv;
 	  Gterm* (*semact)(Gterm *);
  	  GmakeAppl2(sv,apply_code,s,t);
-#ifdef DBG
-	  printf("apply_symbol=%d, rule=%d\n", apply_code, dstr_code);
-	  term_printnl(stdout, sv);
-#endif
 	  semact = term_semact(s);
 	  return (*semact)(sv);} 
 	else if (IS_FSYM_FLAG(defstrat)) {
@@ -280,9 +250,6 @@ printf("term =");
 	  int f1 = FSYM_F1(defstrat);
 	  int f2 = FSYM_F2(defstrat);
 	  Gterm *res;
-#ifdef DBG
-	  printf("DEFSTRAT %d = %d,%d\n", defstrat, FSYM_F1(defstrat), FSYM_F2(defstrat));
-#endif
 	  if (GgetSymb(t) == f1) {
 	    int i;
 	    if (arity == 0 && f1 == f2) return t;
@@ -301,10 +268,6 @@ printf("term =");
 	  Gterm *sv;
 	  Gterm* (*semact)(Gterm *);
 	  GmakeAppl2(sv,apply_code,s,t);
-#ifdef DBG
-	  printf("apply_symbol=%d, rule=%d\n", apply_code, dstr_code);
-	  term_printnl(stdout, sv);
-#endif
 	  semact = term_semact(s);
 	  return (*semact)(sv); 
 	} else {

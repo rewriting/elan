@@ -116,9 +116,7 @@ static void print_f_prefix(FILE *fich,Gterm *t) {
 	} else {
 	  term_print(fich,(Gterm *) getSubterm(tac,i));
 	}
-#ifdef COLOR
 //        fprintf(fich,"{%d}",getColor(tac,i));
-#endif
 	if(i<getArity(tac)-1) {
 	  fprintf(fich,",");
 	}
@@ -223,23 +221,6 @@ static struct termac *termac_insert_bubble(struct termac *tac, int pos);
 static int termac_lookup(Gterm *subterm,
                          struct termac *tac,
                          int low, int high, int *indice);
-#ifdef CC_GC
-// ehm modification
-void finalize(Gterm *obj,int cd) {
-  struct termac *tac=(struct termac*)obj;
-    /*
-      if(obj != (Gterm*)CC_GC_decode((struct termac*)tac->subterm[2*getSize(tac)])) {
-      printf("***** WARNING *****\n");
-      printf("finalization\n");
-      printf("obj [%u] = ",obj); term_println(stdout,obj);
-      printf("cd  = %d\n",cd);
-      printf("backRef = [%u]\n",CC_GC_decode((struct termac*)tac->subterm[2*getSize(tac)]));
-      }
-    */
-    /* mise a NULL du backRef */
-//  tac->subterm[2*getSize(tac)]=NULL;
-}
-#endif
 #define GinitMinimalSize(s) ((1+((s)>>2))<<2)
 void termac_alloc(struct termac **ptr_dest, int size, unsigned int funsym) {
   struct termac *dest;
@@ -258,93 +239,28 @@ void termac_alloc(struct termac **ptr_dest, int size, unsigned int funsym) {
     // si l'allocation est faite au moment de l'insertion du premier element
     // c'est localise dans term.c et ac_tool.c
     //
-#ifdef CC_GC
-  (dest->subterm)=(Gterm**)MALLOC(((1+size)*sizeof(Gterm*))<<1);
-  dest->subterm[2*getSize(dest)]=(Gterm*)CC_GC_encode(dest);
-  GC_register_finalizer(dest,finalize,1,0,0);
-#else
   (dest->subterm)=(Gterm**) MALLOC(((size*sizeof(Gterm*))<<1));
-#endif
 
 #ifdef DEBUG
   cptTermacAlloc++;
 #endif
 }
   // ehm modification a fiare
-#ifdef NOTMACRO
-
-void termac_add_lastColor(struct termac *tac, Gterm *subterm, int mult,int color) {
-    /*
-      if(getArity(tac) == 0) {
-      int size = initMinimalSize(getSize(tac));
-      (tac->subterm)=(Gterm**) MALLOC(2*size*sizeof(Gterm*));
-        // printf("termac_add_last: init size = %d\n",size);
-        } else
-    */
-  int arity = getArity(tac);
-  if(arity == getSize(tac)) {
-    //printf("\n I'm in termCommon.c line 251\n");
-    termac_resize(tac,2*arity);
-  }
-  //printf("\n I'm in termCommon.c line 254\n");
-  setColorMult(tac,arity,color,mult);
-  setSubterm(tac,arity,subterm);
-  //printf("\n in termac_add_lastColor tac ="); term_print(stdout,tac);printf("\n");
-  setArity(tac,arity+1);
-
-#ifdef UPDATE_HCODE
-  //printf("\n I'm in termCommon.c line 260\n");
-  setHcode(tac,INTERN_HFUNCTION(tac,subterm));
-/*
-    // calcul du hcode : a enlever par la suite
-  {
-    int i;
-    setHcode(tac,GgetSymb(tac));
-    for(i=0 ; i<getArity(tac) ; i++) {
-      setHcode(tac,HFUNCTION(tac,(Gterm *) getSubterm(tac,i)));
-    }
-      //printf("add_last tac[hcode = %d] = ",getHcode(tac));
-      //term_println(stdout,((Gterm*)tac));
-  }
-*/
-#endif
-
-}
-#endif
 
    // ehm modification
 void termac_resize(struct termac *tac, int size) {
   if(size > getSize(tac)) {
-#ifdef CC_GC
-    Gterm **newSubterm = (Gterm**) MALLOC(((1+size)*sizeof(Gterm*))<<1);
-#else
     Gterm **newSubterm = (Gterm**) MALLOC((size*sizeof(Gterm*))<<1);
-#endif
     int i;
-#ifdef AFFICHAGE
-    printf("termac_resize from %d to %d (%d)\n",getSize(tac),size,getArity(tac));
-#endif
 
     for(i=0 ; i<2*getArity(tac) ; i++) {
       newSubterm[i]=tac->subterm[i];
     }
     setSize(tac,size);
     tac->subterm = newSubterm;
-#ifdef CC_GC
-    tac->subterm[2*size]=(Gterm*)CC_GC_encode(tac);
-#endif
   }
 }
 
-#ifdef NOTMACRO
-int term_isAC(Gterm *t) {
-  Verif_void(t,"term_isAC(t)");
-
-  //return 0;
-    // TO BE IMPLEMENTED
-    return isAC(t);
-}
-#endif
 
 static Gterm *subterm_unflatten(unsigned int funsym,
                                       struct termac *tac,
@@ -450,31 +366,17 @@ Gterm *term_unflatten(Gterm *t) {
 
 //#define AFFICHAGE
 
-#ifdef COLOR
 struct termac *intern_term_add_onf_term(int isAC,
                                         struct termac *tac,
                                         unsigned int fsym,
                                         Gterm *subterm,
                                         int color)
-#else
-struct termac *intern_term_add_onf_term(int isAC,
-                                        struct termac *tac,
-                                        unsigned int fsym,
-                                        Gterm *subterm)
-#endif
 {
   struct termac *res;
   int i;
   int found;
   int isNullTac =(tac==NULL);
   struct termac *subtermac=(struct termac*)subterm; 
-#ifdef AFFICHAGE
-  printf("term_add_onf_term(");
-  if(tac!=NULL) term_print(stdout,(Gterm*)tac);
-  printf(",");
-  term_print(stdout,subterm);
-  printf(")\n");
-#endif
 
   // Ajout d un sous-terme vide
   if(term_isAC(subterm) && getArity(((struct termac *)subterm))==0) {
@@ -508,29 +410,17 @@ struct termac *intern_term_add_onf_term(int isAC,
 
     if(isAC) {
     //printf("\nin intern_term_add_onf_term I'm line 455 \n");
-#ifdef COLOR
         // il faut colorier les sous-termes
       for(i=0 ; i<getArity(subtermac) ; i++) {
         setColor(subtermac,i,color);
       }
-#endif
       res=merge_sorted_term(tac,subtermac);
         // pour ne pas changer le pointer retourne
       tac->subterm=res->subterm;
       tac->sizeinfo = res->sizeinfo;
         // setArity(tac,getArity(res));
         // setSize(tac,getSize(res));
-#ifdef UPDATE_HCODE
-        // il faut calculer le hcode
-      setHcode(tac,GgetSymb(tac));
-      for(i=0 ; i<getArity(tac) ; i++) {
-        setHcode(tac,INTERN_HFUNCTION(tac,getSubterm(tac,i)));
-      }
-#endif
 
-#ifdef CC_GC
-      tac->subterm[2*getSize(tac)]=(Gterm*)CC_GC_encode(tac);
-#endif
       res=tac;
     } else {
       //printf("\nin intern_term_add_onf_term I'm line 481 \n");
@@ -587,9 +477,6 @@ struct termac *intern_term_add_onf_term(int isAC,
       setSubterm(tac,i,subterm);
       setColorMult(tac,i,color,1);
 
-#ifdef UPDATE_HCODE
-      setHcode(tac,INTERN_HFUNCTION(tac,subterm));
-#endif //UPDATE_HCODE
 
       res=tac;
       goto fin;
@@ -610,11 +497,6 @@ struct termac *intern_term_add_onf_term(int isAC,
   }
 #endif
     */
-#ifdef AFFICHAGE
-  printf("result add_onf_term = ");
-  term_printnl(stdout,(Gterm*)res);
-  printf("\n");
-#endif
   assert(res!=subtermac);
   //printf("\n res = ");term_print(stdout,res);
   return res;
@@ -702,13 +584,6 @@ static struct termac *merge_sorted_term(struct termac *tac1,
   int indice;
   int comp;
 
-#ifdef AFFICHAGE
-  printf("merge_sorted_term(");
-  term_print(stdout,(Gterm*)tac1);
-  printf(",");
-  term_print(stdout,(Gterm*)tac2);
-  printf(")\n");
-#endif
 
   
   TERMAC_ALLOC(res,getArity(tac1)+getArity(tac2),GgetSymbAC(tac1));
@@ -758,11 +633,6 @@ static struct termac *merge_sorted_term(struct termac *tac1,
     setColorMult(res,indice,getColor(tac2,i2),getMult(tac2,i2));
   }
   setArity(res,indice);
-#ifdef AFFICHAGE
-  printf("result merge_sorted_term = ");
-  term_printnl(stdout,(Gterm*)res);
-  printf("\n");
-#endif
   return res;
 }
 
@@ -857,12 +727,6 @@ Gterm* normalise(Gterm *t) {
       setSubterm(tac,i,normalise(getSubterm(tac,i)));
     }
 
-#ifdef UPDATE_HCODE
-    setHcode(tac,GgetSymb(tac));
-    for(i=0 ; i<getArity(tac) ; i++) {
-      setHcode(tac,INTERN_HFUNCTION(tac,getSubterm(tac,i)));
-    }
-#endif // UPDATE_HCODE
 
       // [pem: May 31 00]
       // il faut trier les sous-termes de t
@@ -1065,9 +929,6 @@ void termac_copyTopSymbol(struct termac *tac, struct termac *subterm) {
 //  exit(1);
   termac_resize(tac,getArity(subterm));
   setArity(tac,getArity(subterm));
-#ifdef UPDATE_HCODE
-  setHcode(tac,getHcode(subterm));
-#endif
   for(i=0 ; i<getArity(subterm) ; i++) {
 
     setSubterm(tac,i,(Gterm *) getSubterm(subterm,i));
@@ -1082,9 +943,6 @@ void termac_copyTopSymbolExcept(struct termac *dest,
   int idest,isource;
   termac_resize(dest,getArity(source));
   setArity(dest,getArity(source));
-#ifdef UPDATE_HCODE
-  setHcode(dest,getHcode(source));
-#endif
   for(idest=0,isource=0 ; isource<getArity(source) ; isource++) {
     if(isource==pos) {
       if(getMult(source,isource) > 1) {
@@ -1139,7 +997,6 @@ Gterm *term_removeTopSymbol(Gterm *t) {
     }
   }
 }
-#ifdef COLOR
 int isMonoColor(Gterm *t) {
   int i,res;
   int color;
@@ -1186,7 +1043,6 @@ void setMonoColor(Gterm *t) {
     setColor(tac,i,color);
   }
 }
-#endif
 
 
 extern char *tabStrategyStr[];

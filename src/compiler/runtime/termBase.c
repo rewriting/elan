@@ -220,21 +220,13 @@ long term_notDestructEqual(register Gterm *t1,register Gterm *t2) {
     return (0);
   }
 
-#ifdef UPDATE_HCODE
-  if(getHcode(t1) != getHcode(t2)) {
-      //printf("equal: hcode %d != %d\n",getHcode(t1),getHcode(t2));
-    return (0);
-  }
-#endif
 
-#ifdef COMPUTE_HCODE
   if(hashTerm(t1) != hashTerm(t2)) {
       //printf("equal: hcode %d != %d\n",hashTerm(t1),hashTerm(t2));
       //printf("\tt1 = "); term_println(stdout,t1);
       //printf("\tt2 = "); term_println(stdout,t2);
     return (0);
   }
-#endif
 
   if((arity=term_arity(t1))==0) {
     return(1);
@@ -312,12 +304,6 @@ int Gterm_cmp(register Gterm *t1, register Gterm *t2) {
     return(0);
   }
 
-#ifdef UPDATE_HCODE
-  if(getHcode(t1) != getHcode(t2)) {
-      //printf("cmp: hcode %d != %d\n",getHcode(t1),getHcode(t2));
-    return getHcode(t1) - getHcode(t2);
-  }
-#endif
 
   if(!term_isAC(t1)) {
       /* lexicographic ordering on subterms */
@@ -508,12 +494,6 @@ char *term_getString(Gterm *t) {
   c -= a; c -= b; c ^= (b>>15); \
 }
 
-#ifdef UPDATE_HCODE
-int hashTerm(Gterm *t) { 
-  return getHcode(t);
-} 
-#else
-#ifdef COMPUTE_HCODE
 int hashTerm(Gterm *t) {
   int hash;
 
@@ -534,13 +514,6 @@ int hashTerm(Gterm *t) {
     return hash;
   }
 } 
-#else
-int hashTerm(Gterm *t) { 
-  printf("flag COMPUTE_HCODE not set\n"); 
-  exit(1); 
-} 
-#endif 
-#endif 
 
 int doobs_hfunction(Gterm *t) {
 

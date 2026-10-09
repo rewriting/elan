@@ -40,95 +40,16 @@
 #ifndef __commondefs_h
 #define __commondefs_h
 
-#ifndef RUNTIME // begin RUNTIME
-#ifdef SUN
-#include <builtin.h>
-#include <stream.h>
-#endif
-
-#ifdef HP
-#include <string.h>
-#include <iostream.h>
-#include <fstream.h>
-#endif
-
-#ifdef __DECCXX
-#define true 1
-#define false 0
-#endif
-
-//#include <String.h>
-#include <unistd.h>
-#include <ctype.h>
-#include <stdarg.h>
-
-#include "mitab.h"
-//#include "listmacr.h"
-#endif // end RUNTIME
 
 #include "stringtab.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include "mallo.h"
 
-#ifdef GCMEM
-#include "gc_cpp.h"
-#endif
 // FIN DES INCLUDES
 
 // DEFINITION DES CONSTANTES POUR ELAN
 
-#ifndef RUNTIME // begin RUNTIME
-#define NBITS 32	// number of bits in word in current arch.
-
-                 // values of info record in term grammar
-#define RNOINFO 0       
-#define RGLOP 01	// global rule
-#define RLOCOOP 02	// local rule
-
-
-#define RIMPORTBIT 04  // was it imported 
-
-//#define RSTANDOP 010   // built in rule
-#define RVAR 020       // variable
-#define RSTATMSK 07
-
-//#define NRESW 50        // size of table of res. words in ecolog
-#define DEFAULTSYM -32000 // symbol for default action if parser's tables
-
-/* ------------ some implementation constants -------------------*/
-#define OUTS stderr       // 
-#define OUTPUTS "stderr"  // outputs of executable
-#define MAXNOFIMPORTS 200 // max. number of imported modules
-#define MRWTSIZE 300      // number of res.word of ELAN (to accurate when def.)
-#define MAXINCLDEEP 30    // max. deep of import graph
-#define MAXNOFMAC 50	  // max. number of macro vars.
-#define MAXNESTMAC 10	  // max. nested macro
-#define MAXUNIFFSYM MAXNFSYM  // max. number of symbols in comm. with UNIF
-#define MAXDEEPCONSTEXP 10 // max. deep of constant expression in prepro.
-#define MAXNOFTRN 2000	  // max. number of trans. rule names
-#define MAXNOFAXIOMS 10	  // max. number of parts in specification
-#define MAXNOFSTRAT 500	  // max. number of strategies
-#define MAXINCLSTRAT 30	  // max. number of rep./iterate nesting
-#define MAXNOFSUBPROCESS 30 // max. number of subprocessus
-#define MAXNNONT 500    // maximal number of nonterminals
-//#define MAXTERMDEEP 10000     // max deep  of terms
-#define MAXTERMDEEP 20000     // max deep  of terms
-#define MAXNOFARITIES 100    // maximal number of different arities
-
-//Marian's version 
-#define VARSPRI 50      // variable priority (in term grammar)
-//#define VARSPRI 4010      // variable priority (in term grammar)
-//MARIAN's version
-//#define STANDPRI 10000 // priority of standards (number & identifiers)
-//#define STANDPRI 4000       // priority of standards (number & identifiers)
-
-#define STARTTYPE (NTYPES+1)  // codes for built in types 
-#define RIGHTSTYPE (NTYPES+2)
-#define STRATTYPE (NTYPES+3)
-
-
-#endif // end RUNTIME
 
 #define STRLEN   1000     // max. length of any string 
 
@@ -193,9 +114,6 @@ struct chlist{
 //#include "ochstream.h"
 
 class ichstream
-#ifdef GCMEM
-: public gc
-#endif
  {
  private:
   int fchar;            // first char in ichstream
@@ -230,9 +148,6 @@ class ichstream
 };
 
 class ochstream
-#ifdef GCMEM
-: public gc
-#endif
  {	// I don't know why the ostream doesn't work
 			// so, i have made this module
 private:
@@ -255,9 +170,6 @@ public:
 
 
 class lexem
-#ifdef GCMEM
-: public gc
-#endif
  {		// !!! bodies of functions are in 'lstream.c'
  private:
   int lex;              // value of lexem
@@ -271,14 +183,10 @@ class lexem
                          // and as epsilon rule for parser
 #define IDENT -259       // just an identifier
 #define BOFIDENT -260       // BOFIDENT ... JUSTBUMBER    identifiers
-#ifdef STRINGS
 #define MAXNOFSTRING       10000
 #define STRING     (BOFIDENT-MAXNOFIDENT)
 #define BOFSTRING  (BOFIDENT-MAXNOFIDENT-1)
 #define JUSTNUMBER (BOFSTRING-MAXNOFSTRING)
-#else
-#define JUSTNUMBER (BOFIDENT-MAXNOFIDENT)
-#endif
                             // just a number
 #define BOFTYPES (JUSTNUMBER-1)
                             // BOFTYPES ... user's sortes
@@ -293,9 +201,7 @@ class lexem
   int typeval();
 
   void cridlex(char *ide);
-#ifdef ATERM
   void craidlex(char *ide);
-#endif
   void cridlex();
   void crnumlex(int n);
   
@@ -317,13 +223,11 @@ class lexem
   int numval();  // value of number
   int ischar();   // true if character
   int charval();  // value of character
-#ifdef STRINGS
   int isstring();
   int isrealstring();
   char *stringval();
   void crstringlex();
   void crstringlex(char *s);
-#endif
   int notendoftermlex(); // true if not a lexem for end of term
   char *alfsy(); // body is in the 'lstream.c'
   char *erralfsy(); // body is in the 'lstream.c'
@@ -338,9 +242,7 @@ class lexem
   void maccsymtolex(int );// conversion from int used in parsed 
                           // automat to lexem
   int notEqualMaccsym(int s); // compare with a parser symbol
-#ifdef ATERM
   int Adump(ochstream &af);
-#endif
 };
 
 extern stringtab tabofident;     // body is generated with
@@ -348,9 +250,7 @@ extern stringtab tabofident;     // body is generated with
                                  // in file tabofident.c
 extern stringtab atabofident;    // pour ATERM
 
-#ifdef RUNTIME
 extern stringtab typet;
-#endif
 
 
 inline lexem::lexem() {}
@@ -363,20 +263,13 @@ inline int lexem::nonterminal() {return (lex<=BOFTYPES);}
 inline int lexem::isendofstream() {return(lex==NOLEXEM);}
 inline int lexem::isnotendofstream() {return(lex!=NOLEXEM);}
 inline int lexem::isblankk() {return(lex==BLANKLEXEM);}
-#ifdef STRINGS
 inline int lexem::isident() {return((lex<=BOFIDENT && lex>BOFIDENT-MAXNOFIDENT)||lex==IDENT);}
 inline int lexem::isrealid() {return(lex<=BOFIDENT && lex > BOFIDENT-MAXNOFIDENT);}
-#else
-inline int lexem::isident() {return((lex<=BOFIDENT && lex>BOFTYPES)||lex==IDENT);}
-inline int lexem::isrealid() {return(lex<=BOFIDENT && lex > BOFTYPES);}
-#endif
-#ifdef STRINGS
 extern char   *stringconstants[];
 extern int    stringconstantsi;
 inline int lexem::isstring()  { return((lex<=BOFSTRING && lex>BOFSTRING-MAXNOFSTRING ) || lex == STRING); }
 inline int lexem::isrealstring()  { return(lex<=BOFSTRING && lex>BOFSTRING-MAXNOFSTRING); }
 inline void lexem::crstringlex() { lex = STRING; }
-#endif
 inline int lexem::idval() {return(BOFIDENT-lex);}
 inline int lexem::isnum() {return(lex>=0 || lex == JUSTNUMBER);}
 inline int lexem::isrealnum() {return(lex>=0);}
@@ -386,18 +279,13 @@ inline int lexem::charval() {return(-lex);}
 
 inline int lexem::notendoftermlex() {return (lex!=NOLEXEM);}
 inline void lexem::cridlex(char *ide){ lex = BOFIDENT-tabofident.addstr(ide);}
-#ifdef ATERM
 inline void lexem::craidlex(char *ide){ lex = BOFIDENT-atabofident.addstr(ide);}
-#endif
 inline void lexem::crnumlex(int n){ lex = n;}
 inline void lexem::cridlex(){ lex = IDENT;}
 inline void lexem::crnumlex(){ lex = JUSTNUMBER;}
 
 
 class lbuffer
-#ifdef GCMEM
-: public gc
-#endif
  {
 private:
   struct lbufchunk {
@@ -411,18 +299,6 @@ public:
   ~lbuffer();
   void put(lexem);
   void clear();
-#ifndef RUNTIME // begin RUNTIME
-  isempty();
-  void put(char );
-  void get(lexem &);
-  void flush(int i,void (*f)(lexem)); // apply f on each lexem and clear buff. 
-  void applyflush(int i,void (*f)(lexem)); // just apply f on each lexem
-		// argument i in both cases is not used !!!!!!!!!!!!!!!!!!!!!!
-		// it was added, because of a bug in the gnu C++ compiler !!!!
-  void copy(lbuffer &into);
-  void append(lbuffer &appendto);
-  void dump();
-#endif // end RUNTIME
 };
 
 
@@ -436,9 +312,6 @@ public:
 //#include "lstream.h"
 
 class lstream
-#ifdef GCMEM
-: public gc
-#endif
  {    // stream of lexems (input for parser)
  private:  
   lexem flex;
@@ -462,122 +335,8 @@ class lstream
   void owarn(char *);
   int isready();
   int isblock();
-#ifndef RUNTIME // begin RUNTIME
-  void oerr(char *,char * ...);
-  void owarn(char *,char * ...);
-  lbuffer *getlastinlineAndinit();
-  virtual void beforemess(lexem s);
-  void setposition(int actl,int actp);
-  int actline();
-  int actpos();
-				// follows functions active only in macro p.
-  virtual void pilex(lexem &) {};
-  virtual void addmac(int ,lbuffer &) {};
-/*
-  virtual void addsimiter(int , lbuffer &) {};
-  virtual void addincriter(int , int , int , lbuffer &) {};
-  virtual void addforeach(lbuffer &) {};
-  virtual void addmac(int ,lbuffer &) {};
-  virtual void deletemac(int ) {};
-  virtual void prepend(lbuffer &) {};
-*/
-#endif // end RUNTIME
 };   
 
-#ifndef RUNTIME // begin RUNTIME
-
-#define SIMITERACTION 0
-#define INCRITERACTION 1
-#define NEXTMATCHACTION 2
-#define IDITERACTION 3
-#define SIMPLECOPYACTION 4
-#define MAXPREPEND 10	// max. number of prepends, internall constant
-			// can be fully calculate later
-
-
-class term;
-
-class mlstream: public lstream {
-private:
-  lexem mflex;				// first lexem in mlstream
-  mitab *mactab;			// table of names of macros
-  lbuffer macb[MAXNOFMAC];		// table of bodies of macros
-  struct macactelem {
-    lbuffer currentb;
-    lexem lastlexem;
-    int whichaction;
-    union {
-      struct ssimiter {		// X~N  or body of macro
-        int i;
-      } simiter;
-      struct sincriter {	// {X}_I=1...N
-        int b,e;
-        int mname;
-      } incriter;
-      struct snextmatch {	// FOR EACH X:t SUCH THAT X:=T : {...X...}
-        struct wheress *lastws;
-        struct wherelist *whl;
-	term *substarray;
-        int *varnames;
-        int varnum;
-      } nextmatch;
-      struct siditer {		// X_1,...,X_N
-        int b,e,ch;
-      } iditer;
-    } actdata;
-    lbuffer actionbuf;
-  } macactstack[MAXNESTMAC];		// stack of actions to prepend
-  int macactstacki;
-
-/*
-	The stream of lexems in mlstream is as follows:
-'mflex' is the first lexem to output; then follows lexems in 
-'macactstack[macactstacki-1].currentb', then lexems coded in the action
-'macactstack[macactstacki-1].actionbuf', then lexem
-'macactstack[macactstacki-1].lastlexem', then
-...,
-'macactstack[0].currentb' and 
-'macactstack[0].actionbuf', and
-'macactstack[0].lastlexem',
-and then the rest of lexems from superclass lstream.
-*/
-
-  void addactionprelim();
-  int buffilex(lexem &l);
-  void collpilex(lexem &l);  
-//  void milex(lexem &l);  
-  void expect(char );
-  void expectident();
-  void insteaderr();
-  constexpexp();
-  int getmflex(lexem &l);
-  void fillmacbuf(lbuffer &tmpb);
-  int macroexp();
-  void collident(); 
-  void addvars(char *tn);
-  void addvarid(lexem l);
-  void addsimplecopy(lbuffer &b);
-  void deleteforeachmacs(int *names, int n);
-  void addforeachmacs(int *names, int n, term *inst);
-  void parsetype(char *&tn);
-public:
-  mlstream(char *name);
-  ~mlstream();
-  virtual void beforemess(lexem s);
-  virtual void fulex(lexem &l);
-  virtual void ilex(lexem &l);  
-  virtual void pilex(lexem &l);
-  void addmac(int name,lbuffer &body);
-  void deletemac(int name);
-  void addsimiter(int n, lbuffer &b);
-  void addiditer(int b, int e, int ch, lbuffer &buf);
-  void addincriter(int mn, int b, int e, lbuffer &buf);
-  void addforeach(lbuffer &buf,struct wherelist *wh,int bvarnamesi);
-  void actionstackdump();
-  int macrotest();
-};
-
-#endif // end RUNTIME
 
 struct sgrammrule {
   int priority;              // priority of rule 
@@ -587,16 +346,12 @@ struct sgrammrule {
                              // finished by 'nolexem'.
   int semantic;              // index of semantic's action
   int defstrat;
-#ifdef ATERM
   int topglobgram;           // 1 in topgrammar, 2 in globgram, 3 in both
   int fsymcode;              // index to fsymtab 
-#endif
 };
 
-#ifdef ATERM
 #define INTOPGRAM     1
 #define INGLOBGRAM     2
-#endif
 
 struct grammrulelist {
   struct sgrammrule *r;
@@ -640,9 +395,6 @@ struct earleystables {
 };
 
 class grammar
-#ifdef GCMEM
-: public gc
-#endif
  {
  private:
   // ELAN + LIBEARLEY
@@ -670,15 +422,6 @@ class grammar
   int testcond(struct sitlist *fins,struct sitlist *acts,int k, lexem xk);
   void earleysecprec(lstream *f,struct sitlist *,int);
   // ELAN
-#ifndef RUNTIME // begin RUNTIME
-  void dumpsitset( int i);
-  void pretydumpsitset(stringtab *types);
-  void pretysitldump(stringtab *types,struct sitlist *);
-  int rbodyeq(lexem *b);
-  int hardcompatible(lexem *b);
-  void markusedtype(int );
-  void lextoelex(lexem, lexem &);     // conversion of lexem for earley alg.
-#endif // end RUNTIME
 
  public:
   // ELAN + LIBEARLEY
@@ -690,10 +433,8 @@ class grammar
   void  addnont(lexem &);  
   inline struct grammrulelist *get_rule_list(int i) { return nontt[i]; }
 
-#ifdef EARLEY
   void earleyPrettyDump(ochstream &);
   void earleyDump(ochstream &);
-#endif
 
   int earleycall(lstream *f,lexem startsym,int (*isendofstream)(lexem));
   int earley(lstream &f,lexem startsym,struct earleystables *&tables,int (*)(lexem ));
@@ -701,49 +442,6 @@ class grammar
   void earleyfree(struct earleystables *&table);
   void oambigwarning(struct sitlist *si);
 
-#ifndef RUNTIME // begin RUNTIME
-  void combine();
-
-  struct sgrammrule * addvarrule(lexem &leftside,lexem &l,int priority, int infos ,int num);
-#ifdef PEM
-  struct sgrammrule * adddollarvarrule(lexem &leftside,lexem &l,int priority, int infos ,int num);
-  void preprocdeleterule(struct sgrammrule *);
-#endif
-  void deleterule(struct sgrammrule *);
-  int addalias(struct sgrammrule *, lexem &leftside);
-  int addhardalias(struct sgrammrule *, lexem &leftside);
-//  void setstartsym(lexem &l);
-//  void addrw(lexem l);             // add identifier to rwtab
-//  void removerw(lexem l);          // identifiers have to be removed 
-                                   // in reversed order than added
-  void genglobgr(ochstream &,char *modname,stringtab*t);
-  void freetopl();
-  void addgrammar(grammar &, int which, int as_which);
-  void gr_rule_mapp(int nothing, void (*)(struct sgrammrule *));
-  void dump();
-#ifdef ATERM
-  void rmark(int set, int flag);
-  void Adump(ochstream &af, int flag);
-#endif
-  void pretydump(stringtab *typt);
-#ifdef ANYS
-  int  anycode_ops(ochstream &anymod);
-  int  anycode_rules(ochstream &anymod);
-  int  anysymbol_exists();
-  int  any_code(char *anymodstr, char *anymodfname, char *name);
-#endif
-#ifdef SYMBS
-  int  symbapplcode_ops(ochstream &symbapplmod);
-  int  symbapplcode_rules(ochstream &symbapplmod);
-  int  symbappl_exists();
-  int  symbappl_code(char *symbapplmodstr, char *symbapplmodfname, char *name);
-#endif
-  void  lookinlinecode(int x, int y);
-  int   lookbuiltincode(int x, int y, lexem le, int *infos);
-  int   add_apply_code(int x, int y);
-  void write(ochstream &,int winfos,
-             stringtab *typt,char *before ,char *after);
-#endif // end RUNTIME
 
 };
 
@@ -772,11 +470,9 @@ extern char elanlibstrat[];
 // ......
 extern int warnings,trace,dump,quiet,batch,statis;
 extern int in_runtime;
-#ifdef ATERM
 extern int adump;        // export to aterm form
 extern int aimport;      // import from  aterm form
 extern int aterm_parse;
-#endif
 
 inline int ichstream::actline() {return line;}
 inline int ichstream::actpos() {return pos;}
@@ -802,86 +498,18 @@ inline int lexem::operator !=(char ch) {return (lex!= -ch);}
 #define APPEND(fst,snd,pp) {pp= &(fst);while(*pp!=NULL)pp= &((*pp)->next);*pp=snd;}
 
 #define strfree(s) { CFRE(s);}
-#ifdef MEMORY
-extern int NEW_BLOCKS;
-extern int ALLOS_BLOCKS;
-#endif
 
-#ifdef DEBUG
-#define NNEW(p,t) {p= (new t); if(p==NULL){sterr << "\n\n[new] sorry, no memory\n";\
-                                        failexit();}\
-                             testalloc((long*)p); }
-#define DELETE1(p)  DELETE2(p)
-#define DELETE2(p) { testfree((long*)p);  delete p;}
-
-#else
-#ifdef MEMORY
-#define NNEW(p,t) {p= (new t); NEW_BLOCKS += sizeof(t); if(p==NULL){sterr << "\n\n[new] sorry, no memory\n"; failexit();}}
-#else
 #define NNEW(p,t) {p= (new t); if(p==NULL){sterr << "\n\n[new] sorry, no memory\n"; failexit();}}
-#endif
 #define DELETE1(p)  DELETE2(p)
 
-#ifdef GCMEM
 #define DELETE2(p) { delete p; }
-#else
-#define DELETE2(p) { delete p; }
-#endif
 
 
-#endif
-#ifdef GCMEM
 #define CFRE(p) { fre(p);}
-#else
-#define CFRE(p) { fre(p);}
-#endif
 
-#ifdef MEMORY
-#define AALLOSS(p,n,t) {p= (t*) allo(n,sizeof(t)); ALLOS_BLOCKS += sizeof(t);  /*allotest1(p);*/}
-#else
 #define AALLOSS(p,n,t) {p= (t*) allo(n,sizeof(t)); /*allotest1(p);*/}
-#endif
 #define AALLOS(p,t) AALLOSS(p,1,t)
 
 // ELAN 
-#ifndef RUNTIME // begin RUNTIME
-inline void lbuffer::put(char ch) {lexem l; l.crcharlex(ch); put(l);}
-//inline void grammar::setstartsym(lexem &l) {startsym=l;}
-
-inline lstream::actline() { return istr->actline();}
-inline lstream::actpos()  { return istr->actpos();}
-
-
-extern semact (int, lexem ,lstream *);  //semaction for compiling module
-
-extern void odsek(ochstream &,int n);
-
-extern void freeWhereBacktrack(int varn,struct wheress * &lastws,term *substarray);
-extern int isWhereBacktrackNextSol(struct wherelist *wheres,term *substarray,
-                   struct wheress * &lastws, int trace, int varn);
-extern int isTseqBacktrackNextSol(term &res, struct tseq *rhs, term *substarray,
-                   struct wheress * &lastws, int notbatch, int nback,
-	           struct wherelist *&lastwheres, struct term *&lastresult,
-	           int varn);
-
-extern int traceind,tracelevel;
-extern mitab mrwt;               // res. words for modules table containes 
-                                 // indexes to tabofident ans is generated 
-                                 // into file tabofident.cc
-extern mitab amrwt;              // pour ATERM
-
-
-#define indent() odsek(traceout,traceind*2)
-
-#define CHARSYM(s,rwt,uit,tyt) ( ((s).terminal())?((s).alfsy(rwt,uit)):(tyt->ide(s))) 
-
-extern void allotest(void *);  // body in mallotest.c  !!! in comment !!!!!!!
-extern void freetest(void *);  // body in mallotest.c  !!! in comment !!!!!!!
-
-#define ISSETBIT(bitarr,s) ((bitarr[s/NBITS]>>(s%NBITS))&1)
-#define SETBIT(bitarr,s) {bitarr[s/NBITS]|= 1<<(s%NBITS);}
-#define NULLBIT(bitarr,s) {bitarr[s/NBITS]&= ~(1<<(s%NBITS));}
-
-#endif // end RUNTIME
 
 #endif

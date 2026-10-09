@@ -50,9 +50,6 @@
 #define NUMRULE            69
 #define IDENTRULE          70
 #define DEFAULTRULE        0
-#ifdef STRINGS
-#define STRINGRULE         82
-#endif
 
 char buf[STRINGLENGTH];
 int  currentSort ;

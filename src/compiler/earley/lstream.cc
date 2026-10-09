@@ -87,7 +87,6 @@ void lstream::fulex(lexem &l)
   l=flex;
 }
 
-#ifdef STRINGS
 char strconst[STRLEN];
 char *(stringconstants[MAXNOFSTRING]);
 int  stringconstantsi = 0;
@@ -108,7 +107,6 @@ void lexem::crstringlex(char *s) {
   else {
     sterr << "\ntoo many string constants\n"; failexit(); }
 }
-#endif
 
 
 void lstream::ilex(lexem &l)
@@ -160,7 +158,6 @@ void lstream::ilex(lexem &l)
     }
     istr->ich(c); istr->blankskip(); istr->ich(c); istr->fuch(fc);
   }
-#ifdef STRINGS
   if (c=='"') {
     int  i = 0;
     istr->ich(c); istr->fuch(fc);
@@ -189,7 +186,6 @@ void lstream::ilex(lexem &l)
     flex.crnumlex(n);
     return;
   }
-#endif
 //--- BORO's hacks
   if (c == '\\') {
     if(fc == 'n') {
@@ -207,11 +203,9 @@ void lstream::ilex(lexem &l)
       istr->fuch(fc);
     }
     ide[i]=0;
-#ifdef ATERM
     if (aterm_parse)
       flex.craidlex(ide);
     else
-#endif
       flex.cridlex(ide);
     return;
   }
@@ -268,56 +262,6 @@ void lstream::owarn(char *ch )
   }
 }
 
-#ifndef RUNTIME // begin RUNTIME
-void lstream::oerr(char *ch, char *s ... )
-{ va_list ap;
-  oerr();
-  va_start (ap,s);
-  sterr << ch;
-  while (s!=NULL) {
-    sterr << s;
-    s=va_arg(ap,char *);
-  }
-  va_end(ap);
-}
-
-void lstream::owarn(char *ch, char *s ... )
-{  va_list ap;
-   if (warnings) {
-    owarn();
-    va_start (ap,s);
-    sterr << ch;
-    while (s!=NULL) {
-      sterr << s;
-      s=va_arg(ap,char *);
-    }
-    va_end(ap);
-  }
-}
-
-
-void lstream::beforemess(lexem s)
-{ int n;
-  sterr << "\n\t before  ";
-  for (n=0; n<7 && s.isnotendofstream(); n++) { 
-    ilex(s);
-    sterr << s.alfsy() << " ";
-  }
-  sterr << " \n";
-}
-
-void lstream::setposition(int actl,int actp)
-{
-  istr->setposition(actl,actp);
-}
-
-lbuffer *lstream::getlastinlineAndinit()
-{ lbuffer *ll;
-  ll = lastinline;
-  lastinline = NULL;
-  return(ll);
-}
-#endif // end RUNTIME
 
 /* ----------- here is moreover the lexem ------------*/
 

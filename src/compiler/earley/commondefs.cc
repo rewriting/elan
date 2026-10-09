@@ -48,20 +48,6 @@ int traceind=0;
 int tracelevel=0;
 int aterm_parse = 0;
 int batch=0;
-#ifdef MEMORY
-int NEW_BLOCKS = 0;
-int ALLOS_BLOCKS = 0; 
-#endif
-#ifndef RUNTIME // begin RUNTIME
-void odsek(ochstream &ff,int n)
-{ int i;
-  if (n<0) {
-    n= -n;
-    ff << "\n";
-  }
-  for(i=0; i<=n; i++) ff << " ";
-}
-#endif // end RUNTIME
 
 void interr()
 {
@@ -70,11 +56,9 @@ void interr()
    failexit();
 }
 
-#ifdef RUNTIME
 void failexit()
 {
   stout.flush();
   sterr.flush();
   exit(EXIT_FAILURE);
 }
-#endif

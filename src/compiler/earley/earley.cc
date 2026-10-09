@@ -35,10 +35,6 @@ Parser is realised by two main procedures  "earley" for the first pass and
 
 
 #include "commondefs.h"
-#ifndef RUNTIME // begin RUNTIME
-#include "termdefs.h"	// because of earleycall(...)
-#include "module.h"	// because of prety conflict warning message
-#endif // end RUNTIME
 
 int memnew = 0;
 int memallo = 0;
@@ -206,70 +202,6 @@ int grammar::addtosit(struct sgrammrule *rule, int position, int i)
 
 }
 
-#ifndef RUNTIME // begin RUNTIME
-void grammar::pretysitldump(stringtab *types,struct sitlist *p)
-                                              // pretty dump of list of situations
-{
-  stout << "\n";
-  while (p!=NULL) {
-      stout << "[] at :" << p;
-      stout <<" pos= "<< p->pos << "  i= "<< p->i;
-      stout <<" nextwss = " << p->nextwss;
-      stout << "\t"; writegrrule(stout,p->rule,types);
-      p=p->next;
-    }
-}
-
-void grammar::pretydumpsitset(stringtab *types)
-                                              // pretty dump of sitset
-{
-  struct sitlist *p;
-  struct psymlist *ps;
-  sterr << "\n[sitsetdump] start of dump";
-  for (int i=0; i<=sitseti; i++) {
-    sterr << "\n\nsitset["<<i<<"] dump: lexem= " 
-         << sitset[i].actlex.alfsy();
-    p=sitset[i].sits;
-    pretysitldump(types,p);
-    ps=sitset[i].sitparsym;
-    while (ps!=NULL) {
-      sterr << "\n[psymlistdump] : symbol = "
-           << ps->symbol.alfsy()
-           << "\t sit = " << ps->sit;
-      ps=ps->next;
-    }
-  }
-  sterr << "\n[sitsetdump] end of dump\n\n";
-}
-
-
-void grammar::dumpsitset( int i)
-                                              // dump of sitset
-{
-  struct sitlist *p;
-  struct psymlist *ps;
-  stout << "\n[sitsetdump] start of dump";
-//  for (i=0; i<=sitseti; i++) {
-    stout << "\nsitset["<<i<<"] dump: lexem= "; sitset[i].actlex.dump();
-    p=sitset[i].sits;
-    while (p!=NULL) {
-      stout << "\n\n[sitlistdump] at :" << p;
-      stout << "\n\t"; dumpgrrule(p->rule);
-      stout <<"\t pos= "<< p->pos << "  i= "<< p->i;
-      stout <<"\t nextwss = " << p->nextwss;
-      p=p->next;
-    }
-    ps=sitset[i].sitparsym;
-    while (ps!=NULL) {
-      stout << "\n[psymlistdump] : symbol = "; ps->symbol.dump();
-      stout << "\n\t sit = " << ps->sit;
-      ps=ps->next;
-    }
-//  }
-  stout << "\n[sitsetdump] end of dump\n\n";
-}
-
-#endif // end RUNTIME
 
 static unsigned isadded[NNONTERMINALS],addedt[NNONTERMINALS];
 
@@ -287,10 +219,8 @@ unsigned rigi,rri;
     while (p!=NULL) {
       l= p->rule->rside[p->pos];
       if (l.nonterminal()) {
-#ifdef PEM
 	//	sterr <<"completesit : l.typeval="<<l.typeval()<<"\n";
 	//	sterr <<"\t l.typeval="<<typet.ide(l.typeval())<<"\n";
-#endif 
 	i=l.typeval();
 	j=isadded[i];
 	if (j>=addedti || addedt[j] != i) { //not yet added, I have to do it
@@ -361,9 +291,7 @@ void grammar::solveconflicts(struct sitlist *&sis)
   lexem ll1,ll2;
 
   s1 = &sis;
-#ifdef PEM
   //  sterr << "solve conflicts\n";
-#endif
   while (*s1!=NULL) {
 cont1:
     n1 = (*s1)->rule; p1 = ((*s1)->rule->priority & RPRIORITYMSK);
@@ -372,7 +300,6 @@ cont1:
       n2 = (*s2)->rule;
       p2 = (*s2)->rule->priority & RPRIORITYMSK;
       if ( (*s1)->i == (*s2)->i ) {
-#ifdef PEM
 // Il faut comparer les profils des operateurs
 // on suppose qu ils sont egaux
      ok=1;
@@ -413,13 +340,6 @@ cont1:
 	  ss = *s2; *s2 = ss->next; CFRE(ss); 
 	  continue;
 	}
-#else
-        if ( n1->rulenumber == n2->rulenumber ) {
-	  ss = *s2; *s2 = ss->next; CFRE(ss); 
-	  continue;
-	}
-#endif
-#ifdef PEM
 	//cout << "p1=" << p1 << "\t" << "p2=" << p2 << "\n";
 	//dumpgrrule(n1);
 	//dumpgrrule(n2);
@@ -427,7 +347,6 @@ cont1:
 	//sterr << "\t";writegrrule(sterr,n1,&typet);
 	//sterr << "\t";writegrrule(sterr,n2,&typet);
 	//sterr << "end compare\n";
-#endif
 // Marian's version
         if ( p1 != RNOPRIOR && p2 != RNOPRIOR ) {
 // I think this is a mistake (PEM)
@@ -574,9 +493,7 @@ int grammar::earley(lstream &f,lexem starts,struct earleystables *&tables,int (*
 //    add situations for identifiers or numbers in general  
       if (lex.isrealid()) {le.cridlex(); sadded=earleyaddnewsits(le)||sadded; }
       if (lex.isrealnum()){le.crnumlex();sadded=earleyaddnewsits(le)||sadded;}
-#ifdef STRINGS
       if (lex.isrealstring()){le.crstringlex();sadded=earleyaddnewsits(le)||sadded;}
-#endif
       if (! sadded){
         if (!in_runtime) oearleyerr(f,sitseti-1,isendofstream);
         earleyreturn(tables);  

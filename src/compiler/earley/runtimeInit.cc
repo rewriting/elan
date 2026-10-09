@@ -46,9 +46,7 @@
 
 
 lexem internIdentType,internIntType ;
-#ifdef STRINGS
 lexem internStringType ;
-#endif
 
 
 //#include "runtimeInit.h"
@@ -57,9 +55,7 @@ extern void esemactinit();
 //static stringtab tabofident(3000);
 //static stringtab typet(500);
 stringtab tabofident(3000);
-#ifdef ATERM
 stringtab atabofident(3000);
-#endif
 stringtab typet(500);
 
 #include <signal.h>
@@ -81,18 +77,14 @@ extern "C" void addstandards()
 
       internIdentType.crtypelex(220);
       internIntType.crtypelex(19);
-#ifdef STRINGS
       internStringType.crtypelex(351);
-#endif
 
       le.cridlex(); topGrammar.addsymbol(le); 
       topGrammar.addrule(internIdentType,STANDPRI,RSTANDOP,IDENTRULE);
       le.crnumlex(); topGrammar.addsymbol(le);
       topGrammar.addrule(internIntType,STANDPRI,RSTANDOP,NUMRULE);
-#ifdef STRINGS
       le.crstringlex(); topGrammar.addsymbol(le); 
       topGrammar.addrule(internStringType,STANDPRI,RSTANDOP,STRINGRULE);
-#endif
 }
 
 
@@ -182,10 +174,8 @@ int earleyPos = 0 ;
  
 static int lastIdentVal,lastNumVal;
 
-#ifdef STRINGS
 char *earleyString[EARLEYSIZE] ;
 char *lastStringVal ;
-#endif
 
 
 int esemact(lstream *f,int rulenum,lexem lex,lexem sort)
@@ -213,7 +203,6 @@ int esemact(lstream *f,int rulenum,lexem lex,lexem sort)
         earleyRes[earleyPos++] = lastIdentVal ;
 	break;
 
-#ifdef STRINGS
     case STRINGRULE :
         lastStringVal = lex.stringval(); 
 	earleyKind[earleyPos] = STRINGRULE ;
@@ -225,7 +214,6 @@ int esemact(lstream *f,int rulenum,lexem lex,lexem sort)
       lastStringVal = lex.stringval(); // [pem: Jun 15 01]
         earleyString[earleyPos++] = lastStringVal ;
         break ;
-#endif
     
     default :
        earleyKind[earleyPos] = DEFAULTRULE ;

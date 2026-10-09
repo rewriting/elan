@@ -27,17 +27,9 @@
 
 #include "commondefs.h"
 
-#ifdef GCMEM
-#include "gc.h"
-#endif
 
-#ifdef DEBUG
-#define ADDDEBUG(n) (n)++;
-#define SUBDEBUG(n) (n)--;
-#else
 #define ADDDEBUG(n) 
 #define SUBDEBUG(n) 
-#endif
 
 /* number of calls to malloc */
 static int allo_calls=0;
@@ -52,18 +44,10 @@ void *allo(unsigned n, unsigned s)
     {
       ADDDEBUG(allo_calls);
 
-#ifdef GCMEM
-      p=GC_malloc(n*s);
-#else
       //p=intern_alloc(n*s);
       p=malloc(n*s);
-#endif
 
 
-#ifdef DEBUG
-      //fprintf(stderr,"mallo(%d)=%d\n",n*s,p);
-      testalloc((long*)p);
-#endif
       if (p==NULL)
 	{
 	  sterr << "\n\n[allo] sorry, no memory\n";
@@ -79,17 +63,9 @@ void fre(void *p)
   if (p!=NULL)
     {
       ADDDEBUG(fre_calls);
-#ifdef DEBUG
-      //fprintf(stderr,"fre(%d)\n",p);
-      testfree(p);
-#endif
 
-#ifdef GCMEM
-      GC_free((long*)p);
-#else
       free((long*)p);
       //intern_free((long*)p);
-#endif
 
     }
 }
@@ -155,21 +131,13 @@ void init_alloc()
       length_freelist[i]=0;
       freelist[i]=NULL;
     }
-#ifdef DEBUG
-  for(i=0 ; i<MAXALLOCPLACE ; i++)
-    alloc_table[i]=NULL;
-#endif
 }
 
 char *Valloc(int taille)
 {
   char *zone;
   ADDDEBUG(malloc_calls);
-#ifdef GCMEM
-  zone=(char*) GC_malloc(taille);
-#else
   zone=(char*) malloc(taille);
-#endif
   if (!zone) {
     printf("Echec du Valloc : pas assez de memoire disponible.\n");
     failexit();
@@ -190,11 +158,7 @@ char *allocator(long n)
 	  fprintf(stderr,"\n\n[allocator] memory block too big: %d\n\n",n+scale);
 	  failexit();
 	}
-#ifdef GCMEM
-      actchunk = (char *) GC_malloc(MEMCHUNKSIZE);
-#else
       actchunk = (char *) malloc(MEMCHUNKSIZE);
-#endif
       if (actchunk == NULL)
 	{
 	  fprintf(stderr,"\n\n[allocator] out of memory\n\n");
@@ -207,13 +171,6 @@ char *allocator(long n)
   actchunk += (n+scale);
   SIZE(res)=n; /* on peut ajouter +scale */
 
-#ifdef DEBUG
-  if(n<scale || SIZE(res)<scale)
-    {
-      fprintf(stderr,"\n\n[allocator] size error\n\n");
-      failexit();
-    }
-#endif
 
   return res;
 }
@@ -244,15 +201,6 @@ char *intern_alloc(long size)
   res=(char*)freelist[size/scale];
   freelist[size/scale]= (long*) *(freelist[size/scale]);
 fin:
-#ifdef DEBUG
-  if(SIZE(res)!=size)
-    {
-      fprintf(stderr,"\n\n[intern alloc] error \n\n");
-      fprintf(stderr,"size=%d\tmysize=%d\n",size,SIZE(res));
-      failexit();
-    }
-  //printf("[intern_alloc] (%d)\tsize=%d\n",res,SIZE(res));
-#endif
   return res;
 }
 
@@ -262,9 +210,6 @@ void intern_free(long *p)
 
   size=SIZE(p);
 
-#ifdef DEBUG
-  //fprintf(stderr,"[intern_free] (%d)\tmysize=%d\n",p,size);
-#endif
 
   if(size >= MAX_SIZE_STRUCT)
     {

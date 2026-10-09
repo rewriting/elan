@@ -45,75 +45,6 @@ BG *BG_create(int size, int necessary_link)
   return res;
 }
 
-#ifdef NOTMACRO
-extern void BG_delete(BG *bg)
-{
-  int i;
-  Verif_void(bg,"BG_delete(bg)");
-  Verif_void(bg->bs_tab,"BG_delete(bg->bs_tab)");
-  //Verif_void(bg->link_tab,"BG_delete(bg->link_tab)");
-  if(bg->link_tab != NULL)
-    {
-      for(i=0 ; i<bg->size ; i++)
-	{
-	  bitSet_delete(bg->bs_tab[i]);
-	  if(bg->link_tab[i]!=NULL)
-	    LINK_delete(bg->link_tab[i]);
-	}
-      IFREE(bg->bs_tab);
-      IFREE(bg->link_tab);
-    }
-  else
-    {
-      for(i=0 ; i<bg->size ; i++) {
-	bitSet_delete(bg->bs_tab[i]);
-      }
-      IFREE(bg->bs_tab);
-    }
-  IFREE(bg);
-}
-
-void BG_set(BG *bg, int no_pattern, bitSet *bs)
-{
-  Verif_void(bg,"BG_set(bg)");
-  Verif_void(bs,"BG_set(bs)");
-#ifdef DEBUG
-  if(no_pattern<0 || no_pattern> BG_size(bg))
-    {
-      fprintf(stderr,"BG_set error : no_pattern<0 || no_pattern>size\n");
-      assert(0);
-    }
-#endif
-  bg->bs_tab[no_pattern]=bs;
-}
-
-bitSet *BG_get(BG *bg, int no_pattern)
-{
-  Verif_void(bg,"BG_get(bg)");
-#ifdef DEBUG
-  if(no_pattern<0 || no_pattern> BG_size(bg))
-    {
-      fprintf(stderr,"BG_get error : no_pattern<0 || no_pattern>size\n");
-      fprintf(stderr,"size=%d\tbit=%d\n",BG_size(bg),no_pattern);
-      assert(0);
-    }
-#endif
-  return bg->bs_tab[no_pattern];
-}
-
-void BG_clear(BG *bg, int no_pattern)
-{
-  Verif_void(bg,"BG_clear(bg)");
-#ifdef DEBUG
-  if(no_pattern<0 || no_pattern> BG_size(bg))
-    {
-      fprintf(stderr,"BG_clear error : no_pattern<0 || no_pattern>size\n");
-      assert(0);
-    }
-#endif
-  bg->bs_tab[no_pattern]=0;
-}
-#endif
 
 void BG_print(BG *bg)
 {
@@ -136,20 +67,6 @@ void BG_print(BG *bg)
     }
 }
 
-#ifdef NOTMACRO
-int BG_size(BG *bg)
-{
-  Verif_void(bg,"BG_size(bg)");
-  return bg->size;
-}
-
-
-void BG_set_size(BG *bg, int size)
-{
-  Verif_void(bg,"BG_set_size(bg)");
-  bg->size=size;
-}
-#endif
 
 /*
  * returns 0 if there is no solution
@@ -163,11 +80,7 @@ int BG_cbg2bg(int *liste_pattern, BG *cbg, BG *bg) {
        * ici, on copie un champ de bits
        */
       //printf("liste_pattern[%d] = %d\n",i,liste_pattern[i]);
-#ifdef BGSHARE
     BG_set(bg,i,BG_get(cbg,liste_pattern[i]));
-#else
-    BG_set(bg,i,bitSet_copy(BG_get(cbg,liste_pattern[i])));
-#endif
 
 /*
  * [pem: Apr 23 99]
@@ -302,42 +215,3 @@ int BG_greedy_solve_one(BG *bg, int choice[], int multiplicity[],
   return indice;
 }
 
-#ifdef NOTMACRO
-int BG_link_size(BG *bg)
-{
-  Verif_void(bg,"BG_link_size(bg)");
-  return bg->size;
-}
-
-void BG_link_set(BG *bg, int no_pattern, LINK *link)
-{
-  Verif_void(bg,"BG_link_set(bg)");
-  Verif_void(link,"BG_link_set(link)");
-#ifdef DEBUG
-  if(no_pattern<0 || no_pattern> BG_link_size(bg))
-    {
-      fprintf(stderr,"BG_link_set error : no_pattern<0 || no_pattern>size\n");
-      assert(0);
-    }
-#endif
-  bg->link_tab[no_pattern]=link;
-}
-
-
-LINK *BG_link_get(BG *bg, int no_pattern)
-{
-  Verif_void(bg,"BG_link_get(bg)");
-  //Verif_void(bg->link_tab,"BG_link_get(bg->link_tab)");
-#ifdef DEBUG
-  if(no_pattern<0 || no_pattern> BG_link_size(bg))
-    {
-      fprintf(stderr,"BG_link_get error : no_pattern<0 || no_pattern>size\n");
-      assert(0);
-    }
-#endif
-  if(bg->link_tab == NULL)
-    return NULL;
-  else
-    return bg->link_tab[no_pattern];
-}
-#endif

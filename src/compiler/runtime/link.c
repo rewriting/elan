@@ -57,47 +57,6 @@ void LINK_delete(LINK *link)
   IFREE(link);
 }
 
-#ifdef NOTMACRO
-void LINK_set(LINK *link, int pos, struct match_state *ms)
-{
-  Verif_void(link,"LINK_set(link)");
-  Verif_void(ms,"LINK_set(ms)");
-#ifdef DEBUG
-  if(pos<0 || pos> LINK_size(link))
-    {
-      fprintf(stderr,"LINK_set error : pos<0 || pos>size\n");
-      exit(0);
-    }
-#endif
-  link->ms_tab[pos]=ms;
-}
-
-struct match_state *LINK_get(LINK *link, int pos)
-{
-  Verif_void(link,"LINK_set(link)");
-#ifdef DEBUG
-  if(pos<0 || pos> LINK_size(link))
-    {
-      fprintf(stderr,"LINK_get error : pos<0 || pos>size\n");
-      exit(0);
-    }
-#endif
-  return link->ms_tab[pos];
-}
-
-void LINK_clear(LINK *link, int pos)
-{
-  Verif_void(link,"LINK_clear(link)");
-#ifdef DEBUG
-  if(pos<0 || pos> LINK_size(link))
-    {
-      fprintf(stderr,"LINK_clear error : pos<0 || pos>size\n");
-      exit(0);
-    }
-#endif
-  link->ms_tab[pos]=0;
-}
-#endif
 
 void LINK_print(LINK *link)
 {
@@ -120,16 +79,3 @@ void LINK_print(LINK *link)
     printf(" null . ");
 }
 
-#ifdef NOTMACRO
-int LINK_size(LINK *link)
-{
-  Verif_void(link,"LINK_size(link)");
-  return link->size;
-}
-
-void LINK_set_size(LINK *link, int size)
-{
-  Verif_void(link,"LINK_set_size(link)");
-  link->size=size;
-}
-#endif
