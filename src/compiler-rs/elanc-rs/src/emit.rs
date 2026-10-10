@@ -55,7 +55,7 @@ pub struct Crate {
 pub const RUNTIME_IMPORTS: &[&str] = &[
     "use elan_runtime::builtin::{self, Builtin, Int, Str};",
     "use elan_runtime::print::{Print, StringStyle, Writer};",
-    "use elan_runtime::{impl_sort, step, strat, H, K};",
+    "use elan_runtime::{fatal, impl_sort, step, strat, H, K};",
 ];
 
 /// FNV-1a (64 bits) of byte strings, each followed by a 0 byte.
@@ -208,6 +208,8 @@ struct Emitter<'a> {
     aux: Vec<(String, SortId, Vec<Strategy>)>,
     /// Number of auxiliary functions of the current strategy.
     aux_n: usize,
+    /// The sorts whose `META` function is used.
+    meta_sorts: Vec<SortId>,
 }
 
 impl<'a> Emitter<'a> {
@@ -222,6 +224,7 @@ impl<'a> Emitter<'a> {
             label_mode: false,
             aux: Vec::new(),
             aux_n: 0,
+            meta_sorts: Vec::new(),
         }
     }
 
@@ -430,6 +433,7 @@ impl<'a> Emitter<'a> {
         o_ops(&mut self);
         self.labels();
         self.strategies();
+        self.metas();
         self.main_fn();
         self.out.buf
     }
@@ -1190,6 +1194,7 @@ impl<'a> Emitter<'a> {
                 Strategy::Repeat(b) => format!("repeat*({})", self.seq_text(b)),
                 Strategy::Iterate(b) => format!("iterate*({})", self.seq_text(b)),
                 Strategy::Call(c) => base(&self.ir.strategies[*c].name),
+                Strategy::Meta => "META".to_string(),
             })
             .collect();
         parts.join(" ; ")
@@ -1229,6 +1234,12 @@ impl<'a> Emitter<'a> {
             Strategy::Id => format!("{k}({t})"),
             Strategy::Fail => "false".to_string(),
             Strategy::Call(c) => format!("{}({t}, {k})", self.ir.strategies[*c].fun),
+            Strategy::Meta => {
+                if !self.meta_sorts.contains(&sort) {
+                    self.meta_sorts.push(sort);
+                }
+                format!("{}({t}, {k})", self.meta_fun(sort))
+            }
             Strategy::Rules { choice, labels } => {
                 let funs: Vec<String> = labels
                     .iter()
@@ -1327,6 +1338,331 @@ impl<'a> Emitter<'a> {
                 format!("strat::iterate_star({t}, {k}, &{aux})")
             }
         }
+    }
+
+    // ------------------------------------------------------------------
+    // META (Meta_apply[X], Meta_strat[X])
+    // ------------------------------------------------------------------
+
+    /// The function of the `META` strategy on sort `s`.
+    fn meta_fun(&self, s: SortId) -> String {
+        format!("meta_{}", self.ir.sorts[s].type_name.to_lowercase())
+    }
+
+    /// The operator of `symbol` with result sort `s`.
+    fn op_of(&self, symbol: i32, s: SortId) -> Option<OpId> {
+        self.ir
+            .ops
+            .iter()
+            .position(|o| o.symbol == symbol && o.result == s && o.variant.is_some())
+    }
+
+    /// `Enum::Variant(fields)` as a pattern of operator `o`.
+    fn variant_pat(&self, o: OpId, fields: &[String]) -> String {
+        let (en, _) = self.variant_enum(o);
+        let v = self.ir.ops[o].variant.as_ref().expect("variant");
+        if fields.is_empty() {
+            format!("{en}::{v}")
+        } else {
+            format!("{en}::{v}({})", fields.join(", "))
+        }
+    }
+
+    /// A `match` over the variants of sort `s` (the value `t`, a
+    /// reference): `arms` (operator, field names, code); other heads run
+    /// `other`.
+    fn match_variants(
+        &self,
+        s: SortId,
+        t: &str,
+        arms: &[(OpId, Vec<String>, String)],
+        other: &str,
+    ) -> String {
+        let mut m = String::new();
+        let mut body = String::new();
+        for (o, fields, code) in arms {
+            body.push_str(&format!(
+                "{} => {{\n{code}\n}}\n",
+                self.variant_pat(*o, fields)
+            ));
+        }
+        body.push_str(&format!("_ => {other},\n"));
+        match &self.ir.sorts[s].repr {
+            Repr::Enum { .. } => m.push_str(&format!("match &**{t} {{\n{body}}}")),
+            Repr::Family(_) if self.wrapped(s) => m.push_str(&format!(
+                "match {t} {{\nBuiltin::Stuck(h) => match &**h {{\n{body}}},\n_ => {other},\n}}"
+            )),
+            Repr::Family(_) => m.push_str(other),
+        }
+        m
+    }
+
+    /// The native value of a builtinInt or builtinString argument `v` (a
+    /// reference) of sort `s`.
+    fn native_val(&self, s: SortId, v: &str) -> String {
+        if self.wrapped(s) {
+            format!(
+                "match {v} {{ Builtin::Val(v) => v.clone(), _ => fatal(\"[META-built] META strategy over wrong term\") }}"
+            )
+        } else {
+            format!("{v}.clone()")
+        }
+    }
+
+    /// The `META` functions of the sorts used, then the evaluators of the
+    /// `Strategy[X]` terms.
+    fn metas(&mut self) {
+        let ir = self.ir;
+        if self.meta_sorts.is_empty() && ir.metas.is_empty() {
+            return;
+        }
+        self.out
+            .line("// ==== META (Meta_apply, Meta_strat) ==============================");
+        self.out.line("");
+        let wrong = "fatal(\"[META-built] META strategy over wrong term\")";
+        for s in self.meta_sorts.clone() {
+            let ty = self.ty(s);
+            let mut arms = Vec::new();
+            for (o, op) in ir.ops.iter().enumerate() {
+                let Some(m) = op.meta else { continue };
+                if op.result != s || op.variant.is_none() {
+                    continue;
+                }
+                let ev = match ir.metas.iter().find(|e| e.strategy == op.args[0]) {
+                    Some(e) => e,
+                    None => continue,
+                };
+                let x = ev.term;
+                let tx = self.ty(x);
+                let fields: Vec<String> = (0..op.args.len()).map(|i| format!("a{i}")).collect();
+                let code = match m {
+                    MetaOp::All => format!("{}(a0, a1, true, k)", ev.fun),
+                    MetaOp::Nth => format!(
+                        "let mut n: Int = {};\n\
+                         let mut res: Option<{tx}> = None;\n\
+                         if n >= 0 {{\n\
+                         {}(a0, a1, true, &mut |r: &{tx}| -> bool {{\n\
+                         if n == 0 {{ res = Some(r.clone()); return true; }}\n\
+                         n -= 1;\nfalse\n}});\n}}\n\
+                         match res {{ Some(r) => k(&r), None => false }}",
+                        self.native_val(op.args[2], "a2"),
+                        ev.fun
+                    ),
+                    MetaOp::List => {
+                        let l = op.args[1];
+                        // the list `e.nil`: its cons and nil symbols
+                        let conses: Vec<OpId> = (0..ir.ops.len())
+                            .filter(|&c| {
+                                ir.ops[c].result == l
+                                    && ir.ops[c].variant.is_some()
+                                    && ir.ops[c].args == [x, l]
+                            })
+                            .collect();
+                        let nils: Vec<OpId> = (0..ir.ops.len())
+                            .filter(|&c| {
+                                ir.ops[c].result == l
+                                    && ir.ops[c].variant.is_some()
+                                    && ir.ops[c].args.is_empty()
+                            })
+                            .collect();
+                        let typed = match ir.family_of(x) {
+                            Some(f)
+                                if f.base == x
+                                    && matches!(f.kind, BuiltinKind::Int | BuiltinKind::Str) =>
+                            {
+                                if self.wrapped(x) {
+                                    "matches!(e, Builtin::Stuck(_))".to_string()
+                                } else {
+                                    "false".to_string()
+                                }
+                            }
+                            _ => "true".to_string(),
+                        };
+                        let mut cons_arms = Vec::new();
+                        for &c in &conses {
+                            let mut nil_arms = Vec::new();
+                            for &nl in &nils {
+                                nil_arms.push((
+                                    nl,
+                                    vec![],
+                                    format!(
+                                        "let typed = {typed};\n\
+                                         let mut res: Vec<{tx}> = Vec::new();\n\
+                                         if n > 0 || all {{\n\
+                                         {}(a0, e, typed, &mut |r: &{tx}| -> bool {{\n\
+                                         n -= 1;\n\
+                                         if from > 0 {{ from -= 1; }} else {{ res.push(r.clone()); }}\n\
+                                         !(n > 0 || all)\n}});\n}}\n\
+                                         let mut acc: {} = {}();\n\
+                                         for r in res.iter().rev() {{ acc = {}(r, &acc); }}\n\
+                                         k(&acc)",
+                                        ev.fun,
+                                        self.ty(l),
+                                        ir.ops[nl].fun,
+                                        ir.ops[c].fun
+                                    ),
+                                ));
+                            }
+                            let inner = self.match_variants(l, "tail", &nil_arms, wrong);
+                            cons_arms.push((c, vec!["e".to_string(), "tail".to_string()], inner));
+                        }
+                        format!(
+                            "let mut from: Int = {};\n\
+                             let mut n: Int = {};\n\
+                             let all = n == 0;\n\
+                             if !all {{ n += from; }}\n{}",
+                            self.native_val(op.args[2], "a2"),
+                            self.native_val(op.args[3], "a3"),
+                            self.match_variants(l, "a1", &cons_arms, wrong)
+                        )
+                    }
+                };
+                arms.push((o, fields, code));
+            }
+            self.out.line(&format!(
+                "/// META on {}: the meta_apply terms (strbuiltins, stateofexecution.cc).",
+                ir.sorts[s].name
+            ));
+            self.out.open(&format!(
+                "pub fn {}(t: &{ty}, k: K<{ty}>) -> bool {{",
+                self.meta_fun(s)
+            ));
+            let code = self.match_variants(s, "t", &arms, wrong);
+            for l in code.lines() {
+                self.out.line(l);
+            }
+            self.out.close("}");
+            self.out.line("");
+        }
+        for ev in &ir.metas {
+            self.meta_eval(ev);
+        }
+    }
+
+    /// The evaluator of the `Strategy[X]` terms (`term2strategy`,
+    /// `meta/meta.cc`).
+    fn meta_eval(&mut self, ev: &MetaIr) {
+        let ir = self.ir;
+        let (ts, tx) = (self.ty(ev.strategy), self.ty(ev.term));
+        let bad = "fatal(\"term2strategy internal error\")";
+        let f1 = format!("{}_1", ev.fun);
+        let sig = |f: &str, ty: &str| {
+            format!("pub fn {f}(s: &{ty}, t: &{tx}, typed: bool, k: K<{tx}>) -> bool {{")
+        };
+        // Strategy[X]: s1 or s1 s2 (sequence)
+        let mut arms = Vec::new();
+        if let Some(o) = self.op_of(141, ev.strategy) {
+            arms.push((o, vec!["a".into()], format!("{f1}(a, t, typed, k)")));
+        }
+        if let Some(o) = self.op_of(142, ev.strategy) {
+            arms.push((
+                o,
+                vec!["a".into(), "b".into()],
+                format!(
+                    "{f1}(a, t, typed, &mut |r: &{tx}| -> bool {{ {}(b, r, typed, k) }})",
+                    ev.fun
+                ),
+            ));
+        }
+        self.out.line(&format!(
+            "/// The strategy denoted by a term of sort {} applied to t (term2strategy, meta.cc).",
+            ir.sorts[ev.strategy].name
+        ));
+        self.out.open(&sig(&ev.fun, &ts));
+        for l in self.match_variants(ev.strategy, "s", &arms, bad).lines() {
+            self.out.line(l);
+        }
+        self.out.close("}");
+        self.out.line("");
+        let Some(sg) = ev.strateg else { return };
+        // Strateg[X]
+        let mut arms = Vec::new();
+        if let Some(o) = self.op_of(143, sg) {
+            arms.push((o, vec![], "k(t)".to_string()));
+        }
+        if let Some(o) = self.op_of(144, sg) {
+            let ns = ir.ops[o].args[0];
+            let mut code = format!("let name: Str = {};\n", self.native_val(ns, "a"));
+            for c in &ev.calls {
+                let typed = &ir.strategies[c.typed].fun;
+                let call = match &c.untyped {
+                    Some(Ok(u)) if *u != c.typed => format!(
+                        "if typed {{ {typed}(t, k) }} else {{ {}(t, k) }}",
+                        ir.strategies[*u].fun
+                    ),
+                    Some(Err(why)) => format!(
+                        "if typed {{ {typed}(t, k) }} else {{ elan_runtime::unsupported({why:?}) }}"
+                    ),
+                    _ => format!("{typed}(t, k)"),
+                };
+                code.push_str(&format!(
+                    "if &name[..] == {} {{ return {call}; }}\n",
+                    byte_lit(&c.name)
+                ));
+            }
+            code.push_str("fatal(\"[META] call of an unknown strategy\")");
+            arms.push((o, vec!["a".into()], code));
+        }
+        let rec = |f: &str| format!("&|t: &{tx}, k: K<{tx}>| -> bool {{ {f}(a, t, typed, k) }}");
+        if let Some(o) = self.op_of(139, sg) {
+            arms.push((
+                o,
+                vec!["a".into()],
+                format!("strat::repeat_star(t, k, {})", rec(&ev.fun)),
+            ));
+        }
+        if let Some(o) = self.op_of(140, sg) {
+            arms.push((
+                o,
+                vec!["a".into()],
+                format!("strat::iterate_star(t, k, {})", rec(&ev.fun)),
+            ));
+        }
+        if let Some(ss) = ev.strategies {
+            // dc/dk of the strategies of a list (131: one, 132: s, rest)
+            let one = self.op_of(131, ss);
+            let more = self.op_of(132, ss);
+            let mut walk =
+                format!("let mut v: Vec<{ts}> = Vec::new();\nlet mut l = a.clone();\nloop {{\n");
+            let mut list_arms = Vec::new();
+            if let Some(o) = one {
+                list_arms.push((
+                    o,
+                    vec!["x".to_string()],
+                    "v.push(x.clone());\nbreak;".to_string(),
+                ));
+            }
+            if let Some(o) = more {
+                list_arms.push((
+                    o,
+                    vec!["x".to_string(), "rest".to_string()],
+                    "v.push(x.clone());\nrest.clone()".to_string(),
+                ));
+            }
+            let m = self.match_variants(ss, "(&l)", &list_arms, bad);
+            walk.push_str(&format!("let next = {m};\nl = next;\n}}\n"));
+            walk.push_str(&format!(
+                "let fs: Vec<Box<dyn Fn(&{tx}, K<{tx}>) -> bool + '_>> = v.iter().map(|x| -> Box<dyn Fn(&{tx}, K<{tx}>) -> bool + '_> {{ Box::new(move |t: &{tx}, k: K<{tx}>| -> bool {{ {}(x, t, typed, k) }}) }}).collect();\n\
+                 let ds: Vec<strat::DynStrat<{tx}>> = fs.iter().map(|f| &**f as strat::DynStrat<{tx}>).collect();\n",
+                ev.fun
+            ));
+            if let Some(o) = self.op_of(137, sg) {
+                arms.push((
+                    o,
+                    vec!["a".into()],
+                    format!("{walk}strat::first(t, k, &ds)"),
+                ));
+            }
+            if let Some(o) = self.op_of(138, sg) {
+                arms.push((o, vec!["a".into()], format!("{walk}strat::dk(t, k, &ds)")));
+            }
+        }
+        self.out.open(&sig(&f1, &self.ty(sg)));
+        for l in self.match_variants(sg, "s", &arms, bad).lines() {
+            self.out.line(l);
+        }
+        self.out.close("}");
+        self.out.line("");
     }
 
     /// An auxiliary strategy function for `body` (the step of `repeat*` or

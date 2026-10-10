@@ -34,7 +34,7 @@
 //!    ordinary sorts, their evaluation the rules and strategies of
 //!    `strat[X]` in the `.ref` file (see [`crate::ir`], "Strategy terms");
 //!    labelled rules are reached when their left-hand side can match
-//!    ([`Lowerer::lhs_possible`]).
+//!    (`Lowerer::lhs_possible`).
 
 use std::collections::{BTreeMap, HashMap, HashSet};
 use std::fmt;
@@ -51,8 +51,7 @@ use crate::names;
 /// Why a program cannot be compiled.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Error {
-    /// A construct of a later stage: `stage` is `S6b task 2`, `S6c` or
-    /// `S6d`.
+    /// A construct of a later stage: `stage` is `S6c` or `S6d`.
     Unsupported { stage: &'static str, what: String },
     /// The `.ref` file is not what the compiler expects (a bug or a
     /// misread field).
@@ -84,18 +83,36 @@ const NEVER_BUILT: &str =
 /// The symbol code of a strategy call in a term (`Call`, `term/codes.h`).
 const CALL_SYMBOL: SymbolCode = 144;
 
-/// The stage of the strategy terms built at run time.
-const RUNTIME_STRATEGIES: &str = "S6b task 2";
-
 /// Does a semantic code make an operator a builtin operation? The codes
 /// of the strategy constructors of `strsig[X,Y]`/`strat[X]` (`code -180`
 /// .. `-190`, `-205` .. `-208`, `DS_*` in `term/codes.h`) do not: the
 /// interpreter has no reduction for them (`standardreduction`,
 /// `rewrite/rtmisc.cc`, `default: return(0)`), its strategy terms are
 /// evaluated by the rules of `strat[X]` (see [`crate::ir`]); they are
-/// constructors.
+/// constructors. Neither do the codes of `Meta_strat[X]` (131 .. 147:
+/// `call "name":X`, `id`, sequences...) and of `meta_apply` (128 .. 130,
+/// `Meta_apply[X]`): their terms are constructors too, which only the
+/// `META` strategy interprets ([`MetaOp`]).
 fn builtin_semantic(code: i32) -> bool {
-    code != 0 && !matches!(code.abs(), 179..=190 | 205..=208)
+    code != 0 && !matches!(code.abs(), 128..=147 | 179..=190 | 205..=208)
+}
+
+/// The `meta_apply` operators that the `META` strategy evaluates
+/// (`strbuiltins`, `rewrite/stateofexecution.cc`).
+fn meta_op(code: i32) -> Option<MetaOp> {
+    match code.abs() {
+        128 => Some(MetaOp::List),
+        129 => Some(MetaOp::All),
+        130 => Some(MetaOp::Nth),
+        _ => None,
+    }
+}
+
+/// `Strateg[X]` -> `X`: the sort parameter of a sort of `Meta_strat[X]`.
+fn meta_param<'s>(sort: &'s str, base: &str) -> Option<&'s str> {
+    sort.strip_prefix(base)?
+        .strip_prefix('[')?
+        .strip_suffix(']')
 }
 
 /// An operator profile of the `.ref` file (a candidate when typing).
@@ -311,16 +328,22 @@ impl<'p> Lowerer<'p> {
             }
             Term::Ident(_) => Err(unsupported("S6d", "builtin identifiers (sort ident)").into()),
             Term::Fsym { args, symbol } => {
-                if *symbol == CALL_SYMBOL && matches!(args.as_slice(), [Term::Int(_)]) {
-                    let name = match &args[0] {
-                        Term::Int(s) => self.p.strategy_name(*s as u32).unwrap_or("?").to_string(),
-                        _ => unreachable!(),
+                if let (CALL_SYMBOL, [Term::Int(s)]) = (*symbol, args.as_slice()) {
+                    // `call "name":X` (`call @':'X : (builtinString)
+                    // Strateg[X]`): the export replaces the string by the
+                    // index of the strategy it finds for the name, any sort
+                    // (ref/ref.cc); the term holds the name again, the sort
+                    // is chosen when it is applied (`resolve_call`)
+                    let full = self
+                        .p
+                        .strategy_name(*s as u32)
+                        .ok_or_else(|| Error::Invalid(format!("call of strategy {s}: no name")))?;
+                    let name = full.split(':').next().unwrap_or("");
+                    let call = Term::Fsym {
+                        symbol: CALL_SYMBOL,
+                        args: vec![Term::Str(name.bytes().map(|b| b as i32).collect())],
                     };
-                    return Err(unsupported(
-                        RUNTIME_STRATEGIES,
-                        format!("strategy call {name} in a term"),
-                    )
-                    .into());
+                    return self.type_term(&call, expected);
                 }
                 let cands = self.by_symbol.get(symbol).map(Vec::as_slice).unwrap_or(&[]);
                 let mut why = format!("symbol {symbol} has no profile");
@@ -400,9 +423,7 @@ impl<'p> Lowerer<'p> {
         if let Some(s) = q.strategy {
             reach.reach_strategy(s);
         }
-        // every refusal is collected: a strategy term built at run time is
-        // refused as such (S6b task 2) rather than for the constructs of
-        // the strategy interpreter (strat[X]) that it reaches
+        // every refusal is collected; the first one is reported
         let mut errors = Vec::new();
         loop {
             let r = if let Some(c) = reach.todo.pop() {
@@ -426,14 +447,9 @@ impl<'p> Lowerer<'p> {
                 errors.push(e);
             }
         }
-        let runtime = |e: &Error| matches!(e, Error::Unsupported { stage, .. } if *stage == RUNTIME_STRATEGIES);
-        if let Some(i) =
-            errors
-                .iter()
-                .position(runtime)
-                .or(if errors.is_empty() { None } else { Some(0) })
-        {
-            return Err(errors.swap_remove(i));
+        errors.append(&mut reach.errors);
+        if !errors.is_empty() {
+            return Err(errors.swap_remove(0));
         }
         for &s in &reach.sorts {
             let n = self.sort_name(s);
@@ -449,6 +465,11 @@ impl<'p> Lowerer<'p> {
         match t {
             TT::Op(c, args) => {
                 r.reach(*c);
+                if let (CALL_SYMBOL, [TT::Str(name)]) = (self.cands[*c].symbol, args.as_slice()) {
+                    if let Err(e) = self.reach_call(name, self.cands[*c].result, r) {
+                        r.errors.push(e);
+                    }
+                }
                 for a in args {
                     self.visit(a, r);
                 }
@@ -472,6 +493,15 @@ impl<'p> Lowerer<'p> {
         r.sorts.insert(cand.result);
         r.sorts.extend(cand.args.iter().copied());
         let decl = || self.cand_decl(cand);
+        if cand.semantic != 0 && matches!(cand.semantic.abs(), 133..=136) {
+            return Err(unsupported(
+                "S6d",
+                format!(
+                    "labels named by strings in a strategy term of META ({})",
+                    decl()
+                ),
+            ));
+        }
         match cand.infos {
             0 => {}
             2 => return Err(unsupported("S6c", format!("AC operator {}", decl()))),
@@ -697,7 +727,7 @@ impl<'p> Lowerer<'p> {
                     }
                     r.reach_strategy(*n)
                 }
-                StrategyExpr::Meta => return refuse("META"),
+                StrategyExpr::Meta => {}
                 StrategyExpr::NormIn(_) => return refuse("normin"),
                 StrategyExpr::NormOut(_) => return refuse("normout"),
                 StrategyExpr::TAll(_) => return refuse("tall (traversal)"),
@@ -784,6 +814,96 @@ impl<'p> Lowerer<'p> {
         }
     }
 
+    /// The strategy that `call "name":X` applies to a term of sort `sort`
+    /// (`None`: unknown), as the interpreter finds it when it evaluates a
+    /// `META` strategy (`Strategyname_to_ref_index`, `meta/meta.cc`, fixed
+    /// in commit 93ec493): the last strategy (in table order) named exactly
+    /// `name:sort/...`, else the last named `name:...` of any sort. (Its
+    /// third step, a prefix of the name, cannot happen here: the name is
+    /// the one of the strategy that the export found, `ref/ref.cc`.)
+    fn resolve_call(&self, name: &[u8], sort: Option<&str>) -> Option<StrategyNameIndex> {
+        let mut entries: Vec<_> = self.p.strategy_names.iter().collect();
+        entries.sort_by_key(|e| e.index);
+        let find = |sort: Option<&str>| {
+            entries
+                .iter()
+                .filter(|e| {
+                    let n = e.name.as_bytes();
+                    if n.len() <= name.len() || &n[..name.len()] != name || n[name.len()] != b':' {
+                        return false;
+                    }
+                    let rest = &e.name[name.len() + 1..];
+                    match sort {
+                        None => true,
+                        Some(s) => rest.starts_with(s) && rest[s.len()..].starts_with('/'),
+                    }
+                })
+                .filter(|e| self.p.strategy(e.index).is_some())
+                .last()
+                .map(|e| e.index)
+        };
+        match sort {
+            Some(s) => find(Some(s)).or_else(|| find(None)),
+            None => find(None),
+        }
+    }
+
+    /// A `call "name":X` term (`strateg` is `Strateg[X]`): the strategies it
+    /// calls are reached. The term is applied to terms of sort X (the
+    /// interpreter takes the sort of the head symbol of the term): a term
+    /// of unknown sort only when X is builtinInt or builtinString (a
+    /// number or a string has no symbol, `NEW_META_APPLY` in
+    /// `rewrite/stateofexecution.cc`). The strategy found must be of sort
+    /// X (the interpreter would apply a strategy of another sort to the
+    /// term: refused; for a term of unknown sort, only if it happens, at
+    /// run time, since a term `[S]t` of sort builtinInt has a symbol).
+    fn reach_call(&self, name: &[u8], strateg: SortIndex, r: &mut Reach) -> Result<(), Error> {
+        if r.calls.contains_key(&(name.to_vec(), strateg)) {
+            return Ok(());
+        }
+        let text = String::from_utf8_lossy(name).to_string();
+        let sname = self.sort_name(strateg);
+        let x = meta_param(&sname, "Strateg").ok_or_else(|| {
+            Error::Invalid(format!("call \"{text}\" of sort {sname}, not Strateg[X]"))
+        })?;
+        let xs = self
+            .p
+            .sorts
+            .iter()
+            .find(|s| s.name == x)
+            .map(|s| s.index)
+            .ok_or_else(|| Error::Invalid(format!("call \"{text}\":{x}: no sort {x}")))?;
+        let check = |found: Option<StrategyNameIndex>| -> Result<StrategyNameIndex, Error> {
+            let s = found.ok_or_else(|| {
+                Error::Invalid(format!("call \"{text}\":{x}: no strategy {text}"))
+            })?;
+            let d = self.p.strategy(s).expect("defined");
+            if d.sort != xs {
+                return Err(unsupported(
+                    "S6d",
+                    format!(
+                        "call \"{text}\":{x} finds {}, a strategy of another sort",
+                        self.strategy_name(s)
+                    ),
+                ));
+            }
+            Ok(s)
+        };
+        let typed = check(self.resolve_call(name, Some(x)))?;
+        let untyped = match builtin_kind(x) {
+            Some(BuiltinKind::Int) | Some(BuiltinKind::Str) => {
+                Some(check(self.resolve_call(name, None)).map_err(|e| e.to_string()))
+            }
+            _ => None,
+        };
+        r.reach_strategy(typed);
+        if let Some(Ok(u)) = untyped {
+            r.reach_strategy(u);
+        }
+        r.calls.insert((name.to_vec(), strateg), (typed, untyped));
+        Ok(())
+    }
+
     /// The unlabelled rules whose left-hand side has operator `c` at the
     /// top, in file order, with their typed left-hand side.
     fn rules_of(&self, c: usize) -> Result<Vec<(&'p Rule, TT)>, Error> {
@@ -855,6 +975,14 @@ struct Pending<'p> {
 #[derive(Default)]
 struct Reach<'p> {
     pending: Vec<Pending<'p>>,
+    /// Refusals found while visiting terms.
+    errors: Vec<Error>,
+    /// The `call "name":X` reached: (name, `Strateg[X]`) -> the
+    /// strategy for a term of sort X, and for a term of unknown sort.
+    calls: BTreeMap<
+        (Vec<u8>, SortIndex),
+        (StrategyNameIndex, Option<Result<StrategyNameIndex, String>>),
+    >,
     cands: Vec<usize>,
     seen: HashSet<usize>,
     todo: Vec<usize>,
@@ -975,6 +1103,7 @@ impl<'a, 'p> Builder<'a, 'p> {
                 print,
                 decl: l.cand_decl(k),
                 kind: OpKind::Constructor,
+                meta: meta_op(k.semantic),
             });
         }
 
@@ -1179,6 +1308,8 @@ impl<'a, 'p> Builder<'a, 'p> {
             self.strategies(&sig, &mut used_funs)?
         };
 
+        let metas = self.metas(&sorts, &ops, &mut used_funs)?;
+
         let start_sort = self.sort_of[&l.sort_of(start)];
         let start_strategy = match q.strategy {
             None => None,
@@ -1203,6 +1334,7 @@ impl<'a, 'p> Builder<'a, 'p> {
             ops,
             labels,
             strategies,
+            metas,
             start: Start {
                 query_sort: l.sort_name(q.sort),
                 sort: start_sort,
@@ -1210,6 +1342,54 @@ impl<'a, 'p> Builder<'a, 'p> {
                 strategy: start_strategy,
             },
         })
+    }
+
+    /// The evaluators of the `Strategy[X]` terms of the reachable
+    /// `meta_apply` operators, with the `call "name":X` terms reached.
+    fn metas(
+        &self,
+        sorts: &[SortIr],
+        ops: &[OpIr],
+        used_funs: &mut HashSet<String>,
+    ) -> Result<Vec<MetaIr>, Error> {
+        let by_name = |n: &str| sorts.iter().position(|s| s.name == n);
+        let mut metas: Vec<MetaIr> = Vec::new();
+        for o in ops.iter().filter(|o| o.meta.is_some()) {
+            let strategy = o.args[0];
+            if metas.iter().any(|m| m.strategy == strategy) {
+                continue;
+            }
+            let sname = &sorts[strategy].name;
+            let x = meta_param(sname, "Strategy")
+                .ok_or_else(|| Error::Invalid(format!("{}: a strategy of sort {sname}", o.decl)))?;
+            let term = by_name(x)
+                .ok_or_else(|| Error::Invalid(format!("{}: sort {x} not reached", o.decl)))?;
+            let strateg = by_name(&format!("Strateg[{x}]"));
+            let mut calls = Vec::new();
+            if let Some(sg) = strateg {
+                for ((name, s), (typed, untyped)) in &self.reach.calls {
+                    if *s == sorts[sg].index {
+                        calls.push(MetaCall {
+                            name: name.clone(),
+                            typed: self.strat_of[typed],
+                            untyped: untyped.clone().map(|u| u.map(|u| self.strat_of[&u])),
+                        });
+                    }
+                }
+            }
+            metas.push(MetaIr {
+                fun: names::unique(
+                    used_funs,
+                    format!("ev_{}", sorts[strategy].type_name.to_lowercase()),
+                ),
+                strategy,
+                strateg,
+                strategies: by_name(&format!("Strategies[{x}]")),
+                term,
+                calls,
+            });
+        }
+        Ok(metas)
     }
 
     /// The labels and strategies reached, in table order, with their
@@ -1369,6 +1549,7 @@ impl<'a, 'p> Builder<'a, 'p> {
                 StrategyExpr::Repeat(b) => Strategy::Repeat(self.strategy_seq(b, sort)),
                 StrategyExpr::Iterate(b) => Strategy::Iterate(self.strategy_seq(b, sort)),
                 StrategyExpr::Call(n) => Strategy::Call(self.strat_of[n]),
+                StrategyExpr::Meta => Strategy::Meta,
                 _ => unreachable!("refused during reachability"),
             })
             .collect()

@@ -149,6 +149,22 @@ impl<W: Write> Session<W> {
     }
 }
 
+/// A run-time error of the program (the interpreter's `interr()`): the
+/// message on the standard error, exit status 1. The results printed
+/// before are lost when the standard output is a buffered session.
+pub fn fatal(msg: &str) -> ! {
+    eprintln!("{msg}");
+    std::process::exit(1)
+}
+
+/// A construct that the compiler supports only partly met at run time:
+/// the message on the standard error, exit status 2 (as a refusal of
+/// `elanc-rs`).
+pub fn unsupported(msg: &str) -> ! {
+    eprintln!("elan-runtime: not supported yet: {msg}");
+    std::process::exit(2)
+}
+
 /// Stack size of the thread that runs a program: innermost normalisation
 /// and continuations recurse (spec D3); the memory is reserved, not used.
 pub const BIG_STACK: usize = 1 << 30;

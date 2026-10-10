@@ -78,6 +78,18 @@
 //! contains are not compiled (`lower::Lowerer::lhs_possible`): e.g. the
 //! `[TONE]` rule and its traversal `eval_TONE` when no `tone(S)` is built.
 //!
+//! `call "name":X` (`Meta_strat[X]`) is the one construct with a builtin
+//! evaluation: the `META` strategy of `set_of`/`setof` (`Meta_apply[X]`,
+//! `strapply[X]`) interprets a `meta_apply` term ([`MetaOp`]), whose
+//! first argument, a term of sort `Strategy[X]`, denotes a strategy
+//! (`term2strategy`, `meta/meta.cc`). Its sorts are ordinary sorts too;
+//! `META` and the evaluator of the `Strategy[X]` terms ([`MetaIr`]) are
+//! generated. The strategy of a call is chosen as the interpreter does it
+//! when it evaluates the term (`Strategyname_to_ref_index`, commit
+//! 93ec493): by name and by the sort of the term, known at compile time
+//! (X), not with the index that the export wrote (any sort, the 2004
+//! behaviour that REM keeps).
+//!
 //! # Normalisation scheme
 //!
 //! Every operator `f` is compiled to a function taking its arguments in
@@ -124,7 +136,59 @@ pub struct Ir {
     pub ops: Vec<OpIr>,
     pub labels: Vec<LabelIr>,
     pub strategies: Vec<StrategyIr>,
+    /// The evaluators of the `Strategy[X]` terms of `META` (one per X).
+    pub metas: Vec<MetaIr>,
     pub start: Start,
+}
+
+/// The evaluation of the terms of sort `Strategy[X]` (`Meta_strat[X]`) by
+/// the `META` strategy: `term2strategy` of `meta/meta.cc`, compiled to
+/// `fn(s, t, typed, k) -> bool` applying the strategy denoted by `s` to the
+/// term `t` of sort X: a sequence (`@` 141, `@ @` 142) of `id` (143),
+/// `call "name":X` (144), `dc`/`dk` of strategies (137, 138 over 131,
+/// 132), `repeat` (139) and `iterate` (140). `typed`: the sort of the term
+/// is known (false for a number or a string, which the interpreter cannot
+/// type), it chooses the strategy of a call.
+#[derive(Clone, Debug)]
+pub struct MetaIr {
+    /// Name of the function.
+    pub fun: String,
+    /// `Strategy[X]`.
+    pub strategy: SortId,
+    /// `Strateg[X]`, `Strategies[X]` when reachable.
+    pub strateg: Option<SortId>,
+    pub strategies: Option<SortId>,
+    /// X.
+    pub term: SortId,
+    /// The `call "name":X` terms of the program.
+    pub calls: Vec<MetaCall>,
+}
+
+/// A `call "name":X` and the strategies it applies.
+#[derive(Clone, Debug)]
+pub struct MetaCall {
+    pub name: Vec<u8>,
+    /// For a term whose sort is known (X).
+    pub typed: StratId,
+    /// For a term whose sort is unknown (X builtinInt or builtinString, a
+    /// number or a string): the strategy, or why it is refused (a strategy
+    /// of another sort; the program stops with status 2 if it happens).
+    pub untyped: Option<Result<StratId, String>>,
+}
+
+/// An operator evaluated by the `META` strategy (`strbuiltins`,
+/// `rewrite/stateofexecution.cc`); elsewhere it is a constructor.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum MetaOp {
+    /// `meta_apply(s, t.l, from, n)` (`NEW_META_APPLY`, code 128,
+    /// `set_of`): one result, the list of the results of `s` on `t`, from
+    /// number `from` (0 first), `n` of them (all when `n` is 0).
+    List,
+    /// `meta_apply(s, t)` (`META_APPL`, 129): every result of `s` on `t`.
+    All,
+    /// `meta_apply(s, t, n)` (`META_APPLY`, 130): result number `n` of `s`
+    /// on `t` (0 first), if any.
+    Nth,
 }
 
 /// The labelled rules of one label (a localised rule name of the `.ref`
@@ -197,6 +261,9 @@ pub enum Strategy {
     Iterate(Vec<Strategy>),
     /// A named strategy.
     Call(StratId),
+    /// `META` (the strategy of `where x := (META) t`): `t` is a
+    /// `meta_apply` term ([`MetaOp`]); its results.
+    Meta,
 }
 
 /// A sort.
@@ -282,6 +349,9 @@ pub struct OpIr {
     /// ELAN declaration, for comments: `plus(@,@) : (nat nat) nat`.
     pub decl: String,
     pub kind: OpKind,
+    /// A `meta_apply` operator, which the `META` strategy evaluates (a
+    /// constructor otherwise).
+    pub meta: Option<MetaOp>,
 }
 
 /// A token of a printing form.
@@ -622,6 +692,8 @@ pub fn strategy_det(
         Strategy::Repeat(b) => seq(b),
         Strategy::Iterate(b) => b.iter().any(|s| matches!(s, Strategy::Fail)),
         Strategy::Call(c) => strat_det(*c),
+        // META_APPL gives every result (conservative)
+        Strategy::Meta => false,
     }
 }
 

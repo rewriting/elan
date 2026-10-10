@@ -23,7 +23,7 @@ pub mod term;
 
 pub use ac::{AcSet, Rest};
 pub use builtin::{Builtin, Int, Str};
-pub use driver::{main_program, step, steps, Options, Session};
+pub use driver::{fatal, main_program, step, steps, unsupported, Options, Session};
 pub use print::{Print, Writer};
 pub use strat::{DynStrat, Strat, K};
 pub use term::{
