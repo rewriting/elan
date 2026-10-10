@@ -1,0 +1,6 @@
+work-current/
+*/bin/
+rust/target/
+.gocache-*/
+.time
+.bt

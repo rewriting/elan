@@ -1,0 +1,6 @@
+LPL nqueens description
+  query of sort int
+  result of sort list
+  import nqueens
+  start with (queens_strat) queens(query)
+end

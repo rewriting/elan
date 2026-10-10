@@ -1,0 +1,19 @@
+[package]
+name = "elan_codegen_spike"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "nqueens"
+path = "nqueens.rs"
+
+[[bin]]
+name = "efib"
+path = "efib.rs"
+
+[[bin]]
+name = "propc"
+path = "propc.rs"
+
+[profile.release]
+opt-level = 3
