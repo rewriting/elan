@@ -127,21 +127,21 @@ int ts;
     exit(1); }
 }
 
-/* DC/ONE and IFTOE strategies evaluated at run time (str_eval2) are not
-   supported. In ELAN 3.6 this code wrote through an index taken for a pointer
-   and crashed before trying any alternative; once that write was fixed (S5b),
-   the alternatives still did not work: fail() (choice.h) expands to two
-   statements, so `if (c) fail();` failed unconditionally, and DC/ONE never
-   tried their next alternative nor IFTOE its else branch. Rather than return
-   wrong results silently, stop with an explicit message. Implementing these
-   strategies needs tests against the interpreter (see docs/followups). */
-static void unsupported_runtime_strategy(const char *name)
-{
-  fprintf(stderr, "elan runtime: the %s strategy evaluated at run time is not "
-          "supported by the compiler; use the interpreter (elan)\n", name);
-  exit(1);
-}
+/* fail() (choice.h) expands to two statements: always use it inside braces.
 
+   The choice operators below mirror the code REM generates when the strategy
+   is known at compile time (StrategyDcStrat, StrategyOneStrat, and
+   StrategyEval.genEvalSem for IFTOE):
+   - dc(S1,...,Sn) (and first): all the results of the first Si that has one.
+     A choice point is set before each Si but the last; a flag kept in the
+     stable area (not restored by backtracking) records that Si gave a
+     result, so that backtracking into the choice point once the results of
+     Si are exhausted fails instead of trying S(i+1).
+   - one(S1,...,Sn) (dc one, first one): the first result of the first Si
+     that has one: the same choice points, enclosed in a cut that removes
+     them, and those of Si, once a result is found.
+   - if S then S1 orelse S2 fi: S1 applied to all the results of S when S has
+     one (even if S1 then fails on all of them), S2 otherwise. */
 Gterm *str_eval2(Gterm *s, Gterm *t)
 {
 int defstrat = term_defstrat(s);
@@ -189,40 +189,48 @@ int is_one = 0;
 	  return res;
 	  break; }
       case DS_ONE:
-        is_one = 1;  // THIS SHOULD FOLLOW 
+        is_one = 1;
         __attribute__((fallthrough));
       case DS_DC:
 	{
 	  Gterm *strlist, *res;
-	  long wasr_index;
-	  int is_last = 0;
-	  unsupported_runtime_strategy(is_one ? "one" : "dc");
-	  wasr_index = allocStable(sizeof(int));
-	  *((int*)getStablePointer(wasr_index)) = 0;
+	  long wasr_index = 0;
 
-	  for(strlist = GgetArgument(s,0);
-	      -term_semantic(strlist) != DS_EPSILON;
-	      strlist = GgetArgument(strlist,1)) {
+	  if (is_one) {
+	    CUTOPEN();
+	  } else {
+	    wasr_index = allocStable(sizeof(int));
+	    *((int*)getStablePointer(wasr_index)) = 0;
+	  }
+	  for(strlist = GgetArgument(s,0); ; strlist = GgetArgument(strlist,1)) {
+	    if (-term_semantic(strlist) == DS_EPSILON) { /* no strategy left */
+	      fail();
+	    }
 	    if (-term_semantic(strlist) != DS_COMMA &&
 	        -term_semantic(strlist) != DS_COMMA_CONCUR) {
 	      fprintf(stderr,"DS_COMMA, DS_COMMA_CONCUR symbol expected in DC/DK strategy list\n");
 	      exit(1); }
-	    is_last = (-term_semantic(GgetArgument(strlist,1)) == DS_EPSILON);
-	    if (!is_last) {
-	      if(!setChoicePoint()) {
-		if (is_one) { CUTOPEN(); }
-		res = str_eval2(GgetArgument(strlist,0),t);
-		if (is_one) { CUTCLOSE(); }
-		if (*((int*)getStablePointer(wasr_index)) == 0) *((int*)getStablePointer(wasr_index)) = 1;
-		goto lab_dc;
-	      }
-	      fail();   /* unreachable (see unsupported_runtime_strategy) */
-	    } else // is_last
+	    if (-term_semantic(GgetArgument(strlist,1)) == DS_EPSILON) { /* the last one */
 	      res = str_eval2(GgetArgument(strlist,0),t);
+	      break;
+	    }
+	    if (!setChoicePoint()) {
+	      res = str_eval2(GgetArgument(strlist,0),t);
+	      if (!is_one) {
+	        *((int*)getStablePointer(wasr_index)) = 1;
+	      }
+	      break;
+	    }
+	    /* back from a failure: Si has no (more) results */
+	    if (!is_one && *((int*)getStablePointer(wasr_index)) != 0) {
+	      fail();   /* Si gave results: dc gives no other */
+	    }
 	  }
-	lab_dc:
+	  if (is_one) {
+	    CUTCLOSE();
+	  }
 	  return res;
-	  break; }
+	}
       case DS_IFTE:
 	{
       	  Gterm *cond, *s1, *s2;
@@ -237,19 +245,20 @@ int is_one = 0;
       case DS_IFTOE:
 	{
 	  Gterm *res, *cond, *s1, *s2;
-	  long wasr_index;
-	  unsupported_runtime_strategy("if then else");
-	  wasr_index = allocStable(sizeof(int));
+	  long wasr_index = allocStable(sizeof(int));
 	  *((int*)getStablePointer(wasr_index)) = 0;
 	  cond = GgetArgument(s,0);
           s1 = GgetArgument(s,1);
           s2 = GgetArgument(s,2);
-	  if(!setChoicePoint()) {
+	  if (!setChoicePoint()) {
 	    res = str_eval2(cond,t);
-	    if (*((int*)getStablePointer(wasr_index)) == 0) *((int*)getStablePointer(wasr_index)) = 1;
+	    *((int*)getStablePointer(wasr_index)) = 1;
 	    return str_eval2(s1,res);
 	  }
-	  fail();   /* unreachable (see unsupported_runtime_strategy) */
+	  /* back from a failure: of the condition, or of S1 on all its results */
+	  if (*((int*)getStablePointer(wasr_index)) != 0) {
+	    fail();
+	  }
 	  return str_eval2(s2,t);
 	}
       default:
