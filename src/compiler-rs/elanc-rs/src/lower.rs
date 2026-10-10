@@ -305,9 +305,11 @@ impl<'p> Lowerer<'p> {
                         Term::Int(s) => self.p.strategy_name(*s as u32).unwrap_or("?").to_string(),
                         _ => unreachable!(),
                     };
-                    return Err(
-                        unsupported("S6b", format!("strategy call {name} in a term")).into(),
-                    );
+                    return Err(unsupported(
+                        RUNTIME_STRATEGIES,
+                        format!("strategy call {name} in a term"),
+                    )
+                    .into());
                 }
                 let cands = self.by_symbol.get(symbol).map(Vec::as_slice).unwrap_or(&[]);
                 let mut why = format!("symbol {symbol} has no profile");
@@ -478,7 +480,7 @@ impl<'p> Lowerer<'p> {
         }
         if cand.defstrat != DefStrat::None {
             return Err(unsupported(
-                "S6b",
+                RUNTIME_STRATEGIES,
                 format!("operator with a default strategy {}", decl()),
             ));
         }
