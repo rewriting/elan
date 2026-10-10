@@ -113,6 +113,24 @@ runtime (`str_eval`) instead of the compiled `eval` rules; with
 (both are compared with the interpreter by
 `tests/compiler/test_runtime_strategies.sh`).
 
+`elanc-rs` (built when cargo is found, see `docs/s6-rust-status.md`)
+compiles a program through Rust instead: `elanc-rs -b enum` exports the
+program, writes a cargo crate in `.elan-rs.enum/` and builds `./a.out`
+(`elanc-rs -help` lists the options). It exits with 0 on success, 2 when the
+program uses a construct not supported yet, 1 on any other failure. The
+programs it generates print their results as REM's (`./a.out -noInput`)
+and exit with:
+
+| status | meaning |
+|---|---|
+| 0 | success |
+| 1 | run-time error (message on the standard error), or `-help` |
+| 2 | a construct supported only partly, met at run time |
+| 3 | recursion too deep: the stack is nearly exhausted, the program stops cleanly (`elan: recursion too deep ...`) |
+
+On an error (1, 2, 3) the results printed before it are still written to
+the standard output.
+
 ## Quick start (development)
 
 ```sh

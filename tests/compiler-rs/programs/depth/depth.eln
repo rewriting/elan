@@ -20,6 +20,7 @@ stratop global
   down     : <int -> int> bs;
   tailstop : <int -> int> bs;
   inf      : <int -> int> bs;
+  resdeep  : <int -> int> bs;
 end
 rules for list
   n : int;
@@ -62,5 +63,7 @@ implicit
   [] iternd  => iterate*(dk(dec2)) ; dc(zero) end
   [] repdet  => repeat*(dk(dec)) end
   [] down    => dk(wdown) end
+  // a result (id), then a recursion too deep: the result is printed
+  [] resdeep => dk(id, ndrec) end
 end
 end

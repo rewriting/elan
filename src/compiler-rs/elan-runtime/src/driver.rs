@@ -19,10 +19,12 @@
 //!
 //! Exit statuses: 0 success, 1 run-time error ([`fatal`], `-help`), 2
 //! construct not supported ([`unsupported`]), 3 recursion too deep
-//! ([`crate::depth`]).
+//! ([`crate::depth`]). On an error (1, 2, 3) the results printed before
+//! are written first ([`flush_output`]).
 
 use std::cell::Cell;
 use std::io::Write;
+use std::sync::{Mutex, MutexGuard, TryLockError};
 use std::time::Instant;
 
 use crate::print::{Print, Writer};
@@ -154,17 +156,69 @@ impl<W: Write> Session<W> {
 }
 
 /// A run-time error of the program (the interpreter's `interr()`): the
-/// message on the standard error, exit status 1. The results printed
-/// before are lost when the standard output is a buffered session.
+/// results printed before are flushed ([`flush_output`]), then the message
+/// on the standard error, exit status 1.
 pub fn fatal(msg: &str) -> ! {
+    flush_output();
     eprintln!("{msg}");
     std::process::exit(1)
+}
+
+/// The bytes written to [`ProgramOut`] and not yet to the standard output.
+static OUT_BUF: Mutex<Vec<u8>> = Mutex::new(Vec::new());
+/// [`ProgramOut`] writes its buffer when it holds this many bytes.
+const OUT_CAP: usize = 1 << 16;
+
+fn out_buf() -> MutexGuard<'static, Vec<u8>> {
+    OUT_BUF.lock().unwrap_or_else(|p| p.into_inner())
+}
+
+fn drain(buf: &mut Vec<u8>) -> std::io::Result<()> {
+    let mut o = std::io::stdout().lock();
+    let r = o.write_all(buf).and_then(|_| o.flush());
+    buf.clear();
+    r
+}
+
+/// The standard output of a generated program ([`main_program`]): buffered
+/// in a global buffer, so that [`fatal`] and [`crate::depth::too_deep`],
+/// which exit from anywhere in the program, can still write the results
+/// printed before ([`flush_output`]). A result is written in one call
+/// ([`Session::result`]): the buffer never holds part of one.
+pub struct ProgramOut;
+
+impl Write for ProgramOut {
+    fn write(&mut self, b: &[u8]) -> std::io::Result<usize> {
+        let mut buf = out_buf();
+        buf.extend_from_slice(b);
+        if buf.len() >= OUT_CAP {
+            drain(&mut buf)?;
+        }
+        Ok(b.len())
+    }
+
+    fn flush(&mut self) -> std::io::Result<()> {
+        drain(&mut out_buf())
+    }
+}
+
+/// Write what [`ProgramOut`] holds to the standard output (before an exit
+/// on an error). Does nothing if the buffer is being written (a run-time
+/// error cannot happen inside [`ProgramOut::write`]; never blocks).
+pub fn flush_output() {
+    let mut buf = match OUT_BUF.try_lock() {
+        Ok(b) => b,
+        Err(TryLockError::Poisoned(p)) => p.into_inner(),
+        Err(TryLockError::WouldBlock) => return,
+    };
+    let _ = drain(&mut buf);
 }
 
 /// A construct that the compiler supports only partly met at run time:
 /// the message on the standard error, exit status 2 (as a refusal of
 /// `elanc-rs`).
 pub fn unsupported(msg: &str) -> ! {
+    flush_output();
     eprintln!("elan-runtime: not supported yet: {msg}");
     std::process::exit(2)
 }
@@ -198,7 +252,7 @@ pub fn run_with_stack<R: Send + 'static, F: FnOnce() -> R + Send + 'static>(
 /// then stops with an error, exit status 2).
 pub fn main_program<F>(query_sort: &'static str, program: F)
 where
-    F: FnOnce(&mut Session<std::io::BufWriter<std::io::Stdout>>) + Send + 'static,
+    F: FnOnce(&mut Session<ProgramOut>) + Send + 'static,
 {
     let options = Options::from_env();
     if options.help {
@@ -207,8 +261,7 @@ where
     }
     let code = run_with_stack(BIG_STACK, move || {
         crate::depth::set_limit(BIG_STACK);
-        let out = std::io::BufWriter::new(std::io::stdout());
-        let mut s = Session::new(options, out);
+        let mut s = Session::new(options, ProgramOut);
         if !s.options.no_input {
             let _ = writeln!(s.out, "Enter a query term of sort '{}'", query_sort);
             let _ = s.out.flush();

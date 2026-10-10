@@ -102,15 +102,15 @@ pub fn too_deep_message(size: usize) -> String {
     )
 }
 
-/// Print the message on the standard error and exit with [`DEPTH_EXIT`].
-/// Results still buffered on the standard output are lost (as with
-/// [`crate::fatal`]).
+/// Write the results printed so far ([`crate::driver::flush_output`]),
+/// print the message on the standard error and exit with [`DEPTH_EXIT`].
 #[cold]
 #[inline(never)]
 pub fn too_deep() -> ! {
     let size = SIZE.load(Relaxed);
     // no more guarded calls on this thread: the message has the margin
     LIMIT.store(0, Relaxed);
+    crate::driver::flush_output();
     eprintln!("{}", too_deep_message(size));
     std::process::exit(DEPTH_EXIT)
 }

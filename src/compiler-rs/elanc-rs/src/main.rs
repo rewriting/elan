@@ -38,6 +38,11 @@
 //! not supported yet (later stages of S6), 1 on any other failure. `-v`
 //! prints the commands and the build time; `--no-build` stops after
 //! writing the crate.
+//!
+//! The generated programs exit with 0 on success, 1 on a run-time error
+//! (or `-help`), 2 on a construct supported only partly met at run time,
+//! 3 when the recursion is too deep (`elan-runtime`: `driver`, `depth`);
+//! on 1, 2 and 3 the results printed before are written first.
 
 use std::io::Write;
 use std::path::{Path, PathBuf};
@@ -58,7 +63,11 @@ options:
   --no-build             write the crate only
   -v                     print the commands and the build time
   the REM options of elanc (-nosplit, -quiet, -strategy NAME...) are ignored;
-  other options are passed to elan (as elanc does)";
+  other options are passed to elan (as elanc does)
+exit status: 0 success, 2 construct not supported yet, 1 other failure.
+the generated program exits with 0 success, 1 run-time error, 2 construct
+  supported only partly met at run time, 3 recursion too deep (the results
+  printed before an error are kept)";
 
 /// The REM options without argument of `elanc` (`src/compiler/scripts/
 /// elanc.src`, with `-ba*`): elanc-rs accepts and ignores them, as

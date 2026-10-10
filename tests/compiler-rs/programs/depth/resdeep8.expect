@@ -1,0 +1,6 @@
+# a result, then 10^8 levels of a non-deterministic recursion: stops
+# cleanly, the result printed before is kept (written before the exit)
+status 3
+result 100000000
+stderr elan: recursion too deep
+small 100000000 1000
