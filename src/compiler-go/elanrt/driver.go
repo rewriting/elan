@@ -27,9 +27,9 @@ import (
 // while the arguments start with -; unknown ones are ignored, as in C;
 // -help/-h prints the options and exits with 1.
 //
-// Exit statuses: 0 success, 1 run-time error ([Fatal], -help), 2 construct
-// not supported ([Unsupported]), 3 recursion too deep ([TooDeep]). Every
-// exit writes the buffered output first ([Exit]).
+// Exit statuses: 0 success, 1 run-time error ([Fatal], -help, a panic of
+// the program), 2 construct not supported ([Unsupported]), 3 recursion too
+// deep ([TooDeep]). Every exit writes the buffered output first ([Exit]).
 
 // Steps is the number of rewrite steps (rule applications).
 var Steps int64
@@ -184,6 +184,14 @@ func Main(querySort string, program func(s *Session)) {
 	SetMaxStack(MaxStack)
 	done := make(chan int)
 	go func() {
+		defer func() {
+			// a panic is a bug (of the compiler or the runtime): a run-time
+			// error, the results so far kept, not Go's exit status 2
+			// (which says "not supported yet")
+			if r := recover(); r != nil {
+				Fatal(fmt.Sprintf("elanrt: internal error: %v\n%s", r, debug.Stack()))
+			}
+		}()
 		s := NewSession(o, Out)
 		if !o.NoInput {
 			fmt.Fprintf(Out, "Enter a query term of sort '%s'\n", querySort)

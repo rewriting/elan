@@ -60,7 +60,10 @@ func (p *prog) op(sort uint32, symbol int32, name string, args []uint32, semanti
 		p.p.Identifiers = append(p.p.Identifiers, ref.TableEntry{Index: id, Name: name})
 		rhs = append(rhs, ref.Lexem{Kind: ref.LexIdent, N: int64(id)})
 	}
-	if len(infix) > 0 {
+	if name == "" {
+		// an injection @ : (s) s'
+		rhs = append(rhs, ref.Lexem{Kind: ref.LexType, N: int64(args[0])})
+	} else if len(infix) > 0 {
 		rhs = append(rhs, ref.Lexem{Kind: ref.LexType, N: int64(args[0])})
 		ident()
 		rhs = append(rhs, ref.Lexem{Kind: ref.LexType, N: int64(args[1])})
@@ -249,5 +252,36 @@ func TestWherePatternsThatReadNothing(t *testing.T) {
 	want := "\nresult = r(s(o),s(s(o)))\n\nrewrite_step = 2\n"
 	if got := run(t, wherePatterns()); got != want {
 		t.Errorf("where patterns: %q, want %q", got, want)
+	}
+}
+
+// boxedInts: int (an injection of builtinInt) is boxed, because g(s(o))
+// is stuck; builtinInt + is total (it only sees values): it reads them with a
+// checked accessor naming it, not .Int (0 on a stuck term).
+func boxedInts() *prog {
+	const sInts = 331
+	p := newProg()
+	p.p.Sorts = append(p.p.Sorts, ref.Sort{Index: sInts, Name: "int"})
+	p.op(sInt, 3, "+", []uint32{sInt, sInt}, 3, true)
+	p.op(sInts, 300, "", []uint32{sInt}, 0)
+	p.op(sInts, 301, "plus", []uint32{sInts, sInts}, 0)
+	p.op(sInts, 302, "g", []uint32{sNat}, 0)
+	p.op(sNat, 318, "o", nil, 0)
+	p.op(sNat, 319, "s", []uint32{sNat}, 0)
+	p.op(sOut, 400, "r", []uint32{sInts, sInts}, 0)
+	p.rule(sInts, f(301, f(300, v(0, sInt)), f(300, v(1, sInt))), f(300, f(3, v(0, sInt), v(1, sInt))))
+	p.rule(sInts, f(302, f(318)), f(300, ref.Int{Value: 0}))
+	p.p.Query.ResultSort = sOut
+	p.p.Query.StartWith = f(400, f(301, f(300, ref.Int{Value: 1}), f(300, ref.Int{Value: 2})), f(302, f(319, f(318))))
+	return p
+}
+
+func TestTotalBuiltinReadsBoxedValuesChecked(t *testing.T) {
+	src := boxedInts().gen(t)
+	if !strings.Contains(src, `v0 := rt.MustInt(a0, "plus_3")`) || strings.Contains(src, "a0.Int") {
+		t.Errorf("unchecked unboxing in\n%s", src)
+	}
+	if got := run(t, boxedInts()); got != "\nresult = r(3,g(s(o)))\n\nrewrite_step = 1\n" {
+		t.Errorf("boxed ints: %q", got)
 	}
 }

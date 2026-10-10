@@ -1,6 +1,10 @@
 package elanrt
 
-import "testing"
+import (
+	"fmt"
+	"strings"
+	"testing"
+)
 
 // Values checked with the interpreter (elan -b, macOS arm64; elanc-rs
 // elan-runtime/tests/builtins.rs).
@@ -154,5 +158,27 @@ func TestStuckBuiltinTerms(t *testing.T) {
 	}
 	if s, ok := StrValue(MkStr("a")); !ok || s != "a" {
 		t.Fatal("StrValue")
+	}
+}
+
+// The values received by an operator total on values: a term that is not
+// one is a bug, a panic naming the operator (not a silent 0).
+func TestCheckedAccessors(t *testing.T) {
+	if MustInt(MkInt(-3), "f") != -3 || !MustBool(True, "f") || MustBool(False, "f") || MustStr(MkStr("ab"), "f") != "ab" {
+		t.Fatal("values")
+	}
+	for _, c := range []func(){
+		func() { MustInt(Mk0(symO), "plus_3") },
+		func() { MustBool(MkInt(1), "plus_3") },
+		func() { MustStr(Mk0(symO), "plus_3") },
+	} {
+		func() {
+			defer func() {
+				if r := recover(); r == nil || !strings.Contains(fmt.Sprint(r), "plus_3") {
+					t.Fatalf("panic %v", r)
+				}
+			}()
+			c()
+		}()
 	}
 }

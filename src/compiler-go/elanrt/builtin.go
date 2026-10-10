@@ -151,6 +151,41 @@ func StrValue(t Term) (string, bool) {
 	return StrOf(t), true
 }
 
+// MustInt is the value of the int term t received by op, an operator
+// total on values (the compiler proved that t is not stuck): a stuck term
+// is a bug, a panic naming op (a run-time error of the program), not a
+// silent 0.
+func MustInt(t Term, op string) int32 {
+	if t.Sym != SymInt {
+		notAValue(t, op)
+	}
+	return t.Int
+}
+
+// MustBool is [MustInt] for bool.
+func MustBool(t Term, op string) bool {
+	if !IsBool(t) {
+		notAValue(t, op)
+	}
+	return t == True
+}
+
+// MustStr is [MustInt] for string.
+func MustStr(t Term, op string) string {
+	if t.Sym != SymString {
+		notAValue(t, op)
+	}
+	return StrOf(t)
+}
+
+func notAValue(t Term, op string) {
+	name := "?"
+	if t.Sym >= 0 && int(t.Sym) < len(Syms) {
+		name = Syms[t.Sym].Name
+	}
+	panic(op + ": an argument is not a value (a term of head " + name + "), the operator was compiled as total")
+}
+
 // Lift1 applies the builtin operation op to a: op's result if a is a value
 // and op is defined on it, else the stuck term sym(a).
 func Lift1(sym int32, a Term, op func(a Term) (Term, bool)) Term {

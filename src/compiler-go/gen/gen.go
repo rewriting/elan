@@ -570,8 +570,9 @@ func (e *emitter) builtinBody(o ir.OpID) {
 		vals[i] = fmt.Sprintf("v%d", i)
 		a := fmt.Sprintf("a%d", i)
 		if op.Total {
-			// a boxed family whose terms of this sort are values
-			e.line("v%d := %s", i, e.unboxValue(f.Kind, a))
+			// a boxed family whose terms of this sort are values: checked
+			// (a stuck term would be a bug, a panic naming the operator)
+			e.line("v%d := %s", i, e.unboxValue(f.Kind, a, op.Fun))
 			continue
 		}
 		get := map[ir.BuiltinKind]string{ir.KindInt: "rt.IntOf", ir.KindBool: "rt.BoolOf", ir.KindStr: "rt.StrValue"}[f.Kind]
@@ -637,15 +638,11 @@ func (e *emitter) builtinBody(o ir.OpID) {
 	e.line("return %s", e.fromValue(res, value))
 }
 
-// unboxValue is the value of kind k of the boxed value t.
-func (e *emitter) unboxValue(k ir.BuiltinKind, t string) string {
-	switch k {
-	case ir.KindInt:
-		return t + ".Int"
-	case ir.KindBool:
-		return t + " == rt.True"
-	}
-	return "rt.StrOf(" + t + ")"
+// unboxValue is the value of kind k of the boxed value t received by the
+// function fun (checked: rt.MustInt...).
+func (e *emitter) unboxValue(k ir.BuiltinKind, t, fun string) string {
+	get := map[ir.BuiltinKind]string{ir.KindInt: "rt.MustInt", ir.KindBool: "rt.MustBool", ir.KindStr: "rt.MustStr"}[k]
+	return fmt.Sprintf("%s(%s, %s)", get, t, goString(fun))
 }
 
 // ---------------------------------------------------------------------------
