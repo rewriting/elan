@@ -12,4 +12,5 @@ add_custom_target(elanc_go ALL
 install(PROGRAMS ${ELAN_GO_BIN} DESTINATION bin)
 # generated programs import the runtime module by a replace directive
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/elanrt/
-        DESTINATION share/elan-go/elanrt)
+        DESTINATION share/elan-go/elanrt
+        PATTERN "*_test.go" EXCLUDE)
