@@ -117,7 +117,7 @@ impl<W: Write> Session<W> {
         t.print(&mut self.writer);
         self.writer.raw("\n");
         let s = self.writer.take();
-        let _ = self.out.write_all(s.as_bytes());
+        let _ = self.out.write_all(&s);
     }
 
     /// Number of results printed so far.

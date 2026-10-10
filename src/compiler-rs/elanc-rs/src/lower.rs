@@ -85,7 +85,7 @@ enum TT {
     Var(u32, SortIndex),
     EVar,
     Int(i64),
-    Str(String),
+    Str(Vec<u8>),
 }
 
 /// Typing failure: a type mismatch (try another profile) or a hard error.
@@ -110,10 +110,13 @@ fn builtin_kind(name: &str) -> Option<BuiltinKind> {
     }
 }
 
-/// Decode a `STRING(...)` term: C `char`s (signed bytes).
-fn decode_string(cs: &[i32]) -> String {
-    let bytes: Vec<u8> = cs.iter().map(|&c| c as u8).collect();
-    String::from_utf8_lossy(&bytes).into_owned()
+/// Decode a `STRING(...)` term: C `char`s (signed bytes), kept as bytes
+/// (a string is a C string: it stops at a NUL byte).
+fn decode_string(cs: &[i32]) -> Vec<u8> {
+    cs.iter()
+        .map(|&c| c as u8)
+        .take_while(|&c| c != 0)
+        .collect()
 }
 
 /// Lower a program; `name` is the program name (for the crate).
@@ -1211,7 +1214,7 @@ fn render(b: &Builder, t: &TT, out: &mut String) {
             }
             out.push_str(&n.to_string())
         }
-        TT::Str(s) => out.push_str(&format!("{s:?}")),
+        TT::Str(s) => out.push_str(&string_text(s)),
         TT::Op(c, args) => {
             // the declaration's syntax (the printing form may be an alias)
             let mut i = 0;

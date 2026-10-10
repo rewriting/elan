@@ -101,7 +101,7 @@ pub enum BuiltinKind {
     Int,
     /// `bool`: a `bool`.
     Bool,
-    /// `builtinString`: a `Str` (`Rc<str>`).
+    /// `builtinString`: a `Str` (`Rc<[u8]>`: bytes, as C strings).
     Str,
 }
 
@@ -345,7 +345,7 @@ pub enum Pattern {
     /// A builtinInt literal (already wrapped to 32 bits).
     Int(i64),
     /// A builtinString literal.
-    Str(String),
+    Str(Vec<u8>),
 }
 
 /// A condition or local assignment of a rule.
@@ -370,7 +370,7 @@ pub enum Expr {
     Var(VarId),
     Op { op: OpId, args: Vec<Expr> },
     Int(i64),
-    Str(String),
+    Str(Vec<u8>),
 }
 
 /// A position under the arguments of the function: the argument number,
@@ -411,7 +411,7 @@ pub enum Head {
     /// are at `occ ++ [i]`.
     Op(OpId),
     Int(i64),
-    Str(String),
+    Str(Vec<u8>),
 }
 
 /// The query's start term (`start with () t`, run by `-noInput`).
@@ -430,4 +430,23 @@ impl Ir {
             Repr::Enum { .. } => None,
         }
     }
+}
+
+/// A builtin string for the reader (comments, messages): quoted, its bytes
+/// as Latin-1 characters (ELAN sources are Latin-1), control bytes, `"`
+/// and `\` escaped.
+pub fn string_text(b: &[u8]) -> String {
+    let mut s = String::from("\"");
+    for &c in b {
+        match c {
+            b'"' | b'\\' => {
+                s.push('\\');
+                s.push(c as char);
+            }
+            0..=0x1f | 0x7f => s.push_str(&format!("\\x{c:02x}")),
+            _ => s.push(c as char),
+        }
+    }
+    s.push('"');
+    s
 }

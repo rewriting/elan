@@ -150,6 +150,26 @@ impl Out {
     }
 }
 
+/// A Rust byte string literal (`b"caf\xe9"`): printable ASCII as it is,
+/// other bytes escaped.
+pub fn byte_lit(b: &[u8]) -> String {
+    let mut s = String::from("b\"");
+    for &c in b {
+        match c {
+            b'"' | b'\\' => {
+                s.push('\\');
+                s.push(c as char);
+            }
+            0x20..=0x7e => s.push(c as char),
+            _ => {
+                let _ = write!(s, "\\x{c:02x}");
+            }
+        }
+    }
+    s.push('"');
+    s
+}
+
 /// Name of the Rust variable holding the term at a position.
 fn occ_name(occ: &Occ) -> String {
     let mut s = format!("a{}", occ[0]);
@@ -318,10 +338,10 @@ impl<'a> Emitter<'a> {
         self.wrap(self.int_sort().expect("builtinInt"), &v)
     }
 
-    fn lit_str(&self, s: &str) -> String {
+    fn lit_str(&self, s: &[u8]) -> String {
         self.wrap(
             self.str_sort().expect("builtinString"),
-            &format!("Str::from({s:?})"),
+            &format!("Str::from(&{}[..])", byte_lit(s)),
         )
     }
 
@@ -331,7 +351,7 @@ impl<'a> Emitter<'a> {
             match h {
                 Head::Int(n) if *n < 0 => format!("*{v} == ({n})"),
                 Head::Int(n) => format!("*{v} == {n}"),
-                Head::Str(st) => format!("&**{v} == {st:?}"),
+                Head::Str(st) => format!("&**{v} == {}", byte_lit(st)),
                 Head::Op(o) => match self.ir.ops[*o].kind {
                     OpKind::BoolConst(true) => format!("*{v}"),
                     OpKind::BoolConst(false) => format!("!*{v}"),
@@ -1001,6 +1021,13 @@ fn o_ops(e: &mut Emitter) {
 #[cfg(test)]
 mod tests {
     use super::package_name;
+
+    #[test]
+    fn byte_literals() {
+        assert_eq!(super::byte_lit(b"a\"b\\c"), r#"b"a\"b\\c""#);
+        assert_eq!(super::byte_lit(b"caf\xe9\n"), r#"b"caf\xe9\x0a""#);
+        assert_eq!(super::byte_lit(b""), r#"b"""#);
+    }
 
     #[test]
     fn package_names_depend_on_the_content_only() {

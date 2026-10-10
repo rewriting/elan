@@ -65,9 +65,12 @@ pub enum StringStyle {
     Raw,
 }
 
-/// A text sink with the C printer's token-spacing state.
+/// A byte sink with the C printer's token-spacing state. The output is
+/// bytes, as the C runtime's: builtin strings are written as they are, and
+/// the identifiers of the `.ref` (Latin-1 characters) one byte per
+/// character ([`Writer::ident`]).
 pub struct Writer {
-    buf: String,
+    buf: Vec<u8>,
     alnum: bool,
     pub string_style: StringStyle,
 }
@@ -86,7 +89,7 @@ impl Default for Writer {
 impl Writer {
     pub fn new() -> Writer {
         Writer {
-            buf: String::new(),
+            buf: Vec::new(),
             alnum: false,
             string_style: StringStyle::Quoted,
         }
@@ -98,18 +101,20 @@ impl Writer {
             return;
         };
         if self.alnum && letter_or_digit(first) {
-            self.buf.push(' ');
+            self.buf.push(b' ');
         }
-        self.buf.push_str(s);
+        for c in s.chars() {
+            self.push_char(c);
+        }
         self.alnum = letter_or_digit(last);
     }
 
     /// A one-character token (C `CHARCODE`): `(`, `,`, `.`, ...
     pub fn ch(&mut self, c: char) {
         if self.alnum && letter_or_digit(c) {
-            self.buf.push(' ');
+            self.buf.push(b' ');
         }
-        self.buf.push(c);
+        self.push_char(c);
         self.alnum = letter_or_digit(c);
     }
 
@@ -117,38 +122,51 @@ impl Writer {
     /// whenever the previous token ended alphanumerically.
     pub fn num_code(&mut self, n: i64) {
         if self.alnum {
-            self.buf.push(' ');
+            self.buf.push(b' ');
         }
-        self.buf.push_str(&n.to_string());
+        self.buf.extend_from_slice(n.to_string().as_bytes());
         self.alnum = true;
     }
 
     /// A builtin int (low 32 bits); the spacing flag is left unchanged.
     pub fn int(&mut self, n: Int) {
-        self.buf.push_str(&int_print(n).to_string());
+        self.buf
+            .extend_from_slice(int_print(n).to_string().as_bytes());
     }
 
     /// A builtin string (style [`Writer::string_style`]); the spacing flag
     /// is left unchanged. Quoted strings escape `"` and `\` with `\`.
-    pub fn string(&mut self, s: &str) {
+    /// The bytes are written as they are.
+    pub fn string(&mut self, s: &[u8]) {
         match self.string_style {
-            StringStyle::Raw => self.buf.push_str(s),
+            StringStyle::Raw => self.buf.extend_from_slice(s),
             StringStyle::Quoted => {
-                self.buf.push('"');
-                for c in s.chars() {
-                    if c == '"' || c == '\\' {
-                        self.buf.push('\\');
+                self.buf.push(b'"');
+                for &c in s {
+                    if c == b'"' || c == b'\\' {
+                        self.buf.push(b'\\');
                     }
                     self.buf.push(c);
                 }
-                self.buf.push('"');
+                self.buf.push(b'"');
             }
         }
     }
 
     /// Text outside the term syntax (`result = `): no spacing, flag kept.
     pub fn raw(&mut self, s: &str) {
-        self.buf.push_str(s);
+        self.buf.extend_from_slice(s.as_bytes());
+    }
+
+    /// A character of an identifier or a token: one byte when it is
+    /// Latin-1 (the `.ref` decoding), else its UTF-8 bytes.
+    fn push_char(&mut self, c: char) {
+        if (c as u32) < 256 {
+            self.buf.push(c as u32 as u8);
+        } else {
+            let mut b = [0; 4];
+            self.buf.extend_from_slice(c.encode_utf8(&mut b).as_bytes());
+        }
     }
 
     /// `name(a1,...,an)`: prefix layout with the C tokens.
@@ -178,13 +196,13 @@ impl Writer {
         }
     }
 
-    /// The text written since the last [`Writer::take`].
-    pub fn as_str(&self) -> &str {
+    /// The bytes written since the last [`Writer::take`].
+    pub fn as_bytes(&self) -> &[u8] {
         &self.buf
     }
 
-    /// Take the text (the spacing flag is kept).
-    pub fn take(&mut self) -> String {
+    /// Take the bytes written (the spacing flag is kept).
+    pub fn take(&mut self) -> Vec<u8> {
         std::mem::take(&mut self.buf)
     }
 
@@ -194,9 +212,10 @@ impl Writer {
     }
 }
 
-/// A term as a string, with a fresh printer (tests, error messages).
+/// A term as a string, with a fresh printer (tests, error messages; bytes
+/// that are not UTF-8 are replaced, see [`Writer::take`] for the bytes).
 pub fn to_text<P: Print + ?Sized>(t: &P) -> String {
     let mut w = Writer::new();
     t.print(&mut w);
-    w.take()
+    String::from_utf8_lossy(&w.take()).into_owned()
 }

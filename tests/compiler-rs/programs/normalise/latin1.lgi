@@ -1,0 +1,6 @@
+LPL latin1 description
+  query of sort bool
+  result of sort out
+  import latin1
+  start with () r(strlen("café"), substr("hÃ©llo", 1, 1), "é"[0], strcmp("é", "e"), string(233) + "té", strcmp("é", "è"))
+end

@@ -30,7 +30,7 @@ fn token_spacing_as_the_c_printer() {
     w.ch('(');
     w.num_code(2);
     w.ident("w");
-    assert_eq!(w.take(), "if x+y3 z(2 w");
+    assert_eq!(w.take(), b"if x+y3 z(2 w");
 }
 
 /// Exact output of the C main program (`-noInput -quiet`), including the
@@ -95,12 +95,12 @@ fn builtin_values_print() {
     use elan_runtime::print::StringStyle;
     use elan_runtime::{Builtin, Int, Str};
     on_thread(8 << 10, || {
-        let s: Str = Str::from("a b");
+        let s: Str = Str::from(&b"a b"[..]);
         assert_eq!(to_text(&s), "\"a b\"");
         let mut w = Writer::new();
         w.string_style = StringStyle::Raw;
         s.print(&mut w);
-        assert_eq!(w.take(), "a b");
+        assert_eq!(w.take(), b"a b");
         let v: Builtin<Int, N> = Builtin::Val(3);
         assert_eq!(to_text(&v), "3");
         let st: Builtin<Int, N> = Builtin::Stuck(nat(1));

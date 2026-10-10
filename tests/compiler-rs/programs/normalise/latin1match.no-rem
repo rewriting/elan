@@ -1,0 +1,3 @@
+REM generates `case "￩":` (a C string, not a char constant) for a
+string pattern with a byte above 127 (latin1.lgi covers the other string
+operations with REM).

@@ -51,32 +51,59 @@ fn int_prints_low_32_bits() {
     w.int(4294967296 + 7);
     w.ch(' ');
     w.ident(bool_print(true));
-    assert_eq!(w.take(), "7 true");
+    assert_eq!(w.take(), b"7 true");
 }
 
 #[test]
 fn strings_as_the_interpreter() {
-    assert_eq!(str_len("abc"), 3);
-    assert_eq!(&*str_cat("ab", "c d"), "abc d");
-    assert_eq!(str_cmp("a", "d"), -3);
-    assert_eq!(str_cmp("da", "a"), 3);
-    assert_eq!(str_cmp("ab", "ab"), 0);
-    assert_eq!(str_cmp("ab", "a"), 98);
-    assert_eq!(str_spn("aab", "a"), 2);
-    assert_eq!(&*str_of_char(65), "A");
-    assert_eq!(str_substr("abcd", 1, 2).as_deref(), Some("bc"));
+    assert_eq!(str_len(b"abc"), 3);
+    assert_eq!(&*str_cat(b"ab", b"c d"), b"abc d");
+    assert_eq!(str_cmp(b"a", b"d"), -3);
+    assert_eq!(str_cmp(b"da", b"a"), 3);
+    assert_eq!(str_cmp(b"ab", b"ab"), 0);
+    assert_eq!(str_cmp(b"ab", b"a"), 98);
+    assert_eq!(str_spn(b"aab", b"a"), 2);
+    assert_eq!(&*str_of_char(65), b"A");
+    assert_eq!(str_substr(b"abcd", 1, 2).as_deref(), Some(&b"bc"[..]));
     // out of range: stuck (the interpreter prints string_substr("abc",1,5))
-    assert_eq!(str_substr("abc", 1, 5), None);
-    assert_eq!(str_index("abc", 1), Some(98));
-    assert_eq!(str_index("abc", 3), None);
-    assert_eq!(str_modif("abc", 0, 120).as_deref(), Some("xbc"));
-    assert_eq!(str_modif("abc", -1, 120), None);
+    assert_eq!(str_substr(b"abc", 1, 5), None);
+    assert_eq!(str_index(b"abc", 1), Some(98));
+    assert_eq!(str_index(b"abc", 3), None);
+    assert_eq!(str_modif(b"abc", 0, 120).as_deref(), Some(&b"xbc"[..]));
+    assert_eq!(str_modif(b"abc", -1, 120), None);
     let mut w = Writer::new();
-    w.string("a\"b");
-    assert_eq!(w.take(), "\"a\\\"b\"");
+    w.string(b"a\"b");
+    assert_eq!(w.take(), b"\"a\\\"b\"");
     w.string_style = elan_runtime::print::StringStyle::Raw;
-    w.string("abc d");
-    assert_eq!(w.take(), "abc d");
+    w.string(b"abc d");
+    assert_eq!(w.take(), b"abc d");
+}
+
+/// Strings are bytes, as the interpreter's C strings (ELAN sources are
+/// Latin-1): a byte above 127 is one character, kept as it is.
+#[test]
+fn strings_are_bytes() {
+    assert_eq!(str_len(b"caf\xe9"), 4);
+    assert_eq!(
+        str_substr(b"h\xc3\xa9llo", 1, 1).as_deref(),
+        Some(&b"\xc3"[..])
+    );
+    assert_ne!(Str::from(&b"\xe9"[..]), Str::from(&b"\xe8"[..]));
+    // a signed C char (macOS), strcmp on unsigned bytes
+    assert_eq!(str_index(b"\xe9", 0), Some(-23));
+    assert_eq!(str_cmp(b"\xe9", b"e"), 132);
+    assert_eq!(&*str_of_char(233), b"\xe9");
+    assert_eq!(&*str_cat(&str_of_char(233), b"t\xe9"), b"\xe9t\xe9");
+    assert_eq!(str_modif(b"abc", 1, 0xe9).as_deref(), Some(&b"a\xe9c"[..]));
+    // printed as bytes, quoted or raw
+    let mut w = Writer::new();
+    w.string(b"\xe9\xc3");
+    assert_eq!(w.take(), b"\"\xe9\xc3\"");
+    w.string_style = elan_runtime::print::StringStyle::Raw;
+    w.string(b"t\xe9");
+    // identifiers of the .ref are Latin-1 characters: one byte each
+    w.ident("caf\u{e9}");
+    assert_eq!(w.take(), b"t\xe9caf\xe9");
 }
 
 // A builtin result sort that can be stuck: `f : (int) int` with no rule
@@ -121,4 +148,19 @@ fn stuck_builtin_terms() {
         // stuck terms are shared terms
         assert_eq!(plus(&f(&Builtin::Val(0)), &one), st);
     })
+}
+
+/// Strings are C strings (rtmisc.cc): string(c) and s[i <- c] store the
+/// low byte of c, and a NUL byte ends the string.
+#[test]
+fn strings_stop_at_nul() {
+    assert_eq!(str_len(&str_of_char(0)), 0);
+    assert_eq!(str_len(&str_of_char(256)), 0);
+    assert_eq!(str_modif(b"abc", 1, 0).as_deref(), Some(&b"a"[..]));
+    assert_eq!(str_modif(b"xyz", 0, 256).map(|s| str_len(&s)), Some(0));
+    assert_eq!(
+        str_modif(b"abc", 2, 100 + 256).as_deref(),
+        Some(&b"abd"[..])
+    );
+    assert_eq!(&*str_cat(b"ab", &str_of_char(0)), b"ab");
 }

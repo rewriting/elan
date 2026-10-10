@@ -1,0 +1,6 @@
+LPL cstrings description
+  query of sort bool
+  result of sort out
+  import cstrings
+  start with () r(string(0), strlen(string(0)), "abc"[1 <- 0], strlen("xyz"[0 <- 256]), strlen("ab" + string(0) + "c"), "abc"[2 <- 100])
+end

@@ -1,0 +1,10 @@
+module cstrings
+// Strings are C strings: a string stops at its first NUL byte
+// (rtmisc.cc: string(0) is "", s[i <- 0] truncates at i, the char
+// stored by s[i <- c] is the low byte of c).
+import global int bool string; end
+sort out; end
+operators global
+  r(@,@,@,@,@,@) : (string int string int int string) out;
+end
+end

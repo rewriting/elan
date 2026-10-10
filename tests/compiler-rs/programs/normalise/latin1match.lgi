@@ -1,0 +1,6 @@
+LPL latin1match description
+  query of sort bool
+  result of sort out
+  import latin1match
+  start with () r(k("è"), k("é"), k("café"))
+end

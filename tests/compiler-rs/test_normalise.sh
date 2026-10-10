@@ -18,7 +18,9 @@
 # Exceptions, each documented in its file: <name>.rem holds the expected
 # REM result line when REM differs on purpose (the elanc-rs result is then
 # compared with the interpreter only); <name>.no-interpreter says why the
-# interpreter is not run.
+# interpreter is not run, <name>.no-rem why REM is not run.
+# Outputs are compared as bytes (LC_ALL=C): strings are bytes, and the
+# sources of latin1*.eln are Latin-1.
 # Programs programs/refused/<name>.lgi use constructs of later stages:
 # elanc-rs must stop with status 2 and a "not supported yet" message, and
 # remove the a.out left by a previous compilation.
@@ -32,7 +34,7 @@
 PREFIX=${1:?usage: test_normalise.sh PREFIX}
 PREFIX=$(cd "$PREFIX" && pwd) || exit 2
 HERE=$(cd "$(dirname "$0")" && pwd)
-export ELANLIB=$PREFIX PATH=$PREFIX/bin:$PATH
+export ELANLIB=$PREFIX PATH=$PREFIX/bin:$PATH LC_ALL=C
 TARGET=${ELANC_RS_TARGET_DIR:-$HERE/work/target}
 
 mkdir -p "$HERE/work" "$TARGET" || exit 2
@@ -77,6 +79,8 @@ for lgi in "$HERE"/programs/normalise/*.lgi; do
   # REM
   if [ -z "$HAVE_REM" ]; then
     echo "skip $name vs REM (elanc not installed)"
+  elif [ -f "$HERE/programs/normalise/$name.no-rem" ]; then
+    echo "skip $name vs REM ($name.no-rem)"
   elif ( cd "$d/rem" && elanc -b -nosplit -quiet "$name" >elanc.log 2>&1 \
        && make -f "$name.make" >make.log 2>&1 ); then
     rem=$( cd "$d/rem" && ./a.out -noInput -quiet 2>&1 | grep '^result = ' )

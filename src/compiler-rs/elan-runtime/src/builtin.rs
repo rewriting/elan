@@ -36,9 +36,15 @@
 //!
 //! # string
 //!
-//! [`Str`] = `Rc<str>` (cheap clone, structural equality). The primitives of
-//! `builtinString.eln` mirror `rtmisc.cc` (`STRLENGTH`..`STRNG`); the partial
-//! ones return `None` where the interpreter leaves the term unreduced.
+//! [`Str`] = `Rc<[u8]>` (cheap clone, structural equality): a string is
+//! **bytes**, as the interpreter's C strings, not UTF-8 text. ELAN sources
+//! are Latin-1 bytes: `"café"` is 4 bytes, `"\xe9"` and `"\xe8"` differ,
+//! and a string is printed as its bytes. A string never contains a NUL
+//! byte: the interpreter's strings end at the first NUL (`strlen`), so
+//! `string(0)` is `""` and `s[i <- 0]` truncates `s` at `i`
+//! ([`str_of_char`], [`str_modif`]). The primitives of `builtinString.eln`
+//! mirror `rtmisc.cc` (`STRLENGTH`..`STRNG`); the partial ones return
+//! `None` where the interpreter leaves the term unreduced.
 //! Printing: the interpreter quotes strings (`"abc d"`), the compiled C
 //! runtime prints them raw (`abc d`, `termCommon.c`); see
 //! [`crate::print::Writer::string`].
@@ -63,8 +69,8 @@ use std::rc::Rc;
 /// An ELAN `int` value (always in the `i32` range, see the module doc).
 pub type Int = i64;
 
-/// An ELAN builtin string.
-pub type Str = Rc<str>;
+/// An ELAN builtin string: bytes without NUL (module doc).
+pub type Str = Rc<[u8]>;
 
 #[inline(always)]
 fn w(x: i64) -> i64 {
@@ -132,57 +138,60 @@ pub fn bool_print(b: bool) -> &'static str {
     }
 }
 
+/// A string from bytes, as a C string: up to the first NUL byte.
+pub fn c_string(b: &[u8]) -> Str {
+    let n = b.iter().position(|&c| c == 0).unwrap_or(b.len());
+    Str::from(&b[..n])
+}
 /// `string_strlen(s)` (bytes).
-pub fn str_len(s: &str) -> Int {
+pub fn str_len(s: &[u8]) -> Int {
     w(s.len() as i64)
 }
 /// `string_strcat(s1, s2)`.
-pub fn str_cat(a: &str, b: &str) -> Str {
-    let mut s = String::with_capacity(a.len() + b.len());
-    s.push_str(a);
-    s.push_str(b);
-    s.into()
+pub fn str_cat(a: &[u8], b: &[u8]) -> Str {
+    let mut s = Vec::with_capacity(a.len() + b.len());
+    s.extend_from_slice(a);
+    s.extend_from_slice(b);
+    c_string(&s)
 }
 /// `s[i]`: the byte at i (C `char`, signed), `None` (stuck) out of range.
-pub fn str_index(s: &str, i: Int) -> Option<Int> {
-    let b = s.as_bytes();
-    if 0 <= i && (i as usize) < b.len() {
-        Some(b[i as usize] as i8 as i64)
+pub fn str_index(s: &[u8], i: Int) -> Option<Int> {
+    if 0 <= i && (i as usize) < s.len() {
+        Some(s[i as usize] as i8 as i64)
     } else {
         None
     }
 }
-/// `s[i <- c]`: s with byte i replaced by c, `None` out of range. (The
-/// interpreter modifies the string in place, sharing included; here the
-/// result is a new string. A byte that breaks UTF-8 is replaced lossily.)
-pub fn str_modif(s: &str, i: Int, c: Int) -> Option<Str> {
-    let mut b = s.as_bytes().to_vec();
-    if 0 <= i && (i as usize) < b.len() {
+/// `s[i <- c]`: s with byte i replaced by the low byte of c (a NUL byte
+/// ends the string there), `None` out of range. (The interpreter modifies
+/// the string in place, sharing included; here the result is a new
+/// string.)
+pub fn str_modif(s: &[u8], i: Int, c: Int) -> Option<Str> {
+    if 0 <= i && (i as usize) < s.len() {
+        let mut b = s.to_vec();
         b[i as usize] = c as u8;
-        Some(String::from_utf8_lossy(&b).as_ref().into())
+        Some(c_string(&b))
     } else {
         None
     }
 }
 /// `string_substr(s, i, n)`: n bytes from i, `None` unless
 /// `0 <= i < len` and `0 <= n` and `i + n <= len`.
-pub fn str_substr(s: &str, i: Int, n: Int) -> Option<Str> {
+pub fn str_substr(s: &[u8], i: Int, n: Int) -> Option<Str> {
     let l = s.len() as i64;
     if !(0 <= i && i < l && 0 <= n && i + n <= l) {
         return None;
     }
-    let b = &s.as_bytes()[i as usize..(i + n) as usize];
-    Some(String::from_utf8_lossy(b).as_ref().into())
+    Some(Str::from(&s[i as usize..(i + n) as usize]))
 }
 /// `string_strspn(s, accept)` (C `strspn`).
-pub fn str_spn(s: &str, accept: &str) -> Int {
-    let a = accept.as_bytes();
-    w(s.bytes().take_while(|c| a.contains(c)).count() as i64)
+pub fn str_spn(s: &[u8], accept: &[u8]) -> Int {
+    w(s.iter().take_while(|c| accept.contains(c)).count() as i64)
 }
 /// `string_strcmp(a, b)`: as the interpreter on macOS, the difference of
-/// the first differing bytes (`strcmp("a","d") = -3`), 0 if equal.
-pub fn str_cmp(a: &str, b: &str) -> Int {
-    let (a, b) = (a.as_bytes(), b.as_bytes());
+/// the first differing bytes, unsigned (`strcmp("a","d") = -3`), 0 if
+/// equal.
+pub fn str_cmp(a: &[u8], b: &[u8]) -> Int {
     let n = a.len().max(b.len());
     for i in 0..n {
         let x = a.get(i).copied().unwrap_or(0) as i64;
@@ -193,9 +202,10 @@ pub fn str_cmp(a: &str, b: &str) -> Int {
     }
     0
 }
-/// `string_string(c)`: the one-character string of byte c.
+/// `string_string(c)`: the one-byte string of the low byte of c; `""`
+/// when that byte is NUL (a C string).
 pub fn str_of_char(c: Int) -> Str {
-    String::from_utf8_lossy(&[c as u8]).as_ref().into()
+    c_string(&[c as u8])
 }
 
 /// A value of a builtin sort that can also be a stuck term (module doc).

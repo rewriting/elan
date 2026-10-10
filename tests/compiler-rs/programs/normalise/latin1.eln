@@ -1,0 +1,9 @@
+module latin1
+// Strings are bytes (ELAN sources are Latin-1): a byte above 127 is one
+// character; s[i] is a signed C char.
+import global int bool string; end
+sort out; end
+operators global
+  r(@,@,@,@,@,@) : (int string int int string int) out;
+end
+end

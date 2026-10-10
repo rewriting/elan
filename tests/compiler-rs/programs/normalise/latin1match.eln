@@ -1,0 +1,15 @@
+module latin1match
+// A string pattern with a byte above 127 (Latin-1 source): "é" and
+// "è" are different strings.
+import global int bool string; end
+sort out; end
+operators global
+  k(@) : (string) int;
+  r(@,@,@) : (int int int) out;
+end
+rules for int
+global
+  [] k("é") => 1 end
+  [] k("café") => 2 end
+end
+end
