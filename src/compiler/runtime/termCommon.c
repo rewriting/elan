@@ -1144,7 +1144,16 @@ Gterm *term_metaApply(Gterm *t) {
           CUTOPEN();
             //printf("**********\n");
 
-          (*ptr_array)[*counter] = ((strTabFunType)strTab[index])(mainTerm);
+          /* The strategy returns once per result (backtracking restores
+             the C stack copied at its choice points): the address of the
+             element must be computed after the call. GCC computed it
+             before (unspecified order), from the counter of the first
+             return: every result went to the first element, a NULL was
+             left in the second, and the program crashed (2026). */
+          {
+            Gterm *r = ((strTabFunType)strTab[index])(mainTerm);
+            (*ptr_array)[*counter] = r;
+          }
             //printf("*ptr_array[%d] = ",*counter); term_printnl(stdout,(*ptr_array)[*counter]);
           
           (*counter)++;
