@@ -986,17 +986,20 @@ struct Pending<'p> {
     ctx: String,
 }
 
+/// The `call "name":X` reached: (name, `Strateg[X]`) -> the strategy for
+/// a term of sort X, and for a term of unknown sort (`None`: X is neither
+/// builtinInt nor builtinString, its terms have a symbol; `Err`: the
+/// refusal, reported if it happens at run time).
+type CallMap =
+    BTreeMap<(Vec<u8>, SortIndex), (StrategyNameIndex, Option<Result<StrategyNameIndex, String>>)>;
+
 #[derive(Default)]
 struct Reach<'p> {
     pending: Vec<Pending<'p>>,
     /// Refusals found while visiting terms.
     errors: Vec<Error>,
-    /// The `call "name":X` reached: (name, `Strateg[X]`) -> the
-    /// strategy for a term of sort X, and for a term of unknown sort.
-    calls: BTreeMap<
-        (Vec<u8>, SortIndex),
-        (StrategyNameIndex, Option<Result<StrategyNameIndex, String>>),
-    >,
+    /// The `call "name":X` reached ([`CallMap`]).
+    calls: CallMap,
     cands: Vec<usize>,
     seen: HashSet<usize>,
     todo: Vec<usize>,
