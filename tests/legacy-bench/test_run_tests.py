@@ -34,6 +34,38 @@ class RegressionDiscoveryTest(unittest.TestCase):
                              ("I", "prog", "no", "input", "expected"))
             self.assertEqual(t["dir"], case)
 
+    def test_a_case_fixing_a_2004_bug_is_marked(self):
+        with tempfile.TemporaryDirectory(dir=rt.HERE) as d:
+            for name, marked in (("fixed", True), ("plain", False)):
+                case = Path(d) / name
+                case.mkdir()
+                (case / "prog.lgi").write_text("LPL prog description end\n")
+                if marked:
+                    (case / "fixes-2004").write_text("why\n")
+            tests = {t["dir"].name: t for t in rt.discover_regression(Path(d))}
+            self.assertTrue(tests["fixed"]["fixes_2004"])
+            self.assertFalse(tests["plain"]["fixes_2004"])
+
+    def test_cases_fixing_2004_bugs_are_not_run_on_the_reference(self):
+        t = {"fixes_2004": True}
+        self.assertTrue(rt.modern_only(t, rt.REPO / "reference" / "install"))
+        self.assertFalse(rt.modern_only(t, rt.REPO / "build" / "install"))
+        self.assertFalse(rt.modern_only({}, rt.REPO / "reference" / "install"))
+
+    def test_bench_cases_listed_as_fixes_are_not_run_on_the_reference(self):
+        with tempfile.TemporaryDirectory(dir=rt.HERE) as d:
+            f = Path(d) / "fixes-2004.tsv"
+            f.write_text("# comment\nx/Robot::I::robot:non:robot:robot\twhy\n")
+            ids = rt.load_fixes_2004(f)
+        self.assertEqual(ids, {"x/Robot::I::robot:non:robot:robot"})
+        t = {"id": "x/Robot::I::robot:non:robot:robot"}
+        self.assertTrue(rt.modern_only(t, rt.REPO / "reference" / "install", ids))
+        self.assertFalse(rt.modern_only(t, rt.REPO / "build" / "install", ids))
+
+    def test_modern_only_is_neither_a_regression_nor_an_improvement(self):
+        regress, improve = rt.judge({"a::I::p": "MODERN-ONLY"}, {"a::I::p": "PASS"}, {})
+        self.assertEqual((regress, improve), ([], []))
+
     def test_ignores_directories_without_prog_lgi(self):
         with tempfile.TemporaryDirectory(dir=rt.HERE) as d:
             (Path(d) / "notes").mkdir()
@@ -66,6 +98,7 @@ class RustCompilerKindTest(unittest.TestCase):
         for st in ("UNSUPPORTED", "ERROR", "TIMEOUT", "NOLGI"):
             self.assertFalse(rt.compares_snapshot({"kind": "R"}, st))
         self.assertTrue(rt.compares_snapshot({"kind": "J"}, "ERROR"))
+        self.assertFalse(rt.compares_snapshot({"kind": "I"}, "MODERN-ONLY"))
 
     def test_elanc_rs_target_dir_is_in_the_work_directory(self):
         e = rt.env()

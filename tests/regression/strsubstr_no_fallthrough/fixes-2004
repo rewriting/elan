@@ -1,0 +1,1 @@
+This case tests the fix of a bug of the 2004 system: the reference (make check-reference) does not run it.

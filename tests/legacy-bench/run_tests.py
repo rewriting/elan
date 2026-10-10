@@ -133,8 +133,30 @@ def discover_regression(root=REGRESSION):
         if (d / "prog.lgi").exists():
             tests.append(dict(id=f"regression/{d.name}::I::prog:no:input:expected", dir=d,
                               kind="I", lgi="prog", spc="no", inp="input", out="expected",
-                              flags=[], long=False))
+                              flags=[], long=False,
+                              fixes_2004=(d / "fixes-2004").exists()))
     return tests
+
+
+FIXES_2004 = HERE / "fixes-2004.tsv"
+FIXED_CASES = frozenset()   # loaded by main()
+
+
+def load_fixes_2004(path=FIXES_2004):
+    """fixes-2004.tsv: test-id <TAB> reason: bench cases whose output changed
+    on purpose when a bug of the 2004 system was fixed."""
+    if not Path(path).exists():
+        return set()
+    return {line.split("\t")[0] for line in Path(path).read_text().splitlines()
+            if line.strip() and not line.startswith("#")}
+
+
+def modern_only(t, prefix, fixes=frozenset()):
+    """A case that tests the fix of a bug of the 2004 system (a regression
+    case with a fixes-2004 file, or a bench case listed in fixes-2004.tsv) is
+    not run against the reference (reference/install)."""
+    return (bool(t.get("fixes_2004")) or t.get("id") in fixes) and \
+        Path(prefix).resolve() == (REPO / "reference" / "install").resolve()
 
 
 def discover_examples(root=EXAMPLES):
@@ -211,6 +233,8 @@ def sanitizer_report(err):
 
 
 def run_test(t, timeout):
+    if modern_only(t, PREFIX, FIXED_CASES):
+        return "MODERN-ONLY", "fixes a bug of the 2004 reference (fixes-2004)", ""
     expected = samples(t["dir"]) / f"{t['out']}.out"
     if not expected.exists():
         return "NOREF", f"missing {expected}", ""
@@ -289,7 +313,10 @@ def snapshot_text(t, text):
 
 def compares_snapshot(t, status):
     """Kind R: only an output of a program that ran is compared (elanc-rs
-    refuses the constructs of later stages: UNSUPPORTED)."""
+    refuses the constructs of later stages: UNSUPPORTED); a MODERN-ONLY case
+    did not run."""
+    if status == "MODERN-ONLY":
+        return False
     return t["kind"] != "R" or status in ("PASS", "PASS~", "PASS≈", "FAIL")
 
 
@@ -343,10 +370,10 @@ def judge(statuses, base, exceptions):
         if new == "SANITIZER":          # a sanitizer report is always a failure
             regress.append((tid, base.get(tid, "PASS"), new))
             continue
-        if tid in exceptions:
+        if tid in exceptions or new == "MODERN-ONLY":   # not run (fixes-2004)
             continue
         if tid.startswith(("regression/", "examples/")):
-            if new != "PASS":
+            if new not in ("PASS", "MODERN-ONLY"):
                 regress.append((tid, "PASS", new))
             continue
         if tid in base:
@@ -412,6 +439,8 @@ def main():
               "(ELAN sources contain files differing only by case; see README)")
         return 2
     exceptions = load_exceptions()
+    global FIXED_CASES
+    FIXED_CASES = frozenset(load_fixes_2004())
 
     stamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
     outdir = HERE / "results" / stamp

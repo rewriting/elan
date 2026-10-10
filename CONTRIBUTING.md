@@ -14,6 +14,10 @@ build of 2004.
    commit it on its own: refresh the snapshot and baseline
    (`tests/legacy-bench/run_tests.py --save-baseline --save-snapshots`),
    explain the fix in the message, and add a case to `tests/regression/`.
+   When the fix corrects a bug of the 2004 system, the reference keeps the
+   old behaviour: list the changed bench cases in
+   `tests/legacy-bench/fixes-2004.tsv` and put a `fixes-2004` file in the
+   regression case, so that `make check-reference` does not run them.
 5. Platform-specific snapshot differences go to
    `tests/legacy-bench/platform-exceptions.tsv` with their analysis; there is
    only one set of snapshots.

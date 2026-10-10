@@ -1,0 +1,7 @@
+# Bench cases whose output changed on purpose when a bug of the 2004 system was
+# fixed (their snapshots describe the modern system): make check-reference does
+# not run them (status MODERN-ONLY). test-id<TAB>reason
+elan3/applications/Robot::I::robot:non:robot:robot	call "eval":X took the eval of another sort (commit 93ec493): no result in 2004
+elan3/applications/Robot::I::Robot:non:Robot:Robot	same fix (commit 93ec493)
+elan3/applications/Robot::I::nim:non:nim:nim	same fix (commit 93ec493)
+elan3/applications/Robot::I::tictactoe:non:tictactoe:tictactoe	same fix (commit 93ec493)
