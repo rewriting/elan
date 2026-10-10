@@ -1,0 +1,23 @@
+module ms
+// Strategy[X] terms of Meta_strat[X] evaluated by META (set_of): calls of
+// named strategies, sequences, dk, dc, repeat, iterate, id.
+import global int list[int] Meta_apply[int]; end
+stratop global
+  two  : <int -> int> bs;
+  half : <int -> int> bs;
+  none : <int -> int> bs;
+end
+rules for int
+  n : int;
+global
+  [inc1] n => n+1 end
+  [dbl]  n => n*2 end
+  [hlf]  n => n/2 if n % 2 == 0 end
+end
+strategies for int
+implicit
+  [] two  => dk(inc1, dbl) end
+  [] half => dk(hlf) end
+  [] none => fail end
+end
+end

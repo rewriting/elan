@@ -1,0 +1,1 @@
+REM applies call "eval":state with the strategy that the export (ref/ref.cc) found for the name, of any sort: eval:int, the 2004 behaviour (result nil); the interpreter and elanc-rs look up the name with the sort of the term (commit 93ec493, tests/regression/call_strategy_by_sort).

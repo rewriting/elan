@@ -1,0 +1,6 @@
+LPL ms_repeat description
+  query of sort int
+  result of sort list[int]
+  import ms
+  start with () set_of(repeat call "half":int endrepeat, 40)
+end

@@ -1,0 +1,6 @@
+LPL ms_dc description
+  query of sort int
+  result of sort list[int]
+  import ms
+  start with () set_of(dc(call "none":int, call "two":int, call "half":int), 6)
+end

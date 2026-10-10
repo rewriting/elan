@@ -1,0 +1,1 @@
+REM does not compile the Meta_strat[X] constructors other than call (id, sequences, dk, dc, repeat, iterate: the generated C uses fun_143... without declaring them, cc rejects it).

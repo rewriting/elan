@@ -1,0 +1,6 @@
+LPL callsort_25 description
+  query of sort int
+  result of sort list[state]
+  import callsort
+  start with () setof(dk(right,up), state(2,5))
+end

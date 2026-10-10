@@ -1,0 +1,6 @@
+LPL setofint_100000 description
+  query of sort int
+  result of sort list[builtinInt]
+  import setofint
+  start with () setof(id, 100000)
+end

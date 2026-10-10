@@ -1,0 +1,6 @@
+LPL callother description
+  query of sort int
+  result of sort list[state]
+  import callother
+  start with () set_of(call "two":state, st(1))
+end

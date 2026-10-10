@@ -1,0 +1,22 @@
+module callother
+// call "name":X where the strategy name exists for another sort only: the
+// interpreter applies two:int to a term of sort state; elanc-rs refuses
+// (tests/compiler-rs/test_normalise.sh).
+import global int list[state] Meta_apply[state]; end
+sort state; end
+operators global
+  st(@) : (int) state;
+end
+stratop global
+  two : <int -> int> bs;
+end
+rules for int
+  n : int;
+global
+  [inc1] n => n+1 end
+end
+strategies for int
+implicit
+  [] two => dk(inc1) end
+end
+end

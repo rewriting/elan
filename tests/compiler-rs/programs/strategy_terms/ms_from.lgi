@@ -1,0 +1,6 @@
+LPL ms_from description
+  query of sort int
+  result of sort list[int]
+  import ms
+  start with () set_of(call "two":int call "two":int, 5, 3)
+end
