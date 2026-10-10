@@ -1,0 +1,8 @@
+# 1.2 x 10^7 levels of small frames take the stack to its largest size,
+# then 7 x 10^6 levels of frames 2-3x bigger on the same stack: stops
+# cleanly (a limit computed from the first recursion only let Go's stack
+# overflow, exit status 2)
+status 3
+stderr elan: recursion too deep
+small 12000000 1000 7000000 500
+compilers elanc-rs elanc-go

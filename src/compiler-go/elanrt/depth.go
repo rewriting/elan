@@ -5,6 +5,7 @@ import (
 	"os"
 	"runtime/debug"
 	"runtime/metrics"
+	"unsafe"
 )
 
 // Bounded recursion (spec G4): a program never dies of Go's fatal "stack
@@ -22,27 +23,47 @@ import (
 // can recurse call [Guard] at their entry and [Unguard] at their exit
 // (defer): they count the depth.
 //
-// The limit on the depth is found at run time, because the bytes per level
-// depend on the generated code: every CheckEvery levels of descent, Guard
-// reads the size of the goroutine stacks (runtime/metrics, ~0.3 us). Go
-// grows a stack by doubling it when its use crosses the current size, so
-// when the stack is seen to have grown to the ceiling, half the ceiling was
-// in use at about the current depth d: the limit becomes 3d/2, where 3/4 of
-// the ceiling is in use if the frames keep their average size (the last
-// quarter is the margin for frames up to 2x bigger than the average below
-// d). While the stack is below its ceiling there is no limit (a GC that
-// shrinks the stack removes it).
+// The limit is found at run time, because the bytes per level depend on
+// the generated code and change from one recursion to the next. Every
+// CheckEvery levels of descent, Guard takes a reading: the size of the
+// goroutine stacks (runtime/metrics, ~0.3 us) and the address of a local
+// variable (the stack pointer). Go grows a stack by doubling it when its
+// use crosses the current size, and moves it then (a copy); a GC halves a
+// stack used for less than a quarter of it. While the stack is below its
+// ceiling there is no limit: it can still grow.
+//
+// When a reading sees the stack at the ceiling for the first time (the
+// "anchor"), half the ceiling was in use at the depth dg where it grew,
+// at most the deepest level since the last reading: the use at the anchor
+// is estimated as C/2 x (d + CheckEvery)/dg (C the ceiling, d the current
+// depth: the frames of the last levels have the average size). From then
+// on the stack does not move: it cannot grow (Go's fatal overflow), and a
+// shrink by a GC is seen by the next reading (the stack below its
+// ceiling: no limit again, a new anchor when it grows back). The use at a
+// reading is then measured, not estimated: the use at the anchor plus the
+// distance between the two stack pointers, whatever the frames of the
+// recursions since the anchor (a second deep recursion with bigger frames
+// on the stack left at its ceiling by a first one, frames that grow with
+// the depth). The program stops ([TooDeep]) when the use passes 3/4 of
+// the ceiling: the last quarter is the margin for the levels until the
+// next reading (CheckEvery levels of up to 16 KiB). The next reading is
+// sooner (down to CheckEvery/16 levels) when the frames of the last
+// levels would reach the limit before.
+//
+// Condition: a shrink and a growth back to the ceiling between two
+// readings would move the stack unseen; it needs C/4 bytes of frames in at
+// most 2 x CheckEvery levels (Unguard schedules a reading CheckEvery
+// levels below the lowest level since the last one), frames of 8 KiB or
+// more. The frames of the generated code are below 1 KiB (a function of
+// 25 arguments: 160 bytes).
 //
 // Measured (Apple M4 Max, Go 1.27, tests in depth_test.go): innermost
 // normalisation building a list, 96 bytes per level, stops at 8.4 M
 // levels; a recursion on native ints, 48 bytes, 16.8 M; CPS iterate*, 160
-// bytes, 5.0 M; 4 KiB frames, 197 K. 10^6 levels of each of the first
-// three succeed. A Guard/Unguard pair costs ~2.6 ns.
-//
-// Limit of the method: the limit is computed from the frames below d. A
-// recursion whose frames above d are more than 2x bigger on average, or a
-// second deep recursion with bigger frames while the stack is still at its
-// ceiling (not shrunk by a GC), could reach Go's fatal overflow.
+// bytes, 5.0 M; 4 KiB frames, 180 K; 12 M levels of 48 bytes then 112
+// bytes per level stops at 7.2 M levels of the second recursion. 10^6
+// levels of each of the first three succeed. A Guard/Unguard pair costs
+// ~2.6 ns, a reading ~0.3 us every 16 K levels.
 //
 // The guard and the program run on one goroutine; the counters are plain
 // variables. Go's stack copy needs the old stack: memory peaks at 1.5 GiB
@@ -58,12 +79,17 @@ const CheckEvery = 1 << 14
 
 var (
 	depth     int          // current guarded depth
-	maxDepth  = NoLimit    // limit, set when the stack reaches the ceiling
+	maxDepth  = NoLimit    // estimated depth of the limit (tests, ELAN_STATS)
 	nextCheck = CheckEvery // depth of the next reading
 	lowWater  = 0          // below it, nextCheck is moved down (Unguard)
 	lastStack uint64       // stack bytes at the last reading
 	lastDepth int          // depth at the last reading
+	lastSP    uintptr      // stack pointer at the last reading
 	ceiling   uint64       // largest stack size allowed (a power of two)
+	// the anchor: the first reading with the stack at its ceiling
+	anchored  bool
+	anchorSP  uintptr // its stack pointer
+	anchorUse int64   // the bytes of stack in use there (estimated)
 )
 
 func init() {
@@ -104,7 +130,7 @@ func Unguard() {
 	depth--
 	if depth < lowWater {
 		// back up: the next descent is checked again from here
-		nextCheck, lowWater = min(depth+CheckEvery, maxDepth+1), depth-CheckEvery
+		nextCheck, lowWater = depth+CheckEvery, depth-CheckEvery
 	}
 }
 
@@ -114,8 +140,9 @@ func Depth() int { return depth }
 // NoLimit is the depth limit while the stack is below its ceiling.
 const NoLimit = 1 << 62
 
-// MaxDepth is the depth limit, NoLimit while the stack has not reached
-// its ceiling (tests).
+// MaxDepth is the depth where the use of the stack would reach the limit
+// if the frames kept the size of the last levels measured, NoLimit while
+// the stack is below its ceiling (tests, ELAN_STATS).
 func MaxDepth() int { return maxDepth }
 
 var stackSample = []metrics.Sample{{Name: "/memory/classes/heap/stacks:bytes"}}
@@ -127,27 +154,53 @@ func stackBytes() uint64 {
 	return stackSample[0].Value.Uint64()
 }
 
+// stackPointer is the address of a local variable of its caller's
+// caller frame, near the stack pointer (the stack grows down).
+//
+//go:noinline
+func stackPointer() uintptr {
+	var x byte
+	return uintptr(unsafe.Pointer(&x))
+}
+
 func checkDepth() {
-	if depth > maxDepth {
-		TooDeep()
-	}
-	s := stackBytes()
-	switch {
-	case s < ceiling:
+	s, sp := stackBytes(), stackPointer()
+	step := CheckEvery
+	if s < ceiling {
 		// below the ceiling (again, after a GC shrank the stack): no
 		// limit, a growth to the ceiling is seen at a next reading
+		anchored, maxDepth = false, NoLimit
+	} else {
+		if !anchored {
+			// The stack grew to the ceiling since the last reading: half
+			// the ceiling was in use at a depth dg of at most the deepest
+			// level since then (usually this descent, dg = depth; if the
+			// program went back up after it, the last reading's depth +
+			// CheckEvery bounds it).
+			dg := max(depth, lastDepth+CheckEvery)
+			anchored, anchorSP = true, sp
+			anchorUse = int64(ceiling/2) * int64(depth+CheckEvery) / int64(dg)
+		}
+		use := anchorUse + int64(anchorSP) - int64(sp)
+		limit := int64(ceiling / 4 * 3)
+		if use > limit {
+			TooDeep()
+		}
+		// the frames since the last reading, if it was on this stack and
+		// above: the depth of the limit at that size, the next reading
+		// before it
 		maxDepth = NoLimit
-	case lastStack < ceiling:
-		// The stack grew to the ceiling since the last reading: half the
-		// ceiling was in use at a depth of at most d (the deepest level
-		// since the last reading). Usually the growth happened during this
-		// descent, d is about the current depth; if the program went back
-		// up right after it, d comes from the last reading.
-		d := max(depth, lastDepth+CheckEvery)
-		maxDepth = d + d/2
+		if lastStack >= ceiling && depth > lastDepth && lastSP > sp {
+			perLevel := int64(lastSP-sp) / int64(depth-lastDepth)
+			if perLevel > 0 {
+				left := int((limit - use) / perLevel)
+				maxDepth = depth + left
+				step = min(max(left+1, CheckEvery/16), CheckEvery)
+			}
+		}
 	}
-	lastStack, lastDepth = s, depth
-	nextCheck, lowWater = min(depth+CheckEvery, maxDepth+1), depth-CheckEvery
+	lastStack, lastDepth, lastSP = s, depth, sp
+	nextCheck, lowWater = depth+step, depth-CheckEvery
 }
 
 // TooDeepMessage is the message of [TooDeep] for a stack of size bytes.
