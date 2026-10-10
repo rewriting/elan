@@ -170,6 +170,20 @@ if [ -d "$RUN/peano/$W" ] && [ -x "$RUN/peano/$W/a.out" ]; then
   fi
 fi
 
+# elanc-go builds with -buildvcs=false: the work directories are in a git
+# work tree, and a VCS stamp would run git and make the build depend on
+# the state of the repository.
+if [ "$ELANC" = elanc-go ] && [ -x "$RUN/peano/go/a.out" ]; then
+  n=$((n+1))
+  if ! info=$(${GO:-go} version -m "$RUN/peano/go/a.out" 2>&1); then
+    fail "peano: go version -m failed: $info"
+  elif printf '%s\n' "$info" | grep -q 'vcs'; then
+    fail "peano: the program has VCS stamps: $(printf '%s\n' "$info" | grep vcs | tr '\n' ' ')"
+  else
+    ok "peano: no VCS stamp in the program"
+  fi
+fi
+
 for lgi in "$HERE"/programs/refused/*.lgi; do
   name=$(basename "$lgi" .lgi)
   [ -z "$SELECTION" ] || selected "$name" || continue

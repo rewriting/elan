@@ -17,8 +17,10 @@
 //     the current directory, as REM's .elan.<prog>/): go.mod (module
 //     elanprog, the runtime elan/elanrt by a replace directive) and main.go
 //     (elan/gen);
-//  3. `go build -trimpath` offline (GOTOOLCHAIN=local, GOFLAGS=-mod=mod,
-//     GOPROXY=off, GOWORK=off) with a shared build cache (GOCACHE), so that
+//  3. `go build -trimpath -buildvcs=false` offline (GOTOOLCHAIN=local,
+//     GOFLAGS=-mod=mod, GOPROXY=off, GOWORK=off; no VCS stamp: the work
+//     directory may be in a git work tree, git is not run) with a shared
+//     build cache (GOCACHE), so that
 //     the runtime is compiled once, not per program: --gocache DIR, else
 //     $ELANC_GO_CACHE, else $XDG_CACHE_HOME/elanc-go or
 //     $HOME/.cache/elanc-go; -trimpath keeps the build independent of the
@@ -390,7 +392,7 @@ func compile() {
 		goCmd = "go"
 	}
 	bin := filepath.Join(work, "elanprog")
-	cmd := exec.Command(goCmd, "build", "-trimpath", "-o", bin, ".")
+	cmd := exec.Command(goCmd, "build", "-trimpath", "-buildvcs=false", "-o", bin, ".")
 	cmd.Dir = work
 	cmd.Env = append(os.Environ(), "GOTOOLCHAIN=local", "GOFLAGS=-mod=mod", "GOPROXY=off",
 		"GOWORK=off", "GOCACHE="+cache)

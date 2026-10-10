@@ -198,7 +198,7 @@ func run(t *testing.T, p *prog) string {
 	if err := os.WriteFile(filepath.Join(dir, "main.go"), []byte(src), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	build := exec.Command("go", "build", "-trimpath", "-o", "prog", ".")
+	build := exec.Command("go", "build", "-trimpath", "-buildvcs=false", "-o", "prog", ".")
 	build.Dir = dir
 	build.Env = append(os.Environ(), "GOTOOLCHAIN=local", "GOFLAGS=-mod=mod", "GOPROXY=off", "GOWORK=off")
 	if out, err := build.CombinedOutput(); err != nil {

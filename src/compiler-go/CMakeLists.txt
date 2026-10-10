@@ -5,7 +5,7 @@ set(ELAN_GO_BIN ${CMAKE_CURRENT_BINARY_DIR}/elanc-go)
 add_custom_target(elanc_go ALL
   COMMAND ${CMAKE_COMMAND} -E env GOTOOLCHAIN=local GOFLAGS=-mod=mod
           GOCACHE=${CMAKE_CURRENT_BINARY_DIR}/gocache
-          ${ELAN_GO_EXE} build -o ${ELAN_GO_BIN} ./cmd/elanc-go
+          ${ELAN_GO_EXE} build -buildvcs=false -o ${ELAN_GO_BIN} ./cmd/elanc-go
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   COMMENT "Building elanc-go (go)"
   USES_TERMINAL)
