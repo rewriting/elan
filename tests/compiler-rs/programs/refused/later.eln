@@ -1,6 +1,6 @@
 module later
-// Constructs of later stages of S6 (strategies, AC, query input), which
-// elanc-rs (S6a) must refuse (tests/compiler-rs/test_normalise.sh).
+// Constructs of later stages of S6 (traversals, AC, query input), which
+// elanc-rs must refuse (tests/compiler-rs/test_normalise.sh).
 import global int bool; end
 sort nat set; end
 operators global
@@ -14,6 +14,7 @@ operators global
 end
 stratop global
   go : <nat -> nat> bs;
+  walk : <nat -> nat> bs;
 end
 rules for nat
   x, y : nat;
@@ -24,5 +25,6 @@ end
 strategies for nat
 implicit
   [] go => dk(r) end
+  [] walk => tall(dk(r)) end
 end
 end

@@ -385,21 +385,142 @@ fn unsupported_constructs_are_refused_when_reachable() {
         p.lower(),
         Err(Error::Unsupported { stage: "S6d", .. })
     ));
+    // a traversal (S6d), the strategy interpreter strat[X] (S6b task 2)
     let mut p = peano();
     p.0.query.strategy = Some(3);
-    p.0.strategies.push(StrategyDef {
-        name: 3,
-        sort: NAT,
-        module: 1,
-        body: vec![StrategyExpr::DkRules(vec![1])],
-    });
-    assert!(matches!(
-        p.lower(),
-        Err(Error::Unsupported { stage: "S6b", .. })
-    ));
-    // `start with (id)` is a normalisation
+    p.strategy(3, vec![StrategyExpr::TAll(vec![StrategyExpr::Id])]);
+    match p.lower() {
+        Err(Error::Unsupported { stage: "S6d", what }) => assert!(what.contains("tall"), "{what}"),
+        r => panic!("{r:?}"),
+    }
     p.0.strategies[0].body = vec![StrategyExpr::Id];
     assert!(p.lower().is_ok());
+    p.0.modules.push(TableEntry {
+        index: 2,
+        name: "strat[nat]".into(),
+    });
+    p.0.strategies[0].module = 2;
+    assert!(matches!(
+        p.lower(),
+        Err(Error::Unsupported {
+            stage: "S6b task 2",
+            ..
+        })
+    ));
+}
+
+impl P {
+    fn strategy(&mut self, name: u32, body: Vec<StrategyExpr>) {
+        self.0.strategies.push(StrategyDef {
+            name,
+            sort: NAT,
+            module: 1,
+            body,
+        });
+        self.0.strategy_names.push(TableEntry {
+            index: name,
+            name: format!("st{name}:nat/m"),
+        });
+    }
+
+    fn labelled(&mut self, label: u32, nvars: u32, lhs: Term, rhs: Term, wheres: Vec<Where>) {
+        self.rule(NAT, nvars, lhs, rhs, wheres);
+        self.0.rules.last_mut().unwrap().name = Some(label);
+        if !self.0.rule_names.iter().any(|e| e.index == label) {
+            self.0.rule_names.push(TableEntry {
+                index: label,
+                name: format!("r{label}:nat/m!GL"),
+            });
+        }
+    }
+}
+
+/// Labels: all the rules of a label in source order, the left-hand side
+/// as one pattern; labelled rules do not normalise; determinism.
+#[test]
+fn labels_and_strategies() {
+    let mut p = peano();
+    p.op(NAT, 321, "a", &[], 0, 0);
+    // [r7] a => s(o)  [r8] x => s(x)  [r7] s(x) => x  [r7] a => o
+    p.labelled(7, 0, f(321, vec![]), f(319, vec![f(318, vec![])]), vec![]);
+    p.labelled(8, 1, v(0, NAT), f(319, vec![v(0, NAT)]), vec![]);
+    p.labelled(7, 1, f(319, vec![v(0, NAT)]), v(0, NAT), vec![]);
+    p.labelled(7, 0, f(321, vec![]), f(318, vec![]), vec![]);
+    // st3 = dk(r8, r7) ; st4      st4 = repeat*(one(r7))
+    // st5 = dc(r7) ; [r9] o => o where x := (st3) o
+    p.strategy(
+        3,
+        vec![StrategyExpr::DkRules(vec![8, 7]), StrategyExpr::Call(4)],
+    );
+    p.strategy(
+        4,
+        vec![StrategyExpr::Repeat(vec![StrategyExpr::OneRules(vec![7])])],
+    );
+    p.strategy(5, vec![StrategyExpr::DcRules(vec![7, 9])]);
+    p.labelled(
+        9,
+        1,
+        f(318, vec![]),
+        f(318, vec![]),
+        vec![Where::Assign {
+            lhs: v(0, NAT),
+            strategy: Some(3),
+            rhs: f(318, vec![]),
+        }],
+    );
+    p.0.query.strategy = Some(5);
+    p.start(f(321, vec![]), NAT);
+    let ir = p.lower().unwrap();
+    // a has labelled rules only: a constructor
+    assert!(op_named(&ir, "a").variant.is_some());
+    let names: Vec<&str> = ir.labels.iter().map(|l| l.name.as_str()).collect();
+    assert_eq!(names, ["r7:nat/m!GL", "r8:nat/m!GL", "r9:nat/m!GL"]);
+    let r7 = &ir.labels[0];
+    assert_eq!(r7.rules.len(), 3);
+    assert!(
+        r7.rules[0].text.starts_with("[r7] a =>"),
+        "{}",
+        r7.rules[0].text
+    );
+    assert!(r7.rules.iter().all(|r| r.lhs.len() == 1));
+    let names: Vec<&str> = ir.strategies.iter().map(|s| s.name.as_str()).collect();
+    assert_eq!(names, ["st3:nat/m", "st4:nat/m", "st5:nat/m"]);
+    assert_eq!(
+        ir.strategies[0].body,
+        vec![
+            Strategy::Rules {
+                choice: Choice::Dk,
+                labels: vec![1, 0]
+            },
+            Strategy::Call(1)
+        ]
+    );
+    assert_eq!(ir.start.strategy, Some(2));
+    // st3: dk over 4 rules; st4: repeat* of one; st5: dc of r7 (3 rules
+    // without where) and r9 (a where with st3)
+    let det: Vec<bool> = ir.strategies.iter().map(|s| s.det).collect();
+    assert_eq!(det, [false, true, false]);
+    assert!(ir.labels[0].rules_det && !ir.labels[2].rules_det);
+    assert!(matches!(
+        ir.labels[2].rules[0].conds.as_slice(),
+        [Cond::Apply {
+            strategy: 0,
+            pattern: Pattern::Var(_),
+            ..
+        }]
+    ));
+    // the emitted code: CPS functions, dk as ||, a loop for the
+    // deterministic repeat*, each result of the start strategy printed
+    let main = elanc_rs::emit::emit_crate(&ir, "/rt").main_rs;
+    for needle in [
+        "pub fn rl_r7_7(a0: &H<Nat>, k: K<H<Nat>>, first: bool) -> bool {",
+        "(rl_r8_8(t, k2, false) || rl_r7_7(t, k2, false))",
+        "// repeat* of a deterministic strategy: a loop",
+        "if first && found { return false; }",
+        "st_st5_5(&t, &mut |r: &H<Nat>| -> bool { s.result(r); false });",
+    ] {
+        assert!(main.contains(needle), "{needle} not in:\n{main}");
+    }
 }
 
 #[test]

@@ -1,6 +1,6 @@
-LPL wherestrategy description
+LPL traversal description
   query of sort bool
   result of sort nat
   import later
-  start with () g(o)
+  start with (walk) f(o)
 end

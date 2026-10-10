@@ -1,0 +1,10 @@
+module laterstrat
+// A strategy term built at run time (strat[X], S6b task 2), which
+// elanc-rs must refuse (tests/compiler-rs/test_normalise.sh).
+import global int strat[int]; end
+rules for int
+  n : int;
+global
+  [inc] n => n + 1 end
+end
+end

@@ -48,6 +48,7 @@ const RESERVED: &[&str] = &[
     "Ord",
     "PartialOrd",
     "Iterator",
+    "K",
 ];
 
 /// A name for a character of an operator's syntax.

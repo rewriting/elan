@@ -24,11 +24,20 @@
 //!    all total at first, until nothing changes). Non-total operators get
 //!    a variant for their stuck terms.
 //! 6. **Decision trees** of the defined operators ([`crate::matching`]).
+//! 7. **Strategies** (S6b): the named strategies reachable from the query
+//!    (`start with (S)`) and from the `where x := (S) t` of the reachable
+//!    rules, the labels they use (all the labelled rules of a localised
+//!    rule name, in source order, a decision tree over the whole
+//!    left-hand side), and which of them give at most one result
+//!    (greatest fixpoint, [`crate::ir::strategy_det`]).
 
 use std::collections::{BTreeMap, HashMap, HashSet};
 use std::fmt;
 
-use elan_ref::{DefStrat, Lexem, Program, Rule, RuleBody, SortIndex, SymbolCode, Term, Where};
+use elan_ref::{
+    DefStrat, Lexem, Program, Rule, RuleBody, RuleNameIndex, SortIndex, StrategyExpr,
+    StrategyNameIndex, SymbolCode, Term, Where,
+};
 
 use crate::ir::*;
 use crate::matching;
@@ -37,7 +46,8 @@ use crate::names;
 /// Why a program cannot be compiled.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Error {
-    /// A construct of a later stage: `stage` is `S6b`, `S6c` or `S6d`.
+    /// A construct of a later stage: `stage` is `S6b task 2`, `S6c` or
+    /// `S6d`.
     Unsupported { stage: &'static str, what: String },
     /// The `.ref` file is not what the compiler expects (a bug or a
     /// misread field).
@@ -64,6 +74,16 @@ fn unsupported(stage: &'static str, what: impl Into<String>) -> Error {
 
 /// The symbol code of a strategy call in a term (`Call`, `term/codes.h`).
 const CALL_SYMBOL: SymbolCode = 144;
+
+/// The stage of the strategy terms built at run time.
+const RUNTIME_STRATEGIES: &str = "S6b task 2";
+
+/// Is this the name of a strategy sort (`<int>`, `<int->int>`)? Its terms
+/// are strategies built at run time (`strat[X]`, defined strategies with
+/// parameters, `call "name":X`).
+fn strategy_sort(name: &str) -> bool {
+    name.starts_with('<') && name.ends_with('>')
+}
 
 /// An operator profile of the `.ref` file (a candidate when typing).
 #[derive(Clone, Debug)]
@@ -132,6 +152,8 @@ struct Lowerer<'p> {
     print_form: HashMap<SymbolCode, Vec<Lexem>>,
     /// Unlabelled rules by head symbol, in file order.
     rules_by_symbol: HashMap<SymbolCode, Vec<&'p Rule>>,
+    /// Labelled rules by (localised) label, in file order.
+    rules_by_label: HashMap<RuleNameIndex, Vec<&'p Rule>>,
     int_sort: Option<SortIndex>,
     str_sort: Option<SortIndex>,
     bool_sort: Option<SortIndex>,
@@ -171,11 +193,12 @@ impl<'p> Lowerer<'p> {
             });
         }
         let mut rules_by_symbol: HashMap<SymbolCode, Vec<&Rule>> = HashMap::new();
+        let mut rules_by_label: HashMap<RuleNameIndex, Vec<&Rule>> = HashMap::new();
         for r in &p.rules {
-            // labelled rules: strategies only (S6b); the visibility
-            // (`infos`, global or local) is ignored for normalisation, as REM
-            // does
-            if r.name.is_some() {
+            // labelled rules: strategies only; the visibility (`infos`,
+            // global or local) is ignored for normalisation, as REM does
+            if let Some(l) = r.name {
+                rules_by_label.entry(l).or_default().push(r);
                 continue;
             }
             if let Term::Fsym { symbol, .. } = r.lhs {
@@ -189,6 +212,7 @@ impl<'p> Lowerer<'p> {
             by_symbol,
             print_form,
             rules_by_symbol,
+            rules_by_label,
             int_sort: sort_named("builtinInt"),
             str_sort: sort_named("builtinString"),
             bool_sort: sort_named("bool"),
@@ -349,17 +373,6 @@ impl<'p> Lowerer<'p> {
 
     fn run(&self, name: &str) -> Result<Ir, Error> {
         let q = &self.p.query;
-        // `start with (S) t`: only normalisation (or the identity) in S6a
-        if let Some(s) = q.strategy {
-            let identity = self
-                .p
-                .strategy(s)
-                .map_or(false, |d| d.body == vec![elan_ref::StrategyExpr::Id]);
-            if !identity {
-                let n = self.p.strategy_name(s).unwrap_or("?");
-                return Err(unsupported("S6b", format!("strategies: start with ({n})")));
-            }
-        }
         let start = self.type_top(&q.start_with, Some(q.result_sort), "start term")?;
         if contains_var(&start) {
             return Err(unsupported(
@@ -371,11 +384,44 @@ impl<'p> Lowerer<'p> {
         // Reachability
         let mut reach = Reach::default();
         self.visit(&start, &mut reach);
-        while let Some(c) = reach.todo.pop() {
-            self.expand(c, &mut reach)?;
+        if let Some(s) = q.strategy {
+            reach.reach_strategy(s);
+        }
+        // every refusal is collected: a strategy term built at run time is
+        // refused as such (S6b task 2) rather than for the constructs of
+        // the strategy interpreter (strat[X]) that it reaches
+        let mut errors = Vec::new();
+        loop {
+            let r = if let Some(c) = reach.todo.pop() {
+                self.expand(c, &mut reach)
+            } else if let Some(l) = reach.labels_todo.pop() {
+                self.expand_label(l, &mut reach)
+            } else if let Some(s) = reach.strategies_todo.pop() {
+                self.expand_strategy(s, &mut reach)
+            } else {
+                break;
+            };
+            if let Err(e) = r {
+                errors.push(e);
+            }
+        }
+        let runtime = |e: &Error| matches!(e, Error::Unsupported { stage, .. } if *stage == RUNTIME_STRATEGIES);
+        if let Some(i) =
+            errors
+                .iter()
+                .position(runtime)
+                .or(if errors.is_empty() { None } else { Some(0) })
+        {
+            return Err(errors.swap_remove(i));
         }
         for &s in &reach.sorts {
             let n = self.sort_name(s);
+            if strategy_sort(&n) {
+                return Err(unsupported(
+                    RUNTIME_STRATEGIES,
+                    format!("strategy terms built at run time (sort {n})"),
+                ));
+            }
             if n == "ident" || n.starts_with("intern ") {
                 return Err(unsupported("S6d", format!("builtin sort {n}")));
             }
@@ -411,6 +457,15 @@ impl<'p> Lowerer<'p> {
         r.sorts.insert(cand.result);
         r.sorts.extend(cand.args.iter().copied());
         let decl = || self.cand_decl(cand);
+        if std::iter::once(&cand.result)
+            .chain(&cand.args)
+            .any(|&s| strategy_sort(&self.sort_name(s)))
+        {
+            return Err(unsupported(
+                RUNTIME_STRATEGIES,
+                format!("strategy terms built at run time ({})", decl()),
+            ));
+        }
         match cand.infos {
             0 => {}
             2 => return Err(unsupported("S6c", format!("AC operator {}", decl()))),
@@ -456,28 +511,158 @@ impl<'p> Lowerer<'p> {
             }
             return Ok(());
         }
+        let ctx = format!("rule for {}", decl());
         for (rule, lhs) in rules {
             self.check_rule(rule)?;
-            self.visit(&lhs, r);
-            if contains_evar(&lhs) {
-                continue;
+            self.visit_rule(rule, &lhs, &ctx, r)?;
+        }
+        Ok(())
+    }
+
+    /// Reach what a rule uses (its left-hand side `lhs` is typed).
+    fn visit_rule(&self, rule: &Rule, lhs: &TT, ctx: &str, r: &mut Reach) -> Result<(), Error> {
+        self.visit(lhs, r);
+        if contains_evar(lhs) {
+            return Ok(());
+        }
+        let RuleBody::Plain { rhs, wheres } = &rule.body else {
+            unreachable!("checked")
+        };
+        for w in wheres {
+            for t in self.where_terms(w, ctx, r)? {
+                self.visit(&t, r);
             }
-            let RuleBody::Plain { rhs, wheres } = &rule.body else {
-                unreachable!("checked")
-            };
-            for w in wheres {
-                for t in self.where_terms(w, cand)? {
-                    self.visit(&t, r);
+        }
+        let rhs = self.type_top(rhs, Some(rule.sort), ctx)?;
+        if contains_evar(&rhs) {
+            return Err(Error::Invalid(format!(
+                "extension variable in a right-hand side ({ctx})"
+            )));
+        }
+        self.visit(&rhs, r);
+        Ok(())
+    }
+
+    /// The name of a label (`r1:nat/m!GL`).
+    fn label_name(&self, l: RuleNameIndex) -> String {
+        self.p
+            .rule_name(l)
+            .map(str::to_string)
+            .unwrap_or_else(|| format!("label{l}"))
+    }
+
+    /// The name of a strategy (`go:nat/m`).
+    fn strategy_name(&self, s: StrategyNameIndex) -> String {
+        self.p
+            .strategy_name(s)
+            .map(str::to_string)
+            .unwrap_or_else(|| format!("strategy{s}"))
+    }
+
+    /// The labelled rules of label `l`, in file order.
+    fn label_rules(&self, l: RuleNameIndex) -> &[&'p Rule] {
+        self.rules_by_label
+            .get(&l)
+            .map(Vec::as_slice)
+            .unwrap_or(&[])
+    }
+
+    /// Can label `l` apply to terms of sort `sort`? A rule name of a
+    /// strategy may resolve to the rules of another sort (they never
+    /// match); a label without rules applies to no term.
+    fn label_fits(&self, l: RuleNameIndex, sort: SortIndex) -> bool {
+        self.label_rules(l).iter().all(|r| r.sort == sort) && !self.label_rules(l).is_empty()
+    }
+
+    /// A newly reached label: its rules.
+    fn expand_label(&self, l: RuleNameIndex, r: &mut Reach) -> Result<(), Error> {
+        let ctx = format!("rule {}", self.label_name(l));
+        for &rule in self.label_rules(l) {
+            self.check_rule(rule)?;
+            r.sorts.insert(rule.sort);
+            let lhs = self.type_top(&rule.lhs, Some(rule.sort), &ctx)?;
+            self.visit_rule(rule, &lhs, &ctx, r)?;
+        }
+        Ok(())
+    }
+
+    /// A newly reached strategy: its definition.
+    fn expand_strategy(&self, s: StrategyNameIndex, r: &mut Reach) -> Result<(), Error> {
+        let name = self.strategy_name(s);
+        let def = self
+            .p
+            .strategy(s)
+            .ok_or_else(|| Error::Invalid(format!("strategy {name} is not defined")))?;
+        let module = self.p.module(def.module).unwrap_or("");
+        if module.starts_with("strat[") {
+            return Err(unsupported(
+                RUNTIME_STRATEGIES,
+                format!("strategy terms evaluated at run time ({name}, module {module})"),
+            ));
+        }
+        let sort = self.sort_name(def.sort);
+        if strategy_sort(&sort) {
+            return Err(unsupported(
+                RUNTIME_STRATEGIES,
+                format!("strategy {name} on strategy terms (sort {sort})"),
+            ));
+        }
+        r.sorts.insert(def.sort);
+        self.visit_seq(&def.body, def.sort, &name, r)
+    }
+
+    fn visit_seq(
+        &self,
+        seq: &[StrategyExpr],
+        sort: SortIndex,
+        name: &str,
+        r: &mut Reach,
+    ) -> Result<(), Error> {
+        for e in seq {
+            let refuse =
+                |what: &str| Err(unsupported("S6d", format!("strategy {what} (in {name})")));
+            match e {
+                StrategyExpr::Id | StrategyExpr::Fail => {}
+                StrategyExpr::OneRules(ls)
+                | StrategyExpr::DcRules(ls)
+                | StrategyExpr::DkRules(ls) => {
+                    for &l in ls {
+                        if self.label_fits(l, sort) {
+                            r.reach_label(l);
+                        }
+                    }
                 }
+                StrategyExpr::OneStrats(alts)
+                | StrategyExpr::DcStrats(alts)
+                | StrategyExpr::DkStrats(alts) => {
+                    for a in alts {
+                        self.visit_seq(a, sort, name, r)?;
+                    }
+                }
+                StrategyExpr::Repeat(b) | StrategyExpr::Iterate(b) => {
+                    self.visit_seq(b, sort, name, r)?
+                }
+                StrategyExpr::Call(n) => {
+                    if let Some(d) = self.p.strategy(*n) {
+                        if d.sort != sort {
+                            return Err(Error::Invalid(format!(
+                                "{name} calls {} of another sort",
+                                self.strategy_name(*n)
+                            )));
+                        }
+                    }
+                    r.reach_strategy(*n)
+                }
+                StrategyExpr::Meta => return refuse("META"),
+                StrategyExpr::NormIn(_) => return refuse("normin"),
+                StrategyExpr::NormOut(_) => return refuse("normout"),
+                StrategyExpr::TAll(_) => return refuse("tall (traversal)"),
+                StrategyExpr::TOne(_) => return refuse("tone (traversal)"),
+                StrategyExpr::TSome(_) => return refuse("tsome (traversal)"),
+                StrategyExpr::Rewrite(_) => return refuse("rewrite"),
+                StrategyExpr::DcCall { .. } => return refuse("dccall (external process)"),
+                StrategyExpr::DkCall { .. } => return refuse("dkcall (external process)"),
             }
-            let rhs = self.type_top(rhs, Some(rule.sort), &format!("rule for {}", decl()))?;
-            if contains_evar(&rhs) {
-                return Err(Error::Invalid(format!(
-                    "extension variable in a right-hand side ({})",
-                    decl()
-                )));
-            }
-            self.visit(&rhs, r);
         }
         Ok(())
     }
@@ -495,21 +680,19 @@ impl<'p> Lowerer<'p> {
         Ok(())
     }
 
-    /// The typed terms of a condition (patterns included).
-    fn where_terms(&self, w: &Where, cand: &Cand) -> Result<Vec<TT>, Error> {
-        let ctx = format!("condition of a rule for {}", self.cand_decl(cand));
+    /// The typed terms of a condition (patterns included); the strategies
+    /// of the `where`s are reached.
+    fn where_terms(&self, w: &Where, ctx: &str, reach: &mut Reach) -> Result<Vec<TT>, Error> {
+        let ctx = format!("condition of a {ctx}");
         Ok(match w {
             Where::If(t) => vec![self.type_top(t, self.bool_sort, &ctx)?],
             Where::Assign { lhs, strategy, rhs } => {
-                if let Some(s) = strategy {
-                    let n = self.p.strategy_name(*s).unwrap_or("?");
-                    return Err(unsupported(
-                        "S6b",
-                        format!("where with a strategy ({n}) in {ctx}"),
-                    ));
-                }
                 let r = self.type_top(rhs, var_sort(lhs), &ctx)?;
                 let l = self.type_top(lhs, Some(self.sort_of(&r)), &ctx)?;
+                if let Some(s) = strategy {
+                    self.check_where_strategy(*s, self.sort_of(&r), &ctx)?;
+                    reach.reach_strategy(*s);
+                }
                 vec![l, r]
             }
             Where::Match {
@@ -519,11 +702,8 @@ impl<'p> Lowerer<'p> {
                 rhs,
             } => {
                 if let Some(s) = strategy {
-                    let n = self.p.strategy_name(*s).unwrap_or("?");
-                    return Err(unsupported(
-                        "S6b",
-                        format!("where with a strategy ({n}) in {ctx}"),
-                    ));
+                    self.check_where_strategy(*s, *sort, &ctx)?;
+                    reach.reach_strategy(*s);
                 }
                 vec![
                     self.type_top(pattern, Some(*sort), &ctx)?,
@@ -537,6 +717,29 @@ impl<'p> Lowerer<'p> {
                 ))
             }
         })
+    }
+
+    /// A strategy applied by a `where` to terms of sort `sort`.
+    fn check_where_strategy(
+        &self,
+        s: StrategyNameIndex,
+        sort: SortIndex,
+        ctx: &str,
+    ) -> Result<(), Error> {
+        let name = self.strategy_name(s);
+        match self.p.strategy(s) {
+            None => Err(Error::Invalid(format!(
+                "strategy {name} is not defined ({ctx})"
+            ))),
+            Some(d) if d.sort != sort && !strategy_sort(&self.sort_name(d.sort)) => {
+                Err(Error::Invalid(format!(
+                    "strategy {name} of sort {} applied to a term of sort {} ({ctx})",
+                    self.sort_name(d.sort),
+                    self.sort_name(sort)
+                )))
+            }
+            Some(_) => Ok(()),
+        }
     }
 
     /// The unlabelled rules whose left-hand side has operator `c` at the
@@ -605,6 +808,10 @@ struct Reach {
     seen: HashSet<usize>,
     todo: Vec<usize>,
     sorts: HashSet<SortIndex>,
+    labels: Vec<RuleNameIndex>,
+    labels_todo: Vec<RuleNameIndex>,
+    strategies: Vec<StrategyNameIndex>,
+    strategies_todo: Vec<StrategyNameIndex>,
 }
 
 impl Reach {
@@ -612,6 +819,20 @@ impl Reach {
         if self.seen.insert(c) {
             self.cands.push(c);
             self.todo.push(c);
+        }
+    }
+
+    fn reach_label(&mut self, l: RuleNameIndex) {
+        if !self.labels.contains(&l) {
+            self.labels.push(l);
+            self.labels_todo.push(l);
+        }
+    }
+
+    fn reach_strategy(&mut self, s: StrategyNameIndex) {
+        if !self.strategies.contains(&s) {
+            self.strategies.push(s);
+            self.strategies_todo.push(s);
         }
     }
 }
@@ -637,15 +858,29 @@ struct Builder<'a, 'p> {
     op_of: HashMap<usize, OpId>,
     /// sort index -> sort id
     sort_of: BTreeMap<SortIndex, SortId>,
+    /// label -> label id (labels in table order)
+    label_of: HashMap<RuleNameIndex, LabelId>,
+    /// strategy -> strategy id (strategies in table order)
+    strat_of: HashMap<StrategyNameIndex, StratId>,
 }
 
 impl<'a, 'p> Builder<'a, 'p> {
     fn new(l: &'a Lowerer<'p>, reach: Reach) -> Self {
+        let mut labels = reach.labels.clone();
+        labels.sort_unstable();
+        let mut strategies = reach.strategies.clone();
+        strategies.sort_unstable();
         Builder {
             l,
             reach,
             op_of: HashMap::new(),
             sort_of: BTreeMap::new(),
+            label_of: labels.iter().enumerate().map(|(i, &l)| (l, i)).collect(),
+            strat_of: strategies
+                .iter()
+                .enumerate()
+                .map(|(i, &s)| (s, i))
+                .collect(),
         }
     }
 
@@ -760,7 +995,7 @@ impl<'a, 'p> Builder<'a, 'p> {
             }
             for (r, lhs) in l.rules_of(c)? {
                 let mut rl = RuleLowerer::new(&self, r);
-                match rl.rule(&lhs)? {
+                match rl.rule(&lhs, false)? {
                     Some(ir) => rules[i].push(ir),
                     None => skipped[i].push(format!(
                         "{} (extension variable in the left-hand side: not compiled, as REM)",
@@ -887,19 +1122,201 @@ impl<'a, 'p> Builder<'a, 'p> {
             };
         }
 
+        // labels and strategies
+        let (labels, strategies) = {
+            let sig = Signatures::new(&sorts, &ops, &pre, &total, &family_of, &families);
+            self.strategies(&sig, &mut used_funs)?
+        };
+
         let start_sort = self.sort_of[&l.sort_of(start)];
+        let start_strategy = match q.strategy {
+            None => None,
+            Some(s) => {
+                let id = self.strat_of[&s];
+                if strategies[id].sort != start_sort {
+                    return Err(Error::Invalid(format!(
+                        "start with ({}): the strategy is of sort {}, the term of sort {}",
+                        strategies[id].name,
+                        sorts[strategies[id].sort].name,
+                        sorts[start_sort].name
+                    )));
+                }
+                Some(id)
+            }
+        };
         let start = expr_of(&self, start, &mut |_, _| unreachable!("no variable"));
         Ok(Ir {
             program: name.to_string(),
             sorts,
             families,
             ops,
+            labels,
+            strategies,
             start: Start {
                 query_sort: l.sort_name(q.sort),
                 sort: start_sort,
                 term: start,
+                strategy: start_strategy,
             },
         })
+    }
+
+    /// The labels and strategies reached, in table order, with their
+    /// determinism (greatest fixpoint).
+    fn strategies(
+        &self,
+        sig: &Signatures,
+        used_funs: &mut HashSet<String>,
+    ) -> Result<(Vec<LabelIr>, Vec<StrategyIr>), Error> {
+        let l = self.l;
+        let mut label_idx: Vec<RuleNameIndex> = self.label_of.keys().copied().collect();
+        label_idx.sort_unstable();
+        let mut labels = Vec::new();
+        for &li in &label_idx {
+            let name = l.label_name(li);
+            let base = name.split(':').next().unwrap_or("");
+            let fun = names::unique(
+                used_funs,
+                format!("rl_{}_{li}", names::op_base_name(&[base.to_string()])),
+            );
+            let rules = l.label_rules(li);
+            let sort = self.sort_of[&rules[0].sort];
+            let mut irs = Vec::new();
+            let mut skipped = Vec::new();
+            for &r in rules {
+                let ctx = format!("rule {name}");
+                let lhs = l.type_top(&r.lhs, Some(r.sort), &ctx)?;
+                let mut rl = RuleLowerer::new(self, r);
+                match rl.rule(&lhs, true)? {
+                    Some(mut ir) => {
+                        ir.text = format!("[{base}] {}", ir.text.trim_start_matches("[] "));
+                        irs.push(ir)
+                    }
+                    None => skipped.push(format!(
+                        "[{base}] {} (extension variable in the left-hand side: not compiled, as REM)",
+                        rl.render_tt(&lhs)
+                    )),
+                }
+            }
+            let (tree, never) = matching::decision_tree(&irs, &[sort], sig);
+            for r in never {
+                skipped.push(format!(
+                    "{} (never applies: an operator of its left-hand side is always reduced)",
+                    irs[r].text
+                ));
+            }
+            labels.push(LabelIr {
+                name,
+                fun,
+                sort,
+                rules: irs,
+                skipped,
+                tree,
+                rules_det: true,
+            });
+        }
+
+        let mut strat_idx: Vec<StrategyNameIndex> = self.strat_of.keys().copied().collect();
+        strat_idx.sort_unstable();
+        let mut strategies = Vec::new();
+        for &si in &strat_idx {
+            let name = l.strategy_name(si);
+            let def = l.p.strategy(si).expect("reached strategies are defined");
+            let base = name.split(':').next().unwrap_or("");
+            let fun = names::unique(
+                used_funs,
+                format!("st_{}_{si}", names::op_base_name(&[base.to_string()])),
+            );
+            strategies.push(StrategyIr {
+                name,
+                fun,
+                sort: self.sort_of[&def.sort],
+                body: self.strategy_seq(&def.body, def.sort),
+                det: true,
+            });
+        }
+
+        // determinism: greatest fixpoint
+        loop {
+            let mut changed = false;
+            for label in labels.iter_mut() {
+                let det = label.rules.iter().all(|r| {
+                    r.conds.iter().all(|c| match c {
+                        Cond::Apply { strategy, .. } => strategies[*strategy].det,
+                        _ => true,
+                    })
+                });
+                if det != label.rules_det {
+                    label.rules_det = det;
+                    changed = true;
+                }
+            }
+            for si in 0..strategies.len() {
+                let det = strategies[si].body.iter().all(|s| {
+                    strategy_det(
+                        s,
+                        &|l| labels[l].rules_det,
+                        &|l| labels[l].rules.len(),
+                        &|c| strategies[c].det,
+                    )
+                });
+                if det != strategies[si].det {
+                    strategies[si].det = det;
+                    changed = true;
+                }
+            }
+            if !changed {
+                break;
+            }
+        }
+        Ok((labels, strategies))
+    }
+
+    /// A strategy body of the `.ref` model (checked during reachability).
+    fn strategy_seq(&self, seq: &[StrategyExpr], sort: SortIndex) -> Vec<Strategy> {
+        let labels = |ls: &[RuleNameIndex]| -> Vec<LabelId> {
+            ls.iter()
+                .filter(|&&l| self.l.label_fits(l, sort))
+                .map(|l| self.label_of[l])
+                .collect()
+        };
+        let alts = |a: &[Vec<StrategyExpr>]| -> Vec<Vec<Strategy>> {
+            a.iter().map(|s| self.strategy_seq(s, sort)).collect()
+        };
+        seq.iter()
+            .map(|e| match e {
+                StrategyExpr::Id => Strategy::Id,
+                StrategyExpr::Fail => Strategy::Fail,
+                StrategyExpr::DkRules(ls) => Strategy::Rules {
+                    choice: Choice::Dk,
+                    labels: labels(ls),
+                },
+                StrategyExpr::DcRules(ls) => Strategy::Rules {
+                    choice: Choice::Dc,
+                    labels: labels(ls),
+                },
+                StrategyExpr::OneRules(ls) => Strategy::Rules {
+                    choice: Choice::One,
+                    labels: labels(ls),
+                },
+                StrategyExpr::DkStrats(a) => Strategy::Strats {
+                    choice: Choice::Dk,
+                    alts: alts(a),
+                },
+                StrategyExpr::DcStrats(a) => Strategy::Strats {
+                    choice: Choice::Dc,
+                    alts: alts(a),
+                },
+                StrategyExpr::OneStrats(a) => Strategy::Strats {
+                    choice: Choice::One,
+                    alts: alts(a),
+                },
+                StrategyExpr::Repeat(b) => Strategy::Repeat(self.strategy_seq(b, sort)),
+                StrategyExpr::Iterate(b) => Strategy::Iterate(self.strategy_seq(b, sort)),
+                StrategyExpr::Call(n) => Strategy::Call(self.strat_of[n]),
+                _ => unreachable!("refused during reachability"),
+            })
+            .collect()
     }
 
     fn lexem_texts(&self, ls: &[Lexem]) -> Vec<String> {
@@ -1111,14 +1528,21 @@ impl<'b, 'a, 'p> RuleLowerer<'b, 'a, 'p> {
     }
 
     /// The rule, or `None` when it is not compiled (extension variables).
-    fn rule(&mut self, lhs: &TT) -> Result<Option<RuleIr>, Error> {
+    /// The patterns are those of the arguments of the left-hand side (a
+    /// rule of an operator), or with `whole` the left-hand side itself (a
+    /// labelled rule).
+    fn rule(&mut self, lhs: &TT, whole: bool) -> Result<Option<RuleIr>, Error> {
         if contains_evar(lhs) {
             return Ok(None);
         }
         let l = self.b.l;
-        let TT::Op(_, args) = lhs else { unreachable!() };
         let mut same = vec![];
-        let pats: Vec<Pattern> = args.iter().map(|a| self.pattern(a, &mut same)).collect();
+        let pats: Vec<Pattern> = if whole {
+            vec![self.pattern(lhs, &mut same)]
+        } else {
+            let TT::Op(_, args) = lhs else { unreachable!() };
+            args.iter().map(|a| self.pattern(a, &mut same)).collect()
+        };
         self.conds.append(&mut same);
         let RuleBody::Plain { rhs, wheres } = &self.rule.body else {
             unreachable!("checked")
@@ -1132,16 +1556,27 @@ impl<'b, 'a, 'p> RuleLowerer<'b, 'a, 'p> {
                     let e = self.expr(&t)?;
                     self.conds.push(Cond::If(e));
                 }
-                Where::Assign { lhs, rhs, .. } => {
+                Where::Assign { lhs, rhs, strategy } => {
                     let r = l.type_top(rhs, var_sort(lhs), "where")?;
                     let lt = l.type_top(lhs, Some(l.sort_of(&r)), "where")?;
                     let e = self.expr(&r)?;
                     text_conds.push(format!(
-                        "where {} := () {}",
+                        "where {} := ({}) {}",
                         self.render_tt(&lt),
+                        self.strategy_text(*strategy),
                         self.render_tt(&r)
                     ));
                     match lt {
+                        _ if strategy.is_some() => {
+                            let mut same = vec![];
+                            let p = self.pattern(&lt, &mut same);
+                            self.conds.push(Cond::Apply {
+                                pattern: p,
+                                strategy: self.b.strat_of[&strategy.unwrap()],
+                                expr: e,
+                            });
+                            self.conds.append(&mut same);
+                        }
                         TT::Var(i, s) if !self.var_of.contains_key(&i) => {
                             let v = self.new_var(i, s);
                             self.var_of.insert(i, v);
@@ -1156,19 +1591,30 @@ impl<'b, 'a, 'p> RuleLowerer<'b, 'a, 'p> {
                     }
                 }
                 Where::Match {
-                    pattern, sort, rhs, ..
+                    pattern,
+                    sort,
+                    rhs,
+                    strategy,
                 } => {
                     let r = l.type_top(rhs, Some(*sort), "where")?;
                     let pt = l.type_top(pattern, Some(*sort), "where")?;
                     let e = self.expr(&r)?;
                     text_conds.push(format!(
-                        "where {} := () {}",
+                        "where {} := ({}) {}",
                         self.render_tt(&pt),
+                        self.strategy_text(*strategy),
                         self.render_tt(&r)
                     ));
                     let mut same = vec![];
                     let p = self.pattern(&pt, &mut same);
-                    self.conds.push(Cond::Match(p, e));
+                    match strategy {
+                        Some(s) => self.conds.push(Cond::Apply {
+                            pattern: p,
+                            strategy: self.b.strat_of[s],
+                            expr: e,
+                        }),
+                        None => self.conds.push(Cond::Match(p, e)),
+                    }
                     self.conds.append(&mut same);
                 }
                 Where::Try(_) => unreachable!("refused during reachability"),
@@ -1188,6 +1634,17 @@ impl<'b, 'a, 'p> RuleLowerer<'b, 'a, 'p> {
             conds: std::mem::take(&mut self.conds),
             rhs: rhs_e,
         }))
+    }
+
+    /// The name of the strategy of a `where` (empty for `()`).
+    fn strategy_text(&self, s: Option<StrategyNameIndex>) -> String {
+        match s {
+            None => String::new(),
+            Some(s) => {
+                let n = self.b.l.strategy_name(s);
+                n.split(':').next().unwrap_or("").to_string()
+            }
+        }
     }
 
     /// ELAN text of a typed term (variables `x<model index>`).

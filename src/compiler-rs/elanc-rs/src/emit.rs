@@ -14,8 +14,25 @@
 //!   `unreachable!` when the operator is total); each rule is a labelled
 //!   block (`'r3: { ... }`) left by `break` when a pattern or a condition
 //!   fails;
+//! * per label (S6b): a function in continuation-passing style,
+//!   `pub fn rl_name(a0: &T, k: K<T>, first: bool) -> bool`: the decision
+//!   tree of the labelled rules over the whole term, a rule leaf passing
+//!   its result to `k` (`return true` when `k` asks to stop) and going on
+//!   with the next rules (all of them, in source order; with `first`, only
+//!   those of the first rule that has a result: `dc`);
+//! * per named strategy: `pub fn st_name(t: &T, k: K<T>) -> bool`, its
+//!   body inlined (`dk` as `||` of the alternatives, a sequence as nested
+//!   continuations, `dc`/`DC` with a "found" flag, `one`/`ONE` keeping the
+//!   first result, `repeat*` of a deterministic strategy as a loop, the
+//!   other `repeat*`/`iterate*` through the runtime combinators with an
+//!   auxiliary function for their body);
+//! * conditions `where p := (S) t`: the rest of the rule in the
+//!   continuation of `S` (a closure), so that a failing condition asks `S`
+//!   for its next result (`return false`); in a normalisation function the
+//!   first result for which the rule applies is kept (`res`);
 //! * `main`: the start term, normalised and printed by the runtime driver
-//!   (strings printed raw, as the compiled C programs do).
+//!   (strings printed raw, as the compiled C programs do), or each result
+//!   of the start strategy applied to it.
 //!
 //! Variables and positions are references (`&T`); values are cloned only
 //! when stored in a new term.
@@ -38,7 +55,7 @@ pub struct Crate {
 pub const RUNTIME_IMPORTS: &[&str] = &[
     "use elan_runtime::builtin::{self, Builtin, Int, Str};",
     "use elan_runtime::print::{Print, StringStyle, Writer};",
-    "use elan_runtime::{impl_sort, step, H};",
+    "use elan_runtime::{impl_sort, step, strat, H, K};",
 ];
 
 /// FNV-1a (64 bits) of byte strings, each followed by a 0 byte.
@@ -184,6 +201,13 @@ struct Emitter<'a> {
     out: Out,
     /// counter of labels and fresh names in the current function
     fresh: usize,
+    /// Emitting a label function (rule leaves call the continuation `k`)
+    /// rather than a normalisation function (rule leaves return).
+    label_mode: bool,
+    /// Auxiliary strategy functions still to emit: name, sort, body.
+    aux: Vec<(String, SortId, Vec<Strategy>)>,
+    /// Number of auxiliary functions of the current strategy.
+    aux_n: usize,
 }
 
 impl<'a> Emitter<'a> {
@@ -195,6 +219,9 @@ impl<'a> Emitter<'a> {
                 indent: 0,
             },
             fresh: 0,
+            label_mode: false,
+            aux: Vec::new(),
+            aux_n: 0,
         }
     }
 
@@ -388,7 +415,8 @@ impl<'a> Emitter<'a> {
         ));
         o.line("//!");
         o.line("//! Normalisation (innermost) of the start term with the unlabelled rules;");
-        o.line("//! one function per operator, its arguments in normal form.");
+        o.line("//! one function per operator, its arguments in normal form; labels and");
+        o.line("//! strategies in continuation-passing style.");
         o.line("#![allow(unused, dead_code, non_snake_case, non_camel_case_types)]");
         o.line("#![allow(unreachable_code, unreachable_patterns, irrefutable_let_patterns)]");
         o.line("#![allow(clippy::all)]");
@@ -400,6 +428,8 @@ impl<'a> Emitter<'a> {
         self.sorts();
         self.families();
         o_ops(&mut self);
+        self.labels();
+        self.strategies();
         self.main_fn();
         self.out.buf
     }
@@ -870,16 +900,32 @@ impl<'a> Emitter<'a> {
         let rule = &rules[r];
         let label = format!("'r{}", self.next());
         self.out.line(&format!("// {}", rule.text));
+        if self.label_mode {
+            self.out.line("let mut found = false;");
+        }
         self.out.open(&format!("{label}: {{"));
         for (v, occ) in bindings {
             self.out
                 .line(&format!("let {} = {};", rule.vars[*v].name, occ_name(occ)));
         }
-        for c in &rule.conds {
+        self.conds(rule, 0, &format!("break {label};"), 0);
+        self.out.close("}");
+        if self.label_mode {
+            self.out.line("if first && found { return false; }");
+        }
+    }
+
+    /// The conditions of `rule` from the i-th, then its application. `fail`
+    /// is the statement that abandons this attempt (`break 'r` in the
+    /// rule's block, `return false` in the continuation of a strategy, which
+    /// then gives its next result); `depth` is the number of enclosing
+    /// continuations.
+    fn conds(&mut self, rule: &RuleIr, i: usize, fail: &str, depth: usize) {
+        for (j, c) in rule.conds.iter().enumerate().skip(i) {
             match c {
                 Cond::Same(a, b) => {
                     self.out.line(&format!(
-                        "if {} != {} {{ break {label}; }}",
+                        "if {} != {} {{ {fail} }}",
                         rule.vars[*a].name, rule.vars[*b].name
                     ));
                 }
@@ -891,7 +937,7 @@ impl<'a> Emitter<'a> {
                     } else {
                         format!("!{ex}")
                     };
-                    self.out.line(&format!("if {t} {{ break {label}; }}"));
+                    self.out.line(&format!("if {t} {{ {fail} }}"));
                 }
                 Cond::Let(v, e) => {
                     let ex = self.expr(e, &rule.vars);
@@ -903,14 +949,56 @@ impl<'a> Emitter<'a> {
                     let s = self.expr_sort(e, &rule.vars);
                     let m = format!("m{}", self.next());
                     self.out.line(&format!("let {m} = &{ex};"));
-                    self.pattern_check(p, &m, s, &label, &rule.vars);
+                    self.pattern_check(p, &m, s, fail, &rule.vars);
+                }
+                Cond::Apply {
+                    pattern,
+                    strategy,
+                    expr,
+                } => {
+                    let st = &self.ir.strategies[*strategy];
+                    let ex = self.expr(expr, &rule.vars);
+                    let m = format!("m{}", self.next());
+                    let y = format!("y{}", self.next());
+                    let ty = self.ty(st.sort);
+                    self.out.line(&format!("let {m} = &{ex};"));
+                    self.out.line(&format!(
+                        "// each result of {} (the conditions after it backtrack)",
+                        st.name
+                    ));
+                    let call = format!("{}({m}, &mut |{y}: &{ty}| -> bool {{", st.fun);
+                    // a normalisation function keeps the first result
+                    let keep_first = !self.label_mode && depth == 0;
+                    if keep_first {
+                        self.out.line("let mut res = None;");
+                        self.out.open(&call);
+                    } else {
+                        self.out.open(&format!("if {call}"));
+                    }
+                    self.pattern_check(pattern, &y, st.sort, "return false;", &rule.vars);
+                    self.conds(rule, j + 1, "return false;", depth + 1);
+                    self.out.line("false");
+                    if keep_first {
+                        self.out.close("});");
+                        self.out.line("if let Some(r) = res { return r; }");
+                    } else {
+                        self.out.close("}) { return true; }");
+                    }
+                    return;
                 }
             }
         }
         self.out.line("step();");
         let rhs = self.expr(&rule.rhs, &rule.vars);
-        self.out.line(&format!("return {rhs};"));
-        self.out.close("}");
+        if self.label_mode {
+            self.out.line("found = true;");
+            self.out.line(&format!("if k(&{rhs}) {{ return true; }}"));
+        } else if depth == 0 {
+            self.out.line(&format!("return {rhs};"));
+        } else {
+            self.out.line(&format!("res = Some({rhs});"));
+            self.out.line("return true;");
+        }
     }
 
     fn expr_sort(&self, e: &Expr, vars: &[VarIr]) -> SortId {
@@ -923,8 +1011,8 @@ impl<'a> Emitter<'a> {
     }
 
     /// Match the value at `scrut` (a reference of sort `s`) against `p`,
-    /// binding its variables; `break label` when it does not match.
-    fn pattern_check(&mut self, p: &Pattern, scrut: &str, s: SortId, label: &str, vars: &[VarIr]) {
+    /// binding its variables; run `fail` when it does not match.
+    fn pattern_check(&mut self, p: &Pattern, scrut: &str, s: SortId, fail: &str, vars: &[VarIr]) {
         let ir = self.ir;
         match p {
             Pattern::Var(v) => self.out.line(&format!("let {} = {scrut};", vars[*v].name)),
@@ -935,27 +1023,25 @@ impl<'a> Emitter<'a> {
                     _ => unreachable!(),
                 };
                 let t = self.lit_test(s, scrut, &h);
-                self.out.line(&format!("if !({t}) {{ break {label}; }}"));
+                self.out.line(&format!("if !({t}) {{ {fail} }}"));
             }
             Pattern::Op { op, args } => {
                 let o = &ir.ops[*op];
                 match o.kind {
                     OpKind::BoolConst(_) => {
                         let t = self.lit_test(s, scrut, &Head::Op(*op));
-                        self.out.line(&format!("if !({t}) {{ break {label}; }}"));
+                        self.out.line(&format!("if !({t}) {{ {fail} }}"));
                     }
                     OpKind::Injection => {
                         if self.wrapped(s) {
                             let t = self.inj_test(o.args[0], scrut);
-                            self.out.line(&format!("if !({t}) {{ break {label}; }}"));
+                            self.out.line(&format!("if !({t}) {{ {fail} }}"));
                         }
-                        self.pattern_check(&args[0], scrut, o.args[0], label, vars);
+                        self.pattern_check(&args[0], scrut, o.args[0], fail, vars);
                     }
                     _ if o.variant.is_none() => {
-                        self.out.line(&format!(
-                            "break {label}; // {} is never a normal form",
-                            o.decl
-                        ));
+                        self.out
+                            .line(&format!("{fail} // {} is never a normal form", o.decl));
                     }
                     _ => {
                         let (en, stuck) = self.variant_enum(*op);
@@ -963,7 +1049,7 @@ impl<'a> Emitter<'a> {
                         let node = if stuck {
                             let st = format!("s{}", self.next());
                             self.out.line(&format!(
-                                "let Builtin::Stuck({st}) = {scrut} else {{ break {label}; }};"
+                                "let Builtin::Stuck({st}) = {scrut} else {{ {fail} }};"
                             ));
                             st
                         } else {
@@ -977,9 +1063,9 @@ impl<'a> Emitter<'a> {
                             format!("{en}::{vn}({})", fields.join(", "))
                         };
                         self.out
-                            .line(&format!("let {pat} = &**{node} else {{ break {label}; }};"));
+                            .line(&format!("let {pat} = &**{node} else {{ {fail} }};"));
                         for ((a, f), &as_) in args.iter().zip(&fields).zip(&o.args) {
-                            self.pattern_check(a, f, as_, label, vars);
+                            self.pattern_check(a, f, as_, fail, vars);
                         }
                     }
                 }
@@ -987,13 +1073,315 @@ impl<'a> Emitter<'a> {
         }
     }
 
+    // ------------------------------------------------------------------
+    // Labels and strategies (S6b)
+    // ------------------------------------------------------------------
+
+    fn labels(&mut self) {
+        let ir = self.ir;
+        if ir.labels.is_empty() {
+            return;
+        }
+        self.out
+            .line("// ==== labelled rules ===========================================");
+        self.out.line("");
+        for l in &ir.labels {
+            self.fresh = 0;
+            let ty = self.ty(l.sort);
+            self.out.line(&format!(
+                "/// Label {}: each result of its rules, in order (`first`: of the first rule that has one).",
+                l.name
+            ));
+            for r in &l.rules {
+                self.out.line(&format!("/// {}", r.text));
+            }
+            for sk in &l.skipped {
+                self.out.line(&format!("/// skipped: {sk}"));
+            }
+            self.out.open(&format!(
+                "pub fn {}(a0: &{ty}, k: K<{ty}>, first: bool) -> bool {{",
+                l.fun
+            ));
+            self.label_mode = true;
+            self.decision(&l.tree, &l.rules);
+            self.label_mode = false;
+            self.out.line("false");
+            self.out.close("}");
+            self.out.line("");
+        }
+    }
+
+    fn strategies(&mut self) {
+        let ir = self.ir;
+        if ir.strategies.is_empty() {
+            return;
+        }
+        self.out
+            .line("// ==== strategies =================================================");
+        self.out.line("");
+        for st in &ir.strategies {
+            self.fresh = 0;
+            self.aux_n = 0;
+            let text = self.seq_text(&st.body);
+            self.out.line(&format!(
+                "/// Strategy {}: {text}{}",
+                st.name,
+                if st.det { " (at most one result)" } else { "" }
+            ));
+            self.strategy_fn(&st.fun, st.sort, &st.body);
+            let mut n = 0;
+            while !self.aux.is_empty() {
+                let (fun, sort, body) = self.aux.remove(0);
+                n += 1;
+                let text = self.seq_text(&body);
+                self.out.line(&format!("/// In {} ({n}): {text}", st.name));
+                self.strategy_fn(&fun, sort, &body);
+            }
+        }
+    }
+
+    fn strategy_fn(&mut self, fun: &str, sort: SortId, body: &[Strategy]) {
+        let ty = self.ty(sort);
+        self.out
+            .open(&format!("pub fn {fun}(t: &{ty}, k: K<{ty}>) -> bool {{"));
+        let code = self.seq_code(fun, body, sort, "t", "k");
+        for l in code.lines() {
+            self.out.line(l);
+        }
+        self.out.close("}");
+        self.out.line("");
+    }
+
+    /// ELAN text of a sequence (comments).
+    fn seq_text(&self, seq: &[Strategy]) -> String {
+        if seq.is_empty() {
+            return "id".to_string();
+        }
+        let base = |n: &str| n.split(':').next().unwrap_or("").to_string();
+        let parts: Vec<String> = seq
+            .iter()
+            .map(|s| match s {
+                Strategy::Id => "id".to_string(),
+                Strategy::Fail => "fail".to_string(),
+                Strategy::Rules { choice, labels } => {
+                    let c = match choice {
+                        Choice::Dk => "dk",
+                        Choice::Dc => "dc",
+                        Choice::One => "one",
+                    };
+                    let ls: Vec<String> = labels
+                        .iter()
+                        .map(|&l| base(&self.ir.labels[l].name))
+                        .collect();
+                    format!("{c}({})", ls.join(", "))
+                }
+                Strategy::Strats { choice, alts } => {
+                    let c = match choice {
+                        Choice::Dk => "DK",
+                        Choice::Dc => "DC",
+                        Choice::One => "ONE",
+                    };
+                    let a: Vec<String> = alts.iter().map(|a| self.seq_text(a)).collect();
+                    format!("{c}({})", a.join(", "))
+                }
+                Strategy::Repeat(b) => format!("repeat*({})", self.seq_text(b)),
+                Strategy::Iterate(b) => format!("iterate*({})", self.seq_text(b)),
+                Strategy::Call(c) => base(&self.ir.strategies[*c].name),
+            })
+            .collect();
+        parts.join(" ; ")
+    }
+
+    /// A Rust expression (of type `bool`) applying the sequence `seq` to
+    /// the term `t` (a variable of type `&T`) with the continuation `k` (a
+    /// variable of type `K<T>`): true when `k` asked to stop. `owner` names
+    /// the auxiliary functions.
+    fn seq_code(
+        &mut self,
+        owner: &str,
+        seq: &[Strategy],
+        sort: SortId,
+        t: &str,
+        k: &str,
+    ) -> String {
+        match seq {
+            [] => format!("{k}({t})"),
+            [s] => self.strat_code(owner, s, sort, t, k),
+            [s, rest @ ..] => {
+                let ty = self.ty(sort);
+                let r = format!("r{}", self.next());
+                let kk = format!("k{}", self.next());
+                let rest = self.seq_code(owner, rest, sort, &r, k);
+                let first = self.strat_code(owner, s, sort, t, &kk);
+                format!(
+                    "{{\nlet {kk}: K<{ty}> = &mut |{r}: &{ty}| -> bool {{\n{rest}\n}};\n{first}\n}}"
+                )
+            }
+        }
+    }
+
+    fn strat_code(&mut self, owner: &str, s: &Strategy, sort: SortId, t: &str, k: &str) -> String {
+        let ty = self.ty(sort);
+        match s {
+            Strategy::Id => format!("{k}({t})"),
+            Strategy::Fail => "false".to_string(),
+            Strategy::Call(c) => format!("{}({t}, {k})", self.ir.strategies[*c].fun),
+            Strategy::Rules { choice, labels } => {
+                let funs: Vec<String> = labels
+                    .iter()
+                    .map(|&l| self.ir.labels[l].fun.clone())
+                    .collect();
+                match choice {
+                    Choice::Dk => {
+                        let calls: Vec<String> = funs
+                            .iter()
+                            .map(|f| format!("{f}({t}, {k}, false)"))
+                            .collect();
+                        or_all(&calls)
+                    }
+                    Choice::Dc => match funs.as_slice() {
+                        [] => "false".to_string(),
+                        [f] => format!("{f}({t}, {k}, true)"),
+                        _ => {
+                            let (found, kf) =
+                                (format!("found{}", self.next()), format!("k{}", self.next()));
+                            let calls: Vec<String> = funs
+                                .iter()
+                                .map(|f| format!("{f}({t}, {kf}, true)"))
+                                .collect();
+                            self.first_code(&ty, k, &found, &kf, &calls)
+                        }
+                    },
+                    Choice::One => {
+                        let ko = format!("k{}", self.next());
+                        let calls: Vec<String> = funs
+                            .iter()
+                            .map(|f| format!("{f}({t}, {ko}, false)"))
+                            .collect();
+                        self.one_code(&ty, k, &ko, &or_all(&calls))
+                    }
+                }
+            }
+            Strategy::Strats { choice, alts } => match choice {
+                Choice::Dk => {
+                    let calls: Vec<String> = alts
+                        .iter()
+                        .map(|a| self.seq_code(owner, a, sort, t, k))
+                        .collect();
+                    or_all(&calls)
+                }
+                Choice::Dc => match alts.as_slice() {
+                    [] => "false".to_string(),
+                    [a] => self.seq_code(owner, a, sort, t, k),
+                    _ => {
+                        let (found, kf) =
+                            (format!("found{}", self.next()), format!("k{}", self.next()));
+                        let calls: Vec<String> = alts
+                            .iter()
+                            .map(|a| self.seq_code(owner, a, sort, t, &kf))
+                            .collect();
+                        self.first_code(&ty, k, &found, &kf, &calls)
+                    }
+                },
+                Choice::One => {
+                    let ko = format!("k{}", self.next());
+                    let calls: Vec<String> = alts
+                        .iter()
+                        .map(|a| self.seq_code(owner, a, sort, t, &ko))
+                        .collect();
+                    self.one_code(&ty, k, &ko, &or_all(&calls))
+                }
+            },
+            Strategy::Repeat(b) if self.ir.seq_det(b) => {
+                // a deterministic step: a loop (no stack growth)
+                let cur = format!("cur{}", self.next());
+                let next = format!("next{}", self.next());
+                let c = format!("c{}", self.next());
+                let kn = format!("k{}", self.next());
+                let r = format!("r{}", self.next());
+                let step = self.seq_code(owner, b, sort, &c, &kn);
+                format!(
+                    "{{\n// repeat* of a deterministic strategy: a loop\n\
+                     let mut {cur}: {ty} = {t}.clone();\n\
+                     loop {{\n\
+                     let mut {next}: Option<{ty}> = None;\n\
+                     {{\n\
+                     let {c} = &{cur};\n\
+                     let {kn}: K<{ty}> = &mut |{r}: &{ty}| -> bool {{ {next} = Some({r}.clone()); true }};\n\
+                     let _ = {step};\n\
+                     }}\n\
+                     match {next} {{ Some(n) => {cur} = n, None => break }}\n\
+                     }}\n\
+                     {k}(&{cur})\n}}"
+                )
+            }
+            Strategy::Repeat(b) => {
+                let aux = self.aux_fn(owner, sort, b);
+                format!("strat::repeat_star({t}, {k}, &{aux})")
+            }
+            Strategy::Iterate(b) => {
+                let aux = self.aux_fn(owner, sort, b);
+                format!("strat::iterate_star({t}, {k}, &{aux})")
+            }
+        }
+    }
+
+    /// An auxiliary strategy function for `body` (the step of `repeat*` or
+    /// `iterate*`), emitted after the current strategy.
+    fn aux_fn(&mut self, owner: &str, sort: SortId, body: &[Strategy]) -> String {
+        let base = match owner.rfind("_aux") {
+            Some(i) => &owner[..i],
+            None => owner,
+        };
+        self.aux_n += 1;
+        let name = format!("{base}_aux{}", self.aux_n);
+        self.aux.push((name.clone(), sort, body.to_vec()));
+        name
+    }
+
+    /// The results of the first of `calls` (expressions passing their
+    /// results to `kf`) that has one (`dc`, `DC`).
+    fn first_code(&mut self, ty: &str, k: &str, found: &str, kf: &str, calls: &[String]) -> String {
+        // parenthesised: a block at the start of a statement would end it
+        let mut acc = format!("({})", calls.last().unwrap());
+        for c in calls[..calls.len() - 1].iter().rev() {
+            acc = format!("({c}) || (!{found}.get() && {acc})");
+        }
+        format!(
+            "{{\nlet {found} = std::cell::Cell::new(false);\n\
+             let {kf}: K<{ty}> = &mut |r: &{ty}| -> bool {{ {found}.set(true); {k}(r) }};\n\
+             {acc}\n}}"
+        )
+    }
+
+    /// The first result of `code` (an expression passing its results to
+    /// `ko`), passed to `k` (`one`, `ONE`).
+    fn one_code(&mut self, ty: &str, k: &str, ko: &str, code: &str) -> String {
+        let res = format!("res{}", self.next());
+        format!(
+            "{{\nlet mut {res}: Option<{ty}> = None;\n\
+             {{\n\
+             let {ko}: K<{ty}> = &mut |r: &{ty}| -> bool {{ {res} = Some(r.clone()); true }};\n\
+             let _ = {code};\n\
+             }}\n\
+             match {res} {{ Some(r) => {k}(&r), None => false }}\n}}"
+        )
+    }
+
     fn main_fn(&mut self) {
         let ir = self.ir;
         self.out
             .line("// ==== main =====================================================");
         self.out.line("");
-        self.out
-            .line("/// `-noInput`: the start term of the query, normalised and printed.");
+        match ir.start.strategy {
+            None => self
+                .out
+                .line("/// `-noInput`: the start term of the query, normalised and printed."),
+            Some(st) => self.out.line(&format!(
+                "/// `-noInput`: the start term of the query, normalised, then each result of {}.",
+                ir.strategies[st].name
+            )),
+        }
         self.out.open("fn main() {");
         self.out.open(&format!(
             "elan_runtime::main_program({:?}, |s| {{",
@@ -1001,11 +1389,26 @@ impl<'a> Emitter<'a> {
         ));
         self.out.line("s.writer.string_style = StringStyle::Raw;");
         let e = self.expr(&ir.start.term, &[]);
-        self.out
-            .line(&format!("let t: {} = {e};", self.ty(ir.start.sort)));
-        self.out.line("s.result(&t);");
+        let ty = self.ty(ir.start.sort);
+        self.out.line(&format!("let t: {ty} = {e};"));
+        match ir.start.strategy {
+            None => self.out.line("s.result(&t);"),
+            Some(st) => self.out.line(&format!(
+                "{}(&t, &mut |r: &{ty}| -> bool {{ s.result(r); false }});",
+                ir.strategies[st].fun
+            )),
+        }
         self.out.close("});");
         self.out.close("}");
+    }
+}
+
+/// `a || b || ...` (`false` when empty).
+fn or_all(calls: &[String]) -> String {
+    if calls.is_empty() {
+        "false".to_string()
+    } else {
+        format!("({})", calls.join(" || "))
     }
 }
 

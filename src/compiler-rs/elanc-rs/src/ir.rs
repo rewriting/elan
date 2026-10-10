@@ -22,6 +22,25 @@
 //!   matching automaton ([`Decision`]).
 //! * The **start term** of the query.
 //!
+//! # Strategies (S6b)
+//!
+//! * The **labels** ([`LabelIr`]): the labelled rules of one localised rule
+//!   name (`label:sort/module!GL`), in source order, with the decision tree
+//!   of their whole left-hand sides (one column: the term itself). A label
+//!   is compiled to a function in continuation-passing style over its
+//!   sort, `fn(t, k, first) -> bool`: each result of each rule that
+//!   applies, in order, is passed to `k` (`true` from `k` means stop);
+//!   with `first`, only the results of the first rule that has one (`dc`).
+//!   Labelled rules never take part in normalisation; the right-hand side
+//!   is built by the normalisation functions, so every result is in normal
+//!   form (the interpreter reduces each result).
+//! * The **strategies** ([`StrategyIr`]): the `STRATEGY` definitions
+//!   reachable from the query and from the `where`s, a body made of
+//!   [`Strategy`] elements, each compiled to `fn(t, k) -> bool`.
+//! * [`Cond::Apply`]: `where p := (S) t`, each result of `S` in turn (the
+//!   conditions after it backtrack into `S`); in normalisation, the first
+//!   result for which the rest of the conditions hold.
+//!
 //! # Normalisation scheme
 //!
 //! Every operator `f` is compiled to a function taking its arguments in
@@ -37,11 +56,8 @@
 //!
 //! # Extension points
 //!
-//! * S6b (strategies): labelled rules become CPS functions next to the
-//!   normalisation functions: add `Ir::strategies` and a rule list per
-//!   label; [`Cond`] gets a `Strategy` case (`where x := (s) t`), [`Expr`] a
-//!   strategy-call case. [`Decision`] is reusable for labelled rules (a
-//!   `Try` leaf calls the continuation instead of returning).
+//! * S6b task 2 (strategy terms built at run time): a strategy sort, terms
+//!   of strategies and their evaluation.
 //! * S6c (AC): [`Repr::Enum`] variants get an AC multiset field, [`Pattern`]
 //!   an AC case, [`Decision`] an AC matching node.
 //! * S6d (query): [`Start`] gets the query variable and the parser tables.
@@ -58,6 +74,10 @@ pub type FamilyId = usize;
 pub type RuleId = usize;
 /// Index in [`RuleIr::vars`].
 pub type VarId = usize;
+/// Index in [`Ir::labels`].
+pub type LabelId = usize;
+/// Index in [`Ir::strategies`].
+pub type StratId = usize;
 
 /// A whole program, restricted to what the start term needs.
 #[derive(Clone, Debug)]
@@ -67,7 +87,81 @@ pub struct Ir {
     pub sorts: Vec<SortIr>,
     pub families: Vec<Family>,
     pub ops: Vec<OpIr>,
+    pub labels: Vec<LabelIr>,
+    pub strategies: Vec<StrategyIr>,
     pub start: Start,
+}
+
+/// The labelled rules of one label (a localised rule name of the `.ref`
+/// file), in source order.
+#[derive(Clone, Debug)]
+pub struct LabelIr {
+    /// The localised name (`r1:nat/m!GL`).
+    pub name: String,
+    /// Name of the function.
+    pub fun: String,
+    /// Sort of the rules.
+    pub sort: SortId,
+    /// The rules; each has one left-hand side pattern, the whole term.
+    pub rules: Vec<RuleIr>,
+    /// Rules of the source not compiled, with the reason (comments).
+    pub skipped: Vec<String>,
+    /// The matching automaton (one column: the term).
+    pub tree: Decision,
+    /// Every rule gives at most one result (its `where`s use
+    /// deterministic strategies only).
+    pub rules_det: bool,
+}
+
+/// A named strategy (`STRATEGY` definition).
+#[derive(Clone, Debug)]
+pub struct StrategyIr {
+    /// Name in the `.ref` file (`go:nat/m`).
+    pub name: String,
+    /// Name of the function.
+    pub fun: String,
+    /// Sort of the terms it applies to (and of its results).
+    pub sort: SortId,
+    /// The sequence `s1 ; s2 ; ...`.
+    pub body: Vec<Strategy>,
+    /// It gives at most one result (see [`Ir::seq_det`]).
+    pub det: bool,
+}
+
+/// How a choice keeps the results of its alternatives.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Choice {
+    /// `dk`, `DK`: all results of all alternatives, in order.
+    Dk,
+    /// `dc`, `DC` (`first`): all results of the first alternative that has
+    /// one (for rules: the first **rule** that has one).
+    Dc,
+    /// `one`, `ONE` (`first one`, `dc one`): the first result.
+    One,
+}
+
+/// An elementary strategy (one element of a sequence).
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum Strategy {
+    Id,
+    Fail,
+    /// `dk/dc/one(l1, ..., ln)` over labels.
+    Rules {
+        choice: Choice,
+        labels: Vec<LabelId>,
+    },
+    /// `DK/DC/ONE(s1, ..., sn)` over sequences.
+    Strats {
+        choice: Choice,
+        alts: Vec<Vec<Strategy>>,
+    },
+    /// `repeat*(s)`: the terms reached by `s` on which `s` fails, depth
+    /// first.
+    Repeat(Vec<Strategy>),
+    /// `iterate*(s)`: the term, then `iterate*(s)` of each result of `s`.
+    Iterate(Vec<Strategy>),
+    /// A named strategy.
+    Call(StratId),
 }
 
 /// A sort.
@@ -360,6 +454,14 @@ pub enum Cond {
     Let(VarId, Expr),
     /// `where p := () t`: the normal form of `t` matches `p`.
     Match(Pattern, Expr),
+    /// `where p := (S) t` (`p` a variable for `where x := (S) t`): each
+    /// result of strategy `S` applied to the normal form of `t` that
+    /// matches `p`, in order (backtracking).
+    Apply {
+        pattern: Pattern,
+        strategy: StratId,
+        expr: Expr,
+    },
 }
 
 /// A term to build (right-hand side, condition, start term). Building an
@@ -421,14 +523,70 @@ pub struct Start {
     pub query_sort: String,
     pub sort: SortId,
     pub term: Expr,
+    /// `start with (S) t`: the strategy applied to the normal form of the
+    /// term, each result printed; `None` for `()`.
+    pub strategy: Option<StratId>,
 }
 
 impl Ir {
+    /// Does the sequence give at most one result? (`one`, `ONE`, `id`,
+    /// `fail`, `dc`/`DC` of deterministic alternatives, a choice of one
+    /// alternative that is, `repeat*` of a deterministic strategy, a call
+    /// of a deterministic strategy, sequences of these.)
+    pub fn seq_det(&self, seq: &[Strategy]) -> bool {
+        seq.iter().all(|s| self.det(s))
+    }
+
+    /// See [`Ir::seq_det`].
+    pub fn det(&self, s: &Strategy) -> bool {
+        strategy_det(
+            s,
+            &|l| self.labels[l].rules_det,
+            &|l| self.labels[l].rules.len(),
+            &|c| self.strategies[c].det,
+        )
+    }
+
     pub fn family_of(&self, s: SortId) -> Option<&Family> {
         match self.sorts[s].repr {
             Repr::Family(f) => Some(&self.families[f]),
             Repr::Enum { .. } => None,
         }
+    }
+}
+
+/// Does `s` give at most one result, given the determinism of the rules
+/// of each label, their number and the determinism of the named
+/// strategies? (Used by [`crate::lower`] during its fixpoint and by
+/// [`Ir::det`].)
+pub fn strategy_det(
+    s: &Strategy,
+    rules_det: &dyn Fn(LabelId) -> bool,
+    n_rules: &dyn Fn(LabelId) -> usize,
+    strat_det: &dyn Fn(StratId) -> bool,
+) -> bool {
+    let seq = |v: &[Strategy]| {
+        v.iter()
+            .all(|s| strategy_det(s, rules_det, n_rules, strat_det))
+    };
+    match s {
+        Strategy::Id | Strategy::Fail => true,
+        Strategy::Rules { choice, labels } => match choice {
+            Choice::One => true,
+            Choice::Dc => labels.iter().all(|&l| rules_det(l)),
+            Choice::Dk => {
+                labels.iter().all(|&l| rules_det(l))
+                    && labels.iter().map(|&l| n_rules(l)).sum::<usize>() <= 1
+            }
+        },
+        Strategy::Strats { choice, alts } => match choice {
+            Choice::One => true,
+            Choice::Dc => alts.iter().all(|a| seq(a)),
+            Choice::Dk => alts.len() <= 1 && alts.iter().all(|a| seq(a)),
+        },
+        Strategy::Repeat(b) => seq(b),
+        Strategy::Iterate(b) => b.iter().any(|s| matches!(s, Strategy::Fail)),
+        Strategy::Call(c) => strat_det(*c),
     }
 }
 

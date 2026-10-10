@@ -1,0 +1,6 @@
+LPL runtimestrategy description
+  query of sort int
+  result of sort int
+  import laterstrat
+  start with [dk(inc)]3
+end
