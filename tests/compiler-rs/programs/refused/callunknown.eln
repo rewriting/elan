@@ -1,0 +1,19 @@
+module callunknown
+// call "tw":int where no strategy is named tw (two is): the interpreter
+// stops with `unknown strategy in call used` (status 1); the export
+// writes the index -1 and elanc-rs refuses (tests/compiler-rs/
+// test_normalise.sh).
+import global int list[int] Meta_apply[int]; end
+stratop global
+  two : <int -> int> bs;
+end
+rules for int
+  n : int;
+global
+  [inc1] n => n+1 end
+end
+strategies for int
+implicit
+  [] two => dk(inc1) end
+end
+end

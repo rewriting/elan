@@ -333,7 +333,16 @@ impl<'p> Lowerer<'p> {
                     // Strateg[X]`): the export replaces the string by the
                     // index of the strategy it finds for the name, any sort
                     // (ref/ref.cc); the term holds the name again, the sort
-                    // is chosen when it is applied (`resolve_call`)
+                    // is chosen when it is applied (`resolve_call`). -1:
+                    // no strategy has this name (see `resolve_call`)
+                    if *s < 0 {
+                        return Err(unsupported(
+                            "S6d",
+                            "call \"name\":X of a name that no strategy has (the interpreter \
+                             stops: `unknown strategy in call used`)",
+                        )
+                        .into());
+                    }
                     let full = self
                         .p
                         .strategy_name(*s as u32)
@@ -818,9 +827,14 @@ impl<'p> Lowerer<'p> {
     /// (`None`: unknown), as the interpreter finds it when it evaluates a
     /// `META` strategy (`Strategyname_to_ref_index`, `meta/meta.cc`, fixed
     /// in commit 93ec493): the last strategy (in table order) named exactly
-    /// `name:sort/...`, else the last named `name:...` of any sort. (Its
-    /// third step, a prefix of the name, cannot happen here: the name is
-    /// the one of the strategy that the export found, `ref/ref.cc`.)
+    /// `name:sort/...`, else the last named `name:...` of any sort. Its
+    /// third step, when no strategy has the name: the last strategy whose
+    /// name starts with `name` (in hash order) gives a sort and a module,
+    /// but the name stays `name`, still undefined: the interpreter stops
+    /// with `unknown strategy in call used` (status 1). The export
+    /// (`ref/ref.cc`, the same lookup without the sort) then writes -1,
+    /// refused by [`Lowerer::type_term`]; otherwise the index of a strategy
+    /// named exactly `name`, looked up again here with the sort.
     fn resolve_call(&self, name: &[u8], sort: Option<&str>) -> Option<StrategyNameIndex> {
         let mut entries: Vec<_> = self.p.strategy_names.iter().collect();
         entries.sort_by_key(|e| e.index);
