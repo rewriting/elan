@@ -40,6 +40,10 @@ sub-project (S1–S5b). Each item says where it comes from.
 - `-lfl` (Linux, generated programs) is not checked by CMake (S5a).
 - Installs are not relocatable (absolute paths in `elanc`, `elan`) (S5a).
 - `CMAKE_BUILD_TYPE` changes the runtime library flags (S5a).
+- `check_limits.py` does not strip `/* */` blocks or `#if` branches and skips
+  names missing from one copy (S3b review).
+- Very deep inputs are now bounded only by the C stack (recursive term
+  functions, module loading), not by fixed limits with a message (S3b).
 - Static library `elan_core`: relies on every member being referenced and on
   archive order for static initialisation (S3a).
 - `check_deps.py` strips `/*...*/` even inside string literals (S3a).

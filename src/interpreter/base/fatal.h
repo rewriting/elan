@@ -1,6 +1,8 @@
 // Fatal errors of the interpreter (S3b).
 //
 // A fatal error prints its message (on sterr or stderr) and calls
+// elan_main is not re-entrant after an ElanFatal: the loader state (stacki,
+// stack indices) is left as it was when the error occurred.
 // failexit(). Inside a FatalCatcher scope -- elan_main, a unit test --
 // failexit() throws ElanFatal; elan_main catches it at top level, calls
 // fatal_cleanup() (flush stout and sterr, then kill the subprocesses) and

@@ -100,10 +100,21 @@ char strconst[STRLEN];
 std::vector<char *> stringconstants;
 int  stringconstantsi = 0;
 
+// String constant of a lexem; the index comes from crstringlex, so it is
+// always in range (the fixed array of 2004 hid malformed lexems).
+static char *string_constant(int i)
+{
+  if (i < 0 || i >= (int)stringconstants.size()) {
+    sterr << "[lexem] string constant " << i << " out of range\n";
+    interr();
+  }
+  return stringconstants[i];
+}
+
 char *lexem::stringval() 
 { 
 //  stout << "string " << BOFSTRING-lex << " is " <<  stringconstants[BOFSTRING-lex] << "\n";
-  return(stringconstants[BOFSTRING-lex]); 
+  return(string_constant(BOFSTRING-lex));
 }
 
 void lexem::crstringlex(char *s) {
@@ -339,7 +350,7 @@ const char *lexem::alfsy()
  else if (lex == STRING)
    return "???";
  else if ((lex <= BOFSTRING && lex > BOFSTRING-MAXNOFSTRING )) {
-   return stringconstants[BOFSTRING-lex]; }
+   return string_constant(BOFSTRING-lex); }
  else if (lex >= 0) {snprintf(alfs2,sizeof(alfs2),"%d",lex);return(alfs2);}
  else if (lex <= BOFIDENT) return(tabofident.ide(BOFIDENT-lex));
  else {

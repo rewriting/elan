@@ -655,6 +655,7 @@ lexem le;
  gr=addrule(le,RNOPRIOR,RNOINFO,ld.actcode);
  dumpgrrule(gr);
  add_to_fsymtab(2,gr,APPLY_FLAG(0));
+ if (inlinecodesi >= (int)inlinecodes.size()) inlinecodes.resize(inlinecodesi+1);
  inlinecodes[inlinecodesi].from = x;
  inlinecodes[inlinecodesi].to = y;
 // inlinecodes[inlinecodesi].stratsort = add_strat_nont(x,y);
