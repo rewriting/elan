@@ -19,7 +19,8 @@
 # compared with the interpreter only); <name>.no-interpreter says why the
 # interpreter is not run.
 # Programs programs/refused/<name>.lgi use constructs of later stages:
-# elanc-rs must stop with status 2 and a "not supported yet" message.
+# elanc-rs must stop with status 2 and a "not supported yet" message, and
+# remove the a.out left by a previous compilation.
 #
 # Usage: test_normalise.sh PREFIX [name...]   (an installed ELAN with
 # elanc-rs; the names select programs, default all)
@@ -116,13 +117,14 @@ for lgi in "$HERE"/programs/refused/*.lgi; do
   d=$RUN/refused-$name
   mkdir "$d" || exit 2
   cp "$HERE/programs/refused/$name.lgi" "$HERE/programs/refused/"*.eln "$d/" || exit 2
+  echo stale >"$d/a.out" || exit 2  # a refused program leaves no a.out
   ( cd "$d" && elanc-rs --target-dir "$TARGET" "$name" >elanc-rs.log 2>&1 )
   status=$?
   msg=$(grep 'not supported yet' "$d/elanc-rs.log")
   if [ "$status" = 2 ] && [ -n "$msg" ] && [ ! -e "$d/a.out" ]; then
     ok "refused $name: $msg"
   else
-    fail "refused $name: status $status, expected 2 and a message (see $d/elanc-rs.log)"
+    fail "refused $name: status $status, expected 2 and a message, no a.out (see $d/elanc-rs.log)"
   fi
 done
 

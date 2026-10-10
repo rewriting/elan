@@ -16,7 +16,8 @@
 //!    so that the runtime crate is compiled once, not per program:
 //!    `--target-dir DIR`, else `$ELANC_RS_TARGET_DIR`, else
 //!    `$XDG_CACHE_HOME/elanc-rs/target` or `$HOME/.cache/elanc-rs/target`;
-//! 4. the program is copied to `./a.out` (`-o`/`-output NAME`).
+//! 4. the program is copied to `./a.out` (`-o`/`-output NAME`); that file
+//!    is removed first, so that a refusal or a failure leaves none.
 //!
 //! The runtime crate: `--runtime DIR`, else `$ELAN_RS_RUNTIME`, else the
 //! installation (`<prefix>/share/elan-rs/elan-runtime`, `<prefix>` being
@@ -226,6 +227,14 @@ fn main() {
     });
     let prefix = prefix();
 
+    // a previous program must not survive a refusal or a failure
+    match std::fs::remove_file(&o.output) {
+        Err(e) if e.kind() != std::io::ErrorKind::NotFound => {
+            fail(format!("cannot remove {}: {e}", o.output))
+        }
+        _ => {}
+    }
+
     // the work directory
     let work = PathBuf::from(format!(".elan-rs.{prog}"));
     std::fs::create_dir_all(work.join("src"))
@@ -341,7 +350,6 @@ fn main() {
 
     // 4. the program
     let built = target.join("release").join(&bin);
-    let _ = std::fs::remove_file(&o.output);
     std::fs::copy(&built, &o.output).unwrap_or_else(|e| {
         fail(format!(
             "cannot copy {} to {}: {e}",
