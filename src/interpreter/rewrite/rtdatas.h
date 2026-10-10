@@ -381,6 +381,7 @@ public:
   void assign_all_refs(int warn);           // calls assign_one_ref
   void assign_one_ref(int warn, int ref);                       
   int searchmatch_defs(char *name, int typ, int modu);
+  int searchcall_defs(const char *name, const char *sort);
   // ------------- DEFS:
   const char *strategyname_defs(int n);              
   int strategyindex_defs(char *name, int infos);   

@@ -37,7 +37,7 @@
 #include "strategy.h"
 #include <string.h>
 extern void addstandards(grammar &gr);
-extern int Strategyname_to_ref_index(char *strname, int typ);
+extern int Strategyname_to_ref_index(char *strname, const char *sort);
 extern int cexport;
 
 int adump   = 0;    // export to aterm form
@@ -235,7 +235,9 @@ void term::Awriterec(ochstream &gout)
           tindex = typet.index(tname);
           if (1 || tindex>0) {
               //sindex = Strategyname_to_ref_index(subterm(0)->getstring(),tindex);
-            sindex = Strategyname_to_ref_index(quote1,tindex);
+            // tname: the sort of the shared `call` symbol (code 144), the
+            // last instance declared, not the X of this call: not used
+            sindex = Strategyname_to_ref_index(quote1,NULL);
             
               //stout << sindex << "\n";
             gout << "/**/INT(" << sindex << ").nil," << head() << ")";

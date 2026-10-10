@@ -1,0 +1,20 @@
+module states
+// Two instances of strat[X]: `call "eval":state` (setof, strapply[state]) must
+// find the eval strategy of strat[state], not the one of strat[int].
+import global int strat[state] strat[int] strapply[state] strapply[int] list[state] list[int]; end
+sort state; end
+operators global
+  state(@,@) : (int int) state;
+end
+rules for state
+  x,y : int;
+global
+  [right] state(x,y) => state(x,y+1) end
+  [up]    state(x,y) => state(x+1,y) end
+end
+rules for int
+  n : int;
+global
+  [inc] n => n+1 end
+end
+end

@@ -1,0 +1,1 @@
+setof (strapply) on a sort whose strat[X] instance is not the last one imported: call "eval":X must take the eval of strat[X] (2003-2026: the last eval* found, any sort; robot example).

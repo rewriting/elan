@@ -618,7 +618,7 @@ elan3/applications/Robot::I::Nim:non:Nim:Nim	FAIL
 elan3/applications/Robot::I::Robot:non:Robot:Robot	FAIL
 elan3/applications/Robot::I::nim:non:nim:nim	FAIL
 elan3/applications/Robot::I::robot:non:robot:robot	FAIL
-elan3/applications/Robot::I::tictactoe:non:tictactoe:tictactoe	FAIL
+elan3/applications/Robot::I::tictactoe:non:tictactoe:tictactoe	PASS
 elan3/applications/SPIKE::I::spike:add:spike:add	FAIL
 elan3/applications/Simplest::A::fib:no:ifib:ifib	PASS
 elan3/applications/Simplest::A::hanoi:no:hanoi:ihanoi	PASS
@@ -777,3 +777,18 @@ elan3/contributions/Solving/Equational/UnifPb::I::unificationC:ctesig:exC1:exC1	
 elan3/contributions/Solving/Equational/UnifPb::I::unificationC:ctesig:exC2:exC2	PASS
 elan3/contributions/Solving/Equational/Unification::I::unification:simplesig:ex1:ex1	PASS
 elan3/contributions/Solving/Equational/Unification::I::unification:simplesig:ex2:ex2	PASS
+examples/iterRepeat::I::iterRepeat:no:input:expected	PASS
+examples/map::I::map:no:input:expected	PASS
+examples/normLambda::I::normLambda:no:input:expected	PASS
+examples/normalizeFirst::I::normalizeFirst:no:input:expected	PASS
+examples/poly1::I::poly1:no:input:expected	PASS
+examples/poly2::I::poly2:someVariables:input:expected	PASS
+examples/poly3::I::poly3:someVariables:input:expected	PASS
+examples/poly4::I::poly4:someVariables:input:expected	PASS
+examples/quick::I::quick:no:input:expected	PASS
+examples/simpleList::I::simpleList:no:input:expected	PASS
+examples/stratFail::I::stratFail:no:input:expected	PASS
+examples/testStrat::I::testStrat:no:input:expected	PASS
+examples/unification::I::unification:simplesig:input:expected	PASS
+regression/call_strategy_by_sort::I::prog:no:input:expected	PASS
+regression/strsubstr_no_fallthrough::I::prog:no:input:expected	PASS

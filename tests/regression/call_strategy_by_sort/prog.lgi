@@ -1,0 +1,6 @@
+LPL prog description
+  query of sort state
+  result of sort list[state]
+  import states
+  start with () setof(dk(right,up),query)
+end

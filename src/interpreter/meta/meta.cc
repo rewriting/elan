@@ -422,16 +422,27 @@ void term2strategy(int typ,term *t, strategy **s)
 }
 
 
-int Strategyname_to_ref_index(char *strname, int /*typ*/)
+// The strategy `strname` of `call "strname":X`, applied to a term of sort
+// `sort` (NULL if unknown). The defined strategies are named
+// name:sort/module. Until 2026 the sort was not used ([pem: Apr 13 03]: the
+// sort of the term may be wrong, e.g. for integers) and the name was only a
+// prefix: `call "eval":X` took the last of eval_DC, eval_DK, ..., eval of
+// every strat[Y] in the table, whatever Y (setof with two strat[]
+// instances, robot example). X itself is not known here: all the `call`
+// symbols share the code 144, hence one sort. Now: the exact name with the
+// sort of the term, else the exact name with any sort, else the old search.
+int Strategyname_to_ref_index(char *strname, const char *sort)
 {
     char   *new_ss, *name, *type, *modul;
     const char *ss;
-    int iref, good_type;
-    // BAD SOL     s->setprocmaxn(trrules.searchmatch_defs(strname,typ,-1));
+    int iref, good_type, indx;
 
-    //ss = trrules.strategyname_defs(trrules.searchmatch_defs(strname,typ,-1));
-      //[pem: Apr 13 03] 'typ' cannot be used because its code may be wrong
-    ss = trrules.strategyname_defs(trrules.searchmatch_defs(strname,-1,-1));
+    indx = (sort != NULL) ? trrules.searchcall_defs(strname, sort) : -1;
+    if (indx < 0)
+      indx = trrules.searchcall_defs(strname, NULL);
+    if (indx < 0)
+      indx = trrules.searchmatch_defs(strname,-1,-1);
+    ss = trrules.strategyname_defs(indx);
  
     detach_name_type_module(ss, &name, &type, &modul);
 
@@ -480,7 +491,8 @@ void term2strateg(int typ,term *t, strategy *s)
 	int iref;
 	s->setname(STRCALL,-1);
         
-        iref = Strategyname_to_ref_index(t->subterm(0)->getstring(),typ);
+        iref = Strategyname_to_ref_index(t->subterm(0)->getstring(),
+                                         (typ >= 0) ? typet.ide(typ) : NULL);
         
           //iref = Strategyname_to_ref_index(t->subterm(0)->subterm(0)->getstring(),typ);
 	s->setprocmaxn(iref);
@@ -538,6 +550,25 @@ void SSambiguity1(int /*warn*/, char *name, char *type, char *modu)
   if (!batch) { 
     sterr << "\nthere is an strategy/strategy ambiguity because of a reference " << name 
 	  << " for " << type << " in module " << modu << "\n"; }
+}
+
+// The defined strategy named exactly name:sort/... (any sort if sort is
+// NULL); the last one if several; -1 if none.
+int trsystem::searchcall_defs(const char *name, const char *sort) {
+  size_t ln = strlen(name), ls = sort ? strlen(sort) : 0;
+  int indx = -1;
+  for(strategynames_defs->forinit();
+      strategynames_defs->forcond();
+      strategynames_defs->fornext()) {
+    const char *rr = strategynames_defs->foractval();
+    if (strncmp(rr,name,ln) != 0 || rr[ln] != TYPE_SEPAR)
+      continue;
+    if (sort != NULL &&
+        (strncmp(rr+ln+1,sort,ls) != 0 || rr[ln+1+ls] != MODULE_SEPAR))
+      continue;
+    indx = strategynames_defs->forindex();
+  }
+  return indx;
 }
 
 // typ may be =-1 and also may be modu = -1

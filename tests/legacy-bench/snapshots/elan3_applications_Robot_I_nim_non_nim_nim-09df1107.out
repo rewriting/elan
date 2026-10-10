@@ -4,11 +4,15 @@ end
  end end
 end
 
+ cons_list[state](cons_state(state(4,1),nil),nil) end
+
  end end
 end
 
  end end
 end
+
+ cons_list[state](cons_state(state(6,1),nil),nil) end
 
  end end
 end

@@ -5,9 +5,6 @@ sub-project (S1–S5b). Each item says where it comes from.
 
 ## Behaviour (needs tests against the interpreter or the reference)
 
-- **`robot` example** (`legacy/elan3/doc/ElanExamples/robot`,
-  `applications/Robot`): no result with either interpreter, although the 1997
-  reference output shows paths (S4).
 - **`Compiler.2.1/BenchThesis` in the legacy bench**: the 30 J/JO cases (and
   the I/A cases) of `legacy/` still report `ERROR`/`FAIL` there (ELAN 2.1
   syntax: `rewrite` is a keyword in ELAN 3; `legacy/` is not modified). The
