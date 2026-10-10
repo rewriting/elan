@@ -34,7 +34,10 @@ endif()
 # Strict C17/C++17, warnings are errors (S5b), as the interpreter (S2).
 # -fno-common is explicit: Apple Clang still defaults to -fcommon on Darwin.
 # -fsigned-char: as the interpreter (and the reference build).
-set(ELAN_RT_C_OPTIONS   -std=c17 -fno-common -fsigned-char -Wall -Wextra -Werror)
+set(ELAN_RT_C_OPTIONS   -std=c17 -fno-common -fsigned-char -Wall -Wextra -Werror
+                        # glibc hides POSIX functions (fileno in the flex
+                        # scanner, ...) in strict C17 mode; ignored on macOS
+                        -D_DEFAULT_SOURCE)
 set(ELAN_RT_CXX_OPTIONS -std=c++17 -fsigned-char -Wall -Wextra -Werror)
 
 # Sanitizer build (top-level CMakeLists.txt): the libraries are compiled with

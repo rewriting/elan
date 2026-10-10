@@ -28,6 +28,7 @@
 
 #include <setjmp.h>
 #include <stdlib.h>
+#include <alloca.h>   /* not declared by <stdlib.h> in strict C17 on Linux */
 #include <stdio.h>
 #include <assert.h>
 
