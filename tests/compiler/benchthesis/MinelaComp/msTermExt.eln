@@ -1,0 +1,38 @@
+module msTermExt[Vars,Ops,Types]
+import
+global 	msTermCommons[Vars,Ops,Types]
+	sigFunctions[Types]
+;
+local 	Vars Ops Types
+	identifier int bool
+;
+end
+
+operators
+  global
+// Variables
+//    FOR EACH X:symbol; XS:identifier
+//    SUCH THAT X:=(listExtract)elem(Vars) AND XS:=() stoi(X) :{
+//      XS 	: variable		alias X :;   }
+    FOR EACH X:pair[identifier,type]; XS:identifier
+    SUCH THAT X:=(listExtract)elem(Vars) AND XS:=() stoi(X) :{
+      XS 	: variable		alias X :;
+    }
+
+    @		: ( variable ) term     pri 1000 alias @:;
+
+// Fonctions
+    FOR EACH F:pair[identifier,sig]; FS:identifier
+    SUCH THAT F:=(listExtract) elem(Ops) ANDIF arity(F)==0 
+          AND FS:=() stoi(F):{
+      FS     	:term			alias F:;
+    }
+
+    FOR EACH F:pair[identifier,sig];N:int; FS:identifier
+    SUCH THAT F:=(listExtract) elem(Ops) AND N:=() arity(F) 
+    AND FS:=() stoi(F) ANDIF N > 0 :{
+    FS (@ {,@}~(N-1))   :({term}~N) term        alias F(@{,@}~(N-1)):;
+    }
+end
+
+end

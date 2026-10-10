@@ -1,0 +1,90 @@
+module typeCheck[Vars,Ops,Types]
+import
+global
+	msTerm[Vars,Ops,Types]
+;
+local	Vars Ops Types
+	int bool
+	pair[term,term]
+	list[pair[term,term]]
+	sigFunctions[Types]
+	eq[type]
+;
+end
+
+operators
+  global
+    type_v(@)		: ( variable ) type;
+    type_t(@)		: ( term ) type;
+    type(@)		: ( variable ) type		alias type_v(@):;
+    type(@)		: ( term ) type			alias type_t(@):;
+
+    typecheck(@)	: ( term ) bool;
+    typecheck(@)	: ( pair[term,term] ) bool;
+	// both terms of the same type
+	// and well typed
+    typecheck(@)	: ( list[pair[term,term]] ) bool;
+	// each elem well typed
+end
+
+rules for bool
+ t1, t2 : term;
+	v : variable;
+        p : pair[term,term];
+	pl: list[pair[term,term]];
+global
+  [] typecheck(v)	=> true
+  end
+  [] typecheck([t1,t2])	=> type(t1) == type(t2) and typecheck(t1) and typecheck(t2)
+  end
+  [] typecheck(nil)	=> true
+  end
+  [] typecheck(p.pl)	=> typecheck(p) and typecheck(pl)
+  end
+end
+
+rules for type
+	t  : term;
+	v  : variable;
+global
+  [] type_t(v)	=> type_v(v)
+  end
+end
+
+// Variables
+rules for type
+global
+  FOR EACH X:pair[identifier,type]
+  SUCH THAT X:=(listExtract)elem(Vars) :{
+    [] type_v(X)	=> cod(X)
+    end
+  }
+end
+
+// Functions
+FOR EACH F:pair[identifier,sig]; N:int 
+SUCH THAT F:=(listExtract)elem(Ops) AND N:=()arity(F):{
+rules for type 
+     t_1,...,t_N : term;
+global
+  [] type_t(F(t_1,...,t_N))	=> cod(F)	end
+end
+}
+
+FOR EACH F:pair[identifier,sig]; N:int
+SUCH THAT F:=(listExtract)elem(Ops) AND N:=()arity(F):{
+    rules for bool
+     t_1,...,t_N : term;
+    global
+      [] typecheck(F(t_1,...,t_N))	=> false if false { or dom(I,F) != type(t_I)}_I=1...N
+      end
+      {
+      [] typecheck(F(t_1,...,t_N))	=> false if not typecheck(t_I)
+      end
+      }_I=1...N
+      [] typecheck(F(t_1,...,t_N))	=> true 
+    end
+    end
+}
+
+end

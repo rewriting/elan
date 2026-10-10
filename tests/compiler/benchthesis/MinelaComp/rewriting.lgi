@@ -1,0 +1,51 @@
+LPL rewriting description
+
+  specification description
+
+    part Types  of sort list[identifier]
+		import sigSyntax
+
+    part Vars	of sort list[pair[identifier,type]]
+	 	import sigMsSyntax[Types]
+			type[Types]
+
+    part Ops	of sort list[pair[identifier,sig]]
+	 	import sigMsSyntax[Types]
+			type[Types]
+
+    part Labels of sort list[identifier]
+		import sigSyntax
+
+    part Rules	of sort list[rwrule]
+		import type[Types] 
+ 			msTermExt[Vars,Ops,Types]
+			label[Labels]
+			rwrule[Vars,Ops,Types,Labels]
+  end
+
+  query 	of sort term	//pair[term,proofterm]
+         	result of sort pair[term,proofterm]
+	 	import type[Types]
+			label[Labels]
+			msTermExt[Vars,Ops,Types]
+			rewriting[Vars,Ops,Types,Rules,Labels]
+//			typeCheck[Vars,Ops,Types]
+			builtIn[Vars,Ops,Types]
+			proofterm[Vars,Ops,Types,Rules,Labels]
+			pair[term,proofterm]
+			
+//		check with typecheck(query)	//typecheck(first(query))
+
+         	start with (s_rewrite) [query,proofnil]
+
+//         	start with (s_rewrite) [plus( s(s(s(o))) , s(s(o)) ) , proofnil]
+
+/*
+         	start with (s_rewrite) [
+//			primes( s(s(s(s(s(s(s(s(s(s(o)))))))))) )
+			primes( s(s(s(s(s(s(s(o))))))) )
+//			primes( s(s(s(s(s(o))))) )
+			, proofnil]
+*/
+
+end
