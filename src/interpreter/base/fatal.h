@@ -21,7 +21,10 @@
 //     unwinding).
 // A failexit() in a destructor outside unwinding throws out of a noexcept
 // function: the terminate handler installed by FatalCatcher recognises
-// ElanFatal and calls fatal_exit_now(), as before.
+// ElanFatal and calls fatal_exit_now(), as before. The same handler covers
+// an ElanFatal for which the C++ runtime finds no handler and calls
+// std::terminate without unwinding (GCC drops a catch it proves unreachable,
+// e.g. behind a cleanup that never returns).
 //
 // No exception crosses C frames: the C AC matcher (acmatcher/, libmatch)
 // calls back no C++ code, and the generated parsers are C++.

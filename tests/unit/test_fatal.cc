@@ -72,12 +72,16 @@ TEST(failexit_exits_directly_in_a_forked_child) {
   }), 1);
 }
 
-struct FailsWhenDestroyed { ~FailsWhenDestroyed() { failexit(); } };
+// The destructor fails only when told so at run time: a destructor that
+// always fails lets GCC drop the catch below as unreachable (the cleanup
+// never returns), and then the throw calls std::terminate before unwinding.
+static volatile bool fail_in_destructor = true;
+struct FailsWhenDestroyed { ~FailsWhenDestroyed() { if (fail_in_destructor) failexit(); } };
 
 TEST(failexit_in_a_destructor_during_unwinding_exits) {
   CHECK_EQ(status_of_child([] {
     FatalCatcher catcher;
-    try { FailsWhenDestroyed d; throw 5; } catch (...) { _exit(99); }
+    try { FailsWhenDestroyed d; failexit(); } catch (...) { _exit(99); }
   }), 1);
 }
 
