@@ -43,6 +43,34 @@ class RegressionDiscoveryTest(unittest.TestCase):
         self.assertEqual(rt.discover_regression(rt.HERE / "does-not-exist"), [])
 
 
+
+class RustCompilerKindTest(unittest.TestCase):
+    """Kind R (elanc-rs, spec S6) is compared with the J snapshot of the
+    same case, without its rewrite_step line, and builds in a target dir of
+    the bench's work directory (not the user's cache)."""
+
+    def test_r_case_uses_the_j_snapshot(self):
+        t = {"id": "x/Test::R::p:no:-:p", "kind": "R"}
+        self.assertEqual(rt.snapshot_id(t), "x/Test::J::p:no:-:p")
+        t = {"id": "x/Test::JO::p:no:-:p", "kind": "JO"}
+        self.assertEqual(rt.snapshot_id(t), "x/Test::JO::p:no:-:p")
+
+    def test_r_snapshot_text_drops_rewrite_step(self):
+        snap = "\nresult = s(o)\n\nrewrite_step = 12\n"
+        self.assertEqual(rt.snapshot_text({"kind": "R"}, snap), "\nresult = s(o)\n\n")
+        self.assertEqual(rt.snapshot_text({"kind": "J"}, snap), snap)
+
+    def test_r_snapshot_compared_only_when_the_program_ran(self):
+        for st in ("PASS", "PASS~", "PASS≈", "FAIL"):
+            self.assertTrue(rt.compares_snapshot({"kind": "R"}, st))
+        for st in ("UNSUPPORTED", "ERROR", "TIMEOUT", "NOLGI"):
+            self.assertFalse(rt.compares_snapshot({"kind": "R"}, st))
+        self.assertTrue(rt.compares_snapshot({"kind": "J"}, "ERROR"))
+
+    def test_elanc_rs_target_dir_is_in_the_work_directory(self):
+        e = rt.env()
+        self.assertEqual(Path(e["ELANC_RS_TARGET_DIR"]), rt.WORK / "elanc-rs-target")
+
 class ExamplesDiscoveryTest(unittest.TestCase):
     def test_finds_examples_named_after_their_directory(self):
         with tempfile.TemporaryDirectory(dir=rt.HERE) as d:

@@ -56,7 +56,8 @@ configure: toolchain
 # scratch (the last three only when the compiler is built, -DELAN_COMPILER=ON,
 # the default).
 install: all
-	rm -rf "$(PREFIX)/share/elanlib" "$(PREFIX)/classes" "$(PREFIX)/include/elan-compiler" "$(PREFIX)/bin/elanc"
+	rm -rf "$(PREFIX)/share/elanlib" "$(PREFIX)/classes" "$(PREFIX)/include/elan-compiler" "$(PREFIX)/bin/elanc" \
+	       "$(PREFIX)/bin/elanc-rs" "$(PREFIX)/share/elan-rs"
 	cmake --install $(BUILD)
 
 test-runner:
@@ -105,12 +106,13 @@ check-golden: install
 	python3 tests/golden/run_golden.py --prefix $(PREFIX)
 
 # Tests of the Rust compiler (src/compiler-rs, spec S6), when cargo exists.
-check-rust:
+check-rust: install
 	@if command -v cargo >/dev/null 2>&1; then \
 	  (cd src/compiler-rs && CARGO_TARGET_DIR=$(CURDIR)/$(BUILD)/src/compiler-rs/target cargo test --offline --quiet) \
-	  && if [ -x "$(PREFIX)/bin/elan" ]; then tests/compiler-rs/test_ref_roundtrip.sh "$(PREFIX)"; fi \
-	  && if [ -x "$(PREFIX)/bin/elan" ] && [ -x "$(PREFIX)/bin/elanc-rs" ]; then tests/compiler-rs/test_normalise.sh "$(PREFIX)" \
-	       && tests/compiler-rs/bench_parity.py "$(PREFIX)"; fi; \
+	  && tests/compiler-rs/test_ref_roundtrip.sh "$(PREFIX)" \
+	  && if [ -x "$(PREFIX)/bin/elanc-rs" ]; then tests/compiler-rs/test_normalise.sh "$(PREFIX)" \
+	       && tests/compiler-rs/bench_parity.py "$(PREFIX)"; \
+	     else echo "elanc-rs not installed (-DELAN_RUST=OFF): compiled Rust tests skipped"; fi; \
 	else echo "cargo not found: Rust tests skipped"; fi
 
 check: smoke test-runner check-arch check-unit check-golden check-rust

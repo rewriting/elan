@@ -65,6 +65,9 @@ def env():
     e["ELANLIB"] = os.environ.get("ELAN_TEST_LIB", str(PREFIX))
     e["PATH"] = f"{PREFIX}/bin:{java}/bin:" + e.get("PATH", "")
     e.pop("SECONDELANLIB", None)
+    # kind R: the programs built by elanc-rs share one cargo target dir in
+    # the bench's work directory (git-ignored), not the user's cache
+    e["ELANC_RS_TARGET_DIR"] = str(WORK / "elanc-rs-target")
     return e
 
 
@@ -273,6 +276,23 @@ def run_test(t, timeout):
         shutil.rmtree(work, ignore_errors=True)
 
 
+def snapshot_id(t):
+    """Kind R (elanc-rs) is compared with the snapshot of the J case."""
+    return t["id"].replace("::R::", "::J::") if t["kind"] == "R" else t["id"]
+
+
+def snapshot_text(t, text):
+    """The snapshot as compared with the output of t (kind R: without the
+    rewrite_step line, whose count depends on the compilation scheme)."""
+    return REWRITE_STEP.sub("", text) if t["kind"] == "R" else text
+
+
+def compares_snapshot(t, status):
+    """Kind R: only an output of a program that ran is compared (elanc-rs
+    refuses the constructs of later stages: UNSUPPORTED)."""
+    return t["kind"] != "R" or status in ("PASS", "PASS~", "PASS≈", "FAIL")
+
+
 def safe(tid):
     # + hash of the exact id: macOS file names are case-insensitive and some
     # applications have both Robot.lgi-based and robot.lgi-based tests
@@ -403,19 +423,20 @@ def main():
         for i, f in enumerate(cf.as_completed(futs), 1):
             t = futs[f]
             st, detail, out = f.result()
-            snap = SNAPDIR / (safe(t["id"]) + ".out")
-            if a.save_snapshots and st in ("PASS", "PASS~", "PASS≈", "FAIL"):
+            snap = SNAPDIR / (safe(snapshot_id(t)) + ".out")
+            if a.save_snapshots and st in ("PASS", "PASS~", "PASS≈", "FAIL") and t["kind"] != "R":
                 SNAPDIR.mkdir(exist_ok=True)
                 snap.write_text(out, encoding="latin-1")
             sst = ""
-            if snap.exists() and not a.save_snapshots:
-                sst = "SNAP-OK" if snap.read_text(encoding="latin-1") == out else "SNAP-DIFF"
+            if snap.exists() and not a.save_snapshots and compares_snapshot(t, st):
+                snapped = snapshot_text(t, snap.read_text(encoding="latin-1"))
+                sst = "SNAP-OK" if snapped == out else "SNAP-DIFF"
                 if sst == "SNAP-DIFF" and t["id"] in exceptions:
                     sst = "SNAP-EXC"
                 if sst == "SNAP-DIFF":
                     snapdiff.append(t["id"])
                     (outdir / (safe(t["id"]) + ".snapdiff.txt")).write_text("".join(
-                        difflib.unified_diff(snap.read_text(encoding="latin-1").splitlines(True),
+                        difflib.unified_diff(snapped.splitlines(True),
                                              out.splitlines(True), "snapshot", "got", n=2)))
             results[t["id"]] = (st, detail)
             print(f"[{i}/{len(tests)}] {st:7} {sst:9} {t['id']}", flush=True)
