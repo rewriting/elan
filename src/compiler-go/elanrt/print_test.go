@@ -109,3 +109,25 @@ func TestDeepListPrinting(t *testing.T) {
 		t.Fatal("guard depth")
 	}
 }
+
+// The tokens after a last argument wait in a stack; a layout with nothing
+// after its last argument (a list cell @.@) pushes nothing: printing a
+// list of n cells must not keep n entries.
+func TestPrintingAListKeepsNoEntryPerCell(t *testing.T) {
+	var w Writer
+	var after [][]PrintItem
+	l := list(3)
+	for x := l; x != nil; x = w.head(x, &after) {
+	}
+	if len(after) != 0 {
+		t.Fatalf("%d entries after printing %s", len(after), Format(l))
+	}
+	// f(1,2,3,s(o)): ")" waits after s(o)
+	x := Mk(symF4, MkInt(1), MkInt(2), MkInt(3), nat(1))
+	after = nil
+	for y := x; y != nil; y = w.head(y, &after) {
+	}
+	if len(after) != 2 {
+		t.Fatalf("f(..., s(o)): %d entries, want 2", len(after))
+	}
+}

@@ -171,7 +171,9 @@ func (w *Writer) item(it PrintItem) {
 
 // Term writes a term. It iterates on the last argument of each symbol (a
 // list a1.a2. ... .nil of any length needs no recursion; the tokens that
-// follow a last argument wait in a stack); the other arguments are printed
+// follow a last argument wait in a stack, one entry per symbol that has
+// tokens after its last argument: none for a list cell @.@); the other
+// arguments are printed
 // by a recursive call, guarded ([Guard]).
 func (w *Writer) Term(t Term) {
 	var after [][]PrintItem // tokens to write after the current term, innermost last
@@ -222,7 +224,9 @@ func (w *Writer) head(t Term, after *[][]PrintItem) Term {
 			w.item(it)
 		}
 	}
-	*after = append(*after, items[last+1:])
+	if last+1 < len(items) {
+		*after = append(*after, items[last+1:])
+	}
 	return t.Args[items[last].Arg]
 }
 
@@ -247,7 +251,9 @@ func (w *Writer) acHead(e []Term, items []PrintItem, after *[][]PrintItem) Term 
 			w.item(it)
 		}
 	}
-	*after = append(*after, items[last+1:])
+	if last+1 < len(items) {
+		*after = append(*after, items[last+1:])
+	}
 	return e[len(e)-1]
 }
 

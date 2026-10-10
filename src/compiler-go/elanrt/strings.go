@@ -12,6 +12,10 @@ import (
 // index depends on the history of the run: the hash and the order of a
 // string node come from its bytes, never from the index.
 //
+// The side table does not shrink: its length is the peak number of string
+// nodes alive at once (16 bytes per entry), whose bytes are released when
+// their index is freed (newStrIndex) and kept only for live strings.
+//
 // Only the program goroutine reads and writes strs; the cleanups (run on
 // another goroutine) only append to freedStrs, under strsMu.
 

@@ -160,7 +160,8 @@ if [ -d "$RUN/peano/$W" ] && [ -x "$RUN/peano/$W/a.out" ]; then
      && [ "$(cd "$d" && ./a.out -noInput -quiet | grep '^result = ')" \
           = "$(cd "$RUN/peano/$W" && ./a.out -noInput -quiet | grep '^result = ')" ]; then
     after=$(packages peano)
-    if [ "$before" = "$after" ]; then
+    # (an empty count would say nothing: the cache is elsewhere)
+    if [ "$before" = "$after" ] && [ "$after" -gt 0 ]; then
       ok "peano from another directory: same package ($after files)"
     else
       fail "peano from another directory: $before files, then $after in $TARGET"
