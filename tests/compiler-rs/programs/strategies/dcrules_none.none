@@ -1,0 +1,1 @@
+dc(big) on t(5): big only applies above 1000, so the strategy none has no result (on purpose).

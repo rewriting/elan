@@ -9,7 +9,8 @@
 # programs of programs/DIR instead (programs/strategy_terms: strategy terms
 # evaluated at run time, the programs of tests/compiler/programs/
 # runtime_strategies and start_term with the query replaced by 3, 95 and
-# 200, `<case>_<n>.lgi`); the query given to the
+# 200, `<case>_<n>.lgi`; direct_<n>: f(<n>, 4), go applying to f only);
+# the query given to the
 # interpreter is the content of programs/DIR/query when it exists (the
 # start term ignores it, but it must parse), else `true end`. For each
 # program:
@@ -22,7 +23,9 @@
 #  - REM: `elanc -b -nosplit -quiet` + make + `./a.out -noInput -quiet`:
 #    the `result = ` lines must be byte-identical (the `rewrite_step` line
 #    is not compared: it depends on the compilation scheme).
-# A program may have no result (the sequences are then both empty).
+# A program without result fails (both sides empty prove nothing), unless
+# it has a <name>.none saying why no result is expected (it then fails if
+# elanc-rs gives one).
 # Exceptions, each documented in its file: <name>.no-rem says why REM is
 # not run, <name>.no-interpreter why the interpreter is not run.
 # Outputs are compared as bytes (LC_ALL=C).
@@ -85,6 +88,13 @@ for lgi in "$PROGS"/*.lgi; do
     fail "$name: the compiled program failed (status $status, see $d/rs/run.err)"; continue
   fi
   count=$(printf '%s' "$rs" | grep -c '^result = ')
+  if [ -f "$PROGS/$name.none" ]; then
+    if [ "$count" != 0 ]; then
+      fail "$name: $count results, none expected ($name.none)"; continue
+    fi
+  elif [ "$count" = 0 ]; then
+    fail "$name: no result (vacuous comparison; add $name.none if intended)"; continue
+  fi
 
   # interpreter
   if [ -f "$PROGS/$name.no-interpreter" ]; then

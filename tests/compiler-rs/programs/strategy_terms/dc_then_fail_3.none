@@ -1,0 +1,1 @@
+dc(dk(inc1,inc10), dbl) ; big on 3: the results 4 and 13 are not above 100, big fails: no result on purpose (dc_then_fail_95 and _200 have one).

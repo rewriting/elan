@@ -1,0 +1,1 @@
+if inc1 then big orelse dbl fi on 95: inc1 succeeds, then big fails (96 <= 100) and orelse is not tried: no result on purpose (if_then_fails_200 has one).
