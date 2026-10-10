@@ -312,8 +312,8 @@ Gterm *termParser(int queryMode, int evaluationMode) {
       case 1: /* REFInput */ 
 
         res=(Gterm*)normalise(query);
+        res = main_query_start(res);
         if(earleyQueryStrategy!=0) {
-          res = main_query_start(res);
           res = ((strTabFunType)strTab[earleyQueryStrategy])(res);
         }
         break;
@@ -358,8 +358,8 @@ Gterm *termParser(int queryMode, int evaluationMode) {
                 //ATprintf("\n after nomalise res = %t\n",res);
               //res=normalise(EarleyParser(""));
 	      
+              res = main_query_start(res);
               if(earleyQueryStrategy!=0) {
-                res = main_query_start(res);
                 res = ((strTabFunType)strTab[earleyQueryStrategy])(res);
               }
 
@@ -445,9 +445,11 @@ Gterm *termParser(int queryMode, int evaluationMode) {
 	    }
 	    strCall = strIndex;                     // [Huy: May 22 00]
 	    res = ((strTabFunType)strTab[strIndex])(res);
-        } else if (strlen(sort)==0 && earleyQueryStrategy!=0) {
+        } else if (strlen(sort)==0) {
 	    res = main_query_start(res);
-	    res = ((strTabFunType)strTab[earleyQueryStrategy])(res);
+	    if (earleyQueryStrategy!=0) {
+	      res = ((strTabFunType)strTab[earleyQueryStrategy])(res);
+	    }
         }
         break;
       }
