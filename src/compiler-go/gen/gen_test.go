@@ -217,3 +217,37 @@ func TestGeneratedProgramsRun(t *testing.T) {
 		t.Errorf("builtins: %q, want %q", got, want)
 	}
 }
+
+// wherePatterns has where-patterns whose test never reads the matched term:
+// g is total, so g(q) is never a normal form (an `if false` test), at the
+// top of the pattern (the temporary m<n>) and under a constructor (the
+// temporary p<n>). Go refuses a variable declared and not used.
+//
+//	[] j(n) => o    where g(q) := () n      [] j(n) => s(o)
+//	[] k(n) => o    where s(g(q)) := () n   [] k(n) => s(s(o))
+func wherePatterns() *prog {
+	p := newProg()
+	p.op(sNat, 318, "o", nil, 0)
+	p.op(sNat, 319, "s", []uint32{sNat}, 0)
+	p.op(sNat, 320, "g", []uint32{sNat}, 0)
+	p.op(sNat, 321, "j", []uint32{sNat}, 0)
+	p.op(sNat, 322, "k", []uint32{sNat}, 0)
+	p.op(sOut, 400, "r", []uint32{sNat, sNat}, 0)
+	p.rule(sNat, f(320, v(0, sNat)), v(0, sNat))
+	p.rule(sNat, f(321, v(0, sNat)), f(318),
+		ref.Match{Pattern: f(320, v(1, sNat)), Sort: sNat, Strategy: ref.None, Rhs: v(0, sNat)})
+	p.rule(sNat, f(321, v(0, sNat)), f(319, f(318)))
+	p.rule(sNat, f(322, v(0, sNat)), f(318),
+		ref.Match{Pattern: f(319, f(320, v(1, sNat))), Sort: sNat, Strategy: ref.None, Rhs: v(0, sNat)})
+	p.rule(sNat, f(322, v(0, sNat)), f(319, f(319, f(318))))
+	p.p.Query.ResultSort = sOut
+	p.p.Query.StartWith = f(400, f(321, f(318)), f(322, f(319, f(318))))
+	return p
+}
+
+func TestWherePatternsThatReadNothing(t *testing.T) {
+	want := "\nresult = r(s(o),s(s(o)))\n\nrewrite_step = 2\n"
+	if got := run(t, wherePatterns()); got != want {
+		t.Errorf("where patterns: %q, want %q", got, want)
+	}
+}

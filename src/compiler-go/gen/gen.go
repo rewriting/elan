@@ -865,7 +865,11 @@ func (e *emitter) tryRule(d *ir.Decision, rules []ir.Rule) {
 			}
 			m := fmt.Sprintf("m%d", e.next())
 			e.line("%s := %s", m, e.typedExpr(&c.Expr, r.Vars))
-			opens += e.patternCheck(&c.Pat, m, s, r, used)
+			n, read := e.patternCheck(&c.Pat, m, s, r, used)
+			opens += n
+			if !read {
+				e.line("_ = %s // the pattern reads nothing of it", m)
+			}
 		}
 	}
 	e.line("rt.Step()")
@@ -876,36 +880,43 @@ func (e *emitter) tryRule(d *ir.Decision, rules []ir.Rule) {
 }
 
 // patternCheck matches the term or value t of sort s against p, binding
-// its variables; it opens an if per test and returns their number.
-func (e *emitter) patternCheck(p *ir.Pattern, t string, s ir.SortID, r *ir.Rule, used map[ir.VarID]bool) int {
+// its variables; it opens an if per test and returns their number, and
+// whether its code reads t. A pattern can read nothing of t (Go refuses a
+// variable declared and not used, the caller then discards t): a variable
+// the rule does not use, an injection into a sort whose values are all
+// injected (no test) above such a pattern, or an operator that is never a
+// normal form (a test `if false`).
+func (e *emitter) patternCheck(p *ir.Pattern, t string, s ir.SortID, r *ir.Rule, used map[ir.VarID]bool) (int, bool) {
 	switch p.Kind {
 	case ir.PatVar:
 		if used[p.Var] {
 			e.line("%s := %s", r.Vars[p.Var].Name, t)
+			return 0, true
 		}
-		return 0
+		return 0, false
 	case ir.PatInt:
 		e.open("if %s {", e.headTest(s, t, ir.Head{Kind: ir.HeadInt, Int: p.Int}))
-		return 1
+		return 1, true
 	case ir.PatStr:
 		e.open("if %s {", e.headTest(s, t, ir.Head{Kind: ir.HeadStr, Str: p.Str}))
-		return 1
+		return 1, true
 	}
 	op := &e.ir.Ops[p.Op]
 	switch {
 	case op.Kind == ir.BoolConst:
 		e.open("if %s {", e.headTest(s, t, ir.Head{Kind: ir.HeadOp, Op: p.Op}))
-		return 1
+		return 1, true
 	case op.Kind == ir.Injection:
-		n := 0
+		n, read := 0, false
 		if test := e.headTest(s, t, ir.Head{Kind: ir.HeadOp, Op: p.Op}); test != "" {
 			e.open("if %s {", test)
-			n = 1
+			n, read = 1, true
 		}
-		return n + e.patternCheck(&p.Args[0], t, op.Args[0], r, used)
+		m, sub := e.patternCheck(&p.Args[0], t, op.Args[0], r, used)
+		return n + m, read || sub
 	case !op.Variant:
 		e.open("if false { // %s is never a normal form", comment(op.Decl))
-		return 1
+		return 1, false
 	}
 	e.open("if %s.Sym == %s {", t, symName(op))
 	n := 1
@@ -920,9 +931,13 @@ func (e *emitter) patternCheck(p *ir.Pattern, t string, s ir.SortID, r *ir.Rule,
 		}
 		v := fmt.Sprintf("p%d", e.next())
 		e.line("%s := %s", v, c)
-		n += e.patternCheck(a, v, op.Args[i], r, used)
+		m, read := e.patternCheck(a, v, op.Args[i], r, used)
+		n += m
+		if !read {
+			e.line("_ = %s // the pattern reads nothing of it", v)
+		}
 	}
-	return n
+	return n, true
 }
 
 func (e *emitter) mainFunc() {

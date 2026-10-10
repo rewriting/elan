@@ -1,0 +1,39 @@
+module wherenone
+// Where-patterns whose test reads nothing of the matched term (elanc-go
+// once emitted a Go variable declared and not used for them): an
+// injection into int whose variable the rule does not use (int has no
+// other value: no test), an operator never in normal form (g is total) at
+// the top of the pattern and under a constructor.
+import global int bool; end
+sort nat pair out; end
+operators global
+  o : nat;
+  s(@) : (nat) nat;
+  g(@) : (nat) nat;
+  p(@,@) : (int int) pair;
+  id(@) : (int) int;
+  i(@) : (int) int;
+  j(@) : (nat) int;
+  k(@) : (int) int;
+  l(@) : (nat) int;
+  r(@,@,@,@,@) : (int int int int int) out;
+end
+rules for nat
+  n : nat;
+global
+  [] g(n) => n end
+end
+rules for int
+  x, y : int; n, q : nat; b : builtinInt;
+global
+  [] id(x) => x end
+  [] i(x) => 2 where (int) [b] := () id(x) end
+  [] i(x) => 0 end
+  [] j(n) => 2 where (nat) g(q) := () n end
+  [] j(n) => 0 end
+  [] k(x) => 3 where (pair) p([b], y) := () p(x, x) end
+  [] k(x) => 0 end
+  [] l(n) => 4 where (nat) s(g(q)) := () n end
+  [] l(n) => 1 end
+end
+end

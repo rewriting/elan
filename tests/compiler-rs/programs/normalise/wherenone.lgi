@@ -1,0 +1,6 @@
+LPL wherenone description
+  query of sort bool
+  result of sort out
+  import wherenone
+  start with () r(i(4), i(5), j(s(o)), k(4), l(s(o)))
+end
