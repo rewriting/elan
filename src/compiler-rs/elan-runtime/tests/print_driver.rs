@@ -1,7 +1,7 @@
 //! Printing and the main program's output.
 mod common;
 use common::*;
-use elan_runtime::print::{to_text, Writer};
+use elan_runtime::print::{to_text, Print, Writer};
 use elan_runtime::{step, Options, Session};
 
 #[test]
@@ -86,4 +86,24 @@ fn options() {
     assert!(String::from_utf8(s.into_output())
         .unwrap()
         .starts_with("\nrewrite_step = "));
+}
+
+/// Builtin strings print with the writer's style; a `Builtin` value prints
+/// its value or its stuck term (generated sorts of builtin families).
+#[test]
+fn builtin_values_print() {
+    use elan_runtime::print::StringStyle;
+    use elan_runtime::{Builtin, Int, Str};
+    on_thread(8 << 10, || {
+        let s: Str = Str::from("a b");
+        assert_eq!(to_text(&s), "\"a b\"");
+        let mut w = Writer::new();
+        w.string_style = StringStyle::Raw;
+        s.print(&mut w);
+        assert_eq!(w.take(), "a b");
+        let v: Builtin<Int, N> = Builtin::Val(3);
+        assert_eq!(to_text(&v), "3");
+        let st: Builtin<Int, N> = Builtin::Stuck(nat(1));
+        assert_eq!(to_text(&st), "s(o)");
+    })
 }

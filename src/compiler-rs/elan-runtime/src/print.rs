@@ -39,6 +39,23 @@ impl Print for bool {
     }
 }
 
+impl Print for crate::builtin::Str {
+    fn print(&self, w: &mut Writer) {
+        w.string(self)
+    }
+}
+
+/// A value of a builtin sort that can be stuck prints as its value or as
+/// its stuck term.
+impl<V: Print, S: Print> Print for crate::builtin::Builtin<V, S> {
+    fn print(&self, w: &mut Writer) {
+        match self {
+            crate::builtin::Builtin::Val(v) => v.print(w),
+            crate::builtin::Builtin::Stuck(s) => s.print(w),
+        }
+    }
+}
+
 /// How builtin strings are printed (see [`Writer::string`]).
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum StringStyle {
