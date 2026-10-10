@@ -407,7 +407,7 @@ nolexem.crendofstreamlex();
 int is_any_type(int t)
 {
 int i;
-  for(i=0; i < anysi; i++) if (t == anys[i]) return 1;
+  for(i=0; i < ld.anysi; i++) if (t == ld.anys[i]) return 1;
   return 0;
 }
 
@@ -521,8 +521,8 @@ void grammar::any_code(char *anymodstr, char *anymodfname, const char *name)
 
   anymod << "module " << anymodstr << "\n";
   anymod << "\nimport local Any list[Any] " << name << " ";
-  for(i=0; i < anysi; i++) anymod << " " << ANY_MOD << "[" << 
-    typet.ide(anys[i]) << "] ";
+  for(i=0; i < ld.anysi; i++) anymod << " " << ANY_MOD << "[" << 
+    typet.ide(ld.anys[i]) << "] ";
   anymod << "; \nend";
   anymod << "\noperators global\n";
   anycode_ops(anymod);
@@ -554,8 +554,8 @@ int symbappl_equal(struct ilist *lst, struct sgrammrule *actr)
 int is_symbappl_symbol(struct sgrammrule *actr)
 {
   int i;
-  for (i=0; i < symbappli; i++) {
-    if (symbappl_equal(symbappl[i],actr))
+  for (i=0; i < ld.symbappli; i++) {
+    if (symbappl_equal(ld.symbappl[i],actr))
       return 1;
   }
   return 0;
@@ -628,10 +628,10 @@ void grammar::symbappl_code(char *symbapplmodstr, char *symbapplmodfname, const 
 
   symbapplmod << "module " << symbapplmodstr << "\n";
   symbapplmod << "\nimport local " << name;
-  for(i=0; i < symbappli; i++) {
-    for(j=-1,lst=symbappl[i]; lst; lst=lst->next) j++;
+  for(i=0; i < ld.symbappli; i++) {
+    for(j=-1,lst=ld.symbappl[i]; lst; lst=lst->next) j++;
     symbapplmod << " " << SYMBOL_MODNAME << "[" << j;
-    for(lst=symbappl[i]; lst; lst=lst->next)
+    for(lst=ld.symbappl[i]; lst; lst=lst->next)
       symbapplmod << "," << typet.ide(lst->i);
     symbapplmod << "] ";
   }
@@ -652,7 +652,7 @@ lexem le;
  le.crcharlex(']'); addsymbol(le);
  le.crtypelex(x); addsymbol(le);
  le.crtypelex(y);
- gr=addrule(le,RNOPRIOR,RNOINFO,actcode);
+ gr=addrule(le,RNOPRIOR,RNOINFO,ld.actcode);
  dumpgrrule(gr);
  add_to_fsymtab(2,gr,APPLY_FLAG(0));
  inlinecodes[inlinecodesi].from = x;

@@ -1026,97 +1026,97 @@ int atermsemact(int n,lexem l,lstream * /*f*/)
       // stout << "checkwith = "; checkwith.write(stout); stout << "\n";
       break;
     case 159:
-      actstrategy->setprocmaxn(calledstr);
-      actstrategy->settypeof(strategytype);
-      actstrategy->setname(STRCALL,impmoduli);
+      ld.actstrategy->setprocmaxn(ld.calledstr);
+      ld.actstrategy->settypeof(strategytype);
+      ld.actstrategy->setname(STRCALL,impmoduli);
       break;                            // UUU differece between semact.c
     case 160:				// another element. strategy
       appactstrat();
       break;
     case 163:
-      grow_strstack(strstacki+3);
-      strstack[strstacki+1]=strstack[strstacki+2]=NULL;
-      strstacki+=2;
+      grow_strstack(ld.strstacki+3);
+      ld.strstack[ld.strstacki+1]=ld.strstack[ld.strstacki+2]=NULL;
+      ld.strstacki+=2;
       break;
     case 164:
-      actstrategy->setname(STRNAMEREPEAT,impmoduli); 
-      actstrategy->settypeof(strategytype);
-      actstrategy->setsubst(strstack[strstacki-1]);
-      strstacki-=2;
+      ld.actstrategy->setname(STRNAMEREPEAT,impmoduli); 
+      ld.actstrategy->settypeof(strategytype);
+      ld.actstrategy->setsubst(ld.strstack[ld.strstacki-1]);
+      ld.strstacki-=2;
       break;
     case 165:
-      actstrategy->setname(STRNAMEITERATE,impmoduli);
-      actstrategy->settypeof(strategytype);
-      actstrategy->setsubst(strstack[strstacki-1]);
-      strstacki-=2;
+      ld.actstrategy->setname(STRNAMEITERATE,impmoduli);
+      ld.actstrategy->settypeof(strategytype);
+      ld.actstrategy->setsubst(ld.strstack[ld.strstacki-1]);
+      ld.strstacki-=2;
       break;
     case 172:
-      actstrategy->setname(STRNAMEONE,impmoduli);
-      actstrategy->settypeof(strategytype);
-      actstrategy->setnamelist(rlst);
+      ld.actstrategy->setname(STRNAMEONE,impmoduli);
+      ld.actstrategy->settypeof(strategytype);
+      ld.actstrategy->setnamelist(rlst);
       // UUU see 160:      appactstrat();
       break;
     case 173:
-      actstrategy->setname(STRNAMEDONTCARE,impmoduli);
-      actstrategy->settypeof(strategytype);
-      actstrategy->setnamelist(rlst);
+      ld.actstrategy->setname(STRNAMEDONTCARE,impmoduli);
+      ld.actstrategy->settypeof(strategytype);
+      ld.actstrategy->setnamelist(rlst);
       // UUU see 160:      appactstrat();
       break;
     case 174:
-      actstrategy->setname(STRNAMEDONTKNOW,impmoduli);
-      actstrategy->settypeof(strategytype);
-      actstrategy->setnamelist(rlst);
+      ld.actstrategy->setname(STRNAMEDONTKNOW,impmoduli);
+      ld.actstrategy->settypeof(strategytype);
+      ld.actstrategy->setnamelist(rlst);
       // UUU see 160:  appactstrat();
       break;
     case 171:
-      actstrategy->setname(STRNAMEONE2,impmoduli);
-      actstrategy->settypeof(strategytype);
-      actstrategy->setstl(strlstack[strlstacki-2]);
-      strstacki-=2;
-      strlstacki-=2;
+      ld.actstrategy->setname(STRNAMEONE2,impmoduli);
+      ld.actstrategy->settypeof(strategytype);
+      ld.actstrategy->setstl(ld.strlstack[ld.strlstacki-2]);
+      ld.strstacki-=2;
+      ld.strlstacki-=2;
       break;
     case 175:
-      actstrategy->setname(STRNAMEDONTCARE2,impmoduli);
-      actstrategy->settypeof(strategytype);
-      actstrategy->setstl(strlstack[strlstacki-2]);
-      strstacki-=2;
-      strlstacki-=2;
+      ld.actstrategy->setname(STRNAMEDONTCARE2,impmoduli);
+      ld.actstrategy->settypeof(strategytype);
+      ld.actstrategy->setstl(ld.strlstack[ld.strlstacki-2]);
+      ld.strstacki-=2;
+      ld.strlstacki-=2;
       break;
     case 176:
-      actstrategy->setname(STRNAMEDONTKNOW2,impmoduli);
-      actstrategy->settypeof(strategytype);
-      actstrategy->setstl(strlstack[strlstacki-2]);
-      strstacki-=2;
-      strlstacki-=2;
+      ld.actstrategy->setname(STRNAMEDONTKNOW2,impmoduli);
+      ld.actstrategy->settypeof(strategytype);
+      ld.actstrategy->setstl(ld.strlstack[ld.strlstacki-2]);
+      ld.strstacki-=2;
+      ld.strlstacki-=2;
       break;
     case 177:
       { struct strlist *ss;
       AALLOS(ss , struct strlist);
       ss->next = NULL;
-      ss->str = strstack[strstacki-1];
-      strstack[strstacki-1]=strstack[strstacki]=NULL;
+      ss->str = ld.strstack[ld.strstacki-1];
+      ld.strstack[ld.strstacki-1]=ld.strstack[ld.strstacki]=NULL;
       //	  NNEW(actstrategy ,strategy);
-      grow_strlstack(strlstacki+2);
-      strlstack[strlstacki++] = ss;
-      strlstack[strlstacki++] = ss;
+      grow_strlstack(ld.strlstacki+2);
+      ld.strlstack[ld.strlstacki++] = ss;
+      ld.strlstack[ld.strlstacki++] = ss;
       }
       break;
     case 178:
       { struct strlist *ss;
       AALLOS(ss , struct strlist);
       ss->next = NULL;
-      ss->str = strstack[strstacki-1];
-      strstack[strstacki-1]=strstack[strstacki]=NULL;
+      ss->str = ld.strstack[ld.strstacki-1];
+      ld.strstack[ld.strstacki-1]=ld.strstack[ld.strstacki]=NULL;
       //	  NNEW(actstrategy ,strategy);
-      strlstack[strlstacki-1]->next = ss;
-      strlstack[strlstacki-1] = ss;
+      ld.strlstack[ld.strlstacki-1]->next = ss;
+      ld.strlstack[ld.strlstacki-1] = ss;
       }
       break;
     case 179:
       strindex = nval;
-      strstacki=1;
-      strstack[0]= strstack[1]= NULL;
-      NNEW(actstrategy ,strategy);
+      ld.strstacki=1;
+      ld.strstack[0]= ld.strstack[1]= NULL;
+      NNEW(ld.actstrategy ,strategy);
       break;
     case 180:  
       strategytype = nval;
@@ -1124,17 +1124,17 @@ int atermsemact(int n,lexem l,lstream * /*f*/)
     case 181:
       trrules.settypeofstrategy_defs(strindex,strategytype);
       // strstack[strstacki] -> dump();
-      strstack[0]->settypeof(strategytype);
-      trrules.setstrategy_defs(strindex,strstack[0]); 
+      ld.strstack[0]->settypeof(strategytype);
+      trrules.setstrategy_defs(strindex,ld.strstack[0]); 
       if (!batch) 
 	stout << "Import strategy " << trrules.strategyname_defs(strindex)
 	      << "\n";
       strindex_refs = trrules.strategyindex_refs(trrules.
 			strategyname_defs(strindex));
-      trrules.set_strategies_cross(strindex_refs,strindex,strstack[0]);
+      trrules.set_strategies_cross(strindex_refs,strindex,ld.strstack[0]);
       break;
    case 182:
-     calledstr = nval;
+     ld.calledstr = nval;
      break;
    case 183:
    case 184:
@@ -1144,15 +1144,15 @@ int atermsemact(int n,lexem l,lstream * /*f*/)
      //stout << typet.ide(strategytype) << "\n";
      stringconsti = 0;
 
-     actstrategy->setname((n == 183) ? 
+     ld.actstrategy->setname((n == 183) ? 
 			  STRNAMEDCPROCESSCALL:STRNAMEDKPROCESSCALL,
 			  impmoduli);
-     actstrategy->settypeof(strategytype);
-     actstrategy->setproctype(strategytype);
-     actstrategy->setprocname(stringconst);
-     actstrategy->setprocmaxn(ainfos);
+     ld.actstrategy->settypeof(strategytype);
+     ld.actstrategy->setproctype(strategytype);
+     ld.actstrategy->setprocname(stringconst);
+     ld.actstrategy->setprocmaxn(ainfos);
 
-      actstrategy->setprocgr(&globtermgr);
+      ld.actstrategy->setprocgr(&globtermgr);
 //      addstandards(globtermgr);
 //      actstrategy->setprocgr(topgrammar);
 
@@ -1171,16 +1171,16 @@ int atermsemact(int n,lexem l,lstream * /*f*/)
      rstack[++rstacktop] = rlab;
      break;
    case 195:  // strategy fail
-     actstrategy->setname(STRFAIL,impmoduli);
-     actstrategy->settypeof(strategytype);
+     ld.actstrategy->setname(STRFAIL,impmoduli);
+     ld.actstrategy->settypeof(strategytype);
      break;
    case 196:
-     actstrategy->setname(STRIDENTITY,impmoduli);
-     actstrategy->settypeof(strategytype);
+     ld.actstrategy->setname(STRIDENTITY,impmoduli);
+     ld.actstrategy->settypeof(strategytype);
      break;
    case 197:
-     actstrategy->setname(STRMETA,impmoduli);
-     actstrategy->settypeof(strategytype);
+     ld.actstrategy->setname(STRMETA,impmoduli);
+     ld.actstrategy->settypeof(strategytype);
      break;
    default:
       sterr << "[atermsemact] undefined semantic action " << n 
@@ -1214,14 +1214,14 @@ if (!batch) { stout << "REDUCE_STRATEGY done\n"; }
 
       trrules.settypeofstrategy_defs(redStrategyIndex,strategytype);
       // strstack[strstacki] -> dump();
-      strstack[0]->settypeof(strategytype);
-      trrules.setstrategy_defs(redStrategyIndex,strstack[0]); 
+      ld.strstack[0]->settypeof(strategytype);
+      trrules.setstrategy_defs(redStrategyIndex,ld.strstack[0]); 
       if (!batch) {
 	stout << "Import reduce strategy " << trrules.strategyname_defs(redStrategyIndex)
 	      << "\n"; }
       redStrategyIndex_refs = trrules.strategyindex_refs(trrules.
 			strategyname_defs(redStrategyIndex));
-      trrules.set_strategies_cross(redStrategyIndex_refs,redStrategyIndex,strstack[0]);
+      trrules.set_strategies_cross(redStrategyIndex_refs,redStrategyIndex,ld.strstack[0]);
       break;
     case 113:  
       impmoduli = amodule;
@@ -1230,9 +1230,9 @@ if (!batch) { stout << "REDUCE_STRATEGY done\n"; }
       qresulttypei = nval; qresulttype.crtypelex(qresulttypei);
       // ** init
 	      //stout << "MODULE= " << impmoduli << "\n";
-      strstacki=1;
-      strstack[0]= strstack[1]= NULL;
-      NNEW(actstrategy ,strategy);
+      ld.strstacki=1;
+      ld.strstack[0]= ld.strstack[1]= NULL;
+      NNEW(ld.actstrategy ,strategy);
       break;
     default:
       atermsemact(n,l,f);

@@ -34,37 +34,8 @@
 
 extern int handlestrategydefinition(lstream *f);
 
-extern struct sgrammrule *dollar_vartab[MAXNOFVAR];
-// copie de vartab pour les regles de variable avec un dollar
 
- std::vector<int> profistck;           // stack of profiles (grows on demand)
- int profistcki =       -1;             // top-pointer to the profistck
- lexem actlvtab[MAXNOFVAR];             // for variables in labels
- int actlvtabi = 0;                     // pointer to actlvtab
- lexem actruletype_l;                   // type of terms in the CP rule
- int actruletypeindex = 0;              //
- int actruletypeindex_l = 0;            //
-// struct grammrulelist *listofrules=NULL;// list of rules added in strategy body
- int profi_level = 0;                   // level of nesting of profiles
- int profi_lev = 0;
- int selectorn = 0;
- int numb_selectors = 0;
- int sel_poss = 0;
- struct selector selectors[MLENGRRULE];
- char strategy_type[STRLEN];             // name of the first type in profile
-
- int pos_l = 0;                         // index of type X, when parsing <X->Y>
- class profitab profit;                 // table of profiles
- transrule *acttrrulelab;               // LAB_ RW rule
-
- struct RPair { struct sgrammrule *r1, *r2; struct RPair *next; };
- struct RPair *fsymrules = NULL;        // list of rule indexes (r1,r2)
-
-int spairi = 0;
-std::vector<struct Spair> spair;
-
-int Gtypestack[MAXGTYPESTACK];
-int Gtypestacki = 0;
+ struct RPair { struct sgrammrule *r1, *r2; struct RPair *next; }; // ld.fsymrules
 
 int    inlinecodesi = 0;
 std::vector<struct INLINES> inlinecodes;
@@ -97,23 +68,23 @@ int is_let(int cde)        SEARCHINDEX(let,cde)
 
 int stratsort2index(int cde) { 
  int i; 
- for (i = 0; i < spairi; i++) if (spair[i].stratsort == cde) return i; 
+ for (i = 0; i < ld.spairi; i++) if (ld.spair[i].stratsort == cde) return i; 
   return -1; 
 }
 
 int add_strat_nont(int pos1,int pos2)
 {int  r, i; /*pom,*/
 
-  make_new_nonts(strategy_type,STRATEGY,typet.ide(pos1),typet.ide(pos2)); 
-  r = typet.addstr(strategy_type);
-  for(i = 0; i < spairi; i++)
-    if (spair[i].from == pos1 && spair[i].to == pos2) break;
-  if (i >= spairi) {
-    if (spairi >= (int)spair.size()) spair.resize(spairi + 1);
-    spair[spairi].from = pos1;
-    spair[spairi].to = pos2;
-    spair[spairi].stratsort = r; 
-    spairi++;
+  make_new_nonts(ld.strategy_type,STRATEGY,typet.ide(pos1),typet.ide(pos2)); 
+  r = typet.addstr(ld.strategy_type);
+  for(i = 0; i < ld.spairi; i++)
+    if (ld.spair[i].from == pos1 && ld.spair[i].to == pos2) break;
+  if (i >= ld.spairi) {
+    if (ld.spairi >= (int)ld.spair.size()) ld.spair.resize(ld.spairi + 1);
+    ld.spair[ld.spairi].from = pos1;
+    ld.spair[ld.spairi].to = pos2;
+    ld.spair[ld.spairi].stratsort = r; 
+    ld.spairi++;
   }
   return r;
 }
@@ -121,18 +92,18 @@ int add_strat_nont(int pos1,int pos2)
 //------------------------------------------- PROFI_STACK 
 void push_profistck(int p)
 {
-   profistcki++;
-   if (profistcki >= (int)profistck.size()) profistck.resize(profistcki + 1);
-   profistck[profistcki] = p;
+   ld.profistcki++;
+   if (ld.profistcki >= (int)ld.profistck.size()) ld.profistck.resize(ld.profistcki + 1);
+   ld.profistck[ld.profistcki] = p;
  }
 
 int top_profistck()
-{ return profistck[profistcki]; }
+{ return ld.profistck[ld.profistcki]; }
 
 int pop_profistck()
 {
-  if (profistcki >= 0)
-    return profistck[profistcki--];
+  if (ld.profistcki >= 0)
+    return ld.profistck[ld.profistcki--];
   else {
     sterr << "[profiles] int.err.\n"; failexit(); }
 }
@@ -201,9 +172,9 @@ int handlestrategybody(lstream *f)
   int resan; /* ,whi;*/
   char *strnam;                      // temp variable for rulenames
 
-  applex.crtypelex(add_strat_nont(actruletypeindex_l,actruletypeindex));
-  selflex.crtypelex(actruletypeindex_l);
-  reslex.crtypelex(actruletypeindex);
+  applex.crtypelex(add_strat_nont(ld.actruletypeindex_l,ld.actruletypeindex));
+  selflex.crtypelex(ld.actruletypeindex_l);
+  reslex.crtypelex(ld.actruletypeindex);
 
   // right1 => Y
   modframes[stacki].gr.addsymbol(reslex); le.crtypelex(RIGHTSTYPE);
@@ -231,33 +202,33 @@ int handlestrategybody(lstream *f)
   if (! resan) return(resan);
 
 ///...ADDING
-  lside.popt(); rside.popt(); 
+  ld.lside.popt(); ld.rside.popt(); 
 
-  rside.remove_inlines();
+  ld.rside.remove_inlines();
 
   //stout << "strategy was applied = " << strategywasapplied << "\n";
 
   if (!strategywasapplied) {
     ls.stinit(); 
     ls.crvar(0,selflex); // should be self 
-    ls.pusht(lside); 
-    ls.crterm(apply_code(actruletypeindex_l,actruletypeindex),2);
+    ls.pusht(ld.lside); 
+    ls.crterm(apply_code(ld.actruletypeindex_l,ld.actruletypeindex),2);
     ls.popt();
     //ls.write(stout); stout.flush();
     //--------------
     rs.stinit(); 
     rs.crvar(0,selflex); // should be self 
-    rs.pusht(rside); 
-    rs.crterm(apply_code(actruletypeindex_l,actruletypeindex),2);
+    rs.pusht(ld.rside); 
+    rs.crterm(apply_code(ld.actruletypeindex_l,ld.actruletypeindex),2);
     rs.popt();
-  } else { ls = lside; rs = rside; }
+  } else { ls = ld.lside; rs = ld.rside; }
   NNEW(rlab, term);
-  strnam = attach_type("DSTR",actruletypeindex); 
+  strnam = attach_type("DSTR",ld.actruletypeindex); 
 
   if (strategywasapplied) {
 
-  acttrrule = trrules.addrule(strnam,actvtabi,ls,rs,
-		    stratmoduli(actruletypeindex_l,actruletypeindex),
+  ld.acttrrule = trrules.addrule(strnam,ld.actvtabi,ls,rs,
+		    stratmoduli(ld.actruletypeindex_l,ld.actruletypeindex),
 		    RGLOP,     // AAA
 	            NULL,
 	            (acsymbolinleftside?ACMATCH:NORMMATCH),*rlab,NULL);  
@@ -266,15 +237,15 @@ int handlestrategybody(lstream *f)
   else {
   //------------------------ to be able to remove repeat from the strategy eval
   resvar.stinit();
-  resvar.crvar(actvtabi,reslex);
+  resvar.crvar(ld.actvtabi,reslex);
   resvar.popt();
-  acttrrule = trrules.addrule(strnam,actvtabi+1,ls,resvar,
-		    stratmoduli(actruletypeindex_l,actruletypeindex),
+  ld.acttrrule = trrules.addrule(strnam,ld.actvtabi+1,ls,resvar,
+		    stratmoduli(ld.actruletypeindex_l,ld.actruletypeindex),
 		    RGLOP,     // AAA
 	            NULL,
 	            (acsymbolinleftside?ACMATCH:NORMMATCH),*rlab,NULL);  
   //stout << "##4 ##"; acttrrulelab->dump(0); stout << "\n";
-  dstr_rs = rs;
+  ld.dstr_rs = rs;
   }
   modframes[stacki].gr.deleterule(mainrule1);
   modframes[stacki].gr.deleterule(rightsrule1); 
@@ -289,29 +260,29 @@ int semact3(int n,lexem l,lstream *f)
   /* struct sgrammrule *gr;*/
   switch (n) {
   case 318:
-     selectorn = typet.addstr(actimp->s);
-     CFRE(actimp->s); CFRE(actimp); actimp=NULL;
+     ld.selectorn = typet.addstr(ld.actimp->s);
+     CFRE(ld.actimp->s); CFRE(ld.actimp); ld.actimp=NULL;
     break;
   case 319:// __ :: (imodule1) imodule2;  -- parsing a simple type profi
-    selectorn = 0;				      
+    ld.selectorn = 0;				      
     [[fallthrough]];
   case 320:      // case 319 should be without break;
      ACTIMP2POS;
-     if (selectorn) {
-       selectors[numb_selectors].type = pos;
-       selectors[numb_selectors].possition = sel_poss;
-       selectors[numb_selectors].name = selectorn;
-       numb_selectors++; }
-     sel_poss++;
+     if (ld.selectorn) {
+       ld.selectors[ld.numb_selectors].type = pos;
+       ld.selectors[ld.numb_selectors].possition = ld.sel_poss;
+       ld.selectors[ld.numb_selectors].name = ld.selectorn;
+       ld.numb_selectors++; }
+     ld.sel_poss++;
      push_profistck(pos);
-     if (profi_level <= 1 /*only topmost level*/) {
-       if (profi_lev == 1 /*arg type*/) {
-         actprofis++;
+     if (ld.profi_level <= 1 /*only topmost level*/) {
+       if (ld.profi_lev == 1 /*arg type*/) {
+         ld.actprofis++;
          le.crtypelex(pos);
          modframes[stacki].gr.addnont(le);
        } else {
-         actleftside.crtypelex(pos);
-         if (actarity!=actprofis) {
+         ld.actleftside.crtypelex(pos);
+         if (ld.actarity!=ld.actprofis) {
            sterr <<
 	   "\n[semact] arity of definition is not compatible with the profil";
            return(ERRORIM); }
@@ -324,27 +295,27 @@ int semact3(int n,lexem l,lstream *f)
      ACTIMP2POS;
 
      // syntactic convention removed ..........
-     if (n == 321) pos_l = pos;  // if <X> ....
+     if (n == 321) ld.pos_l = pos;  // if <X> ....
  
-     pos = add_strat_nont(pos_l,pos); // code of the sprofil
+     pos = add_strat_nont(ld.pos_l,pos); // code of the sprofil
      push_profistck(pos);
      le.crtypelex(pos);
-     if (profi_level <= 1 /*only topmost level*/) {
-       if (profi_lev == 1 /*arg type*/) {
-         actprofis++;
+     if (ld.profi_level <= 1 /*only topmost level*/) {
+       if (ld.profi_lev == 1 /*arg type*/) {
+         ld.actprofis++;
          modframes[stacki].gr.addnont(le);
        } else {
-         actleftside = le;
+         ld.actleftside = le;
        }
      }
      break;
     }
   case 324: // symbol -> in <X->Y>
      ACTIMP2POS;
-     pos_l = pos;
+     ld.pos_l = pos;
      break;
   case 329: 
-    numb_selectors = 0; sel_poss = 0;
+    ld.numb_selectors = 0; ld.sel_poss = 0;
     break;
   case 330:
     if (!alpha_syntax) {
@@ -365,22 +336,22 @@ int semact3(int n,lexem l,lstream *f)
  case 333:
     f->fulex(le);
 
-    acttrrulelab = NULL; acttrrule = NULL;
+    ld.acttrrulelab = NULL; ld.acttrrule = NULL;
 
-    stratindex = strattype; 
-    pos = modframes[stacki].gr.lookbuiltincode(actruletypeindex_l, actruletypeindex, le, &infos);
-    rinfos = infos;
+    ld.stratindex = ld.strattype; 
+    pos = modframes[stacki].gr.lookbuiltincode(ld.actruletypeindex_l, ld.actruletypeindex, le, &infos);
+    ld.rinfos = infos;
     if (pos > 0) { term ls, rs, resvar, *rlab;
       lexem applex, selflex, reslex;
       char *strnam;             
-      apli = apply_code(actruletypeindex_l,actruletypeindex);
+      apli = apply_code(ld.actruletypeindex_l,ld.actruletypeindex);
       if (apli != -1) { // the module strat[x,y] has been used
 	// modframes[stacki].gr.add_apply_code(actruletypeindex_l,actruletypeindex);
         // add_stratmoduli(actruletypeindex_l,actruletypeindex);
 	// apli = apply_code(actruletypeindex_l,actruletypeindex); }
-        applex.crtypelex(add_strat_nont(actruletypeindex_l,actruletypeindex));
-	selflex.crtypelex(actruletypeindex_l);
-	reslex.crtypelex(actruletypeindex);
+        applex.crtypelex(add_strat_nont(ld.actruletypeindex_l,ld.actruletypeindex));
+	selflex.crtypelex(ld.actruletypeindex_l);
+	reslex.crtypelex(ld.actruletypeindex);
       
 	ls.stinit(); 
 	ls.crvar(0,selflex); // should be self 
@@ -394,26 +365,26 @@ int semact3(int n,lexem l,lstream *f)
 	rs.crvar(0,selflex); // should be self 
 	rs.popt();
 	NNEW(rlab, term);
-	strnam = attach_type("DSTR",actruletypeindex);
+	strnam = attach_type("DSTR",ld.actruletypeindex);
 
 	resvar.stinit();
 	resvar.crvar(1,reslex);
 	resvar.popt();
       
-	acttrrule = trrules.addrule(strnam,2,ls,resvar,
-		    stratmoduli(actruletypeindex_l,actruletypeindex),
+	ld.acttrrule = trrules.addrule(strnam,2,ls,resvar,
+		    stratmoduli(ld.actruletypeindex_l,ld.actruletypeindex),
 		    RGLOP,     // AAA
 	            NULL,
 	            (acsymbolinleftside?ACMATCH:NORMMATCH),*rlab,NULL);  
         // stout << "QQQQQ" << le.alfsy() << "--" << typet.ide(actruletypeindex_l) << "--" << import.ide(impmoduli) << "\n";
 	//stout << "##5 ##"; acttrrule->dump(0); stout << "\n";
 
-        actwhstrategy = trrules.strategyindex_refs(
-		attach_type_mod(le.alfsy(),actruletypeindex_l,impmoduli));
-        acttrrule->addwhere(reverse_wheres,1,(actwhstrategy==-1)?((strategy**)NULL):
-			  trrules.getstrategyadr_refs(actwhstrategy),
+        ld.actwhstrategy = trrules.strategyindex_refs(
+		attach_type_mod(le.alfsy(),ld.actruletypeindex_l,impmoduli));
+        ld.acttrrule->addwhere(reverse_wheres,1,(ld.actwhstrategy==-1)?((strategy**)NULL):
+			  trrules.getstrategyadr_refs(ld.actwhstrategy),
 			  rs,reslex);
-	actwhstrategy = -1; // 3005
+	ld.actwhstrategy = -1; // 3005
       // stout << " CONVERT RULE \n"; acttrrule->dump(0); 
     }
     }
@@ -424,21 +395,21 @@ int semact3(int n,lexem l,lstream *f)
  case 334:                                // end of topmost profile
     //   __ : __  __    ::(ssymbollist,sprofil,atribl) strdef1      
     //   __ : __        ::(ssymbollist,sprofil) strdef1             
-    if (profi_level > 0 || actarity != actprofis) {
+    if (ld.profi_level > 0 || ld.actarity != ld.actprofis) {
       f->owarn("\n[semact] arity of strategy is not compatible with the profil\n",NULL);
       return(ERRORIM); }
-    profi_level = 0; actprofis = 0;
+    ld.profi_level = 0; ld.actprofis = 0;
     break;
  case 335: // operators
-   in_stratop = 0;
+   ld.in_stratop = 0;
    break;
  case 336: // operators
-   in_stratop = 1;
+   ld.in_stratop = 1;
    break;
  case 340:                               // body in strategy definition
     // strategy __ endstr body :: (rwstr,strdeflist) rest2    
     // body              :: rest2                    
-    acttrrulelab = NULL; acttrrule = NULL;
+    ld.acttrrulelab = NULL; ld.acttrrule = NULL;
     if (! handlestrategybody(f)) return(HANDERRORIM);
     break;
  case 341:  case 342:                           // type of strategy
@@ -448,66 +419,66 @@ int semact3(int n,lexem l,lstream *f)
 
      // syntactic convention removed ..........
      if (n == 342) {
-      pos_l = pos;  
-      stratindex = pos; // KKKKKKKKK
-      strattype = pos;
+      ld.pos_l = pos;  
+      ld.stratindex = pos; // KKKKKKKKK
+      ld.strattype = pos;
      }// if <X> ....
  
-     actruletypeindex_l = pos_l; actruletype_l.crtypelex(pos_l); //:s
-     actruletypeindex = pos;   actruletype.crtypelex(pos);
+     ld.actruletypeindex_l = ld.pos_l; ld.actruletype_l.crtypelex(ld.pos_l); //:s
+     ld.actruletypeindex = pos;   ld.actruletype.crtypelex(pos);
 
-     if (actvtabi+1 >= MAXNOFVAR) {
+     if (ld.actvtabi+1 >= MAXNOFVAR) {
        f->owarn("\n[semact] too much local variables in rule\n",
        "more then MAXNOFVAR\n",NULL);
        return(ERRORIM);
      }
-     lle.cridlex("self"); actvtab[actvtabi] = lle;
-     vartab[actvtabi]=modframes[stacki].gr.addvarrule(actruletype_l,// self : s
-                      actvtab[actvtabi],VARSPRI,RVAR,-actvtabi-1);
-     dollar_vartab[vartabi]=modframes[stacki].gr.adddollarvarrule(actruletype_l,
-			    actvtab[vartabi],VARSPRI,RVAR,-vartabi-1);
-     actvtabi++;
-    vartabi++;
+     lle.cridlex("self"); ld.actvtab[ld.actvtabi] = lle;
+     ld.vartab[ld.actvtabi]=modframes[stacki].gr.addvarrule(ld.actruletype_l,// self : s
+                      ld.actvtab[ld.actvtabi],VARSPRI,RVAR,-ld.actvtabi-1);
+     ld.dollar_vartab[ld.vartabi]=modframes[stacki].gr.adddollarvarrule(ld.actruletype_l,
+			    ld.actvtab[ld.vartabi],VARSPRI,RVAR,-ld.vartabi-1);
+     ld.actvtabi++;
+    ld.vartabi++;
      break; 
  case 351:                               // varident in the rule label
 				         //  __ ::( identifier ) varname1
-   if (actlvtabi >= MAXNOFVAR) {
+   if (ld.actlvtabi >= MAXNOFVAR) {
      f->owarn("\n[semact] too much local variables in rule\n","more then MAXNOFVAR\n",NULL);
      return(ERRORIM); }
-   actlvtab[actlvtabi++]=l;
+   ld.actlvtab[ld.actlvtabi++]=l;
    break;
                                       //__ := [       ::(beforewhere2)beforewhere   
  case 353:                                     // processing of new where
    { int resan,strx,stry;
    /*char *strnam;*/
-   resan = modframes[stacki].gr.earleycall(f,actwheretype,endofin);
+   resan = modframes[stacki].gr.earleycall(f,ld.actwheretype,endofin);
    if (! resan) return(HANDERRORIM);
-   ter1.popt();
+   ld.ter1.popt();
    // S2: strx/stry were used uninitialised when ter1 is not an applied code
-   if (!inverse_apply_code(ter1,&strx,&stry)) interr();
-   trrules.strategyremove_refs(actstratindex);	
-   actwhstrategy = trrules.strategyindex_refs(
-               attach_type_mod(EVALSTR,actwheretype.typeval(),
+   if (!inverse_apply_code(ld.ter1,&strx,&stry)) interr();
+   trrules.strategyremove_refs(ld.actstratindex);	
+   ld.actwhstrategy = trrules.strategyindex_refs(
+               attach_type_mod(EVALSTR,ld.actwheretype.typeval(),
 			   evalmoduli(strx,stry)));
 //EEEE			   evalmoduli(actwheretype.typeval())));
-   if (acttrrule) { // elan rule
-     acttrrule->addwhere(reverse_wheres,actwherevar,(actwhstrategy==-1)?((strategy**)NULL):
-			 trrules.getstrategyadr_refs(actwhstrategy),
-			 ter1,actwheretype);
+   if (ld.acttrrule) { // elan rule
+     ld.acttrrule->addwhere(reverse_wheres,ld.actwherevar,(ld.actwhstrategy==-1)?((strategy**)NULL):
+			 trrules.getstrategyadr_refs(ld.actwhstrategy),
+			 ld.ter1,ld.actwheretype);
    }
-   if (acttrrulelab) { // strategy LAB_ rule
-     ter1.copyrec(ter2);
-     acttrrulelab->addwhere(reverse_wheres,actwherevar,(actwhstrategy==-1)?((strategy**)NULL):
-		    trrules.getstrategyadr_refs(actwhstrategy),ter2,actwheretype);
+   if (ld.acttrrulelab) { // strategy LAB_ rule
+     ld.ter1.copyrec(ld.ter2);
+     ld.acttrrulelab->addwhere(reverse_wheres,ld.actwherevar,(ld.actwhstrategy==-1)?((strategy**)NULL):
+		    trrules.getstrategyadr_refs(ld.actwhstrategy),ld.ter2,ld.actwheretype);
    } 
-   actwhstrategy = -1;
+   ld.actwhstrategy = -1;
    break;
   }
  case 360:                                      // begin of strategy
                                                 //  strategy :: RWstrategy
 //  KKKK
-   rinfos=RLOCOOP;modframes[stacki].importrinfos = RLOCOOP;
-   in_strategies = 1;
+   ld.rinfos=RLOCOOP;modframes[stacki].importrinfos = RLOCOOP;
+   ld.in_strategies = 1;
    create_nested();
 //   listofrules = NULL;
    break;
@@ -515,87 +486,87 @@ int semact3(int n,lexem l,lstream *f)
   case 361:
   {
     ACTIMP2POS;
-    if (Gtypestacki >= MAXGTYPESTACK) {
+    if (ld.Gtypestacki >= MAXGTYPESTACK) {
       sterr << "\n[semact] sorts nested too deeply, more than MAXGTYPESTACK="
             << MAXGTYPESTACK << "\n\t fatal\n";
       failexit(); }
-    Gtypestack[Gtypestacki++] = pos;
+    ld.Gtypestack[ld.Gtypestacki++] = pos;
     break;
   }
   case 362: 
   {
     int pos1;
-    pos1 = Gtypestack[--Gtypestacki];
+    pos1 = ld.Gtypestack[--ld.Gtypestacki];
     pos = add_strat_nont(pos1,pos1);
-    Gtypestack[Gtypestacki++] = pos;
+    ld.Gtypestack[ld.Gtypestacki++] = pos;
     break;
   }
   case 363:
   {
     int pos1, pos2;
-    pos2 = Gtypestack[--Gtypestacki];
-    pos1 = Gtypestack[--Gtypestacki];
+    pos2 = ld.Gtypestack[--ld.Gtypestacki];
+    pos1 = ld.Gtypestack[--ld.Gtypestacki];
     pos = add_strat_nont(pos1,pos2);
-    Gtypestack[Gtypestacki++] = pos;
+    ld.Gtypestack[ld.Gtypestacki++] = pos;
     break;
   }
   case 364:
   {
-    actvartype.crtypelex(Gtypestack[--Gtypestacki]);
+    ld.actvartype.crtypelex(ld.Gtypestack[--ld.Gtypestacki]);
     break;
   }
   case 365:  case 366:
   { int pos1, pos2;
 
      if (n == 365) {
-       pos1 = pos2 = Gtypestack[--Gtypestacki];
+       pos1 = pos2 = ld.Gtypestack[--ld.Gtypestacki];
      } else {
-       pos2 = Gtypestack[--Gtypestacki];
-       pos1 = Gtypestack[--Gtypestacki];
+       pos2 = ld.Gtypestack[--ld.Gtypestacki];
+       pos1 = ld.Gtypestack[--ld.Gtypestacki];
      }
-     stratindex = pos2;
-     strattype = pos2;
+     ld.stratindex = pos2;
+     ld.strattype = pos2;
  
-     actruletypeindex_l = pos1; actruletype_l.crtypelex(pos1); //:s
-     actruletypeindex = pos2;   actruletype.crtypelex(pos2);
+     ld.actruletypeindex_l = pos1; ld.actruletype_l.crtypelex(pos1); //:s
+     ld.actruletypeindex = pos2;   ld.actruletype.crtypelex(pos2);
 
-     if (actvtabi+1 >= MAXNOFVAR) {
+     if (ld.actvtabi+1 >= MAXNOFVAR) {
        f->owarn("\n[semact] too much local variables in rule\n",
        "more then MAXNOFVAR\n",NULL);
        return(ERRORIM);
      }
-     lle.cridlex("self"); actvtab[actvtabi] = lle;
-     vartab[actvtabi]=modframes[stacki].gr.addvarrule(actruletype_l,// self : s
-                      actvtab[actvtabi],VARSPRI,RVAR,-actvtabi-1);
-     dollar_vartab[vartabi]=modframes[stacki].gr.adddollarvarrule(actruletype_l,
-			    actvtab[vartabi],VARSPRI,RVAR,-vartabi-1);
-     actvtabi++;
-    vartabi++;
+     lle.cridlex("self"); ld.actvtab[ld.actvtabi] = lle;
+     ld.vartab[ld.actvtabi]=modframes[stacki].gr.addvarrule(ld.actruletype_l,// self : s
+                      ld.actvtab[ld.actvtabi],VARSPRI,RVAR,-ld.actvtabi-1);
+     ld.dollar_vartab[ld.vartabi]=modframes[stacki].gr.adddollarvarrule(ld.actruletype_l,
+			    ld.actvtab[ld.vartabi],VARSPRI,RVAR,-ld.vartabi-1);
+     ld.actvtabi++;
+    ld.vartabi++;
     break; 
   }
   case 367: case 368: 
    { int pos1, pos2;
     if (n == 367) {
-       pos1 = pos2 = Gtypestack[--Gtypestacki];
+       pos1 = pos2 = ld.Gtypestack[--ld.Gtypestacki];
      } else {
-       pos2 = Gtypestack[--Gtypestacki];
-       pos1 = Gtypestack[--Gtypestacki];
+       pos2 = ld.Gtypestack[--ld.Gtypestacki];
+       pos1 = ld.Gtypestack[--ld.Gtypestacki];
      }
-     actruletypeindex_l = pos1; actruletype_l.crtypelex(pos1);
-     actruletypeindex = pos2;   actruletype.crtypelex(pos2);
+     ld.actruletypeindex_l = pos1; ld.actruletype_l.crtypelex(pos1);
+     ld.actruletypeindex = pos2;   ld.actruletype.crtypelex(pos2);
      break;
    }
   case 369:
-    selectorn = typet.addstr(l.alfsy());
+    ld.selectorn = typet.addstr(l.alfsy());
     break;
   case 370:
-     typecheck(f,actimp->s);
-     pos = typet.addstr(actimp->s); 
-     if (selectorn) {
-       selectors[numb_selectors].type = pos;
-       selectors[numb_selectors].possition = sel_poss;
-       selectors[numb_selectors].name = selectorn;
-       numb_selectors++; }
+     typecheck(f,ld.actimp->s);
+     pos = typet.addstr(ld.actimp->s); 
+     if (ld.selectorn) {
+       ld.selectors[ld.numb_selectors].type = pos;
+       ld.selectors[ld.numb_selectors].possition = ld.sel_poss;
+       ld.selectors[ld.numb_selectors].name = ld.selectorn;
+       ld.numb_selectors++; }
 //     sel_poss++;
      break;
  }
@@ -676,7 +647,7 @@ int gr_compatible(struct sgrammrule *r1, struct sgrammrule *r2)
 int fsymrule_exists(struct sgrammrule *r1, struct sgrammrule *r2)
 {
 struct RPair *p;
-  for(p = fsymrules; p; p=p->next)
+  for(p = ld.fsymrules; p; p=p->next)
     if (p->r1 == r1 && p->r2 == r2) return 1;
 //    else stout << "[" << p->r1 << "," << p->r2 << "]"
 //		 << "!=[" << r1 << "," <<     r2 << "]\n";
@@ -687,7 +658,7 @@ void fsymrule_add(struct sgrammrule *r1, struct sgrammrule *r2)
 {
 struct RPair *p;
   NNEW(p, struct RPair);
-  p->r1 = r1; p->r2 = r2; p->next = fsymrules; fsymrules = p;
+  p->r1 = r1; p->r2 = r2; p->next = ld.fsymrules; ld.fsymrules = p;
 }
 
 struct sgrammrule *add_fsymrule(struct sgrammrule *gr1,struct sgrammrule *gr2,
@@ -713,9 +684,9 @@ struct sgrammrule *add_fsymrule(struct sgrammrule *gr1,struct sgrammrule *gr2,
   lle.crtypelex(
       add_strat_nont(gr1->leftside.typeval(),gr2->leftside.typeval()));
   gr=modframes[stacki].gr.addrule(lle,
-			     gr1->priority+DELTA_PRIOR,rinfos,
+			     gr1->priority+DELTA_PRIOR,ld.rinfos,
 			     /////////rulepri+DELTA_PRIOR | finfos2,rinfos,
-			     actcode);
+			     ld.actcode);
 
 // stout << " => " << gr << "rule = " << actcode-1 << "\n";
 
@@ -811,9 +782,9 @@ int handlestrategydefinition(lstream *f)
   int resan; /*,whi;*/
   char *strnam;                      // temp variable for rulenames
 
-  applex.crtypelex(add_strat_nont(actruletypeindex_l,actruletypeindex));
-  selflex.crtypelex(actruletypeindex_l);
-  reslex.crtypelex(actruletypeindex);
+  applex.crtypelex(add_strat_nont(ld.actruletypeindex_l,ld.actruletypeindex));
+  selflex.crtypelex(ld.actruletypeindex_l);
+  reslex.crtypelex(ld.actruletypeindex);
 
   // right2 => <X->Y>
   modframes[stacki].gr.addsymbol(applex); le.crtypelex(STRATTYPE);
@@ -831,32 +802,32 @@ int handlestrategydefinition(lstream *f)
   if (! resan) return(resan);
 
 ///...ADDING
-  lside.popt(); rside.popt(); 
+  ld.lside.popt(); ld.rside.popt(); 
 
-  rside.remove_inlines();
+  ld.rside.remove_inlines();
 
   ls.stinit(); 
   ls.crvar(0,selflex); // should be self 
-  ls.pusht(lside); 
-  ls.crterm(apply_code(actruletypeindex_l,actruletypeindex),2);
+  ls.pusht(ld.lside); 
+  ls.crterm(apply_code(ld.actruletypeindex_l,ld.actruletypeindex),2);
   ls.popt();
   //ls.write(stout); stout.flush();
   //--------------
   rs.stinit(); 
   rs.crvar(0,selflex); // should be self 
-  rs.pusht(rside); 
-  rs.crterm(apply_code(actruletypeindex_l,actruletypeindex),2);
+  rs.pusht(ld.rside); 
+  rs.crterm(apply_code(ld.actruletypeindex_l,ld.actruletypeindex),2);
   rs.popt();
   NNEW(rlab, term);
-  strnam = attach_type("DSTR",actruletypeindex); 
+  strnam = attach_type("DSTR",ld.actruletypeindex); 
 
   //------------------------ to be able to remove repeat from the strategy eval
   resvar.stinit();
-  resvar.crvar(actvtabi,reslex);
+  resvar.crvar(ld.actvtabi,reslex);
   resvar.popt();
 
-  acttrrule = trrules.addrule(strnam,actvtabi+1,ls,resvar,
-		    stratmoduli(actruletypeindex_l,actruletypeindex),
+  ld.acttrrule = trrules.addrule(strnam,ld.actvtabi+1,ls,resvar,
+		    stratmoduli(ld.actruletypeindex_l,ld.actruletypeindex),
 		    RGLOP,     // AAA
 	            NULL,
 	            (acsymbolinleftside?ACMATCH:NORMMATCH),*rlab,NULL);  
@@ -870,7 +841,7 @@ int handlestrategydefinition(lstream *f)
   acttrrule->dump(0);
   stout << "MMMMMMMMM\n";
   */
-  dstr_rs = rs;
+  ld.dstr_rs = rs;
 
   modframes[stacki].gr.deleterule(mainrule2);
   modframes[stacki].gr.deleterule(rightsrule2);

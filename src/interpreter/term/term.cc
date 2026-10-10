@@ -1140,15 +1140,15 @@ int strx, stry;
   varn = var->head();
 
   inverse_apply_code(*strat,&strx,&stry);
-  strnam = attach_type_mod("eval",vartab[varn]->leftside.typeval(),
+  strnam = attach_type_mod("eval",ld.vartab[varn]->leftside.typeval(),
 			   evalmoduli(strx,stry));
 // EEEEE	   evalmoduli(vartab[varn]->leftside.typeval()));
-  actwhstrategy = trrules.strategyindex_refs(strnam); 
-  acttrrule->addwhere(0,varn,
-		      (actwhstrategy==-1)?
+  ld.actwhstrategy = trrules.strategyindex_refs(strnam); 
+  ld.acttrrule->addwhere(0,varn,
+		      (ld.actwhstrategy==-1)?
                       ((strategy**)NULL):
-                      trrules.getstrategyadr_refs(actwhstrategy),
-                      *strat,vartab[varn]->leftside);
+                      trrules.getstrategyadr_refs(ld.actwhstrategy),
+                      *strat,ld.vartab[varn]->leftside);
 }
 
 void term::add_let_symbol(int j, term asses, term exp)
@@ -1165,20 +1165,20 @@ char *strnam;
   snprintf(sss,sizeof(sss),"INLINE%d",++ninlines);
   inle.cridlex(sss); modframes[stacki].gr.addsymbol(inle);
   le.crcharlex('('); modframes[stacki].gr.addsymbol(le);
-  for(i=0, arty=0; i<actvtabi; i++) {
+  for(i=0, arty=0; i<ld.actvtabi; i++) {
     uu = is_affected_let(i,asses);
     if (uu > 1) {
       sterr<<"[error] variable Var(" <<i<< ") is several times assigned\n"; 
       failexit(); }
     if ((exp.cont_var(i) || is_referenced_let(i,asses)) && uu == 0) {
-      modframes[stacki].gr.addnont(vartab[i]->leftside);
-      arty++; this->crvar(i,vartab[i]->leftside); 
+      modframes[stacki].gr.addnont(ld.vartab[i]->leftside);
+      arty++; this->crvar(i,ld.vartab[i]->leftside); 
     }
   }
   le.crcharlex(')'); modframes[stacki].gr.addsymbol(le);
   le.crtypelex(add_strat_nont(inlinecodes[j].from,inlinecodes[j].to));
-  gr = modframes[stacki].gr.addrule(le,RNOPRIOR,RGLOP,actcode);
-  cde = actcode;
+  gr = modframes[stacki].gr.addrule(le,RNOPRIOR,RGLOP,ld.actcode);
+  cde = ld.actcode;
   add_to_fsymtab(arty,gr,0 ); // later DS_LET
   this->crterm(cde,arty);
   this->popt();
@@ -1187,18 +1187,18 @@ char *strnam;
   selfle.crtypelex(inlinecodes[j].from); 
   resle.crtypelex(inlinecodes[j].to); 
   ls.stinit();
-  ls.crvar(actvtabi,selfle);
+  ls.crvar(ld.actvtabi,selfle);
   ls.pusht(labterm);
   ls.crterm(apply_code(inlinecodes[j].from,inlinecodes[j].to),2);
   ls.popt();
   //  ls.write(stout); stout.flush();
   //--------------
   resvar.stinit();
-  resvar.crvar(actvtabi+1,resle);
+  resvar.crvar(ld.actvtabi+1,resle);
   resvar.popt();
   //---------------
   rs.stinit();
-  rs.crvar(actvtabi,selfle);
+  rs.crvar(ld.actvtabi,selfle);
   rs.pusht(exp);
   rs.crterm(apply_code(inlinecodes[j].from,inlinecodes[j].to),2);
   rs.popt();
@@ -1206,7 +1206,7 @@ char *strnam;
   NNEW(rlab, term); 
 
   strnam = attach_type("DSTR",inlinecodes[j].to);
-  acttrrule = trrules.addrule(strnam,actvtabi+2,ls,resvar, // rs,
+  ld.acttrrule = trrules.addrule(strnam,ld.actvtabi+2,ls,resvar, // rs,
 			      stratmoduli(inlinecodes[j].from,inlinecodes[j].to),RGLOP,
 			      NULL,
 			      (acsymbolinleftside?ACMATCH:NORMMATCH),*rlab,NULL);
@@ -1219,11 +1219,11 @@ char *strnam;
 
 //--- add resvar
 
-  actwhstrategy = trrules.strategyindex_refs(attach_type_mod(EVALSTR,
+  ld.actwhstrategy = trrules.strategyindex_refs(attach_type_mod(EVALSTR,
 			inlinecodes[j].to, evalmoduli(inlinecodes[j].from, inlinecodes[j].to)));
-  acttrrule->addwhere(reverse_wheres,actvtabi+1,
-		      (actwhstrategy==-1)?((strategy**)NULL):
-		      trrules.getstrategyadr_refs(actwhstrategy),
+  ld.acttrrule->addwhere(reverse_wheres,ld.actvtabi+1,
+		      (ld.actwhstrategy==-1)?((strategy**)NULL):
+		      trrules.getstrategyadr_refs(ld.actwhstrategy),
 		      rs,resle);
 }
 
@@ -1235,30 +1235,30 @@ char *strnam;
 //char strnam[STRLEN];
 /// RRRRR int strx, stry;
   if (t->head()/*semantic()*/ == STRANYIF) {
-    acttrrule->addwhere(0,IFVARN,NULL,*(t->subterm(0)),booltype); }
+    ld.acttrrule->addwhere(0,IFVARN,NULL,*(t->subterm(0)),booltype); }
   else {
     // 3005 var = t->subterm(0); strat = t->subterm(1);
     var = t->subterm(1); strat = t->subterm(0);
     if (var->inf() != TVAR) {
       sterr << "[fatal] a variable should be affected\n"; failexit(); }
     varn = var->head();
-    wtype = vartab[varn]->leftside.typeval();
+    wtype = ld.vartab[varn]->leftside.typeval();
     ///// RRRRR inverse_apply_code(*strat,&strx,&stry);
     strnam = attach_type_mod("eval",wtype,evalmoduli(wtype,wtype));
 	// RRRR evalmoduli(strx,stry)); 
         // RRR in inline should be a strategy that does not change the sort
-    actwhstrategy = trrules.strategyindex_refs(strnam); 
+    ld.actwhstrategy = trrules.strategyindex_refs(strnam); 
     wt.stinit(); 
     wt.pusht(*var); 
     wt.pusht(*strat);
     wt.crterm(apply_code(wtype,wtype),2);
     wt.popt();
-    acttrrule->addwhere(0,affected[varn],
-			(actwhstrategy==-1)?
+    ld.acttrrule->addwhere(0,affected[varn],
+			(ld.actwhstrategy==-1)?
 			((strategy**)NULL):
-			trrules.getstrategyadr_refs(actwhstrategy),
-			wt,vartab[varn]->leftside);
-    actwhstrategy = -1; // 3005
+			trrules.getstrategyadr_refs(ld.actwhstrategy),
+			wt,ld.vartab[varn]->leftside);
+    ld.actwhstrategy = -1; // 3005
   }
 }
 
@@ -1277,27 +1277,27 @@ char *strnam;
   snprintf(sss,sizeof(sss),"INLINE%d",++ninlines);
   inle.cridlex(sss); modframes[stacki].gr.addsymbol(inle);
   le.crcharlex('('); modframes[stacki].gr.addsymbol(le);
-  for(i=0, arty=0; i<actvtabi; i++) {
+  for(i=0, arty=0; i<ld.actvtabi; i++) {
     affected[i] = 0;
     if (extended && (uu = is_affected(i,anies))) {
       if (uu > 1) {
 	sterr<<"[error] variable Var(" <<i<< ") is several times affected\n"; 
 	failexit(); }
-      affected[i] = actvtabi+naffected; naffected++;
+      affected[i] = ld.actvtabi+naffected; naffected++;
       t2.ren_var(i,affected[i]);
     }
     if ((!(t1.cont_var(i))) && 
 	(t2.cont_var(i) 
 	|| (extended && anies.cont_var(i))
 	 )) { // not exact !!!
-      modframes[stacki].gr.addnont(vartab[i]->leftside);
-      arty++; this->crvar(i,vartab[i]->leftside); 
+      modframes[stacki].gr.addnont(ld.vartab[i]->leftside);
+      arty++; this->crvar(i,ld.vartab[i]->leftside); 
     }
   }
   le.crcharlex(')'); modframes[stacki].gr.addsymbol(le);
   le.crtypelex(add_strat_nont(inlinecodes[j].from,inlinecodes[j].to));
-  gr = modframes[stacki].gr.addrule(le,RNOPRIOR,RGLOP,actcode);
-  cde = actcode;
+  gr = modframes[stacki].gr.addrule(le,RNOPRIOR,RGLOP,ld.actcode);
+  cde = ld.actcode;
   add_to_fsymtab(arty,gr,0);  // later DS_INLINE
   this->crterm(cde,arty);
   this->popt();
@@ -1315,7 +1315,7 @@ char *strnam;
   NNEW(rlab, term); 
 
   strnam = attach_type("DSTR",inlinecodes[j].to);
-  acttrrule = trrules.addrule(strnam,actvtabi+naffected,ls,rs,
+  ld.acttrrule = trrules.addrule(strnam,ld.actvtabi+naffected,ls,rs,
 			      stratmoduli(inlinecodes[j].from,inlinecodes[j].to),RGLOP,
 			      NULL,
 			      (acsymbolinleftside?ACMATCH:NORMMATCH),*rlab,NULL);
@@ -1323,7 +1323,7 @@ char *strnam;
   if (extended) {
     for(any = &anies; any->head()/*semantic()*/ == STRANYCONS; 
        any = any->subterm(0)) {
-      for (i=0; i < actvtabi; i++) {
+      for (i=0; i < ld.actvtabi; i++) {
 	if (is_affected(i,*(any->subterm(0))))
          any->subterm(1)->ren_var(i,affected[i]); }
         inlinewhereif(any->subterm(1)); }
@@ -1349,16 +1349,16 @@ term *cond;
                     (check == ADDRENAME && rr && 
 		     compile)) {
 		     //		     (compile || adump) )) {
-		  actrr = var_rename(actvtabi); //...
+		  actrr = var_rename(ld.actvtabi); //...
 		  t->fsymi = actrr;  // in lhs
-                  r.ren_var(vn,actvtabi); // in rhs
+                  r.ren_var(vn,ld.actvtabi); // in rhs
                   for(whss=*whs; whss; whss=whss->next) {
-		    whss->whereterm.ren_var(vn,actvtabi);
+		    whss->whereterm.ren_var(vn,ld.actvtabi);
 		  }
 		  NNEW(cond,term);
 		  cond->stinit();
-		  cond->crvar(vn,vartab[vn]->leftside);
-		  cond->crvar(actvtabi,vartab[vn]->leftside);
+		  cond->crvar(vn,ld.vartab[vn]->leftside);
+		  cond->crvar(ld.actvtabi,ld.vartab[vn]->leftside);
 		  cond->crterm(EQUALL);
 		  cond->popt();
 		  AALLOS(wl ,struct wherelist);
@@ -1367,7 +1367,7 @@ term *cond;
 		  wl->whereterm = *cond;
 		  wl->next = *whs;
 		  *whs = wl;
-	          actvtabi++; }
+	          ld.actvtabi++; }
 		else 
 		  t->fsymi = var_rename(vn);
                 break;

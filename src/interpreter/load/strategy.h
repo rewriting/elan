@@ -26,9 +26,9 @@
 */
 
 #define ACTIMP2POS {\
-     typecheck(f,actimp->s);\
-     pos = typet.addstr(actimp->s); \
-     /**/ CFRE(actimp->s); CFRE(actimp); actimp=NULL;\
+     typecheck(f,ld.actimp->s);\
+     pos = typet.addstr(ld.actimp->s); \
+     /**/ CFRE(ld.actimp->s); CFRE(ld.actimp); ld.actimp=NULL;\
 }
  
 #ifndef __strategy_h
@@ -44,10 +44,6 @@ struct nvlist {
 };                          // a stack of var declarations (for the case of nested declarations using 
 						//				nested "rules" construction)
 
-extern int anysi;
-extern int anys[];
-extern int symbappli;
-extern struct ilist *symbappl[];
 
 
 #define AUXRULES 2
@@ -102,33 +98,9 @@ extern lexem Scase, Sotherwise, Sthen, Sswitch, Schoose, Stry;
 
 extern lexem Sif,Swhere,Send,Sstart;     // some usefull reserved words
 
-extern int rulen,rulepri;                       // the number and the priority of the currently parsed (CP) rule 
-extern int rinfos,finfos2;                      // syntactic priority and associativity of CP symbol
-extern int finfos;                              // is the CP symbol AC ?
-extern int actarity,actprofis,actcode;          // arity of the CP symbol; CP profil; and current code number
-extern lexem actleftside;                       // codomain of the CP profile
-extern lexem actruletype;                       // type of terms in the CP rul
 extern void fsymrule_add(struct sgrammrule *r1, struct sgrammrule *r2);
 extern int fsymrule_exists(struct sgrammrule *r1, struct sgrammrule *r2);
 
-extern lexem actvartype,actvartype1;            // CP variables type
-extern lexem actwheretype;                      // type of the CP where affectation
-extern int actwherevar,actwhstrategy,actstratindex;  // CP variable of a where; its strategy; and index of the strategy 
-extern int wasdefinedas;                        // only for the COMPILER, is the symbol defined as an inlined function?
-extern struct sgrammrule *actalr,*actalr1;      // CP functional symbol grammar rule
-
-extern struct nvlist *nestedvartabi;
-extern struct sgrammrule *vartab[MAXNOFVAR];    // grammar rules for variables
-extern transrule *acttrrulelab;                 // the CP RW rule
-extern lexem actvtab[MAXNOFVAR];                // names of variables
-extern int actvarrename[MAXNOFVAR];             // table used during the renaming of variables inside RW-rules
-extern int actvarnum;                           // the real number of variables inside an RW-rule
-extern int selectorn;
-extern int numb_selectors, sel_poss;
-extern struct selector selectors[];
-extern int actvtabi,vartabi;                    // numbers of variables (two values differ during parsing variable declarations
-extern int big;						//			 for the same type)
-extern term lside,rside,condition;              // left hand side, right hand side and the condition of the CP RW rule
 // One frame per module being read: an import reads the imported module one
 // level deeper (stacki+1). The frames of a level are reused by the next
 // module read at that level. The stack grows on demand (imports of any
@@ -143,21 +115,9 @@ struct ModuleFrame {
 extern std::deque<ModuleFrame> modframes;       // modframes[0..stacki]: the modules being read
 extern int stacki;                              // index to modframes
 extern void grow_modframes(int level);          // makes modframes[level] exist
-extern std::vector<strategy *> strstack;        // stack used while parsing nested strategies (REPEAT,ITERATE)
-extern int strstacki;                         // index to strstack
-extern std::vector<struct strlist *> strlstack; // stack used while parsing nested list of strategies (DONT CARE/KNOW CHOOSE)
-extern int strlstacki;                        // index to strlstack
-// the two stacks above grow on demand (MAXINCLSTRAT = 30 until S3b)
+// ld.strstack and ld.strlstack grow on demand (MAXINCLSTRAT = 30 until S3b)
 extern void grow_strstack(int n);               // makes strstack[0..n-1] exist
 extern void grow_strlstack(int n);              // makes strlstack[0..n-1] exist
-extern term ter1, ter2;                         // a temporary term variable
-extern const char *acttrrulename;                     // the name of the CP RW rule
-extern transrule *acttrrule;                    // the CP RW rule
-extern strategy *actstrategy;                   // the CP strategy
-extern char *actargmodname;                     // the name of the CP module
-extern int symbolcode;                          // the value of a character defined by its ASCII code
-extern struct chlist *actarglist,*actimp;	// used to pass the arg. also
-extern int strnam[];                          
 
 // int mainstrategy;
 // int & mainnewmod;
@@ -172,24 +132,6 @@ extern int pretydumpsitset(lstream *f,stringtab *types); // pretty dump of earle
 
 
 
-extern std::vector<int> profistck;           // stack of profiles (grows on demand)
-extern int profistcki;             // top-pointer to the profistck
-extern int in_strat_def;          // true iff parsing str body
-extern int in_strat_module;           // true if parse strat.eln
-extern int opdefinition;                  // parsing op or strategy def
-extern lexem actlvtab[MAXNOFVAR];             // for variables in labels
-extern int actlvtabi;                     // pointer to actlvtab
-extern lexem actruletype_l;                   // type of terms in the CP rule
-extern int actruletypeindex;              //
-extern int actruletypeindex_l;            //
-extern term rlabel;                           // term corresponding to a label
-extern struct grammrulelist *listofrules;// list of rules added in strategy body
-extern int profi_level;                   // level of nesting of profiles
-extern int profi_lev;
-extern char strategy_type[];             // name of the first type in profile
-extern int complex_label;                    // rule label is != ident
-extern int pos_l;                         // index of type X, when parsing <X->Y>
-extern term dstr_rs;                     // right-hand side of a dstr rule
 
 //#define make_new_nonts(x,y,z,u) { sprintf(x,"%s[%s,%s]",y,z,u); }
 #define make_new_nonts(x,y,z,u) { snprintf(x,sizeof(x),"<%s->%s>",z,u); }
@@ -214,11 +156,8 @@ class profitab
     int equal(struct ilist *ilistptr1, struct ilist *ilistptr2); 
 };
 
-extern class profitab profit;                        // table of profiles
 
-extern  int spairi;
 struct  Spair { int from; int to; int stratsort; };  // cannot be move to inlinecodesi
-extern std::vector<struct Spair> spair;          // pairs [x,y] if strat[x,y] (grows on demand)
 
 struct selector {
          int type;
@@ -257,7 +196,6 @@ extern int is_inlin(int cde);
 extern int is_inlineplus(int cde);
 extern int is_let(int cde);
 extern int stratsort2index(int cde);
-extern int stratindex;
 extern int is_def_str(int from, int to);
 extern int apply_code(int from, int to);
 extern int inverse_apply_code(term t, int *from, int *to);
@@ -278,11 +216,8 @@ extern int semact3(int n,lexem l,lstream *f);
 extern void typecheck(lstream *f,char *s);
 extern void create_fsymterm(lexem *rside, term &t, int &varc);
 extern int add_stratmoduli(int x, int y);
-extern int in_strategies;
-extern int in_stratop;
-extern int strattype;
 extern int alpha_syntax;
-extern int calledstr;
+extern int big;                                 // statistics level of -s/-S (driver/ldmain.cc)
 extern void appactstrat();
 
 void importmod(char *impmodule,lstream *f,int supermodule);
@@ -303,5 +238,122 @@ extern int peval_switch;
 extern int peval_compression;
 extern term *defer(term *trm, term *substarray, int &varn);
 extern void peval_init();
+
+struct RPair;                                   // msemact3.cc
+struct tseq;                                    // rtdatas.h
+
+// The state of the module parser (the semantic actions of msemact.cc and
+// msemact3.cc, "CP" = currently parsed), until S3b about 110 separate
+// globals. There is ONE instance, ld, shared by every level of import:
+// importmod_inf reads an imported module (readmodules) in the middle of the
+// importing one, and the inner SEMACT(0) resets part of this state
+// (rulepri, finfos, actarity, actsemantic, actvtabi, vartabi, nestedvartabi,
+// condition, actimp) and sets actcode = fsymtabi; the importing module then
+// continues with the advanced actcode. Making it per-level would change
+// that. The only per-level state is the module frames (modframes, above).
+//
+// Not here: the tables of the loaded program that the rest of the
+// interpreter reads after loading (inlinecodes, visibilities, fsymtab...),
+// and impmoduli and withrhs, which lex/mlstream.cc and parse/esemact.cc
+// (lower modules, see tests/architecture) reach through extern declarations
+// (rtdatas.h, termdefs.h).
+struct LoaderState {
+  // the CP function symbol (operator declaration)
+  int rulen = 0, rulepri = 0;                   // the number and the priority of the CP rule
+  int rinfos = 0, finfos2 = 0;                  // syntactic priority and associativity of the CP symbol
+  int finfos = 0;                               // is the CP symbol AC ?
+  int actarity = 0, actprofis = 0, actcode = 0; // arity of the CP symbol; CP profile; and current code number
+  int actsemantic = 0;                          // semantic flag of the CP symbol
+  lexem actleftside;                            // codomain of the CP profile
+  lexem actruletype;                            // type of terms in the CP rule
+  lexem sntype;
+  int wasdefinedas = 0;                         // only for the COMPILER, is the symbol defined as an inlined function?
+  struct sgrammrule *actalr = nullptr;          // CP functional symbol grammar rule
+  int symbolcode = 0;                           // the value of a character defined by its ASCII code
+  struct chlist *actarglist = nullptr, *actimp = nullptr; // used to pass the arguments (module names)
+
+  // variables of the CP rule
+  lexem actvartype, actvartype1;                // CP variables type
+  struct nvlist *nestedvartabi = nullptr;       // a stack of var declarations (nested "rules" constructions)
+  struct sgrammrule *vartab[MAXNOFVAR] = {};    // grammar rules for variables
+  struct sgrammrule *dollar_vartab[MAXNOFVAR] = {}; // copy of vartab for the rules of variables with a dollar
+  lexem actvtab[MAXNOFVAR];                     // names of variables
+  int actvarrename[MAXNOFVAR] = {};             // table used during the renaming of variables inside RW-rules
+  int actvarnum = 0;                            // the real number of variables inside an RW-rule
+  int maxvarnum = 0;
+  int actvtabi = 0, vartabi = 0;                // numbers of variables (they differ while parsing variable
+                                                // declarations of the same type)
+  lexem actlvtab[MAXNOFVAR];                    // for variables in labels
+  int actlvtabi = 0;                            // pointer to actlvtab
+  int RENAME_ALL_VARS = 0;
+  int RENAME_IDENTITY = 0;
+
+  // the CP rewrite rule
+  term lside, rside, condition;                 // left hand side, right hand side and condition of the CP RW rule
+  term ter1, ter2;                              // temporary terms
+  const char *acttrrulename = nullptr;          // the name of the CP RW rule
+  transrule *acttrrule = nullptr;               // the CP RW rule
+  transrule *acttrrulelab = nullptr;            // LAB_ RW rule
+  lexem actwheretype;                           // type of the CP where affectation
+  int actwherevar = 0, actwhstrategy = 0, actstratindex = 0; // CP variable of a where; its strategy; index of the strategy
+  struct tseq *act_rhs = nullptr;
+  int pattype = 0;
+  int wherecount = 0;
+  lexem actruletype_l;                          // type of terms in the CP rule (labels)
+  int actruletypeindex = 0;
+  int actruletypeindex_l = 0;
+  term dstr_rs;                                 // right-hand side of a dstr rule
+
+  // strategies
+  std::vector<strategy *> strstack = std::vector<strategy *>(2); // nested strategies (REPEAT, ITERATE)
+  int strstacki = 0;                            // index to strstack
+  std::vector<struct strlist *> strlstack;      // nested lists of strategies (DONT CARE/KNOW CHOOSE)
+  int strlstacki = 0;                           // index to strlstack
+  const char *actstrategyname = nullptr;        // the name of MV strategy
+  strategy *actstrategy = nullptr;              // the CP strategy
+  int stratindex = 0;                           // type index of Marian's strategy
+  int calledstr = 0;                            // strategy in call(..)
+  int in_strategies = 0;
+  int in_stratop = 0;
+  int strattype = -1;
+  int locstratlen = 0;
+  int *locstrattable = nullptr;                 // table of local strategies
+  struct ilist *locstrat = nullptr;             // local strategy of a symbol
+  struct ilist **locstratend = &locstrat;       // local strategy end
+
+  // strategy profiles and sorts <X->Y> (msemact3.cc)
+  std::vector<int> profistck;                   // stack of profiles (grows on demand)
+  int profistcki = -1;                          // top-pointer to profistck
+  int profi_level = 0;                          // level of nesting of profiles
+  int profi_lev = 0;
+  int selectorn = 0;
+  int numb_selectors = 0;
+  int sel_poss = 0;
+  struct selector selectors[MLENGRRULE] = {};
+  char strategy_type[STRLEN] = {};              // name of the first type in profile
+  int pos_l = 0;                                // index of type X, when parsing <X->Y>
+  profitab profit = {};                         // table of profiles
+  struct RPair *fsymrules = nullptr;            // list of rule indexes (r1,r2)
+  int spairi = 0;
+  std::vector<struct Spair> spair;              // pairs [x,y] if strat[x,y] (grows on demand)
+  int Gtypestack[MAXGTYPESTACK] = {};
+  int Gtypestacki = 0;
+
+  // imports
+  char *actargmodname = nullptr;                // the name of the CP module
+  int in_stratmoduli = 0;                       // true if in str* module
+  int stratmoduli_fromi = -1;                   // X of str* module
+  int stratmoduli_toi = -1;                     // Y
+  int is_explimpl = 0;                          // explode-implode module should be loaded
+  int ignore = 0;                               // ignore deeper levels
+  int explimpl_index = 0;                       // file counter
+  int anysi = 0;                                // pointer to anys
+  int anys[MAXANYS] = {};                       // modules for which any[X] has been imported
+  int is_symbappl = 0;
+  int symbappli = 0;
+  struct ilist *symbappl[MAXSYMBAPPL] = {};
+  int symbappl_index = 0;                       // file counter
+};
+extern LoaderState ld;                          // body in msemact.cc
 #endif
 
