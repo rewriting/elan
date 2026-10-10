@@ -1,6 +1,6 @@
 # S6 — An ELAN compiler in Rust (compiler, runtime and generated code)
 
-Date: 2026-10-10 · Status: approved in principle by the user ("tu peux écrire
+Date: 2026-10-10 · Status: S6a and S6b done; **frozen on 2026-10-11** in favour of Go (S7, `2026-10-11-s7-go-compiler-design.md`; status and remaining work: `docs/s6-rust-status.md`). Originally approved in principle by the user ("tu peux écrire
 la spec et commencer"); details decided autonomously, recorded here.
 
 ## 1. Context and decision
