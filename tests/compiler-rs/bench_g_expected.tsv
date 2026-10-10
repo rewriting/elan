@@ -1,4 +1,4 @@
-# G cases compiled by the new compiler and their status (written by bench_parity.py --save)
+# G cases compiled by elanc-go and their status (written by bench_parity.py --save)
 elan/sources/Compiler.2.1/BenchThesis/FastCompletion::G::ans:KNZ86:-:jKNZ86	ERROR
 elan/sources/Compiler.2.1/BenchThesis/FastCompletion::G::ans:Zeh89:-:jZeh89	ERROR
 elan/sources/Compiler.2.1/BenchThesis/FastCompletion::G::ans:curry:-:jcurry	ERROR

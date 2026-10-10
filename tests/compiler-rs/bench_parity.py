@@ -1,19 +1,23 @@
 #!/usr/bin/env python3
-"""The bench compiled by elanc-rs (kind R) against elanc (kind J).
+"""The bench compiled by a new compiler against elanc (kind J): elanc-rs
+(kind R) or elanc-go (kind G).
 
-Runs tests/legacy-bench/run_tests.py --kinds R (which compares every R
+Runs tests/legacy-bench/run_tests.py --kinds R or G (which compares every
 output with the J snapshot of the case, rewrite_step line excluded) and
 fails when:
-- the runner fails (an R output differs from the J snapshot);
-- an R case has a worse status than the same J case in the baseline
+- the runner fails (an output differs from the J snapshot);
+- a case has a worse status than the same J case in the baseline
   (PASS < PASS~ < PASS≈ < FAIL < ERROR);
-- a case recorded in bench_r_expected.tsv (the R cases elanc-rs compiles,
-  with their status) has a worse status, e.g. becomes UNSUPPORTED.
-UNSUPPORTED cases not recorded (refused until S6b-S6d) are counted only.
+- a case recorded in the expected file of the kind (the cases the
+  compiler compiles, with their status) has a worse status, e.g. becomes
+  UNSUPPORTED.
+UNSUPPORTED cases not recorded (refused until S6b-S6d for elanc-rs,
+S7b-S7d for elanc-go) are counted only.
 Usage: bench_parity.py PREFIX [--kind R|G] [--save]
        --kind R (default): elanc-rs, expected cases in bench_r_expected.tsv;
        --kind G: elanc-go, expected cases in bench_g_expected.tsv;
-       --save rewrites the expected file of the kind.
+       --save rewrites the expected file of the kind (bench_r_expected.tsv
+       or bench_g_expected.tsv) with the cases of this run.
 """
 import re, subprocess, sys
 from collections import Counter
@@ -25,14 +29,40 @@ HERE = Path(__file__).resolve().parent
 RANK = {"PASS": 0, "PASS~": 1, "PASS≈": 2, "FAIL": 3, "ERROR": 4, "TIMEOUT": 5,
         "SANITIZER": 6}
 
+COMPILER = {"R": "elanc-rs", "G": "elanc-go"}
+USAGE = "usage: bench_parity.py PREFIX [--kind R|G] [--save]"
+
+def parse(argv):
+    """The command line: (prefix, kind, save); exits with a message (status
+    2) when it is wrong."""
+    prefix, kind, save = None, "R", False
+    i = 0
+    while i < len(argv):
+        a = argv[i]
+        if a == "--save":
+            save = True
+        elif a == "--kind":
+            if i + 1 >= len(argv) or argv[i + 1].startswith("-"):
+                print(f"bench_parity.py: --kind needs a value (R or G)\n{USAGE}", file=sys.stderr)
+                sys.exit(2)
+            i += 1
+            kind = argv[i]
+            if kind not in COMPILER:
+                print(f"bench_parity.py: unknown kind {kind} (R or G)\n{USAGE}", file=sys.stderr)
+                sys.exit(2)
+        elif a.startswith("-") or prefix is not None:
+            print(f"bench_parity.py: unexpected argument {a}\n{USAGE}", file=sys.stderr)
+            sys.exit(2)
+        else:
+            prefix = a
+        i += 1
+    if prefix is None:
+        print(USAGE, file=sys.stderr)
+        sys.exit(2)
+    return prefix, kind, save
+
 def main():
-    prefix = sys.argv[1]
-    save = "--save" in sys.argv[2:]
-    kind = "R"
-    if "--kind" in sys.argv[2:]:
-        kind = sys.argv[sys.argv.index("--kind") + 1]
-    if kind not in ("R", "G"):
-        sys.exit(f"bench_parity.py: unknown kind {kind}")
+    prefix, kind, save = parse(sys.argv[1:])
     EXPECTED = HERE / f"bench_{kind.lower()}_expected.tsv"
     base = {}
     for line in (BENCH / "baseline.tsv").read_text().splitlines():
@@ -67,7 +97,7 @@ def main():
     print(f"bench {kind}: " + ", ".join(f"{k}={v}" for k, v in sorted(counts.items())))
     if save:
         rows = sorted((t, s) for t, s in got.items() if s in RANK)
-        EXPECTED.write_text(f"# {kind} cases compiled by the new compiler and their status "
+        EXPECTED.write_text(f"# {kind} cases compiled by {COMPILER[kind]} and their status "
                             "(written by bench_parity.py --save)\n"
                             + "".join(f"{t}\t{s}\n" for t, s in rows))
         print(f"saved {len(rows)} cases in {EXPECTED.name}")

@@ -18,6 +18,8 @@ Test kinds (same semantics as the original scripts):
   R  jtest  : elanc-rs (Rust compiler, spec S6) LGI [SPC]; a.out -noInput -quiet,
               rewrite_step lines ignored; UNSUPPORTED when elanc-rs refuses (exit 2).
               Not in the default kinds.
+  G  jtest  : the same with elanc-go (Go compiler, spec S7; a go build cache in the
+              bench work directory). Not in the default kinds.
 
 ctest/actest/cctest (old C compiler) and pitest/pevaltest (partial evaluator)
 have no script anymore and are not replayed.
@@ -31,7 +33,7 @@ Two oracles:
                 behaviour exactly. Status "SNAP-OK"/"SNAP-DIFF" is reported separately.
 
 Usage:
-  run_tests.py [--list] [--kinds I,A,J,JO] [--filter REGEX] [-j N] [--timeout S]
+  run_tests.py [--list] [--kinds I,A,J,JO,R,G] [--filter REGEX] [-j N] [--timeout S]
                [--save-baseline] [--long/--no-long]
 Results are written to tests/results/<timestamp>/ (summary.tsv, one .diff per failure)
 and compared with tests/baseline.tsv when it exists.

@@ -2,7 +2,10 @@
 #   make                 build the interpreter (build/)
 #   make install         install into $(PREFIX)
 #   make check           unit tests of the runner + golden tests + interpreter tests (I, A)
-#                        of the bench + compiled tests (J, JO)
+#                        of the bench + compiled tests (J, JO) + check-rust + check-go
+#   make check-rust      tests of the Rust compiler elanc-rs (when cargo exists)
+#   make check-go        tests of the Go compiler elanc-go and its runtime (when go >= 1.24
+#                        exists): go vet/test, .ref reader, normalisation, depth, bench G
 #   make check-golden    golden tests: .ref files, -d dump, statistics, errors
 #   make check-compiler  compiled tests (J, JO) only: elanc, REM, runtime libraries
 #   make reference       build the 2004 reference system (reference/install)
