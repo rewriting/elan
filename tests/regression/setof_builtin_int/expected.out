@@ -1,0 +1,20 @@
+ cons_builtinInt(0,nil) end
+
+ end end
+end
+
+ cons_builtinInt(1,nil) end
+
+ end end
+end
+
+ cons_builtinInt(331,nil) end
+
+ end end
+end
+
+ cons_builtinInt(100000,nil) end
+
+ end end
+end
+

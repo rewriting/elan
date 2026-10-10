@@ -1,0 +1,6 @@
+module bi
+// setof over builtin integers with several strat[] instances (int, bool,
+// builtinInt): call "eval":builtinInt must not use the integer value as a
+// symbol to find the sort (tests/regression/setof_builtin_int).
+import global builtinInt int strat[int] bool strat[bool] strat[builtinInt] strapply[builtinInt] list[builtinInt] strapply[bool] list[bool]; end
+end

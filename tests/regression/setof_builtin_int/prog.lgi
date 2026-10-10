@@ -1,0 +1,6 @@
+LPL prog description
+  query of sort builtinInt
+  result of sort list[builtinInt]
+  import bi
+  start with () setof(id,query)
+end

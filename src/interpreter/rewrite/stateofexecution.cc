@@ -548,10 +548,14 @@ int strbuiltins(term &res)
 	  int nil_fsym = res.subterm(1)->subterm(1)->head();
 	  
 	  // stout << " CONS = " << cons_fsym << " NIL = " << nil_fsym;
+	  // the sort of the term (for `call "name":X`): only for a function
+	  // application; the head of a builtin number or string is its value,
+	  // not a symbol ("type problem with integers"): -1 (unknown) then
+	  term *qt = res.subterm(1)->subterm(0);
+	  int qtyp = (qt->inf() == TNORMFS)
+	    ? ((fsymtab[qt->head()].textform())->leftside).typeval() : -1;
 	  new_meta_apply( 
-// type problem with intergers
-	     ((fsymtab[res.subterm(1)->subterm(0)->head()].
-	       textform())->leftside).typeval(), /* typ */
+	     qtyp, /* typ */
 	     cons_fsym, nil_fsym,
              res.subterm(0), // strategy
 	     res.subterm(1)->subterm(0), // term
