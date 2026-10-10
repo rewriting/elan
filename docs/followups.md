@@ -27,8 +27,6 @@ sub-project (S1–S5b). Each item says where it comes from.
   (+7–14 %), `group` (2000 output made with another `group.spc`) and the
   binding order of MinelaComp `iappend` (see
   `tests/compiler/benchthesis/README.md`).
-- **The rtmisc.cc `STRSUBSTR` builtin falls through into `STRSPN`** for other
-  argument sorts — kept as in 2004, probably unintended (S2).
 - **`trace_backup`/`trace_recover`** (`-coq -proofterm` compiled programs)
   are not safe under backtracking (slots reused after `trace_recover`); and
   `norm_4` now returns `t` where 2004 returned an undefined value (S5b).

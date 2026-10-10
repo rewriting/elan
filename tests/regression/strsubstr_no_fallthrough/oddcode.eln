@@ -1,0 +1,8 @@
+module oddcode
+// An operator with the builtin code of string_substr (154) but other
+// argument sorts: it must stay unreduced.
+import global builtinString builtinInt; end
+operators global
+  odd(@,@,@) : (builtinString builtinString builtinInt) builtinInt pri 2000 code 154;
+end
+end

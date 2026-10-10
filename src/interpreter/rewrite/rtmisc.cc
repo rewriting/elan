@@ -578,9 +578,7 @@ static int standardreduction(term &t)
           ss[l3] = 0;
           tt.crststring(ss); 
           break; }
-        // S2: no 'else return 0;' here, unlike the neighbouring cases: with
-        // other argument sorts STRSUBSTR falls into STRSPN (kept as in 2004).
-        [[fallthrough]];
+        else return 0;
       case STRSPN:        // #define STRSPN         156
         if (t.subterm(0)->inf() == TSTRING &&  t.subterm(1)->inf() == TSTRING) {
           tt.crstterm(strspn(t.subterm(0)->getstring(),t.subterm(1)->getstring() ),TNUMBER);

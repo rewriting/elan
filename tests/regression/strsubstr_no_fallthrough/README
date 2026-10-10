@@ -1,0 +1,1 @@
+An operator with the code of string_substr (154) but a builtinString second argument stays unreduced (2004: fell through into strspn).
