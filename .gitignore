@@ -3,3 +3,4 @@
 build/
 build-*/
 build-manual/
+tests/compiler-rs/work/
