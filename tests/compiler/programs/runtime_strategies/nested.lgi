@@ -1,0 +1,6 @@
+LPL nested description
+  query of sort int
+  result of sort int
+  import rt
+  start with [dc(one(big, dk(inc1,inc10)) ; big, if big then id orelse dk(dbl, inc10) fi)]query
+end

@@ -1,0 +1,6 @@
+LPL one_then_fail description
+  query of sort int
+  result of sort int
+  import rt
+  start with [one(dk(inc1,inc10)) ; big]query
+end

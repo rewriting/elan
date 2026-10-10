@@ -1,0 +1,6 @@
+LPL one_last description
+  query of sort int
+  result of sort int
+  import rt
+  start with [one(big, dk(inc10,inc1))]query
+end

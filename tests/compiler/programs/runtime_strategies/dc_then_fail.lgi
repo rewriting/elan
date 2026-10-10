@@ -1,0 +1,6 @@
+LPL dc_then_fail description
+  query of sort int
+  result of sort int
+  import rt
+  start with [dc(dk(inc1,inc10), dbl) ; big]query
+end

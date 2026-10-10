@@ -1,0 +1,6 @@
+LPL one_in_dk description
+  query of sort int
+  result of sort int
+  import rt
+  start with [dk(one(dk(inc1,inc10)), dbl)]query
+end

@@ -1,0 +1,6 @@
+LPL if_cond_results description
+  query of sort int
+  result of sort int
+  import rt
+  start with [if dk(inc1,inc10) then dbl orelse id fi]query
+end

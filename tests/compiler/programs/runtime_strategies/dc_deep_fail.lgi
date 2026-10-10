@@ -1,0 +1,6 @@
+LPL dc_deep_fail description
+  query of sort int
+  result of sort int
+  import rt
+  start with [dc(inc1 ; big, dbl)]query
+end
