@@ -648,41 +648,51 @@ void Aread_visibilities(void *voidf)
 //---------------------------------------------------- PARSER
 //---------------------------------------------------- PARSER
 
-int strindex_refs = 0;
-int strindex = 0;
-int strindex1 = 0;
-int nval = 0;
-int ar = 0;
-int rlab = 0;
-int amodule = 0;
-lexem lex, lefside, varsortlex;
-int spriority, srulenumber , ssemantic, Ffsymi, Finfos, Farity, topglopflag,
-    varindex,varsort,
-    Wherevar, Wherestrat, querysorti, resultsorti, mainstrati ;
-term cterm, Lhs, Rhs, bcond, ifterm, startwtt, checkwtt, whereterm;
-transrule *rrule;
-struct namelist *rlst = NULL;
-int strconstr = 0;
-struct strlist *strliststack[64];
-int strliststacktop = 0;
-int rstack[64];
-int rstacktop = 0;
-int strategytype = 0;
-char stringconst[STRLEN];
-int stringconsti = 0;
-int achead = 0;
-int ainfos = 0;
-int acsymbol = 0;
-int ssyntactic = 0;
-int varn = 0;
-struct wherelist *wlist = NULL;
-struct wherelist *wliststack[50];  int wliststacki = 0;
-term bcondstack[50];  int bcondstacki = 0;
-struct branch *listbranchstack[50]; int listbranchstacki = 0; 
-struct tseq *switchstack[50]; int switchstacki = 0;
-struct branch *branchstack[50]; int branchstacki = 0;       
-struct WHEREbranches *WHEREbranchesstack[50]; int WHEREbranchesstacki = 0;
-lexem whtype;
+// The state of the .ref parser (atermsemact, reducesemact: the semantic
+// actions of the parsers generated from aterm.ref and aterm.reduce), until
+// S3b separate globals. One instance, rp, used only in this file. The
+// strategies being read are built on the loader's stacks (ld.strstack,
+// ld.strlstack, ld.actstrategy: load/strategy.h); the result of a reduce
+// file (redTerm, redStrategyIndex...) stays global, the driver reads it.
+struct RefParserState {
+  int strindex_refs = 0;
+  int strindex = 0;
+  int strindex1 = 0;
+  int nval = 0;                       // the last number read
+  int ar = 0;
+  int rlab = 0;
+  int amodule = 0;
+  lexem lex, lefside, varsortlex;
+  int spriority = 0, srulenumber = 0, ssemantic = 0, Ffsymi = 0, Finfos = 0, Farity = 0,
+      topglopflag = 0, varindex = 0, varsort = 0, Wherevar = 0, Wherestrat = 0,
+      querysorti = 0, resultsorti = 0, mainstrati = 0;
+  term cterm, Lhs, Rhs, bcond, ifterm, startwtt, checkwtt, whereterm;
+  transrule *rrule = nullptr;
+  struct namelist *rlst = nullptr;
+  int strconstr = 0;
+  struct strlist *strliststack[64] = {};
+  int strliststacktop = 0;
+  int rstack[64] = {};
+  int rstacktop = 0;
+  int strategytype = 0;
+  char stringconst[STRLEN] = {};
+  int stringconsti = 0;
+  int achead = 0;
+  int ainfos = 0;
+  int acsymbol = 0;
+  int ssyntactic = 0;
+  int varn = 0;
+  // the fixed-size stacks below are pushed with REFPUSH (checked)
+  struct wherelist *wlist = nullptr;
+  struct wherelist *wliststack[50] = {};  int wliststacki = 0;
+  term bcondstack[50];  int bcondstacki = 0;
+  struct branch *listbranchstack[50] = {}; int listbranchstacki = 0;
+  struct tseq *switchstack[50] = {}; int switchstacki = 0;
+  struct branch *branchstack[50] = {}; int branchstacki = 0;
+  struct WHEREbranches *WHEREbranchesstack[50] = {}; int WHEREbranchesstacki = 0;
+  lexem whtype;
+};
+static RefParserState rp;
 
 // The stacks of the .ref parser have fixed sizes: a .ref file nested more
 // deeply fails with a message instead of overflowing them.
@@ -692,9 +702,10 @@ lexem whtype;
         << "\n\t fatal\n";
   failexit();
 }
+// REFPUSH(s, t, v) pushes v on the stack rp.s of top rp.t
 #define REFPUSH(stack, top, value) do { \
-    if ((top) >= (int)(sizeof(stack) / sizeof((stack)[0]))) ref_stack_overflow(#stack); \
-    (stack)[(top)++] = (value); } while (0)
+    if (rp.top >= (int)(sizeof(rp.stack) / sizeof(rp.stack[0]))) ref_stack_overflow(#stack); \
+    rp.stack[rp.top++] = (value); } while (0)
 
 
 int atermsemact(int n,lexem l,lstream * /*f*/)
@@ -705,158 +716,158 @@ int atermsemact(int n,lexem l,lstream * /*f*/)
   if (n >= 0 && n < 300) {
    switch (n) {
     case 0: 
-      cterm.stinit(); Lhs.stinit(); Rhs.stinit(); bcond.stinit();
-      strliststacktop = 0; strliststack[strliststacktop] = NULL;
+      rp.cterm.stinit(); rp.Lhs.stinit(); rp.Rhs.stinit(); rp.bcond.stinit();
+      rp.strliststacktop = 0; rp.strliststack[rp.strliststacktop] = NULL;
       break;
-    case 1:  lex.crtypelex(nval); ar++;
+    case 1:  rp.lex.crtypelex(rp.nval); rp.ar++;
       //sterr << "type(" << nval << ")";
       break;
-    case 2:  lex.crcharlex(nval); 
+    case 2:  rp.lex.crcharlex(rp.nval); 
       //sterr << "char(" << nval << ")";
       break;
-    case 3:  lex.crnumlex(nval); 
+    case 3:  rp.lex.crnumlex(rp.nval); 
       //sterr << "num(" << nval << ")";
       break;
     case 4:  
       //sterr << "#" << n << "#"; //lex.crstringlex(nval); 
       //lex.dump(); sterr << ".";
       break;
-    case 5:  lex.cridlex(nval); 
+    case 5:  rp.lex.cridlex(rp.nval); 
       //sterr << "id(" << nval << ")";
       break;
-    case 6: lex.crblanklex();
+    case 6: rp.lex.crblanklex();
       break;
-    case 7:  nval = l.numval();
+    case 7:  rp.nval = l.numval();
       break;
-    case 8:   nval =  -l.numval();
+    case 8:   rp.nval =  -l.numval();
       break;
     case 9:
-      ssyntactic = nval;
+      rp.ssyntactic = rp.nval;
       break;
     case 10:
-      acsymbol = nval; ar =0;
+      rp.acsymbol = rp.nval; rp.ar =0;
       break;
     case 11:  
-	if (topglopflag & INTOPGRAM) {
+	if (rp.topglopflag & INTOPGRAM) {
 	  rule = topgrammar->
-	         addrule(lefside,spriority+(ssyntactic*(RPRIORITYMSK+1)),
-			 RGLOP /*???*/ , srulenumber);
+	         addrule(rp.lefside,rp.spriority+(rp.ssyntactic*(RPRIORITYMSK+1)),
+			 RGLOP /*???*/ , rp.srulenumber);
 	  // stout << "#1"; dumpgrrule(rule);
 	}
-	if (topglopflag & INGLOBGRAM) {
+	if (rp.topglopflag & INGLOBGRAM) {
 	  rule = globtermgr.
-	    addrule(lefside,spriority+(ssyntactic*(RPRIORITYMSK+1)),
-		    RGLOP /*???*/ , srulenumber); }
-	rule->semantic =ssemantic;
+	    addrule(rp.lefside,rp.spriority+(rp.ssyntactic*(RPRIORITYMSK+1)),
+		    RGLOP /*???*/ , rp.srulenumber); }
+	rule->semantic =rp.ssemantic;
 	//stout << "#2"; dumpgrrule(rule);
 
 
 
 //	if ((topglopflag & INTOPGRAM) || (fsymtab[srulenumber].textform() == NULL))
-        if ( ssyntactic & PRINTABLE)
+        if ( rp.ssyntactic & PRINTABLE)
 	{
-	  fsym s(ar,rule,acsymbol);
+	  fsym s(rp.ar,rule,rp.acsymbol);
 	  //s.dump();
 	  //stout << "setsemantic " << ssemantic << "\n";
-	  s.set_semantic(ssemantic); 
-	  fsymtab[srulenumber] = s;
-	  if (srulenumber >= fsymtabi) fsymtabi = srulenumber+1;
+	  s.set_semantic(rp.ssemantic); 
+	  fsymtab[rp.srulenumber] = s;
+	  if (rp.srulenumber >= fsymtabi) fsymtabi = rp.srulenumber+1;
 	} 
       break;
-    case 13:  spriority = nval;
+    case 13:  rp.spriority = rp.nval;
       break;
-    case 14:  srulenumber = nval;
+    case 14:  rp.srulenumber = rp.nval;
       break;
-    case 15:  ssemantic = nval;
+    case 15:  rp.ssemantic = rp.nval;
       break;
-    case 16: lefside.crtypelex(nval);
+    case 16: rp.lefside.crtypelex(rp.nval);
       break;
-    case 17: topglopflag = nval;
+    case 17: rp.topglopflag = rp.nval;
       break;
     case 18:
-      varindex = nval;
+      rp.varindex = rp.nval;
       break;
     case 19:
-      varsort = nval; varsortlex.crtypelex(varsort);
+      rp.varsort = rp.nval; rp.varsortlex.crtypelex(rp.varsort);
       break;
-    case 20:  cterm.crvar(varindex,varsortlex);
+    case 20:  rp.cterm.crvar(rp.varindex,rp.varsortlex);
       //cterm.write(stout); stout << "\n";
       //stout << "var " << nval << "\n";
       break;
-    case 21:  cterm.crstterm(nval,TNUMBER);
+    case 21:  rp.cterm.crstterm(rp.nval,TNUMBER);
       //cterm.write(stout); stout << "\n";
       //stout << "int " << nval << "\n";
       break;
-    case 22:  cterm.crstterm(nval,TIDENT);
+    case 22:  rp.cterm.crstterm(rp.nval,TIDENT);
       //cterm.write(stout); stout << "\n";
       break;
     case 23:
-      stringconst[stringconsti++] = 0;
-      cterm.crststring(strdup(stringconst));
-      stringconsti = 0;
+      rp.stringconst[rp.stringconsti++] = 0;
+      rp.cterm.crststring(strdup(rp.stringconst));
+      rp.stringconsti = 0;
       break;
     case 24:  
       // cterm.crterm_reverse(Ffsymi,Farity);
-      cterm.crterm_reverse(Ffsymi,fsymtab[Ffsymi].arity());
+      rp.cterm.crterm_reverse(rp.Ffsymi,fsymtab[rp.Ffsymi].arity());
 
       //cterm.write(stout); stout << "\n";
       //stout << "@" << Ffsymi << "," << Farity << "\n";
       break;
-    case 25: Ffsymi = nval;
+    case 25: rp.Ffsymi = rp.nval;
       break;
-    case 26: Finfos = nval;
+    case 26: rp.Finfos = rp.nval;
       break;
-    case 27: Farity = nval;
+    case 27: rp.Farity = rp.nval;
       break;
     case 28: 
-      whereterm.popt();
+      rp.whereterm.popt();
       break;
-    case 29: Wherestrat = nval;
+    case 29: rp.Wherestrat = rp.nval;
       break;
     case 30:  
-      ifterm.popt();
+      rp.ifterm.popt();
       // rrule->addwhere(1,IFVARN,NULL,ifterm,booltype);
-      addwheretolist(1,IFVARN,NULL,ifterm,booltype,&wlist);
+      addwheretolist(1,IFVARN,NULL,rp.ifterm,booltype,&rp.wlist);
       break;
     case 31:  
       {
-	ifterm.popt();
-	if (!whereterm.is_variable(&Wherevar)) {
+	rp.ifterm.popt();
+	if (!rp.whereterm.is_variable(&rp.Wherevar)) {
 	  sterr << "[fatal] in where parsing \n"; failexit(); }
-	addwheretolist(1,Wherevar,
-		       (Wherestrat==-1)?((strategy**)NULL):
-		       trrules.getstrategyadr_refs(Wherestrat),ifterm,
-		       whtype,&wlist);
+	addwheretolist(1,rp.Wherevar,
+		       (rp.Wherestrat==-1)?((strategy**)NULL):
+		       trrules.getstrategyadr_refs(rp.Wherestrat),rp.ifterm,
+		       rp.whtype,&rp.wlist);
       }
       break;
     case 45: // PWHERE
       {
-	ifterm.popt();
-	addpatternwheretolist(1,(Wherestrat==-1)?((strategy**)NULL):
-			      trrules.getstrategyadr_refs(Wherestrat),
-			      whereterm, ifterm,whtype.typeval(),
-			      &wlist);
+	rp.ifterm.popt();
+	addpatternwheretolist(1,(rp.Wherestrat==-1)?((strategy**)NULL):
+			      trrules.getstrategyadr_refs(rp.Wherestrat),
+			      rp.whereterm, rp.ifterm,rp.whtype.typeval(),
+			      &rp.wlist);
       }	  
       break;	 
     case 46:
-      whtype.crtypelex(nval);
+      rp.whtype.crtypelex(rp.nval);
       break;
     case 32:
-      stringconst[stringconsti++] = nval;
-      if (stringconsti >= STRLEN) {
+      rp.stringconst[rp.stringconsti++] = rp.nval;
+      if (rp.stringconsti >= STRLEN) {
 	sterr << "\n[IMPORT] string constant too long\n"; failexit(); }
       break;
     case 33:
-      varn = nval;
+      rp.varn = rp.nval;
       break;
     case 34:  
-	Lhs.popt();
+	rp.Lhs.popt();
 	// stout << "\n<LHS=";       // Lhs.dump();      Lhs.write(stout); stout << ">"; 
       break;
     case 35: 
       {
 	/*term rlabel;*/
-        Rhs.popt();
+        rp.Rhs.popt();
 	// stout << "<RHS=";       Rhs.dump(); // Rhs.write(stout);     stout << ">"; 
 	/*
 	if (!batch) {
@@ -876,40 +887,40 @@ int atermsemact(int n,lexem l,lstream * /*f*/)
       break;
     case 41: {
 	term rlabel;
-        Rhs.popt();
+        rp.Rhs.popt();
 	// stout << "<RHS=";       Rhs.dump(); // Rhs.write(stout);     stout << ">"; 
 	if (!batch) {
-	  if (rlab != -1 && amodule != -1) {
-	    stout << "Import rule " << trrules.rulename(rlab)
-	          << " form module " << import.ide(amodule)
+	  if (rp.rlab != -1 && rp.amodule != -1) {
+	    stout << "Import rule " << trrules.rulename(rp.rlab)
+	          << " form module " << import.ide(rp.amodule)
 		  << "\n"; }
 	}
-	rrule = trrules.addrule(((rlab == -1)?(char*)NULL:trrules.rulename(rlab)),
-			varn, Lhs,Rhs,amodule, ainfos, NULL,
-			achead,rlabel,NULL);
-	rlab = -1; amodule = -1;
+	rp.rrule = trrules.addrule(((rp.rlab == -1)?(char*)NULL:trrules.rulename(rp.rlab)),
+			rp.varn, rp.Lhs,rp.Rhs,rp.amodule, rp.ainfos, NULL,
+			rp.achead,rlabel,NULL);
+	rp.rlab = -1; rp.amodule = -1;
 	break;
     }
     case 36:
-      achead = nval;
+      rp.achead = rp.nval;
       break;
     case 37:
-      rlab = nval;
+      rp.rlab = rp.nval;
       break;
     case 38:
-      amodule = nval;
+      rp.amodule = rp.nval;
       break;
     case 39:
-      ainfos = nval;
+      rp.ainfos = rp.nval;
       break;
     case 40:
-      if (topglopflag & INTOPGRAM)
-	topgrammar->addsymbol(lex);
-      if (topglopflag & INGLOBGRAM)
-	globtermgr.addsymbol(lex);
+      if (rp.topglopflag & INTOPGRAM)
+	topgrammar->addsymbol(rp.lex);
+      if (rp.topglopflag & INGLOBGRAM)
+	globtermgr.addsymbol(rp.lex);
       break;
     case 126:
-      REFPUSH(wliststack, wliststacki, wlist); wlist = NULL;
+      REFPUSH(wliststack, wliststacki, rp.wlist); rp.wlist = NULL;
       break;
     case 127:
       REFPUSH(WHEREbranchesstack, WHEREbranchesstacki, NULL);
@@ -917,16 +928,16 @@ int atermsemact(int n,lexem l,lstream * /*f*/)
     case 128:
         { struct WHEREbranches *brlist;
 	NNEW(brlist, struct WHEREbranches);
-	brlist->wherebranch = wliststack[--wliststacki];
-	brlist->next = WHEREbranchesstack[--WHEREbranchesstacki];
+	brlist->wherebranch = rp.wliststack[--rp.wliststacki];
+	brlist->next = rp.WHEREbranchesstack[--rp.WHEREbranchesstacki];
 	REFPUSH(WHEREbranchesstack, WHEREbranchesstacki, brlist);
 	}
       break;
     case 129:  // TRY
        { struct WHEREbranches *brlist;
-        wlist = wliststack[--wliststacki];
-	brlist = WHEREbranchesstack[--WHEREbranchesstacki];
-            addtrywheretolist(1,brlist,&wlist);
+        rp.wlist = rp.wliststack[--rp.wliststacki];
+	brlist = rp.WHEREbranchesstack[--rp.WHEREbranchesstacki];
+            addtrywheretolist(1,brlist,&rp.wlist);
 	}	
       break;
     case 130:
@@ -934,58 +945,58 @@ int atermsemact(int n,lexem l,lstream * /*f*/)
       struct tseq *tseq = NULL;
       AALLOS(tseq, struct tseq);
       tseq->is_case = (n == 131);
-      tseq->seq = wliststack[--wliststacki];
+      tseq->seq = rp.wliststack[--rp.wliststacki];
       if (tseq->is_case == 0) {
 	NNEW(tseq->u.one_branch.result,term);
-	*(tseq->u.one_branch.result) = Rhs;
+	*(tseq->u.one_branch.result) = rp.Rhs;
       } else {
-	tseq->u.more_branches.brlist = listbranchstack[--listbranchstacki];
+	tseq->u.more_branches.brlist = rp.listbranchstack[--rp.listbranchstacki];
       }
       REFPUSH(switchstack, switchstacki, tseq); 
      }
       break;
     case 134:
-      bcond.popt();
-      REFPUSH(bcondstack, bcondstacki, bcond); bcond.stinit();
+      rp.bcond.popt();
+      REFPUSH(bcondstack, bcondstacki, rp.bcond); rp.bcond.stinit();
       break;
     case 135:
       { struct branch *sbranch; /*,**p;*/
         AALLOS(sbranch, struct branch);
-	sbranch->tseq = switchstack[--switchstacki];
-	sbranch->test = bcondstack[--bcondstacki];
+	sbranch->tseq = rp.switchstack[--rp.switchstacki];
+	sbranch->test = rp.bcondstack[--rp.bcondstacki];
 	REFPUSH(branchstack, branchstacki, sbranch);
       }
      break;
     case 133:
 	//wherelisdump(stout,wlist,0);
-	rrule->setwheres(wlist);
-	wlist = NULL;
+	rp.rrule->setwheres(rp.wlist);
+	rp.wlist = NULL;
 	break;
     case 136:
 	{ term rlabel;
 	  struct tseq *tseq;
 	// stout << " Right hand side \n"; dump_tseq(stout, 10, tseq);
-	tseq = switchstack[--switchstacki];
+	tseq = rp.switchstack[--rp.switchstacki];
        	if (tseq->is_case == 0) {
-  	  rrule = trrules.addrule(((rlab == -1)?(char*)NULL:trrules.rulename(rlab)),
-		  	  varn, Lhs,*(tseq->u.one_branch.result),
-			  amodule, ainfos,
+  	  rp.rrule = trrules.addrule(((rp.rlab == -1)?(char*)NULL:trrules.rulename(rp.rlab)),
+		  	  rp.varn, rp.Lhs,*(tseq->u.one_branch.result),
+			  rp.amodule, rp.ainfos,
 			      NULL,
-			achead,rlabel,tseq->seq);
+			rp.achead,rlabel,tseq->seq);
 	} else {
 	  term noterm;
 	  noterm.stinit();
-  	  rrule = trrules.addrule(((rlab == -1)?(char*)NULL:trrules.rulename(rlab)),
-		  	  varn, Lhs,noterm,
-			  amodule, ainfos,
+  	  rp.rrule = trrules.addrule(((rp.rlab == -1)?(char*)NULL:trrules.rulename(rp.rlab)),
+		  	  rp.varn, rp.Lhs,noterm,
+			  rp.amodule, rp.ainfos,
 			      tseq,
-			achead,rlabel,NULL);
+			rp.achead,rlabel,NULL);
 	}
-	rlab = -1; amodule = -1;
+	rp.rlab = -1; rp.amodule = -1;
 	}
       break;
     case 137 :
-      REFPUSH(wliststack, wliststacki, wlist); wlist = NULL;
+      REFPUSH(wliststack, wliststacki, rp.wlist); rp.wlist = NULL;
       break;
     case 138:
       REFPUSH(listbranchstack, listbranchstacki, NULL);
@@ -993,9 +1004,9 @@ int atermsemact(int n,lexem l,lstream * /*f*/)
    case 139: 
         { struct branch *branchlist = NULL;
 	struct branch  *br; /* **p*/
-	branchlist = listbranchstack[--listbranchstacki];
+	branchlist = rp.listbranchstack[--rp.listbranchstacki];
 	
-	br = branchstack[--branchstacki];
+	br = rp.branchstack[--rp.branchstacki];
 	br->next = branchlist;
 	branchlist = br;
 
@@ -1013,11 +1024,11 @@ int atermsemact(int n,lexem l,lstream * /*f*/)
 	}
       break;
     case 140:
-      sourcetypei = nval; sourcetype.crtypelex(sourcetypei);
+      sourcetypei = rp.nval; sourcetype.crtypelex(sourcetypei);
       break;
-    case 141: qresulttypei = nval; qresulttype.crtypelex(qresulttypei);
+    case 141: qresulttypei = rp.nval; qresulttype.crtypelex(qresulttypei);
       break;
-    case 142: mainstrategy = nval; 
+    case 142: mainstrategy = rp.nval; 
       break;
     case 143: startwith.popt();
       // stout << "startwith = "; startwith.write(stout); stout << "\n";
@@ -1027,7 +1038,7 @@ int atermsemact(int n,lexem l,lstream * /*f*/)
       break;
     case 159:
       ld.actstrategy->setprocmaxn(ld.calledstr);
-      ld.actstrategy->settypeof(strategytype);
+      ld.actstrategy->settypeof(rp.strategytype);
       ld.actstrategy->setname(STRCALL,impmoduli);
       break;                            // UUU differece between semact.c
     case 160:				// another element. strategy
@@ -1040,51 +1051,51 @@ int atermsemact(int n,lexem l,lstream * /*f*/)
       break;
     case 164:
       ld.actstrategy->setname(STRNAMEREPEAT,impmoduli); 
-      ld.actstrategy->settypeof(strategytype);
+      ld.actstrategy->settypeof(rp.strategytype);
       ld.actstrategy->setsubst(ld.strstack[ld.strstacki-1]);
       ld.strstacki-=2;
       break;
     case 165:
       ld.actstrategy->setname(STRNAMEITERATE,impmoduli);
-      ld.actstrategy->settypeof(strategytype);
+      ld.actstrategy->settypeof(rp.strategytype);
       ld.actstrategy->setsubst(ld.strstack[ld.strstacki-1]);
       ld.strstacki-=2;
       break;
     case 172:
       ld.actstrategy->setname(STRNAMEONE,impmoduli);
-      ld.actstrategy->settypeof(strategytype);
-      ld.actstrategy->setnamelist(rlst);
+      ld.actstrategy->settypeof(rp.strategytype);
+      ld.actstrategy->setnamelist(rp.rlst);
       // UUU see 160:      appactstrat();
       break;
     case 173:
       ld.actstrategy->setname(STRNAMEDONTCARE,impmoduli);
-      ld.actstrategy->settypeof(strategytype);
-      ld.actstrategy->setnamelist(rlst);
+      ld.actstrategy->settypeof(rp.strategytype);
+      ld.actstrategy->setnamelist(rp.rlst);
       // UUU see 160:      appactstrat();
       break;
     case 174:
       ld.actstrategy->setname(STRNAMEDONTKNOW,impmoduli);
-      ld.actstrategy->settypeof(strategytype);
-      ld.actstrategy->setnamelist(rlst);
+      ld.actstrategy->settypeof(rp.strategytype);
+      ld.actstrategy->setnamelist(rp.rlst);
       // UUU see 160:  appactstrat();
       break;
     case 171:
       ld.actstrategy->setname(STRNAMEONE2,impmoduli);
-      ld.actstrategy->settypeof(strategytype);
+      ld.actstrategy->settypeof(rp.strategytype);
       ld.actstrategy->setstl(ld.strlstack[ld.strlstacki-2]);
       ld.strstacki-=2;
       ld.strlstacki-=2;
       break;
     case 175:
       ld.actstrategy->setname(STRNAMEDONTCARE2,impmoduli);
-      ld.actstrategy->settypeof(strategytype);
+      ld.actstrategy->settypeof(rp.strategytype);
       ld.actstrategy->setstl(ld.strlstack[ld.strlstacki-2]);
       ld.strstacki-=2;
       ld.strlstacki-=2;
       break;
     case 176:
       ld.actstrategy->setname(STRNAMEDONTKNOW2,impmoduli);
-      ld.actstrategy->settypeof(strategytype);
+      ld.actstrategy->settypeof(rp.strategytype);
       ld.actstrategy->setstl(ld.strlstack[ld.strlstacki-2]);
       ld.strstacki-=2;
       ld.strlstacki-=2;
@@ -1113,44 +1124,44 @@ int atermsemact(int n,lexem l,lstream * /*f*/)
       }
       break;
     case 179:
-      strindex = nval;
+      rp.strindex = rp.nval;
       ld.strstacki=1;
       ld.strstack[0]= ld.strstack[1]= NULL;
       NNEW(ld.actstrategy ,strategy);
       break;
     case 180:  
-      strategytype = nval;
+      rp.strategytype = rp.nval;
       break;
     case 181:
-      trrules.settypeofstrategy_defs(strindex,strategytype);
+      trrules.settypeofstrategy_defs(rp.strindex,rp.strategytype);
       // strstack[strstacki] -> dump();
-      ld.strstack[0]->settypeof(strategytype);
-      trrules.setstrategy_defs(strindex,ld.strstack[0]); 
+      ld.strstack[0]->settypeof(rp.strategytype);
+      trrules.setstrategy_defs(rp.strindex,ld.strstack[0]); 
       if (!batch) 
-	stout << "Import strategy " << trrules.strategyname_defs(strindex)
+	stout << "Import strategy " << trrules.strategyname_defs(rp.strindex)
 	      << "\n";
-      strindex_refs = trrules.strategyindex_refs(trrules.
-			strategyname_defs(strindex));
-      trrules.set_strategies_cross(strindex_refs,strindex,ld.strstack[0]);
+      rp.strindex_refs = trrules.strategyindex_refs(trrules.
+			strategyname_defs(rp.strindex));
+      trrules.set_strategies_cross(rp.strindex_refs,rp.strindex,ld.strstack[0]);
       break;
    case 182:
-     ld.calledstr = nval;
+     ld.calledstr = rp.nval;
      break;
    case 183:
    case 184:
-     stringconst[stringconsti] = 0;
+     rp.stringconst[rp.stringconsti] = 0;
      //stout << stringconst  << "\n";
      //stout << ainfos << "\n";
      //stout << typet.ide(strategytype) << "\n";
-     stringconsti = 0;
+     rp.stringconsti = 0;
 
      ld.actstrategy->setname((n == 183) ? 
 			  STRNAMEDCPROCESSCALL:STRNAMEDKPROCESSCALL,
 			  impmoduli);
-     ld.actstrategy->settypeof(strategytype);
-     ld.actstrategy->setproctype(strategytype);
-     ld.actstrategy->setprocname(stringconst);
-     ld.actstrategy->setprocmaxn(ainfos);
+     ld.actstrategy->settypeof(rp.strategytype);
+     ld.actstrategy->setproctype(rp.strategytype);
+     ld.actstrategy->setprocname(rp.stringconst);
+     ld.actstrategy->setprocmaxn(rp.ainfos);
 
       ld.actstrategy->setprocgr(&globtermgr);
 //      addstandards(globtermgr);
@@ -1158,29 +1169,29 @@ int atermsemact(int n,lexem l,lstream * /*f*/)
 
      break;
    case 190:
-     rlst = NULL;
+     rp.rlst = NULL;
      break;
    case 191:
      AALLOS(nl, struct namelist);
-     nl->strname = rstack[rstacktop--];
-     nl->next = rlst;
-     rlst = nl;
+     nl->strname = rp.rstack[rp.rstacktop--];
+     nl->next = rp.rlst;
+     rp.rlst = nl;
      break;
    case 192:
-     if (rstacktop+1 >= 64) ref_stack_overflow("rstack");
-     rstack[++rstacktop] = rlab;
+     if (rp.rstacktop+1 >= 64) ref_stack_overflow("rstack");
+     rp.rstack[++rp.rstacktop] = rp.rlab;
      break;
    case 195:  // strategy fail
      ld.actstrategy->setname(STRFAIL,impmoduli);
-     ld.actstrategy->settypeof(strategytype);
+     ld.actstrategy->settypeof(rp.strategytype);
      break;
    case 196:
      ld.actstrategy->setname(STRIDENTITY,impmoduli);
-     ld.actstrategy->settypeof(strategytype);
+     ld.actstrategy->settypeof(rp.strategytype);
      break;
    case 197:
      ld.actstrategy->setname(STRMETA,impmoduli);
-     ld.actstrategy->settypeof(strategytype);
+     ld.actstrategy->settypeof(rp.strategytype);
      break;
    default:
       sterr << "[atermsemact] undefined semantic action " << n 
@@ -1198,23 +1209,23 @@ int reducesemact(int n,lexem l,lstream *f)
 {
   switch (n) {
     case 111:   // reduce-term
-      redTerm = cterm;
+      redTerm = rp.cterm;
       // stout << "REDUCE TERM = "; redTerm.write(stout); stout << "\n";
       //transred(redStrategyIndex,redTerm,0);  
       break;
     case 112:  // reduce-strategy
       // stout << "REDUCE STRATEGY = "; strstack[0]->dump(); stout << "\n";
 
-if (!batch) { stout << "REDUCE_STRATEGY " << strategytype << ":" << impmoduli << "\n"; }
+if (!batch) { stout << "REDUCE_STRATEGY " << rp.strategytype << ":" << impmoduli << "\n"; }
 
       redStrategyIndex = trrules.strategyindex_defs(
-           attach_type_mod("REDUCE_STRATEGY",strategytype,impmoduli),RGLOP);
+           attach_type_mod("REDUCE_STRATEGY",rp.strategytype,impmoduli),RGLOP);
 
 if (!batch) { stout << "REDUCE_STRATEGY done\n"; }
 
-      trrules.settypeofstrategy_defs(redStrategyIndex,strategytype);
+      trrules.settypeofstrategy_defs(redStrategyIndex,rp.strategytype);
       // strstack[strstacki] -> dump();
-      ld.strstack[0]->settypeof(strategytype);
+      ld.strstack[0]->settypeof(rp.strategytype);
       trrules.setstrategy_defs(redStrategyIndex,ld.strstack[0]); 
       if (!batch) {
 	stout << "Import reduce strategy " << trrules.strategyname_defs(redStrategyIndex)
@@ -1224,10 +1235,10 @@ if (!batch) { stout << "REDUCE_STRATEGY done\n"; }
       trrules.set_strategies_cross(redStrategyIndex_refs,redStrategyIndex,ld.strstack[0]);
       break;
     case 113:  
-      impmoduli = amodule;
-      strategytype = nval;
-      sourcetypei = nval; sourcetype.crtypelex(sourcetypei);
-      qresulttypei = nval; qresulttype.crtypelex(qresulttypei);
+      impmoduli = rp.amodule;
+      rp.strategytype = rp.nval;
+      sourcetypei = rp.nval; sourcetype.crtypelex(sourcetypei);
+      qresulttypei = rp.nval; qresulttype.crtypelex(qresulttypei);
       // ** init
 	      //stout << "MODULE= " << impmoduli << "\n";
       ld.strstacki=1;
