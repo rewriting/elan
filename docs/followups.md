@@ -17,12 +17,22 @@ sub-project (S1–S5b). Each item says where it comes from.
 - **`robot` example** (`legacy/elan3/doc/ElanExamples/robot`,
   `applications/Robot`): no result with either interpreter, although the 1997
   reference output shows paths (S4).
-- **`Compiler.2.1/BenchThesis` (30 J/JO cases ERROR)**: these programs (ELAN
-  2.1, 2000) do not parse in ELAN 3 (`import ... rewrite[...]`: `rewrite`
-  became a keyword). S1 attributed the failure to builtin codes 200–215
-  colliding with program symbols: that was an artefact of the 2004 `elanc`,
-  which compiled the incomplete `.ref` left by the failed export. Porting
-  them to ELAN 3 syntax would turn them into real compiler tests.
+- **`Compiler.2.1/BenchThesis` in the legacy bench**: the 30 J/JO cases (and
+  the I/A cases) of `legacy/` still report `ERROR`/`FAIL` there (ELAN 2.1
+  syntax: `rewrite` is a keyword in ELAN 3; `legacy/` is not modified). The
+  ported copies in `tests/compiler/benchthesis/` (identifier `rewrite`
+  renamed `rewriting`) run in `make check` (`test_benchthesis.sh`, 64 cases,
+  reference outputs as oracle, modern = reference byte for byte). Remaining
+  differences with the 2000 outputs: printing, `rewrite_step` counts
+  (+7–14 %), `group` (2000 output made with another `group.spc`) and the
+  binding order of MinelaComp `iappend` (see
+  `tests/compiler/benchthesis/README.md`).
+- **REM ignores the start term when the query is read**: with
+  `start with (S) t` where `t` is not just `query` (e.g. MinelaComp
+  `[query,proofnil]`), a compiled program reading its query from stdin
+  applies `S` to the query itself (`Query.genStrategyCall`), silently (the
+  interpreter applies it to `t`); only `-noInput` uses `t`, when ground.
+  Same in 2004 (seen with BenchThesis MinelaComp).
 - **The rtmisc.cc `STRSUBSTR` builtin falls through into `STRSPN`** for other
   argument sorts — kept as in 2004, probably unintended (S2).
 - **`trace_backup`/`trace_recover`** (`-coq -proofterm` compiled programs)

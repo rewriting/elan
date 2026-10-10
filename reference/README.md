@@ -58,6 +58,10 @@ the job of the modern port):
 * the `Compiler.2.1/BenchThesis` programs (ELAN 2.1 syntax: they import a
   module `rewrite`, a keyword in ELAN 3) do not parse; the 2004 `elanc`
   ignored the failed export and compiled an incomplete `.ref`, which shows up
-  as builtin code clashes (`fun_202` ...) when the C code is compiled;
+  as builtin code clashes (`fun_202` ...) when the C code is compiled.
+  Ported to ELAN 3 (the identifier `rewrite` renamed), they run on the
+  reference, whose outputs are the oracle of
+  `../tests/compiler/test_benchthesis.sh` (see
+  `../tests/compiler/benchthesis/README.md`);
 * some reference outputs (`SAMPLES/*.out`) were produced with older libraries
   and printers; see `../tests/legacy-bench/README.md`.
