@@ -5,6 +5,19 @@ sub-project (S1–S5b). Each item says where it comes from.
 
 ## Behaviour (needs tests against the interpreter or the reference)
 
+- **`call "name":X` in compiled programs** (`ref.cc`, review of branch
+  `compiled-start-term`): the `.ref` export resolves the name with any sort
+  (the sort printed with the shared `call` symbol, code 144, is the last
+  instance declared); a compiled program with two `strat[]` instances may
+  still run the `eval` of another sort, where the interpreter now uses the
+  sort of the term (`meta.cc`, robot example).
+- **`if b then S1 else S2 fi` compiled with `-strategy 2`** tests
+  `GgetSymb(cond)` (any term other than `false` is true), where the
+  interpreter fails on a condition that is neither `true` nor `false`.
+- **Compiler tests**: a case whose interpreter and compiled outputs are
+  both empty passes (`test_start_term.sh`, `test_runtime_strategies.sh`);
+  the level-2 marker is the same for every StrategyEval path; no AC,
+  string, `-commandLine`, `-REFInput` or `-coq` start-term case.
 - **`Compiler.2.1/BenchThesis` in the legacy bench**: the 30 J/JO cases (and
   the I/A cases) of `legacy/` still report `ERROR`/`FAIL` there (ELAN 2.1
   syntax: `rewrite` is a keyword in ELAN 3; `legacy/` is not modified). The
