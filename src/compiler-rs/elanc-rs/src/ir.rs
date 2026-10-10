@@ -41,6 +41,43 @@
 //!   conditions after it backtrack into `S`); in normalisation, the first
 //!   result for which the rest of the conditions hold.
 //!
+//! # Strategy terms (S6b task 2)
+//!
+//! Strategies built at run time (`[S]t`, `where x := [S]t`, defined
+//! strategies with parameters `[] app(s) => s`, `if b then S1 else S2 fi`,
+//! `if S then S1 orelse S2 fi`, the labels as strategy constants) are
+//! terms of the strategy sorts `<X>` (`<X->X>`) and `StrList[X,X]` of
+//! `strsig[X,Y]`/`strat[X]` (`elanlib/strategy`). The interpreter has no
+//! builtin evaluation of them: the codes `-180` (`[@]@`) .. `-190`, `-205`
+//! .. `-208` of their operators (`DS_*`, `term/codes.h`) are never used by
+//! its rewriting (`standardreduction`, `rewrite/rtmisc.cc`, has no case for
+//! them; the `defstrat` word of the grammar rules, `FSYM_FLAG`, `LAB_FLAG`,
+//! `DSTR_FLAG`, `APPLY_FLAG`, is only written to the `.ref` file,
+//! `ref/ref.cc`, for REM). Their semantics is the one of ordinary ELAN
+//! code, which the `.ref` file contains in full:
+//! * the strategy `eval:X/strat[X]` (`first(dk(FSYM), dk(DSTR), dk(DK),
+//!   ..., dc(dk(IFO1), dk(IFO2)) ; dk(IFO3))`) and `eval_DK`, `eval_DC`,
+//!   `eval_ONE`, which a `where x := [S]t` calls (the interpreter exports it
+//!   as `where x := (eval) [S]t`);
+//! * the labelled rules of `strat[X]` (`[DK] [dk(SS)]a => b where b :=
+//!   (eval_DK)((SS))a`, `[IF1]`, `[IFO1]`, `[CONST]`, ...) and the rules
+//!   the interpreter generates when loading (`load/msemact.cc`,
+//!   `msemact3.cc`): `[LAB] [l]x => y` for every label `l` used as a
+//!   strategy constant (`[LAB] [inc1]x => x+1`), `[DSTR]` for every
+//!   defined strategy (`[DSTR] [app(s)]x => y where y := (eval)[s]x`),
+//!   `[FSYM]` congruences (`[s1 + s2](a + b) => ...`).
+//!
+//! So the strategy sorts are ordinary sorts here (D2: an enum per sort, a
+//! variant per strategy constructor: `dk`, `dc`, `one`, `id`, `;`, the
+//! labels, the defined strategies, `[@]@`...), and `eval` is an ordinary
+//! named strategy compiled with the combinators of task 1: the results and
+//! their order are the interpreter's by construction. The `[@]@`
+//! application is a constructor of the sort `X` (the interpreter leaves
+//! `[S]t` unevaluated in normal forms, only `eval` applies it). Labelled
+//! rules whose left-hand side has an operator that no term of the program
+//! contains are not compiled (`lower::Lowerer::lhs_possible`): e.g. the
+//! `[TONE]` rule and its traversal `eval_TONE` when no `tone(S)` is built.
+//!
 //! # Normalisation scheme
 //!
 //! Every operator `f` is compiled to a function taking its arguments in
@@ -56,8 +93,6 @@
 //!
 //! # Extension points
 //!
-//! * S6b task 2 (strategy terms built at run time): a strategy sort, terms
-//!   of strategies and their evaluation.
 //! * S6c (AC): [`Repr::Enum`] variants get an AC multiset field, [`Pattern`]
 //!   an AC case, [`Decision`] an AC matching node.
 //! * S6d (query): [`Start`] gets the query variable and the parser tables.

@@ -933,7 +933,10 @@ impl<'a> Emitter<'a> {
                     let ex = self.expr(e, &rule.vars);
                     let bool_sort = self.expr_sort(e, &rule.vars);
                     let t = if self.wrapped(bool_sort) {
-                        format!("!matches!({ex}, Builtin::Val(true))")
+                        format!(
+                            "!matches!({{ let c: {} = {ex}; c }}, Builtin::Val(true))",
+                            self.ty(bool_sort)
+                        )
                     } else {
                         format!("!{ex}")
                     };

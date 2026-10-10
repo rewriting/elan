@@ -30,13 +30,18 @@
 //!    rule name, in source order, a decision tree over the whole
 //!    left-hand side), and which of them give at most one result
 //!    (greatest fixpoint, [`crate::ir::strategy_det`]).
+//!    Strategy terms (`strat[X]`) need nothing more: their sorts are
+//!    ordinary sorts, their evaluation the rules and strategies of
+//!    `strat[X]` in the `.ref` file (see [`crate::ir`], "Strategy terms");
+//!    labelled rules are reached when their left-hand side can match
+//!    ([`Lowerer::lhs_possible`]).
 
 use std::collections::{BTreeMap, HashMap, HashSet};
 use std::fmt;
 
 use elan_ref::{
-    DefStrat, Lexem, Program, Rule, RuleBody, RuleNameIndex, SortIndex, StrategyExpr,
-    StrategyNameIndex, SymbolCode, Term, Where,
+    Lexem, Program, Rule, RuleBody, RuleNameIndex, SortIndex, StrategyExpr, StrategyNameIndex,
+    SymbolCode, Term, Where,
 };
 
 use crate::ir::*;
@@ -72,17 +77,25 @@ fn unsupported(stage: &'static str, what: impl Into<String>) -> Error {
     }
 }
 
+/// Comment of a rule not compiled by [`Lowerer::lhs_possible`].
+const NEVER_BUILT: &str =
+    "(never applies: no term of the program has an operator of its left-hand side)";
+
 /// The symbol code of a strategy call in a term (`Call`, `term/codes.h`).
 const CALL_SYMBOL: SymbolCode = 144;
 
 /// The stage of the strategy terms built at run time.
 const RUNTIME_STRATEGIES: &str = "S6b task 2";
 
-/// Is this the name of a strategy sort (`<int>`, `<int->int>`)? Its terms
-/// are strategies built at run time (`strat[X]`, defined strategies with
-/// parameters, `call "name":X`).
-fn strategy_sort(name: &str) -> bool {
-    name.starts_with('<') && name.ends_with('>')
+/// Does a semantic code make an operator a builtin operation? The codes
+/// of the strategy constructors of `strsig[X,Y]`/`strat[X]` (`code -180`
+/// .. `-190`, `-205` .. `-208`, `DS_*` in `term/codes.h`) do not: the
+/// interpreter has no reduction for them (`standardreduction`,
+/// `rewrite/rtmisc.cc`, `default: return(0)`), its strategy terms are
+/// evaluated by the rules of `strat[X]` (see [`crate::ir`]); they are
+/// constructors.
+fn builtin_semantic(code: i32) -> bool {
+    code != 0 && !matches!(code.abs(), 179..=190 | 205..=208)
 }
 
 /// An operator profile of the `.ref` file (a candidate when typing).
@@ -93,7 +106,6 @@ struct Cand {
     result: SortIndex,
     semantic: i32,
     infos: i32,
-    defstrat: DefStrat,
     /// The lexems of the first grammar rule of this profile (declaration).
     decl: Vec<Lexem>,
 }
@@ -188,7 +200,6 @@ impl<'p> Lowerer<'p> {
                 result: g.sort,
                 semantic: o.semantic,
                 infos: o.infos,
-                defstrat: o.defstrat,
                 decl: o.rhs.clone(),
             });
         }
@@ -400,6 +411,14 @@ impl<'p> Lowerer<'p> {
                 self.expand_label(l, &mut reach)
             } else if let Some(s) = reach.strategies_todo.pop() {
                 self.expand_strategy(s, &mut reach)
+            } else if let Some(i) = reach
+                .pending
+                .iter()
+                .position(|p| self.lhs_possible(&p.lhs, &reach))
+            {
+                // a rule whose left-hand side has become possible
+                let p = reach.pending.swap_remove(i);
+                self.accept_rule(p.rule, &p.lhs, &p.ctx, &mut reach)
             } else {
                 break;
             };
@@ -418,12 +437,6 @@ impl<'p> Lowerer<'p> {
         }
         for &s in &reach.sorts {
             let n = self.sort_name(s);
-            if strategy_sort(&n) {
-                return Err(unsupported(
-                    RUNTIME_STRATEGIES,
-                    format!("strategy terms built at run time (sort {n})"),
-                ));
-            }
             if n == "ident" || n.starts_with("intern ") {
                 return Err(unsupported("S6d", format!("builtin sort {n}")));
             }
@@ -454,20 +467,11 @@ impl<'p> Lowerer<'p> {
     }
 
     /// A newly reached operator: check it, then reach what its rules use.
-    fn expand(&self, c: usize, r: &mut Reach) -> Result<(), Error> {
+    fn expand(&self, c: usize, r: &mut Reach<'p>) -> Result<(), Error> {
         let cand = &self.cands[c];
         r.sorts.insert(cand.result);
         r.sorts.extend(cand.args.iter().copied());
         let decl = || self.cand_decl(cand);
-        if std::iter::once(&cand.result)
-            .chain(&cand.args)
-            .any(|&s| strategy_sort(&self.sort_name(s)))
-        {
-            return Err(unsupported(
-                RUNTIME_STRATEGIES,
-                format!("strategy terms built at run time ({})", decl()),
-            ));
-        }
         match cand.infos {
             0 => {}
             2 => return Err(unsupported("S6c", format!("AC operator {}", decl()))),
@@ -477,12 +481,6 @@ impl<'p> Lowerer<'p> {
                     format!("commutative operator {}", decl()),
                 ))
             }
-        }
-        if cand.defstrat != DefStrat::None {
-            return Err(unsupported(
-                RUNTIME_STRATEGIES,
-                format!("operator with a default strategy {}", decl()),
-            ));
         }
         if Some(cand.result) == self.bool_sort {
             // `true` and `false` are values of every bool computation
@@ -497,7 +495,7 @@ impl<'p> Lowerer<'p> {
             }
         }
         let rules = self.rules_of(c)?;
-        if cand.semantic != 0 {
+        if builtin_semantic(cand.semantic) {
             let code = cand.semantic.abs();
             if BuiltinOp::from_code(code).is_none() {
                 return Err(unsupported(
@@ -515,14 +513,73 @@ impl<'p> Lowerer<'p> {
         }
         let ctx = format!("rule for {}", decl());
         for (rule, lhs) in rules {
-            self.check_rule(rule)?;
-            self.visit_rule(rule, &lhs, &ctx, r)?;
+            self.accept_rule(rule, &lhs, &ctx, r)?;
         }
         Ok(())
     }
 
-    /// Reach what a rule uses (its left-hand side `lhs` is typed).
-    fn visit_rule(&self, rule: &Rule, lhs: &TT, ctx: &str, r: &mut Reach) -> Result<(), Error> {
+    /// An operator that can be at the top of a term without being built by
+    /// an expression of the program: an injection of a builtin sort (the
+    /// values of the builtin operations), `true` and `false` (the results
+    /// of the comparisons). Conservative: keeping a rule is always correct.
+    fn always_possible(&self, c: usize) -> bool {
+        let k = &self.cands[c];
+        let builtin = |s: SortIndex| builtin_kind(&self.sort_name(s)).is_some();
+        (k.args.len() == 1 && builtin(k.args[0]) && !builtin(k.result))
+            || (k.args.is_empty()
+                && (k.symbol == 0 || k.symbol == 1)
+                && Some(k.result) == self.bool_sort)
+    }
+
+    /// Can the left-hand side `lhs` of a labelled rule match a term of the
+    /// program? Each of its operators must be reached by an expression or
+    /// by the left-hand side of an unlabelled rule (or be [always
+    /// possible](Self::always_possible)): the terms of a compiled program
+    /// are built by its start term and by the right-hand sides and
+    /// conditions of the reachable rules (the query is not read, S6d; when
+    /// it is, the operators of the query's grammar will count as built). A
+    /// labelled rule whose left-hand side has an operator that no term
+    /// contains never applies; it is not compiled and what it uses is not
+    /// reached. This keeps out, e.g., the `[TONE] [tone(S)]a => ...` rule
+    /// of `strat[X]` (the traversal `tone` is S6d) when no strategy term
+    /// `tone(...)` is built, and the congruence rules `[FSYM]` of the
+    /// operators never applied to strategies. (Unlabelled rules are all
+    /// reached with their operator, as in S6a: conservative.)
+    fn lhs_possible(&self, lhs: &TT, r: &Reach) -> bool {
+        match lhs {
+            TT::Op(c, args) => {
+                (r.seen.contains(c) || self.always_possible(*c))
+                    && args.iter().all(|a| self.lhs_possible(a, r))
+            }
+            _ => true,
+        }
+    }
+
+    /// A labelled rule of a reached label: reached now if its left-hand
+    /// side can match, else kept pending until it can.
+    fn visit_rule(
+        &self,
+        rule: &'p Rule,
+        lhs: TT,
+        ctx: &str,
+        r: &mut Reach<'p>,
+    ) -> Result<(), Error> {
+        if self.lhs_possible(&lhs, r) {
+            self.accept_rule(rule, &lhs, ctx, r)
+        } else {
+            r.pending.push(Pending {
+                rule,
+                lhs,
+                ctx: ctx.to_string(),
+            });
+            Ok(())
+        }
+    }
+
+    /// Reach what a rule uses (its left-hand side `lhs` is typed and can
+    /// match).
+    fn accept_rule(&self, rule: &Rule, lhs: &TT, ctx: &str, r: &mut Reach) -> Result<(), Error> {
+        self.check_rule(rule)?;
         self.visit(lhs, r);
         if contains_evar(lhs) {
             return Ok(());
@@ -577,13 +634,12 @@ impl<'p> Lowerer<'p> {
     }
 
     /// A newly reached label: its rules.
-    fn expand_label(&self, l: RuleNameIndex, r: &mut Reach) -> Result<(), Error> {
+    fn expand_label(&self, l: RuleNameIndex, r: &mut Reach<'p>) -> Result<(), Error> {
         let ctx = format!("rule {}", self.label_name(l));
         for &rule in self.label_rules(l) {
-            self.check_rule(rule)?;
             r.sorts.insert(rule.sort);
             let lhs = self.type_top(&rule.lhs, Some(rule.sort), &ctx)?;
-            self.visit_rule(rule, &lhs, &ctx, r)?;
+            self.visit_rule(rule, lhs, &ctx, r)?;
         }
         Ok(())
     }
@@ -595,20 +651,6 @@ impl<'p> Lowerer<'p> {
             .p
             .strategy(s)
             .ok_or_else(|| Error::Invalid(format!("strategy {name} is not defined")))?;
-        let module = self.p.module(def.module).unwrap_or("");
-        if module.starts_with("strat[") {
-            return Err(unsupported(
-                RUNTIME_STRATEGIES,
-                format!("strategy terms evaluated at run time ({name}, module {module})"),
-            ));
-        }
-        let sort = self.sort_name(def.sort);
-        if strategy_sort(&sort) {
-            return Err(unsupported(
-                RUNTIME_STRATEGIES,
-                format!("strategy {name} on strategy terms (sort {sort})"),
-            ));
-        }
         r.sorts.insert(def.sort);
         self.visit_seq(&def.body, def.sort, &name, r)
     }
@@ -733,13 +775,11 @@ impl<'p> Lowerer<'p> {
             None => Err(Error::Invalid(format!(
                 "strategy {name} is not defined ({ctx})"
             ))),
-            Some(d) if d.sort != sort && !strategy_sort(&self.sort_name(d.sort)) => {
-                Err(Error::Invalid(format!(
-                    "strategy {name} of sort {} applied to a term of sort {} ({ctx})",
-                    self.sort_name(d.sort),
-                    self.sort_name(sort)
-                )))
-            }
+            Some(d) if d.sort != sort => Err(Error::Invalid(format!(
+                "strategy {name} of sort {} applied to a term of sort {} ({ctx})",
+                self.sort_name(d.sort),
+                self.sort_name(sort)
+            ))),
             Some(_) => Ok(()),
         }
     }
@@ -804,8 +844,17 @@ fn contains_evar(t: &TT) -> bool {
     }
 }
 
+/// A rule whose left-hand side cannot match yet (see
+/// [`Lowerer::lhs_possible`]).
+struct Pending<'p> {
+    rule: &'p Rule,
+    lhs: TT,
+    ctx: String,
+}
+
 #[derive(Default)]
-struct Reach {
+struct Reach<'p> {
+    pending: Vec<Pending<'p>>,
     cands: Vec<usize>,
     seen: HashSet<usize>,
     todo: Vec<usize>,
@@ -816,7 +865,7 @@ struct Reach {
     strategies_todo: Vec<StrategyNameIndex>,
 }
 
-impl Reach {
+impl<'p> Reach<'p> {
     fn reach(&mut self, c: usize) {
         if self.seen.insert(c) {
             self.cands.push(c);
@@ -855,7 +904,7 @@ enum PreKind {
 
 struct Builder<'a, 'p> {
     l: &'a Lowerer<'p>,
-    reach: Reach,
+    reach: Reach<'p>,
     /// candidate -> op id
     op_of: HashMap<usize, OpId>,
     /// sort index -> sort id
@@ -867,7 +916,7 @@ struct Builder<'a, 'p> {
 }
 
 impl<'a, 'p> Builder<'a, 'p> {
-    fn new(l: &'a Lowerer<'p>, reach: Reach) -> Self {
+    fn new(l: &'a Lowerer<'p>, reach: Reach<'p>) -> Self {
         let mut labels = reach.labels.clone();
         labels.sort_unstable();
         let mut strategies = reach.strategies.clone();
@@ -937,7 +986,7 @@ impl<'a, 'p> Builder<'a, 'p> {
             let k = &l.cands[c];
             let rules = l.rules_of(c)?;
             has_rules.push(!rules.is_empty());
-            let p = if k.semantic != 0 {
+            let p = if builtin_semantic(k.semantic) {
                 PreKind::Builtin(BuiltinOp::from_code(k.semantic.abs()).unwrap())
             } else if !rules.is_empty() {
                 PreKind::Defined
@@ -1189,6 +1238,10 @@ impl<'a, 'p> Builder<'a, 'p> {
                 let ctx = format!("rule {name}");
                 let lhs = l.type_top(&r.lhs, Some(r.sort), &ctx)?;
                 let mut rl = RuleLowerer::new(self, r);
+                if !l.lhs_possible(&lhs, &self.reach) {
+                    skipped.push(format!("[{base}] {} {NEVER_BUILT}", rl.render_tt(&lhs)));
+                    continue;
+                }
                 match rl.rule(&lhs, true)? {
                     Some(mut ir) => {
                         ir.text = format!("[{base}] {}", ir.text.trim_start_matches("[] "));

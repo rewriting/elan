@@ -385,7 +385,8 @@ fn unsupported_constructs_are_refused_when_reachable() {
         p.lower(),
         Err(Error::Unsupported { stage: "S6d", .. })
     ));
-    // a traversal (S6d), the strategy interpreter strat[X] (S6b task 2)
+    // a traversal (S6d); a strategy of the strategy interpreter strat[X]
+    // is compiled as any other (S6b task 2)
     let mut p = peano();
     p.0.query.strategy = Some(3);
     p.strategy(3, vec![StrategyExpr::TAll(vec![StrategyExpr::Id])]);
@@ -400,13 +401,7 @@ fn unsupported_constructs_are_refused_when_reachable() {
         name: "strat[nat]".into(),
     });
     p.0.strategies[0].module = 2;
-    assert!(matches!(
-        p.lower(),
-        Err(Error::Unsupported {
-            stage: "S6b task 2",
-            ..
-        })
-    ));
+    assert!(p.lower().is_ok());
 }
 
 impl P {
@@ -560,4 +555,49 @@ fn a_rule_that_types_to_no_profile_is_an_error() {
         Err(Error::Invalid(m)) => assert!(m.contains("cannot type") && m.contains("plus"), "{m}"),
         r => panic!("the rule must not be dropped silently: {r:?}"),
     }
+}
+
+/// A labelled rule whose left-hand side has an operator that no term of
+/// the program contains is not compiled, and what only it uses is not
+/// reached (strat[X]: the `[TONE]` rule and its traversal); it is compiled
+/// when the operator is built. The codes of the strategy constructors of
+/// strsig/strat (`code -180`..) make constructors, not builtins.
+#[test]
+fn labelled_rules_need_their_operators() {
+    let mut p = peano();
+    p.op(NAT, 321, "a", &[], 0, 0);
+    p.op(NAT, 322, "b", &[NAT], -205, 0); // as tone(@): code -205
+                                          // [r7] b(x) => x where y := (st4) x     [r7] x => s(x)
+                                          // st3 = dk(r7)    st4 = tall(id)        start: (st3) a
+    p.labelled(
+        7,
+        2,
+        f(322, vec![v(0, NAT)]),
+        v(0, NAT),
+        vec![Where::Assign {
+            lhs: v(1, NAT),
+            strategy: Some(4),
+            rhs: v(0, NAT),
+        }],
+    );
+    p.labelled(7, 1, v(0, NAT), f(319, vec![v(0, NAT)]), vec![]);
+    p.strategy(3, vec![StrategyExpr::DkRules(vec![7])]);
+    p.strategy(4, vec![StrategyExpr::TAll(vec![StrategyExpr::Id])]);
+    p.0.query.strategy = Some(3);
+    p.start(f(321, vec![]), NAT);
+    let ir = p.lower().unwrap();
+    assert_eq!(ir.labels[0].rules.len(), 1, "{:?}", ir.labels[0].skipped);
+    assert!(ir.labels[0].skipped[0].contains("never applies"));
+    assert!(ir.ops.iter().all(|o| o.name != "b"));
+    assert_eq!(ir.strategies.len(), 1);
+    // b built by the start term: the rule and the traversal are reached
+    p.start(f(322, vec![f(321, vec![])]), NAT);
+    match p.lower() {
+        Err(Error::Unsupported { stage: "S6d", what }) => assert!(what.contains("tall"), "{what}"),
+        r => panic!("{r:?}"),
+    }
+    p.0.strategies[1].body = vec![StrategyExpr::Id];
+    let ir = p.lower().unwrap();
+    assert_eq!(ir.labels[0].rules.len(), 2);
+    assert!(matches!(op_named(&ir, "b").kind, OpKind::Constructor));
 }
