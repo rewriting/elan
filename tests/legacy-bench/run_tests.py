@@ -15,6 +15,9 @@ Test kinds (same semantics as the original scripts):
               (-noInput = evaluate the compiled `start with` query; it was the default
               when the reference outputs were produced)
   JO jtest  : same with -optimiseChoicePoint (second half of the original jtest)
+  R  jtest  : elanc-rs (Rust compiler, spec S6) LGI [SPC]; a.out -noInput -quiet,
+              rewrite_step lines ignored; UNSUPPORTED when elanc-rs refuses (exit 2).
+              Not in the default kinds.
 
 ctest/actest/cctest (old C compiler) and pitest/pevaltest (partial evaluator)
 have no script anymore and are not replayed.
@@ -53,7 +56,7 @@ EXCEPTIONS = HERE / "platform-exceptions.tsv"
 # Directories whose tst_all files are harvested
 SUITES = [ELAN3 / "applications", ELAN3 / "contributions", ROOT / "elan" / "sources"]
 
-KIND_OF_CMD = {"itest": ["I"], "aitest": ["A"], "jtest": ["J", "JO"]}
+KIND_OF_CMD = {"itest": ["I"], "aitest": ["A"], "jtest": ["J", "JO", "R"]}
 
 
 def env():
@@ -232,6 +235,13 @@ def run_test(t, timeout):
             if rc != 0:
                 return "ERROR", f"export rc={rc}\n{e1[-2000:]}", o1
             rc, out, err = run(["elan", "-b", "--import", f"{t['lgi']}.ref"], wd, inp, timeout)
+        elif k == "R":   # elanc-rs (spec S6); only with --kinds R
+            rc, o1, e1 = run(["elanc-rs", "-b", *flags, t["lgi"], *spc], wd, None, timeout * 3)
+            if rc == 2:
+                return "UNSUPPORTED", (o1 + e1)[-1500:], ""
+            if rc != 0 or not (wd / "a.out").exists():
+                return "ERROR", f"elanc-rs rc={rc}\n{o1[-1500:]}\n{e1[-1500:]}", ""
+            rc, out, err = run(["./a.out", "-noInput", "-quiet"], wd, None, timeout)
         else:  # J, JO
             opts = ["-b", "-nosplit", "-quiet"] + (["-optimiseChoicePoint"] if k == "JO" else [])
             rc, o1, e1 = run(["elanc", *opts, *flags, t["lgi"], *spc], wd, None, timeout)
@@ -245,6 +255,8 @@ def run_test(t, timeout):
         if sanitizer_report(err):
             return "SANITIZER", f"{sanitizer_report(err)}\n{err[-4000:]}", out
         exp = expected.read_text(encoding="latin-1", errors="replace")
+        if k == "R":   # rewrite_step counts depend on the compilation scheme
+            out, exp = REWRITE_STEP.sub("", out), REWRITE_STEP.sub("", exp)
         if out == exp:
             return "PASS", "", out
         if norm(out) == norm(exp):
@@ -269,6 +281,7 @@ def safe(tid):
     return re.sub(r"[^A-Za-z0-9_.-]+", "_", tid) + "-" + h
 
 
+REWRITE_STEP = re.compile(r"^rewrite_step = \d+\n", re.M)
 STATS = re.compile(r"^\s*(rewrite_step|total time|average speed|nb_|time)\b.*$", re.M)
 ATOM = re.compile(r"[A-Za-z_][A-Za-z0-9_']*|-?\d+|\"[^\"]*\"")  # 5.7.nil is a list, not 5.7
 
