@@ -100,6 +100,19 @@ class RustCompilerKindTest(unittest.TestCase):
         self.assertTrue(rt.compares_snapshot({"kind": "J"}, "ERROR"))
         self.assertFalse(rt.compares_snapshot({"kind": "I"}, "MODERN-ONLY"))
 
+    def test_g_case_uses_the_j_snapshot_like_r(self):
+        t = {"id": "x/Test::G::p:no:-:p", "kind": "G"}
+        self.assertEqual(rt.snapshot_id(t), "x/Test::J::p:no:-:p")
+        snap = "\nresult = s(o)\n\nrewrite_step = 12\n"
+        self.assertEqual(rt.snapshot_text(t, snap), "\nresult = s(o)\n\n")
+        self.assertTrue(rt.compares_snapshot(t, "PASS"))
+        self.assertFalse(rt.compares_snapshot(t, "UNSUPPORTED"))
+        self.assertEqual(rt.COMPILER_KINDS["G"], "elanc-go")
+        self.assertEqual(rt.COMPILER_KINDS["R"], "elanc-rs")
+
+    def test_elanc_go_cache_is_in_the_work_directory(self):
+        self.assertEqual(Path(rt.env()["ELANC_GO_CACHE"]), rt.WORK / "elanc-go-cache")
+
     def test_elanc_rs_target_dir_is_in_the_work_directory(self):
         e = rt.env()
         self.assertEqual(Path(e["ELANC_RS_TARGET_DIR"]), rt.WORK / "elanc-rs-target")

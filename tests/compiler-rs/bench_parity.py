@@ -10,7 +10,10 @@ fails when:
 - a case recorded in bench_r_expected.tsv (the R cases elanc-rs compiles,
   with their status) has a worse status, e.g. becomes UNSUPPORTED.
 UNSUPPORTED cases not recorded (refused until S6b-S6d) are counted only.
-Usage: bench_parity.py PREFIX [--save]   (--save rewrites bench_r_expected.tsv)
+Usage: bench_parity.py PREFIX [--kind R|G] [--save]
+       --kind R (default): elanc-rs, expected cases in bench_r_expected.tsv;
+       --kind G: elanc-go, expected cases in bench_g_expected.tsv;
+       --save rewrites the expected file of the kind.
 """
 import re, subprocess, sys
 from collections import Counter
@@ -18,13 +21,19 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]
 BENCH = REPO / "tests" / "legacy-bench"
-EXPECTED = Path(__file__).resolve().parent / "bench_r_expected.tsv"
+HERE = Path(__file__).resolve().parent
 RANK = {"PASS": 0, "PASS~": 1, "PASS≈": 2, "FAIL": 3, "ERROR": 4, "TIMEOUT": 5,
         "SANITIZER": 6}
 
 def main():
     prefix = sys.argv[1]
     save = "--save" in sys.argv[2:]
+    kind = "R"
+    if "--kind" in sys.argv[2:]:
+        kind = sys.argv[sys.argv.index("--kind") + 1]
+    if kind not in ("R", "G"):
+        sys.exit(f"bench_parity.py: unknown kind {kind}")
+    EXPECTED = HERE / f"bench_{kind.lower()}_expected.tsv"
     base = {}
     for line in (BENCH / "baseline.tsv").read_text().splitlines():
         if line and not line.startswith("#"):
@@ -37,10 +46,10 @@ def main():
                 tid, st = line.split("\t")[:2]
                 expected[tid] = st
     p = subprocess.run([sys.executable, str(BENCH / "run_tests.py"), "--prefix", prefix,
-                        "--kinds", "R"], capture_output=True, text=True)
+                        "--kinds", kind], capture_output=True, text=True)
     counts, problems, got = Counter(), [], {}
     for line in p.stdout.splitlines():
-        m = re.match(r"\[\d+/\d+\]\s+(\S+)\s+(SNAP-\S+\s+)?(\S+::R::\S+)", line)
+        m = re.match(r"\[\d+/\d+\]\s+(\S+)\s+(SNAP-\S+\s+)?(\S+::" + kind + r"::\S+)", line)
         if not m:
             continue
         st, snap, tid = m.group(1), (m.group(2) or "").strip(), m.group(3)
@@ -48,17 +57,17 @@ def main():
         got[tid] = st
         if snap == "SNAP-DIFF":
             problems.append(f"{tid}: output differs from the elanc (J) snapshot")
-        j = base.get(tid.replace("::R::", "::J::"))
+        j = base.get(tid.replace(f"::{kind}::", "::J::"))
         if st in RANK and j in RANK and RANK[st] > RANK[j]:
-            problems.append(f"{tid}: R {st}, J {j}")
+            problems.append(f"{tid}: {kind} {st}, J {j}")
     for tid, st in expected.items():
         now = got.get(tid, "MISSING")
         if RANK.get(now, 99) > RANK.get(st, 99):
             problems.append(f"{tid}: was {st}, now {now}")
-    print("bench R: " + ", ".join(f"{k}={v}" for k, v in sorted(counts.items())))
+    print(f"bench {kind}: " + ", ".join(f"{k}={v}" for k, v in sorted(counts.items())))
     if save:
         rows = sorted((t, s) for t, s in got.items() if s in RANK)
-        EXPECTED.write_text("# R cases compiled by elanc-rs and their status "
+        EXPECTED.write_text(f"# {kind} cases compiled by the new compiler and their status "
                             "(written by bench_parity.py --save)\n"
                             + "".join(f"{t}\t{s}\n" for t, s in rows))
         print(f"saved {len(rows)} cases in {EXPECTED.name}")
