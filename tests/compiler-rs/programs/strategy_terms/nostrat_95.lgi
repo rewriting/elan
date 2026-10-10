@@ -1,0 +1,6 @@
+LPL nostrat_95 description
+  query of sort int
+  result of sort int
+  import st
+  start with () f(g(95),1)
+end

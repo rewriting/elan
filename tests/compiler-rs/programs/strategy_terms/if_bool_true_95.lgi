@@ -1,0 +1,6 @@
+LPL if_bool_true_95 description
+  query of sort int
+  result of sort int
+  import rt
+  start with [if 3 > 2 then inc1 else dbl fi]95
+end

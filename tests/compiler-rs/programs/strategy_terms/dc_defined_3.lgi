@@ -1,0 +1,6 @@
+LPL dc_defined_3 description
+  query of sort int
+  result of sort int
+  import rt
+  start with [app(dc(big, dk(inc1,inc10), dbl))]3
+end

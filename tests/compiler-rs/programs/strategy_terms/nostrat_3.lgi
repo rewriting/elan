@@ -1,0 +1,6 @@
+LPL nostrat_3 description
+  query of sort int
+  result of sort int
+  import st
+  start with () f(g(3),1)
+end

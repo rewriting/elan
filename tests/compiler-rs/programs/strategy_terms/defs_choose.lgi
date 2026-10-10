@@ -1,0 +1,6 @@
+LPL defs_choose description
+  query of sort int
+  result of sort int
+  import defs
+  start with [choose(twice(inc1), upto(2, dbl)) ; big]60
+end

@@ -1,0 +1,6 @@
+LPL one_then_fail_95 description
+  query of sort int
+  result of sort int
+  import rt
+  start with [one(dk(inc1,inc10)) ; big]95
+end

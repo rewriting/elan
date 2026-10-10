@@ -1,0 +1,21 @@
+module rt
+// Rules and a defined strategy used by the run-time strategy tests
+// (tests/compiler/test_runtime_strategies.sh).
+import global strat[int] int; end
+stratop global
+  app(@) : (<int>) <int>;
+end
+rules for int
+n : int;
+global
+  [inc1]  n => n+1  end
+  [inc10] n => n+10 end
+  [dbl]   n => n*2  end
+  [big]   n => n    if n > 100 end
+end
+strategies for int
+s : <int>;
+implicit
+  [] app(s) => s end
+end
+end

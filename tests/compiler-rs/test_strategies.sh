@@ -5,7 +5,14 @@
 # Programs: programs/strategies/<name>.lgi, each with a ground start term
 # `start with (S) t` (or `()` for the normalisation of rules whose `where`s
 # use strategies) and `query of sort bool`; the modules are the .eln files
-# of the directory (all copied next to each program). For each program:
+# of the directory (all copied next to each program). With `-d DIR`, the
+# programs of programs/DIR instead (programs/strategy_terms: strategy terms
+# evaluated at run time, the programs of tests/compiler/programs/
+# runtime_strategies and start_term with the query replaced by 3, 95 and
+# 200, `<case>_<n>.lgi`); the query given to the
+# interpreter is the content of programs/DIR/query when it exists (the
+# start term ignores it, but it must parse), else `true end`. For each
+# program:
 #  - elanc-rs builds it (shared cargo target directory, see TARGET below)
 #    and `./a.out -noInput -quiet` prints one `result = t` line per result;
 #  - the interpreter: `elan -b` with the query `true end` (ignored by the
@@ -20,9 +27,9 @@
 # not run, <name>.no-interpreter why the interpreter is not run.
 # Outputs are compared as bytes (LC_ALL=C).
 #
-# Usage: test_strategies.sh PREFIX [name...]   (an installed ELAN with
-# elanc-rs; the names select programs, default all)
-# The work directory is tests/compiler-rs/work/strategies.XXXXXX (kept,
+# Usage: test_strategies.sh PREFIX [-d DIR] [name...]   (an installed ELAN
+# with elanc-rs; the names select programs, default all)
+# The work directory is tests/compiler-rs/work/DIR.XXXXXX (kept,
 # git-ignored); the cargo target directory is shared between runs:
 # $ELANC_RS_TARGET_DIR, default tests/compiler-rs/work/target. The status is
 # non-zero on any failure.
@@ -31,10 +38,15 @@ PREFIX=$(cd "$PREFIX" && pwd) || exit 2
 HERE=$(cd "$(dirname "$0")" && pwd)
 export ELANLIB=$PREFIX PATH=$PREFIX/bin:$PATH LC_ALL=C
 TARGET=${ELANC_RS_TARGET_DIR:-$HERE/work/target}
-PROGS=$HERE/programs/strategies
+shift
+DIR=strategies
+if [ "$1" = -d ]; then DIR=${2:?-d DIR}; shift 2; fi
+PROGS=$HERE/programs/$DIR
+QUERY='true end'
+[ -f "$PROGS/query" ] && QUERY=$(cat "$PROGS/query")
 
 mkdir -p "$HERE/work" "$TARGET" || exit 2
-RUN=$(mktemp -d "$HERE/work/strategies.XXXXXX") || exit 2
+RUN=$(mktemp -d "$HERE/work/$DIR.XXXXXX") || exit 2
 echo "work directory: $RUN"
 
 HAVE_REM=; command -v elanc >/dev/null 2>&1 && HAVE_REM=1
@@ -42,7 +54,6 @@ fails=0 n=0
 ok()   { echo "ok   $1"; }
 fail() { echo "FAIL $1"; fails=$((fails+1)); }
 
-shift
 selected() {  # selected NAME: NAME is one of the names given
   for s in $SELECTION; do [ "$s" = "$1" ] && return 0; done
   return 1
@@ -79,7 +90,7 @@ for lgi in "$PROGS"/*.lgi; do
   if [ -f "$PROGS/$name.no-interpreter" ]; then
     echo "skip $name vs interpreter ($name.no-interpreter)"
   else
-    iout=$( cd "$d/int" && printf 'true end\n' | elan -b "$name.lgi" 2>&1; echo "status $?" )
+    iout=$( cd "$d/int" && printf '%s\n' "$QUERY" | elan -b "$name.lgi" 2>&1; echo "status $?" )
     istatus=$(printf '%s\n' "$iout" | sed -n 's/^status //p')
     int=$(printf '%s\n' "$iout" | sed -n 's/^ \(.*\) end$/\1/p' | grep -v '^end$')
     a=$(printf '%s\n' "$rs" | sed 's/^result = *//' | tr -d '"' | oneline)

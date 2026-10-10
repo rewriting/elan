@@ -1,0 +1,6 @@
+LPL if_then_fails_95 description
+  query of sort int
+  result of sort int
+  import rt
+  start with [if inc1 then big orelse dbl fi]95
+end

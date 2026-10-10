@@ -1,0 +1,20 @@
+module ift
+// A strategy term with a non-constant condition applied to a non-variable
+// source in a where (tests/compiler/test_runtime_strategies.sh, if_where):
+// building the condition must not overwrite the source.
+import global strat[int] int; end
+operators global
+  h(@) : (int) int;
+  g(@) : (int) int;
+  k(@) : (int) int;
+end
+rules for int
+  n,x,y : int;
+global
+  [inc1] n => n+1 end
+  [dbl]  n => n*2 end
+  []     h(n) => n+1 end
+  []     g(n) => n*10 end
+  []     k(x) => y where y:=(eval)[if h(x) > 2 then inc1 else dbl fi] g(x) end
+end
+end

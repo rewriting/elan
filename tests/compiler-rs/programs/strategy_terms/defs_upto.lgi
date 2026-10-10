@@ -1,0 +1,6 @@
+LPL defs_upto description
+  query of sort int
+  result of sort int
+  import defs
+  start with [upto(3, dk(inc1,dbl))]1
+end

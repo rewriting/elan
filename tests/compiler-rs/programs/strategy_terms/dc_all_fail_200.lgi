@@ -1,0 +1,6 @@
+LPL dc_all_fail_200 description
+  query of sort int
+  result of sort int
+  import rt
+  start with [dc(big, fail)]200
+end

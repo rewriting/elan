@@ -1,0 +1,6 @@
+LPL twice_200 description
+  query of sort int
+  result of sort int
+  import st
+  start with (go) f(200,200)
+end

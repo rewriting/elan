@@ -1,0 +1,6 @@
+LPL defs_return description
+  query of sort int
+  result of sort int
+  import defs
+  start with [dk(return 7, 5, 6, id)]5
+end

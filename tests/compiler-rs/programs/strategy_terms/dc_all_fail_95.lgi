@@ -1,0 +1,6 @@
+LPL dc_all_fail_95 description
+  query of sort int
+  result of sort int
+  import rt
+  start with [dc(big, fail)]95
+end

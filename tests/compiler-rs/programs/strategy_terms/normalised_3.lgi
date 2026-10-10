@@ -1,0 +1,6 @@
+LPL normalised_3 description
+  query of sort int
+  result of sort int
+  import st
+  start with (go) f(g(3),1)
+end

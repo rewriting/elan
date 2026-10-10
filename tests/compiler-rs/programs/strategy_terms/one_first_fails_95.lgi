@@ -1,0 +1,6 @@
+LPL one_first_fails_95 description
+  query of sort int
+  result of sort int
+  import rt
+  start with [one(big, dk(inc1,inc10), dbl)]95
+end

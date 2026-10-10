@@ -1,0 +1,6 @@
+LPL if_else_200 description
+  query of sort int
+  result of sort int
+  import rt
+  start with [if big then inc1 orelse dbl fi]200
+end

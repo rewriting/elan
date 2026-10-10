@@ -1,0 +1,6 @@
+LPL dc_last_95 description
+  query of sort int
+  result of sort int
+  import rt
+  start with [dc(big, big, dbl)]95
+end

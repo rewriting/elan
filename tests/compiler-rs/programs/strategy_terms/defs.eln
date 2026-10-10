@@ -1,0 +1,30 @@
+module defs
+// Defined strategies with parameters (strategies and integers), recursion,
+// conditions, the strategy operators of strat[int] (strategy terms
+// evaluated at run time).
+import global int strat[int]; end
+stratop global
+  twice(@)    : (<int>) <int>;
+  upto(@,@)   : (int <int>) <int>;
+  choose(@,@) : (<int> <int>) <int>;
+  either(@)   : (int) <int>;
+end
+rules for int
+  n : int;
+global
+  [inc1]  n => n+1  end
+  [inc10] n => n+10 end
+  [dbl]   n => n*2  end
+  [big]   n => n    if n > 100 end
+end
+strategies for int
+  s, s2 : <int>;
+  k     : int;
+implicit
+  [] twice(s)     => s ; s end
+  [] upto(k, s)   => s ; upto(k - 1, s) if k > 0 end
+  [] upto(k, s)   => id if k <= 0 end
+  [] choose(s, s2) => dk(s, s2) end
+  [] either(k)    => if k > 2 then inc1 else dk(dbl, inc10) fi end
+end
+end

@@ -1,0 +1,6 @@
+LPL defs_either description
+  query of sort int
+  result of sort int
+  import defs
+  start with [dk(either(1), either(3))]5
+end

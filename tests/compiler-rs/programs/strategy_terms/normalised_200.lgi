@@ -1,0 +1,6 @@
+LPL normalised_200 description
+  query of sort int
+  result of sort int
+  import st
+  start with (go) f(g(200),1)
+end

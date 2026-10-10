@@ -1,0 +1,6 @@
+LPL defs_twice description
+  query of sort int
+  result of sort int
+  import defs
+  start with [twice(dk(inc1,inc10))]1
+end

@@ -1,0 +1,6 @@
+LPL if_where_3 description
+  query of sort int
+  result of sort int
+  import ift
+  start with [id]k(3)
+end

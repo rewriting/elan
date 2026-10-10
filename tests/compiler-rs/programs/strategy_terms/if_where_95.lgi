@@ -1,0 +1,6 @@
+LPL if_where_95 description
+  query of sort int
+  result of sort int
+  import ift
+  start with [id]k(95)
+end
