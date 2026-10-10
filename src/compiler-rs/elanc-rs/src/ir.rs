@@ -757,6 +757,90 @@ impl Ir {
     }
 }
 
+impl Ir {
+    /// The named strategies that give at least one result whenever they
+    /// terminate (`id`, `repeat*`, `iterate*`, a choice with such an
+    /// alternative, sequences of these; least fixpoint over the calls).
+    pub fn total_strategies(&self) -> Vec<bool> {
+        fn total(s: &Strategy, tot: &[bool]) -> bool {
+            match s {
+                Strategy::Id | Strategy::Repeat(_) | Strategy::Iterate(_) => true,
+                Strategy::Fail | Strategy::Rules { .. } | Strategy::Meta => false,
+                Strategy::Strats { alts, .. } => {
+                    alts.iter().any(|a| a.iter().all(|s| total(s, tot)))
+                }
+                Strategy::Call(c) => tot[*c],
+            }
+        }
+        let mut tot = vec![false; self.strategies.len()];
+        loop {
+            let mut changed = false;
+            for (i, st) in self.strategies.iter().enumerate() {
+                if !tot[i] && st.body.iter().all(|s| total(s, &tot)) {
+                    tot[i] = true;
+                    changed = true;
+                }
+            }
+            if !changed {
+                return tot;
+            }
+        }
+    }
+
+    /// The calls of strategy `me` to itself in tail position, when `me` is
+    /// deterministic: its function can then be a loop (spec D3) where such
+    /// a call on `r` replaces the term by `r` and starts again, the stack
+    /// staying flat (`s => first(step ; s, id)` run 10^6 times). A call is
+    /// in tail position when the result of the body is then the result of
+    /// the call: it ends the body, or the last sequence of a `DC`/`ONE`
+    /// alternative (or of a `DK` of one alternative) in tail position,
+    /// what comes before it in its sequence giving at most one result; in
+    /// an alternative that is not the last one, only if `me` always has a
+    /// result (`total`, [`Ir::total_strategies`]): else its failure would
+    /// let the next alternatives run. The nodes are returned by address
+    /// (the emitter recognises them while it walks the same body).
+    pub fn tail_calls(&self, me: StratId, total: &[bool]) -> Vec<*const Strategy> {
+        let mut out = Vec::new();
+        if self.strategies[me].det {
+            self.tail_seq(me, total[me], &self.strategies[me].body, &mut out);
+        }
+        out
+    }
+
+    fn tail_seq(
+        &self,
+        me: StratId,
+        me_total: bool,
+        seq: &[Strategy],
+        out: &mut Vec<*const Strategy>,
+    ) {
+        let Some((last, prefix)) = seq.split_last() else {
+            return;
+        };
+        if !self.seq_det(prefix) {
+            return;
+        }
+        match last {
+            Strategy::Call(c) if *c == me => out.push(last as *const Strategy),
+            Strategy::Strats {
+                choice: Choice::Dc | Choice::One,
+                alts,
+            } => {
+                for (i, a) in alts.iter().enumerate() {
+                    if i + 1 == alts.len() || me_total {
+                        self.tail_seq(me, me_total, a, out);
+                    }
+                }
+            }
+            Strategy::Strats {
+                choice: Choice::Dk,
+                alts,
+            } if alts.len() == 1 => self.tail_seq(me, me_total, &alts[0], out),
+            _ => {}
+        }
+    }
+}
+
 /// Does `s` give at most one result, given the determinism of the rules
 /// of each label, their number and the determinism of the named
 /// strategies? (Used by [`crate::lower`] during its fixpoint and by

@@ -23,9 +23,11 @@
 //! * per named strategy: `pub fn st_name(t: &T, k: K<T>) -> bool`, its
 //!   body inlined (`dk` as `||` of the alternatives, a sequence as nested
 //!   continuations, `dc`/`DC` with a "found" flag, `one`/`ONE` keeping the
-//!   first result, `repeat*` of a deterministic strategy as a loop, the
-//!   other `repeat*`/`iterate*` through the runtime combinators with an
-//!   auxiliary function for their body);
+//!   first result, `repeat*` and `iterate*` of a deterministic strategy
+//!   as loops, the other `repeat*`/`iterate*` through the runtime
+//!   combinators with an auxiliary function for their body; a
+//!   deterministic strategy calling itself in tail position as a loop,
+//!   [`Ir::tail_calls`]);
 //! * the functions that can recurse (strategies, labels, the
 //!   normalisation of the operators of a cycle, [`Ir::recursive_ops`])
 //!   start with `elan_runtime::guard()`: past a stack depth the program
@@ -217,6 +219,12 @@ struct Emitter<'a> {
     /// The operators whose normalisation checks the stack
     /// ([`Ir::recursive_ops`]).
     recursive: Vec<bool>,
+    /// The named strategies that always have a result
+    /// ([`Ir::total_strategies`]).
+    total: Vec<bool>,
+    /// While emitting a tail-recursive strategy as a loop: its calls in
+    /// tail position ([`Ir::tail_calls`]), which set the next term.
+    tail_nodes: Vec<*const Strategy>,
 }
 
 impl<'a> Emitter<'a> {
@@ -233,6 +241,8 @@ impl<'a> Emitter<'a> {
             aux_n: 0,
             meta_sorts: Vec::new(),
             recursive: ir.recursive_ops(),
+            total: ir.total_strategies(),
+            tail_nodes: Vec::new(),
         }
     }
 
@@ -1138,16 +1148,27 @@ impl<'a> Emitter<'a> {
         self.out
             .line("// ==== strategies =================================================");
         self.out.line("");
-        for st in &ir.strategies {
+        for (i, st) in ir.strategies.iter().enumerate() {
             self.fresh = 0;
             self.aux_n = 0;
             let text = self.seq_text(&st.body);
+            self.tail_nodes = ir.tail_calls(i, &self.total);
             self.out.line(&format!(
-                "/// Strategy {}: {text}{}",
+                "/// Strategy {}: {text}{}{}",
                 st.name,
-                if st.det { " (at most one result)" } else { "" }
+                if st.det { " (at most one result)" } else { "" },
+                if self.tail_nodes.is_empty() {
+                    ""
+                } else {
+                    " (tail-recursive: a loop)"
+                }
             ));
-            self.strategy_fn(&st.fun, st.sort, &st.body);
+            if self.tail_nodes.is_empty() {
+                self.strategy_fn(&st.fun, st.sort, &st.body);
+            } else {
+                self.loop_strategy_fn(&st.fun, st.sort, &st.body);
+                self.tail_nodes.clear();
+            }
             let mut n = 0;
             while !self.aux.is_empty() {
                 let (fun, sort, body) = self.aux.remove(0);
@@ -1168,6 +1189,41 @@ impl<'a> Emitter<'a> {
         for l in code.lines() {
             self.out.line(l);
         }
+        self.out.close("}");
+        self.out.line("");
+    }
+
+    /// A deterministic strategy whose calls to itself in tail position
+    /// ([`Ir::tail_calls`]) restart a loop on their term instead of
+    /// recursing: the body runs on `cur`; its result (at most one) stops
+    /// it, as does a tail call, which sets the next term.
+    fn loop_strategy_fn(&mut self, fun: &str, sort: SortId, body: &[Strategy]) {
+        let ty = self.ty(sort);
+        self.out
+            .open(&format!("pub fn {fun}(t: &{ty}, k: K<{ty}>) -> bool {{"));
+        self.out.line("elan_runtime::guard();");
+        self.out.line(&format!("let mut cur: {ty} = t.clone();"));
+        self.out.open("loop {");
+        self.out.line(&format!(
+            "let tail: std::cell::Cell<Option<{ty}>> = std::cell::Cell::new(None);"
+        ));
+        self.out.line(&format!("let mut res: Option<{ty}> = None;"));
+        self.out.open("{");
+        self.out.line("let c = &cur;");
+        self.out.line(&format!(
+            "let kr: K<{ty}> = &mut |r: &{ty}| -> bool {{ res = Some(r.clone()); true }};"
+        ));
+        let code = format!("let _ = {};", self.seq_code(fun, body, sort, "c", "kr"));
+        for l in code.lines() {
+            self.out.line(l);
+        }
+        self.out.close("}");
+        self.out.open("match tail.take() {");
+        self.out.line("Some(n) => cur = n,");
+        self.out
+            .line("None => return match res { Some(r) => k(&r), None => false },");
+        self.out.close("}");
+        self.out.close("}");
         self.out.close("}");
         self.out.line("");
     }
@@ -1246,6 +1302,10 @@ impl<'a> Emitter<'a> {
         match s {
             Strategy::Id => format!("{k}({t})"),
             Strategy::Fail => "false".to_string(),
+            Strategy::Call(_) if self.tail_nodes.contains(&(s as *const Strategy)) => {
+                // a tail call of the strategy emitted as a loop: next term
+                format!("{{ tail.set(Some({t}.clone())); true }}")
+            }
             Strategy::Call(c) => format!("{}({t}, {k})", self.ir.strategies[*c].fun),
             Strategy::Meta => {
                 if !self.meta_sorts.contains(&sort) {
@@ -1345,6 +1405,30 @@ impl<'a> Emitter<'a> {
             Strategy::Repeat(b) => {
                 let aux = self.aux_fn(owner, sort, b);
                 format!("strat::repeat_star({t}, {k}, &{aux})")
+            }
+            Strategy::Iterate(b) if self.ir.seq_det(b) => {
+                // a deterministic step: a loop (no stack growth); each
+                // term is passed to k before the next step
+                let cur = format!("cur{}", self.next());
+                let next = format!("next{}", self.next());
+                let c = format!("c{}", self.next());
+                let kn = format!("k{}", self.next());
+                let r = format!("r{}", self.next());
+                let step = self.seq_code(owner, b, sort, &c, &kn);
+                format!(
+                    "{{\n// iterate* of a deterministic strategy: a loop\n\
+                     let mut {cur}: {ty} = {t}.clone();\n\
+                     loop {{\n\
+                     if {k}(&{cur}) {{ break true; }}\n\
+                     let mut {next}: Option<{ty}> = None;\n\
+                     {{\n\
+                     let {c} = &{cur};\n\
+                     let {kn}: K<{ty}> = &mut |{r}: &{ty}| -> bool {{ {next} = Some({r}.clone()); true }};\n\
+                     let _ = {step};\n\
+                     }}\n\
+                     match {next} {{ Some(n) => {cur} = n, None => break false }}\n\
+                     }}\n}}"
+                )
             }
             Strategy::Iterate(b) => {
                 let aux = self.aux_fn(owner, sort, b);
@@ -1710,16 +1794,21 @@ impl<'a> Emitter<'a> {
     }
 
     /// The first result of `code` (an expression passing its results to
-    /// `ko`), passed to `k` (`one`, `ONE`).
+    /// `ko`), passed to `k` (`one`, `ONE`). Without a result, the stop of
+    /// `code` is returned: only a tail call of a strategy emitted as a
+    /// loop stops without passing through `ko` (the next term is set; the
+    /// alternatives after this one must not run).
     fn one_code(&mut self, ty: &str, k: &str, ko: &str, code: &str) -> String {
         let res = format!("res{}", self.next());
+        let stop = format!("stop{}", self.next());
         format!(
             "{{\nlet mut {res}: Option<{ty}> = None;\n\
+             let {stop}: bool;\n\
              {{\n\
              let {ko}: K<{ty}> = &mut |r: &{ty}| -> bool {{ {res} = Some(r.clone()); true }};\n\
-             let _ = {code};\n\
+             {stop} = {code};\n\
              }}\n\
-             match {res} {{ Some(r) => {k}(&r), None => false }}\n}}"
+             match {res} {{ Some(r) => {k}(&r), None => {stop} }}\n}}"
         )
     }
 

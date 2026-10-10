@@ -562,6 +562,95 @@ fn labels_and_strategies() {
     }
 }
 
+/// Deterministic strategies calling themselves in tail position are loops
+/// (spec D3); `iterate*` of a deterministic step is a loop.
+#[test]
+fn tail_recursive_strategies_are_loops() {
+    use StrategyExpr::*;
+    let mut p = peano();
+    // [r7] s(x) => x   [r8] x => s(x)   [r8] s(x) => x
+    p.labelled(7, 1, f(319, vec![v(0, NAT)]), v(0, NAT), vec![]);
+    p.labelled(8, 1, v(0, NAT), f(319, vec![v(0, NAT)]), vec![]);
+    p.labelled(8, 1, f(319, vec![v(0, NAT)]), v(0, NAT), vec![]);
+    // st3 = DC(dc(r7) ; st3, id)        total, a tail call
+    // st4 = DC(dk(r8) ; st4, id)        not deterministic: no loop
+    // st5 = DC(dc(r7) ; st5, dc(r7))    st5 can fail: not in tail position
+    // st6 = DC(dc(r7), dc(r7) ; st6)    last alternative: a tail call
+    // st7 = ONE(dk(r8) ; st7, id)       dk(r8) before the call: no loop
+    // st9 = iterate*(dc(r7))
+    // st10 = DK(st3, st4, st5, st6, st7, st9) (start)
+    p.strategy(
+        3,
+        vec![DcStrats(vec![vec![DcRules(vec![7]), Call(3)], vec![Id]])],
+    );
+    p.strategy(
+        4,
+        vec![DcStrats(vec![vec![DkRules(vec![8]), Call(4)], vec![Id]])],
+    );
+    p.strategy(
+        5,
+        vec![DcStrats(vec![
+            vec![DcRules(vec![7]), Call(5)],
+            vec![DcRules(vec![7])],
+        ])],
+    );
+    p.strategy(
+        6,
+        vec![DcStrats(vec![
+            vec![DcRules(vec![7])],
+            vec![DcRules(vec![7]), Call(6)],
+        ])],
+    );
+    p.strategy(
+        7,
+        vec![OneStrats(vec![vec![DkRules(vec![8]), Call(7)], vec![Id]])],
+    );
+    p.strategy(9, vec![Iterate(vec![DcRules(vec![7])])]);
+    p.strategy(
+        10,
+        vec![DkStrats(
+            [3, 4, 5, 6, 7, 9].iter().map(|&c| vec![Call(c)]).collect(),
+        )],
+    );
+    p.0.query.strategy = Some(10);
+    p.start(f(318, vec![]), NAT);
+    let ir = p.lower().unwrap();
+    let names: Vec<&str> = ir.strategies.iter().map(|s| s.name.as_str()).collect();
+    assert_eq!(
+        names,
+        [
+            "st3:nat/m",
+            "st4:nat/m",
+            "st5:nat/m",
+            "st6:nat/m",
+            "st7:nat/m",
+            "st9:nat/m",
+            "st10:nat/m"
+        ]
+    );
+    let total = ir.total_strategies();
+    assert_eq!(total, [true, true, false, false, true, true, true]);
+    let tails: Vec<usize> = (0..ir.strategies.len())
+        .map(|i| ir.tail_calls(i, &total).len())
+        .collect();
+    assert_eq!(tails, [1, 0, 0, 1, 0, 0, 0]);
+    let main = elanc_rs::emit::emit_crate(&ir, "/rt").main_rs;
+    assert_eq!(
+        main.matches("(tail-recursive: a loop)").count(),
+        2,
+        "{main}"
+    );
+    for needle in [
+        "{ tail.set(Some(r3.clone())); true }",
+        "// iterate* of a deterministic strategy: a loop",
+        // ONE passes on the stop of a tail call
+        "None => stop",
+        "pub fn st_st4_4(t: &H<Nat>, k: K<H<Nat>>) -> bool {\n    elan_runtime::guard();",
+    ] {
+        assert!(main.contains(needle), "{needle} not in:\n{main}");
+    }
+}
+
 #[test]
 fn printing_form_is_the_last_grammar_rule() {
     let mut p = peano();
