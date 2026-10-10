@@ -1,0 +1,6 @@
+LPL injections description
+  query of sort bool
+  result of sort out
+  import injections
+  start with () res(s(s(o)) ++ 40, eval(s(s(o)) ++ 40), eval(inf) ++ s(o))
+end

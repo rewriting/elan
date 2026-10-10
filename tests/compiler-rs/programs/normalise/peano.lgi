@@ -1,0 +1,6 @@
+LPL peano description
+  query of sort bool
+  result of sort out
+  import peano
+  start with () res(fact(s(s(s(o)))) + plus(o,s(o)), mult(s(s(o)), s(s(s(o)))), toint(fact(s(s(s(s(o)))))))
+end

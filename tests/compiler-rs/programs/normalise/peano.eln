@@ -1,0 +1,32 @@
+module peano
+// Peano arithmetic: constructors o, s and +, defined plus, mult, fact,
+// a defined operator of sort int (tests/compiler-rs/test_normalise.sh).
+import global int bool; end
+sort nat out; end
+operators global
+  o : nat;
+  s(@) : (nat) nat;
+  @ + @ : (nat nat) nat assocLeft pri 10;
+  plus(@,@) : (nat nat) nat;
+  mult(@,@) : (nat nat) nat;
+  fact(@) : (nat) nat;
+  toint(@) : (nat) int;
+  res(@,@,@) : (nat nat int) out;
+end
+rules for nat
+  x,y : nat;
+global
+  [] plus(x,o) => x end
+  [] plus(x,s(y)) => s(plus(x,y)) end
+  [] mult(x,o) => o end
+  [] mult(x,s(y)) => plus(mult(x,y),x) end
+  [] fact(o) => s(o) end
+  [] fact(s(x)) => mult(s(x),fact(x)) end
+end
+rules for int
+  x : nat;
+global
+  [] toint(o) => 0 end
+  [] toint(s(x)) => toint(x) + 1 end
+end
+end

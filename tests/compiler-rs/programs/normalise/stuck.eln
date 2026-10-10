@@ -1,0 +1,30 @@
+module stuck
+// Defined operators to which no rule applies: the term stays, also under
+// builtin operations (int and bool sorts) and inside other terms; and,
+// or, not take a stuck argument as false (as the interpreter and REM).
+import global int bool; end
+sort nat out; end
+operators global
+  o : nat;
+  s(@) : (nat) nat;
+  g(@) : (nat) nat;
+  h(@) : (nat) nat;
+  f(@) : (nat) int;
+  p(@) : (nat) bool;
+  r(@,@,@,@,@,@,@) : (int int nat nat int bool bool) out;
+end
+rules for nat
+  x : nat;
+global
+  [] g(o) => o end
+  [] h(g(x)) => x end
+end
+rules for int
+global
+  [] f(o) => 0 end
+end
+rules for bool
+global
+  [] p(o) => true end
+end
+end

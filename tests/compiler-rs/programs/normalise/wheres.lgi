@@ -1,0 +1,6 @@
+LPL wheres description
+  query of sort bool
+  result of sort out
+  import wheres
+  start with () res(divmod(17, 5), sumsq(3, 4), headsum(10 . 20 . 30 . nil), first(7 . nil) + first(7 . 8 . nil) * 100, split(1 . nil))
+end

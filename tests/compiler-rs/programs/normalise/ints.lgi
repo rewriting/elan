@@ -1,0 +1,6 @@
+LPL ints description
+  query of sort bool
+  result of sort out
+  import ints
+  start with () all(r(65536 * 65536, 65536 * 65536 + 2147483647 + 1, 0 - 2147483647 - 1 - 1, (0 - 7) / 2, (0 - 7) % 3, 5 / 0, 5 % 0, - (0 - 2147483647 - 1)), b(65536 * 65536 == 0, 3 < 4, 3 >= 4, 2 != 2), fib(20))
+end

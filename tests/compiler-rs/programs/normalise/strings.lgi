@@ -1,0 +1,6 @@
+LPL strings description
+  query of sort bool
+  result of sort out
+  import strings
+  start with () r(greet("world"), "abc" + "def", strlen("hello"), "abc"[1], substr("abcdef", 2, 3), strcmp("abc", "abd"), strlen(string(65) + "z"))
+end

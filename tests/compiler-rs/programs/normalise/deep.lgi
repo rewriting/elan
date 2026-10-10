@@ -1,0 +1,6 @@
+LPL deep description
+  query of sort bool
+  result of sort out
+  import deep
+  start with () r(len(gen(100000)), last(gen(100000)))
+end

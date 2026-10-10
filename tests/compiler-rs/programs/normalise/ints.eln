@@ -1,0 +1,19 @@
+module ints
+// Builtin int: the interpreter's 32-bit C int (wrap-around, truncating
+// division, x/0 = 0 and x%0 = x as on arm64), comparisons, unary minus,
+// a function defined by conditional rules.
+import global int bool; end
+sort out; end
+operators global
+  fib(@) : (int) int;
+  r(@,@,@,@,@,@,@,@) : (int int int int int int int int) out;
+  b(@,@,@,@) : (bool bool bool bool) out;
+  all(@,@,@) : (out out int) out;
+end
+rules for int
+  n : int;
+global
+  [] fib(n) => n if n < 2 end
+  [] fib(n) => fib(n - 1) + fib(n - 2) end
+end
+end

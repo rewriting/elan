@@ -1,0 +1,33 @@
+module lists
+// Lists of int: append, reverse, length, sum, a list built by rules.
+import global int bool; end
+sort list out; end
+operators global
+  nil : list;
+  @ . @ : (int list) list;
+  append(@,@) : (list list) list;
+  rev(@) : (list) list;
+  length(@) : (list) int;
+  sum(@) : (list) int;
+  upto(@) : (int) list;
+  res(@,@,@,@) : (list list int int) out;
+end
+rules for list
+  x, n : int; l, l1 : list;
+global
+  [] append(nil, l) => l end
+  [] append(x.l1, l) => x.append(l1, l) end
+  [] rev(nil) => nil end
+  [] rev(x.l) => append(rev(l), x.nil) end
+  [] upto(n) => nil if n <= 0 end
+  [] upto(n) => append(upto(n - 1), n.nil) if n > 0 end
+end
+rules for int
+  x : int; l : list;
+global
+  [] length(nil) => 0 end
+  [] length(x.l) => 1 + length(l) end
+  [] sum(nil) => 0 end
+  [] sum(x.l) => x + sum(l) end
+end
+end

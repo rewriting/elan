@@ -1,0 +1,35 @@
+module conditions
+// Conditions: a failing condition falls through to the next rule; when
+// every rule fails the term stays (stuck).
+import global int bool; end
+sort list out; end
+operators global
+  nil : list;
+  @ . @ : (int list) list;
+  insert(@,@) : (int list) list;
+  sort(@) : (list) list;
+  max(@,@) : (int int) int;
+  sign(@) : (int) int;
+  pos(@) : (int) int;
+  res(@,@,@,@,@) : (list int int int int) out;
+end
+rules for list
+  x, y : int; l : list;
+global
+  [] insert(x, nil) => x.nil end
+  [] insert(x, y.l) => x.y.l if x <= y end
+  [] insert(x, y.l) => y.insert(x, l) end
+  [] sort(nil) => nil end
+  [] sort(x.l) => insert(x, sort(l)) end
+end
+rules for int
+  x, y : int;
+global
+  [] max(x, y) => x if x >= y end
+  [] max(x, y) => y end
+  [] sign(x) => 1 if x > 0 end
+  [] sign(x) => 0 - 1 if x < 0 end
+  [] sign(x) => 0 end
+  [] pos(x) => x if x > 0 if x < 1000 end
+end
+end

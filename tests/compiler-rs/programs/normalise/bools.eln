@@ -1,0 +1,19 @@
+module bools
+// Builtin bool: and, or, not, comparisons, a bool-valued function.
+import global int bool; end
+sort nat out; end
+operators global
+  o : nat;
+  s(@) : (nat) nat;
+  even(@) : (nat) bool;
+  xor(@,@) : (bool bool) bool;
+  r(@,@,@,@,@,@) : (bool bool bool bool bool bool) out;
+end
+rules for bool
+  x : nat; a, c : bool;
+global
+  [] even(o) => true end
+  [] even(s(x)) => not(even(x)) end
+  [] xor(a, c) => (a or c) and not(a and c) end
+end
+end

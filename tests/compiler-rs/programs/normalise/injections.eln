@@ -1,0 +1,35 @@
+module injections
+// Injections: of a user sort (nat into expr), of builtinInt into a sort
+// with another constructor (num), and int itself.
+import global int bool; end
+sort nat num expr out; end
+operators global
+  o : nat;
+  s(@) : (nat) nat;
+  @ : (builtinInt) num;
+  inf : num;
+  @ : (nat) expr;
+  @ : (num) expr;
+  @ ++ @ : (expr expr) expr;
+  eval(@) : (expr) num;
+  addnum(@,@) : (num num) num;
+  toint(@) : (nat) builtinInt;
+  res(@,@,@) : (expr num expr) out;
+end
+rules for num
+  x : nat; e, f : expr; n, m : builtinInt; a, b : num;
+global
+  [] eval(x) => toint(x) end
+  [] eval(a) => a end
+  [] eval(e ++ f) => addnum(eval(e), eval(f)) end
+  [] addnum(inf, a) => inf end
+  [] addnum(a, inf) => inf end
+  [] addnum(n, m) => n + m end
+end
+rules for builtinInt
+  x : nat;
+global
+  [] toint(o) => 0 end
+  [] toint(s(x)) => toint(x) + 1 end
+end
+end

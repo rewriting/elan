@@ -1,0 +1,6 @@
+LPL stuck description
+  query of sort bool
+  result of sort out
+  import stuck
+  start with () r(f(o) + 1, f(s(o)) + 1, g(s(o)), h(g(s(o))), f(s(o)) * 2 + f(o), p(s(o)), not(p(s(o)) and true) or p(s(o)))
+end

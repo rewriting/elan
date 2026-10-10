@@ -1,0 +1,28 @@
+module deep
+// A list of 10^5 elements built by rules, then measured: deep recursion
+// in the normalisation functions and an iterative release of the list.
+import global int bool; end
+sort list out; end
+operators global
+  nil : list;
+  @ . @ : (int list) list;
+  gen(@) : (int) list;
+  len(@) : (list) int;
+  last(@) : (list) int;
+  r(@,@) : (int int) out;
+end
+rules for list
+  n : int;
+global
+  [] gen(n) => nil if n <= 0 end
+  [] gen(n) => n . gen(n - 1) end
+end
+rules for int
+  x, y : int; l : list;
+global
+  [] len(nil) => 0 end
+  [] len(x . l) => len(l) + 1 end
+  [] last(x . nil) => x end
+  [] last(x . y . l) => last(y . l) end
+end
+end

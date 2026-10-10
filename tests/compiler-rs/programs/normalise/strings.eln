@@ -1,0 +1,14 @@
+module strings
+// Builtin strings: concatenation, length, index, substring, comparison.
+import global int bool string; end
+sort out; end
+operators global
+  greet(@) : (string) string;
+  r(@,@,@,@,@,@,@) : (string string int int string int int) out;
+end
+rules for string
+  s : string;
+global
+  [] greet(s) => "hello " + s + "!" end
+end
+end

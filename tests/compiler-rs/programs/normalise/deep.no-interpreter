@@ -1,0 +1,2 @@
+The interpreter is quadratic on this program (16000 elements: 11 s,
+10^5: several minutes); lists.lgi covers the same rules.

@@ -1,0 +1,5 @@
+# Known difference with REM: its integers are 63-bit tagged longs
+# (src/compiler/runtime/builtin.h) printed by their low 32 bits, so
+# `65536 * 65536 == 0` is false there; it is true in the interpreter (32-bit
+# C int, elan-runtime/src/builtin.rs), which elanc-rs follows.
+result = all(r(0,-2147483648,2147483647,-3,-1,0,5,-2147483648),b(false,true,false,false),6765)

@@ -1,0 +1,6 @@
+LPL nonlinear description
+  query of sort bool
+  result of sort out
+  import nonlinear
+  start with () res(same(s(s(o)), s(s(o))), same(s(o), o), f(s(s(o)), s(s(o))), f(s(o), s(s(o))), dedup(1.1.2.3.3.3.4.1.nil), s(f(o, o)) == s(o) and s(o) != o)
+end

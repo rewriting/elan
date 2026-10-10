@@ -108,7 +108,8 @@ check-golden: install
 check-rust:
 	@if command -v cargo >/dev/null 2>&1; then \
 	  (cd src/compiler-rs && CARGO_TARGET_DIR=$(CURDIR)/$(BUILD)/src/compiler-rs/target cargo test --offline --quiet) \
-	  && if [ -x "$(PREFIX)/bin/elan" ]; then tests/compiler-rs/test_ref_roundtrip.sh "$(PREFIX)"; fi; \
+	  && if [ -x "$(PREFIX)/bin/elan" ]; then tests/compiler-rs/test_ref_roundtrip.sh "$(PREFIX)"; fi \
+	  && if [ -x "$(PREFIX)/bin/elan" ] && [ -x "$(PREFIX)/bin/elanc-rs" ]; then tests/compiler-rs/test_normalise.sh "$(PREFIX)"; fi; \
 	else echo "cargo not found: Rust tests skipped"; fi
 
 check: smoke test-runner check-arch check-unit check-golden check-rust

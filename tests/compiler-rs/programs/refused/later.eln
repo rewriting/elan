@@ -1,0 +1,28 @@
+module later
+// Constructs of later stages of S6 (strategies, AC, query input), which
+// elanc-rs (S6a) must refuse (tests/compiler-rs/test_normalise.sh).
+import global int bool; end
+sort nat set; end
+operators global
+  o : nat;
+  s(@) : (nat) nat;
+  f(@) : (nat) nat;
+  g(@) : (nat) nat;
+  empty : set;
+  @ u @ : (set set) set (AC);
+  single(@) : (nat) set;
+end
+stratop global
+  go : <nat -> nat> bs;
+end
+rules for nat
+  x, y : nat;
+global
+  [r] f(x) => s(x) end
+  []  g(x) => y where y := (go) f(x) end
+end
+strategies for nat
+implicit
+  [] go => dk(r) end
+end
+end

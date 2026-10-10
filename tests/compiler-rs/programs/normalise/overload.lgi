@@ -1,0 +1,6 @@
+LPL overload description
+  query of sort bool
+  result of sort out
+  import overload
+  start with () res(size(s(s(o)) + s(o)), size(node(node(leaf, leaf), s(s(o)), leaf)), twice(s(o)), twice(21), twice(node(leaf, leaf)))
+end

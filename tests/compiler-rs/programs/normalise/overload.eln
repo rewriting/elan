@@ -1,0 +1,41 @@
+module overload
+// Overloading: the same names on several sorts, int and nat additions.
+import global int bool; end
+sort nat tree out; end
+operators global
+  o : nat;
+  s(@) : (nat) nat;
+  @ + @ : (nat nat) nat;
+  leaf : tree;
+  node(@,@) : (tree tree) tree;
+  node(@,@,@) : (tree nat tree) tree;
+  size(@) : (nat) int;
+  size(@) : (tree) int;
+  twice(@) : (nat) nat;
+  twice(@) : (int) int;
+  twice(@) : (tree) tree;
+  res(@,@,@,@,@) : (int int nat int tree) out;
+end
+rules for nat
+  x, y : nat;
+global
+  [] x + o => x end
+  [] x + s(y) => s(x + y) end
+  [] twice(x) => x + x end
+end
+rules for int
+  x : nat; n : int; t, u : tree;
+global
+  [] size(o) => 0 end
+  [] size(s(x)) => size(x) + 1 end
+  [] size(leaf) => 0 end
+  [] size(node(t, u)) => size(t) + size(u) + 1 end
+  [] size(node(t, x, u)) => size(t) + size(x) + size(u) end
+  [] twice(n) => n + n end
+end
+rules for tree
+  t, u : tree; x : nat;
+global
+  [] twice(t) => node(t, t) end
+end
+end

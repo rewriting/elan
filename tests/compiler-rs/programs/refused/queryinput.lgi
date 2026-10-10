@@ -1,0 +1,6 @@
+LPL queryinput description
+  query of sort nat
+  result of sort nat
+  import later
+  start with () s(query)
+end

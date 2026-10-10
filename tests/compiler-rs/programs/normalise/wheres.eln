@@ -1,0 +1,35 @@
+module wheres
+// Local assignments (where x := () t) and where with a pattern
+// (where (sort) p := () t), which may fail and fall through.
+import global int bool; end
+sort pair list out; end
+operators global
+  nil : list;
+  @ . @ : (int list) list;
+  p(@,@) : (int int) pair;
+  split(@) : (list) pair;
+  divmod(@,@) : (int int) pair;
+  sumsq(@,@) : (int int) int;
+  headsum(@) : (list) int;
+  first(@) : (list) int;
+  res(@,@,@,@,@) : (pair int int int pair) out;
+end
+rules for pair
+  x, y, q, r : int;
+global
+  [] divmod(x, y) => p(q, r) where q := () x / y where r := () x % y end
+end
+rules for int
+  x, y, a, b, s : int; l : list;
+global
+  [] sumsq(x, y) => s where a := () x * x where b := () y * y where s := () a + b end
+  [] headsum(l) => a + b where (pair) p(a, b) := () split(l) end
+  [] first(l) => a where (list) a . nil := () l end
+  [] first(l) => 0 - 1 end
+end
+rules for pair
+  x, y : int; l : list;
+global
+  [] split(x . y . l) => p(x, y) end
+end
+end

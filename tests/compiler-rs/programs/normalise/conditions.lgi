@@ -1,0 +1,6 @@
+LPL conditions description
+  query of sort bool
+  result of sort out
+  import conditions
+  start with () res(sort(5.3.8.1.9.2.7.nil), max(3, 7), sign(0 - 12) + sign(0) * 10, pos(5), pos(5000) + pos(0))
+end

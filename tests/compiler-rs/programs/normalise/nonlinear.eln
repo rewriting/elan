@@ -1,0 +1,35 @@
+module nonlinear
+// Non-linear left-hand sides: equality of shared terms and of ints;
+// the builtin equality of terms (eq[nat]).
+import global int bool eq[nat]; end
+sort nat list out; end
+operators global
+  o : nat;
+  s(@) : (nat) nat;
+  f(@,@) : (nat nat) nat;
+  same(@,@) : (nat nat) bool;
+  nil : list;
+  @ . @ : (int list) list;
+  dedup(@) : (list) list;
+  res(@,@,@,@,@,@) : (bool bool nat nat list bool) out;
+end
+rules for bool
+  x, y : nat;
+global
+  [] same(x, x) => true end
+  [] same(x, y) => false end
+end
+rules for nat
+  x, y : nat;
+global
+  [] f(s(x), s(x)) => x end
+  [] f(x, y) => o end
+end
+rules for list
+  x : int; l : list;
+global
+  [] dedup(x . x . l) => dedup(x . l) end
+  [] dedup(x . l) => x . dedup(l) end
+  [] dedup(nil) => nil end
+end
+end

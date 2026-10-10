@@ -1,0 +1,6 @@
+LPL bools description
+  query of sort bool
+  result of sort out
+  import bools
+  start with () r(even(s(s(s(s(o))))), even(s(s(s(o)))), xor(true, false), xor(true, true), true == false, not(false) and 1 < 2)
+end

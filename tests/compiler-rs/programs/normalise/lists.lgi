@@ -1,0 +1,6 @@
+LPL lists description
+  query of sort bool
+  result of sort out
+  import lists
+  start with () res(rev(1.2.3.4.nil), append(upto(5), rev(upto(3))), length(upto(20)), sum(upto(100)))
+end

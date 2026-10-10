@@ -1,0 +1,6 @@
+LPL startstrategy description
+  query of sort bool
+  result of sort nat
+  import later
+  start with (go) f(o)
+end
