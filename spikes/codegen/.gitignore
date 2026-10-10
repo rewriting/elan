@@ -5,3 +5,4 @@ rust/target/
 .time
 .bt
 rust-enum/target/
+go-repr/bin/
