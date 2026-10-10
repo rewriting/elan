@@ -10,6 +10,8 @@
 BUILD   ?= build
 PREFIX  ?= $(CURDIR)/$(BUILD)/install
 BENCH    = tests/legacy-bench/run_tests.py
+# parallel build jobs (a plain -j is unlimited with make and can exhaust memory)
+JOBS    ?= $(shell nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 2)
 
 # Compilers of the modern interpreter: the system Clang on macOS, GCC
 # elsewhere.  They are not exported: reference/build.sh chooses its own
@@ -27,7 +29,7 @@ endif
 .PHONY: manual manual-update all configure install check check-compiler check-golden check-sanitize check-arch check-unit test-runner smoke reference check-reference clean toolchain
 
 all: configure
-	cmake --build $(BUILD) -j
+	cmake --build $(BUILD) -j $(JOBS)
 
 toolchain:
 	@command -v $(ELAN_CC)  >/dev/null || { echo "ERROR: C compiler '$(ELAN_CC)' not found (set ELAN_CC, see README)"; exit 1; }
