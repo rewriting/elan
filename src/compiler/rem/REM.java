@@ -312,7 +312,7 @@ public class REM {
       mainMakefile.write("SUBDIRS = " + subdirName + "\n\n");
       // a failed build of the subdirectory fails the main Makefile (it
       // returned 0 until 2026: the loop ended with `cd ..`)
-      mainMakefile.write("all clean veryclean:\n\t@for DIR in $(SUBDIRS); do echo Make $@ in $$DIR; (cd $$DIR && $(MAKE) $@) || exit 1; [ $@ != all ] || cp -f $$DIR/" + outputName + " . || exit 1; done\n\n");
+      mainMakefile.write("all clean veryclean:\n\t@for DIR in $(SUBDIRS); do echo Make $@ in $$DIR; (cd $$DIR && $(MAKE) $@ && { [ $@ != all ] || cp -f '" + outputName + "' ..; }) || exit 1; done\n\n");
 
       /*
        * Sous Makefile

@@ -116,5 +116,27 @@ if echo "$out" | grep -q '^result = 0$'; then ok "compiled_int_prints_low_32_bit
 else fail "compiled_int_prints_low_32_bits (got: $(echo "$out" | grep result))"; fi
 
 rm -rf "$WORK"
+# 8. the generated main Makefile fails when the build fails, and succeeds
+#    with -output, a plain name or an absolute path (copied to the main
+#    directory, as in 2004)
+fresh makestatus
+( cd "$WORK/makestatus" && elanc -nosplit -quiet enum >/dev/null 2>&1 )
+echo "syntax error" >> "$WORK/makestatus/.elan.enum/enum.c"
+if ( cd "$WORK/makestatus" && make -f enum.make >/dev/null 2>&1 ); then
+  fail "generated_makefile_fails_when_the_build_fails"
+else
+  ok "generated_makefile_fails_when_the_build_fails"
+fi
+for out in prog "$WORK/outputabs/abs/prog"; do
+  fresh outputabs; mkdir -p "$WORK/outputabs/abs"
+  if ( cd "$WORK/outputabs" && elanc -nosplit -quiet -output "$out" enum >/dev/null 2>&1 \
+       && make -f enum.make >/dev/null 2>&1 ) && [ -x "$WORK/outputabs/prog" ] \
+     && ( cd "$WORK/outputabs" && [ -x "$out" ] ); then
+    ok "generated_makefile_with_output $out"
+  else
+    fail "generated_makefile_with_output $out"
+  fi
+done
+
 echo "$fails failed"
 [ "$fails" -eq 0 ]
