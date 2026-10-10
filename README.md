@@ -106,7 +106,11 @@ uses the C/C++ compilers and the Boehm GC of the build (`ELAN_CC`,
 `ELAN_CXX`, `GC_PREFIX`, which the environment can override; `ELAN_SANITIZE`
 holds the sanitizer options in a `make check-sanitize` build). `elanc` and
 REM exit with a non-zero status on errors. The ATerm runtime of 2003
-(`-aterm`) is not supported.
+(`-aterm`) is not supported. With `-strategy 1`, the strategy terms of
+`strat[X]` (`elanlib/strategy/strat.eln`) are evaluated at run time by the C
+runtime (`str_eval`) instead of the compiled `eval` rules
+(`tests/compiler/test_runtime_strategies.sh`); `-strategy 2` generates C that
+does not compile (docs/followups.md).
 
 ## Quick start (development)
 

@@ -5,12 +5,15 @@ sub-project (S1–S5b). Each item says where it comes from.
 
 ## Behaviour (needs tests against the interpreter or the reference)
 
-- **Compiled DC/ONE and IFTOE strategies evaluated at run time** (`str_eval2`,
-  `src/compiler/runtime/streval.c`): stop with "not supported by the compiler"
-  (S5b). ELAN 3.6 crashed there; the intended semantics (try the next
-  alternative / the else branch) is to be implemented with tests comparing the
-  compiled program with the interpreter. Construct: a strategy *term*
-  evaluated at run time (REM `StrategyEval.genEval`, non-built-in strategy).
+- **`elanc -strategy 2`** (REM `Flags.strat`, option not listed in the
+  usage): the generated C does not compile with current compilers
+  (`StrategyEval.genEvalLab`/`genEvalDstr` call `str_ruleN`/`str_dstrN`,
+  which are not declared: `-Wint-conversion` errors), and
+  `genEvalSem` DC/IFTOE still store `allocStable` (an index) in an `int *`
+  (the 3.6 bug fixed in `str_eval2`). `-strategy 1` (strategy terms
+  evaluated by `str_eval`/`str_eval2`) works and is tested
+  (`tests/compiler/test_runtime_strategies.sh`); the `if b then S1 else S2
+  fi` case of `str_eval2` (DS_IFTE) is not covered by it.
 - **`robot` example** (`legacy/elan3/doc/ElanExamples/robot`,
   `applications/Robot`): no result with either interpreter, although the 1997
   reference output shows paths (S4).

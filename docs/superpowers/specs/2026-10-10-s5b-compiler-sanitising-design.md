@@ -26,8 +26,11 @@ Decisions and deviations found while implementing:
 - `str_eval2` DC/ONE and IFTOE (strategies evaluated at run time): in 3.6 they
   crashed (an index used as a pointer); once that was fixed, `fail()`
   expanding to two statements made them fail unconditionally. They now stop
-  with an explicit "not supported by the compiler" error (review finding);
-  implementing them is in docs/followups.md.
+  with an explicit "not supported by the compiler" error (review finding).
+  Follow-up (branch `compiled-runtime-dc`): implemented as REM compiles them
+  when they are known at compile time, and compared with the interpreter by
+  `tests/compiler/test_runtime_strategies.sh` (programs compiled with
+  `elanc -strategy 1`, the construct that reaches `str_eval2`).
 - Integers print their low 32 bits (`%d` of `(int)GgetInt`), as in 3.6 and the
   interpreter (review finding: `%ld` had changed the output above 2^31;
   test `compiled_int_prints_low_32_bits`).
