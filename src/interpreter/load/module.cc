@@ -25,6 +25,8 @@
 
 */
 
+#include <cstdlib>
+#include <exception>
 #include "module.h"
 #include "strategy.h"
 
@@ -111,11 +113,69 @@ void settrueterm()
   falseterm.stinit(); falseterm.crterm(FALSEVAL); falseterm.popt();
 }
 
-void failexit()
+// Fatal errors: see base/fatal.h.
+namespace {
+int fatal_catchers = 0;           // FatalCatcher scopes alive
+bool fatal_forked_child = false;  // in a forked child (match/process.cc)
+bool fatal_direct = false;        // in the ^C handler
+bool fatal_exiting = false;       // exit() has started (static destruction)
+std::terminate_handler fatal_previous_terminate = nullptr;
+
+// A failexit() in a noexcept function (a destructor) ends here: exit as
+// failexit() did before S3b.
+[[noreturn]] void fatal_terminate()
+{
+  if (std::exception_ptr e = std::current_exception()) {
+    try { std::rethrow_exception(e); }
+    catch (const ElanFatal &) { fatal_exit_now(); }
+    catch (...) {}
+  }
+  if (fatal_previous_terminate) fatal_previous_terminate();
+  std::abort();
+}
+
+bool fatal_can_throw()
+{
+  return fatal_catchers > 0 && !fatal_forked_child && !fatal_direct
+      && !fatal_exiting && std::uncaught_exceptions() == 0;
+}
+}  // namespace
+
+const char *ElanFatal::what() const noexcept { return "elan: fatal error"; }
+
+FatalCatcher::FatalCatcher()
+{
+  static bool installed = false;
+  if (!installed) {
+    installed = true;
+    fatal_previous_terminate = std::set_terminate(fatal_terminate);
+    std::atexit([] { fatal_exiting = true; });
+  }
+  fatal_catchers++;
+}
+
+FatalCatcher::~FatalCatcher() { fatal_catchers--; }
+
+void fatal_in_forked_child() { fatal_forked_child = true; }
+
+void fatal_direct_exit(bool on) { fatal_direct = on; }
+
+void fatal_cleanup()
 {
   stout.flush(); sterr.flush();
   kill_all_processus();
+}
+
+void fatal_exit_now()
+{
+  fatal_cleanup();
   exit(EXIT_FAILURE);
+}
+
+void failexit()
+{
+  if (fatal_can_throw()) throw ElanFatal();
+  fatal_exit_now();
 }
 
 

@@ -33,6 +33,7 @@
 #define __streams_h
 
 #include <stdio.h>
+#include "fatal.h"                    // failexit(), interr()
 
 #define NFILE 0		// type of ichstream. internal ichstream constants.
 #define PIPE 1
@@ -105,7 +106,5 @@ inline char * ichstream::actname() {return fname;}
 extern ochstream stout,sterr,graphout,dumpout,traceout;
 extern void odsek(ochstream &,int n);
 
-[[noreturn]] extern void failexit(); // body in specials.c and module.c
-[[noreturn]] extern void interr();   // body in commondefs.c
 
 #endif

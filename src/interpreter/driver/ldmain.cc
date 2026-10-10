@@ -765,6 +765,8 @@ void interrupt(int /*sig*/)
 {
   int c;
 
+  fatal_direct_exit(true);   // a signal handler: a fatal error exits directly (base/fatal.h)
+
   while(1) {
   stout << "\n\n[ executionAbort Continue Dump Exit Statistics\n" 
 	<< "  changeTrace changeQuiet "
@@ -773,6 +775,7 @@ void interrupt(int /*sig*/)
   stout.flush();
   switch (c=getchar()) {
   case 'A': case 'a':                          // abort this execution
+    fatal_direct_exit(false);
     longjmp(ebuf,1);                           // jump into main procedure
   case 'D': case 'd':                          // dump :
     interrupt_d();
@@ -828,6 +831,7 @@ void interrupt(int /*sig*/)
   case 'C': case 'c' :               // Continue the execution
     while (c!='\n' && c!=EOF) c=getchar();       // flush the current input 
     sterr << "\n[] execution continue:\n";
+    fatal_direct_exit(false);
     signal(SIGINT,interrupt);    
     return;                                      // and return from interrut
     //default: 
@@ -856,7 +860,22 @@ void conform_strategies(int warn)
 // The command-line interpreter; main() (driver/main.cc) only calls it, so
 // that the core library elan_core has no main.
 
+static int elan_main_body(int argc, char **argv);
+
+// A fatal error (failexit) inside the interpreter throws ElanFatal, caught
+// here: same output and exit status as the former exit(1) (base/fatal.h).
 int elan_main(int argc, char **argv)
+{
+  FatalCatcher catcher;
+  try {
+    return elan_main_body(argc, argv);
+  } catch (const ElanFatal &e) {
+    fatal_cleanup();                 // flush stout and sterr, kill the subprocesses
+    return e.status;
+  }
+}
+
+static int elan_main_body(int argc, char **argv)
 {
   char *modsource,*moddest_c,*callcompilstr,*calllinkstr=NULL; /* ,*includef*/
   const char *nsoptstr;

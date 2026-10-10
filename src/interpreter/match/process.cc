@@ -162,6 +162,7 @@ struct processdata *newprocess(const char *command,
         sterr<<"\tprobably not enought memory\n";
         failexit();
     case 0  :                     /* here I will exec subprocess */
+        fatal_in_forked_child();  // a fatal error exits the child directly (base/fatal.h)
         open_subprocess_pipes(pipe1_name,pipe2_name,r,w);
 	execlp(command,command,arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,NULL);
         fprintf(stderr,"[error] match_state: can't execute %s\n\t int.err.\n",
@@ -318,6 +319,7 @@ struct processdata *newsubprocess(stateofexecution *stexec,
         sterr<<"\tprobably not enought memory\n";
         failexit();
     case 0  :                     /* here I will exec subprocess */
+        fatal_in_forked_child();  // a fatal error exits the child directly (base/fatal.h)
         open_subprocess_pipes(pipe1_name,pipe2_name,r,w);
 
 	// ... execution
