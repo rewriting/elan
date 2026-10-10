@@ -40,6 +40,24 @@ if(ELAN_RUST)
   endif()
 endif()
 
+# The compiler in Go (spec S7): only when go >= 1.24 is found.
+option(ELAN_GO "Build the Go compiler elanc-go (needs go >= 1.24)" ON)
+if(ELAN_GO)
+  find_program(ELAN_GO_EXE go)
+  if(ELAN_GO_EXE)
+    execute_process(COMMAND ${ELAN_GO_EXE} env GOVERSION OUTPUT_VARIABLE ELAN_GO_VERSION
+                    OUTPUT_STRIP_TRAILING_WHITESPACE)
+    string(REGEX MATCH "go([0-9]+)\\.([0-9]+)" _m "${ELAN_GO_VERSION}")
+    if(CMAKE_MATCH_1 GREATER 1 OR (CMAKE_MATCH_1 EQUAL 1 AND CMAKE_MATCH_2 GREATER_EQUAL 24))
+      add_subdirectory(src/compiler-go)
+    else()
+      message(STATUS "${ELAN_GO_VERSION} is older than go1.24: elanc-go is not built")
+    endif()
+  else()
+    message(STATUS "go not found: elanc-go is not built")
+  endif()
+endif()
+
 if(ELAN_SANITIZE)
   add_compile_options(-fsanitize=${ELAN_SANITIZERS} -fno-sanitize-recover=undefined
                       -fno-omit-frame-pointer -g)

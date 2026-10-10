@@ -26,7 +26,7 @@ else
   ELAN_CXX ?= g++
 endif
 
-.PHONY: manual manual-update all configure install check check-rust check-compiler check-golden check-sanitize check-arch check-unit test-runner smoke reference check-reference clean toolchain
+.PHONY: manual manual-update all configure install check check-rust check-go check-compiler check-golden check-sanitize check-arch check-unit test-runner smoke reference check-reference clean toolchain
 
 all: configure
 	cmake --build $(BUILD) -j $(JOBS)
@@ -57,7 +57,7 @@ configure: toolchain
 # the default).
 install: all
 	rm -rf "$(PREFIX)/share/elanlib" "$(PREFIX)/classes" "$(PREFIX)/include/elan-compiler" "$(PREFIX)/bin/elanc" \
-	       "$(PREFIX)/bin/elanc-rs" "$(PREFIX)/share/elan-rs"
+	       "$(PREFIX)/bin/elanc-rs" "$(PREFIX)/share/elan-rs" "$(PREFIX)/bin/elanc-go" "$(PREFIX)/share/elan-go"
 	cmake --install $(BUILD)
 
 test-runner:
@@ -118,7 +118,15 @@ check-rust: install
 	     else echo "elanc-rs not installed (-DELAN_RUST=OFF): compiled Rust tests skipped"; fi; \
 	else echo "cargo not found: Rust tests skipped"; fi
 
-check: smoke test-runner check-arch check-unit check-golden check-rust
+# Tests of the Go compiler (src/compiler-go, spec S7), when go >= 1.24 exists.
+GO_ENV = GOTOOLCHAIN=local GOFLAGS=-mod=mod GOCACHE=$(CURDIR)/$(BUILD)/src/compiler-go/gocache
+check-go: install
+	@if [ -x "$(PREFIX)/bin/elanc-go" ]; then \
+	  (cd src/compiler-go && $(GO_ENV) go vet ./... && $(GO_ENV) go test ./...) \
+	  && (cd src/compiler-go/elanrt && $(GO_ENV) go vet ./... && $(GO_ENV) go test ./...); \
+	else echo "elanc-go not built (go >= 1.24 missing or -DELAN_GO=OFF): Go tests skipped"; fi
+
+check: smoke test-runner check-arch check-unit check-golden check-rust check-go
 	$(BENCH) --prefix $(PREFIX) --kinds I,A
 	@$(CHECK_COMPILER)
 
