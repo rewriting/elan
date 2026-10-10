@@ -97,7 +97,11 @@ extern Gterm *con_0,*con_1;
 #define fun_3(a,b) GsetIntegerTag(GgetInt(a) + GgetInt(b))
 #define fun_4(a,b) GsetIntegerTag(GgetInt(a) - GgetInt(b))
 #define fun_5(a,b) GsetIntegerTag(GgetInt(a) * GgetInt(b))
-#define fun_6(a,b) GsetIntegerTag(GgetInt(a) / GgetInt(b))
+/* x/0 = 0 and x%0 = x, the results of the interpreter (rtmisc.cc int_div,
+   int_mod): division by zero was undefined behaviour (it traps on x86) */
+extern long Gint_div(long a, long b);
+extern long Gint_mod(long a, long b);
+#define fun_6(a,b) GsetIntegerTag(Gint_div(GgetInt(a), GgetInt(b)))
 // 7
 #define fun_8(a,b) bool2term(GgetInt(a) == GgetInt(b)) 
 #define fun_9(a,b) bool2term(GgetInt(a) != GgetInt(b))
@@ -124,7 +128,7 @@ extern Gterm *con_0,*con_1;
 #define fun_25(a) (a) 
 #define fun_26(a) (a) 
 
-#define fun_27(a,b) GsetIntegerTag(GgetInt(a) % GgetInt(b))
+#define fun_27(a,b) GsetIntegerTag(Gint_mod(GgetInt(a), GgetInt(b)))
 #define fun_28(a,b) GsetIntegerTag(GgetInt(a) & GgetInt(b))
 #define fun_29(a,b) GsetIntegerTag(GgetInt(a) | GgetInt(b))
 // 30 : <

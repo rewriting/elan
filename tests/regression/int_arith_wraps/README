@@ -1,0 +1,1 @@
+Integer arithmetic wraps modulo 2^32 and x/0 = 0, x%0 = x, MIN/-1 = MIN, MIN%-1 = 0 (the results of the arm64 interpreter, now defined behaviour: signed overflow was UB, x/0 trapped on x86).

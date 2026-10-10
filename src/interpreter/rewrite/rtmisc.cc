@@ -291,6 +291,28 @@ int GET_LSTREAM(lstream *XXX, int /*pid*/, lexem rtype, term *res)
   else return 0; 
 }
 
+// Integer builtins on C int, with the results the interpreter always gave
+// on two's complement machines (arm64), but defined: + - * and unary minus
+// wrap modulo 2^32 (signed overflow was undefined behaviour), x/0 = 0,
+// x%0 = x, INT_MIN/-1 = INT_MIN, INT_MIN%-1 = 0 (x/0 trapped on x86).
+// tests/regression/int_arith_wraps.
+static int int_add(int a, int b) { return (int)((unsigned)a + (unsigned)b); }
+static int int_sub(int a, int b) { return (int)((unsigned)a - (unsigned)b); }
+static int int_mul(int a, int b) { return (int)((unsigned)a * (unsigned)b); }
+static int int_neg(int a)        { return (int)(0u - (unsigned)a); }
+static int int_div(int a, int b)
+{
+  if (b == 0) return 0;
+  if (b == -1) return int_neg(a);
+  return a / b;
+}
+static int int_mod(int a, int b)
+{
+  if (b == 0) return a;
+  if (b == -1) return 0;
+  return a % b;
+}
+
 static int standardreduction(term &t)
 {
   int pid,fstat,hd,nn; /* det, */
@@ -305,23 +327,23 @@ static int standardreduction(term &t)
   switch ((nn=t.semantic())) {
       case PLUS :			//	PLUS
         two_int_args(
-          tt.crstterm(t.subterm(0)->head()+t.subterm(1)->head(),TNUMBER))
+          tt.crstterm(int_add(t.subterm(0)->head(),t.subterm(1)->head()),TNUMBER))
           break;
       case MINUS :			//	MINUS
         two_int_args(
-          tt.crstterm(t.subterm(0)->head()-t.subterm(1)->head(),TNUMBER))
+          tt.crstterm(int_sub(t.subterm(0)->head(),t.subterm(1)->head()),TNUMBER))
           break;
       case TIMES :			//	TIMES
         two_int_args(
-          tt.crstterm(t.subterm(0)->head()*t.subterm(1)->head(),TNUMBER))
+          tt.crstterm(int_mul(t.subterm(0)->head(),t.subterm(1)->head()),TNUMBER))
           break;
       case DIV :			//	DIV
         two_int_args(
-          tt.crstterm(t.subterm(0)->head()/t.subterm(1)->head(),TNUMBER))
+          tt.crstterm(int_div(t.subterm(0)->head(),t.subterm(1)->head()),TNUMBER))
           break;
       case MOD :
         two_int_args(
-          tt.crstterm(t.subterm(0)->head() % t.subterm(1)->head(),TNUMBER))
+          tt.crstterm(int_mod(t.subterm(0)->head(),t.subterm(1)->head()),TNUMBER))
           break;
       case INTAND :
         two_int_args(
@@ -357,7 +379,7 @@ static int standardreduction(term &t)
           break;
       case UNMIN :
         one_int_arg(
-          tt.crstterm(-(t.subterm(0)->head()),TNUMBER))
+          tt.crstterm(int_neg(t.subterm(0)->head()),TNUMBER))
           break;
       case BOOLAND :
 	tt.crterm((istrueterm(*(t.subterm(0))) && istrueterm(*(t.subterm(1))))?TRUEVAL:FALSEVAL);

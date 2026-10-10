@@ -1,0 +1,1 @@
+This case tests the fix of undefined behaviour of the 2004 system (signed overflow; x/0 traps on x86): the reference (make check-reference) does not run it.

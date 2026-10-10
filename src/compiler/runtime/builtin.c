@@ -43,3 +43,16 @@ void Ginit_builtin() {
 
 }
 
+/* fun_6, fun_27 (builtin.h): x/0 = 0, x%0 = x, as the interpreter */
+long Gint_div(long a, long b)
+{
+  if (b == 0) return 0;
+  if (b == -1) return (long)(0ul - (unsigned long)a);
+  return a / b;
+}
+
+long Gint_mod(long a, long b)
+{
+  if (b == 0 || b == -1) return b == 0 ? a : 0;
+  return a % b;
+}
