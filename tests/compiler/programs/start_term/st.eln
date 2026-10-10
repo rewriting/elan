@@ -1,0 +1,24 @@
+module st
+// Operator, rule and strategy used by the start-term tests
+// (tests/compiler/test_start_term.sh).
+import global int bool; end
+operators global
+  f(@,@) : (int int) int;
+  g(@)   : (int) int;
+end
+stratop global
+  go   : <int -> int> bs;
+  keep : <int -> int> bs;
+end
+rules for int
+  x,y : int;
+global
+  [r] f(x,y) => x+y end
+  []  g(x)   => x*3 end
+end
+strategies for int
+implicit
+  [] go   => dk(r) end
+  [] keep => id    end
+end
+end

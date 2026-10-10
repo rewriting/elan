@@ -1,0 +1,6 @@
+LPL ground description
+  query of sort int
+  result of sort int
+  import st
+  start with (go) f(1,2)
+end

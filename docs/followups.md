@@ -27,12 +27,6 @@ sub-project (S1–S5b). Each item says where it comes from.
   (+7–14 %), `group` (2000 output made with another `group.spc`) and the
   binding order of MinelaComp `iappend` (see
   `tests/compiler/benchthesis/README.md`).
-- **REM ignores the start term when the query is read**: with
-  `start with (S) t` where `t` is not just `query` (e.g. MinelaComp
-  `[query,proofnil]`), a compiled program reading its query from stdin
-  applies `S` to the query itself (`Query.genStrategyCall`), silently (the
-  interpreter applies it to `t`); only `-noInput` uses `t`, when ground.
-  Same in 2004 (seen with BenchThesis MinelaComp).
 - **The rtmisc.cc `STRSUBSTR` builtin falls through into `STRSPN`** for other
   argument sorts — kept as in 2004, probably unintended (S2).
 - **`trace_backup`/`trace_recover`** (`-coq -proofterm` compiled programs)

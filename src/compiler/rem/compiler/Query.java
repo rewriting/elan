@@ -29,11 +29,13 @@ import java.util.*;
 public class Query {
   private Lexem stratName;
   private Term queryTerm;
+  private Term startTerm;
   private int sourceSort;
   
   public Query(int sourceSort, Lexem name, Term term) {
     this.sourceSort = sourceSort;
     stratName=name;
+    startTerm=term;
     if(term.isGround()) {
       queryTerm=term;
     } else {
@@ -87,15 +89,40 @@ public class Query {
     
   }
 
-  public void genStrategyCall(OutputCode s,int deep) {
-    if(stratName==null) {
-        /* generate nothing */
+  /*
+   * Gterm *main_query_start(Gterm *q): the start term of the query
+   * (`start with (S) t`) where the variable `query` is bound to q, the term
+   * read; the runtime applies S to it, as the interpreter does.
+   */
+  public void genStartTerm(OutputCode s,int deep) {
+    s.write("Gterm *main_query_start(Gterm *q) {\n");
+    if(startTerm.isVariable()) {
+      s.write(deep+1,"return q;\n");
     } else {
-      Strategy strategy = Strategy.getStrategy(stratName);
-      s.write(deep,"res=str" + strategy.getName() + "(res);\n");
+      s.write(deep+1,"Gterm *res;\n");
+      startTerm.setFullNumbering();
+      startTerm.rightsideVariableAffectation();
+      startTerm.rightsideVariableLiberation();
+      s.write(deep+1,"{\n");
+      s.write(deep+2,"/* " + startTerm + " */\n");
+      Tools.genDeclaration(s,deep+2, startTerm.getMaxUsedVariable(0) );
+      genBindQuery(startTerm,s,deep+2);
+      startTerm.genTermConstruction(s,deep+2);
+      s.write(deep+2,"res=" + startTerm.genCore() + ";\n");
+      s.write(deep+1,"}\n");
+      s.write(deep+1,"return res;\n");
+    }
+    s.write("}\n");
+  }
+
+  private static void genBindQuery(Term t,OutputCode s,int deep) {
+    if(t.isVariable()) {
+      s.write(deep,t.genCore() + "=q;\n");
+    } else {
+      for(int i=0 ; i<t.arity() ; i++) {
+        genBindQuery(t.getSubterm(i),s,deep);
+      }
     }
   }
 
-
 }
-

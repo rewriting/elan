@@ -1,0 +1,6 @@
+LPL twice description
+  query of sort int
+  result of sort int
+  import st
+  start with (go) f(query,query)
+end

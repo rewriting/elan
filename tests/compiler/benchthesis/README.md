@@ -79,6 +79,11 @@ a comment in `rewriting.lgi`; `rewritingC.lgi` is that variant:
             query of sort pair[term,proofterm]  // was: term
             start with (s_rewrite) query  // was: [query,proofnil]
 
+Since then, the compiler applies the start term as the interpreter does
+(branch `compiled-start-term`): the compiled `rewriting.lgi` gives the
+interpreter's results (`tests/compiler/test_start_term.sh`). `rewritingC.lgi`
+is kept: its outputs are those of the 2004 compiled programs.
+
 ## The cases (64)
 
 | kind | app | program | queries | expected | historical |

@@ -1,0 +1,6 @@
+LPL normalised description
+  query of sort int
+  result of sort int
+  import st
+  start with (go) f(g(query),1)
+end

@@ -226,6 +226,7 @@ public final class Tools {
     query.genCode(s,deep+1);
     s.write(deep+1,"return res;\n");
     s.write("}\n");
+    query.genStartTerm(s,deep);
 
       /* symbol_init */
     s.write("void symbol_init() {\n");

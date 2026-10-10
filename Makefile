@@ -90,6 +90,7 @@ check-unit: all
 # -DELAN_COMPILER=OFF).
 CHECK_COMPILER = if [ -x "$(PREFIX)/bin/elanc" ]; then \
 	  tests/compiler/test_elanc.sh "$(PREFIX)" && tests/compiler/test_runtime_strategies.sh "$(PREFIX)" \
+	  && tests/compiler/test_start_term.sh "$(PREFIX)" \
 	  && tests/compiler/test_benchthesis.sh "$(PREFIX)" \
 	  && $(BENCH) --prefix $(PREFIX) --kinds J,JO; \
 	else echo "compiler not built (-DELAN_COMPILER=OFF): compiled tests (J, JO) skipped"; fi
