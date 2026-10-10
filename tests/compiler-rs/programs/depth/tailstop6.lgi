@@ -1,0 +1,6 @@
+LPL tailstop6 description
+  query of sort bool
+  result of sort int
+  import depth
+  start with (tailstop) 1000000
+end

@@ -1,0 +1,6 @@
+LPL iternd6 description
+  query of sort bool
+  result of sort int
+  import depth
+  start with (iternd) 1000000
+end

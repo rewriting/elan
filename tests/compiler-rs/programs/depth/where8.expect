@@ -1,0 +1,4 @@
+# a chain of 10^8 where conditions: stops cleanly
+status 3
+stderr elan: recursion too deep
+small 100000000 1000

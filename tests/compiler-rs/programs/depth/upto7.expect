@@ -1,0 +1,5 @@
+# a defined strategy with parameters nesting 10^7 strategy terms: stops cleanly
+query 0 end
+status 3
+stderr elan: recursion too deep
+small 10000000 100

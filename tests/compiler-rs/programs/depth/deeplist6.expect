@@ -1,0 +1,4 @@
+# a list of 10^6 elements built by normalisation, then measured
+status 0
+result 1000000
+small 1000000 1000

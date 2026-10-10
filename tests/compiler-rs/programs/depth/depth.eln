@@ -1,0 +1,66 @@
+module depth
+// Deep recursions (spec D3): strategies, normalisation, conditions.
+import global int bool; end
+sort list; end
+operators global
+  nil : list;
+  @ . @ : (int list) list;
+  gen(@) : (int) list;
+  len(@) : (list) int;
+  count(@) : (int) int;
+end
+stratop global
+  tail     : <int -> int> bs;
+  tailone  : <int -> int> bs;
+  taildc   : <int -> int> bs;
+  ndrec    : <int -> int> bs;
+  iterdet  : <int -> int> bs;
+  iternd   : <int -> int> bs;
+  repdet   : <int -> int> bs;
+  down     : <int -> int> bs;
+  tailstop : <int -> int> bs;
+  inf      : <int -> int> bs;
+end
+rules for list
+  n : int;
+global
+  [] gen(n) => nil if n <= 0 end
+  [] gen(n) => n . gen(n - 1) end
+end
+rules for int
+  x, y : int; l : list;
+global
+  [] len(nil) => 0 end
+  [] len(x . l) => len(l) + 1 end
+  [] count(x) => 0 if x <= 0 end
+  [] count(x) => count(x - 1) + 1 end
+  // one result per term (a decrement) ...
+  [dec] x => x - 1 if x > 0 end
+  // ... or two rules, the second never applies: not provably deterministic
+  [dec2] x => x - 1 if x > 0 end
+  [dec2] x => x - 1 if x < 0 end
+  [zero] x => x if x == 0 end
+  [inc] x => x + 1 end
+  // a chain of conditions: one where per level
+  [wdown] x => y if x > 0 where y := (down) x - 1 end
+  [wdown] x => x if x <= 0 end
+end
+strategies for int
+implicit
+  // tail-recursive deterministic strategies: loops
+  [] tail    => first(dk(dec) ; tail, id) end
+  [] tailone => first one(dc(dec) ; tailone, id) end
+  [] taildc  => dc(dk(dec) ; dc one(taildc), id) end
+  // a tail call under a ONE under a DC: the second alternative (an
+  // endless recursion) runs only at 0, after the last dec
+  [] tailstop => first(first one(dc(dec) ; tailstop), first(dc(zero), inf)) end
+  // deterministic, not in tail position: an endless recursion
+  [] inf      => first(dc(inc) ; inf, id) ; id end
+  // the same recursion, not provably deterministic: a deep recursion
+  [] ndrec   => first(dk(dec2) ; ndrec, id) end
+  [] iterdet => iterate*(dc(dec)) ; dc(zero) end
+  [] iternd  => iterate*(dk(dec2)) ; dc(zero) end
+  [] repdet  => repeat*(dk(dec)) end
+  [] down    => dk(wdown) end
+end
+end

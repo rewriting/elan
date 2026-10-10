@@ -1,0 +1,6 @@
+LPL upto7 description
+  query of sort int
+  result of sort int
+  import upto
+  start with [upto(10000000, inc1)]0
+end

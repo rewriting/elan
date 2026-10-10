@@ -1,0 +1,5 @@
+# a defined strategy with parameters nesting 10^5 strategy terms
+query 0 end
+status 0
+result 100000
+small 100000 100

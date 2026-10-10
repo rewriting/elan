@@ -1,0 +1,4 @@
+# 10^8 levels of a non-deterministic recursion: stops cleanly
+status 3
+stderr elan: recursion too deep
+small 100000000 1000

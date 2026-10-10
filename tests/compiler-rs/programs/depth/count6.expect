@@ -1,0 +1,4 @@
+# count(x) => count(x - 1) + 1: normalisation 10^6 deep
+status 0
+result 1000000
+small 1000000 1000

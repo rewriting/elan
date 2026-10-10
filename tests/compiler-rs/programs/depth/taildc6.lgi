@@ -1,0 +1,6 @@
+LPL taildc6 description
+  query of sort bool
+  result of sort int
+  import depth
+  start with (taildc) 1000000
+end

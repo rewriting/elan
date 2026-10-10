@@ -1,0 +1,5 @@
+# dc(dk(dec) ; dc one(taildc), id): a loop (tail call under a DC and a ONE)
+status 0
+result 0
+maxrss 64
+small 1000000 1000

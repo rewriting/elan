@@ -1,0 +1,6 @@
+LPL count8 description
+  query of sort bool
+  result of sort int
+  import depth
+  start with () count(100000000)
+end

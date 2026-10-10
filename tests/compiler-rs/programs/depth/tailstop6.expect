@@ -1,0 +1,6 @@
+# first(first one(dc(dec) ; tailstop), first(dc(zero), inf)): a loop;
+# the second alternative runs only at 0 (it would recurse endlessly)
+status 0
+result 0
+maxrss 64
+small 1000000 1000

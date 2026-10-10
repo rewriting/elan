@@ -1,0 +1,4 @@
+# iterate* of a step not provably deterministic: 10^6 levels fit in the stack
+status 0
+result 0
+small 1000000 1000

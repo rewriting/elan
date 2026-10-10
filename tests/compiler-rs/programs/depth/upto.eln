@@ -1,0 +1,20 @@
+module upto
+// A defined strategy with parameters, recursive: [upto(n, inc1)] 0 nests
+// n strategy terms (strat[int], evaluated at run time).
+import global int strat[int]; end
+stratop global
+  upto(@,@) : (int <int>) <int>;
+end
+rules for int
+  n : int;
+global
+  [inc1] n => n+1 end
+end
+strategies for int
+  s : <int>;
+  k : int;
+implicit
+  [] upto(k, s) => s ; upto(k - 1, s) if k > 0 end
+  [] upto(k, s) => id if k <= 0 end
+end
+end

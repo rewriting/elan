@@ -1,0 +1,5 @@
+# first one(dc(dec) ; tailone, id): a loop
+status 0
+result 0
+maxrss 64
+small 1000000 1000

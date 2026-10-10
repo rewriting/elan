@@ -113,6 +113,7 @@ check-rust: install
 	  && if [ -x "$(PREFIX)/bin/elanc-rs" ]; then tests/compiler-rs/test_normalise.sh "$(PREFIX)" \
 	       && tests/compiler-rs/test_strategies.sh "$(PREFIX)" \
 	       && tests/compiler-rs/test_strategies.sh "$(PREFIX)" -d strategy_terms \
+	       && tests/compiler-rs/test_depth.sh "$(PREFIX)" \
 	       && tests/compiler-rs/bench_parity.py "$(PREFIX)"; \
 	     else echo "elanc-rs not installed (-DELAN_RUST=OFF): compiled Rust tests skipped"; fi; \
 	else echo "cargo not found: Rust tests skipped"; fi

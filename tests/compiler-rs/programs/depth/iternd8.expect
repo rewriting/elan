@@ -1,0 +1,4 @@
+# iterate* of a non-deterministic step 10^8 deep: stops cleanly
+status 3
+stderr elan: recursion too deep
+small 100000000 1000

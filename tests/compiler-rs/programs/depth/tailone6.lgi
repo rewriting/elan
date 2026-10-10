@@ -1,0 +1,6 @@
+LPL tailone6 description
+  query of sort bool
+  result of sort int
+  import depth
+  start with (tailone) 1000000
+end

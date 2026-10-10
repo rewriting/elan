@@ -1,0 +1,5 @@
+# first(dk(dec) ; tail, id): a tail-recursive deterministic strategy, a loop
+status 0
+result 0
+maxrss 64
+small 1000000 1000

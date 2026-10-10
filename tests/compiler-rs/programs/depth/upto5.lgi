@@ -1,0 +1,6 @@
+LPL upto5 description
+  query of sort int
+  result of sort int
+  import upto
+  start with [upto(100000, inc1)]0
+end
