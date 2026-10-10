@@ -423,3 +423,20 @@ fn printing_form_is_the_last_grammar_rule() {
         vec![PrintItem::Arg(0), PrintItem::Char('+'), PrintItem::Arg(1)]
     );
 }
+
+#[test]
+fn a_rule_that_types_to_no_profile_is_an_error() {
+    // plus(x, b) => x with b of sort bool: plus has no profile (nat bool)
+    let mut p = peano();
+    p.rule(
+        NAT,
+        2,
+        f(320, vec![v(0, NAT), v(1, BOOL)]),
+        v(0, NAT),
+        vec![],
+    );
+    match p.lower() {
+        Err(Error::Invalid(m)) => assert!(m.contains("cannot type") && m.contains("plus"), "{m}"),
+        r => panic!("the rule must not be dropped silently: {r:?}"),
+    }
+}

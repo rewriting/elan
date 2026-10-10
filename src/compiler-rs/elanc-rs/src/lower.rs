@@ -552,7 +552,18 @@ impl<'p> Lowerer<'p> {
             }
             match self.type_term(&r.lhs, Some(r.sort)) {
                 Ok(t) if matches!(t, TT::Op(h, _) if h == c) => v.push((r, t)),
-                Ok(_) | Err(TypeErr::Mismatch(_)) => {}
+                // a rule of another profile of the symbol (overloading)
+                Ok(_) => {}
+                // a rule with the symbol at the top that fits no profile:
+                // refused rather than silently ignored
+                Err(TypeErr::Mismatch(m)) => {
+                    return Err(Error::Invalid(format!(
+                        "a rule of sort {} for symbol {} ({}): cannot type its left-hand side: {m}",
+                        self.sort_name(r.sort),
+                        cand.symbol,
+                        self.cand_decl(cand)
+                    )))
+                }
                 // a rule of this operator that S6a cannot compile
                 Err(TypeErr::Hard(e)) => return Err(e),
             }
