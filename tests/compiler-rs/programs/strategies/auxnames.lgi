@@ -1,0 +1,6 @@
+LPL auxnames description
+  query of sort bool
+  result of sort int
+  import auxnames
+  start with (go_aux) f(3)
+end

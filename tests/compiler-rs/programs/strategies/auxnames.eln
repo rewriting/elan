@@ -1,0 +1,35 @@
+module auxnames
+// Two strategies named go_aux, on int and on bool, each with a
+// non-deterministic repeat* (an auxiliary function): their auxiliary
+// functions must have distinct Rust names (elanc-rs emitted st_go_aux1
+// twice, a rustc error E0428).
+import global int bool; end
+operators global
+  f(@) : (int) int;
+end
+stratop global
+  go_aux : <int -> int> bs;
+  go_aux : <bool -> bool> bs;
+end
+rules for int
+  n : int; c : bool;
+global
+  [] f(n) => n where c := (go_aux) true end
+  [dec] n => n - 1 if n > 0 end
+  [dec] n => n - 2 if n > 1 end
+end
+rules for bool
+  b : bool;
+global
+  [neg] b => false if b end
+  [neg] b => false if b end
+end
+strategies for int
+implicit
+  [] go_aux => repeat*(dk(dec)) end
+end
+strategies for bool
+implicit
+  [] go_aux => repeat*(dk(neg)) end
+end
+end

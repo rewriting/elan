@@ -1,0 +1,6 @@
+LPL metasorts description
+  query of sort bool
+  result of sort list[AB]
+  import metasorts
+  start with () set_of(call "sx":AB, a)
+end

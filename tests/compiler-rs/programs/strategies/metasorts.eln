@@ -1,0 +1,34 @@
+module metasorts
+// META on two sorts whose Rust type names differ only by case (list[AB],
+// list[Ab]: ListAB, ListAb): their META functions must have distinct
+// names (elanc-rs emitted meta_listab twice, a rustc error E0428).
+import global bool list[AB] list[Ab] Meta_apply[AB] Meta_apply[Ab]; end
+sort AB Ab; end
+operators global
+  a       : AB;
+  wrap(@) : (list[Ab]) AB;
+  c       : Ab;
+  d       : Ab;
+end
+stratop global
+  sx : <AB -> AB> bs;
+  sy : <Ab -> Ab> bs;
+end
+rules for AB
+  l : list[Ab];
+global
+  [r1] a => wrap(l) where l := () set_of(call "sy":Ab, c) end
+end
+rules for Ab
+global
+  [r2] c => d end
+end
+strategies for AB
+implicit
+  [] sx => dk(r1) end
+end
+strategies for Ab
+implicit
+  [] sy => dk(r2) end
+end
+end

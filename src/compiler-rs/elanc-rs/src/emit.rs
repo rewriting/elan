@@ -214,6 +214,9 @@ struct Emitter<'a> {
     aux: Vec<(String, SortId, Vec<Strategy>)>,
     /// Number of auxiliary functions of the current strategy.
     aux_n: usize,
+    /// The function of the current strategy, prefix of the names of its
+    /// auxiliary functions (unique: [`crate::names::unique`] in the lowering).
+    aux_base: String,
     /// The sorts whose `META` function is used.
     meta_sorts: Vec<SortId>,
     /// The operators whose normalisation checks the stack
@@ -239,6 +242,7 @@ impl<'a> Emitter<'a> {
             label_mode: false,
             aux: Vec::new(),
             aux_n: 0,
+            aux_base: String::new(),
             meta_sorts: Vec::new(),
             recursive: ir.recursive_ops(),
             total: ir.total_strategies(),
@@ -1151,6 +1155,7 @@ impl<'a> Emitter<'a> {
         for (i, st) in ir.strategies.iter().enumerate() {
             self.fresh = 0;
             self.aux_n = 0;
+            self.aux_base = st.fun.clone();
             let text = self.seq_text(&st.body);
             self.tail_nodes = ir.tail_calls(i, &self.total);
             self.out.line(&format!(
@@ -1403,7 +1408,7 @@ impl<'a> Emitter<'a> {
                 )
             }
             Strategy::Repeat(b) => {
-                let aux = self.aux_fn(owner, sort, b);
+                let aux = self.aux_fn(sort, b);
                 format!("strat::repeat_star({t}, {k}, &{aux})")
             }
             Strategy::Iterate(b) if self.ir.seq_det(b) => {
@@ -1431,7 +1436,7 @@ impl<'a> Emitter<'a> {
                 )
             }
             Strategy::Iterate(b) => {
-                let aux = self.aux_fn(owner, sort, b);
+                let aux = self.aux_fn(sort, b);
                 format!("strat::iterate_star({t}, {k}, &{aux})")
             }
         }
@@ -1441,9 +1446,12 @@ impl<'a> Emitter<'a> {
     // META (Meta_apply[X], Meta_strat[X])
     // ------------------------------------------------------------------
 
-    /// The function of the `META` strategy on sort `s`.
+    /// The function of the `META` strategy on sort `s`: `meta_` and the
+    /// Rust type of the sort, unique ([`crate::names::unique`] in the lowering).
+    /// (Until 2026 the type was lowercased: `list[AB]` and `list[Ab]` both
+    /// had a `meta_listab`.)
     fn meta_fun(&self, s: SortId) -> String {
-        format!("meta_{}", self.ir.sorts[s].type_name.to_lowercase())
+        format!("meta_{}", self.ir.sorts[s].type_name)
     }
 
     /// The operator of `symbol` with result sort `s`.
@@ -1766,14 +1774,15 @@ impl<'a> Emitter<'a> {
     }
 
     /// An auxiliary strategy function for `body` (the step of `repeat*` or
-    /// `iterate*`), emitted after the current strategy.
-    fn aux_fn(&mut self, owner: &str, sort: SortId, body: &[Strategy]) -> String {
-        let base = match owner.rfind("_aux") {
-            Some(i) => &owner[..i],
-            None => owner,
-        };
+    /// `iterate*`), emitted after the current strategy: `<f>_aux<n>`, `f`
+    /// the function of the strategy (unique; the names of the strategies
+    /// end with `_<digits>`, never with `aux<digits>`), `n` counting its
+    /// auxiliary functions, nested ones included. (Until 2026 `f` was the
+    /// name of the owner up to its last `_aux`: two strategies named
+    /// `go_aux` of two sorts both had a `st_go_aux1`.)
+    fn aux_fn(&mut self, sort: SortId, body: &[Strategy]) -> String {
         self.aux_n += 1;
-        let name = format!("{base}_aux{}", self.aux_n);
+        let name = format!("{}_aux{}", self.aux_base, self.aux_n);
         self.aux.push((name.clone(), sort, body.to_vec()));
         name
     }
