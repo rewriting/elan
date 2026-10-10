@@ -442,6 +442,16 @@ func (l *lowerer) visit(t *tt, r *reach) {
 	}
 }
 
+// strategyTermCode tells whether a semantic code (its absolute value) is
+// that of a strategy term constructor, not of a builtin operation: the
+// strategy constructors of strsig[X]/strat[X] (179..190, 205..208, DS_*
+// in term/codes.h), of Meta_strat[X] (131..147) and meta_apply (128..130).
+// The interpreter has no reduction for them; their terms are strategies
+// (S7b), as in elanc-rs (builtin_semantic, lower.rs).
+func strategyTermCode(code int32) bool {
+	return 128 <= code && code <= 147 || 179 <= code && code <= 190 || 205 <= code && code <= 208
+}
+
 // expand checks a newly reached operator, then reaches what its rules use.
 func (l *lowerer) expand(c int, r *reach) error {
 	k := &l.cands[c]
@@ -478,6 +488,9 @@ func (l *lowerer) expand(c int, r *reach) error {
 		code := k.semantic
 		if code < 0 {
 			code = -code
+		}
+		if strategyTermCode(code) {
+			return unsupported("S7b", "strategy term operator %s (code %d)", l.candDecl(k), k.semantic)
 		}
 		if _, ok := BuiltinFromCode(code); !ok {
 			return unsupported("S7d", "builtin operation code %d (%s)", code, l.candDecl(k))

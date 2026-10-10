@@ -387,6 +387,16 @@ func TestUnsupportedConstructsAreRefusedWhenReachable(t *testing.T) {
 	if st, what := unsupportedStage(t, p); st != "S7d" || !strings.Contains(what, "code 155") {
 		t.Fatalf("%s %s", st, what)
 	}
+	// the codes of strategy terms (strsig/strat, Meta_strat, meta_apply)
+	// are strategies (S7b), not builtins
+	for _, code := range []int32{128, 147, -180, 179, 190, -205, 208} {
+		p = peano()
+		p.op(sNat, 156, "x", []uint32{sNat}, code, 0)
+		p.start(f(156, f(318)), sNat)
+		if st, what := unsupportedStage(t, p); st != "S7b" || !strings.Contains(what, "strategy term") {
+			t.Fatalf("code %d: %s %s", code, st, what)
+		}
+	}
 }
 
 // A builtin operation needs values of builtin sorts: declared on a sort
