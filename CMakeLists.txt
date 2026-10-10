@@ -45,8 +45,10 @@ option(ELAN_GO "Build the Go compiler elanc-go (needs go >= 1.24)" ON)
 if(ELAN_GO)
   find_program(ELAN_GO_EXE go)
   if(ELAN_GO_EXE)
-    execute_process(COMMAND ${ELAN_GO_EXE} env GOVERSION OUTPUT_VARIABLE ELAN_GO_VERSION
-                    OUTPUT_STRIP_TRAILING_WHITESPACE)
+    # the local toolchain: the one that builds elanc-go (GOTOOLCHAIN=local),
+    # not one go would download or switch to
+    execute_process(COMMAND ${CMAKE_COMMAND} -E env GOTOOLCHAIN=local ${ELAN_GO_EXE} env GOVERSION
+                    OUTPUT_VARIABLE ELAN_GO_VERSION OUTPUT_STRIP_TRAILING_WHITESPACE)
     string(REGEX MATCH "go([0-9]+)\\.([0-9]+)" _m "${ELAN_GO_VERSION}")
     if(CMAKE_MATCH_1 GREATER 1 OR (CMAKE_MATCH_1 EQUAL 1 AND CMAKE_MATCH_2 GREATER_EQUAL 24))
       add_subdirectory(src/compiler-go)

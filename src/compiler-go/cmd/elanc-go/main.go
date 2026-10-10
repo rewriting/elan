@@ -33,7 +33,9 @@
 // installation (<prefix>/share/elan-go/elanrt, <prefix> being the parent of
 // the directory of this executable). The interpreter: --elan FILE, else
 // <prefix>/bin/elan, else elan from PATH. The go command: --go FILE, else
-// go from PATH.
+// the go that CMake found when ELAN was built (its path recorded at the
+// installation in <prefix>/share/elan-go/go-command), if it is still an
+// executable file, else go from PATH.
 //
 // --from-ref FILE compiles an existing .ref file (no export; the program
 // name is still taken from the .lgi argument).
@@ -76,7 +78,8 @@ options:
   --runtime DIR          the elanrt module (default $ELAN_GO_RUNTIME,
                          else <prefix>/share/elan-go/elanrt)
   --elan FILE            the ELAN interpreter (default <prefix>/bin/elan)
-  --go FILE              the go command (default go)
+  --go FILE              the go command (default the go found when ELAN
+                         was built, else go from PATH)
   --from-ref FILE        compile this .ref file instead of exporting the program
   --no-build             write the Go module only
   -v                     print the commands and the build time
@@ -212,6 +215,21 @@ func defaultCache() string {
 		return filepath.Join(d, ".cache", "elanc-go")
 	}
 	return ""
+}
+
+// defaultGo is the go command: the one recorded at the installation in
+// <prefix>/share/elan-go/go-command (the go that CMake found), if it is an
+// executable file, else go from PATH.
+func defaultGo(pre string) string {
+	b, err := os.ReadFile(filepath.Join(pre, "share", "elan-go", "go-command"))
+	if err != nil {
+		return "go"
+	}
+	p := strings.TrimRight(string(b), "\r\n")
+	if st, err := os.Stat(p); err == nil && st.Mode().IsRegular() && st.Mode()&0o111 != 0 {
+		return p
+	}
+	return "go"
 }
 
 // writeIfChanged writes path unless it already has this content.
@@ -389,7 +407,7 @@ func compile() {
 	}
 	goCmd := o.goCmd
 	if goCmd == "" {
-		goCmd = "go"
+		goCmd = defaultGo(pre)
 	}
 	bin := filepath.Join(work, "elanprog")
 	cmd := exec.Command(goCmd, "build", "-trimpath", "-buildvcs=false", "-o", bin, ".")

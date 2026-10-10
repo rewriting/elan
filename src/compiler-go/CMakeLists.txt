@@ -4,12 +4,15 @@
 set(ELAN_GO_BIN ${CMAKE_CURRENT_BINARY_DIR}/elanc-go)
 add_custom_target(elanc_go ALL
   COMMAND ${CMAKE_COMMAND} -E env GOTOOLCHAIN=local GOFLAGS=-mod=mod
-          GOCACHE=${CMAKE_CURRENT_BINARY_DIR}/gocache
+          GOPROXY=off GOWORK=off GOCACHE=${CMAKE_CURRENT_BINARY_DIR}/gocache
           ${ELAN_GO_EXE} build -buildvcs=false -o ${ELAN_GO_BIN} ./cmd/elanc-go
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   COMMENT "Building elanc-go (go)"
   USES_TERMINAL)
 install(PROGRAMS ${ELAN_GO_BIN} DESTINATION bin)
+# the go found by CMake: elanc-go builds the programs with it (unless --go)
+file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/go-command "${ELAN_GO_EXE}\n")
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/go-command DESTINATION share/elan-go)
 # generated programs import the runtime module by a replace directive
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/elanrt/
         DESTINATION share/elan-go/elanrt

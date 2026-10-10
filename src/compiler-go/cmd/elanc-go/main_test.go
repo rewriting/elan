@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 	"os/exec"
+	"path/filepath"
 	"slices"
 	"strings"
 	"testing"
@@ -66,5 +67,34 @@ func TestBadCommandLines(t *testing.T) {
 	}
 	if _, err := parseArgs([]string{"-help"}); err != errHelp {
 		t.Fatalf("help: %v", err)
+	}
+}
+
+// The go command: the one CMake found, recorded at the installation in
+// <prefix>/share/elan-go/go-command, else go from PATH.
+func TestDefaultGoCommand(t *testing.T) {
+	pre := t.TempDir()
+	if g := defaultGo(pre); g != "go" {
+		t.Fatalf("no record: %q", g)
+	}
+	dir := filepath.Join(pre, "share", "elan-go")
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	goExe := filepath.Join(pre, "my go", "go")
+	if err := os.MkdirAll(filepath.Dir(goExe), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(dir, "go-command"), []byte(goExe+"\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if g := defaultGo(pre); g != "go" {
+		t.Fatalf("recorded go missing: %q", g)
+	}
+	if err := os.WriteFile(goExe, []byte("#!/bin/sh\n"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if g := defaultGo(pre); g != goExe {
+		t.Fatalf("recorded go: %q, want %q", g, goExe)
 	}
 }

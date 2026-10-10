@@ -119,7 +119,7 @@ check-rust: install
 	else echo "cargo not found: Rust tests skipped"; fi
 
 # Tests of the Go compiler (src/compiler-go, spec S7), when go >= 1.24 exists.
-GO_ENV = GOTOOLCHAIN=local GOFLAGS=-mod=mod GOCACHE=$(CURDIR)/$(BUILD)/src/compiler-go/gocache
+GO_ENV = GOTOOLCHAIN=local GOFLAGS=-mod=mod GOPROXY=off GOWORK=off GOCACHE=$(CURDIR)/$(BUILD)/src/compiler-go/gocache
 check-go: install
 	@if [ -x "$(PREFIX)/bin/elanc-go" ]; then \
 	  (cd src/compiler-go && $(GO_ENV) go vet ./... && $(GO_ENV) go test ./...) \

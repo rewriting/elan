@@ -35,7 +35,7 @@ case $READER in
   go)
     ROUNDTRIP=$RUN/elan-ref-roundtrip
     ( cd "$REPO/src/compiler-go" \
-      && GOTOOLCHAIN=local GOFLAGS=-mod=mod \
+      && GOTOOLCHAIN=local GOFLAGS=-mod=mod GOPROXY=off GOWORK=off \
          GOCACHE=${GOCACHE:-$REPO/build/src/compiler-go/gocache} \
          go build -o "$ROUNDTRIP" ./cmd/elan-ref-roundtrip ) || exit 2 ;;
   *)
