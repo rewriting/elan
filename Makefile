@@ -124,7 +124,8 @@ check-go: install
 	@if [ -x "$(PREFIX)/bin/elanc-go" ]; then \
 	  (cd src/compiler-go && $(GO_ENV) go vet ./... && $(GO_ENV) go test ./...) \
 	  && (cd src/compiler-go/elanrt && $(GO_ENV) go vet ./... && $(GO_ENV) go test ./...) \
-	  && $(GO_ENV) tests/compiler-rs/test_ref_roundtrip.sh "$(PREFIX)" go; \
+	  && $(GO_ENV) tests/compiler-rs/test_ref_roundtrip.sh "$(PREFIX)" go \
+	  && ELANC=elanc-go tests/compiler-rs/test_normalise.sh "$(PREFIX)"; \
 	else echo "elanc-go not built (go >= 1.24 missing or -DELAN_GO=OFF): Go tests skipped"; fi
 
 check: smoke test-runner check-arch check-unit check-golden check-rust check-go
