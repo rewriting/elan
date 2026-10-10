@@ -11,15 +11,15 @@ pub mod lower;
 pub mod matching;
 pub mod names;
 
-/// Compile the `.ref` text of program `name` to a crate.
+/// Compile the `.ref` text of program `name` to a crate (named after its
+/// content, [`emit::package_name`]).
 pub fn compile_ref(
     src: &[u8],
     name: &str,
-    bin_name: &str,
     runtime_path: &str,
 ) -> Result<emit::Crate, lower::Error> {
     let p = elan_ref::parse_bytes(src)
         .map_err(|e| lower::Error::Invalid(format!("cannot read the .ref file: {e}")))?;
     let ir = lower::lower(&p, name)?;
-    Ok(emit::emit_crate(&ir, bin_name, runtime_path))
+    Ok(emit::emit_crate(&ir, runtime_path))
 }

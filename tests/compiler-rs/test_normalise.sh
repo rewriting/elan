@@ -112,6 +112,32 @@ for lgi in "$HERE"/programs/normalise/*.lgi; do
   fi
 done
 
+# The same program compiled from another directory reuses its package in
+# the shared target directory (named after the generated code, not after
+# the work directory): the target directory does not grow.
+packages() {  # packages NAME: the files of NAME's packages in $TARGET
+  ls -a "$TARGET/release" "$TARGET/release/deps" "$TARGET/release/.fingerprint" \
+    2>/dev/null | grep -c "^elan[-_]$1[-_]"
+}
+if [ -d "$RUN/peano/rs" ] && [ -x "$RUN/peano/rs/a.out" ]; then
+  n=$((n+1))
+  d=$RUN/peano/again
+  mkdir "$d" && cp "$RUN/peano/rs/peano.lgi" "$RUN/peano/rs/peano.eln" "$d/" || exit 2
+  before=$(packages peano)
+  if ( cd "$d" && elanc-rs --target-dir "$TARGET" peano >elanc-rs.log 2>&1 ) \
+     && [ "$(cd "$d" && ./a.out -noInput -quiet | grep '^result = ')" \
+          = "$(cd "$RUN/peano/rs" && ./a.out -noInput -quiet | grep '^result = ')" ]; then
+    after=$(packages peano)
+    if [ "$before" = "$after" ]; then
+      ok "peano from another directory: same package ($after files)"
+    else
+      fail "peano from another directory: $before files, then $after in $TARGET"
+    fi
+  else
+    fail "peano from another directory: elanc-rs failed or another result (see $d/elanc-rs.log)"
+  fi
+fi
+
 for lgi in "$HERE"/programs/refused/*.lgi; do
   name=$(basename "$lgi" .lgi)
   [ -z "$SELECTION" ] || selected "$name" || continue

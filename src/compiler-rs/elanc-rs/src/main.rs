@@ -17,6 +17,9 @@
 //!    so that the runtime crate is compiled once, not per program:
 //!    `--target-dir DIR`, else `$ELANC_RS_TARGET_DIR`, else
 //!    `$XDG_CACHE_HOME/elanc-rs/target` or `$HOME/.cache/elanc-rs/target`;
+//!    the package is named after the generated code
+//!    ([`elanc_rs::emit::package_name`]), so that the same program compiled
+//!    from another directory reuses its package there;
 //! 4. the program is copied to `./a.out` (`-o`/`-output NAME`); that file
 //!    is removed first, so that a refusal or a failure leaves none.
 //!
@@ -188,17 +191,6 @@ fn default_target_dir() -> Option<PathBuf> {
         .or_else(|| env_path("HOME").map(|h| h.join(".cache/elanc-rs/target")))
 }
 
-/// A short stable hash (FNV-1a) of a text, for unique binary names in the
-/// shared target directory.
-fn fnv(s: &str) -> u32 {
-    let mut h: u32 = 0x811c_9dc5;
-    for b in s.bytes() {
-        h ^= b as u32;
-        h = h.wrapping_mul(0x0100_0193);
-    }
-    h
-}
-
 /// Write `path` unless it already has this content (cargo then has nothing
 /// to rebuild).
 fn write_if_changed(path: &Path, content: &str) {
@@ -336,18 +328,7 @@ fn main() {
     let runtime = runtime
         .canonicalize()
         .unwrap_or_else(|e| fail(format!("runtime {}: {e}", runtime.display())));
-    let bin = format!(
-        "elan-{}-{:08x}",
-        prog.chars()
-            .map(|c| if c.is_ascii_alphanumeric() {
-                c.to_ascii_lowercase()
-            } else {
-                '_'
-            })
-            .collect::<String>(),
-        fnv(&work.to_string_lossy())
-    );
-    let krate = match elanc_rs::compile_ref(&src, &prog, &bin, &runtime.to_string_lossy()) {
+    let krate = match elanc_rs::compile_ref(&src, &prog, &runtime.to_string_lossy()) {
         Ok(k) => k,
         Err(e @ lower::Error::Unsupported { .. }) => {
             eprintln!("elanc-rs: {prog}: {e}");
@@ -355,6 +336,7 @@ fn main() {
         }
         Err(e) => fail(format!("{prog}: {e}")),
     };
+    let bin = krate.bin;
     write_if_changed(&work.join("Cargo.toml"), &krate.cargo_toml);
     write_if_changed(&work.join("src/main.rs"), &rustfmt(krate.main_rs));
     if !o.build {
