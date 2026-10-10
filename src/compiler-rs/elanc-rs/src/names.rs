@@ -16,6 +16,7 @@ const RESERVED: &[&str] = &[
     "Int",
     "Str",
     "Print",
+    "StringStyle",
     "Writer",
     "Sort",
     "Session",
@@ -207,8 +208,26 @@ mod tests {
         assert_eq!(type_name("string"), "StringSort");
         assert_eq!(variant_name("plus", 3), "Plus");
         assert_eq!(variant_name("self", 400), "Self400");
+        assert_eq!(type_name("stringStyle"), "StringStyleSort");
         let mut used = HashSet::new();
         assert_eq!(unique(&mut used, "a".into()), "a");
         assert_eq!(unique(&mut used, "a".into()), "a_2");
+    }
+
+    /// Every capitalised name imported by the generated code is reserved:
+    /// no sort type or variant can take it.
+    #[test]
+    fn runtime_imports_are_reserved() {
+        for line in crate::emit::RUNTIME_IMPORTS {
+            let names = line
+                .split(|c: char| !(c.is_ascii_alphanumeric() || c == '_'))
+                .filter(|n| n.starts_with(|c: char| c.is_ascii_uppercase()));
+            for n in names {
+                assert!(RESERVED.contains(&n), "{n} (imported) is not reserved");
+                let lower = n[..1].to_lowercase() + &n[1..];
+                assert_ne!(type_name(&lower), n);
+                assert_ne!(variant_name(&lower, 7), n);
+            }
+        }
     }
 }
