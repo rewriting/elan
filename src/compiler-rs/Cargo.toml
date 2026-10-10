@@ -1,0 +1,14 @@
+# ELAN compiler in Rust (spec docs/superpowers/specs/2026-10-10-s6-rust-compiler-design.md).
+# Rust >= 1.74, standard library only, built offline.
+[workspace]
+members = ["elan-ref", "elanc-rs", "elan-runtime"]
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.74"
+license = "GPL-2.0-or-later"
+
+[profile.release]
+debug = false

@@ -29,6 +29,17 @@ if(ELAN_COMPILER)
   add_subdirectory(src/compiler)
 endif()
 
+# The compiler in Rust (spec S6): only when cargo is found.
+option(ELAN_RUST "Build the Rust compiler elanc-rs (needs cargo)" ON)
+if(ELAN_RUST)
+  find_program(ELAN_CARGO cargo)
+  if(ELAN_CARGO)
+    add_subdirectory(src/compiler-rs)
+  else()
+    message(STATUS "cargo not found: elanc-rs is not built")
+  endif()
+endif()
+
 if(ELAN_SANITIZE)
   add_compile_options(-fsanitize=${ELAN_SANITIZERS} -fno-sanitize-recover=undefined
                       -fno-omit-frame-pointer -g)

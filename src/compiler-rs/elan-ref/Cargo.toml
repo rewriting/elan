@@ -1,0 +1,7 @@
+[package]
+name = "elan-ref"
+description = "Reader of the .ref export of ELAN programs (docs/ref-format.md)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true

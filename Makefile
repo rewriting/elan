@@ -26,7 +26,7 @@ else
   ELAN_CXX ?= g++
 endif
 
-.PHONY: manual manual-update all configure install check check-compiler check-golden check-sanitize check-arch check-unit test-runner smoke reference check-reference clean toolchain
+.PHONY: manual manual-update all configure install check check-rust check-compiler check-golden check-sanitize check-arch check-unit test-runner smoke reference check-reference clean toolchain
 
 all: configure
 	cmake --build $(BUILD) -j $(JOBS)
@@ -104,7 +104,13 @@ check-golden: install
 	cd tests/golden && python3 test_run_golden.py
 	python3 tests/golden/run_golden.py --prefix $(PREFIX)
 
-check: smoke test-runner check-arch check-unit check-golden
+# Tests of the Rust compiler (src/compiler-rs, spec S6), when cargo exists.
+check-rust:
+	@if command -v cargo >/dev/null 2>&1; then \
+	  cd src/compiler-rs && CARGO_TARGET_DIR=$(CURDIR)/$(BUILD)/src/compiler-rs/target cargo test --offline --quiet; \
+	else echo "cargo not found: Rust tests skipped"; fi
+
+check: smoke test-runner check-arch check-unit check-golden check-rust
 	$(BENCH) --prefix $(PREFIX) --kinds I,A
 	@$(CHECK_COMPILER)
 

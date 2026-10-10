@@ -1,0 +1,10 @@
+[package]
+name = "elanc-rs"
+description = "ELAN compiler: .ref export to a Rust crate"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+elan-ref = { path = "../elan-ref" }
