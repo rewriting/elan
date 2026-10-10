@@ -389,6 +389,30 @@ func TestUnsupportedConstructsAreRefusedWhenReachable(t *testing.T) {
 	}
 }
 
+// A builtin operation needs values of builtin sorts: declared on a sort
+// of terms (`@ pl @ : (t t) t code 3;`, the interpreter leaves the term),
+// it is refused (elanc-go crashed on it).
+func TestBuiltinOnASortOfTermsIsRefused(t *testing.T) {
+	p := peano()
+	p.op(sNat, 3, "pl", []uint32{sNat, sNat}, 3, 0) // + on nat
+	p.start(f(3, f(318), f(318)), sNat)
+	if st, what := unsupportedStage(t, p); st != "S7d" || !strings.Contains(what, "pl") {
+		t.Fatalf("%s %s", st, what)
+	}
+	// a result of a sort of terms
+	p = peano()
+	p.op(sNat, 150, "len", []uint32{sStr}, 150, 0)
+	p.start(f(150, ref.Str{Codes: []int32{'a'}}), sNat)
+	if st, what := unsupportedStage(t, p); st != "S7d" || !strings.Contains(what, "len") {
+		t.Fatalf("%s %s", st, what)
+	}
+	// and, or, not, ==, != take any term: fine on a sort of terms
+	p = peano()
+	p.op(sBool, 18, "eq", []uint32{sNat, sNat}, 18, 0)
+	p.start(f(18, f(318), f(318)), sBool)
+	p.lower(t)
+}
+
 func TestPrintingFormIsTheLastGrammarRule(t *testing.T) {
 	p := peano()
 	// an alias declared after: `@ + @` with the same symbol as plus

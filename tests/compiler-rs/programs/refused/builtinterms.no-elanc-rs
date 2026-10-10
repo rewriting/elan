@@ -1,0 +1,3 @@
+elanc-rs emits Rust that does not compile for a builtin operation on a
+sort of terms (cargo build fails, exit 1, instead of a refusal with exit
+2): recorded in docs/s6-rust-status.md, not fixed (S6 is on hold).

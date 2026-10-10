@@ -21,7 +21,9 @@
 # Exceptions, each documented in its file: <name>.rem holds the expected
 # REM result line when REM differs on purpose (the compiler's result is then
 # compared with the interpreter only); <name>.no-interpreter says why the
-# interpreter is not run, <name>.no-rem why REM is not run.
+# interpreter is not run, <name>.no-rem why REM is not run,
+# <name>.no-<compiler> (e.g. .no-elanc-rs) why the program is not run
+# with that compiler (normalised or refused programs).
 # Outputs are compared as bytes (LC_ALL=C): strings are bytes, and the
 # sources of latin1*.eln are Latin-1.
 # Programs programs/refused/<name>.lgi use constructs of later stages:
@@ -74,6 +76,9 @@ SELECTION="$*"
 for lgi in "$HERE"/programs/normalise/*.lgi; do
   name=$(basename "$lgi" .lgi)
   [ -z "$SELECTION" ] || selected "$name" || continue
+  if [ -f "$HERE/programs/normalise/$name.no-$ELANC" ]; then
+    echo "skip $name ($name.no-$ELANC)"; continue
+  fi
   n=$((n+1))
   d=$RUN/$name
   mkdir "$d" "$d/$W" "$d/rem" "$d/int" || exit 2
@@ -168,6 +173,9 @@ fi
 for lgi in "$HERE"/programs/refused/*.lgi; do
   name=$(basename "$lgi" .lgi)
   [ -z "$SELECTION" ] || selected "$name" || continue
+  if [ -f "$HERE/programs/refused/$name.no-$ELANC" ]; then
+    echo "skip refused $name ($name.no-$ELANC)"; continue
+  fi
   n=$((n+1))
   d=$RUN/refused-$name
   mkdir "$d" || exit 2

@@ -1,0 +1,6 @@
+LPL builtinterms description
+  query of sort bool
+  result of sort out
+  import builtinterms
+  start with () r(a pl a)
+end

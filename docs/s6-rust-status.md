@@ -46,3 +46,9 @@ compared with.
 * Deferred review notes: non-tail recursion still uses the 1 GiB stack
   (exit 3 beyond); mutual tail recursion is not a loop; the order of AC
   arguments follows creation ids (D5) and must not reach the output.
+* Known bugs found by the review of the Go compiler (S7a), not fixed:
+  - a builtin operation declared on a sort of terms (`@ pl @ : (t t) t
+    code 3;`, the interpreter leaves `a pl a`) gives Rust that does not
+    compile (cargo build fails, exit 1, instead of a refusal with exit 2);
+    tests/compiler-rs/programs/refused/builtinterms.no-elanc-rs skips the
+    test for elanc-rs (elanc-go refuses it, S7d).

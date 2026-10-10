@@ -1,9 +1,36 @@
 package main
 
 import (
+	"os"
+	"os/exec"
 	"slices"
+	"strings"
 	"testing"
 )
+
+func TestMain(m *testing.M) {
+	if os.Getenv("ELANC_GO_TEST_PANIC") == "1" {
+		guarded(func() { panic("boom") })
+		os.Exit(0)
+	}
+	os.Exit(m.Run())
+}
+
+// A panic of the compiler exits with 1 (a failure) and a message, not with
+// Go's 2 (which the driver uses for "not supported yet").
+func TestInternalErrorExitsWith1(t *testing.T) {
+	exe, err := os.Executable()
+	if err != nil {
+		t.Fatal(err)
+	}
+	cmd := exec.Command(exe)
+	cmd.Env = append(os.Environ(), "ELANC_GO_TEST_PANIC=1")
+	out, err := cmd.CombinedOutput()
+	ee, ok := err.(*exec.ExitError)
+	if !ok || ee.ExitCode() != 1 || !strings.HasPrefix(string(out), "elanc-go: internal error: boom\n") {
+		t.Fatalf("%v\n%s", err, out)
+	}
+}
 
 // The command line of the bench (run_tests.py, kind R) and of elanc.
 func TestRemOptionsAreIgnored(t *testing.T) {

@@ -715,6 +715,27 @@ func (b *builder) build(name string, start *tt, q *ref.Query, sortIndices []ref.
 		ir.Sorts[s].Family = f
 	}
 
+	// a builtin operation computes a value of a builtin sort, from values
+	// when it needs them: declared on sorts of terms (`@ pl @ : (t t) t
+	// code 3`, the interpreter leaves the term as it is), it is not
+	// compiled
+	for i, c := range cs {
+		if pre[i].kind != Builtin {
+			continue
+		}
+		op := &ir.Ops[i]
+		_, ok := familyOf[op.Result]
+		for _, a := range op.Args {
+			if _, isF := familyOf[a]; !isF && pre[i].builtin.NeedsValues() {
+				ok = false
+			}
+		}
+		if !ok {
+			return nil, unsupported("S7d", "builtin operation %s on sorts that are not builtin (%s)",
+				pre[i].builtin, l.candDecl(&l.cands[c]))
+		}
+	}
+
 	// rules
 	rules := make([][]Rule, len(ir.Ops))
 	skipped := make([][]string, len(ir.Ops))

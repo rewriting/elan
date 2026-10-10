@@ -37,7 +37,8 @@
 // name is still taken from the .lgi argument).
 //
 // Exit status: 0 on success, 2 when the program uses a construct that is
-// not supported yet (later stages of S7), 1 on any other failure. -v prints
+// not supported yet (later stages of S7), 1 on any other failure (an
+// internal error included). -v prints
 // the commands and the build time; --no-build stops after writing the
 // module.
 //
@@ -55,6 +56,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime/debug"
 	"slices"
 	"strings"
 	"time"
@@ -253,7 +255,22 @@ func copyFile(from, to string) error {
 	return out.Close()
 }
 
-func main() {
+func main() { guarded(compile) }
+
+// guarded runs f; a panic (a bug of the compiler) is a failure, exit status
+// 1 with the error and its stack, not Go's exit status 2, which says "not
+// supported yet".
+func guarded(f func()) {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Fprintf(os.Stderr, "elanc-go: internal error: %v\n%s", r, debug.Stack())
+			os.Exit(1)
+		}
+	}()
+	f()
+}
+
+func compile() {
 	o, err := parseArgs(os.Args[1:])
 	switch {
 	case err == errHelp:
