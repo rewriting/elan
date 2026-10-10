@@ -140,18 +140,31 @@ type lowerer struct {
 	p             *ref.Program
 	cands         []cand
 	bySymbol      map[ref.SymbolCode][]int
-	printForm     map[ref.SymbolCode][]ref.Lexem
+	printForm     map[profile][]ref.Lexem // the last grammar rule of each profile
 	rulesBySymbol map[ref.SymbolCode][]*ref.Rule
 	intSort       optSort
 	strSort       optSort
 	boolSort      optSort
 }
 
+// profile is an operator: its symbol, the sorts of its arguments and its
+// result (a symbol is shared by the operators of several profiles, e.g.
+// == of eq[X] on bool and on builtinInt).
+type profile struct {
+	symbol ref.SymbolCode
+	args   string // the argument sorts, as text (a comparable key)
+	result ref.SortIndex
+}
+
+func profileOf(symbol ref.SymbolCode, args []ref.SortIndex, result ref.SortIndex) profile {
+	return profile{symbol, fmt.Sprint(args), result}
+}
+
 func newLowerer(p *ref.Program) *lowerer {
 	l := &lowerer{
 		p:             p,
 		bySymbol:      map[ref.SymbolCode][]int{},
-		printForm:     map[ref.SymbolCode][]ref.Lexem{},
+		printForm:     map[profile][]ref.Lexem{},
 		rulesBySymbol: map[ref.SymbolCode][]*ref.Rule{},
 	}
 	for _, r := range p.Operators() {
@@ -162,7 +175,7 @@ func newLowerer(p *ref.Program) *lowerer {
 				args = append(args, ref.SortIndex(x.N))
 			}
 		}
-		l.printForm[o.Symbol] = o.Rhs
+		l.printForm[profileOf(o.Symbol, args, r.Grammar.Sort)] = o.Rhs
 		ids := l.bySymbol[o.Symbol]
 		if slices.ContainsFunc(ids, func(i int) bool {
 			return slices.Equal(l.cands[i].args, args) && l.cands[i].result == r.Grammar.Sort
@@ -863,20 +876,15 @@ func (b *builder) lexemTexts(ls []ref.Lexem) []string {
 	return v
 }
 
-// printItems is the printing form: the last grammar rule of the symbol (C
-// runtime); the operator's own declaration if that rule has another arity.
+// printItems is the printing form: the last grammar rule of the symbol
+// with the operator's profile, as the interpreter prints (an alias
+// declared after the operator, `eq_bool(@,@)` after `@ == @`); the rules
+// of the symbol with other profiles are not used (eq_builtinInt, declared
+// last, is not the form of == on bool; the C runtime of REM, keyed by the
+// symbol only, would print it).
 func (b *builder) printItems(k *cand) []PrintItem {
-	arity := func(ls []ref.Lexem) int {
-		n := 0
-		for _, x := range ls {
-			if x.Kind == ref.LexType {
-				n++
-			}
-		}
-		return n
-	}
 	ls := k.decl
-	if f, ok := b.l.printForm[k.symbol]; ok && arity(f) == len(k.args) {
+	if f, ok := b.l.printForm[profileOf(k.symbol, k.args, k.result)]; ok {
 		ls = f
 	}
 	var items []PrintItem

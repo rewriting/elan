@@ -52,3 +52,9 @@ compared with.
     compile (cargo build fails, exit 1, instead of a refusal with exit 2);
     tests/compiler-rs/programs/refused/builtinterms.no-elanc-rs skips the
     test for elanc-rs (elanc-go refuses it, S7d).
+  - the printing form of an operator is the last grammar rule of its
+    symbol, whatever its profile: a stuck `maybe == maybe` on bool prints
+    `eq_builtinInt(maybe,maybe)` (the rule of == on builtinInt, declared
+    last), the interpreter `eq_bool(maybe,maybe)`; elanc-go keys the form
+    by symbol and profile. programs/normalise/boolprint.no-elanc-rs skips
+    the test for elanc-rs.

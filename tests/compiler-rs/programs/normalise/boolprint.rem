@@ -1,0 +1,5 @@
+# Known difference with REM: its comparisons on bool (the C runtime's
+# builtins) compute with the stuck term maybe as with a value, so the three
+# comparisons give true; the interpreter leaves them as they are (maybe is
+# not a value), as the compilers do.
+result = r(true,true,true,3)

@@ -434,6 +434,14 @@ func TestPrintingFormIsTheLastGrammarRule(t *testing.T) {
 	if got := opNamed(t, ir, "plus").Print; !reflect.DeepEqual(got, want) {
 		t.Fatalf("print %+v", got)
 	}
+	// the last rule of the symbol with the operator's profile: an operator
+	// of another profile declared after (eq_builtinInt after eq_bool) does
+	// not give its form
+	p.op(sStr, 320, "plusStr", []uint32{sStr, sStr}, 0, 0)
+	ir = p.lower(t)
+	if got := opNamed(t, ir, "plus").Print; !reflect.DeepEqual(got, want) {
+		t.Fatalf("print with another profile last: %+v", got)
+	}
 }
 
 func TestARuleThatTypesToNoProfileIsAnError(t *testing.T) {

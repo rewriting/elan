@@ -1,0 +1,5 @@
+elanc-rs prints the printing form of the last grammar rule of a symbol,
+whatever its profile: eq_builtinInt(maybe,maybe) where the interpreter
+prints eq_bool(maybe,maybe). Recorded in docs/s6-rust-status.md, not
+fixed (S6 is on hold); elanc-go keys the printing form by symbol and
+profile.

@@ -1,0 +1,6 @@
+LPL boolprint description
+  query of sort bool
+  result of sort out
+  import boolprint
+  start with () r(maybe == maybe, maybe != true, maybe <= false, 1 + 2)
+end

@@ -1,0 +1,12 @@
+module boolprint
+// The printing form of an operator is the last grammar rule of its symbol
+// with its profile: ==, != and <= on bool share their symbols with the
+// operators on builtinInt (eq_builtinInt...), declared last; a stuck
+// maybe == maybe prints as eq_bool(maybe,maybe), as the interpreter does.
+import global int bool; end
+sort out; end
+operators global
+  maybe : bool;
+  r(@,@,@,@) : (bool bool bool int) out;
+end
+end
