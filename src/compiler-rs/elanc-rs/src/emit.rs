@@ -26,6 +26,10 @@
 //!   first result, `repeat*` of a deterministic strategy as a loop, the
 //!   other `repeat*`/`iterate*` through the runtime combinators with an
 //!   auxiliary function for their body);
+//! * the functions that can recurse (strategies, labels, the
+//!   normalisation of the operators of a cycle, [`Ir::recursive_ops`])
+//!   start with `elan_runtime::guard()`: past a stack depth the program
+//!   stops with a message (exit status 3) instead of overflowing (D3);
 //! * conditions `where p := (S) t`: the rest of the rule in the
 //!   continuation of `S` (a closure), so that a failing condition asks `S`
 //!   for its next result (`return false`); in a normalisation function the
@@ -210,6 +214,9 @@ struct Emitter<'a> {
     aux_n: usize,
     /// The sorts whose `META` function is used.
     meta_sorts: Vec<SortId>,
+    /// The operators whose normalisation checks the stack
+    /// ([`Ir::recursive_ops`]).
+    recursive: Vec<bool>,
 }
 
 impl<'a> Emitter<'a> {
@@ -225,6 +232,7 @@ impl<'a> Emitter<'a> {
             aux: Vec::new(),
             aux_n: 0,
             meta_sorts: Vec::new(),
+            recursive: ir.recursive_ops(),
         }
     }
 
@@ -652,6 +660,9 @@ impl<'a> Emitter<'a> {
                     self.out.line(&format!("/// skipped: {s}"));
                 }
                 self.out.open(&format!("{} {{", self.signature(o)));
+                if self.recursive[o] {
+                    self.out.line("elan_runtime::guard();");
+                }
                 self.decision(tree, rules);
                 if *total {
                     self.out.line(&format!(
@@ -1109,6 +1120,7 @@ impl<'a> Emitter<'a> {
                 "pub fn {}(a0: &{ty}, k: K<{ty}>, first: bool) -> bool {{",
                 l.fun
             ));
+            self.out.line("elan_runtime::guard();");
             self.label_mode = true;
             self.decision(&l.tree, &l.rules);
             self.label_mode = false;
@@ -1151,6 +1163,7 @@ impl<'a> Emitter<'a> {
         let ty = self.ty(sort);
         self.out
             .open(&format!("pub fn {fun}(t: &{ty}, k: K<{ty}>) -> bool {{"));
+        self.out.line("elan_runtime::guard();");
         let code = self.seq_code(fun, body, sort, "t", "k");
         for l in code.lines() {
             self.out.line(l);
@@ -1527,6 +1540,7 @@ impl<'a> Emitter<'a> {
                 "pub fn {}(t: &{ty}, k: K<{ty}>) -> bool {{",
                 self.meta_fun(s)
             ));
+            self.out.line("elan_runtime::guard();");
             let code = self.match_variants(s, "t", &arms, wrong);
             for l in code.lines() {
                 self.out.line(l);
@@ -1569,6 +1583,7 @@ impl<'a> Emitter<'a> {
             ir.sorts[ev.strategy].name
         ));
         self.out.open(&sig(&ev.fun, &ts));
+        self.out.line("elan_runtime::guard();");
         for l in self.match_variants(ev.strategy, "s", &arms, bad).lines() {
             self.out.line(l);
         }
@@ -1658,6 +1673,7 @@ impl<'a> Emitter<'a> {
             }
         }
         self.out.open(&sig(&f1, &self.ty(sg)));
+        self.out.line("elan_runtime::guard();");
         for l in self.match_variants(sg, "s", &arms, bad).lines() {
             self.out.line(l);
         }

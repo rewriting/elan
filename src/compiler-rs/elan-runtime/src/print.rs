@@ -23,6 +23,8 @@ pub trait Print {
 impl<T: crate::Sort + Print> Print for crate::H<T> {
     #[inline]
     fn print(&self, w: &mut Writer) {
+        // printing a deep term recurses
+        crate::guard();
         (**self).print(w)
     }
 }

@@ -176,6 +176,50 @@ fn total_operator_has_no_variant() {
 }
 
 #[test]
+fn recursive_operators_are_the_cycles_of_the_call_graph() {
+    // plus calls itself; double(x) => plus(x, x) does not; ev(s(x)) =>
+    // od(x), od(s(x)) => ev(x): a cycle of two
+    let mut p = peano();
+    p.op(NAT, 321, "double", &[NAT], 0, 0);
+    p.op(NAT, 322, "ev", &[NAT], 0, 0);
+    p.op(NAT, 324, "od", &[NAT], 0, 0);
+    p.rule(
+        NAT,
+        3,
+        f(321, vec![v(0, NAT)]),
+        f(320, vec![v(0, NAT), v(0, NAT)]),
+        vec![],
+    );
+    p.rule(
+        NAT,
+        4,
+        f(322, vec![f(319, vec![v(0, NAT)])]),
+        f(324, vec![v(0, NAT)]),
+        vec![],
+    );
+    p.rule(
+        NAT,
+        5,
+        f(324, vec![f(319, vec![v(0, NAT)])]),
+        f(322, vec![v(0, NAT)]),
+        vec![],
+    );
+    p.start(
+        f(
+            320,
+            vec![f(321, vec![f(318, vec![])]), f(322, vec![f(318, vec![])])],
+        ),
+        NAT,
+    );
+    let ir = p.lower().unwrap();
+    let rec = ir.recursive_ops();
+    let is_rec = |name: &str| rec[ir.ops.iter().position(|o| o.name == name).unwrap()];
+    assert!(is_rec("plus"));
+    assert!(is_rec("ev") && is_rec("od"));
+    assert!(!is_rec("double") && !is_rec("s") && !is_rec("o"));
+}
+
+#[test]
 fn another_constructor_makes_an_operator_partial() {
     let mut p = peano();
     p.op(NAT, 321, "inf", &[], 0, 0);

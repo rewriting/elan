@@ -660,6 +660,103 @@ impl Ir {
     }
 }
 
+impl Ir {
+    /// The defined operators whose normalisation can call itself again
+    /// through other operators (a cycle of the graph "the rules of `f` build
+    /// a term with `g`"): their functions check the depth of the stack
+    /// (`elan_runtime::guard`, spec D3). The others are not checked: their
+    /// frames are bounded between two checked calls, and a check in a small
+    /// hot function (`x + y` of the int module) costs (nqueens 12: 0.40 s
+    /// to 0.67 s). Recursion through a strategy (`where y := (S) t`) is
+    /// checked by the strategy functions.
+    pub fn recursive_ops(&self) -> Vec<bool> {
+        let n = self.ops.len();
+        let mut succ: Vec<Vec<OpId>> = vec![Vec::new(); n];
+        fn ops_of(e: &Expr, out: &mut Vec<OpId>) {
+            if let Expr::Op { op, args } = e {
+                out.push(*op);
+                for a in args {
+                    ops_of(a, out);
+                }
+            }
+        }
+        for (o, op) in self.ops.iter().enumerate() {
+            if let OpKind::Defined { rules, .. } = &op.kind {
+                for r in rules {
+                    ops_of(&r.rhs, &mut succ[o]);
+                    for c in &r.conds {
+                        match c {
+                            Cond::Same(..) => {}
+                            Cond::If(e) | Cond::Let(_, e) | Cond::Match(_, e) => {
+                                ops_of(e, &mut succ[o])
+                            }
+                            Cond::Apply { expr, .. } => ops_of(expr, &mut succ[o]),
+                        }
+                    }
+                }
+                succ[o].sort_unstable();
+                succ[o].dedup();
+            }
+        }
+        // strongly connected components (Tarjan, iterative)
+        let mut index = vec![usize::MAX; n];
+        let mut low = vec![0usize; n];
+        let mut on_stack = vec![false; n];
+        let mut stack: Vec<OpId> = Vec::new();
+        let mut rec = vec![false; n];
+        let mut next = 0usize;
+        for root in 0..n {
+            if index[root] != usize::MAX {
+                continue;
+            }
+            // (node, position in its successors)
+            let mut work: Vec<(OpId, usize)> = vec![(root, 0)];
+            index[root] = next;
+            low[root] = next;
+            next += 1;
+            stack.push(root);
+            on_stack[root] = true;
+            while let Some(&(v, i)) = work.last() {
+                if i < succ[v].len() {
+                    let w = succ[v][i];
+                    work.last_mut().unwrap().1 += 1;
+                    if index[w] == usize::MAX {
+                        index[w] = next;
+                        low[w] = next;
+                        next += 1;
+                        stack.push(w);
+                        on_stack[w] = true;
+                        work.push((w, 0));
+                    } else if on_stack[w] {
+                        low[v] = low[v].min(index[w]);
+                    }
+                    continue;
+                }
+                work.pop();
+                if let Some(&(u, _)) = work.last() {
+                    low[u] = low[u].min(low[v]);
+                }
+                if low[v] == index[v] {
+                    let mut comp = Vec::new();
+                    loop {
+                        let w = stack.pop().unwrap();
+                        on_stack[w] = false;
+                        comp.push(w);
+                        if w == v {
+                            break;
+                        }
+                    }
+                    let cyclic = comp.len() > 1 || succ[v].contains(&v);
+                    for w in comp {
+                        rec[w] = cyclic;
+                    }
+                }
+            }
+        }
+        rec
+    }
+}
+
 /// Does `s` give at most one result, given the determinism of the rules
 /// of each label, their number and the determinism of the named
 /// strategies? (Used by [`crate::lower`] during its fixpoint and by

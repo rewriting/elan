@@ -16,6 +16,10 @@
 //! = R rwr/sec` (here wall-clock time; C used `getrusage` user time).
 //! Options are read while arguments start with `-`; unknown ones are
 //! ignored, as in C; `-help`/`-h` prints the options and exits with 1.
+//!
+//! Exit statuses: 0 success, 1 run-time error ([`fatal`], `-help`), 2
+//! construct not supported ([`unsupported`]), 3 recursion too deep
+//! ([`crate::depth`]).
 
 use std::cell::Cell;
 use std::io::Write;
@@ -167,6 +171,7 @@ pub fn unsupported(msg: &str) -> ! {
 
 /// Stack size of the thread that runs a program: innermost normalisation
 /// and continuations recurse (spec D3); the memory is reserved, not used.
+/// Its recursion is bounded ([`crate::depth`]).
 pub const BIG_STACK: usize = 1 << 30;
 
 /// Run `f` on a thread with a stack of `size` bytes and return its result;
@@ -201,6 +206,7 @@ where
         std::process::exit(1);
     }
     let code = run_with_stack(BIG_STACK, move || {
+        crate::depth::set_limit(BIG_STACK);
         let out = std::io::BufWriter::new(std::io::stdout());
         let mut s = Session::new(options, out);
         if !s.options.no_input {

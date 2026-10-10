@@ -10,11 +10,13 @@
 //! * [`builtin`]: int (interpreter semantics), bool, string, stuck terms.
 //! * [`print`]: the printer of the compiled C programs.
 //! * [`driver`]: options, output, big-stack main thread, step counter.
+//! * [`depth`]: the recursion bound (stack guard).
 //!
 //! Standard library only; terms are per thread (`Rc`).
 
 pub mod ac;
 pub mod builtin;
+pub mod depth;
 pub mod driver;
 pub mod print;
 pub mod release;
@@ -23,6 +25,7 @@ pub mod term;
 
 pub use ac::{AcSet, Rest};
 pub use builtin::{Builtin, Int, Str};
+pub use depth::guard;
 pub use driver::{fatal, main_program, step, steps, unsupported, Options, Session};
 pub use print::{Print, Writer};
 pub use strat::{DynStrat, Strat, K};

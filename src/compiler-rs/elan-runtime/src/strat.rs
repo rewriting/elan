@@ -126,6 +126,7 @@ pub fn iterate_star<T, S>(t: &T, k: K<T>, s: &S) -> bool
 where
     S: Fn(&T, K<T>) -> bool + ?Sized,
 {
+    crate::guard();
     if k(t) {
         return true;
     }
@@ -146,6 +147,7 @@ pub fn repeat_star<T, S>(t: &T, k: K<T>, s: &S) -> bool
 where
     S: Fn(&T, K<T>) -> bool + ?Sized,
 {
+    crate::guard();
     let mut any = false;
     let stop = s(t, &mut |r| {
         any = true;
