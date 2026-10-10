@@ -1,6 +1,6 @@
 module ans_completion[vars,fss,prec,syst]
 import	global 	equation[vars,fss,prec]
-		rewrite[vars,fss,prec]
+		rewriting[vars,fss,prec]
 		compute_state[vars,fss,prec,equation]
 	;
 
@@ -258,16 +258,16 @@ rules for equation
 global
   [compose] compose(s->t,l->r)		=> s->v
 	where rrwr:=() translate(l->r,maxvar(s,0))
-	where v:=(dk(rewrite)) rewrite(t,rrwr)
+	where v:=(dk(rewriting)) rewriting(t,rrwr)
   end
 
   [simplify] simplify(s=t,l->r)		=> s=v
 	where rrwr:=() translate(l->r,maxvar(s,maxvar(t,0)))
-	where v:=(dk(rewrite)) rewrite(t,rrwr)
+	where v:=(dk(rewriting)) rewriting(t,rrwr)
   end
   [simplify] simplify(s=t,l->r)		=> v=t
 	where rrwr:=() translate(l->r,maxvar(s,maxvar(t,0)))
-	where v:=(dk(rewrite)) rewrite(s,rrwr)
+	where v:=(dk(rewriting)) rewriting(s,rrwr)
   end
 
   [collapse] collapse(s->t,l->r)	=> v=t

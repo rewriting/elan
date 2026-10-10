@@ -1,4 +1,4 @@
-module rewrite[vars,fss,prec]
+module rewriting[vars,fss,prec]
 import 	global	equation[vars,fss,prec]
 		applySubstOn[fss,vars,term]
 		substitution
@@ -10,7 +10,7 @@ end
 
 operators
   global
-    rewrite(@,@)	: (term equation) term;
+    rewriting(@,@)	: (term equation) term;
 end
 
 rules for term
@@ -20,7 +20,7 @@ rules for term
         theta 		: substitution;
         omega 		: list[int];
 global
-  [rewrite] rewrite(s,l->r)	=> s[theta(r)] at omega
+  [rewriting] rewriting(s,l->r)	=> s[theta(r)] at omega
                 where omega := (chooseOccurence) nvocc(s)
                 where filtre := (matchs) true & l = s at omega
                 where theta := () system_to_subst(filtre)

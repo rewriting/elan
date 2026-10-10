@@ -26,7 +26,7 @@ end
 
 operators
   global
-    	rewrite(@,@) 	: (term rwrule) rewrite_state;
+    	rewriting(@,@) 	: (term rwrule) rewrite_state;
 
   local
 	[@,@,@,@,@]':'@	: (term list[int] label rulebodies substitution proofterm) rewrite_state;
@@ -59,7 +59,7 @@ rules for rewrite_state
 	couple	: pair[term,proofterm];
 
 global
-  [] rewrite(s,rw)	=> [s,nil,label(rw),rw2rb(rw),identity]:proofnil
+  [] rewriting(s,rw)	=> [s,nil,label(rw),rw2rb(rw),identity]:proofnil
   end
 
 local
@@ -127,9 +127,9 @@ rules for pair[term,proofterm]
         rwr	: rwrule;
 	pi	: proofterm;
 local
-  [rewrite]  [s,pi] => [rs2t(rs),pi;simplif(rs2pt(rs))]
+  [rewriting]  [s,pi] => [rs2t(rs),pi;simplif(rs2pt(rs))]
 	where rwr:= (listExtract) elem(pprwrules)
-	where rs:=(rewrite_state) rewrite(s,rwr)	
+	where rs:=(rewrite_state) rewriting(s,rwr)	
   end
 end
 
@@ -146,7 +146,7 @@ end
 
 strategies for pair[term,proofterm]
 implicit
-  [.] s_rewrite => repeat*(dc one(rewrite))
+  [.] s_rewrite => repeat*(dc one(rewriting))
   end
 end
 
