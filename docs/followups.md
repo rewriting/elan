@@ -32,6 +32,14 @@ sub-project (S1–S5b). Each item says where it comes from.
   wraps to a negative value (e.g. `2147483648`) is then taken by the lexer
   for a lexem of another kind (`sort(...)`), and the query is rejected
   (interpreter `lex/lstream.cc`, compiled runtime `earley/lstream.cc`).
+- **`call "name":X` with a name of another sort only** (interpreter,
+  found by S6b): `set_of(call "two":state, st(1))`, where only `two:int`
+  exists, applies the int strategy to a state and prints the ill-sorted
+  `cons_state(plus(st(1),1),nil)` (`tests/compiler-rs/programs/refused/callother`);
+  elanc-rs refuses it.
+- **REM: Meta_strat terms** (`call`, sequences... built as `Strategy[X]`
+  terms) give C that does not compile (`fun_143`), found by S6b
+  (`tests/compiler-rs/programs/strategy_terms/ms_*`, `.no-rem`).
 - **`trace_backup`/`trace_recover`** (`-coq -proofterm` compiled programs)
   are not safe under backtracking (slots reused after `trace_recover`); and
   `norm_4` now returns `t` where 2004 returned an undefined value (S5b).
