@@ -115,6 +115,9 @@ public final class Tools {
     
     s.write(Symbol.genDeclarFsym(deep));
     s.write(Strategy.genDeclar(deep));
+    if(Flags.strat > 0) {
+      s.write(Symbol.genDeclarStrategyFunctions(deep));
+    }
     s.write("#endif\n");
   }
 

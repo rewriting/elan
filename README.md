@@ -108,9 +108,10 @@ holds the sanitizer options in a `make check-sanitize` build). `elanc` and
 REM exit with a non-zero status on errors. The ATerm runtime of 2003
 (`-aterm`) is not supported. With `-strategy 1`, the strategy terms of
 `strat[X]` (`elanlib/strategy/strat.eln`) are evaluated at run time by the C
-runtime (`str_eval`) instead of the compiled `eval` rules
-(`tests/compiler/test_runtime_strategies.sh`); `-strategy 2` generates C that
-does not compile (docs/followups.md).
+runtime (`str_eval`) instead of the compiled `eval` rules; with
+`-strategy 2`, REM compiles to C the strategy terms known at compile time
+(both are compared with the interpreter by
+`tests/compiler/test_runtime_strategies.sh`).
 
 ## Quick start (development)
 

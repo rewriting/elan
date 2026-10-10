@@ -365,6 +365,28 @@ public abstract class Symbol implements Comparable {
 
   // *** Peter
   // arguments of a rewrite rule has to been added
+  /*
+   * Prototypes of the functions of genLabeledRules and genDefinedStrategies
+   * (called by the strategy terms compiled by StrategyEval, -strategy 2)
+   */
+  public static String genDeclarStrategyFunctions(int deep) {
+    StringBuffer s = new StringBuffer();
+    s.append("\n#ifdef BORO\n");
+    Iterator it = map.values().iterator();
+    while(it.hasNext()) {
+      Symbol sym = (Symbol) it.next();
+      if(sym instanceof SymbolLab) {
+        Tools.indent(s,deep);
+        s.append("extern Gterm* str_rule" + sym.getSymbolCode() + "(Gterm *v0);\n");
+      } else if(sym instanceof SymbolDstr) {
+        Tools.indent(s,deep);
+        s.append("extern Gterm* str_dstr" + sym.getSymbolCode() + "(Gterm *v0);\n");
+      }
+    }
+    s.append("#endif\n");
+    return s.toString();
+  }
+
   public static void genLabeledRules(OutputCode s,int deep) {
     StrategyRuleName rterm;
     StrategyTerm sterm;

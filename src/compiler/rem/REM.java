@@ -67,7 +67,7 @@ public class REM {
     //    System.out.println("\t-color");
     //    System.out.println("\t-choicePointDebug");
     //    System.out.println("\t-oldVariableAffectation");
-    //    System.out.println("\t-strategy <0|1|2>");
+    System.out.println("\t-strategy <0|1|2>");
     //    System.out.println("\t-withGoto");
   }
 
@@ -310,7 +310,9 @@ public class REM {
        * Main Makefile
        */
       mainMakefile.write("SUBDIRS = " + subdirName + "\n\n");
-      mainMakefile.write("all clean veryclean:\n\t@for DIR in $(SUBDIRS); do echo Make $@ in $$DIR; cd $$DIR && $(MAKE) $@; cp -f " + outputName + " ..; cd ..; done\n\n");
+      // a failed build of the subdirectory fails the main Makefile (it
+      // returned 0 until 2026: the loop ended with `cd ..`)
+      mainMakefile.write("all clean veryclean:\n\t@for DIR in $(SUBDIRS); do echo Make $@ in $$DIR; (cd $$DIR && $(MAKE) $@) || exit 1; [ $@ != all ] || cp -f $$DIR/" + outputName + " . || exit 1; done\n\n");
 
       /*
        * Sous Makefile

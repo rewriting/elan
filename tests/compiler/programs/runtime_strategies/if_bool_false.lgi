@@ -1,0 +1,6 @@
+LPL if_bool_false description
+  query of sort int
+  result of sort int
+  import rt
+  start with [if 2 > 3 then inc1 else dbl fi]query
+end

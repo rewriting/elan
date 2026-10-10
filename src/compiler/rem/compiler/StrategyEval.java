@@ -116,8 +116,8 @@ public class StrategyEval {
       
       Tools.indent(s,deep); s.write("{ \n"); 
       if (is_det) {
-	Tools.indent(s,deep+1); s.write("int *wasr=(int*) allocStable(sizeof(int));\n");
-	Tools.indent(s,deep+1); s.write("*wasr=0;\n"); }
+	Tools.indent(s,deep+1); s.write("long wasr=allocStable(sizeof(int));\n");
+	Tools.indent(s,deep+1); s.write("*((int*)getStablePointer(wasr))=0;\n"); }
       
       while (strlist.getSemantic() != -ElanConstants.DS_EPSILON) {
         boolean is_last = (
@@ -132,7 +132,7 @@ public class StrategyEval {
 	genEval(s,deep+1, 0, dest, strlist.getSubterm(0),src);  
 	
 	if (!is_last && is_det) {
-	  Tools.indent(s,deep+1); s.write("if(*wasr==0) *wasr=1;\n"); }
+	  Tools.indent(s,deep+1); s.write("*((int*)getStablePointer(wasr))=1;\n"); }
 
 	Tools.indent(s,deep); s.write("goto stratEvalLab" + lab +";\n");
 	//	 ???? Tools.indent(s,deep); s.write("goto stratLab"+exitLab +";\n");
@@ -142,7 +142,7 @@ public class StrategyEval {
 	  deep--;
 	  Tools.indent(s,deep+1); s.write("} \n");
 	  if (is_det) {
-	    Tools.indent(s,deep+1); s.write("if(*wasr!=0) { \n"); 
+	    Tools.indent(s,deep+1); s.write("if(*((int*)getStablePointer(wasr))!=0) {\n"); 
 	    Tools.genFail(s,deep+2);
 	    Tools.indent(s,deep+1); s.write("} \n");              
 	  }
@@ -156,6 +156,8 @@ public class StrategyEval {
       s.write(dest + " = " + src + ";\n");
       break;
     case ElanConstants.DS_IFTE:
+        // the condition is built (and normalised) before it is tested
+	str.getSubterm(0).genTermConstruction(s,deep);
 	Tools.indent(s,deep); s.write("if (GgetSymb("+
 				str.getSubterm(0).genCore()+
 				")) {\n");
@@ -172,18 +174,18 @@ public class StrategyEval {
         int iflab = StrategyEval.label++; //StrategyTerm.strategyLabel++;
 
 	Tools.indent(s,deep); s.write("{\n");
-	Tools.indent(s,deep+1); s.write("int *wasr=(int*) allocStable(sizeof(int));\n");
+	Tools.indent(s,deep+1); s.write("long wasr=allocStable(sizeof(int));\n");
 	Tools.indent(s,deep+1); s.write("Gterm *res" + deep + ";\n");
-	Tools.indent(s,deep+1); s.write("*wasr=0;\n"); 
+	Tools.indent(s,deep+1); s.write("*((int*)getStablePointer(wasr))=0;\n"); 
 	Tools.indent(s,deep+1); s.write("if (!setChoicePoint()) {\n"); 
 
 	genEval(s,deep+2, 0, "res" + deep, str.getSubterm(0),src);  
-	Tools.indent(s,deep+2); s.write("if(*wasr==0) *wasr=1;\n"); 
+	Tools.indent(s,deep+2); s.write("*((int*)getStablePointer(wasr))=1;\n"); 
 	genEval(s,deep+2, 0, dest, str.getSubterm(1),"res" + deep); 
  	Tools.indent(s,deep+2); s.write("goto stratEvalLab" + iflab +";\n");
 	Tools.indent(s,deep+1); s.write("}\n");
 
-	Tools.indent(s,deep+1); s.write("if(*wasr!=0) { \n"); 
+	Tools.indent(s,deep+1); s.write("if(*((int*)getStablePointer(wasr))!=0) {\n"); 
 	Tools.genFail(s,deep+2);
 	Tools.indent(s,deep+1); s.write("} \n");   
 
