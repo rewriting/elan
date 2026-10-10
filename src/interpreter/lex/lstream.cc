@@ -232,11 +232,14 @@ void lstream::ilex(lexem &l)
   }
 // number
   if (isdigit(c)) {
-    n= c - '0';
+    // unsigned: a literal above 2^31-1 wraps modulo 2^32 as it always did,
+    // without signed overflow (n*10+c-'0' overflowed even for 2147483647)
+    unsigned u = (unsigned)(c - '0');
     while (isdigit(fc)) {
       istr->ich(c); istr->fuch(fc);
-      n=n*10+c-'0';
+      u = u*10u + (unsigned)(c - '0');
     }
+    n = (int)u;
     flex.crnumlex(n);
     return;
   }

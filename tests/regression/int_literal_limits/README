@@ -1,0 +1,1 @@
+Integer literals: 2147483647 is read without signed overflow (lstream.cc computed n*10+c before subtracting the digit offset: UB, stopped under UBSan); larger literals wrap modulo 2^32, as before.

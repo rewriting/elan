@@ -47,7 +47,7 @@ cp -R "$HERE"/benchthesis/MinelaComp/. "$WORK/minela/"
 
 for lgi in "$WORK"/programs/*.lgi; do
   name=$(basename "$lgi" .lgi)
-  for q in 5 7; do
+  for q in 5 7 2147483647; do
     check "$WORK/programs" "$name $q" "$name" "" "$q end"
   done
 done
