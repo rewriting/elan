@@ -12,8 +12,9 @@
 #   result T        the results, in order (`result = T` lines; none when
 #                   there is no `result` line)
 #   stderr TEXT     a text the standard error contains
-#   maxrss MB       maximum resident set size (checked when /usr/bin/time
-#                   measures it: BSD/macOS `-l`, GNU `-v`)
+#   maxrss MB       maximum resident set size, measured by /usr/bin/time
+#                   (BSD/macOS `-l`, GNU `-v`; $ELAN_TEST_TIME overrides
+#                   the path): the program fails when it cannot be measured
 #   small BIG SMALL the program with BIG replaced by SMALL in its start term
 #                   is compiled too and its results compared with the
 #                   interpreter's (`elan -b`); the interpreter cannot run the large sizes
@@ -43,9 +44,10 @@ RUN=$(mktemp -d "$HERE/work/depth.XXXXXX") || exit 2
 echo "work directory: $RUN"
 
 # how /usr/bin/time reports the maximum RSS
+TIME=${ELAN_TEST_TIME:-/usr/bin/time}
 TIMEFLAG=
-if /usr/bin/time -l true 2>/dev/null >/dev/null; then TIMEFLAG=-l
-elif /usr/bin/time -v true 2>/dev/null >/dev/null; then TIMEFLAG=-v
+if "$TIME" -l true 2>/dev/null >/dev/null; then TIMEFLAG=-l
+elif "$TIME" -v true 2>/dev/null >/dev/null; then TIMEFLAG=-v
 fi
 
 fails=0 n=0
@@ -86,7 +88,7 @@ for lgi in "$PROGS"/*.lgi; do
     fail "$name: elanc-rs failed (see $d/big/elanc-rs.log)"; continue
   fi
   if [ -n "$TIMEFLAG" ]; then
-    ( cd "$d/big" && /usr/bin/time $TIMEFLAG ./a.out -noInput -quiet >out 2>err ); status=$?
+    ( cd "$d/big" && "$TIME" $TIMEFLAG ./a.out -noInput -quiet >out 2>err ); status=$?
   else
     ( cd "$d/big" && ./a.out -noInput -quiet >out 2>err ); status=$?
   fi
@@ -107,7 +109,9 @@ for lgi in "$PROGS"/*.lgi; do
     fail "$name: the standard error does not contain '$want_stderr' (see $d/big/err)"
   elif grep -q 'overflowed its stack\|Segmentation\|panicked' "$d/big/err"; then
     fail "$name: crash (see $d/big/err)"
-  elif [ -n "$maxrss" ] && [ -n "$rss" ] && [ "$rss" -gt "$maxrss" ]; then
+  elif [ -n "$maxrss" ] && [ -z "$rss" ]; then
+    fail "$name: maxrss $maxrss expected but the RSS cannot be measured ($TIME -l or -v missing: install GNU time)"
+  elif [ -n "$maxrss" ] && [ "$rss" -gt "$maxrss" ]; then
     fail "$name: $rss MB of RSS, expected at most $maxrss MB"
   else
     ok "$name: $info [$results]"
