@@ -4,8 +4,9 @@
 #
 # Programs: programs/normalise/<name>.lgi (+ .eln), each with a start term
 # `start with () t` and `query of sort bool`. For each program:
-#  - elanc-rs builds it (shared cargo target directory, see TARGET below)
-#    and `./a.out -noInput -quiet` prints `result = t`;
+#  - elanc-rs builds it (shared cargo target directory, see TARGET below;
+#    the REM options of the bench, -b -nosplit -quiet, are ignored) and
+#    `./a.out -noInput -quiet` prints `result = t`;
 #  - REM: `elanc -b -nosplit -quiet` + make + `./a.out -noInput -quiet`:
 #    the `result = ` lines must be byte-identical (the `rewrite_step` line
 #    is not compared: it depends on the compilation scheme);
@@ -61,7 +62,8 @@ for lgi in "$HERE"/programs/normalise/*.lgi; do
   done
 
   # elanc-rs
-  if ! ( cd "$d/rs" && elanc-rs -v --target-dir "$TARGET" "$name" >elanc-rs.log 2>&1 ); then
+  # the REM options of the bench command line are accepted and ignored
+  if ! ( cd "$d/rs" && elanc-rs -v -b -nosplit -quiet --target-dir "$TARGET" "$name" >elanc-rs.log 2>&1 ); then
     fail "$name: elanc-rs failed (see $d/rs/elanc-rs.log)"; continue
   fi
   build=$(sed -n 's/^elanc-rs: build time //p' "$d/rs/elanc-rs.log")

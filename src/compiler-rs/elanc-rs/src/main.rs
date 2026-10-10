@@ -6,9 +6,10 @@
 //!
 //! 1. `elan --cexport .elan-rs.<prog>/<prog>.ref -b [elan options]
 //!    <dir>/<prog>.lgi [spec]`, as `elanc` (`src/compiler/scripts/elanc.src`)
-//!    runs it: options this driver does not know are passed to `elan`
-//!    (`--trace`, `-t`, `--elanlib`, `--secondlib`, `-l`, `--output` take an
-//!    argument);
+//!    runs it: the REM options of `elanc` are accepted and ignored (`-v`
+//!    lists them), other options this driver does not know are passed to
+//!    `elan` (`--trace`, `-t`, `--elanlib`, `--secondlib`, `-l`, `--output`
+//!    take an argument);
 //! 2. the `.ref` file is read, lowered to the IR and emitted as a cargo
 //!    crate in `.elan-rs.<prog>/` (the work directory, in the current
 //!    directory, as REM's `.elan.<prog>/`);
@@ -53,7 +54,35 @@ options:
   --from-ref FILE        compile this .ref file instead of exporting the program
   --no-build             write the crate only
   -v                     print the commands and the build time
+  the REM options of elanc (-nosplit, -quiet, -strategy NAME...) are ignored;
   other options are passed to elan (as elanc does)";
+
+/// The REM options without argument of `elanc` (`src/compiler/scripts/
+/// elanc.src`, with `-ba*`): elanc-rs accepts and ignores them, as
+/// `-strategy NAME`; `-output NAME` is `-o`.
+const REM_OPTIONS: &[&str] = &[
+    "-O",
+    "-O2",
+    "-fast",
+    "-nocode",
+    "-nosplit",
+    "-split",
+    "-lib",
+    "-choicePointDebug",
+    "-noOptimiseChoicePoint",
+    "-optimiseChoicePoint",
+    "-verbose",
+    "-debug",
+    "-coq",
+    "-proofterm",
+    "-color",
+    "-noColor",
+    "-withGoto",
+    "-oldVariableAffectation",
+    "-onlyC",
+    "-noC",
+    "-quiet",
+];
 
 struct Options {
     output: String,
@@ -64,6 +93,8 @@ struct Options {
     build: bool,
     verbose: bool,
     elan_options: Vec<String>,
+    /// REM options (elanc.src), ignored
+    ignored: Vec<String>,
     lgi: String,
     spec: Option<String>,
 }
@@ -78,6 +109,7 @@ fn parse_args(args: Vec<String>) -> Options {
     let (mut target_dir, mut runtime, mut elan, mut from_ref) = (None, None, None, None);
     let (mut build, mut verbose) = (true, false);
     let mut elan_options = vec!["-b".to_string()];
+    let mut ignored = Vec::new();
     let mut positional = Vec::new();
     let mut it = args.into_iter();
     while let Some(a) = it.next() {
@@ -104,6 +136,12 @@ fn parse_args(args: Vec<String>) -> Options {
                 elan_options.push(v);
             }
             "-b" => {} // always passed
+            // REM options (elanc.src): accepted for compatibility, ignored
+            "-strategy" => {
+                let v = value(&a);
+                ignored.push(format!("{a} {v}"));
+            }
+            _ if REM_OPTIONS.contains(&a.as_str()) || a.starts_with("-ba") => ignored.push(a),
             _ if a.starts_with('-') => elan_options.push(a),
             _ => positional.push(a),
         }
@@ -126,6 +164,7 @@ fn parse_args(args: Vec<String>) -> Options {
         build,
         verbose,
         elan_options,
+        ignored,
         lgi: positional.pop().unwrap(),
         spec,
     }
@@ -226,6 +265,9 @@ fn main() {
         d.join(format!("{n}.spc"))
     });
     let prefix = prefix();
+    if o.verbose && !o.ignored.is_empty() {
+        eprintln!("elanc-rs: REM options ignored: {}", o.ignored.join(" "));
+    }
 
     // a previous program must not survive a refusal or a failure
     match std::fs::remove_file(&o.output) {
@@ -357,4 +399,46 @@ fn main() {
             o.output
         ))
     });
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn args(v: &[&str]) -> Vec<String> {
+        v.iter().map(|s| s.to_string()).collect()
+    }
+
+    /// The command line of the bench (run_tests.py, kind R) and of elanc.
+    #[test]
+    fn rem_options_are_ignored() {
+        let o = parse_args(args(&["-b", "-nosplit", "-quiet", "prog"]));
+        assert_eq!(o.lgi, "prog");
+        assert_eq!(o.elan_options, ["-b"]);
+        assert_eq!(o.ignored, ["-nosplit", "-quiet"]);
+        let o = parse_args(args(&[
+            "-strategy",
+            "foo",
+            "-O2",
+            "-split",
+            "-bar",
+            "-noC",
+            "p",
+            "s.spc",
+        ]));
+        assert_eq!((o.lgi.as_str(), o.spec.as_deref()), ("p", Some("s.spc")));
+        assert_eq!(o.elan_options, ["-b"]);
+        assert_eq!(
+            o.ignored,
+            ["-strategy foo", "-O2", "-split", "-bar", "-noC"]
+        );
+    }
+
+    #[test]
+    fn elan_options_are_passed() {
+        let o = parse_args(args(&["--trace", "2", "-nosplit", "-x", "-o", "out", "p"]));
+        assert_eq!(o.elan_options, ["-b", "--trace", "2", "-x"]);
+        assert_eq!(o.output, "out");
+        assert_eq!(o.ignored, ["-nosplit"]);
+    }
 }
