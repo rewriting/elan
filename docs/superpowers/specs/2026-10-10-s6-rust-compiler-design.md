@@ -77,10 +77,10 @@ program.
 | # | Decision | Reason |
 |---|---|---|
 | D1 | Input is the `.ref` export (no new parser of ELAN source). | Stable, documented, pinned by golden tests; REM reads the same file, so both compilers can run side by side. |
-| D2 | **Term representation: decided by the spike `spikes/codegen/rust-enum/`** (typed enums per sort with `Rc` + weak hash-consing, versus generic nodes in an arena). The choice and its measurements are recorded here before S6a's runtime task. | The representation fixes the memory model; it must be measured, not assumed. |
+| D2 | **Typed terms**: each ELAN sort is a Rust `enum`, each operator a variant (injections included; a defined operator also has a variant, for terms where no rule applies); shared terms are reference-counted nodes with a global creation id, **hash-consed** in one weak table per sort (equality = pointer equality). Builtins are native (`i64`, `bool`, strings) where a sort has no other constructor; a builtin result sort that can be stuck is wrapped. Dropping is iterative (generated per recursive sort). Decided from `spikes/codegen/rust-enum/` (NOTES.md): versus the u32 arena, nqueens 4x faster, propc 3 15 MB instead of 90 MB (286 MB unfreed), AC 1.4x slower (table lookups and multiset copies; to optimise in S6c). | Memory is solved without a collector (shared terms are acyclic); the Rust type checker checks the sorts of the generated code; the code is close to the source. |
 | D3 | Strategies: success continuations (`s(t, k)`, `k` returns "stop"), deterministic strategies (`repeat*` of `first one`, `one`, normalisation) compiled as loops; recursion depth bounded by an explicit check and a large stack for the main thread, a trampoline if the bench needs it. | Model validated by the spike (same solution order as REM). |
 | D4 | AC: flattened canonical form (sorted multiset); matching code generated per pattern for the common shapes (one AC symbol at the root with a rest variable, conditions pruned as soon as their variables are bound); a general AC matcher in the runtime for the other shapes (nested AC symbols, several rest variables). | Specialised code is what made efib fast; the general case must exist for correctness. |
-| D5 | Memory: no tracing collector to write if D2 is `Rc`: terms are acyclic, reference counting frees them exactly; dropping deep terms is iterative (no stack overflow). If D2 is an arena, a collector of the hash-consing table from the continuation roots is a task of S6a. | User's third hard problem; settled early because everything depends on it. |
+| D5 | Memory: reference counting (D2); the weak tables are purged when they grow; dropping deep terms is iterative (a 10^7-element list is freed on an 8 MB stack in the spike). AC multisets are ordered by creation id: deterministic for a given program and input, but it depends on which terms were alive (the spike's propc step counts differ from the arena's; results are equal). Order-independent output (e.g. printing AC terms) must not rely on it. | User's third hard problem; settled early because everything depends on it. |
 | D6 | Query parsing at run time: the Earley parser of the runtime is ported to Rust and reads the grammars of the `.ref` file (S6d); until then, programs run with `-noInput` (start term) only. | Keeps the first stages small; the port is mechanical and testable against the C parser. |
 | D7 | Not in scope: `-coq`, `-proofterm`, `-lib`, `-aterm`, `-debug` variants (broken or experimental today). | Recorded in docs/followups.md if needed later. |
 | D8 | Tests are differential: the interpreter and REM are the oracles; every stage adds dedicated programs and runs the bench subset its constructs cover. | The method that made the revival work. |
@@ -121,3 +121,9 @@ program.
   differential tests catch misreadings.
 * AC general case and strategies as terms: the largest unknowns; S6b and
   S6c start with their tests.
+* Generic views of typed terms (query parsing, printing, tracing,
+  strategy terms): generated per sort (a uniform view or a conversion to an
+  untyped tree); the generator carries more than with untyped nodes.
+* AC speed with typed terms (spike: 1.4x slower than the arena): look up a
+  multiset before building it, store short multisets inline, per-sort
+  allocation; measured in S6c against the spike figures.

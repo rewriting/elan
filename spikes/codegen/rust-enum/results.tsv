@@ -1,0 +1,9 @@
+variant	program	size	real_s	user_s	rss_mb
+rust	nqueens	11	0.13	0.13	10.1
+rust-enum	nqueens	11	0.03	0.03	2.5
+rust	nqueens	12	0.85	0.84	40.3
+rust-enum	nqueens	12	0.20	0.20	3.3
+rust	propc	2	0.06	0.05	24.9
+rust-enum	propc	2	0.10	0.10	5.7
+rust	propc	3	0.29	0.28	90.2
+rust-enum	propc	3	0.40	0.40	15.5

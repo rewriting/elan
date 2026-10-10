@@ -1,0 +1,23 @@
+[package]
+name = "elan_codegen_spike_enum"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "nqueens"
+path = "nqueens.rs"
+
+[[bin]]
+name = "propc"
+path = "propc.rs"
+
+[[bin]]
+name = "droptest"
+path = "droptest.rs"
+
+[profile.release]
+opt-level = 3
+
+[features]
+# never free terms (keeps every id stable, like the arena of the first version)
+immortal = []
