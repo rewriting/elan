@@ -28,6 +28,10 @@ sub-project (S1–S5b). Each item says where it comes from.
   (+7–14 %), `group` (2000 output made with another `group.spc`) and the
   binding order of MinelaComp `iappend` (see
   `tests/compiler/benchthesis/README.md`).
+- **Integer literals above 2^31-1** wrap modulo 2^32 when read; one that
+  wraps to a negative value (e.g. `2147483648`) is then taken by the lexer
+  for a lexem of another kind (`sort(...)`), and the query is rejected
+  (interpreter `lex/lstream.cc`, compiled runtime `earley/lstream.cc`).
 - **`trace_backup`/`trace_recover`** (`-coq -proofterm` compiled programs)
   are not safe under backtracking (slots reused after `trace_recover`); and
   `norm_4` now returns `t` where 2004 returned an undefined value (S5b).
