@@ -152,6 +152,21 @@ with their reason in `tests/architecture/allowed-exceptions.txt`):
 | `lex` | lexems, lexer, preprocessor |
 | `base` | streams, string/int tables, allocation, options |
 
+Conventions inside the interpreter:
+
+* **Fatal errors** print their message and call `failexit()`
+  (`base/fatal.h`). In `elan_main` (and in unit tests, inside a
+  `FatalCatcher`) it throws `ElanFatal`; `elan_main` catches it, flushes
+  stdout and stderr, kills the subprocesses and returns 1. The forked
+  children (`match/process.cc`), the ^C handler, static initialisation and
+  destruction exit directly as before.
+* **Terms** (`term/termdefs.h`) are non-owning handles to shared nodes,
+  managed by hand with reference counters (`incrcount`, `tdelete`); no RAII.
+* **Parser state**: the semantic actions of the module parser share one
+  `LoaderState ld` (`load/strategy.h`; one instance for every import
+  level), the module frames being read are `modframes[0..stacki]`; the
+  `.ref` parser has its own `RefParserState rp` (`ref/ref.cc`).
+
 `parser/` is the parser-table generator `macc`, `acmatcher/` the AC matcher.
 Everything except `driver/main.cc` is the library `elan_core`, which the unit
 tests (`tests/unit/test_*.cc`, using `tests/unit/check.h`) link against: add a

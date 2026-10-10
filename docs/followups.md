@@ -51,8 +51,15 @@ sub-project (S1–S5b). Each item says where it comes from.
 
 ## Planned sub-projects
 
-- **S3b — interpreter internals**: fixed-size global tables, ~70 parser-state
-  globals, `exit()` on every error, term ownership; then a `term` unit test
-  (needs a loaded symbol table).
+- **S3b — interpreter internals** (spec `2026-10-10-s3b-internals-design.md`):
+  done: goldens of what the bench does not see, contract guards, no silent
+  overflow, dynamic stacks, parser state grouped (`LoaderState ld`,
+  `RefParserState rp`, module frames), fatal errors as `ElanFatal`, `term`
+  unit test (`tests/unit/test_fatal.cc`). Kept by decision: hashed table
+  sizes and codes (REF contract), manual term ownership (documented in
+  `term/termdefs.h`). Left: `interr()` still `abort()`s; the C AC matcher
+  exits by itself on its own errors (out of memory); `impmoduli` and
+  `withrhs` stay separate globals until lex/parse stop reaching into the
+  loader.
 - **cpl redesign** (backtracking without copying the C stack), which would
   also allow ASan for the compiled programs.

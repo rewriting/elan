@@ -188,6 +188,19 @@ struct hterm {
   term *subt;                // pointer to a_r_r_a_y_ of subterms
 };
 
+// A term is a NON-OWNING HANDLE: one pointer to a node (struct hterm).
+// Copying a term copies the pointer, not the node; destroying a term frees
+// nothing (term has no destructor). Nodes are shared between terms, rules,
+// substitutions and the states of the strategy interpreter, which keep
+// their terms in malloc'd structures. Ownership is manual, by convention:
+// hterm::counter counts the extra references to a node (a parent counts
+// its subterms, incrcount/decrcount for other holders); tdelete() frees a
+// node whose counter is 0 and, recursively, the subterms it was the last to
+// reference; toptdelete() frees only the top node. Terms are built on a
+// global stack (t.stinit(); t.crvar(..); t.crterm(..); t.popt(): see crterm
+// below) and many are never freed (the sanitizer build disables leak
+// detection for that reason). Kept as is by decision (S3b design, section
+// 3): RAII would change when nodes are freed all over the interpreter.
 class term
  {
  private:

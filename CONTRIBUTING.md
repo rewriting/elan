@@ -34,6 +34,15 @@ build of 2004.
    include pass: restructure instead. Removing entries is always welcome.
 9. New or changed interpreter behaviour gets a unit test in `tests/unit/`
    (characterisation tests first when touching old code).
+10. Errors in the interpreter: print the message (on `sterr`), then call
+    `failexit()`, never `exit()`. It throws `ElanFatal`, caught by
+    `elan_main` (status 1, subprocesses killed) or by a unit test inside a
+    `FatalCatcher`; do not catch it elsewhere (no `catch (...)`). Code that
+    must not unwind exits directly: a forked child calls
+    `fatal_in_forked_child()` right after `fork()`; signal handlers bracket
+    their body with `fatal_direct_exit(true/false)`. No exception may cross
+    C frames: C libraries (the AC matcher) must not call back C++ code that
+    can fail. Successful ends (`quit`) keep `exit(0)`.
 
 ## Before pushing
 
