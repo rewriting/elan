@@ -164,7 +164,9 @@ extern long Gint_mod(long a, long b);
 #define fun_153(s,n1,n2) term_newString(substitute(term_getString(s),GgetInt(n1),GgetInt(n2)))
 #define fun_154(s,i,l)   term_newString(subString(term_getString(s),GgetInt(i),GgetInt(l)))
 #define fun_156(s1,s2)   GsetIntegerTag(strspn(term_getString(s1),term_getString(s2)))
-#define fun_157(s1,s2)   GsetIntegerTag(strcmp(term_getString(s1),term_getString(s2)))
+/* -1, 0 or 1, as the interpreter (C strcmp only specifies the sign) */
+extern long Gstrcmp_sign(const char *a, const char *b);
+#define fun_157(s1,s2)   GsetIntegerTag(Gstrcmp_sign(term_getString(s1),term_getString(s2)))
 #define fun_158(t)       term_newString(build_string(GgetInt(t))) // string(t)
 #define fun_177(t)       term_newString(findIdent(GgetIdentifier(t))) // ident2string(t)
 

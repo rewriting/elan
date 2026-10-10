@@ -296,6 +296,8 @@ int GET_LSTREAM(lstream *XXX, int /*pid*/, lexem rtype, term *res)
 // wrap modulo 2^32 (signed overflow was undefined behaviour), x/0 = 0,
 // x%0 = x, INT_MIN/-1 = INT_MIN, INT_MIN%-1 = 0 (x/0 trapped on x86).
 // tests/regression/int_arith_wraps.
+// strcmp: -1, 0 or 1 (C only specifies the sign; tests/regression/strcmp_sign)
+static int int_sign(int c) { return (c > 0) - (c < 0); }
 static int int_add(int a, int b) { return (int)((unsigned)a + (unsigned)b); }
 static int int_sub(int a, int b) { return (int)((unsigned)a - (unsigned)b); }
 static int int_mul(int a, int b) { return (int)((unsigned)a * (unsigned)b); }
@@ -608,7 +610,7 @@ static int standardreduction(term &t)
         else return 0;
       case STRCMP:        // #define STRCMP         157
         if (t.subterm(0)->inf() == TSTRING &&  t.subterm(1)->inf() == TSTRING) {
-          tt.crstterm(strcmp(t.subterm(0)->getstring(),t.subterm(1)->getstring() ),TNUMBER);
+          tt.crstterm(int_sign(strcmp(t.subterm(0)->getstring(),t.subterm(1)->getstring())),TNUMBER);
           break; }
         else return 0;
       case STRNG:          // 158

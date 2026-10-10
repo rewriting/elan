@@ -22,6 +22,7 @@
     Pierre-Etienne Moreau	e-mail: Pierre-Etienne.Moreau@loria.fr
 
 */
+#include <string.h>
 #include "builtin.h"
 
 
@@ -55,4 +56,11 @@ long Gint_mod(long a, long b)
 {
   if (b == 0 || b == -1) return b == 0 ? a : 0;
   return a % b;
+}
+
+/* fun_157 (builtin.h): strcmp as -1, 0 or 1 */
+long Gstrcmp_sign(const char *a, const char *b)
+{
+  int c = strcmp(a, b);
+  return (c > 0) - (c < 0);
 }

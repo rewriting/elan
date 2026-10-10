@@ -197,7 +197,8 @@ pub fn str_cmp(a: &[u8], b: &[u8]) -> Int {
         let x = a.get(i).copied().unwrap_or(0) as i64;
         let y = b.get(i).copied().unwrap_or(0) as i64;
         if x != y {
-            return x - y;
+            // -1 or 1, as the interpreter (C strcmp only specifies the sign)
+            return if x < y { -1 } else { 1 };
         }
     }
     0

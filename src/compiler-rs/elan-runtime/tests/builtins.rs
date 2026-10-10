@@ -58,10 +58,10 @@ fn int_prints_low_32_bits() {
 fn strings_as_the_interpreter() {
     assert_eq!(str_len(b"abc"), 3);
     assert_eq!(&*str_cat(b"ab", b"c d"), b"abc d");
-    assert_eq!(str_cmp(b"a", b"d"), -3);
-    assert_eq!(str_cmp(b"da", b"a"), 3);
+    assert_eq!(str_cmp(b"a", b"d"), -1);
+    assert_eq!(str_cmp(b"da", b"a"), 1);
     assert_eq!(str_cmp(b"ab", b"ab"), 0);
-    assert_eq!(str_cmp(b"ab", b"a"), 98);
+    assert_eq!(str_cmp(b"ab", b"a"), 1);
     assert_eq!(str_spn(b"aab", b"a"), 2);
     assert_eq!(&*str_of_char(65), b"A");
     assert_eq!(str_substr(b"abcd", 1, 2).as_deref(), Some(&b"bc"[..]));
@@ -91,7 +91,7 @@ fn strings_are_bytes() {
     assert_ne!(Str::from(&b"\xe9"[..]), Str::from(&b"\xe8"[..]));
     // a signed C char (macOS), strcmp on unsigned bytes
     assert_eq!(str_index(b"\xe9", 0), Some(-23));
-    assert_eq!(str_cmp(b"\xe9", b"e"), 132);
+    assert_eq!(str_cmp(b"\xe9", b"e"), 1);
     assert_eq!(&*str_of_char(233), b"\xe9");
     assert_eq!(&*str_cat(&str_of_char(233), b"t\xe9"), b"\xe9t\xe9");
     assert_eq!(str_modif(b"abc", 1, 0xe9).as_deref(), Some(&b"a\xe9c"[..]));

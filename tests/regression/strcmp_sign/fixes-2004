@@ -1,0 +1,1 @@
+This case fixes a platform dependence of the 2004 system (strcmp values): the reference (make check-reference) does not run it.

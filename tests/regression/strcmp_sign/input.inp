@@ -1,0 +1,5 @@
+strcmp("a","d") end
+strcmp("d","a") end
+strcmp("abc","abc") end
+strcmp("abc","ab") end
+strcmp("é","a") end

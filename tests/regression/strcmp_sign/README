@@ -1,0 +1,1 @@
+strcmp gives -1, 0 or 1 on every platform (C strcmp only specifies the sign: macOS gave the byte difference, glibc 1, REM -32); bytes compare unsigned, as C strcmp.
