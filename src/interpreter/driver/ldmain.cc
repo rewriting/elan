@@ -1213,6 +1213,9 @@ int elan_main(int argc, char **argv)
 	  genof_h = fopen(moddest_h,"w");
 
 	  // generation de la grammaire et des tables de types et d'identificateurs
+	  // (in its own block: the destructor closes genof_h once, here;
+	  // it used to be called explicitly, then again at the end of the if)
+	  {
 	  ochstream earleyOut(genof_h);
 
           // globtermgr.earleyDump(earleyOut);
@@ -1222,7 +1225,7 @@ int elan_main(int argc, char **argv)
 	  //earleyOut << "#define SOURCETYPE " << sourcetype.numval() << "\n";
 // BIZZARDDDE	  earleyOut << "#define SOURCETYPE " << qresulttype.numval() << "\n";
 	  earleyOut << "#define SOURCETYPE " << qresulttype.typeval() << "\n";
-	  earleyOut.~ochstream();
+	  }
 
 	  // Generation de maincompiled.c dans moddest_c
 	  fprintf(genof_c,"#include \"%s\"\n\n",moddest_h);
