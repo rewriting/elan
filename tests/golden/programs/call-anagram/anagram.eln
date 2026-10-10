@@ -1,0 +1,25 @@
+module anagram
+// call "name":X with two strategy names of equal character sums (ab, ba)
+// inserted in different orders in the reference and definition tables
+// (zz refers to ba before ab and ba are defined): the export must give the
+// index of the definition (ref/ref.cc), else elanc-rs and REM apply the
+// other strategy (tests/compiler-rs/programs/strategy_terms/anagram_*).
+import global int bool list[int] Meta_apply[int]; end
+stratop global
+  ab : <int -> int> bs;
+  ba : <int -> int> bs;
+  zz : <int -> int> bs;
+end
+rules for int
+  n : int;
+global
+  [inc1] n => n+1 end
+  [dbl]  n => n*2 end
+end
+strategies for int
+implicit
+  [] zz => ba end
+  [] ab => dk(inc1) end
+  [] ba => dk(dbl) end
+end
+end

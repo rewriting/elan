@@ -1,0 +1,6 @@
+LPL anagram description
+  query of sort int
+  result of sort list[int]
+  import anagram
+  start with () set_of(call "ab":int, 5)
+end

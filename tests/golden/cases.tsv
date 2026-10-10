@@ -67,3 +67,6 @@ run	err-too-many-any-imports	tests/golden/programs/too-many-any-imports	input	pr
 run	deep-term	tests/golden/programs/deep-term	input	-b prog.lgi
 run	deep-import	tests/golden/programs/deep-import	input	prog.lgi
 run	nested-strategies	tests/golden/programs/nested-strategies	input	prog.lgi
+# call "name":X: the index of the definition of the strategy (ref/ref.cc),
+# with two names of equal character sums (ab, ba) in different table orders
+ref	call-anagram	tests/golden/programs/call-anagram	anagram	-

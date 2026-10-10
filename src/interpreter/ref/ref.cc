@@ -236,8 +236,14 @@ void term::Awriterec(ochstream &gout)
           if (1 || tindex>0) {
               //sindex = Strategyname_to_ref_index(subterm(0)->getstring(),tindex);
             // tname: the sort of the shared `call` symbol (code 144), the
-            // last instance declared, not the X of this call: not used
-            sindex = Strategyname_to_ref_index(quote1,NULL);
+            // last instance declared, not the X of this call: not used.
+            // The index of the definition (StrategyNames, the table that
+            // the .ref dumps), as STRCALL, WHERE and QUERY: until 2026 the
+            // index in the table of references, another strategy when two
+            // names collide in the hash tables in different orders
+            // (tests/golden/programs/call-anagram)
+            sindex = trrules.strategy_refs_into_defs(
+                       Strategyname_to_ref_index(quote1,NULL));
             
               //stout << sindex << "\n";
             gout << "/**/INT(" << sindex << ").nil," << head() << ")";

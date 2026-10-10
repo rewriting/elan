@@ -5,7 +5,9 @@ only. These tests pin, byte for byte, what it does not see:
 
 * the `.ref` files written by `elan --export` and `elan --cexport` for 27
   bench programs (applications and contributions whose I/A tests pass,
-  `Compiler.4.0/Test` programs whose compiled J tests pass): their numbers are
+  `Compiler.4.0/Test` programs whose compiled J tests pass), and of
+  `programs/call-anagram` (the strategy index of `call "ab":int` when `ab` and
+  `ba` share a hash bucket): their numbers are
   stringtab hash positions and symbol codes, read by `elan --import`, by REM
   and by the compiled runtime (see `docs/ref-format.md`);
 * the `-d` dump of 5 programs and the `-s`/`-S` statistics of 6 (times
@@ -43,3 +45,4 @@ table below.
 | all (initial set) | commit `96974dc` (S3b design), Apple Clang 17, macOS |
 | `err-too-many-any-imports` | S3b step 3 (the overflow of `anys` now fails with a message) |
 | `deep-term`, `deep-import`, `nested-strategies` | S3b step 4 (dynamic stacks: these programs now run; before, `err-deep-import` and `err-nested-strategies` failed) |
+| `call-anagram` | S6b review: `call "name":X` exports the index of the definition (`StrategyNames`), not of the reference |

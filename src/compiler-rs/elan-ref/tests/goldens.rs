@@ -1,5 +1,5 @@
 //! Round trip of the golden exports `tests/golden/expected/*.ref` (`elan
-//! --export`) and `*.cref` (`elan --cexport`): 27 programs, 54 files.
+//! --export`) and `*.cref` (`elan --cexport`): 28 programs, 56 files.
 
 use elan_ref::{normalise, parse_bytes, print_bytes, DefStrat, Lexem, Program, RuleBody, Term};
 use std::path::PathBuf;
@@ -44,7 +44,7 @@ fn load(name: &str) -> Program {
 #[test]
 fn all_goldens_round_trip() {
     let files = golden_files();
-    assert_eq!(files.len(), 54, "27 programs, a .ref and a .cref each");
+    assert_eq!(files.len(), 56, "28 programs, a .ref and a .cref each");
     let mut failures = Vec::new();
     for f in &files {
         let src = std::fs::read(f).unwrap();
@@ -70,6 +70,30 @@ fn all_goldens_round_trip() {
         }
     }
     assert!(failures.is_empty(), "{}", failures.join("\n"));
+}
+
+/// The first `call` (symbol 144) of `t`: the strategy index it holds.
+fn call_index(t: &Term) -> Option<i64> {
+    match t {
+        Term::Fsym { symbol: 144, args } => match args.as_slice() {
+            [Term::Int(s)] => Some(*s),
+            _ => None,
+        },
+        Term::Fsym { args, .. } => args.iter().find_map(call_index),
+        _ => None,
+    }
+}
+
+/// `call "ab":int` exports the index of `ab` in `StrategyNames`, although
+/// `ab` and `ba` (equal character sums, the same hash bucket) are in
+/// another order in the table of references: until 2026 the export gave
+/// the index of the reference, that of `ba` here
+/// (tests/golden/programs/call-anagram).
+#[test]
+fn call_anagram_model() {
+    let p = load("call-anagram.cref");
+    let s = call_index(&p.query.start_with).expect("a call in the start term");
+    assert_eq!(p.strategy_name(s as u32), Some("ab:int/anagram"));
 }
 
 #[test]

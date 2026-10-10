@@ -138,6 +138,14 @@ fn term(o: &mut String, t: &Term) {
             codes_(o, codes);
             o.push(')');
         }
+        // a strategy call of `--cexport`: `FSYM(/**/INT(s).nil,144)`, with
+        // neither the space before the argument nor the one before the
+        // symbol (ref/ref.cc)
+        Term::Fsym { args, symbol: 144 } if matches!(args.as_slice(), [Term::Int(_)]) => {
+            o.push_str("FSYM(");
+            term(o, &args[0]);
+            o.push_str(".nil,144)");
+        }
         Term::Fsym { args, symbol } => {
             o.push_str("FSYM(");
             let mut sep = ' ';
