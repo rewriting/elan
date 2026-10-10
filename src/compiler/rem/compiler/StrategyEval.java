@@ -48,6 +48,20 @@ public class StrategyEval {
   public static void genEval(OutputCode s,int deep,
 			       int exitLab, String dest, 
 			       Term str, String src) {
+    /*
+     * src may be a slot sv[k] that the construction of a subterm of str
+     * (an if condition, a label or defined strategy argument) reuses: it is
+     * copied first (the copy is a local of a new block)
+     */
+    int srcLab = StrategyEval.label++;
+    Tools.indent(s,deep); s.write("{ Gterm *src" + srcLab + " = " + src + ";\n");
+    genEval2(s,deep,exitLab,dest,str,"src" + srcLab);
+    Tools.indent(s,deep); s.write("}\n");
+  }
+
+  private static void genEval2(OutputCode s,int deep,
+			       int exitLab, String dest, 
+			       Term str, String src) {
     Symbol symb = str.getSymbol();
     
     if (Flags.verbose) {

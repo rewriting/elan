@@ -1,0 +1,6 @@
+LPL if_where description
+  query of sort int
+  result of sort int
+  import ift
+  start with [id]k(query)
+end
