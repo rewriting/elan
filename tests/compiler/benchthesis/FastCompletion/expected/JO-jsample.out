@@ -1,0 +1,4 @@
+
+result = cons_equation(a->b,cons_equation(f(g(var(0)))->g(var(0)),cons_equation(g(b)->b,cons_equation(f(b)->b,nil))))
+
+rewrite_step = 2842

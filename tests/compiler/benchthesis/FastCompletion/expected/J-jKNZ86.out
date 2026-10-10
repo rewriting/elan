@@ -1,0 +1,4 @@
+
+result = cons_equation(s(s(var(0)))->var(0),cons_equation(f(o,var(0))->var(0),cons_equation(g(o,var(0))->var(0),cons_equation(f(s(var(0)),var(1))->s(f(var(0),var(1))),cons_equation(h(o)->s(o),cons_equation(f(f(var(0),o),o)->var(0),cons_equation(g(s(var(0)),var(1))->f(g(var(0),var(1)),o),nil)))))))
+
+rewrite_step = 23485

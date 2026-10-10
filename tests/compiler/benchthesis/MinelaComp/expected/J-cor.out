@@ -1,0 +1,6 @@
+Enter a query term of sort 'pair[term,proofterm]'
+
+
+result = [true,proofnil;(or1(b->false))]
+
+rewrite_step = 79

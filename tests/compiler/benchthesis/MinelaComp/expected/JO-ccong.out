@@ -1,0 +1,6 @@
+Enter a query term of sort 'pair[term,proofterm]'
+
+
+result = [f(c,d),proofnil;f((r1(identity)),b);f(c,(r2(identity)))]
+
+rewrite_step = 196

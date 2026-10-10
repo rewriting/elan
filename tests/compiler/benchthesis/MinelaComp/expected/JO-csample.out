@@ -1,0 +1,6 @@
+Enter a query term of sort 'pair[term,proofterm]'
+
+
+result = [h(f(f(h(a)))),proofnil;h(g((r1(identity))));h((r2(x->a)))[[cons_proofterm(h((r1(identity))),nil)]]]
+
+rewrite_step = 539

@@ -84,11 +84,13 @@ check-unit: all
 # Compiled tests of the bench (spec S5a, D4): elanc -> make -> a.out, against
 # the installed compiler (the generated programs are built with the
 # compilers of this build, see src/compiler/CMakeLists.txt), after the tests
-# of elanc and of the strategies evaluated at run time (tests/compiler).
+# of elanc, of the strategies evaluated at run time and of the BenchThesis
+# programs ported to ELAN 3 (tests/compiler).
 # The compiled tests run only when the compiler is installed (not with
 # -DELAN_COMPILER=OFF).
 CHECK_COMPILER = if [ -x "$(PREFIX)/bin/elanc" ]; then \
 	  tests/compiler/test_elanc.sh "$(PREFIX)" && tests/compiler/test_runtime_strategies.sh "$(PREFIX)" \
+	  && tests/compiler/test_benchthesis.sh "$(PREFIX)" \
 	  && $(BENCH) --prefix $(PREFIX) --kinds J,JO; \
 	else echo "compiler not built (-DELAN_COMPILER=OFF): compiled tests (J, JO) skipped"; fi
 check-compiler: install

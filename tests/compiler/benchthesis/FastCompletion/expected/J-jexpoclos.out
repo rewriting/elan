@@ -1,0 +1,4 @@
+
+result = cons_equation(ae->f(af,af),cons_equation(ad->f(f(af,af),f(af,af)),cons_equation(ac->f(f(f(af,af),f(af,af)),f(f(af,af),f(af,af))),cons_equation(ab->f(f(f(f(af,af),f(af,af)),f(f(af,af),f(af,af))),f(f(f(af,af),f(af,af)),f(f(af,af),f(af,af)))),cons_equation(aa->f(f(f(f(f(af,af),f(af,af)),f(f(af,af),f(af,af))),f(f(f(af,af),f(af,af)),f(f(af,af),f(af,af)))),f(f(f(f(af,af),f(af,af)),f(f(af,af),f(af,af))),f(f(f(af,af),f(af,af)),f(f(af,af),f(af,af))))),cons_equation(b->f(f(f(f(f(f(af,af),f(af,af)),f(f(af,af),f(af,af))),f(f(f(af,af),f(af,af)),f(f(af,af),f(af,af)))),f(f(f(f(af,af),f(af,af)),f(f(af,af),f(af,af))),f(f(f(af,af),f(af,af)),f(f(af,af),f(af,af))))),f(f(f(f(f(af,af),f(af,af)),f(f(af,af),f(af,af))),f(f(f(af,af),f(af,af)),f(f(af,af),f(af,af)))),f(f(f(f(af,af),f(af,af)),f(f(af,af),f(af,af))),f(f(f(af,af),f(af,af)),f(f(af,af),f(af,af)))))),nil))))))
+
+rewrite_step = 145667

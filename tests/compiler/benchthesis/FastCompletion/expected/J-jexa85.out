@@ -1,0 +1,4 @@
+
+result = cons_equation(p(var(0),e)->var(0),cons_equation(p(e,var(0))->var(0),cons_equation(i(i(var(0)))->var(0),cons_equation(p(var(0),i(var(0)))->e,cons_equation(p(var(0),p(i(var(0)),var(1)))->var(1),cons_equation(i(e)->e,cons_equation(p(i(var(0)),var(0))->e,cons_equation(p(i(var(0)),p(var(0),var(1)))->var(1),cons_equation(h(e)->e,cons_equation(p(p(var(0),var(1)),var(2))->p(var(0),p(var(1),var(2))),cons_equation(h(i(var(0)))->i(h(var(0))),cons_equation(h(p(var(0),var(1)))->p(h(var(0)),h(var(1))),cons_equation(i(p(var(0),var(1)))->p(i(var(1)),i(var(0))),nil)))))))))))))
+
+rewrite_step = 367736

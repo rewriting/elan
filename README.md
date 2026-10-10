@@ -116,8 +116,8 @@ does not compile (docs/followups.md).
 
 ```sh
 make                 # build the interpreter and the compiler (CMake, into build/)
-make check           # unit tests, architecture, golden tests, 368 bench tests + 13 examples, 410 compiled tests
-make check-compiler  # only the compiled tests (elanc, J/JO kinds of the bench)
+make check           # unit tests, architecture, golden tests, 368 bench tests + 13 examples, 410 compiled tests, 64 BenchThesis cases
+make check-compiler  # only the compiled tests (tests/compiler, J/JO kinds of the bench)
 make check-sanitize  # same under ASan+UBSan (UBSan only on macOS; compiled programs: UBSan)
 make install PREFIX=$HOME/.local   # any file system
 make reference       # build the 2004 reference system (interpreter + compiler)

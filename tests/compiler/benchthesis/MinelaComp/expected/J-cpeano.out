@@ -1,0 +1,6 @@
+Enter a query term of sort 'pair[term,proofterm]'
+
+
+result = [s(s(s(s(s(o))))),proofnil;(r1(x->s(s(s(o)))o y->s(o)))[[cons_proofterm((r1(x->s(s(s(o)))o y->o))[[cons_proofterm((r2(x->s(s(s(o))))),nil)]],nil)]]]
+
+rewrite_step = 984

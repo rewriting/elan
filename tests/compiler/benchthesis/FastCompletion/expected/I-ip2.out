@@ -1,0 +1,5 @@
+ cons_equation(f(e1,var(0))->var(0),cons_equation(f(e2,var(0))->var(0),cons_equation(f(var(0),i1(var(0)))->e1,cons_equation(i1(e1)->e1,cons_equation(i1(e2)->e1,cons_equation(f(var(0),f(i1(var(0)),var(1)))->var(1),cons_equation(f(i1(var(0)),f(var(0),var(1)))->var(1),cons_equation(f(f(var(0),var(1)),var(2))->f(var(0),f(var(1),var(2))),cons_equation(i1(i1(var(0)))->f(var(0),e1),cons_equation(f(i1(var(0)),e1)->i1(var(0)),cons_equation(i2(var(0))->f(i1(var(0)),e2),cons_equation(i1(f(var(0),var(1)))->f(i1(var(1)),i1(var(0))),nil)))))))))))) end
+
+ end end
+end
+
