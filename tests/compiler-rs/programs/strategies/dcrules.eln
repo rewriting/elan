@@ -1,0 +1,34 @@
+module dcrules
+// dc over labels: every result of the first RULE that has one (not of the
+// first label): a rule with a non-deterministic where gives several
+// results; the rules after it, of the same label or not, are not used.
+import global int bool; end
+operators global
+  t(@) : (int) int;
+end
+stratop global
+  pick : <int -> int> bs;
+  first2 : <int -> int> bs;
+  none : <int -> int> bs;
+  three : <int -> int> bs;
+end
+rules for int
+  x, y : int;
+global
+  [r1] t(x) => x if x > 100 end
+  [r1] t(x) => y where y := (three) x if y != x + 2 end
+  [r1] t(x) => 0 end
+  [r2] t(x) => 1 end
+  [big] x => x if x > 1000 end
+  [inc] x => x + 1 end
+  [inc] x => x + 2 end
+  [inc] x => x + 3 end
+end
+strategies for int
+implicit
+  [] three => dk(inc) end
+  [] pick => dc(big, r2, r1) end
+  [] first2 => dc(r1, r2) end
+  [] none => dc(big) end
+end
+end

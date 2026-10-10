@@ -1,0 +1,6 @@
+LPL iterates_det description
+  query of sort bool
+  result of sort int
+  import iterates
+  start with (det) 3
+end

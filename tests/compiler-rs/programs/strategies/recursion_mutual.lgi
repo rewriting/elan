@@ -1,0 +1,6 @@
+LPL recursion_mutual description
+  query of sort bool
+  result of sort int
+  import recursion
+  start with (even) 4
+end

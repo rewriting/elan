@@ -1,0 +1,6 @@
+LPL repeats_none description
+  query of sort bool
+  result of sort int
+  import repeats
+  start with (none) 7
+end

@@ -1,0 +1,11 @@
+module samelabel2
+// Rules with the labels of samelabel.eln, imported.
+import global int bool; end
+rules for int
+  x : int;
+global
+  [r] x => x + 1 end
+  [s] x => x + 2 end
+  [r] x => x + 3 end
+end
+end

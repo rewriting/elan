@@ -1,0 +1,6 @@
+LPL wherepat_norm description
+  query of sort bool
+  result of sort int
+  import wherepat
+  start with () first(3) * 100 + first(0 - 3)
+end

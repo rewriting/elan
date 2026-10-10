@@ -1,0 +1,6 @@
+LPL seqs description
+  query of sort bool
+  result of sort int
+  import seqs
+  start with (three) 0
+end

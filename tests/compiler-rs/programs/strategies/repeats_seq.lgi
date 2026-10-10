@@ -1,0 +1,6 @@
+LPL repeats_seq description
+  query of sort bool
+  result of sort int
+  import repeats
+  start with (then_dec) 100
+end

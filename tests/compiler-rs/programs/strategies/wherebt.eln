@@ -1,0 +1,37 @@
+module wherebt
+// where x := (S) t with a non-deterministic S: each result in turn; a
+// failing condition after it asks S for its next result (backtracking),
+// across two such wheres; in a labelled rule all the combinations are
+// results, in an unlabelled rule (normalisation) the first one is kept.
+import global int bool; end
+operators global
+  pair(@,@) : (int int) int;
+  norm(@) : (int) int;
+  nonorm(@) : (int) int;
+end
+stratop global
+  three : <int -> int> bs;
+  go : <int -> int> bs;
+end
+rules for int
+  x, y, z, y2 : int;
+global
+  [inc] x => x + 1 end
+  [inc] x => x + 2 end
+  [inc] x => x + 3 end
+  [comb] pair(x, y) => z * 100 + y2
+         where z := (three) x
+         if z != x + 2
+         where y2 := (three) y
+         if (z + y2) % 2 == 0
+  end
+  []  norm(x) => z * 10 + y where z := (three) x where y := (three) z if y > z + 2 if z > x + 1 end
+  []  nonorm(x) => y where y := (three) x if y > x + 5 end
+  []  nonorm(x) => 0 - 1 end
+end
+strategies for int
+implicit
+  [] three => dk(inc) end
+  [] go => dk(comb) end
+end
+end

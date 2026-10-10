@@ -1,0 +1,6 @@
+LPL dcrules_none description
+  query of sort bool
+  result of sort int
+  import dcrules
+  start with (none) t(5)
+end

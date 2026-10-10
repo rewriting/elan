@@ -1,0 +1,6 @@
+LPL seqs_cut description
+  query of sort bool
+  result of sort int
+  import seqs
+  start with (steps) 0
+end

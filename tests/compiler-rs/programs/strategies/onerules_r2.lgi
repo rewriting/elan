@@ -1,0 +1,6 @@
+LPL onerules_r2 description
+  query of sort bool
+  result of sort int
+  import onerules
+  start with (fone) t(5)
+end

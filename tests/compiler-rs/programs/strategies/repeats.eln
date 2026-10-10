@@ -1,0 +1,33 @@
+module repeats
+// repeat*: the terms on which the step fails, reached depth first (several
+// maximal results with a non-deterministic step; a loop with a
+// deterministic step, also a million times; the term itself when the
+// step fails at once).
+import global int bool; end
+stratop global
+  down : <int -> int> bs;
+  half : <int -> int> bs;
+  none : <int -> int> bs;
+  then_dec : <int -> int> bs;
+  count : <int -> int> bs;
+end
+rules for int
+  x : int;
+global
+  [dec] x => x - 1 if x > 0 end
+  [dec] x => x - 2 if x > 1 end
+  [hlf] x => x / 2 if x > 0 end
+  [neg] x => x if x < 0 end
+  [hlf] x => x - 1 if x > 5 end
+  [inc1] x => x + 1 end
+  [minus1] x => x - 1 if x > 0 end
+end
+strategies for int
+implicit
+  [] down => repeat*(dk(dec)) end
+  [] half => repeat*(dc(hlf)) end
+  [] none => repeat*(dk(neg)) end
+  [] count => repeat*(dc(minus1)) end
+  [] then_dec => repeat*(first one(hlf)) ; dk(dec, inc1, inc1) end
+end
+end

@@ -1,0 +1,6 @@
+LPL repeats_det description
+  query of sort bool
+  result of sort int
+  import repeats
+  start with (half) 1000000
+end

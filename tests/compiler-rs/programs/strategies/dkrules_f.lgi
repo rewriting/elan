@@ -1,0 +1,6 @@
+LPL dkrules_f description
+  query of sort bool
+  result of sort nat
+  import dkrules
+  start with (both) f(s(s(o)))
+end

@@ -1,0 +1,6 @@
+LPL labelnorm_id description
+  query of sort bool
+  result of sort nat
+  import labelnorm
+  start with (keep) plus(f(s(o)), g(a))
+end

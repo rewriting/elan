@@ -1,0 +1,6 @@
+LPL choices_first description
+  query of sort bool
+  result of sort int
+  import choices
+  start with (firsts) 5
+end

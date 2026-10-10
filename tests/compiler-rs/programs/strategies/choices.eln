@@ -1,0 +1,33 @@
+module choices
+// DK, DC (first) and ONE (first one) over strategies, nested; a choice
+// whose first alternative fails, and one whose first alternative has
+// several results.
+import global int bool; end
+stratop global
+  inc : <int -> int> bs;
+  dbl : <int -> int> bs;
+  big : <int -> int> bs;
+  nest : <int -> int> bs;
+  firsts : <int -> int> bs;
+  ones : <int -> int> bs;
+  dks : <int -> int> bs;
+end
+rules for int
+  x : int;
+global
+  [r_inc] x => x + 1 end
+  [r_inc] x => x + 2 end
+  [r_dbl] x => x * 2 end
+  [r_big] x => x if x > 100 end
+end
+strategies for int
+implicit
+  [] inc => dk(r_inc) end
+  [] dbl => dk(r_dbl) end
+  [] big => dk(r_big) end
+  [] dks => dk(big, inc, dbl) end
+  [] firsts => first(big, inc, dbl) end
+  [] ones => first one(big, inc, dbl) end
+  [] nest => dk(first(big, dks), first one(big, dbl, inc), first(big, fail), dk(inc ; ones, firsts ; dbl)) end
+end
+end

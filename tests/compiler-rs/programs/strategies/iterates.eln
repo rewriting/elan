@@ -1,0 +1,21 @@
+module iterates
+// iterate*: the term, then iterate* of each result of the step, depth
+// first (non-deterministic and deterministic steps).
+import global int bool; end
+stratop global
+  all : <int -> int> bs;
+  det : <int -> int> bs;
+end
+rules for int
+  x : int;
+global
+  [grow] x => x * 10 if x < 100 end
+  [grow] x => x * 10 + 1 if x < 100 end
+  [dec] x => x - 1 if x > 0 end
+end
+strategies for int
+implicit
+  [] all => iterate*(dk(grow)) end
+  [] det => iterate*(dc(dec)) ; dk(grow) end
+end
+end

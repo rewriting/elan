@@ -1,0 +1,6 @@
+LPL repeats_long description
+  query of sort bool
+  result of sort int
+  import repeats
+  start with (count) 1000000
+end

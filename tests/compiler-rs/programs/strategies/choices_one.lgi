@@ -1,0 +1,6 @@
+LPL choices_one description
+  query of sort bool
+  result of sort int
+  import choices
+  start with (ones) 5
+end

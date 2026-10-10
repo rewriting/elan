@@ -1,0 +1,21 @@
+module idfail
+// id, fail and their compositions; a strategy without result prints
+// nothing.
+import global int bool; end
+stratop global
+  ident : <int -> int> bs;
+  never : <int -> int> bs;
+  mix : <int -> int> bs;
+end
+rules for int
+  x : int;
+global
+  [inc] x => x + 1 end
+end
+strategies for int
+implicit
+  [] ident => id ; id end
+  [] never => dk(inc) ; fail ; dk(inc) end
+  [] mix => dk(fail, id ; dk(inc), never, ident) end
+end
+end

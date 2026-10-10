@@ -1,0 +1,6 @@
+LPL idfail_none description
+  query of sort bool
+  result of sort int
+  import idfail
+  start with (never) 1
+end

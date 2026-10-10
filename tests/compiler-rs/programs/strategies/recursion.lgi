@@ -1,0 +1,6 @@
+LPL recursion description
+  query of sort bool
+  result of sort int
+  import recursion
+  start with (norm) 20
+end

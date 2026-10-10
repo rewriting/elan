@@ -1,0 +1,38 @@
+module wherepat
+// where p := (S) t: the results of S that do not match the pattern are
+// skipped (backtracking), in labelled and unlabelled rules.
+import global int bool; end
+sort pair; end
+operators global
+  p(@,@) : (int int) pair;
+  q(@) : (int) pair;
+  sum(@) : (int) int;
+  first(@) : (int) int;
+end
+stratop global
+  mk : <pair -> pair> bs;
+  go : <int -> int> bs;
+end
+rules for pair
+  x, y : int;
+global
+  [mkr] p(x, y) => q(x) end
+  [mkr] p(x, y) => p(y, x) end
+  [mkr] p(x, y) => q(y) end
+  [mkr] p(x, y) => p(x + y, x) end
+end
+rules for int
+  x, a, b : int;
+global
+  [sumr] sum(x) => a * 10 + b where (pair) p(a, b) := (mk) p(x, x + 1) end
+  [] first(x) => a where (pair) q(a) := (mk) p(x, x + 1) if a > x end
+end
+strategies for pair
+implicit
+  [] mk => dk(mkr) end
+end
+strategies for int
+implicit
+  [] go => dk(sumr) end
+end
+end

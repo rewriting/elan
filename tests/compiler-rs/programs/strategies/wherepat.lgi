@@ -1,0 +1,6 @@
+LPL wherepat description
+  query of sort bool
+  result of sort int
+  import wherepat
+  start with (go) sum(3)
+end

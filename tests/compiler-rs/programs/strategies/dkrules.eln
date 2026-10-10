@@ -1,0 +1,34 @@
+module dkrules
+// dk over labels: every result of every rule of each label, labels in the
+// order of the dk, rules of a label in source order (several rules with
+// the same label, some of them not matching).
+import global int bool; end
+sort nat; end
+operators global
+  o : nat;
+  s(@) : (nat) nat;
+  a : nat;
+  b : nat;
+  e : nat;
+  f(@) : (nat) nat;
+end
+stratop global
+  both : <nat -> nat> bs;
+  rev : <nat -> nat> bs;
+end
+rules for nat
+  x : nat;
+global
+  [r1] a => b end
+  [r1] f(x) => x end
+  [r1] a => e end
+  [r2] a => s(o) end
+  [r1] x => s(x) end
+  [r2] f(s(x)) => f(x) end
+end
+strategies for nat
+implicit
+  [] both => dk(r1, r2) end
+  [] rev => dk(r2, r1) end
+end
+end

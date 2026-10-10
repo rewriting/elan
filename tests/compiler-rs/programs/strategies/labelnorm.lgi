@@ -1,0 +1,6 @@
+LPL labelnorm description
+  query of sort bool
+  result of sort nat
+  import labelnorm
+  start with (go) d
+end

@@ -1,0 +1,22 @@
+module samelabel
+// One label, rules in two modules: a strategy uses the rules of the label
+// that it sees (its module's and the imported global ones), each module's
+// rules in source order.
+import global int bool samelabel2; end
+stratop global
+  go : <int -> int> bs;
+  first_r : <int -> int> bs;
+end
+rules for int
+  x : int;
+global
+  [r] x => x * 10 end
+  [s] x => x + 7 end
+  [r] x => x * 100 end
+end
+strategies for int
+implicit
+  [] go => dk(r, s) end
+  [] first_r => dc(r) end
+end
+end

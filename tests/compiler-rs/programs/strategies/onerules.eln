@@ -1,0 +1,31 @@
+module onerules
+// one over labels (first one, dc one): the first result of the first rule
+// that has one, even when that rule has several.
+import global int bool; end
+operators global
+  t(@) : (int) int;
+end
+stratop global
+  fone : <int -> int> bs;
+  dcone : <int -> int> bs;
+  three : <int -> int> bs;
+  allof : <int -> int> bs;
+end
+rules for int
+  x, y : int;
+global
+  [r1] t(x) => x if x > 100 end
+  [r1] t(x) => y where y := (three) x if y != x + 1 end
+  [r2] t(x) => 1 end
+  [inc] x => x + 1 end
+  [inc] x => x + 2 end
+  [inc] x => x + 3 end
+end
+strategies for int
+implicit
+  [] three => dk(inc) end
+  [] fone => first one(r2, r1) end
+  [] dcone => dc one(r1, r2) end
+  [] allof => dk(r1, r2) end
+end
+end

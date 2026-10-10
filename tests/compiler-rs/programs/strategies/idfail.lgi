@@ -1,0 +1,6 @@
+LPL idfail description
+  query of sort bool
+  result of sort int
+  import idfail
+  start with (mix) 1
+end

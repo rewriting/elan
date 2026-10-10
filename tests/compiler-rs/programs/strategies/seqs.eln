@@ -1,0 +1,22 @@
+module seqs
+// Sequences s1 ; s2 ; s3: s2 on every result of s1, in order; a failing
+// step cuts its branch only.
+import global int bool; end
+stratop global
+  three : <int -> int> bs;
+  steps : <int -> int> bs;
+end
+rules for int
+  x : int;
+global
+  [inc] x => x + 1 end
+  [inc] x => x + 2 end
+  [ten] x => x * 10 end
+  [odd] x => x if x % 2 == 1 end
+end
+strategies for int
+implicit
+  [] three => dk(inc) ; dk(inc) ; dk(ten) end
+  [] steps => dk(inc) ; dk(odd) ; id ; dk(inc, ten) end
+end
+end

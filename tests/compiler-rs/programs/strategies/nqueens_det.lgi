@@ -1,0 +1,6 @@
+LPL nqueens_det description
+  query of sort bool
+  result of sort list
+  import nqueens
+  start with (det_queens_strat) queens(8)
+end

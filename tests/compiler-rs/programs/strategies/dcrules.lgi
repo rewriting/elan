@@ -1,0 +1,6 @@
+LPL dcrules description
+  query of sort bool
+  result of sort int
+  import dcrules
+  start with (first2) t(5)
+end

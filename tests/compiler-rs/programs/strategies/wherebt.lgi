@@ -1,0 +1,6 @@
+LPL wherebt description
+  query of sort bool
+  result of sort int
+  import wherebt
+  start with (go) pair(1, 10)
+end

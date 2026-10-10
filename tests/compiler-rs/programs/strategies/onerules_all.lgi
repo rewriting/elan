@@ -1,0 +1,6 @@
+LPL onerules_all description
+  query of sort bool
+  result of sort int
+  import onerules
+  start with (allof) t(5)
+end

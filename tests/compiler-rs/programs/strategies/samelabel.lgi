@@ -1,0 +1,6 @@
+LPL samelabel description
+  query of sort bool
+  result of sort int
+  import samelabel
+  start with (go) 1
+end

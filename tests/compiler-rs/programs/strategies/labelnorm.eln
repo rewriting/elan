@@ -1,0 +1,35 @@
+module labelnorm
+// Labelled rules never apply during normalisation, unlabelled rules
+// normalise every result of a strategy, and the start term is normalised
+// before the strategy applies.
+import global int bool; end
+sort nat; end
+operators global
+  o : nat;
+  s(@) : (nat) nat;
+  a : nat;
+  d : nat;
+  f(@) : (nat) nat;
+  g(@) : (nat) nat;
+  plus(@,@) : (nat nat) nat;
+end
+stratop global
+  keep : <nat -> nat> bs;
+  go : <nat -> nat> bs;
+end
+rules for nat
+  x, y : nat;
+global
+  [] d => a end
+  [lf] f(x) => plus(x, s(x)) end
+  [la] a => g(s(o)) end
+  [lg] g(x) => f(x) end
+  [] plus(o, y) => y end
+  [] plus(s(x), y) => s(plus(x, y)) end
+end
+strategies for nat
+implicit
+  [] keep => id end
+  [] go => dk(la) ; dk(lg) ; dk(lf) end
+end
+end

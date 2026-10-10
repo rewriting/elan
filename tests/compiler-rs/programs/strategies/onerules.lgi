@@ -1,0 +1,6 @@
+LPL onerules description
+  query of sort bool
+  result of sort int
+  import onerules
+  start with (dcone) t(5)
+end

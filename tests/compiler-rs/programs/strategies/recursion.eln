@@ -1,0 +1,27 @@
+module recursion
+// Named strategies calling each other, recursively: a normaliser written
+// with first(s ; self, id), and mutual recursion with a non-deterministic
+// step.
+import global int bool; end
+stratop global
+  norm : <int -> int> bs;
+  even : <int -> int> bs;
+  odd : <int -> int> bs;
+  step : <int -> int> bs;
+end
+rules for int
+  x : int;
+global
+  [dec] x => x - 3 if x > 2 end
+  [down] x => x - 1 if x > 0 end
+  [down] x => x - 2 if x > 1 end
+  [stop] x => x * 100 end
+end
+strategies for int
+implicit
+  [] step => dk(down) end
+  [] norm => first(dk(dec) ; norm, id) end
+  [] even => first(dk(down) ; odd, dk(stop)) end
+  [] odd => dk(down) ; even end
+end
+end
