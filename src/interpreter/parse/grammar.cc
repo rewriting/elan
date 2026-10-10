@@ -936,7 +936,7 @@ void earleyPrettyDumpGrammarRule(ochstream &stout,struct sgrammrule *gr)
       // un symbole : f,g,a,( ...
       stout << gr->leftside.alfsy();
       stout << "cela ne devrait pas arriver\n";
-      exit(1);
+      failexit();
     }
   stout << " ";
   stout << " -->  ";
@@ -1003,7 +1003,7 @@ int earleyDumpGrammarRule(ochstream &stout,struct sgrammrule *gr)
       // un symbole : f,g,a,( ...
       stout << gr->leftside.alfsy();
       stout << "cela ne devrait pas arriver\n";
-      exit(1);
+      failexit();
     }
   // on compte le nombre de membres droits
   compteur=0;

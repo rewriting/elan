@@ -1768,13 +1768,13 @@ int term::storeVariable(int n, term *tabVar) {
   } else if(a==2) {
     if(n>MAX_SYNTACTICMATCHING_VAR-1) {
 	 fprintf(stderr,"term_storeVariable: increase MAX_SYNTACTICMATCHING_VAR=%d\n",MAX_SYNTACTICMATCHING_VAR); 
-	 exit(1); 
+	 failexit(); 
     }
     tabVar[n]=t->subt[0];
     return t->subt[1].storeVariable(n+1,tabVar);
   } else {
     fprintf(stderr,"term_storeVariable: current term is not correct\n");  
-    exit(1);
+    failexit();
   }
   return n;
 }

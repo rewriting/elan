@@ -616,7 +616,7 @@ void genWheresCode(FILE *ff,int deep,struct wherelist *wheres,int det,int lastRu
       if (wh->strateg!=NULL) {
 	fprintf(stderr,"[error] strategy \'%s\' is not defined\n",
 		         trrules.strategyname_refs(wh->strateg));
-	exit(EXIT_FAILURE);
+	failexit();
       }
       intend(ff,deep+1); 
       fprintf(ff,"v%d = ",wh->leftvarterm.givlsvarnum());
