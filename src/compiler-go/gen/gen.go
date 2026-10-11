@@ -41,8 +41,11 @@
 //     continuation of S (a closure), so that a failing condition asks S
 //     for its next result (`return false`); in a normalisation function
 //     the first result for which the rule applies is kept;
-//   - AC operators (S7c, ac.go): their function builds the canonical term
-//     (rt.MkAC2) and applies their rules to it; an AC pattern is matched
+//   - AC operators (S7c, ac.go): their function merges the elements of
+//     its arguments (rt.MergeAC) and gives them to its function over a
+//     multiset (op_ac), which takes the AC term (rt.ACTerm: the shared
+//     node, or a transient one) and applies their rules to it, then makes
+//     it shared (rt.Intern) when it is a normal form; an AC pattern is matched
 //     by loops over the elements of its subject (each solution passed to
 //     the rest of the rule, the conditions pruning as soon as their
 //     variables are bound);
@@ -216,6 +219,16 @@ func (e *emitter) unbox(s ir.SortID, t string) string {
 
 func symName(op *ir.Op) string { return "sym_" + op.Fun }
 
+// acFun is the normalisation function of the AC operator op over a
+// multiset; nil for a constructor (rt.ApplyAC and rt.ExtendAC then
+// build the term).
+func acFun(op *ir.Op) string {
+	if op.Kind != ir.Defined {
+		return "nil"
+	}
+	return op.ACFun
+}
+
 // mk is the construction of the term o(args), args being terms.
 func (e *emitter) mk(o ir.OpID, args []string) string {
 	sym := symName(&e.ir.Ops[o])
@@ -273,7 +286,7 @@ func (e *emitter) expr(x *ir.Expr, vars []ir.Var) string {
 	if op.AC {
 		if args := e.acArgs(x, vars); len(args) > 2 {
 			// one AC term: normalised once, as a whole
-			return fmt.Sprintf("rt.ApplyAC(%s, %s, %s)", symName(op), op.Fun, strings.Join(args, ", "))
+			return fmt.Sprintf("rt.ApplyAC(%s, %s, %s)", symName(op), acFun(op), strings.Join(args, ", "))
 		}
 	}
 	var args []string
@@ -582,14 +595,25 @@ func (e *emitter) opFunc(o ir.OpID) {
 		for _, s := range op.Skipped {
 			e.line("//\tskipped: %s", comment(s))
 		}
-		e.open("%s {", e.signature(o))
+		if op.AC {
+			e.open("%s {", e.signature(o))
+			e.line("return %s(rt.MergeAC(%s, a0, a1))", acFun(op), symName(op))
+			e.close("}")
+			e.line("")
+			e.line("// %s: the normal form of the AC term of %s over the elements e", acFun(op), op.Fun)
+			e.line("// (flattened, sorted, two or more; kept).")
+			e.open("func %s(e []rt.Term) rt.Term {", acFun(op))
+		} else {
+			e.open("%s {", e.signature(o))
+		}
 		if op.Recursive {
 			e.line("rt.Guard()")
 			e.line("defer rt.Unguard()")
 		}
 		if op.AC {
-			e.line("// the canonical term (flattened, sorted): the only column of the rules")
-			e.line("a0 = %s", e.stuck(o))
+			e.line("// the AC term (shared, or transient until it is a normal form): the")
+			e.line("// only column of the rules")
+			e.line("a0 := rt.ACTerm(%s, e)", symName(op))
 		}
 		e.resType = e.goType(op.Result)
 		switch falls := e.decision(op.Tree, op.Rules); {
@@ -599,7 +623,7 @@ func (e *emitter) opFunc(o ir.OpID) {
 			e.line(`panic("%s: no rule applies to a total operator")`, op.Fun)
 		case op.AC:
 			e.line("// no rule applies: the term is a normal form")
-			e.line("return a0")
+			e.line("return rt.Intern(a0)")
 		default:
 			e.line("// no rule applies: the term is a normal form")
 			e.line("return %s", e.stuck(o))
@@ -1002,7 +1026,7 @@ func (e *emitter) conds(r *ir.Rule, from int, used map[ir.VarID]bool, depth int)
 		if r.Rhs.Kind == ir.ExprOp && r.Rhs.Op == e.ext.op {
 			args = e.acArgs(&r.Rhs, r.Vars)
 		}
-		rhs = fmt.Sprintf("rt.ExtendAC(%s, %s, %s, %s)", symName(op), op.Fun, e.ext.rest, strings.Join(args, ", "))
+		rhs = fmt.Sprintf("rt.ExtendAC(%s, %s, %s, %s)", symName(op), acFun(op), e.ext.rest, strings.Join(args, ", "))
 	}
 	switch {
 	case e.labelMode && depth == 0:

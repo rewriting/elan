@@ -155,7 +155,20 @@ func Merge(a, b []Term) []Term {
 }
 
 // Insert returns the sorted multiset e with one more occurrence of x.
-func Insert(e []Term, x Term) []Term { return Merge(e, []Term{x}) }
+func Insert(e []Term, x Term) []Term {
+	// after the elements <= x, as Merge(e, {x})
+	i, _ := slices.BinarySearchFunc(e, x, func(a, x Term) int {
+		if Compare(a, x) <= 0 {
+			return -1
+		}
+		return 1
+	})
+	out := make([]Term, len(e)+1)
+	copy(out, e[:i])
+	out[i] = x
+	copy(out[i+1:], e[i:])
+	return out
+}
 
 // MkAC returns the AC term sym of the sorted multiset e: the element
 // itself if there is one, the shared node sym(e...) if there are more, nil
@@ -172,7 +185,57 @@ func MkAC(sym int32, e []Term) Term {
 }
 
 // MkAC2 returns the canonical AC term sym(a, b) (flattened, sorted).
-func MkAC2(sym int32, a, b Term) Term { return MkAC(sym, Merge(Elems(sym, a), Elems(sym, b))) }
+func MkAC2(sym int32, a, b Term) Term { return MkAC(sym, MergeAC(sym, a, b)) }
+
+// MergeAC returns the sorted multiset of sym(a, b): the union of the
+// elements of a and b (seen as arguments of sym), a fresh slice.
+func MergeAC(sym int32, a, b Term) []Term {
+	if a.Sym == sym {
+		if b.Sym == sym {
+			return Merge(a.Args, b.Args)
+		}
+		return Insert(a.Args, b)
+	}
+	if b.Sym == sym {
+		return Insert(b.Args, a)
+	}
+	if Compare(a, b) <= 0 {
+		return []Term{a, b}
+	}
+	return []Term{b, a}
+}
+
+// ACTerm returns the AC term sym(e...) (e sorted, two elements or more;
+// kept): its shared node if it exists, else a transient node, outside the
+// unique table. The normalisation function of an AC symbol matches its
+// rules on it, then returns [Intern] of it if no rule applies: a term
+// that rewrites never pays for a node of the table (a weak pointer, ~0.25
+// us). A transient node never leaves that function.
+func ACTerm(sym int32, e []Term) Term {
+	h := nodeHash(sym, 0, e)
+	if n := lookup(h, sym, 0, e); n != nil {
+		Hits++
+		return n
+	}
+	return &Node{Sym: sym, Hash: h, Args: e, tmp: true}
+}
+
+// Intern returns the shared node of t: t itself unless it is a transient
+// node of [ACTerm], which then joins the unique table (or gives way to
+// the equal node built meanwhile).
+func Intern(t Term) Term {
+	if !t.tmp {
+		return t
+	}
+	if n := lookup(t.Hash, t.Sym, t.Int, t.Args); n != nil {
+		Hits++
+		return n
+	}
+	t.tmp = false
+	Created++
+	insert(t)
+	return t
+}
 
 // Find returns the position of the first occurrence of x in the sorted
 // multiset e, or -1.
@@ -460,33 +523,39 @@ func (s *Down) Rest() []Term {
 	return out
 }
 
-// NormAC returns the normal form of the AC term of sym over the multiset e
-// (non-empty, sorted), f being the normalisation function of sym (it
-// flattens its arguments and applies the rules of sym): the element itself
-// if there is one, else f(e[0], the others). The elements left over by an
-// AC match can make a reducible term (and(x, t) on and(a, a, t) with
-// and(x, x) => x).
-func NormAC(sym int32, e []Term, f func(a, b Term) Term) Term {
+// NormAC returns the normal form of the AC term over the multiset e
+// (non-empty, sorted; kept), f being the normalisation function of its
+// symbol over a multiset of two elements or more (it applies the rules
+// of the symbol): the element itself if there is one, else f(e). The
+// elements left over by an AC match can make a reducible term (and(x, t)
+// on and(a, a, t) with and(x, x) => x).
+func NormAC(e []Term, f func(e []Term) Term) Term {
 	if len(e) == 1 {
 		return e[0]
 	}
-	return f(e[0], MkAC(sym, e[1:]))
+	return f(e)
 }
 
 // ApplyAC returns the normal form of the AC term sym(args...) (the args
-// in normal form), normalised as a whole: f is the normalisation function
-// of sym.
-func ApplyAC(sym int32, f func(a, b Term) Term, args ...Term) Term {
-	return NormAC(sym, Flatten(sym, args...), f)
+// in normal form), normalised as a whole: f is the normalisation
+// function of sym over a multiset, nil for a constructor.
+func ApplyAC(sym int32, f func(e []Term) Term, args ...Term) Term {
+	if f == nil {
+		return MkAC(sym, Flatten(sym, args...))
+	}
+	return NormAC(Flatten(sym, args...), f)
 }
 
 // ExtendAC returns the result of a rule applied modulo an extension:
 // sym(args..., rest...) normalised as a whole (args: the right-hand side,
 // or its arguments when sym is at its top), the right-hand side itself
-// when rest is empty and args is one term.
-func ExtendAC(sym int32, f func(a, b Term) Term, rest []Term, args ...Term) Term {
+// when rest is empty and args is one term; f as for [ApplyAC].
+func ExtendAC(sym int32, f func(e []Term) Term, rest []Term, args ...Term) Term {
 	if len(rest) == 0 && len(args) == 1 {
 		return args[0]
 	}
-	return NormAC(sym, Merge(Flatten(sym, args...), rest), f)
+	if f == nil {
+		return MkAC(sym, Merge(Flatten(sym, args...), rest))
+	}
+	return NormAC(Merge(Flatten(sym, args...), rest), f)
 }

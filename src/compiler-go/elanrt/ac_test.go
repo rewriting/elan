@@ -27,6 +27,47 @@ func TestCanonicalFormIsIndependentOfGroupingAndOrder(t *testing.T) {
 	}
 }
 
+// A transient AC term (ACTerm) is outside the unique table until Intern;
+// an AC term that exists is found, not rebuilt; Intern gives way to an
+// equal node built meanwhile.
+func TestTransientACTerms(t *testing.T) {
+	a, b, c := atom(41), atom(42), atom(43)
+	x := ACTerm(symAnd, MergeAC(symAnd, a, b))
+	if !x.tmp || Format(x) != "and(p(41),p(42))" {
+		t.Fatalf("transient %s (tmp %v)", Format(x), x.tmp)
+	}
+	created := Created
+	if y := Intern(x); y != x || y.tmp || and(a, b) != x || Created != created+1 {
+		t.Fatal("Intern of a new term: the node itself, shared")
+	}
+	if ACTerm(symAnd, MergeAC(symAnd, b, a)) != x {
+		t.Fatal("ACTerm of an existing term: its node")
+	}
+	z := ACTerm(symAnd, MergeAC(symAnd, x, c))
+	shared := and(c, and(b, a)) // built meanwhile
+	if z == shared || Intern(z) != shared {
+		t.Fatal("Intern after an equal term was built: that term")
+	}
+	if Intern(a) != a {
+		t.Fatal("Intern of a shared term")
+	}
+	// MergeAC as Merge of Elems; Insert as Merge
+	for _, p := range [][2]Term{{a, b}, {b, a}, {x, c}, {c, x}, {x, x}, {a, a}} {
+		want := Merge(Elems(symAnd, p[0]), Elems(symAnd, p[1]))
+		if got := MergeAC(symAnd, p[0], p[1]); !slices.Equal(got, want) {
+			t.Errorf("MergeAC(%s, %s)", Format(p[0]), Format(p[1]))
+		}
+	}
+	if got := Insert([]Term{a, b, b, c}, b); !slices.Equal(got, []Term{a, b, b, b, c}) {
+		t.Error("Insert of a repeated element")
+	}
+	// a constructor: ApplyAC and ExtendAC build the term
+	if ApplyAC(symU, nil, a, MkAC2(symU, c, b)) != MkAC2(symU, MkAC2(symU, a, b), c) ||
+		ExtendAC(symU, nil, []Term{c}, a, b) != MkAC2(symU, MkAC2(symU, a, b), c) {
+		t.Error("ApplyAC, ExtendAC of a constructor")
+	}
+}
+
 // The order is REM's (Gterm_cmp): ints by value, strings, then by symbol
 // code (declaration order here), then the arguments; an AC term as a
 // multiset (distinct elements, then multiplicities).

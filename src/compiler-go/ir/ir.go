@@ -407,6 +407,9 @@ type Op struct {
 	Name string
 	// Fun is the name of the normalisation function (Name_Symbol, unique).
 	Fun string
+	// ACFun is, for an AC operator, the name of its normalisation
+	// function over a multiset (Fun_ac, unique).
+	ACFun string
 	// Variant tells whether a term with this operator at the top can be a
 	// normal form (a constructor, or an operator that can be stuck): the
 	// operator then has a runtime symbol.

@@ -259,5 +259,5 @@ func Stats() string {
 		", live " + strconv.Itoa(LiveTerms()) +
 		", table " + strconv.Itoa(TableSize()) +
 		", rebuilds " + strconv.FormatInt(Rebuilds, 10) +
-		", forced GCs " + strconv.FormatInt(ForcedGCs, 10)
+		", forced GCs " + strconv.FormatInt(ForcedGCs, 10) + ", gc cycles " + strconv.FormatUint(gcCycles(), 10)
 }

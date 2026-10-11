@@ -1110,6 +1110,9 @@ func (b *builder) build(name string, start *tt, q *ref.Query, sortIndices []ref.
 			Meta:   metaOp(k.semantic),
 			AC:     k.infos == 2,
 		}
+		if op.AC {
+			op.ACFun = unique(usedFuns, op.Fun+"_ac")
+		}
 		for _, a := range k.args {
 			op.Args = append(op.Args, b.sortOf[a])
 		}

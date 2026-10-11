@@ -54,7 +54,7 @@ func acSets() *prog {
 
 func TestACProgramRuns(t *testing.T) {
 	src := acSets().gen(t)
-	for _, want := range []string{"rt.MkAC2(sym_u_340, a0, a1)", "rt.NewDown(", "rt.FirstOcc("} {
+	for _, want := range []string{"rt.MergeAC(sym_u_340, a0, a1)", "rt.ACTerm(sym_u_340, e)", "return rt.Intern(a0)", "rt.NewDown(", "rt.FirstOcc("} {
 		if !strings.Contains(src, want) {
 			t.Errorf("no %s in\n%s", want, src)
 		}

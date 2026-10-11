@@ -15,6 +15,10 @@ type Node struct {
 	Int  int32  // payload of an int node (SymInt); of a string node: its slot in the string table
 	Hash uint64 // structural hash: from the symbol's name and arity, the payload and the arguments' hashes
 	Args []Term // arguments; for an AC symbol, n >= 2 flattened elements in canonical order
+	// tmp marks a transient AC term ([ACTerm]): not in the unique table,
+	// seen only by the normalisation function of its symbol until
+	// [Intern] makes it the shared node.
+	tmp bool
 }
 
 // Nodes of arity 1 to 3 carry their arguments inline: one allocation per

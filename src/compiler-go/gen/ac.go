@@ -102,7 +102,7 @@ func (e *emitter) hoist(r *ir.Rule, next *int, pending map[ir.VarID]bool, used m
 func (e *emitter) acValue(o ir.OpID, m string) string {
 	op := &e.ir.Ops[o]
 	if op.Kind == ir.Defined {
-		return fmt.Sprintf("rt.NormAC(%s, %s, %s)", symName(op), m, op.Fun)
+		return fmt.Sprintf("rt.NormAC(%s, %s)", m, acFun(op))
 	}
 	return fmt.Sprintf("rt.MkAC(%s, %s)", symName(op), m)
 }
