@@ -23,7 +23,7 @@ func TestMain(m *testing.M) {
 }
 
 // A panic of the compiler exits with 1 (a failure) and a message, not with
-// Go's 2 (which the driver uses for "not supported yet").
+// Go's 2 (which the driver uses for "not supported").
 func TestInternalErrorExitsWith1(t *testing.T) {
 	exe, err := os.Executable()
 	if err != nil {

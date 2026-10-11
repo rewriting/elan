@@ -50,13 +50,20 @@ func (queryBuilder) Str(s string) Term         { return MkStr(s) }
 
 // readQuery reads the query from the standard input, as REM's
 // EarleyParser: the term built and normalised, then a newline; an error
-// stops the program.
-func readQuery(q *QueryParser) Term {
+// stops the program. When the start term does not use the query (used
+// false), its derivation is read (the same errors) but no term is built:
+// nil (S7e task 13: the program has no query operator then).
+func readQuery(q *QueryParser, used bool) Term {
 	tree, err := earley.Parse(stdin, queryTables(q), q.Sort, os.Stderr)
 	if err != nil {
 		parseFatal(err)
 	}
-	query := buildQuery(tree, q)
+	var query Term
+	if used {
+		query = buildQuery(tree, q)
+	} else {
+		deriveQuery(tree)
+	}
 	Out.WriteString("\n")
 	return query
 }
@@ -84,14 +91,33 @@ func parseFatal(err error) {
 // buildQuery builds the term of the derivation tree (an *earley.Fatal
 // raised by a builder stops the program).
 func buildQuery(tree *earley.Tree, q *QueryParser) Term {
-	defer func() {
-		if x := recover(); x != nil {
-			f, ok := x.(*earley.Fatal)
-			if !ok {
-				panic(x)
-			}
-			parseFatal(f)
-		}
-	}()
+	defer stopOnFatal()
 	return earley.Build[Term](tree, queryBuilder{q})
 }
+
+// deriveQuery reads the derivation tree as buildQuery, building nothing.
+func deriveQuery(tree *earley.Tree) {
+	defer stopOnFatal()
+	earley.Build[struct{}](tree, noBuilder{})
+}
+
+// stopOnFatal, deferred, stops the program on an *earley.Fatal.
+func stopOnFatal() {
+	if x := recover(); x != nil {
+		f, ok := x.(*earley.Fatal)
+		if !ok {
+			panic(x)
+		}
+		parseFatal(f)
+	}
+}
+
+// noBuilder builds nothing (earley.Builder): the query is not used.
+type noBuilder struct{}
+
+func (noBuilder) Op(int, []struct{}) struct{} { return struct{}{} }
+func (noBuilder) AC(int, []struct{}) struct{} { return struct{}{} }
+func (noBuilder) IsAC(int) bool               { return false }
+func (noBuilder) Int(int32) struct{}          { return struct{}{} }
+func (noBuilder) Ident(int32) struct{}        { return struct{}{} }
+func (noBuilder) Str(string) struct{}         { return struct{}{} }

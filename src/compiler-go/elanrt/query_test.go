@@ -1,6 +1,7 @@
 package elanrt
 
 import (
+	"strconv"
 	"strings"
 	"testing"
 
@@ -38,6 +39,17 @@ func init() {
 		SetQuery(natQuery())
 		Main("Nat", false, func(s *Session, _ Term) { s.Result(nat(0)) })
 	}
+	// the query's operators refused (a program whose start term ignores
+	// the query compiles none)
+	helpers["queryignorednoop"] = func() {
+		q := natQuery()
+		q.Op = func(r int, a []Term) Term {
+			Unsupported("a query with the operator of grammar rule " + strconv.Itoa(r))
+			return nil
+		}
+		SetQuery(q)
+		Main("Nat", false, func(s *Session, _ Term) { s.Result(nat(0)) })
+	}
 }
 
 // A query read from the standard input (REM's termParser, query mode 2):
@@ -51,11 +63,18 @@ func TestMainQuery(t *testing.T) {
 	if st != 0 || errs != "" || out != prompt+"\n\nresult = s(s(s(o)))\n\nrewrite_step = 2\n" {
 		t.Fatalf("status %d, out %q, err %q", st, out, errs)
 	}
-	// the query is read (and normalised) even when the start term does
-	// not use it
-	out, errs, st = runHelperIn(t, "queryignored", nil, "s(o)", "-quiet")
-	if st != 0 || errs != "" || out != prompt+"\n\nresult = o\n\nrewrite_step = 1\n" {
-		t.Fatalf("status %d, out %q, err %q", st, out, errs)
+	// the query is parsed even when the start term does not use it, but
+	// its term is not built (S7e task 13): no operator of the query is
+	// called (no step, no refusal); its syntax errors are reported
+	for _, h := range []string{"queryignored", "queryignorednoop"} {
+		out, errs, st = runHelperIn(t, h, nil, "s(s(o)) end", "-quiet")
+		if st != 0 || errs != "" || out != prompt+"\n\nresult = o\n\nrewrite_step = 0\n" {
+			t.Fatalf("%s: status %d, out %q, err %q", h, st, out, errs)
+		}
+		out, errs, st = runHelperIn(t, h, nil, "s(o end\n", "-quiet")
+		if st != 1 || out != prompt || !strings.Contains(errs, "syntax error on symbol 'end'") {
+			t.Fatalf("%s: status %d, out %q, err %q", h, st, out, errs)
+		}
 	}
 	out, errs, st = runHelperIn(t, "query", nil, "s(o end\n", "-quiet")
 	want := "\n[error] :file=standard input\tline=1\tpos=1\n[earley] syntax error on symbol 'end'\n" +
@@ -75,7 +94,7 @@ func TestMainQuery(t *testing.T) {
 	}
 	for _, args := range [][]string{{"-sort=", "nat"}, {"-strategy=", "s:nat"}, {"-REFInput"}, {"-commandLine"}} {
 		out, errs, st = runHelperIn(t, "query", nil, "o end", args...)
-		if st != 2 || !strings.Contains(errs, "not supported") {
+		if st != 2 || !strings.HasPrefix(errs, "elanrt: not supported (not planned): the option ") {
 			t.Fatalf("%v: status %d, out %q, err %q", args, st, out, errs)
 		}
 	}

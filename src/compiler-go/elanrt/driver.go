@@ -138,12 +138,15 @@ func Warning(msg string) {
 	fmt.Fprint(os.Stderr, msg)
 }
 
-// Unsupported stops a program that meets a construct the compiler
-// supports only partly: the message on the standard error, status 2 (as a
-// refusal of the compiler).
+// Unsupported stops a program that meets a construct the compiler does
+// not compile, by design (the refusals kept, docs/followups.md: REM's
+// options of its programs that choose another sort or strategy, a query
+// with a refused operator when the start term uses it...): the message on
+// the standard error, status 2 (as a refusal of the compiler, whose
+// wording it takes: ir.NotPlanned).
 func Unsupported(msg string) {
 	FlushOutput()
-	fmt.Fprintln(os.Stderr, "elanrt: not supported yet: "+msg)
+	fmt.Fprintln(os.Stderr, "elanrt: not supported (not planned): "+msg)
 	endProfiles()
 	os.Exit(2)
 }
@@ -234,11 +237,11 @@ func init() {
 // (s.Result(t)) of the start term, the query given as its second argument;
 // the statistics are printed after it returns, then the program exits
 // (status 0). querySort is the sort named in the prompt when a query must
-// be read (without -noInput: not supported yet, status 2). usesQuery: the
-// start term uses the query; under -noInput, the program prints REM's
-// message (rem/compiler/Query.java: "No ground term is defined", "Do not
-// use -noInput in this case") and exits with status 0 without running;
-// else program gets a nil query.
+// be read (without -noInput). usesQuery: the start term uses the query
+// (else the query is parsed but not built: readQuery); under -noInput,
+// the program prints REM's message (rem/compiler/Query.java: "No ground
+// term is defined", "Do not use -noInput in this case") and exits with
+// status 0 without running; else program gets a nil query.
 func Main(querySort string, usesQuery bool, program func(s *Session, query Term)) {
 	o := ParseOptions(os.Args[1:])
 	if o.Help {
@@ -255,7 +258,7 @@ func Main(querySort string, usesQuery bool, program func(s *Session, query Term)
 		defer func() {
 			// a panic is a bug (of the compiler or the runtime): a run-time
 			// error, the results so far kept, not Go's exit status 2
-			// (which says "not supported yet")
+			// (which says "not supported")
 			if r := recover(); r != nil {
 				Fatal(fmt.Sprintf("elanrt: internal error: %v\n%s", r, debug.Stack()))
 			}
@@ -274,11 +277,11 @@ func Main(querySort string, usesQuery bool, program func(s *Session, query Term)
 			fmt.Fprintf(Out, "Enter a query term of sort '%s'\n", querySort)
 			FlushOutput()
 			if queryParser == nil {
-				fmt.Fprintln(os.Stderr, "elanrt: reading a query is not supported yet; use -noInput")
+				fmt.Fprintln(os.Stderr, "elanrt: reading a query is not supported (not planned): the program has no query grammar; use -noInput")
 				done <- 2
 				return
 			}
-			query = readQuery(queryParser)
+			query = readQuery(queryParser, usesQuery)
 		}
 		stop := func() {}
 		if f := os.Getenv("ELAN_CPUPROFILE"); f != "" {

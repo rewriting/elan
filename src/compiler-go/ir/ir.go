@@ -985,7 +985,8 @@ type QueryKind uint8
 const (
 	// QueryNone: the parser never builds it (a rule of a sort that a
 	// query cannot contain, or a number, identifier or string: built by
-	// the parser).
+	// the parser; every rule when the start term does not use the query:
+	// it is parsed, not built).
 	QueryNone QueryKind = iota
 	// QueryOp: the function of the operator Op.
 	QueryOp

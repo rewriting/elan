@@ -351,9 +351,11 @@ func numbered(src string) string {
 // function building the term of each grammar rule (the operator's
 // function, its arguments unboxed and its result boxed), rt.SetQuery
 // before rt.Main; an operator that is not compiled stops the program when
-// a query contains it.
+// a query contains it (the start term uses the query: else no operator
+// is compiled, TestQueryIgnoredNoOperator).
 func TestQueryParserCode(t *testing.T) {
 	p := peano()
+	p.p.Query.StartWith = f(320, v(0, sNat), f(318))
 	p.op(sNat, 321, "io", []uint32{sNat}, 113) // a builtin not supported
 	src := p.gen(t)
 	for _, want := range []string{
@@ -369,6 +371,21 @@ func TestQueryParserCode(t *testing.T) {
 		if !strings.Contains(src, want) {
 			t.Errorf("missing %q in\n%s", want, src)
 		}
+	}
+}
+
+// TestQueryIgnoredNoOperator: when the start term does not use the query
+// (S7e task 13), the program parses it (the grammar, rt.SetQuery) but
+// builds no term: queryOp calls no operator.
+func TestQueryIgnoredNoOperator(t *testing.T) {
+	src := peano().gen(t)
+	for _, want := range []string{"var grammar = []earley.Rule{", "rt.SetQuery(&rt.QueryParser{Rules: grammar, Sort: 323,", "rt.Main(\"nat\", false,"} {
+		if !strings.Contains(src, want) {
+			t.Errorf("missing %q in\n%s", want, src)
+		}
+	}
+	if i := strings.Index(src, "func queryOp("); i < 0 || strings.Contains(src[i:i+strings.Index(src[i:], "\n}\n")], "plus_320(") {
+		t.Errorf("queryOp calls an operator:\n%s", src)
 	}
 }
 
@@ -423,7 +440,7 @@ func TestChooseLinear(t *testing.T) {
 	}
 }
 
-// TestQueryOnlyOperatorsKeepIntsNative (S7e task 2): a program shaped as
+// TestQueryOnlyOperatorsKeepIntsNative (S7e tasks 2, 13): a program shaped as
 // nqueens (a partial bool operator over native ints, a constant a : int
 // and btoi that only the query can contain, a start term without the
 // query) keeps its ints native: noattack takes int32s.

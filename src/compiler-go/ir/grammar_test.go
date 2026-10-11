@@ -66,12 +66,14 @@ func TestGrammarAsREM(t *testing.T) {
 	}
 }
 
-// TestQueryRules: the operators that a query can build (the grammar rules
-// reachable from the query's sort) are compiled even when the start term
-// does not use them; one that cannot be compiled is refused at run time
-// only (QueryUnsupported), and the rules of other sorts are not used.
+// TestQueryRules: when the start term uses the query, the operators that
+// a query can build (the grammar rules reachable from the query's sort)
+// are compiled, even those the start term does not reach; one that
+// cannot be compiled is refused at run time only (QueryUnsupported), and
+// the rules of other sorts are not used.
 func TestQueryRules(t *testing.T) {
 	p := peano()
+	p.start(f(320, v(0, sNat), f(318)), sNat)
 	p.op(sNat, 321, "double", []uint32{sNat}, 0, 0)
 	p.rule(sNat, 1, f(321, v(0, sNat)), f(320, v(0, sNat), v(0, sNat)))
 	p.op(sNat, 322, "io", []uint32{sNat}, 115, 0) // a builtin not supported
@@ -171,9 +173,10 @@ func queryRuleOf(t *testing.T, ir *IR, sym int32) QueryRule {
 }
 
 // TestQueryOnlyOperatorsKeepIntNative: when the start term does not use
-// the query, an operator that only the query reaches does not box a
-// family native in the program: its rule is refused (QueryUnsupported,
-// status 2 at run time) with the reason.
+// the query, the query is parsed but not built (S7e task 13): no query
+// operator is compiled (every rule QueryNone, none refused), so an
+// operator that only the query reaches does not box a family native in
+// the program.
 func TestQueryOnlyOperatorsKeepIntNative(t *testing.T) {
 	ir := queryOnly().lower(t)
 	for _, n := range []string{"int", "builtinInt"} {
@@ -182,23 +185,18 @@ func TestQueryOnlyOperatorsKeepIntNative(t *testing.T) {
 			t.Errorf("%s is boxed", n)
 		}
 	}
-	a := queryRuleOf(t, ir, 303)
-	if a.Kind != QueryUnsupported || a.Why != "the query operator a : int would make int a sort of terms in the whole program (the start term does not use the query)" {
-		t.Errorf("a: %+v", a)
+	if ir.Start.Query == nil {
+		t.Fatal("no query parser")
 	}
-	// btoi takes a bool that p can leave stuck: btoi or p (whichever the
-	// query grammar adds last) is refused, for builtinInt or bool
-	b, pr := queryRuleOf(t, ir, 25), queryRuleOf(t, ir, 304)
-	refused := func(r QueryRule) bool {
-		return r.Kind == QueryUnsupported && strings.HasPrefix(r.Why, "the query operator ") &&
-			strings.HasSuffix(r.Why, "a sort of terms in the whole program (the start term does not use the query)")
+	for i, r := range ir.Start.Query.Rules {
+		if r.Kind != QueryNone {
+			t.Errorf("rule %d (symbol %d): %+v", i, ir.Start.Query.Grammar[i].Symbol, r)
+		}
 	}
-	if !refused(b) && !refused(pr) {
-		t.Errorf("btoi %+v, p %+v", b, pr)
-	}
-	// the others are compiled
-	if r := queryRuleOf(t, ir, 301); r.Kind != QueryOp {
-		t.Errorf("plus: %+v", r)
+	for _, op := range ir.Ops {
+		if op.Symbol == 303 || op.Symbol == 304 || op.Symbol == 25 {
+			t.Errorf("%s is compiled", op.Decl)
+		}
 	}
 }
 

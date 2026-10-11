@@ -245,21 +245,19 @@ sub-project (S1–S5b). Each item says where it comes from.
     strategy is of another sort; a query using an operator whose
     compilation was refused (Task 5); the options `-sort=`, `-strategy=`,
     `-REFInput`, `-commandLine` of REM's programs;
-  - at run time (status 2), S7e task 2: when the start term does not use
-    the query, a query containing an operator that only the query reaches
-    and that would make a sort native in the program alone a sort of
-    terms (a constant `a : int` that no rule uses; `btoi` over a bool that
-    a partial operator can leave stuck): `the query operator <decl> would
-    make <sort> a sort of terms in the whole program (the start term does
-    not use the query)` (`programs/query/queryonly`, `.no-rem`: REM
-    accepts it and prints the start term's result). Ruling: refuse such a
-    query rather than compile the query's operators twice (boxed for the
-    query only) — the query's value is dropped when the start term does
-    not use it, only its normalisation steps are visible; the cost was
-    every program with a partial bool operator or a stray constant of a
-    builtin family boxing its ints (nqueens 12 4.6 s instead of 0.74 s).
-    Cost if wrong: status 2 for such a query in such a program (none of
-    the 152 queries of `test_query.sh` but `queryonly`'s own).
+  - (removed, S7e task 13: the run-time refusal of task 2 — a query
+    containing an operator that only the query reaches and that would
+    box a family native in the program, when the start term does not
+    use the query. Such a query is now parsed but not built: no query
+    operator is compiled, nothing is refused, the native families stay
+    native, and the start term's result is printed as REM does
+    (`programs/query/queryonly`, compared with REM). What differs from
+    REM: REM builds and normalises the unused query, so its
+    `rewrite_step` line counts the query's steps (not compared by
+    `test_query.sh`), and a query whose normalisation does not end or
+    stops the program (an array error, a write) does so in REM only.
+    The run-time refusals left are worded `elanrt: not supported (not
+    planned): ...`.)
 
 ## Performance
 
