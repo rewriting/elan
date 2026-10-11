@@ -191,8 +191,9 @@ sub-project (S1–S5b). Each item says where it comes from.
   fails (9999); `open` gives `Error(errno)` on a failure, which `stdio`'s
   `iserr([x])` does not recognise (`rb(false,errno([2]))`, REM
   `rb(true,1)`). Regression programs: `programs/io/*.no-interpreter`.
-- **elanc-go: kept refusals** (S7d task 7; status 2, "not supported
-  (not planned)" or "not supported yet (S7e)"; the inventory of
+- **elanc-go: kept refusals** (S7d task 7, closed in S7e; status 2,
+  "not supported (not planned)" — since S7e no refusal names a stage,
+  `ir` `TestKeptRefusalsAreNotPlanned` checks it; the inventory of
   `unsupported(` in `src/compiler-go/ir`):
   - not planned — no program can reach it: a commutative-only operator
     (the language has none); a `switch/case` right-hand side (SWRULE: the
@@ -216,14 +217,26 @@ sub-project (S1–S5b). Each item says where it comes from.
     215 (equality of molecules, one application's builtin), 115 and 117
     (create a process) and 123 (the interpreter's I/O error constructor
     `Error(e)` of builtinIO): REM has no fun_115, 117, 123 (S7e task 6);
-  - S7e — possible later, no program of the tests needs it: AC shapes
-    REM transforms before matching (`refused/acnested`, `acallrep`: both
-    oracles agree, e2 and e1), an AC operator whose arguments are not of
-    its result sort or printed without its two arguments, a where pattern
-    with an AC operator of a builtin sort, an identifier in an AC pattern;
-    rules for a builtin operation; any other builtin code (the I/O codes
-    and the arrays are compiled since S7e tasks 6-7, builtinHashTerm
-    too);
+  - not planned (S7e, were "S7e" refusals) — possible, but no program
+    of the tests, of the bench or of the library needs it, and each would
+    port a piece of REM for no program:
+    - AC shapes REM transforms before matching (`refused/acnested`,
+      `acallrep`: both oracles agree, e2 and e1; a port of REM's
+      bipartite matcher and of `RewriteRule.java` transformation2) and a
+      where pattern with an AC operator of a builtin sort (its value is
+      native: only a stuck term could match);
+    - an identifier in an AC pattern (REM's order of a tagged identifier
+      among its matchers' items is not established; no oracle program);
+    - an AC operator whose arguments are not of its result sort (REM and
+      Eker's matcher flatten `(s s) s` only; no program declares one);
+    - rules for a builtin operation (whether the builtin or the rules
+      come first in each oracle is not established; no program has one);
+    - any other builtin code: no module of the library declares one (REM's
+      ASF list codes 192-199, the interpreter's 79-82, 155, 179-190,
+      205-208); the I/O codes and the arrays are compiled since S7e tasks
+      6-7, builtinHashTerm too;
+    - (removed: "an AC operator printed without its two arguments" could
+      not happen — a candidate's arguments are those of its printing form.)
   - at run time (status 2): a META call of a number or a string whose
     strategy is of another sort; a query using an operator whose
     compilation was refused (Task 5); the options `-sort=`, `-strategy=`,

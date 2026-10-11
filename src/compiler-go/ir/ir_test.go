@@ -6,7 +6,10 @@ package ir
 
 import (
 	"errors"
+	"os"
+	"path/filepath"
 	"reflect"
+	"regexp"
 	"slices"
 	"strings"
 	"testing"
@@ -389,7 +392,7 @@ func TestUnsupportedConstructsAreRefusedWhenReachable(t *testing.T) {
 	p = peano()
 	p.op(sNat, 155, "x", []uint32{sNat}, 155, 0)
 	p.start(f(155, f(318)), sNat)
-	if st, what := unsupportedStage(t, p); st != "S7e" || !strings.Contains(what, "code 155") {
+	if st, what := unsupportedStage(t, p); st != NotPlanned || !strings.Contains(what, "code 155") {
 		t.Fatalf("%s %s", st, what)
 	}
 	// the kept refusals of the builtin codes (S7d task 7): the stage and
@@ -613,6 +616,54 @@ func TestArrayBuiltins(t *testing.T) {
 	for b, want := range map[BuiltinOp][]int{ArrayNew: {0}, ArrayGet: {1}, ArraySet: {1}, ArrayLength: nil, TermHash: nil} {
 		if !b.OnTerms() || !slices.Equal(b.IntArgs(), want) {
 			t.Errorf("%v: on terms %v, int arguments %v", b, b.OnTerms(), b.IntArgs())
+		}
+	}
+}
+
+// The refusals kept at the end of S7e are all "not planned" (S7e
+// acceptance): a builtin code no module declares, rules for a builtin
+// operation, an AC operator of another profile; and no refusal of the
+// IR names a stage (S7c-S7e) any more.
+func TestKeptRefusalsAreNotPlanned(t *testing.T) {
+	for _, c := range []struct {
+		name  string
+		build func(p *prog)
+		why   string
+	}{
+		{"rules for a builtin operation", func(p *prog) {
+			p.op(sInt, 344, "x", []uint32{sInt, sInt}, 5, 0) // + on builtinInt
+			p.rule(sInt, 2, f(344, v(0, sInt), v(1, sInt)), v(0, sInt))
+			p.start(f(344, ref.Int{Value: 1}, ref.Int{Value: 2}), sInt)
+		}, "rules for the builtin operation"},
+		{"AC operator of another profile", func(p *prog) {
+			p.op(sSet, 345, "w", []uint32{sNat, sSet}, 0, 2)
+			p.op(sSet, 346, "e", nil, 0, 0)
+			p.start(f(345, f(318), f(346)), sSet)
+		}, "not of its result sort"},
+	} {
+		p := peano()
+		c.build(p)
+		if st, what := unsupportedStage(t, p); st != NotPlanned || !strings.Contains(what, c.why) {
+			t.Errorf("%s: %s %s", c.name, st, what)
+		}
+	}
+	files, err := filepath.Glob("*.go")
+	if err != nil {
+		t.Fatal(err)
+	}
+	stage := regexp.MustCompile(`unsupported\("S7[a-e]"`)
+	for _, name := range files {
+		if strings.HasSuffix(name, "_test.go") {
+			continue
+		}
+		b, err := os.ReadFile(name)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for i, line := range strings.Split(string(b), "\n") {
+			if stage.MatchString(line) {
+				t.Errorf("%s:%d: a refusal of a later stage: %s", name, i+1, strings.TrimSpace(line))
+			}
 		}
 	}
 }

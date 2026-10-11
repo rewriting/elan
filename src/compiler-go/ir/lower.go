@@ -49,8 +49,9 @@ import (
 //     ([lowerer.resolveCall]); META gets a function per sort and an
 //     evaluator of the Strategy[X] terms per X ([builder.metas]).
 
-// Unsupported is a construct of a later stage: Stage is S7c (AC) or S7d
-// (query input and the rest). The compiler exits with status 2.
+// Unsupported is a construct elanc-go does not compile; the compiler exits
+// with status 2. Stage is NotPlanned since S7e (until then a later stage,
+// S7c-S7e, could name the stage that would compile it).
 type Unsupported struct {
 	Stage string
 	What  string
@@ -88,7 +89,7 @@ func builtinRefusal(code int32, decl string) error {
 	case code == 215:
 		return unsupported(NotPlanned, "builtin operation code %d (%s): equality of molecules (a builtin of one application of REM)", code, decl)
 	}
-	return unsupported("S7e", "builtin operation code %d (%s)", code, decl)
+	return unsupported(NotPlanned, "builtin operation code %d (%s): no module of the library declares it, no program uses it (REM's list codes 192-199, the interpreter's 79-82, 155, 179-190, 205-208)", code, decl)
 }
 
 // Invalid is a .ref file that is not what the compiler expects (a bug or a
@@ -928,7 +929,7 @@ func (l *lowerer) expand(c int, r *reach) error {
 			return builtinRefusal(code, l.candDecl(k))
 		}
 		if len(rules) > 0 {
-			return unsupported("S7e", "rules for the builtin operation %s (no program has one)", l.candDecl(k))
+			return unsupported(NotPlanned, "rules for the builtin operation %s (no program has one; the oracles' order of the builtin and the rules is not established)", l.candDecl(k))
 		}
 		return nil
 	}
@@ -1147,22 +1148,14 @@ const builtinAC = "AC operator %s on a builtin sort (the oracles disagree; strin
 
 func (l *lowerer) checkAC(k *cand) error {
 	if len(k.args) != 2 || k.args[0] != k.result || k.args[1] != k.result {
-		return unsupported("S7e", "AC operator %s whose arguments are not of its result sort (its terms are flattened: (s s) s; no program of the bench declares one)", l.candDecl(k))
+		return unsupported(NotPlanned, "AC operator %s whose arguments are not of its result sort (its terms are flattened: (s s) s; no program declares one)", l.candDecl(k))
 	}
 	if _, ok := builtinKind(l.sortName(k.result)); ok || isBuiltin(k.semantic) {
 		return unsupported(NotPlanned, builtinAC, l.candDecl(k))
 	}
 	// (an injection of a builtin sort into the sort makes it a family:
-	// checked when the IR is built)
-	var args []int64
-	for _, x := range l.printForm[profileOf(k.symbol, k.args, k.result)] {
-		if x.Kind == ref.LexType {
-			args = append(args, x.N)
-		}
-	}
-	if len(args) != 2 {
-		return unsupported("S7e", "AC operator %s printed without its two arguments (REM prints an AC term as a right comb of its form; no program of the bench has one)", l.candDecl(k))
-	}
+	// checked when the IR is built; the printing form of the profile has
+	// the two arguments: a candidate's arguments are its form's)
 	return nil
 }
 
@@ -2487,9 +2480,12 @@ func (rl *ruleLowerer) acAbstract(t *tt, n *remNode, p Pattern, same *[]Cond) Pa
 	return p
 }
 
+// refuse records a kept refusal of the rule being lowered (not planned:
+// an AC shape REM transforms before matching, docs/followups.md); the
+// first one is reported.
 func (rl *ruleLowerer) refuse(format string, a ...any) {
 	if rl.err == nil {
-		rl.err = unsupported("S7e", format, a...)
+		rl.err = unsupported(NotPlanned, format, a...)
 	}
 }
 
