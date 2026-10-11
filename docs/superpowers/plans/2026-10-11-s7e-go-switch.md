@@ -177,10 +177,10 @@ Today nothing fails when a case gets slower (finding 1 went unnoticed through S7
 - `bench_perf.sh PREFIX [N] [--check]`: the table as today plus a `limit_s` column; limits: 2x the Go spike figure of RESULTS.md where there is one (nqueens 11: 0.40, nqueens 12: 2.40, efib 100/200: 0.02/0.14, propc 2/3: 0.26/1.28), else 1.5x the S7c final figure (nqueens 10: 0.05, efib 150: 0.06, propc 1: 0.02, deeplist3m: 1.9); with `--check`, a case over its limit prints `SLOW <case>: <t> s > <limit> s` and the exit status is 1.
 - `bench_jg.py PREFIX [--filter REGEX] [--runs N] [--check] [--tsv FILE]`: discovers the G cases with `run_tests.discover()`, builds each with `elanc-rem` (from Task 9 on; `elanc` before) + make and with `elanc-go` (shared warm cache in `tests/legacy-bench/work/jg/gocache`, warmed by one build first), runs each `a.out -noInput -quiet` 3 times untimed then N times interleaved J/G (default 15), and prints per case: compile J (elanc, make), compile G (new, unchanged), run J/G (best, ms), RSS J/G (MB), steps J/G, status. `--check` fails (exit 1) when a case's steps or status differ, or when G is slower than J by more than max(1 ms, 5 %) (the process-start noise measured in finding 2), or when a G compile exceeds 2 s.
 
-- [ ] **Step 1: Write `--check` and the limits** in `bench_perf.sh`.
-- [ ] **Step 2: Run it to see it fail.** `tests/compiler-rs/bench_perf.sh build/install 3 --check` — Expected: exit 1, `SLOW nqueens11: 0.75 s > 0.40 s`, `SLOW nqueens12: 4.59 s > 2.40 s` (and nqueens10), every other case under its limit.
-- [ ] **Step 3: Write `bench_jg.py`**; run `python3 tests/compiler-rs/bench_jg.py build/install --filter 'Compiler.4.0/Test' --check` — Expected: 33 cases, steps and statuses equal, exit 0 (or a `SLOWER` line within the noise analysed in finding 2: then widen nothing, re-run; a reproducible one is a finding for Task 2).
-- [ ] **Step 4: Commit** (`tests: performance guards for elanc-go: bench_perf --check, bench_jg.py (S7e task 1)`). `bench_perf.sh --check` stays out of `make check` (timings depend on the machine); the README of `tests/compiler-rs` (or the script header) says to run both after a change of the runtime or of the generated code.
+- [x] **Step 1: Write `--check` and the limits** in `bench_perf.sh`.
+- [x] **Step 2: Run it to see it fail.** `tests/compiler-rs/bench_perf.sh build/install 3 --check` — Expected: exit 1, `SLOW nqueens11: 0.75 s > 0.40 s`, `SLOW nqueens12: 4.59 s > 2.40 s` (and nqueens10), every other case under its limit.
+- [x] **Step 3: Write `bench_jg.py`**; run `python3 tests/compiler-rs/bench_jg.py build/install --filter 'Compiler.4.0/Test' --check` — Expected: 33 cases, steps and statuses equal, exit 0 (or a `SLOWER` line within the noise analysed in finding 2: then widen nothing, re-run; a reproducible one is a finding for Task 2).
+- [x] **Step 4: Commit** (`tests: performance guards for elanc-go: bench_perf --check, bench_jg.py (S7e task 1)`). `bench_perf.sh --check` stays out of `make check` (timings depend on the machine); the README of `tests/compiler-rs` (or the script header) says to run both after a change of the runtime or of the generated code.
 
 ### Task 2: Native families again: the query's operators do not box the program
 
@@ -338,3 +338,14 @@ No user-visible change: `bin/elanc` is still REM's driver; `bin/elanc-rem` is th
 - Timing noise below 10 ms makes "at least as fast on every case" undecidable at the process-start scale; `bench_jg.py` states its tolerance (max(1 ms, 5 %)) and interleaves runs; the gate shows the raw numbers.
 - I/O and arrays mutate state outside terms: hash-consing must never share an array, and the order of effects must follow REM's evaluation order (innermost, left to right); the tests compare files and stdout with REM's byte for byte.
 - The switch changes the requirements of `elanc` (Go instead of JDK + Boehm + C toolchain): a machine with only the old requirements gets `elanc` = REM through the CMake fallback, with a STATUS message.
+
+## Results
+
+### Task 1 results
+
+`bench_perf.sh PREFIX [N] [--check]` (limit_s column, `SLOW` lines, exit 1 with `--check`) and `bench_jg.py` (new). Measured at d9c73a8 + Task 1:
+
+- `bench_perf.sh build/install 3 --check`: exit 1 (RED, as expected until Task 2): `SLOW nqueens10: 0.13 s > 0.05 s`, `SLOW nqueens11: 0.80 s > 0.40 s`, `SLOW nqueens12: 4.75 s > 2.40 s`; every other case under its limit (efib 200 0.07, propc 3 0.29, deeplist3m 1.33 s).
+- `bench_jg.py build/install --filter 'Compiler.4.0/Test' --check`: 33 cases built by both, steps and statuses equal, no `SLOWER`, exit 0. Run times are timed in Python (fork/exec + wait4, which also gives the child's own max RSS), so the process-start floor is ~2.7 ms (G) / ~3.1 ms (J) here; G is faster than J in all 33 (largest: propc2 1172 → 83 ms, manySortedSet3 77 → 7.9 ms); G compile of a new program 0.12-0.17 s, unchanged 0.05-0.08 s.
+- Ruling: the J compiler of `bench_jg.py` is `elanc-rem` when `PREFIX/bin/elanc-rem` exists, else `elanc` — why: Task 9 renames REM's call sites and the script must work before and after it — cost if wrong: none (both are REM's driver until the gate; after a switch `elanc` alone would be Go, which the `elanc-rem` test avoids).
+- Ruling: a case that J cannot build is reported (`J fails`) but is not a `--check` failure; one that G cannot build while J can is — why: the guard is about elanc-go regressing against REM, not about REM's own failures (BCompletion, ELAN 2.1 syntax) — cost if wrong: none for G's regressions; a REM build regression is caught by the J kinds of `make check`.
