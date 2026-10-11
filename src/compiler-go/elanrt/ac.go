@@ -60,6 +60,12 @@ func Compare(a, b Term) int {
 			return c
 		}
 	}
+	if a.Sym == SymArray && b.Sym == SymArray {
+		// two arrays of equal contents: two arrays still (as Eq), by
+		// their own hashes (made from the count of arrays: the same in
+		// every run)
+		return cmp.Compare(a.Hash, b.Hash)
+	}
 	// two symbols with the same code (a builtin code shared by several
 	// profiles): by runtime code
 	return cmp.Compare(a.Sym, b.Sym)

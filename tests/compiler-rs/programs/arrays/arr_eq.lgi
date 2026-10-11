@@ -1,0 +1,6 @@
+LPL arr_eq description
+  query of sort bool
+  result of sort Term
+  import arrtest
+  start with () eqs(new(1, a))
+end

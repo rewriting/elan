@@ -1,0 +1,1 @@
+the interpreter leaves the array operations as terms (its array codes are 300-303, the library's 200-203)

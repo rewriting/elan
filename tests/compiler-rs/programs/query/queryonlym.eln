@@ -1,0 +1,19 @@
+module queryonlym
+import global int bool;
+end
+operators
+global
+  a        : int;
+  f(@)     : (int) int;
+  p(@)     : (int) bool;
+end
+rules for int
+  n : int;
+global
+  [] f(n) => n - 1 end
+end
+rules for bool
+global
+  [] p(0) => true end
+end
+end

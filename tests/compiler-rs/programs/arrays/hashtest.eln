@@ -1,0 +1,17 @@
+module hashtest
+// builtinHashTerm (code 210, used by hashSet[X]): REM's values (its
+// hashTerm, 16 bits) on ints, constants, terms, an AC term.
+import global bool builtinInt builtinHashTerm[T] builtinHashTerm[builtinInt]; end
+sort T out; end
+operators global
+  a : T;
+  b : T;
+  f(@,@) : (builtinInt T) T;
+  @ u @ : (T T) T (AC);
+  r(@,@,@,@,@,@) : (builtinInt builtinInt builtinInt builtinInt builtinInt builtinInt) out;
+end
+rules for T
+global
+  [] f(0, a) => a end
+end
+end

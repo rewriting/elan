@@ -1,0 +1,6 @@
+LPL arr_length description
+  query of sort bool
+  result of sort Term
+  import arrtest
+  start with () ri(length(new(4, a)))
+end

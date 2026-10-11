@@ -1,0 +1,19 @@
+module hashnat
+// builtinHashTerm on a native injection family (S7e review, task 13):
+// x : E := 7 is the injection node of 7 in REM (26989), not the int 7.
+import global bool builtinInt builtinHashTerm[E] builtinHashTerm[W] builtinHashTerm[builtinInt] builtinHashTerm[string] string; end
+sort E W out; end
+operators global
+  @ : (builtinInt) E;
+  @ : (builtinInt) W;
+  u : W;
+  g(@) : (W) W;
+  r(@,@,@,@,@) : (builtinInt builtinInt builtinInt builtinInt builtinInt) out;
+  go : out;
+end
+rules for out
+  x : E;
+global
+  [] go => r(builtinHashTerm(x), builtinHashTerm(7), builtinHashTerm(g(7)), builtinHashTerm(-5), builtinHashTerm(g(u))) where x := () 7 end
+end
+end

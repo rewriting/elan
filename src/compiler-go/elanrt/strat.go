@@ -236,6 +236,13 @@ func (o *OneChoice[T]) Pass(stop bool) bool {
 	return stop
 }
 
+// Reset makes o a new one, without result (each turn of a tail-call loop:
+// the state is made once per call, S7e task 4).
+func (o *OneChoice[T]) Reset() {
+	var zero T
+	o.res, o.ok = zero, false
+}
+
 // DcChoice is a `dc`/`DC` over several alternatives: its continuation K passes
 // each result to k and records that one was found; the alternatives after
 // the first that has a result are not tried (generated code:
@@ -256,3 +263,6 @@ func NewDc[T any](k K[T]) *DcChoice[T] {
 	}
 	return d
 }
+
+// Reset makes d a new dc, nothing found (each turn of a tail-call loop).
+func (d *DcChoice[T]) Reset() { d.Found = false }

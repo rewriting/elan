@@ -396,6 +396,18 @@ func (e *emitter) metaLabels(ev *ir.MetaEval) {
 	e.line("\trt.Warning(\"\\n[warning] non existing rule '\" + name + \"' used\\n\\n\")")
 	e.line("}")
 	e.close("}")
+	if labels >= 0 {
+		if _, native := p.Native(labels); native {
+			// Labels[X] is a native family (its only constructor the
+			// injection of builtinString, "l1" ... "ln" not reached): the
+			// term is the boxed string
+			e.line("add(metaStr(l))")
+			e.line("return ss")
+			e.close("}")
+			e.line("")
+			return
+		}
+	}
 	if more := e.opOf(codeLabelsMore, labels); labels >= 0 && more >= 0 {
 		e.open("for l.Sym == %s {", symName(&p.Ops[more]))
 		e.line("add(metaStr(l.Args[0]))")

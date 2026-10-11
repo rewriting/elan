@@ -1,0 +1,1 @@
+elanc-rs refuses the I/O builtins (S6: not in its scope); elanc-go compiles them (S7e task 6)

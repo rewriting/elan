@@ -1,16 +1,22 @@
 // Command elanc-go compiles an ELAN program to a native program through Go
-// (spec docs/superpowers/specs/2026-10-11-s7-go-compiler-design.md).
+// (spec docs/superpowers/specs/2026-10-11-s7-go-compiler-design.md). Since
+// S7e it is also installed as elanc (bin/elanc -> elanc-go, CMake variable
+// ELAN_ELANC=go, the default); REM's driver is elanc-rem. Its messages and
+// its usage name it as it was invoked (elanc or elanc-go).
 //
 // Usage:
 //
-//	elanc-go [options] program[.lgi] [specification[.spc]]
+//	elanc [options] program[.lgi] [specification[.spc]]
 //
 // Steps:
 //
 //  1. `elan --cexport .elan-go.<prog>/<prog>.ref -b [elan options]
 //     <dir>/<prog>.lgi [spec]`, as elanc (src/compiler/scripts/elanc.src)
-//     runs it: the REM options of elanc are accepted and ignored (-v lists
-//     them), other options this driver does not know are passed to elan
+//     runs it: the REM options without effect on the result are accepted
+//     and ignored (-v lists them); REM's options that change the result or
+//     the files written (-coq, -proofterm, -lib, -debug, -onlyC, -noC,
+//     -nocode, -strategy 1|2) are refused, status 2, with a message naming
+//     elanc-rem; other options this driver does not know are passed to elan
 //     (--trace, -t, --elanlib, --secondlib, -l, --output take an argument);
 //  2. the .ref file is read (package elan/ref), lowered to the IR (elan/ir)
 //     and emitted as a Go module in .elan-go.<prog>/ (the work directory, in
@@ -31,7 +37,8 @@
 //
 // The runtime module: --runtime DIR, else $ELAN_GO_RUNTIME, else the
 // installation (<prefix>/share/elan-go/elanrt, <prefix> being the parent of
-// the directory of this executable). The interpreter: --elan FILE, else
+// the directory of this executable, symlinks resolved: bin/elanc ->
+// elanc-go). The interpreter: --elan FILE, else
 // <prefix>/bin/elan, else elan from PATH. The go command: --go FILE, else
 // the go that CMake found when ELAN was built (its path recorded at the
 // installation in <prefix>/share/elan-go/go-command), if it is still an
@@ -41,7 +48,7 @@
 // name is still taken from the .lgi argument).
 //
 // Exit status: 0 on success, 2 when the program uses a construct that is
-// not supported yet (later stages of S7), 1 on any other failure (an
+// not supported or an option that only REM has, 1 on any other failure (an
 // internal error included). -v prints
 // the commands and the build time; --no-build stops after writing the
 // module.
@@ -54,6 +61,7 @@ package main
 
 import (
 	"bytes"
+	"cmp"
 	"errors"
 	"fmt"
 	"io"
@@ -70,7 +78,13 @@ import (
 	"elan/ref"
 )
 
-const usage = `usage: elanc-go [options] program[.lgi] [specification[.spc]]
+// usageText is the usage of the command invoked as name (elanc or elanc-go).
+func usageText(name string) string {
+	return strings.ReplaceAll(usage, "NAME", name)
+}
+
+const usage = `usage: NAME [options] program[.lgi] [specification[.spc]]
+builds the program ./a.out (through Go); REM's compiler is elanc-rem
 options:
   -o FILE, -output FILE  the program built (default a.out)
   --gocache DIR          go build cache shared by the programs
@@ -83,21 +97,39 @@ options:
   --from-ref FILE        compile this .ref file instead of exporting the program
   --no-build             write the Go module only
   -v                     print the commands and the build time
-  the REM options of elanc (-nosplit, -quiet, -strategy NAME...) are ignored;
-  other options are passed to elan (as elanc does)
-exit status: 0 success, 2 construct not supported yet, 1 other failure.
+  REM's options without effect on the result (-nosplit, -quiet, -O, -O2,
+  -optimiseChoicePoint, -strategy 0, ...) are ignored; REM's options -coq,
+  -proofterm, -lib, -debug, -onlyC, -noC, -nocode, -strategy 1|2 are
+  refused (status 2): use elanc-rem; other options are passed to elan
+  (-t N, --trace N, -l DIR, --elanlib DIR, --secondlib DIR, ...)
+exit status: 0 success, 2 construct not supported or option of REM only,
+  1 other failure.
 the generated program exits with 0 success, 1 run-time error, 2 construct
   supported only partly met at run time, 3 recursion too deep (the results
   printed before an error are kept)`
 
-// remOptions are the REM options without argument of elanc
-// (src/compiler/scripts/elanc.src, with -ba*): accepted and ignored, as
-// -strategy NAME; -output NAME is -o.
+// remOptions are the REM options without argument of elanc-rem
+// (src/compiler/scripts/elanc.src, with -ba*) that do not change the result
+// of the program: accepted and ignored, as -strategy 0 (or any other value
+// REM ignores); -output NAME is -o.
 var remOptions = []string{
-	"-O", "-O2", "-fast", "-nocode", "-nosplit", "-split", "-lib",
+	"-O", "-O2", "-fast", "-nosplit", "-split",
 	"-choicePointDebug", "-noOptimiseChoicePoint", "-optimiseChoicePoint",
-	"-verbose", "-debug", "-coq", "-proofterm", "-color", "-noColor",
-	"-withGoto", "-oldVariableAffectation", "-onlyC", "-noC", "-quiet",
+	"-verbose", "-color", "-noColor",
+	"-withGoto", "-oldVariableAffectation", "-quiet",
+}
+
+// remOnlyOptions are REM's options that change the result or the files
+// written (Coq output, proof terms, a library, the debug runtime, C only, no
+// code; -strategy 1 and 2, below): refused (S7e task 11), the message names
+// elanc-rem.
+var remOnlyOptions = []string{"-coq", "-proofterm", "-lib", "-debug", "-onlyC", "-noC", "-nocode"}
+
+// remOnlyError is an option that only REM has.
+type remOnlyError struct{ option string }
+
+func (e *remOnlyError) Error() string {
+	return "option " + e.option + " is REM's: use elanc-rem"
 }
 
 type options struct {
@@ -115,14 +147,24 @@ type options struct {
 	spec        string
 }
 
+// name is the command's name as invoked: elanc (bin/elanc -> elanc-go) or
+// elanc-go.
+func name() string {
+	if len(os.Args) == 0 || os.Args[0] == "" {
+		return "elanc-go"
+	}
+	return filepath.Base(os.Args[0])
+}
+
 func fail(format string, a ...any) {
-	fmt.Fprintf(os.Stderr, "elanc-go: "+format+"\n", a...)
+	fmt.Fprintf(os.Stderr, name()+": "+format+"\n", a...)
 	os.Exit(1)
 }
 
 func parseArgs(args []string) (options, error) {
 	o := options{output: "a.out", build: true, elanOptions: []string{"-b"}}
 	var positional []string
+	var refused *remOnlyError // the first option of REM only
 	for i := 0; i < len(args); i++ {
 		a := args[i]
 		value := func() (string, error) {
@@ -161,8 +203,14 @@ func parseArgs(args []string) (options, error) {
 		case a == "-b": // always passed
 		case a == "-strategy":
 			if v, err = value(); err == nil {
-				o.ignored = append(o.ignored, a+" "+v)
+				if v == "1" || v == "2" { // strategy terms evaluated at run time
+					refused = cmp.Or(refused, &remOnlyError{a + " " + v})
+				} else {
+					o.ignored = append(o.ignored, a+" "+v)
+				}
 			}
+		case slices.Contains(remOnlyOptions, a):
+			refused = cmp.Or(refused, &remOnlyError{a})
 		case slices.Contains(remOptions, a) || strings.HasPrefix(a, "-ba"):
 			o.ignored = append(o.ignored, a)
 		case strings.HasPrefix(a, "-"):
@@ -173,6 +221,9 @@ func parseArgs(args []string) (options, error) {
 		if err != nil {
 			return o, err
 		}
+	}
+	if refused != nil { // the whole line is read: -o names the file to remove
+		return o, refused
 	}
 	if len(positional) == 2 {
 		o.spec = positional[1]
@@ -196,6 +247,13 @@ func prefix() string {
 	if err != nil {
 		return ""
 	}
+	return prefixOf(exe)
+}
+
+// prefixOf is the parent of the directory of the file exe designates,
+// symlinks resolved (bin/elanc -> elanc-go, or a link to bin/elanc from
+// another directory).
+func prefixOf(exe string) string {
 	if r, err := filepath.EvalSymlinks(exe); err == nil {
 		exe = r
 	}
@@ -283,7 +341,7 @@ func main() { guarded(compile) }
 func guarded(f func()) {
 	defer func() {
 		if r := recover(); r != nil {
-			fmt.Fprintf(os.Stderr, "elanc-go: internal error: %v\n%s", r, debug.Stack())
+			fmt.Fprintf(os.Stderr, "%s: internal error: %v\n%s", name(), r, debug.Stack())
 			os.Exit(1)
 		}
 	}()
@@ -292,20 +350,28 @@ func guarded(f func()) {
 
 func compile() {
 	o, err := parseArgs(os.Args[1:])
+	var remOnly *remOnlyError
 	switch {
 	case err == errHelp:
-		fmt.Println(usage)
+		fmt.Println(usageText(name()))
 		os.Exit(0)
 	case err == errUsage:
-		fmt.Fprintln(os.Stderr, usage)
+		fmt.Fprintln(os.Stderr, usageText(name()))
 		os.Exit(1)
+	case errors.As(err, &remOnly):
+		// a previous program must not survive a refusal
+		if err := os.Remove(o.output); err != nil && !errors.Is(err, os.ErrNotExist) {
+			fail("cannot remove %s: %v", o.output, err)
+		}
+		fmt.Fprintf(os.Stderr, "%s: %v\n", name(), err)
+		os.Exit(2)
 	case err != nil:
 		fail("%v", err)
 	}
 	lgiDir, prog := split(o.lgi, ".lgi")
 	pre := prefix()
 	if o.verbose && len(o.ignored) > 0 {
-		fmt.Fprintln(os.Stderr, "elanc-go: REM options ignored: "+strings.Join(o.ignored, " "))
+		fmt.Fprintln(os.Stderr, name()+": REM options ignored: "+strings.Join(o.ignored, " "))
 	}
 
 	// a previous program must not survive a refusal or a failure
@@ -379,7 +445,7 @@ func compile() {
 	var unsup *ir.Unsupported
 	switch {
 	case errors.As(err, &unsup):
-		fmt.Fprintf(os.Stderr, "elanc-go: %s: %v\n", prog, err)
+		fmt.Fprintf(os.Stderr, "%s: %s: %v\n", name(), prog, err)
 		os.Exit(2)
 	case err != nil:
 		fail("%s: %v", prog, err)
@@ -423,7 +489,7 @@ func compile() {
 		fail("go build failed (%v), module in %s", err, work)
 	}
 	if o.verbose {
-		fmt.Fprintf(os.Stderr, "elanc-go: build time %.2f s\n", time.Since(t0).Seconds())
+		fmt.Fprintf(os.Stderr, "%s: build time %.2f s\n", name(), time.Since(t0).Seconds())
 	}
 
 	// 4. the program

@@ -176,6 +176,10 @@ parallel. Run times (`./a.out
 | sample | 2842 | 0.00 | 0.00 |
 | taussky | 795094 | 0.03 | 0.21 |
 
+S7e (2026-10-11, the gate of the switch: `elanc` is elanc-go since then,
+the tests still call it `elanc-go`): p8 0.97-1.07 s (J 5.38-5.62 s),
+compile 0.39 s for p8, 0.28-0.32 s for the others, RSS 11-12 MB (J 8-9 MB).
+
 The steps are those of J (elanc-go tries the same redexes in the same
 order). MinelaComp (`./a.out -quiet < SAMPLES/c<x>.inp`): primes8 0.05 s
 (REM 0.29 s), primes4 0.01 s (0.04), the others under 0.01 s.

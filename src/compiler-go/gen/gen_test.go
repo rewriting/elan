@@ -351,9 +351,11 @@ func numbered(src string) string {
 // function building the term of each grammar rule (the operator's
 // function, its arguments unboxed and its result boxed), rt.SetQuery
 // before rt.Main; an operator that is not compiled stops the program when
-// a query contains it.
+// a query contains it (the start term uses the query: else no operator
+// is compiled, TestQueryIgnoredNoOperator).
 func TestQueryParserCode(t *testing.T) {
 	p := peano()
+	p.p.Query.StartWith = f(320, v(0, sNat), f(318))
 	p.op(sNat, 321, "io", []uint32{sNat}, 113) // a builtin not supported
 	src := p.gen(t)
 	for _, want := range []string{
@@ -369,6 +371,25 @@ func TestQueryParserCode(t *testing.T) {
 		if !strings.Contains(src, want) {
 			t.Errorf("missing %q in\n%s", want, src)
 		}
+	}
+}
+
+// TestQueryIgnoredUncompiled: when the start term does not use the query
+// (S7e task 13), the operators of the program are compiled for the
+// query (queryOp calls plus), the others not (queryUncompiled: a query
+// containing one is parsed, not built).
+func TestQueryIgnoredUncompiled(t *testing.T) {
+	p := peano()
+	p.op(sNat, 321, "double", []uint32{sNat}, 0) // only the query reaches it
+	src := p.gen(t)
+	for _, want := range []string{"var grammar = []earley.Rule{", "return plus_320(a[0], a[1])",
+		"func queryUncompiled(r int) bool {", "IsAC: queryIsAC, Uncompiled: queryUncompiled})", "rt.Main(\"nat\", false,"} {
+		if !strings.Contains(src, want) {
+			t.Errorf("missing %q in\n%s", want, src)
+		}
+	}
+	if strings.Contains(src, "double_321") {
+		t.Errorf("double is compiled:\n%s", src)
 	}
 }
 
@@ -420,5 +441,29 @@ func TestChooseLinear(t *testing.T) {
 	dir, src := module(t, chooses(3))
 	if out, err := goCmd(dir, "vet", ".").CombinedOutput(); err != nil {
 		t.Errorf("go vet: %v\n%s\n%s", err, out, numbered(src))
+	}
+}
+
+// TestQueryOnlyOperatorsKeepIntsNative (S7e tasks 2, 13): a program shaped as
+// nqueens (a partial bool operator over native ints, a constant a : int
+// and btoi that only the query can contain, a start term without the
+// query) keeps its ints native: noattack takes int32s.
+func TestQueryOnlyOperatorsKeepIntsNative(t *testing.T) {
+	const sInts = 331
+	p := newProg()
+	p.p.Sorts = append(p.p.Sorts, ref.Sort{Index: sInts, Name: "int"})
+	p.op(sInt, 3, "+", []uint32{sInt, sInt}, 3, true)
+	p.op(sInt, 25, "btoi", []uint32{sBool}, 25)
+	p.op(sInts, 300, "", []uint32{sInt}, 0)
+	p.op(sInts, 303, "a", nil, 0)
+	p.op(sNat, 318, "nil", nil, 0)
+	p.op(sNat, 319, "cons", []uint32{sInts, sNat}, 0)
+	p.op(sBool, 402, "noattack", []uint32{sInts, sInts, sNat}, 0)
+	p.rule(sBool, f(402, v(0, sInts), v(1, sInts), f(318)), f(1))
+	p.p.Query.Sort, p.p.Query.ResultSort = sInts, sBool
+	p.p.Query.StartWith = f(402, f(300, ref.Int{Value: 1}), f(300, ref.Int{Value: 2}), f(319, f(300, ref.Int{Value: 3}), f(318)))
+	src := p.gen(t)
+	if !strings.Contains(src, "func noattack_402(a0 int32, a1 int32, a2 rt.Term)") {
+		t.Errorf("noattack does not take native ints in\n%s", src)
 	}
 }

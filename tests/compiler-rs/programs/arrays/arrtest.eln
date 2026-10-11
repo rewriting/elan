@@ -1,0 +1,45 @@
+module arrtest
+// Arrays (builtinArray[X], codes 200-203, S7e task 7): REM is the only
+// oracle (src/compiler/runtime/termBase.c term_newArray, term_getArray,
+// term_setArray, term_getLength: an array is mutated in place; out of
+// range or not an array, REM prints an error and exits 1); the
+// interpreter leaves the operations as terms (its codes are 300-303).
+import global bool builtinInt builtinArray[Term]; end
+sort Term Holder; end
+operators global
+  a        : Term;
+  b        : Term;
+  c        : Term;
+  r(@)     : (Term) Term;
+  ri(@)    : (builtinInt) Term;
+  rb(@,@)  : (bool bool) Term;
+  h(@)     : (builtinArray[Term]) Holder;
+  w(@)     : (builtinArray[Term]) Term;
+  g2(@)    : (Holder) Term;
+  sh(@)    : (builtinArray[Term]) Term;
+  eqs(@)   : (builtinArray[Term]) Term;
+  neqs(@)  : (builtinArray[Term]) Term;
+  stuck    : builtinArray[Term];
+  eqt(@,@) : (builtinArray[Term] builtinArray[Term]) bool code 18;
+  bt       : <Term -> Term> bs;
+end
+rules for Term
+  t, u : builtinArray[Term];
+  p : Holder;
+global
+  // the mutation of l1 is not undone when its condition fails
+  [l1] w(t) => w(t) where u := () t[0]<-b if false end
+  [l2] w(t) => t[0] end
+  // a term holding an array sees its later mutations
+  [] sh(t) => g2(p) where p := () h(t) where u := () t[0]<-c end
+  [] g2(h(t)) => t[0] end
+  // equality of arrays: the same array, equal contents
+  [] eqs(t) => rb(eqt(t, t), eqt(t, new(1, a))) end
+  // different contents (REM: true, arrays/arr_neq.no-rem)
+  [] neqs(t) => rb(eqt(t, t), eqt(t, new(3, b))) end
+end
+strategies for Term
+implicit
+  [] bt => first(dk(l1), dk(l2)) end
+end
+end

@@ -4,9 +4,21 @@ Frozen on 2026-10-11 at the end of S6b, when the user chose Go for the
 compiler, the runtime and the generated code (spec
 `docs/superpowers/specs/2026-10-11-s7-go-compiler-design.md`). The code stays
 in `src/compiler-rs/` (Cargo workspace: `elan-ref`, `elan-runtime`,
-`elanc-rs`), built when cargo is found (`ELAN_RUST=ON`) and tested by
-`make check-rust`; it is the second implementation the Go compiler is
-compared with.
+`elanc-rs`). Since S7e (spec G7: `elanc-go` has reached parity, every
+case of `bench_r_expected.tsv` has the same status in
+`bench_g_expected.tsv`) it is optional: not built by default
+(`ELAN_RUST=OFF`); a build with `-DELAN_RUST=ON` (and cargo) builds it and
+`make check-rust` (part of `make check`) tests it:
+
+```sh
+make BUILD=build-rust CMAKE_FLAGS=-DELAN_RUST=ON check-rust   # or check
+```
+
+(a separate `BUILD` keeps `build/`; in CI: run the workflow by hand with
+`rust` = true, `gh workflow run ci.yml -f rust=true`). Without
+`-DELAN_RUST=ON`, `make check-rust` prints `elanc-rs not built ...: Rust
+tests skipped`. The test scripts of `tests/compiler-rs` default to
+`elanc-go` (`ELANC=elanc-rs` selects it, `bench_parity.py --kind R`).
 
 ## Done
 

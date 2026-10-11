@@ -66,15 +66,17 @@ func TestGrammarAsREM(t *testing.T) {
 	}
 }
 
-// TestQueryRules: the operators that a query can build (the grammar rules
-// reachable from the query's sort) are compiled even when the start term
-// does not use them; one that cannot be compiled is refused at run time
-// only (QueryUnsupported), and the rules of other sorts are not used.
+// TestQueryRules: when the start term uses the query, the operators that
+// a query can build (the grammar rules reachable from the query's sort)
+// are compiled, even those the start term does not reach; one that
+// cannot be compiled is refused at run time only (QueryUnsupported), and
+// the rules of other sorts are not used.
 func TestQueryRules(t *testing.T) {
 	p := peano()
+	p.start(f(320, v(0, sNat), f(318)), sNat)
 	p.op(sNat, 321, "double", []uint32{sNat}, 0, 0)
 	p.rule(sNat, 1, f(321, v(0, sNat)), f(320, v(0, sNat), v(0, sNat)))
-	p.op(sNat, 322, "io", []uint32{sNat}, 113, 0) // a builtin not supported
+	p.op(sNat, 322, "io", []uint32{sNat}, 115, 0) // a builtin not supported
 	p.op(sSet, 341, "single", []uint32{sNat}, 0, 0)
 	ir := p.lower(t)
 	q := ir.Start.Query
@@ -89,7 +91,7 @@ func TestQueryRules(t *testing.T) {
 				t.Errorf("rule %d (symbol %d): %+v", i, g.Symbol, r)
 			}
 		case 322:
-			if r.Kind != QueryUnsupported || !strings.Contains(r.Why, "113") {
+			if r.Kind != QueryUnsupported || !strings.Contains(r.Why, "115") {
 				t.Errorf("io: %+v", r)
 			}
 		default:
@@ -137,5 +139,108 @@ func TestQueryRulesParserCodes(t *testing.T) {
 	}
 	if n != 6 {
 		t.Errorf("%d user rules", n)
+	}
+}
+
+// queryOnly is ints() with operators that only a query can contain (S7e
+// task 2): a constant a : int (a second constructor of int) and, in the
+// builtinInt grammar, btoi(@) : (bool) builtinInt (code 25), with p(@) :
+// (int) bool partial (p(0) => true only, so a bool can be stuck); the
+// query is of sort int, the start term 1 + 1 is ground.
+func queryOnly() *prog {
+	p := ints()
+	p.op(sInts, 303, "a", nil, 0, 0)
+	p.op(sInt, 25, "btoi", []uint32{sBool}, 25, 0)
+	p.op(sBool, 304, "p", []uint32{sInts}, 0, 0)
+	p.rule(sBool, 0, f(304, f(300, ref.Int{Value: 0})), f(1))
+	one := f(300, ref.Int{Value: 1})
+	p.start(f(301, one, one), sInts)
+	p.p.Query.Sort = sInts
+	return p
+}
+
+// queryRuleOf is the query rule of the grammar rule of symbol sym.
+func queryRuleOf(t *testing.T, ir *IR, sym int32) QueryRule {
+	t.Helper()
+	q := ir.Start.Query
+	for i, g := range q.Grammar {
+		if g.Symbol == sym {
+			return q.Rules[i]
+		}
+	}
+	t.Fatalf("no grammar rule of symbol %d", sym)
+	return QueryRule{}
+}
+
+// TestQueryOnlyOperatorsKeepIntNative: when the start term does not use
+// the query, the query operators that the program reaches are compiled
+// (a query of them is built, as in REM) and the others are not
+// (QueryUncompiled, S7e task 13: a query containing one is parsed, not
+// built), so an operator that only the query reaches does not box a
+// family native in the program.
+func TestQueryOnlyOperatorsKeepIntNative(t *testing.T) {
+	ir := queryOnly().lower(t)
+	for _, n := range []string{"int", "builtinInt"} {
+		s, _ := sortNamed(t, ir, n)
+		if k, ok := ir.Native(s); !ok || k != KindInt {
+			t.Errorf("%s is boxed", n)
+		}
+	}
+	for _, sym := range []int32{303, 25, 304} {
+		if r := queryRuleOf(t, ir, sym); r.Kind != QueryUncompiled {
+			t.Errorf("symbol %d: %+v", sym, r)
+		}
+	}
+	for _, op := range ir.Ops {
+		if op.Symbol == 303 || op.Symbol == 304 || op.Symbol == 25 {
+			t.Errorf("%s is compiled", op.Decl)
+		}
+	}
+	if r := queryRuleOf(t, ir, 301); r.Kind != QueryOp {
+		t.Errorf("plus: %+v", r)
+	}
+}
+
+// TestQueryUsedKeepsBoxing: when the start term uses the query, the
+// query's operators are compiled as before (S7d task 5): int is boxed.
+func TestQueryUsedKeepsBoxing(t *testing.T) {
+	p := queryOnly()
+	p.start(f(301, v(0, sInts), f(300, ref.Int{Value: 1})), sInts)
+	ir := p.lower(t)
+	s, _ := sortNamed(t, ir, "int")
+	if _, ok := ir.Native(s); ok {
+		t.Error("int is native")
+	}
+	if r := queryRuleOf(t, ir, 303); r.Kind != QueryOp {
+		t.Errorf("a: %+v", r)
+	}
+	if r := queryRuleOf(t, ir, 25); r.Kind != QueryOp {
+		t.Errorf("btoi: %+v", r)
+	}
+}
+
+// TestReadSortsAreParsed: the sorts of the terms a program reads
+// (read_builtinIO, code 120, S7e task 6) are parsed with the query's
+// grammar: their operators are compiled even when the query's sort
+// cannot contain them, as for a query that the start term uses.
+func TestReadSortsAreParsed(t *testing.T) {
+	p := peano()
+	p.p.Query.Sort = sBool
+	p.op(sNat, 330, "rd", []uint32{sInt, sNat}, 120, 0)
+	p.start(f(330, ref.Int{Value: 3}, f(318)), sNat)
+	ir := p.lower(t)
+	q := ir.Start.Query
+	if q == nil || q.Sort != sBool {
+		t.Fatalf("%+v", q)
+	}
+	for i, g := range q.Grammar {
+		if g.Symbol == 319 || g.Symbol == 320 {
+			if r := q.Rules[i]; r.Kind != QueryOp || ir.Ops[r.Op].Symbol != g.Symbol {
+				t.Errorf("rule %d (symbol %d): %+v", i, g.Symbol, r)
+			}
+		}
+	}
+	if rd := opBySymbol(t, ir, 330); rd.Kind != Builtin || rd.Builtin != IORead || !rd.Total {
+		t.Errorf("rd: %+v", rd)
 	}
 }

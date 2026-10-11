@@ -1,0 +1,6 @@
+LPL io_closeout description
+  query of sort bool
+  result of sort File
+  import iotest
+  start with () close(stdout)
+end

@@ -1,0 +1,3 @@
+The start term f(3) does not use the query; the query uses only operators
+of the program (f, -): it is built and normalised as in REM, whose
+rewrite_step line counts its steps (S7e task 13): compared too.

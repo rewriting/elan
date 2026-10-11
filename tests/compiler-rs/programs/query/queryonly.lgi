@@ -1,0 +1,6 @@
+LPL queryonly description
+  query of sort int
+  result of sort int
+  import queryonlym
+  start with () f(3)
+end

@@ -1,0 +1,6 @@
+LPL io_readbad description
+  query of sort bool
+  result of sort out
+  import iotest
+  start with () readbad
+end

@@ -21,7 +21,7 @@ directory to `work/`).
 |------|-----------------|-------------|-------|
 | `I`  | `itest`  | `elan -b X.lgi [Y.spc] < SAMPLES/in.inp` | 232 |
 | `A`  | `aitest` | `elan --export X.ref ...` then `elan --import X.ref < in.inp` | 136 |
-| `J`  | `jtest`  | `elanc -nosplit X`, `make`, `a.out -noInput -quiet` | 205 |
+| `J`  | `jtest`  | `elanc-rem -nosplit X` (REM's driver by its own name, whatever `elanc` is), `make`, `a.out -noInput -quiet` | 205 |
 | `JO` | `jtest` (2nd half) | same with `-optimiseChoicePoint` | 205 |
 
 `ctest`/`actest` (C compiler of ELAN 2), `pitest` (partial evaluator) and the

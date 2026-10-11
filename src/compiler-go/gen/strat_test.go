@@ -5,6 +5,8 @@ package gen
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -276,5 +278,82 @@ func TestDcWithoutResult(t *testing.T) {
 	}
 	if got := run(t, p); strings.Contains(got, "result = ") {
 		t.Errorf("st23: %q", got)
+	}
+}
+
+// tailLoops has two tail-recursive strategies compiled as loops, with the
+// states of a DC and of a ONE (S7e task 4):
+//
+//	[r7] s(x) => x
+//	st3 = DC(dc(r7) ; st3, id)     o on s^n(o)
+//	st4 = ONE(dc(r7) ; st4, id)    o on s^n(o)
+//	st5 = DK(st3, st4)
+func tailLoops() *prog {
+	p := peano()
+	p.labelled(7, f(319, v(0, sNat)), v(0, sNat))
+	id := ref.StrategyExpr{Op: ref.SId}
+	dc7 := rules(ref.SDcRules, 7)
+	p.strategy(3, strats(ref.SDcStrats, ref.StrategySeq{dc7, call(3)}, ref.StrategySeq{id}))
+	p.strategy(4, strats(ref.SOneStrats, ref.StrategySeq{dc7, call(4)}, ref.StrategySeq{id}))
+	p.strategy(5, strats(ref.SDkStrats, ref.StrategySeq{call(3)}, ref.StrategySeq{call(4)}))
+	p.p.Query.Strategy = ref.Some(5)
+	p.p.Query.StartWith = f(319, f(319, f(318)))
+	return p
+}
+
+// TestTailLoopsAllocateOnce: a loop's closures and the states of its dc
+// and one are created once per call, not at each turn (S7e task 4): 10^6
+// turns allocate less than one object per 100 turns.
+func TestTailLoopsAllocateOnce(t *testing.T) {
+	if testing.Short() {
+		t.Skip("go test of a generated program")
+	}
+	p := tailLoops()
+	src := p.gen(t)
+	for _, want := range []string{
+		"\tone := rt.NewOne(k)",
+		"\tdc1 := rt.NewDc(one.K)",
+		"\tone1 := rt.NewOne(one.K)",
+		"for {\n\t\ttail = false\n\t\tone.Reset()\n\t\tdc1.Reset()",
+		"for {\n\t\ttail = false\n\t\tone.Reset()\n\t\tone1.Reset()",
+	} {
+		if !strings.Contains(src, want) {
+			t.Errorf("missing %q in\n%s", want, src)
+		}
+	}
+	dir, _ := module(t, p)
+	test := `package main
+
+import (
+	"testing"
+
+	rt "elan/elanrt"
+)
+
+func TestTurns(t *testing.T) {
+	const n = 1000000
+	x := o_318()
+	for i := 0; i < n; i++ {
+		x = s_319(x)
+	}
+	for _, st := range []func(rt.Term, rt.K[rt.Term]) bool{st_st3_3, st_st4_4} {
+		var got rt.Term
+		allocs := testing.AllocsPerRun(1, func() {
+			st(x, func(r rt.Term) bool { got = r; return false })
+		})
+		if got.Sym != sym_o_318 {
+			t.Errorf("result %v", got)
+		}
+		if per := allocs / n; per > 0.01 {
+			t.Errorf("%.2f allocations per turn", per)
+		}
+	}
+}
+`
+	if err := os.WriteFile(filepath.Join(dir, "turns_test.go"), []byte(test), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if out, err := goCmd(dir, "test", "-run", "TestTurns", ".").CombinedOutput(); err != nil {
+		t.Errorf("go test: %v\n%s", err, out)
 	}
 }

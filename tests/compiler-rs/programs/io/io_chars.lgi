@@ -1,0 +1,6 @@
+LPL io_chars description
+  query of sort bool
+  result of sort out
+  import iotest
+  start with () r(putc(stdout, 300), putc(stdout, 10), putc(stderr, 69))
+end

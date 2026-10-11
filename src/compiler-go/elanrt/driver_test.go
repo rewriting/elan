@@ -125,7 +125,7 @@ func TestMainProgram(t *testing.T) {
 		t.Fatalf("fatal: status %d, out %q, err %q", st, out, errs)
 	}
 	// a panic (a bug of the compiler or the runtime): the same, not Go's
-	// exit status 2 ("not supported yet")
+	// exit status 2 ("not supported")
 	out, errs, st = runHelper(t, "panic", nil, "-noInput", "-quiet")
 	if st != 1 || out != "\nresult = s(o)\n" ||
 		!strings.HasPrefix(errs, "elanrt: internal error: plus_320: no rule applies to a total operator\n") {

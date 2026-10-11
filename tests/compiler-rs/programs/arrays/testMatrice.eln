@@ -1,0 +1,78 @@
+module testMatrice
+
+import bool builtinInt 
+       builtinArray[Term]
+       builtinArray[builtinArray[Term]]
+       matrice[Term];
+end
+
+sort Term;
+end 
+
+operators global
+  go     : Term;
+  empty  : Term; 
+  a      : Term; 
+  b      : Term; 
+  c      : Term; 
+  d      : Term; 
+  f(@,@) : (Term Term) Term;
+
+  mat1   : matrice[Term];
+  mat2   : matrice[Term];
+  mat3   : matrice[Term];
+  mat4   : matrice[Term];
+
+end
+
+rules for Term
+global
+  [] go      => mat4[0,1]
+  end
+end
+
+rules for matrice[Term]
+  m, m1,m2,m3,m4 : matrice[Term];
+  t : builtinArray[builtinArray[Term]];
+global
+// matrice 2x2
+//  a  b
+//  c  d
+
+
+  [] mat1      => m4
+                  where m  :=() new(2,2,empty)
+                  where m1 :=() m[0,0]<-a
+                  where m2 :=() m1[0,1]<-c
+                  where m3 :=() m2[1,0]<-b
+                  where m4 :=() m3[1,1]<-d
+
+  end
+
+  [] mat2      => m4
+                  where m  :=() new(2,2,empty)
+                  where m1 :=() m[0,0]<-a
+                  where m2 :=() m[0,1]<-c
+                  where m3 :=() m[1,0]<-b
+                  where m4 :=() m[1,1]<-d
+
+  end
+
+
+  [] mat3      => new(2,2,empty) 
+		  [0,0]<-a
+		  [0,1]<-c
+		  [1,0]<-b
+		  [1,1]<-d
+  end
+
+  [] mat4      => new(2,2,empty) 
+		  .set(0,0,a)
+		  .set(0,1,c)
+		  .set(1,0,b)
+		  .set(1,1,d)
+  end
+
+end
+
+end

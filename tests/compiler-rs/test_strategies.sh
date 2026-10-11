@@ -2,7 +2,8 @@
 # Strategies compiled by a new compiler (elanc-rs, S6b; elanc-go, S7b)
 # compared with the interpreter and with REM.
 #
-# The compiler is $ELANC: elanc-rs (default) or elanc-go; below, "the
+# The compiler is $ELANC: elanc-go (default since S7e) or elanc-rs (built
+# only with -DELAN_RUST=ON); below, "the
 # compiler" is that one.
 #
 # Programs: programs/strategies/<name>.lgi, each with a ground start term
@@ -24,12 +25,21 @@
 #    start term) prints ` t end` per result: the sequences of results must
 #    be equal, in order (the leading spaces of the compiled programs'
 #    token spacing are not compared, nor the quotes of strings);
-#  - REM: `elanc -b -nosplit -quiet` + make + `./a.out -noInput -quiet`:
+#  - REM: `elanc-rem -b -nosplit -quiet` + make + `./a.out -noInput -quiet`:
 #    the `result = ` lines must be byte-identical; the `rewrite_step` line
 #    is compared only when DIR has a file rem-steps (programs/ac: elanc-go
 #    tries the same redexes in the same order as REM), except for a
 #    program with a <name>.steps saying why its count differs (elsewhere
 #    it depends on the compilation scheme).
+# Both compiled programs read /dev/null as their standard input. When DIR
+# has a file `output` (programs/io), the whole output of each program
+# (standard output without its rewrite_step line, and standard error) is
+# compared with REM's byte for byte, and the files listed in <name>.files
+# (written by the program in its directory) with REM's; the files of
+# DIR/data are copied next to each program. A program with a
+# <name>.status (a run-time error of REM's: arrays out of range) must stop
+# with that status, REM's program too; their whole outputs are then
+# compared (DIR/output), nothing else.
 # A program without result fails (both sides empty prove nothing), unless
 # it has a <name>.none saying why no result is expected (it then fails if
 # the compiler gives one).
@@ -51,7 +61,7 @@
 # for elanc-rs, S7c-S7e for elanc-go) fails, the refusal quoted.
 # Outputs are compared as bytes (LC_ALL=C).
 #
-# Usage: [ELANC=elanc-go] test_strategies.sh PREFIX [-d DIR] [name...]   (an
+# Usage: [ELANC=elanc-rs] test_strategies.sh PREFIX [-d DIR] [name...]   (an
 # installed ELAN with the compiler; the names select programs, default all)
 # The work directory is tests/compiler-rs/work/DIR.XXXXXX for elanc-rs,
 # DIR-go.XXXXXX for elanc-go (kept, git-ignored); the build cache is shared
@@ -63,7 +73,7 @@ PREFIX=${1:?usage: test_strategies.sh PREFIX}
 PREFIX=$(cd "$PREFIX" && pwd) || exit 2
 HERE=$(cd "$(dirname "$0")" && pwd)
 export ELANLIB=$PREFIX PATH=$PREFIX/bin:$PATH LC_ALL=C
-ELANC=${ELANC:-elanc-rs}
+ELANC=${ELANC:-elanc-go}
 # per compiler: the build cache and its option, the stage of the refusals,
 # the suffix of the work directory, the subdirectory of each program
 case $ELANC in
@@ -99,7 +109,9 @@ mkdir -p "$HERE/work" "$TARGET" || exit 2
 RUN=$(mktemp -d "$HERE/work/$DIR$SUFFIX.XXXXXX") || exit 2
 echo "work directory: $RUN ($ELANC)"
 
-HAVE_REM=; command -v elanc >/dev/null 2>&1 && HAVE_REM=1
+HAVE_REM=; command -v elanc-rem >/dev/null 2>&1 && HAVE_REM=1
+# the programs read an empty standard input (getc(stdin): -1)
+NULL=/dev/null
 fails=0 n=0
 ok()   { echo "ok   $1"; }
 fail() { echo "FAIL $1"; fails=$((fails+1)); }
@@ -124,6 +136,25 @@ selected() {  # selected NAME: NAME is one of the names given
 }
 SELECTION="$*"
 
+# same_output NAME D: with DIR/output, the whole output of the compiled
+# program in D/$W (standard output without its rewrite_step line, standard
+# error) and the files of NAME.files are REM's (in D/rem), byte for byte
+same_output() {
+  [ -f "$PROGS/output" ] || return 0
+  same=1
+  grep -v '^rewrite_step = ' "$2/$W/run.out" >"$2/$W/run.out.cmp"
+  grep -v '^rewrite_step = ' "$2/rem/run.out" >"$2/rem/run.out.cmp"
+  for f in run.out.cmp run.err $(cat "$PROGS/$1.files" 2>/dev/null); do
+    if ! cmp -s "$2/$W/$f" "$2/rem/$f"; then
+      fail "$1 vs REM: $f differs (see $2)"; same=
+    fi
+  done
+  files=
+  [ -f "$PROGS/$1.files" ] && files=" and files ($(tr '\n' ' ' <"$PROGS/$1.files" | sed 's/ $//'))"
+  [ -n "$same" ] && ok "$1 vs REM: the same output, error output$files"
+  return 0
+}
+
 # results on one line: `a | b | c`
 oneline() { tr '\n' '|' | sed -e 's/|$//' -e 's/|/ | /g'; }
 
@@ -138,6 +169,7 @@ for lgi in "$PROGS"/*.lgi; do
   mkdir "$d" "$d/$W" "$d/rem" "$d/int" || exit 2
   for w in $W rem int; do
     cp "$lgi" "$PROGS"/*.eln "$d/$w/" || exit 2
+    if [ -d "$PROGS/data" ]; then cp "$PROGS"/data/* "$d/$w/" || exit 2; fi
   done
 
   # the compiler
@@ -154,9 +186,33 @@ for lgi in "$PROGS"/*.lgi; do
   fi
   vet "$name" "$d/$W" || continue
   build=$(sed -n "s/^$ELANC: build time //p" "$d/$W/$ELANC.log")
-  out=$( cd "$d/$W" && ./a.out -noInput -quiet 2>"$d/$W/run.err"; echo "status $?" )
+  out=$( cd "$d/$W" && ./a.out -noInput -quiet <"$NULL" >run.out 2>run.err; s=$?; cat run.out; echo; echo "status $s" )
   status=$(printf '%s\n' "$out" | sed -n 's/^status //p')
   rs=$(printf '%s\n' "$out" | grep '^result = ')
+  # a program stopped by a run-time error of REM's (<name>.status): the
+  # status, and the whole output as REM's
+  if [ -f "$PROGS/$name.status" ]; then
+    want=$(cat "$PROGS/$name.status")
+    if [ "$status" != "$want" ]; then
+      fail "$name: status $status, expected $want ($name.status, see $d/$W)"; continue
+    fi
+    ok "$name: status $want ($name.status)"
+    if [ -n "$HAVE_REM" ] && [ ! -f "$PROGS/$name.no-rem" ]; then
+      if ( cd "$d/rem" && elanc-rem -b -nosplit -quiet "$name" >elanc.log 2>&1 \
+           && make -f "$name.make" >make.log 2>&1 ); then
+        ( cd "$d/rem" && ./a.out -noInput -quiet <"$NULL" >run.out 2>run.err )
+        rstatus=$?
+        if [ "$rstatus" != "$want" ]; then
+          fail "$name: the REM program's status $rstatus, expected $want"
+        else
+          same_output "$name" "$d"
+        fi
+      else
+        fail "$name: elanc-rem or make failed (see $d/rem/*.log)"
+      fi
+    fi
+    continue
+  fi
   if [ "$status" != 0 ] || ! printf '%s\n' "$out" | grep -q '^rewrite_step = '; then
     fail "$name: the compiled program failed (status $status, see $d/$W/run.err)"; continue
   fi
@@ -201,12 +257,12 @@ for lgi in "$PROGS"/*.lgi; do
 
   # REM
   if [ -z "$HAVE_REM" ]; then
-    echo "skip $name vs REM (elanc not installed)"
+    echo "skip $name vs REM (elanc-rem not installed)"
   elif [ -f "$PROGS/$name.no-rem" ]; then
     echo "skip $name vs REM ($name.no-rem)"
-  elif ( cd "$d/rem" && elanc -b -nosplit -quiet "$name" >elanc.log 2>&1 \
+  elif ( cd "$d/rem" && elanc-rem -b -nosplit -quiet "$name" >elanc.log 2>&1 \
        && make -f "$name.make" >make.log 2>&1 ); then
-    rout=$( cd "$d/rem" && ./a.out -noInput -quiet 2>&1; echo "status $?" )
+    rout=$( cd "$d/rem" && ./a.out -noInput -quiet <"$NULL" >run.out 2>run.err; s=$?; cat run.out run.err; echo; echo "status $s" )
     rstatus=$(printf '%s\n' "$rout" | sed -n 's/^status //p')
     rem=$(printf '%s\n' "$rout" | grep '^result = ')
     if [ "$rstatus" != 0 ]; then
@@ -224,8 +280,9 @@ for lgi in "$PROGS"/*.lgi; do
     else
       ok "$name vs REM: $count results"
     fi
+    if [ "$rstatus" = 0 ]; then same_output "$name" "$d"; fi
   else
-    fail "$name: elanc or make failed (see $d/rem/*.log)"
+    fail "$name: elanc-rem or make failed (see $d/rem/*.log)"
   fi
 done
 

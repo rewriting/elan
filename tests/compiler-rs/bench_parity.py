@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""The bench compiled by a new compiler against elanc (kind J): elanc-rs
+"""The bench compiled by a new compiler against REM (elanc-rem, kind J): elanc-rs
 (kind R) or elanc-go (kind G).
 
 Runs tests/legacy-bench/run_tests.py --kinds R or G (which compares every
@@ -19,8 +19,10 @@ is reported (a stale entry).
 UNSUPPORTED cases not recorded (refused until S6b-S6d for elanc-rs,
 S7b-S7d for elanc-go) are counted only.
 Usage: bench_parity.py PREFIX [--kind R|G] [--save]
-       --kind R (default): elanc-rs, expected cases in bench_r_expected.tsv;
-       --kind G: elanc-go, expected cases in bench_g_expected.tsv;
+       --kind G (default since S7e): elanc-go, expected cases in
+       bench_g_expected.tsv;
+       --kind R: elanc-rs (built only with -DELAN_RUST=ON), expected cases
+       in bench_r_expected.tsv;
        --save rewrites the expected file of the kind (bench_r_expected.tsv
        or bench_g_expected.tsv) with the cases of this run.
 """
@@ -40,7 +42,7 @@ USAGE = "usage: bench_parity.py PREFIX [--kind R|G] [--save]"
 def parse(argv):
     """The command line: (prefix, kind, save); exits with a message (status
     2) when it is wrong."""
-    prefix, kind, save = None, "R", False
+    prefix, kind, save = None, "G", False
     i = 0
     while i < len(argv):
         a = argv[i]
@@ -100,7 +102,7 @@ def main():
         if snap == "SNAP-DIFF":
             snapdiffs.add(tid)
             if tid not in differs:
-                problems.append(f"{tid}: output differs from the elanc (J) snapshot")
+                problems.append(f"{tid}: output differs from the J (elanc-rem) snapshot")
         j = base.get(tid.replace(f"::{kind}::", "::J::"))
         if st in RANK and j in RANK and RANK[st] > RANK[j]:
             problems.append(f"{tid}: {kind} {st}, J {j}")

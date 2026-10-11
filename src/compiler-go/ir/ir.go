@@ -567,6 +567,19 @@ const (
 	IdentEq                        // == on ident (14)
 	IdentNe                        // != on ident (15)
 	IdentToString                  // ident2string (177): the name
+	IOGetc                         // getc_builtinStdio (113): rt.Getc (S7e task 6)
+	IOPutc                         // putc_builtinStdio (114): rt.Putc
+	IOOpen                         // open_builtinStdio (116): rt.Open
+	IOClose                        // close_builtinStdio (118): rt.Close
+	IOWrite                        // write_builtinIO (119): rt.WriteTerm, (builtinInt X) X
+	IORead                         // read_builtinIO (120): rt.ReadTerm, (builtinInt X) X
+	IOPid                          // the injection of builtinStdio's Pid (121): its argument
+	IOFlush                        // flush_builtinStdio (122): rt.Flush
+	ArrayNew                       // new of builtinArray[X] (200): rt.NewArray (S7e task 7)
+	ArrayGet                       // @.get(@), @[@] (201): rt.ArrayGet
+	ArraySet                       // @.set(@,@), @[@]<-@ (202): rt.ArraySet, in place
+	ArrayLength                    // @.length (203): rt.ArrayLength
+	TermHash                       // builtinHashTerm (210): rt.HashTerm, REM's hashTerm
 )
 
 var builtinNames = [...]string{
@@ -576,6 +589,8 @@ var builtinNames = [...]string{
 	"StrLen", "StrCat", "StrIndex", "StrModif", "StrSubstr", "StrSpn", "StrCmp", "StrOfChar",
 	"BoolToInt", "IntToBool", "TermReplace", "TermOccurs", "TermMatch", "TermUnify",
 	"IdentEq", "IdentNe", "IdentToString",
+	"IOGetc", "IOPutc", "IOOpen", "IOClose", "IOWrite", "IORead", "IOPid", "IOFlush",
+	"ArrayNew", "ArrayGet", "ArraySet", "ArrayLength", "TermHash",
 }
 
 func (b BuiltinOp) String() string { return builtinNames[b] }
@@ -588,6 +603,8 @@ var builtinCodes = map[int32]BuiltinOp{
 	156: StrSpn, 157: StrCmp, 158: StrOfChar,
 	25: BoolToInt, 26: IntToBool, 16: TermReplace, 17: TermOccurs, 191: TermMatch, 175: TermUnify,
 	14: IdentEq, 15: IdentNe, 177: IdentToString,
+	113: IOGetc, 114: IOPutc, 116: IOOpen, 118: IOClose, 119: IOWrite, 120: IORead, 121: IOPid, 122: IOFlush,
+	200: ArrayNew, 201: ArrayGet, 202: ArraySet, 203: ArrayLength, 210: TermHash,
 }
 
 // BuiltinFromCode is the operation of a semantic code; false when it is not
@@ -609,15 +626,30 @@ func (b BuiltinOp) NeedsValues() bool {
 }
 
 // OnTerms tells whether the operation works on terms of any sorts, its
-// result too (replace, occurs, syntactic matching and unification):
-// declared on sorts of terms, it is compiled (a value operation on sorts
-// of terms is a constructor).
+// result too (replace, occurs, syntactic matching and unification; write
+// and read; the operations on arrays; the hash of a term), some of its arguments being
+// builtinInt values ([BuiltinOp.IntArgs]): declared on sorts of terms, it
+// is compiled (a value operation on sorts of terms is a constructor).
 func (b BuiltinOp) OnTerms() bool {
 	switch b {
-	case TermReplace, TermOccurs, TermMatch, TermUnify:
+	case TermReplace, TermOccurs, TermMatch, TermUnify, IOWrite, IORead,
+		ArrayNew, ArrayGet, ArraySet, ArrayLength, TermHash:
 		return true
 	}
 	return false
+}
+
+// IntArgs are the positions of the arguments of an operation on terms
+// that are builtinInt values (a file number, the size of an array, an
+// index): the term stays when one of them is not a value.
+func (b BuiltinOp) IntArgs() []int {
+	switch b {
+	case IOWrite, IORead, ArrayNew:
+		return []int{0}
+	case ArrayGet, ArraySet:
+		return []int{1}
+	}
+	return nil
 }
 
 // Partial tells whether the operation is undefined on some values (the
@@ -962,6 +994,11 @@ const (
 	// QueryUnsupported: the operator is not compiled (Why); a query that
 	// contains it stops the program (status 2).
 	QueryUnsupported
+	// QueryUncompiled: the start term does not use the query and only the
+	// query reaches the operator: it is not compiled (the program's
+	// native families stay native); a query containing it is parsed but
+	// not built (S7e task 13).
+	QueryUncompiled
 )
 
 // QueryRule is how the term of a grammar rule is built.
@@ -977,6 +1014,55 @@ func (ir *IR) FamilyOf(s SortID) *Family {
 		return &ir.Families[f]
 	}
 	return nil
+}
+
+// HoldsArray tells, for each sort, whether its terms can hold an array
+// (builtinArray[X], mutated in place by set: S7e task 13): an array sort,
+// or a sort with a variant (or, for a family, a stuck operator) having an
+// argument of such a sort. The normal form of an AC term of such a sort
+// is not cached (rt.Normal): the term can rewrite once an array it holds
+// changes.
+func (ir *IR) HoldsArray() []bool {
+	holds := make([]bool, len(ir.Sorts))
+	for s := range ir.Sorts {
+		holds[s] = strings.HasPrefix(ir.Sorts[s].Name, "builtinArray[")
+	}
+	for changed := true; changed; {
+		changed = false
+		for s := range ir.Sorts {
+			if holds[s] {
+				continue
+			}
+			ops := ir.Sorts[s].Variants
+			if f := ir.FamilyOf(s); f != nil {
+				ops = append(ops[:len(ops):len(ops)], f.Stuck...)
+			}
+			for _, o := range ops {
+				for _, a := range ir.Ops[o].Args {
+					if holds[a] && !holds[s] {
+						holds[s], changed = true, true
+					}
+				}
+			}
+		}
+	}
+	return holds
+}
+
+// InjectionCode is the .ref code of the injection of a builtin sort that
+// is the only constructor of sort s (a family member other than its
+// base), 0 for another sort: REM's terms of s are the injection's nodes
+// over builtin values (rt.HashTermInj).
+func (ir *IR) InjectionCode(s SortID) int32 {
+	if f := ir.FamilyOf(s); f == nil || f.Base == s {
+		return 0
+	}
+	for o := range ir.Ops {
+		if op := &ir.Ops[o]; op.Kind == Injection && op.Result == s {
+			return op.Symbol
+		}
+	}
+	return 0
 }
 
 // Native returns the native kind of the terms of sort s, and false when

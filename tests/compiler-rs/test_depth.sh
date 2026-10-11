@@ -1,6 +1,7 @@
 #!/bin/sh
-# Deep recursions in programs compiled by a new compiler, $ELANC: elanc-rs
-# (default; spec S6 D3) or elanc-go (spec S7, G4): a program never
+# Deep recursions in programs compiled by a new compiler, $ELANC: elanc-go
+# (default since S7e; spec S7, G4) or elanc-rs (spec S6 D3; built only with
+# -DELAN_RUST=ON): a program never
 # overflows its stack. Either the computation succeeds or the program
 # stops with
 #   elan: recursion too deep (stack of 1024 MiB exhausted); ...
@@ -30,7 +31,7 @@
 #                   all list elanc-go
 # Lines starting with `#` are comments.
 #
-# Usage: [ELANC=elanc-go] test_depth.sh PREFIX [name...]   (an installed
+# Usage: [ELANC=elanc-rs] test_depth.sh PREFIX [name...]   (an installed
 # ELAN with the compiler; the names select programs, default all)
 # The work directory is tests/compiler-rs/work/depth.XXXXXX for elanc-rs,
 # depth-go.XXXXXX for elanc-go (kept, git-ignored); the build cache is
@@ -42,7 +43,7 @@ PREFIX=${1:?usage: test_depth.sh PREFIX [name...]}
 PREFIX=$(cd "$PREFIX" && pwd) || exit 2
 HERE=$(cd "$(dirname "$0")" && pwd)
 export ELANLIB=$PREFIX PATH=$PREFIX/bin:$PATH LC_ALL=C
-ELANC=${ELANC:-elanc-rs}
+ELANC=${ELANC:-elanc-go}
 case $ELANC in
   elanc-rs) TARGET=${ELANC_RS_TARGET_DIR:-$HERE/work/target} CACHE_OPT=--target-dir SUFFIX= ;;
   elanc-go) TARGET=${ELANC_GO_CACHE:-$HERE/work/gocache} CACHE_OPT=--gocache SUFFIX=-go ;;

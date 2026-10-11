@@ -1,0 +1,4 @@
+The whole output of each program (standard output without its
+rewrite_step line, standard error) is compared with REM's byte for byte,
+and the files a program writes (<name>.files) with the files REM's writes
+(test_strategies.sh).

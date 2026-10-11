@@ -1,0 +1,6 @@
+LPL arr_shared description
+  query of sort bool
+  result of sort Term
+  import arrtest
+  start with () sh(new(1, a))
+end
