@@ -32,6 +32,8 @@ sub-project (S1–S5b). Each item says where it comes from.
   wraps to a negative value (e.g. `2147483648`) is then taken by the lexer
   for a lexem of another kind (`sort(...)`), and the query is rejected
   (interpreter `lex/lstream.cc`, compiled runtime `earley/lstream.cc`).
+  elanc-go's query parser (S7d task 5) keeps it a number (the value
+  wrapped): `programs/query/bigint` (`.no-rem`, `.no-interpreter`).
 - **`call "name":X` with a name of another sort only** (interpreter,
   found by S6b): `set_of(call "two":state, st(1))`, where only `two:int`
   exists, applies the int strategy to a state and prints the ill-sorted
@@ -85,6 +87,25 @@ sub-project (S1–S5b). Each item says where it comes from.
   (`tests/compiler-rs/bench_g_differs.tsv`; `test_normalise.sh` puts the
   names back in REM's output, `rem_idents.py`). REM needs at least one
   rule in a program (`ParseException: Encountered "EndDef"`).
+- **REM: the identifiers of a query can get other indices than the
+  program's** (found by S7d task 5): the compiled runtime rebuilds its
+  table of identifiers by adding the names of the program in index order
+  (`src/compiler/earley/runtimeInit.cc` `tabofidentInit`), so two names
+  of the same hash position whose probe sequence wraps around the table
+  (position + 211 >= 3000) are swapped, and a query naming one gets the
+  index of the other (`tests/compiler-rs/programs/query/collide`: REM
+  `r(false,true)`, the interpreter and elanc-go `r(true,false)`). The same
+  re-adding puts the empty string in position 0 or on its probe chain.
+  elanc-go keeps the indices of the `.ref` file.
+- **REM: the Earley parser of the compiled programs reads past its
+  arrays** (found by S7d task 5): an error message prints a string lexem
+  (`STRING`, a string read) through the table of identifiers
+  (`lexem::alfsy`, index 3000 and above: `(null)` on macOS); at the end of
+  the input before a complete term, the completed situations are advanced
+  past the end of their rule (`earleyaddnewsits` on `NOLEXEM`: the next
+  error lists `'\0'`, read from uninitialised memory). elanc-go prints
+  `STRING` and the string quoted, and reports the error at the end of the
+  input (`test_query.sh` maps the first to REM's `(null)`).
 - **REM: Meta_strat terms** (`call`, sequences... built as `Strategy[X]`
   terms) give C that does not compile (`fun_143`), found by S6b
   (`tests/compiler-rs/programs/strategy_terms/ms_*`, `.no-rem`).

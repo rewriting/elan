@@ -1,0 +1,5 @@
+A number above 2^31-1 wraps modulo 2^32 when read, as in both oracles, but
+stays a number lexem (the plan, Task 5 Step 3): REM and the interpreter
+take 2147483648 (-2^31 once wrapped) for a lexem of another kind (a sort,
+"syntax error on symbol 'sort(2147470386)'") and reject the query
+(docs/followups.md, "Integer literals above 2^31-1").

@@ -1,0 +1,50 @@
+module qmod
+// Programs reading their query (S7d task 5, test_query.sh): mixfix
+// operators with priorities and associativity, overloaded operators,
+// injections, strings, numbers, identifiers, AC operators. The rules show
+// how a query was parsed (m(x,y) for x -- y, ...).
+import global int bool ident identifier string; end
+sort e p v; end
+operators global
+  a : e;
+  b : e;
+  c : e;
+  // associativity: -- left, ^^ right, ;; neither (ambiguous)
+  @ -- @ : (e e) e assocLeft pri 1;
+  @ ^^ @ : (e e) e assocRight pri 1;
+  @ ;; @ : (e e) e pri 1;
+  @ ** @ : (e e) e assocLeft pri 2;
+  m(@,@) : (e e) e;
+  r(@,@) : (e e) e;
+  s(@,@) : (e e) e;
+  t(@,@) : (e e) e;
+  // overloading: f on e and on int, the same name and syntax
+  f(@) : (e) e;
+  f(@) : (int) int;
+  fe(@) : (e) e;
+  // injections
+  @ : (int) e;
+  @ : (string) e;
+  @ : (v) e;
+  k(@) : (ident) v;
+  // AC
+  @ U @ : (e e) e (AC);
+  // pairs of other sorts
+  <@,@> : (int string) p;
+end
+rules for e
+  x, y, z : e;
+  n : int;
+global
+  [] x -- y => m(x,y) end
+  [] x ^^ y => r(x,y) end
+  [] x ;; y => s(x,y) end
+  [] x ** y => t(x,y) end
+  [] f(x) => fe(x) end
+end
+rules for int
+  n : int;
+global
+  [] f(n) => n * 10 end
+end
+end

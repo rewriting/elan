@@ -1,0 +1,6 @@
+LPL collide description
+  query of sort ident
+  result of sort t
+  import collide
+  start with () r(query == zzzzzzzzzzzzzzzzzzzzzzll, query == llzzzzzzzzzzzzzzzzzzzzzz)
+end

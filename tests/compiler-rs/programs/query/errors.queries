@@ -1,0 +1,10 @@
+a -- ) end
+a -- zork end
+<EOF>
+a --
+a -- b
+a -- b end garbage
+end
+a -- b // no newline
+/* comment */ a ;; /# inline #/ b end
+f(a) f(b) end

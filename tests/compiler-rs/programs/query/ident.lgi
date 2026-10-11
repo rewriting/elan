@@ -1,0 +1,6 @@
+LPL ident description
+  query of sort ident
+  result of sort bool
+  import qmod
+  start with () query == toto
+end

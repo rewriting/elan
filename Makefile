@@ -6,7 +6,7 @@
 #   make check-rust      tests of the Rust compiler elanc-rs (when cargo exists)
 #   make check-go        tests of the Go compiler elanc-go and its runtime (when go >= 1.24
 #                        exists): go vet/test, .ref reader, normalisation, strategies, AC,
-#                        depth, bench G, BenchThesis G
+#                        depth, bench G, query input, BenchThesis G
 #   make check-golden    golden tests: .ref files, -d dump, statistics, errors
 #   make check-compiler  compiled tests (J, JO) only: elanc, REM, runtime libraries
 #   make reference       build the 2004 reference system (reference/install)
@@ -123,9 +123,6 @@ check-rust: install
 	else echo "cargo not found: Rust tests skipped"; fi
 
 # Tests of the Go compiler (src/compiler-go, spec S7), when go >= 1.24 exists.
-# BenchThesis G cases not run yet: MinelaComp reads its query (S7d task 5)
-BENCHTHESIS_G_SKIP = MinelaComp-G-cappend MinelaComp-G-ccong MinelaComp-G-cor MinelaComp-G-cpeano \
-  MinelaComp-G-cprimes4 MinelaComp-G-cprimes8 MinelaComp-G-csample
 GO_ENV = GOTOOLCHAIN=local GOFLAGS=-mod=mod GOPROXY=off GOWORK=off GOCACHE=$(CURDIR)/$(BUILD)/src/compiler-go/gocache
 check-go: install
 	@if [ -x "$(PREFIX)/bin/elanc-go" ]; then \
@@ -138,7 +135,8 @@ check-go: install
 	  && ELANC=elanc-go tests/compiler-rs/test_strategies.sh "$(PREFIX)" -d ac \
 	  && ELANC=elanc-go tests/compiler-rs/test_depth.sh "$(PREFIX)" \
 	  && tests/compiler-rs/bench_parity.py "$(PREFIX)" --kind G \
-	  && BENCHTHESIS_KINDS=G BENCHTHESIS_SKIP="$(BENCHTHESIS_G_SKIP)" tests/compiler/test_benchthesis.sh "$(PREFIX)"; \
+	  && ELANC=elanc-go tests/compiler-rs/test_query.sh "$(PREFIX)" \
+	  && BENCHTHESIS_KINDS=G tests/compiler/test_benchthesis.sh "$(PREFIX)"; \
 	else echo "elanc-go not built (go >= 1.24 missing or -DELAN_GO=OFF): Go tests skipped"; fi
 
 check: smoke test-runner check-arch check-unit check-golden check-rust check-go
