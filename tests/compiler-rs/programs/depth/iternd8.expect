@@ -2,3 +2,4 @@
 status 3
 stderr elan: recursion too deep
 small 100000000 1000
+compilers elanc-rs elanc-go

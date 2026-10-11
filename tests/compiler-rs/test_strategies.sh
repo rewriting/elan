@@ -1,6 +1,9 @@
 #!/bin/sh
-# Strategies compiled by the Rust compiler (elanc-rs, S6b) compared with the
-# interpreter and with REM.
+# Strategies compiled by a new compiler (elanc-rs, S6b; elanc-go, S7b)
+# compared with the interpreter and with REM.
+#
+# The compiler is $ELANC: elanc-rs (default) or elanc-go; below, "the
+# compiler" is that one.
 #
 # Programs: programs/strategies/<name>.lgi, each with a ground start term
 # `start with (S) t` (or `()` for the normalisation of rules whose `where`s
@@ -14,8 +17,7 @@
 # interpreter is the content of programs/DIR/query when it exists (the
 # start term ignores it, but it must parse), else `true end`. For each
 # program:
-#  - elanc-rs builds it (shared cargo target directory, see TARGET below)
-#    and `./a.out -noInput -quiet` prints one `result = t` line per result;
+#  - the compiler builds it (shared build cache, see TARGET below) and `./a.out -noInput -quiet` prints one `result = t` line per result;
 #  - the interpreter: `elan -b` with the query `true end` (ignored by the
 #    start term) prints ` t end` per result: the sequences of results must
 #    be equal, in order (the leading spaces of the compiled programs'
@@ -25,22 +27,39 @@
 #    is not compared: it depends on the compilation scheme).
 # A program without result fails (both sides empty prove nothing), unless
 # it has a <name>.none saying why no result is expected (it then fails if
-# elanc-rs gives one).
+# the compiler gives one).
 # Exceptions, each documented in its file: <name>.no-rem says why REM is
-# not run, <name>.no-interpreter why the interpreter is not run.
+# not run, <name>.no-interpreter why the interpreter is not run,
+# <name>.no-<compiler> (e.g. .no-elanc-go) why the program is not run with
+# that compiler. A program that the compiler refuses (status 2, "not
+# supported yet (<stage>)", the stage being one of its own: S6... for
+# elanc-rs, S7... for elanc-go) fails, the refusal quoted.
 # Outputs are compared as bytes (LC_ALL=C).
 #
-# Usage: test_strategies.sh PREFIX [-d DIR] [name...]   (an installed ELAN
-# with elanc-rs; the names select programs, default all)
-# The work directory is tests/compiler-rs/work/DIR.XXXXXX (kept,
-# git-ignored); the cargo target directory is shared between runs:
-# $ELANC_RS_TARGET_DIR, default tests/compiler-rs/work/target. The status is
-# non-zero on any failure.
+# Usage: [ELANC=elanc-go] test_strategies.sh PREFIX [-d DIR] [name...]   (an
+# installed ELAN with the compiler; the names select programs, default all)
+# The work directory is tests/compiler-rs/work/DIR.XXXXXX for elanc-rs,
+# DIR-go.XXXXXX for elanc-go (kept, git-ignored); the build cache is shared
+# between runs, one per compiler: the cargo target directory
+# $ELANC_RS_TARGET_DIR, default tests/compiler-rs/work/target, or the go
+# build cache $ELANC_GO_CACHE, default tests/compiler-rs/work/gocache. The
+# status is non-zero on any failure.
 PREFIX=${1:?usage: test_strategies.sh PREFIX}
 PREFIX=$(cd "$PREFIX" && pwd) || exit 2
 HERE=$(cd "$(dirname "$0")" && pwd)
 export ELANLIB=$PREFIX PATH=$PREFIX/bin:$PATH LC_ALL=C
-TARGET=${ELANC_RS_TARGET_DIR:-$HERE/work/target}
+ELANC=${ELANC:-elanc-rs}
+# per compiler: the build cache and its option, the stage of the refusals,
+# the suffix of the work directory, the subdirectory of each program
+case $ELANC in
+  elanc-rs)
+    TARGET=${ELANC_RS_TARGET_DIR:-$HERE/work/target}
+    CACHE_OPT=--target-dir STAGE=S6 SUFFIX= W=rs ;;
+  elanc-go)
+    TARGET=${ELANC_GO_CACHE:-$HERE/work/gocache}
+    CACHE_OPT=--gocache STAGE=S7 SUFFIX=-go W=go ;;
+  *) echo "unknown compiler ELANC=$ELANC (elanc-rs or elanc-go)" >&2; exit 2 ;;
+esac
 shift
 DIR=strategies
 if [ "$1" = -d ]; then DIR=${2:?-d DIR}; shift 2; fi
@@ -49,8 +68,8 @@ QUERY='true end'
 [ -f "$PROGS/query" ] && QUERY=$(cat "$PROGS/query")
 
 mkdir -p "$HERE/work" "$TARGET" || exit 2
-RUN=$(mktemp -d "$HERE/work/$DIR.XXXXXX") || exit 2
-echo "work directory: $RUN"
+RUN=$(mktemp -d "$HERE/work/$DIR$SUFFIX.XXXXXX") || exit 2
+echo "work directory: $RUN ($ELANC)"
 
 HAVE_REM=; command -v elanc >/dev/null 2>&1 && HAVE_REM=1
 fails=0 n=0
@@ -69,23 +88,34 @@ oneline() { tr '\n' '|' | sed -e 's/|$//' -e 's/|/ | /g'; }
 for lgi in "$PROGS"/*.lgi; do
   name=$(basename "$lgi" .lgi)
   [ -z "$SELECTION" ] || selected "$name" || continue
+  if [ -f "$PROGS/$name.no-$ELANC" ]; then
+    echo "skip $name ($name.no-$ELANC)"; continue
+  fi
   n=$((n+1))
   d=$RUN/$name
-  mkdir "$d" "$d/rs" "$d/rem" "$d/int" || exit 2
-  for w in rs rem int; do
+  mkdir "$d" "$d/$W" "$d/rem" "$d/int" || exit 2
+  for w in $W rem int; do
     cp "$lgi" "$PROGS"/*.eln "$d/$w/" || exit 2
   done
 
-  # elanc-rs
-  if ! ( cd "$d/rs" && elanc-rs -v -b -nosplit -quiet --target-dir "$TARGET" "$name" >elanc-rs.log 2>&1 ); then
-    fail "$name: elanc-rs failed (see $d/rs/elanc-rs.log)"; continue
+  # the compiler
+  ( cd "$d/$W" && $ELANC -v -b -nosplit -quiet $CACHE_OPT "$TARGET" "$name" >$ELANC.log 2>&1 )
+  cstatus=$?
+  if [ "$cstatus" != 0 ]; then
+    refusal=$(grep -E "not supported yet \($STAGE[b-e]( task [0-9])?\)" "$d/$W/$ELANC.log" | head -1)
+    if [ "$cstatus" = 2 ] && [ -n "$refusal" ]; then
+      fail "$name: refused by $ELANC: $refusal"
+    else
+      fail "$name: $ELANC failed (status $cstatus, see $d/$W/$ELANC.log)"
+    fi
+    continue
   fi
-  build=$(sed -n 's/^elanc-rs: build time //p' "$d/rs/elanc-rs.log")
-  out=$( cd "$d/rs" && ./a.out -noInput -quiet 2>"$d/rs/run.err"; echo "status $?" )
+  build=$(sed -n "s/^$ELANC: build time //p" "$d/$W/$ELANC.log")
+  out=$( cd "$d/$W" && ./a.out -noInput -quiet 2>"$d/$W/run.err"; echo "status $?" )
   status=$(printf '%s\n' "$out" | sed -n 's/^status //p')
   rs=$(printf '%s\n' "$out" | grep '^result = ')
   if [ "$status" != 0 ] || ! printf '%s\n' "$out" | grep -q '^rewrite_step = '; then
-    fail "$name: the compiled program failed (status $status, see $d/rs/run.err)"; continue
+    fail "$name: the compiled program failed (status $status, see $d/$W/run.err)"; continue
   fi
   count=$(printf '%s' "$rs" | grep -c '^result = ')
   if [ -f "$PROGS/$name.none" ]; then
@@ -110,7 +140,7 @@ for lgi in "$PROGS"/*.lgi; do
     elif [ "$a" = "$b" ]; then
       ok "$name vs interpreter: $count results [$a] (build $build)"
     else
-      fail "$name vs interpreter: elanc-rs [$a], interpreter [$b]"
+      fail "$name vs interpreter: $ELANC [$a], interpreter [$b]"
     fi
   fi
 
@@ -129,7 +159,7 @@ for lgi in "$PROGS"/*.lgi; do
     elif [ "$rs" = "$rem" ]; then
       ok "$name vs REM: $count results"
     else
-      fail "$name vs REM: elanc-rs [$(printf '%s\n' "$rs" | oneline)], REM [$(printf '%s\n' "$rem" | oneline)]"
+      fail "$name vs REM: $ELANC [$(printf '%s\n' "$rs" | oneline)], REM [$(printf '%s\n' "$rem" | oneline)]"
     fi
   else
     fail "$name: elanc or make failed (see $d/rem/*.log)"

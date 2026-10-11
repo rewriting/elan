@@ -27,8 +27,8 @@
 #   query TEXT      the query given to the interpreter (default `true end`;
 #                   ignored, but it must parse)
 #   compilers C...  the compilers that run the program (default elanc-rs):
-#                   most programs use strategies, which elanc-go compiles
-#                   from S7b on; the normalisation ones list elanc-go too
+#                   all list elanc-go but those with strategy terms built
+#                   at run time (S7b task 2 of elanc-go)
 # Lines starting with `#` are comments.
 #
 # Usage: [ELANC=elanc-go] test_depth.sh PREFIX [name...]   (an installed

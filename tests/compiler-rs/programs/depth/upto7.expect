@@ -3,3 +3,5 @@ query 0 end
 status 3
 stderr elan: recursion too deep
 small 10000000 100
+# (elanc-go: strategy terms built at run time, S7b task 2)
+compilers elanc-rs
