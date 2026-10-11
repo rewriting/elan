@@ -4,7 +4,10 @@
 // here Fail panics with Exit and Run recovers it.
 package diag
 
-import "io"
+import (
+	"fmt"
+	"io"
+)
 
 // D is the interpreter's output state: stout, sterr and the `warnings`
 // option (base/commondefs.cc, default on; -w, -q and -b clear it).
@@ -18,6 +21,14 @@ type Exit struct{ Status int }
 
 // Fail is failexit(): a fatal error, status 1.
 func (d *D) Fail() { panic(Exit{Status: 1}) }
+
+// Internal is an internal error of the front end (a state the C++ does not
+// define, or a bug of the port, not an error of the program): "where: msg"
+// on the error stream, status 70.
+func (d *D) Internal(where, format string, a ...any) {
+	d.Errs(where, ": ", fmt.Sprintf(format, a...), "\n")
+	panic(Exit{Status: 70})
+}
 
 // Errs writes its arguments to the error stream (sterr << ...).
 func (d *D) Errs(parts ...string) {

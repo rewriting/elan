@@ -31,18 +31,14 @@ const (
 // Hash is stringtab::member's start position: the sum of the bytes as
 // *signed* chars (the build uses -fsigned-char) modulo size, with C's %
 // (truncated, so a negative sum gives a result in (-size, 0]). A negative
-// position is an out-of-bounds index in the C++: it panics, naming the
-// string (a byte >= 0x80 in an identifier; none in the corpus).
+// position is an out-of-bounds index in the C++ (a byte >= 0x80 in an
+// identifier; none in the corpus): StringTab reports it as an internal error.
 func Hash(s string, size int) int {
 	sum := 0
 	for i := 0; i < len(s); i++ {
 		sum += int(int8(s[i]))
 	}
-	p := sum % size
-	if p < 0 {
-		panic(fmt.Sprintf("tables.Hash: %s hashes to %d (the C++ indexes out of bounds)", strconv.Quote(s), p))
-	}
-	return p
+	return sum % size
 }
 
 // StringTab is stringtab: an open-addressing table of strings, probing by
@@ -69,6 +65,9 @@ func NewStringTab(d *diag.D, size int, init ...string) *StringTab {
 // Member is stringtab::member; it sets Posid.
 func (t *StringTab) Member(s string) bool {
 	t.Posid = Hash(s, len(t.id))
+	if t.Posid < 0 {
+		t.d.Internal("front/tables", "%s hashes to %d (the C++ indexes out of bounds)", strconv.Quote(s), t.Posid)
+	}
 	for t.used[t.Posid] {
 		if t.id[t.Posid] == s {
 			return true

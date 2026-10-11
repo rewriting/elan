@@ -42,12 +42,25 @@ func TestHashSignedChars(t *testing.T) {
 	if h := Hash(s, 3000); h != 0 {
 		t.Fatalf("Hash = %d", h)
 	}
-	defer func() {
-		if r := recover(); r == nil || !strings.Contains(r.(string), `"\xe9"`) {
-			t.Fatalf("recovered %v", r)
-		}
-	}()
-	Hash("\xe9", 3000) // -23: the C++ indexes out of bounds
+	if h := Hash("\xe9", 3000); h != -23 { // C's %: the C++ indexes out of bounds
+		t.Fatalf("Hash = %d", h)
+	}
+}
+
+// A negative start position (the C++ indexes out of bounds) is an internal
+// error of the front end: a message naming the string, status 70.
+func TestStringTabNegativeHash(t *testing.T) {
+	d, errb := newD()
+	st := NewStringTab(d, 3000)
+	if s := diag.Run(func() { st.AddStr("\xe9") }); s != 70 {
+		t.Fatalf("status %d", s)
+	}
+	if !strings.Contains(errb.String(), `"\xe9" hashes to -23`) || !strings.HasPrefix(errb.String(), "front/tables: ") {
+		t.Fatalf("stderr %q", errb.String())
+	}
+	if s := diag.Run(func() { st.Member("\xe9") }); s != 70 {
+		t.Fatalf("Member: status %d", s)
+	}
 }
 
 func TestStringTab(t *testing.T) {

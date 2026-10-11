@@ -53,3 +53,15 @@ func TestWarnOnlyWithWarnings(t *testing.T) {
 		t.Fatalf("got %q", err.String())
 	}
 }
+
+func TestInternalIsStatus70(t *testing.T) {
+	var err bytes.Buffer
+	d := &D{Err: &err}
+	st := Run(func() {
+		d.Internal("front/x", "bad %d", 3)
+		t.Fatal("Internal returned")
+	})
+	if st != 70 || err.String() != "front/x: bad 3\n" {
+		t.Fatalf("status %d, stderr %q", st, err.String())
+	}
+}
