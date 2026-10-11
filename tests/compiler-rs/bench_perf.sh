@@ -8,7 +8,9 @@
 # different count is a FAIL) and the reference numbers of the spike
 # (spikes/codegen/go-repr/NOTES.md: Go, generic nodes, weak table, default
 # GOGC; the hybrid with native builtins for nqueens) and of REM
-# (spikes/codegen/RESULTS.md, the S7c plan).
+# (spikes/codegen/RESULTS.md, the S7c plan), and elanc-rs's time where it
+# runs the program (Apple M4 Max). deeplist3m is the deep normalisation
+# len(gen(3 x 10^6)) of programs/depth/depth.eln.
 #
 # Not part of `make check` (timings depend on the machine); run it by hand
 # after a change of the runtime or of the generated code:
@@ -35,23 +37,26 @@ elif "$TIME" -v true >/dev/null 2>&1; then TIMEFLAG=-v
 else echo "bench_perf.sh: $TIME -l or -v needed" >&2; exit 2
 fi
 
-# case: name program start-term query-sort result-sort expected-steps spike REM
-CASES='nqueens10 nqueens (queens_strat)queens(10) int list 18376901 0.03/0.01 -
-nqueens11 nqueens (queens_strat)queens(11) int list 105918861 0.17/0.08 22.2
-nqueens12 nqueens (queens_strat)queens(12) int list 653494329 0.97/0.46 -
-efib100 efib ()go(100) bool eInt 10193 0.01 9.1
-efib150 efib ()go(150) bool eInt 22793 0.03 -
-efib200 efib ()go(200) bool eInt 40393 0.06 ~140
-propc1 propc ()q1 Prop Prop 12841 - 0.21
-propc2 propc ()q2 Prop Prop 218978 0.12 1.49
-propc3 propc ()q3 Prop Prop 556880 0.68 9.7'
+# case: name program start-term query-sort result-sort expected-steps spike REM elanc-rs
+CASES='nqueens10 nqueens (queens_strat)queens(10) int list 18376901 0.03/0.01 - -
+nqueens11 nqueens (queens_strat)queens(11) int list 105918861 0.17/0.08 22.2 -
+nqueens12 nqueens (queens_strat)queens(12) int list 653494329 0.97/0.46 - 0.37
+efib100 efib ()go(100) bool eInt 10193 0.01 9.1 -
+efib150 efib ()go(150) bool eInt 22793 0.03 - -
+efib200 efib ()go(200) bool eInt 40393 0.06 ~140 -
+propc1 propc ()q1 Prop Prop 12841 - 0.21 -
+propc2 propc ()q2 Prop Prop 218978 0.12 1.49 -
+propc3 propc ()q3 Prop Prop 556880 0.68 9.7 -
+deeplist3m depth ()len(gen(3000000)) bool int 15000003 - - 0.36'
 
 fails=0
-printf '%-10s %8s %8s %8s %11s  %-9s %s\n' case real_s user_s rss_MB steps spike_s REM_s
-while read -r name prog start sort rsort steps spike rem; do
+printf '%-10s %8s %8s %8s %11s  %-9s %-6s %s\n' case real_s user_s rss_MB steps spike_s REM_s elanc-rs_s
+while read -r name prog start sort rsort steps spike rem rs; do
   d=$RUN/$name
   mkdir -p "$d" || exit 2
-  cp "$SPIKE/$prog.eln" "$d/" || exit 2
+  if [ "$prog" = depth ]; then cp "$HERE/programs/depth/depth.eln" "$d/" || exit 2
+  else cp "$SPIKE/$prog.eln" "$d/" || exit 2
+  fi
   strat="${start%%)*})"
   term=${start#*)}
   printf 'LPL %s description\n  query of sort %s\n  result of sort %s\n  import %s\n  start with %s %s\nend\n' \
@@ -78,7 +83,7 @@ while read -r name prog start sort rsort steps spike rem; do
   done
   mark=
   if [ "$steps" != 0 ] && [ "$got" != "$steps" ]; then mark=" FAIL: steps $got, expected $steps"; fails=$((fails+1)); fi
-  printf '%-10s %8s %8s %8s %11s  %-9s %s%s\n' "$name" "$best_real" "$best_user" "$rss" "$got" "$spike" "$rem" "$mark"
+  printf '%-10s %8s %8s %8s %11s  %-9s %-6s %s%s\n' "$name" "$best_real" "$best_user" "$rss" "$got" "$spike" "$rem" "$rs" "$mark"
 done <<EOF
 $CASES
 EOF
