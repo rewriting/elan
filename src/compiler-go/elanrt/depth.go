@@ -21,7 +21,9 @@ import (
 // doubling up to the maximum stack size (debug.SetMaxStack; [Main] sets
 // 2e9, so the largest stack is 1 GiB, the "ceiling"). The functions that
 // can recurse call [Guard] at their entry and [Unguard] at their exit
-// (defer): they count the depth.
+// (at each return in the normalisation functions, deferred in the
+// strategies): they count the depth; [Main] checks that the count is back
+// to 0 at the end.
 //
 // The limit is found at run time, because the bytes per level depend on
 // the generated code and change from one recursion to the next. Every
@@ -116,7 +118,7 @@ func SetMaxStack(bytes int) {
 }
 
 // Guard counts one level of recursion: call it at the entry of a function
-// that can recurse, with `defer Unguard()`. It stops the program
+// that can recurse, with [Unguard] at each exit. It stops the program
 // ([TooDeep]) past the limit.
 func Guard() {
 	depth++

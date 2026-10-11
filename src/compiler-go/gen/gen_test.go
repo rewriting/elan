@@ -129,8 +129,8 @@ func TestShapeOfTheGeneratedCode(t *testing.T) {
 		"sym_o_318 int32 = rt.SymFalse + 1 + iota",
 		"// plus_320: plus(@,@) : (nat nat) nat.",
 		"//\t[] plus(x0,s(x1)) => s(plus(x0,x1))",
-		"func plus_320(a0 rt.Term, a1 rt.Term) rt.Term {\n\trt.Guard()\n\tdefer rt.Unguard()\n\tswitch a1.Sym {",
-		"return s_319(plus_320(x0, x1))",
+		"func plus_320(a0 rt.Term, a1 rt.Term) rt.Term {\n\trt.Guard() // (each return calls rt.Unguard)\n\tswitch a1.Sym {",
+		"var ret1 rt.Term = s_319(plus_320(x0, x1))\n\t\trt.Unguard()\n\t\treturn ret1",
 		"func s_319(a0 rt.Term) rt.Term {\n\treturn rt.Mk1(sym_s_319, a0)\n}",
 		`rt.Main("nat", func(s *rt.Session) {`,
 	} {

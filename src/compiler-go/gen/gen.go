@@ -17,7 +17,8 @@
 //     applied in a block of nested ifs (its conditions), then the stuck
 //     term (or a panic when the operator is total). The functions on a call
 //     cycle guard their depth (rt.Guard, exit status 3 before Go's fatal
-//     stack overflow).
+//     stack overflow; rt.Unguard at each return, once its value is
+//     computed).
 //   - per label (S7b): a function in continuation-passing style,
 //     `func rl_inc_7(a0 T, k rt.K[T], first bool) bool`: the decision tree
 //     of the labelled rules over the whole term, a rule leaf passing its
@@ -99,6 +100,9 @@ type emitter struct {
 	injTests []ir.OpID
 	// labelMode: the rules are those of a label (each result to k)
 	labelMode bool
+	// guarded: a normalisation function that counts its depth (rt.Guard):
+	// its returns end its level (ret)
+	guarded bool
 	// res, ok are the variables of the result kept by a normalisation
 	// function after a `where p := (S) t`; resType is their type
 	res, ok, resType string
@@ -615,16 +619,18 @@ func (e *emitter) opFunc(o ir.OpID) {
 		} else {
 			e.open("%s {", e.signature(o))
 		}
+		e.guarded = op.Recursive
+		e.resType = e.goType(op.Result)
 		if op.Recursive {
-			e.line("rt.Guard()")
-			e.line("defer rt.Unguard()")
+			e.line("rt.Guard() // (each return calls rt.Unguard)")
 		}
 		if op.AC {
 			e.line("// the AC term (shared, or transient until it is a normal form): the")
 			e.line("// only column of the rules")
 			e.line("a0 := rt.ACTerm(%s, e)", symName(op))
 			e.open("if rt.Normal(a0) {")
-			e.line("return a0 // a normal form found before, without a step")
+			e.line("// a normal form found before, without a step")
+			e.ret("a0")
 			e.close("}")
 		}
 		mark := e.b.Len()
@@ -647,14 +653,45 @@ func (e *emitter) opFunc(o ir.OpID) {
 			e.line(`panic("%s: no rule applies to a total operator")`, op.Fun)
 		case op.AC:
 			e.line("// no rule applies: the term is a normal form")
-			e.line("return rt.NormalForm(a0, steps)")
+			e.ret("rt.NormalForm(a0, steps)")
 		default:
 			e.line("// no rule applies: the term is a normal form")
-			e.line("return %s", e.stuck(o))
+			e.ret(e.stuck(o))
 		}
+		e.guarded = false
 		e.close("}")
 	}
 	e.line("")
+}
+
+// ret writes the return of x from a normalisation function; a guarded
+// one ends its level once x is computed (x can recurse). (rt.Unguard is
+// called at each return rather than deferred: a deferred call is not
+// inlined, ~5 % of nqueens.)
+func (e *emitter) ret(x string) {
+	if !e.guarded {
+		e.line("return %s", x)
+		return
+	}
+	if isIdent(x) {
+		e.line("rt.Unguard()")
+		e.line("return %s", x)
+		return
+	}
+	r := fmt.Sprintf("ret%d", e.next())
+	e.line("var %s %s = %s", r, e.resType, x)
+	e.line("rt.Unguard()")
+	e.line("return %s", r)
+}
+
+// isIdent tells whether x is a Go identifier (a variable: no call).
+func isIdent(x string) bool {
+	for i, c := range x {
+		if !(c == '_' || 'a' <= c && c <= 'z' || 'A' <= c && c <= 'Z' || i > 0 && '0' <= c && c <= '9') {
+			return false
+		}
+	}
+	return x != ""
 }
 
 func (e *emitter) builtinBody(o ir.OpID) {
@@ -1063,7 +1100,7 @@ func (e *emitter) conds(r *ir.Rule, from int, used map[ir.VarID]bool, depth int)
 		e.line("found = true")
 		e.line("return k(%s)", rhs)
 	case depth == 0:
-		e.line("return %s", rhs)
+		e.ret(rhs)
 	default:
 		e.line("%s, %s = %s, true", e.res, e.ok, rhs)
 		e.line("return true")
@@ -1130,7 +1167,7 @@ func (e *emitter) apply(r *ir.Rule, j int, used map[ir.VarID]bool, depth int) {
 	if keepFirst {
 		e.close("})")
 		e.open("if %s {", e.ok)
-		e.line("return %s", e.res)
+		e.ret(e.res)
 		e.close("}")
 	} else {
 		e.indent--

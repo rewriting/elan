@@ -219,6 +219,10 @@ func Main(querySort string, program func(s *Session)) {
 			stop = startProfile(f)
 		}
 		program(s)
+		if depth != 0 {
+			// every Guard has its Unguard (generated code: a bug otherwise)
+			panic(fmt.Sprintf("guarded depth %d at the end of the program", depth))
+		}
 		stop()
 		if f := os.Getenv("ELAN_MEMPROFILE"); f != "" {
 			writeMemProfile(f)
