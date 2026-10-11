@@ -9,7 +9,9 @@
 // `eos` last, "@inline <chars>" after a lexem during whose reading an inline
 // was read; warnings on (elan's default). The library lookup needs ELANLIB
 // (and SECONDELANLIB, default ..): the Go front end has no compiled-in prefix.
-// S8a: .eln files come with the preprocessor (task 7), `load` with task 8.
+// A .eln is read through the preprocessor (macro.Lex) with the standalone
+// evaluator macro.Refuse: a FOR EACH or IF condition is refused where the
+// standalone C++ would need a grammar. `load` comes with task 8.
 package main
 
 import (
@@ -20,6 +22,7 @@ import (
 
 	"elan/front/diag"
 	"elan/front/lex"
+	"elan/front/macro"
 	"elan/front/tables"
 )
 
@@ -40,10 +43,6 @@ func run(args []string) int {
 }
 
 func lexFile(name string) int {
-	if strings.HasSuffix(name, ".eln") {
-		fmt.Fprintln(os.Stderr, "front-trace: .eln files need the preprocessor (S8a task 7)")
-		return 3
-	}
 	lib, err := lex.NewLib(os.Getenv("ELANLIB"), "", os.Getenv("SECONDELANLIB"), false)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "front-trace:", err)
@@ -54,6 +53,10 @@ func lexFile(name string) int {
 	d := &diag.D{Out: out, Err: os.Stderr, Warnings: true}
 	c := &lex.Context{D: d, Ident: tables.NewTabOfIdent(d), Lib: lib}
 	return diag.Run(func() {
+		if strings.HasSuffix(name, ".eln") {
+			macro.Lex(c, lex.Open(c, name), name, macro.Refuse{}, out)
+			return
+		}
 		s := lex.New(c, lex.Open(c, name), true)
 		for {
 			l := s.Ilex()

@@ -1,0 +1,8 @@
+@begin incrmacname.eln
+id 646 module
+@@stderr
+
+[error] :file=incrmacname.eln	line=1	pos=0
+[mlstream] identifier expected instead of 1
+	 before  1 = 1 . . . 1 
+@@status 1

@@ -1,0 +1,9 @@
+@begin cexp2.eln
+id 646 module
+@@stderr
+
+[error] :file=cexp2.eln	line=0	pos=20
+[PARSER] syntax error 	on symbol 'x'
+	 before  = = x & y ! = 
+	one of ( 'IDENTIFIER'  'NUMBER'  '-'  '(' ) expected 
+@@status 1

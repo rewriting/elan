@@ -1,0 +1,8 @@
+@begin femany49.eln
+id 646 module
+@@stderr
+
+[error] :file=femany49.eln	line=0	pos=218
+	SUCH expected  instead of THAT
+	 before  THAT v0 : = ( ) f 
+@@status 1

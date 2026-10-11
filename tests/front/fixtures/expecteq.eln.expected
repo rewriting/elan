@@ -1,0 +1,8 @@
+@begin expecteq.eln
+id 646 module
+@@stderr
+
+[error] :file=expecteq.eln	line=0	pos=20
+[mlstream] '=' expected  instead of 1
+	 before  1 . . . 2 end ENDOFLSTREAM 
+@@status 1

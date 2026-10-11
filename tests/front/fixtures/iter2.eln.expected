@@ -1,0 +1,25 @@
+@begin iter2.eln
+id 646 module
+id 109 m
+id 264 x_1
+char 44
+id 265 x_2
+char 44
+id 266 x_3
+id 264 x_1
+char 59
+id 265 x_2
+char 59
+id 266 x_3
+id 265 x_2
+char 44
+id 266 x_3
+id 320 p_q
+id 263 w_1
+char 46
+char 46
+id 311 end
+eos
+@end
+@@stderr
+@@status 0

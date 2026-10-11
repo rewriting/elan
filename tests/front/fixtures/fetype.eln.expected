@@ -1,0 +1,8 @@
+@begin fetype.eln
+id 646 module
+@@stderr
+
+[error] :file=fetype.eln	line=0	pos=53
+[preprocessor] unknown type list[pair[int,bool]] used
+	 before  SUCH THAT x : = ( ) 
+@@status 1

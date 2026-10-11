@@ -1,0 +1,11 @@
+@begin incrnested.eln
+id 646 module
+@@stderr
+
+[error] :file=incrnested.eln	line=0	pos=37
+[mlstream] identifier expected instead of 1
+	 before  1 = 1 . . . 
+[error] :file=incrnested.eln	line=0	pos=37
+[mlstream] identifier expected instead of 2
+	 before  2 = 1 . . . 2 
+@@status 1

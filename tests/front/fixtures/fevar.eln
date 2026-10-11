@@ -1,0 +1,1 @@
+module m FOR EACH x:bool SUCH THAT y:=() f :{ g(x) } end

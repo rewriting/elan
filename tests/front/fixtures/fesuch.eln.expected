@@ -1,0 +1,8 @@
+@begin fesuch.eln
+id 646 module
+@@stderr
+
+[error] :file=fesuch.eln	line=0	pos=33
+	SUCH expected  instead of THAT
+	 before  THAT x : = ( ) f 
+@@status 1

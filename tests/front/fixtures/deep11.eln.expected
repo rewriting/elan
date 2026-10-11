@@ -1,0 +1,7 @@
+@begin deep11.eln
+id 646 module
+@@stderr
+
+[error] :file=deep11.eln	line=0	pos=50
+[mlstream.deeperr] evalstacki overflowed over MAXDEEPCONSTEXP = 10, fatal
+@@status 1
