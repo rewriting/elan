@@ -32,6 +32,8 @@ sub-project (S1–S5b). Each item says where it comes from.
   wraps to a negative value (e.g. `2147483648`) is then taken by the lexer
   for a lexem of another kind (`sort(...)`), and the query is rejected
   (interpreter `lex/lstream.cc`, compiled runtime `earley/lstream.cc`).
+  elanc-go's query parser (S7d task 5) keeps it a number (the value
+  wrapped): `programs/query/bigint` (`.no-rem`, `.no-interpreter`).
 - **`call "name":X` with a name of another sort only** (interpreter,
   found by S6b): `set_of(call "two":state, st(1))`, where only `two:int`
   exists, applies the int strategy to a state and prints the ill-sorted
@@ -52,6 +54,91 @@ sub-project (S1–S5b). Each item says where it comes from.
   (exporter, `src/interpreter/ref/ref.cc`), so elanc-go and elanc-rs exit
   with status 1 instead of refusing the program (status 2, "not supported
   yet"); the interpreter runs it. To do with the calls by name, S7d (S6d).
+- **Interpreter: `builtinSyntacticMatching` fails on every function
+  symbol** (found by S7d, bench `bimatch`): `term::equalMatch`
+  (`src/interpreter/term/term.cc`) ends the `TNORMFS` case with `break`
+  after matching the arguments, so it returns 0: only a variable or a
+  constant pattern matches (`f(var(1))` against `f(a)` gives `fail`, even
+  `g(a,b)` against `g(a,b)`). REM (`builtinMatching.c`) and the 2000 output
+  (`.(a,nil)`) agree on `a.nil`; elanc-go follows them
+  (`tests/compiler-rs/programs/normalise/bimatch`, `synmatch`,
+  `.no-interpreter`). Not fixed (the interpreter does not change in S7d).
+- **REM: term builtins** (found by S7d): `term_equalMatch` compares two
+  strings with `return strcmp(...)` (true when they differ) and refuses a
+  variable whose value would be an int, an identifier or an AC term (the
+  tag tests come before the variable lookup); `builtinSyntacticUnification`
+  (175) is not implemented (`fun_175: TODO`: the C does not compile);
+  `btoi`/`itob` (25, 26) return their argument (a boolean constant read as
+  an int: the program crashes), and the interpreter stops on them ("not yet
+  implemented in the interpreted version"); a value builtin declared on a
+  sort of terms (`@ pl @ : (t t) t code 3`) adds addresses. elanc-go:
+  matching as REM with these fixed, unification as the interpreter, btoi
+  1/0 and itob `n != 0`, the value builtin a constructor (S7d plan, Task 1
+  rulings).
+- **replace/occurs on AC terms differ between the oracles** (S7d): the
+  interpreter finds an AC sub-multiset (`a U b` occurs in `a U b U c`,
+  `stermreplace`/`occursin`), REM the elements only (`term_rec_replace`,
+  `term_occur`); elanc-go follows the interpreter
+  (`programs/normalise/replace_ac.rem`).
+- **REM prints identifiers as `IDENT(n)`** (`src/compiler/runtime/termOut.c`,
+  n the index of the identifier in the `.ref` Identifiers table): the J
+  snapshots of `ident1` (Compiler 2.1/3.0/4.0) are `result = IDENT(454)`,
+  the interpreter and elanc-go print `toto`
+  (`tests/compiler-rs/bench_g_differs.tsv`; `test_normalise.sh` puts the
+  names back in REM's output, `rem_idents.py`). REM needs at least one
+  rule in a program (`ParseException: Encountered "EndDef"`).
+- **REM: the identifiers of a query can get other indices than the
+  program's** (found by S7d task 5): the compiled runtime rebuilds its
+  table of identifiers by adding the names of the program in index order
+  (`src/compiler/earley/runtimeInit.cc` `tabofidentInit`), so two names
+  of the same hash position whose probe sequence wraps around the table
+  (position + 211 >= 3000) are swapped, and a query naming one gets the
+  index of the other (`tests/compiler-rs/programs/query/collide`: REM
+  `r(false,true)`, the interpreter and elanc-go `r(true,false)`). The same
+  re-adding puts the empty string in position 0 or on its probe chain.
+  elanc-go keeps the indices of the `.ref` file.
+- **REM: the Earley parser of the compiled programs reads past its
+  arrays** (found by S7d task 5): an error message prints a string lexem
+  (`STRING`, a string read) through the table of identifiers
+  (`lexem::alfsy`, index 3000 and above: `(null)` on macOS); at the end of
+  the input before a complete term, the completed situations are advanced
+  past the end of their rule (`earleyaddnewsits` on `NOLEXEM`: the next
+  error lists `'\0'`, read from uninitialised memory). elanc-go prints
+  `STRING` and the string quoted, and reports the error at the end of the
+  input (`test_query.sh` maps the first to REM's `(null)`).
+- **REM: traversals and normin/normout** (found by S7d task 6;
+  `tests/compiler-rs/programs/strategies/trav_*`, `rewrite_*`, `normin_*`,
+  each `.no-rem` says which): (1) the strategy after a traversal in a
+  sequence gets the last argument's result, not the rebuilt term
+  (`StrategyTraversalAll.java` and its siblings leave `v0` there):
+  `tall(s) ; id` or a bottom-up `bu => tall(bu) ; first(dk(r), id)` give
+  wrong terms, and crash when that argument is an int; (2) tall/tsome on an
+  AC term with a non-deterministic strategy keep the elements of the
+  previous result (`genericSetSubterm` adds to one term allocated before
+  the loop); (3) `rewrite` does not renormalise the term it rebuilds
+  (`term_rewriteStep`, no `specialApply`); (4) `normin`/`normout` run the
+  step function of the start strategy (`strTab[... + strCall]`, trace.c):
+  right only as the start strategy itself, elsewhere one step at the top
+  at most; `normout` does not go into AC terms (`normout_ac`, `.no-rem`;
+  elanc-go goes into them, `normin_ac` equal to REM); (5) REM is untyped: a rule
+  `x => s(x)` applies to an int argument (`h(s(o),s(3))`). elanc-go follows
+  REM elsewhere (the S7d plan, Task 6 rulings). The interpreter does not
+  interpret traversals at all ("Traversal is not intepreted").
+- **REM's compiler crashes on `rewrite(dk(...))`** (found by the S7d
+  review): `rewrite` whose body is not a named strategy, e.g.
+  `repeat*(rewrite(dk(cyc)))` or `rewrite(dk(cyc)) ; rr`, stops elanc with
+  `java.lang.ClassCastException: StrategyDkRule cannot be cast to
+  StrategyCall` (`StrategyRewriteStep.compile`, StrategyRewriteStep.java:53):
+  REM compiles `rewrite(s)` only for a named s. elanc-go compiles any body
+  (`rewrite_*` name their strategy, so REM is the oracle there).
+- **normin/normout on cyclic rules do not terminate** (found by the S7d
+  review): `normin(cyc)` / `normout(cyc)` with `[cyc] a => b`, `[cyc] b =>
+  a` on `g(a,b)` loop forever in elanc-go — a genuine non-termination like
+  `repeat*` on such rules: each step succeeds, no depth is consumed (the
+  rules rewrite in place), so no stack-depth exit (status 4) stops it.
+  REM's normout loops too; REM's normin stops at `g(b,a)` (one rewrite per
+  argument: its normin is not a normal form for these rules). Kept as is
+  (the rules have no normal form); a step bound would need an option.
 - **REM: Meta_strat terms** (`call`, sequences... built as `Strategy[X]`
   terms) give C that does not compile (`fun_143`), found by S6b
   (`tests/compiler-rs/programs/strategy_terms/ms_*`, `.no-rem`).
@@ -63,6 +150,43 @@ sub-project (S1–S5b). Each item says where it comes from.
 - **`main_coq_skeleton.c`** (`elanc -coq`) does not compile with current
   compilers (pre-ANSI multi-line string); `elanc -noC` links a non-existent
   `-lelan` (S5b).
+
+- **elanc-go: kept refusals** (S7d task 7; status 2, "not supported
+  (not planned)" or "not supported yet (S7e)"; the inventory of
+  `unsupported(` in `src/compiler-go/ir`):
+  - not planned — no program can reach it: a commutative-only operator
+    (the language has none); a `switch/case` right-hand side (SWRULE: the
+    interpreter's parser no longer reads `switch`, NO_MORE_SWITCH in
+    `load/msemact.cc`, the manual's section is commented out; REM does not
+    read it); a builtin sort `intern ...` of the parser's grammar; a String
+    lexem in a grammar (REM does not read it either);
+  - not planned — the oracles do not compute it, or disagree: an AC
+    operator on a builtin sort (`programs/refused/acbuiltin`: the
+    interpreter `pl(pl(1,2),3)`, REM `pl(1,pl(2,3))`; strings under AC
+    make both fail); `call "name":X` finding only a strategy of another
+    sort (`refused/callother`: both apply it to the term, ill-sorted
+    `plus(st(1),1)`); `call "name":X` of an unknown name (`refused/
+    callunknown`: the export writes -1 and loses the name; the interpreter
+    stops with `unknown strategy in call used`, REM crashes); `and`, `or`,
+    `not`, `==` declared with a result that is not a bool; dccall/dkcall
+    (external processes, REM has none); builtin codes 30-33 (`cmp[X]`
+    term order: REM has none, the interpreter's `term::tcmp` uses its own
+    symbol indices), 34-78 (doubles: REM has none), 90-112 (the
+    interpreter's top-level commands), 160-174 (calls of the ELAN system),
+    210 (hash of a term: representation-dependent), 215 (equality of
+    molecules, one application's builtin);
+  - S7e — possible later, no program of the tests needs it: AC shapes
+    REM transforms before matching (`refused/acnested`, `acallrep`: both
+    oracles agree, e2 and e1), an AC operator whose arguments are not of
+    its result sort or printed without its two arguments, a where pattern
+    with an AC operator of a builtin sort, an identifier in an AC pattern;
+    builtin codes 113-123 (input/output: REM has them) and 200-203
+    (arrays: REM has them, the interpreter uses the codes 300-303); rules
+    for a builtin operation; any other builtin code;
+  - at run time (status 2): a META call of a number or a string whose
+    strategy is of another sort; a query using an operator whose
+    compilation was refused (Task 5); the options `-sort=`, `-strategy=`,
+    `-REFInput`, `-commandLine` of REM's programs.
 
 ## Performance
 

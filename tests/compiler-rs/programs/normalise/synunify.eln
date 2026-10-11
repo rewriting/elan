@@ -1,0 +1,20 @@
+module synunify
+// builtinSyntacticUnification (code 175) as the interpreter's
+// term::equalUnify and buildMGUResult (src/interpreter/term/term.cc): a
+// variable is bound to the term it is unified with (the lower variable to
+// the higher between two variables, no occurs check), and the result
+// lists, per variable, the term it is bound to (followed through bound
+// variables, not substituted inside), or the variable itself.
+import global bool builtinSyntacticMatching[term,vars]; end
+sort term vars out; end
+operators global
+  a : term; b : term;
+  v1 : term; v2 : term;
+  f(@) : (term) term;
+  g(@,@) : (term term) term;
+  @.@ : (term vars) vars;
+  nil : vars;
+  fail : vars;
+  r(@,@,@,@,@,@,@) : (vars vars vars vars vars vars vars) out;
+end
+end

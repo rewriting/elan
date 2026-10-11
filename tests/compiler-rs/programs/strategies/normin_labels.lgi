@@ -1,0 +1,6 @@
+LPL normin_labels description
+  query of sort bool
+  result of sort nat
+  import trav
+  start with (ninlab) f(o)
+end

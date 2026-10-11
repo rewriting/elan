@@ -1,0 +1,4 @@
+REM's fun_25 (btoi) and fun_26 (itob) return their argument
+(src/compiler/runtime/builtin.h): a boolean constant used as a tagged int
+or the reverse; the compiled program crashes (status 139). The expected
+result is btoi.expected.

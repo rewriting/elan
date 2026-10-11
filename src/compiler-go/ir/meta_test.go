@@ -134,12 +134,12 @@ func TestCallLookupBySort(t *testing.T) {
 	// only two:set: refused
 	p = metaProg(4)
 	p.p.Strategies[0].Sort = sSet
-	if st, what := unsupportedStage(t, p); st != "S7d" || !strings.Contains(what, "another sort") {
+	if st, what := unsupportedStage(t, p); st != NotPlanned || !strings.Contains(what, "another sort") {
 		t.Fatalf("%s %s", st, what)
 	}
 	// no strategy named so: the export writes -1
 	p = metaProg(-1)
-	if st, what := unsupportedStage(t, p); st != "S7d" || !strings.Contains(what, "unknown strategy in call used") {
+	if st, what := unsupportedStage(t, p); st != NotPlanned || !strings.Contains(what, "unknown strategy in call used") {
 		t.Fatalf("%s %s", st, what)
 	}
 }
@@ -171,5 +171,35 @@ func TestDefaultStrategiesAndRecursionThroughMeta(t *testing.T) {
 		ref.Assign{Lhs: v(1, sList), Rhs: f(332, f(141, f(144, ref.Int{Value: 3})), v(0, sNat))}}}
 	if !opNamed(t, p.lower(t), "set_of").Recursive {
 		t.Fatal("set_of: a cycle through META")
+	}
+}
+
+// Labels named by strings (Meta_strat[X] codes 133-136, S7d task 7): the
+// labels of X are all reached (a string can name any of them at run
+// time), and the evaluator knows them by the interpreter's name
+// label:sort (trrules.trruleindex of the string; the .ref names are
+// localised: label:sort/module!GL).
+func TestLabelsNamedByStrings(t *testing.T) {
+	const sLabels = 503 // Labels[nat]
+	p := metaProg(3)
+	p.p.Sorts = append(p.p.Sorts, ref.Sort{Index: sLabels, Name: "Labels[nat]"})
+	p.op(sLabels, 133, "", []uint32{sStr}, 133, 0)
+	p.op(sStrateg, 136, "dk", []uint32{sLabels}, 136, 0)
+	// [r8] s(x) => x, used by no strategy
+	p.labelled(8, 1, f(319, v(0, sNat)), v(0, sNat))
+	p.start(f(332, f(141, f(136, f(133, ref.Str{Codes: []int32{'r', '8', ':', 'n', 'a', 't'}}))), f(318)), sList)
+	ir := p.lower(t)
+	ev := ir.MetaEvals[0]
+	var names []string
+	for _, ml := range ev.Labels {
+		names = append(names, ml.Name)
+		for _, l := range ml.Labels {
+			if !strings.HasPrefix(ir.Labels[l].Name, ml.Name+"/") {
+				t.Errorf("%s: label %s", ml.Name, ir.Labels[l].Name)
+			}
+		}
+	}
+	if !reflect.DeepEqual(names, []string{"r7:nat", "r8:nat"}) {
+		t.Fatalf("%v", names)
 	}
 }

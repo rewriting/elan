@@ -1,0 +1,7 @@
+[tone(inc)]3 is evaluated by eval_TONE => tone(TONE1) of strat[int]: TONE1 ([S]a => ...) applies to neither argument of [inc]3 (inc, 3): no result (REM: no result).
+The META traversal path (a strategy term tone(S) evaluated by strat[X])
+has this negative program and traversal.none's, plus one positive
+program, runtimetraversal_app: strat[X] defines only tone, as eval_TONE =
+tone(TONE1) applied to the application term [S]a itself (its arguments
+S and a), so TONE1 ([S]a => ...) applies only when a is itself an
+application term: [tone(inc)] [inc] 3 gives [inc]4, as REM.

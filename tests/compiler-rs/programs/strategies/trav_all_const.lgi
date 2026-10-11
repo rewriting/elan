@@ -1,0 +1,6 @@
+LPL trav_all_const description
+  query of sort bool
+  result of sort nat
+  import trav
+  start with (all) o
+end

@@ -66,7 +66,7 @@ func down(t int32, k K[int32]) bool { return t > 0 && k(t-1) }
 func init() {
 	helpers["deep"] = func() {
 		n, _ := strconv.Atoi(os.Args[len(os.Args)-1])
-		Main("List", func(s *Session) {
+		Main("List", false, func(s *Session, _ Term) {
 			s.ResultInt(int32(n)) // printed before the deep recursion: must be flushed
 			t0 := time.Now()
 			var r int32

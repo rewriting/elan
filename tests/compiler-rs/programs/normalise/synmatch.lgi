@@ -1,0 +1,13 @@
+LPL synmatch description
+  query of sort bool
+  result of sort out
+  import synmatch
+  start with () r(builtinSyntacticMatching(g(v1, f(v2)), g(a, f(b)), v1.v2.nil, fail),
+                  builtinSyntacticMatching(g(v1, v1), g(a, b), v1.nil, fail),
+                  builtinSyntacticMatching(g(v1, v1), g(f(c), f(c)), v1.nil, fail),
+                  builtinSyntacticMatching(g(f(a), v2), g(c, b), v2.f(a).nil, fail),
+                  builtinSyntacticMatching(g(a, b), g(a, b), nil, fail),
+                  builtinSyntacticMatching(g(a, var(2)), g(a, var(3)), var(2).nil, fail),
+                  builtinSyntacticMatching(f(var(1)), f(var(1)), var(1).nil, fail),
+                  builtinSyntacticMatching(g(v1, a), g(b, c), v1.nil, fail))
+end

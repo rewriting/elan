@@ -1,0 +1,6 @@
+LPL choose_dc2 description
+  query of sort bool
+  result of sort int
+  import chooses
+  start with (sdc2) 7
+end

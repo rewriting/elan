@@ -1,0 +1,1 @@
+REM does not compile the Meta_strat[X] constructors of labels named by strings (dc/dk("name" ...), codes 133-136): cc rejects the generated C, as for ms_dc.no-rem.

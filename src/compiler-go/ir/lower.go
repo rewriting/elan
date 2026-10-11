@@ -3,6 +3,7 @@ package ir
 import (
 	"cmp"
 	"fmt"
+	"maps"
 	"slices"
 	"strconv"
 	"strings"
@@ -55,7 +56,42 @@ type Unsupported struct {
 	What  string
 }
 
-func (e *Unsupported) Error() string { return "not supported yet (" + e.Stage + "): " + e.What }
+func (e *Unsupported) Error() string {
+	if e.Stage == NotPlanned {
+		return "not supported (" + NotPlanned + "): " + e.What
+	}
+	return "not supported yet (" + e.Stage + "): " + e.What
+}
+
+// NotPlanned is the stage of a refusal kept by design (S7d task 7): a
+// construct no program can reach, one that the oracles do not compute
+// (or compute differently), or one outside the compiled language (the
+// reasons in docs/followups.md, "elanc-go: kept refusals").
+const NotPlanned = "not planned"
+
+// builtinRefusal is the refusal of a builtin operation code that elanc-go
+// does not compile, by family of codes (the library's declarations).
+func builtinRefusal(code int32, decl string) error {
+	switch {
+	case 30 <= code && code <= 33:
+		return unsupported(NotPlanned, "builtin operation code %d (%s): the term order of cmp[X] (REM has none: its C does not compile; the interpreter's term::tcmp orders function symbols by its own indices and compares AC terms by matching)", code, decl)
+	case 34 <= code && code <= 78:
+		return unsupported(NotPlanned, "builtin operation code %d (%s): doubles (REM has none)", code, decl)
+	case 90 <= code && code <= 112:
+		return unsupported(NotPlanned, "builtin operation code %d (%s): a command of the interpreter's top level (Query[I,O,P])", code, decl)
+	case 113 <= code && code <= 123:
+		return unsupported("S7e", "builtin operation code %d (%s): input/output (stdio, files; REM's fun_113..123; no program of the tests uses them)", code, decl)
+	case 160 <= code && code <= 174:
+		return unsupported(NotPlanned, "builtin operation code %d (%s): a call of the ELAN system (meta-level: parsing, .ref of a program; REM has none)", code, decl)
+	case 200 <= code && code <= 203:
+		return unsupported("S7e", "builtin operation code %d (%s): arrays (REM's fun_200..203; the interpreter uses the codes 300-303: no oracle for the library's declarations)", code, decl)
+	case code == 210:
+		return unsupported(NotPlanned, "builtin operation code %d (%s): the hash of a term (REM's value depends on its representation)", code, decl)
+	case code == 215:
+		return unsupported(NotPlanned, "builtin operation code %d (%s): equality of molecules (a builtin of one application of REM)", code, decl)
+	}
+	return unsupported("S7e", "builtin operation code %d (%s)", code, decl)
+}
 
 // Invalid is a .ref file that is not what the compiler expects (a bug or a
 // misread field).
@@ -100,6 +136,7 @@ const (
 	ttEVar
 	ttInt
 	ttStr
+	ttIdent // an identifier literal (i: its index)
 )
 
 // tt is a typed term: operators resolved to candidates.
@@ -126,6 +163,8 @@ func builtinKind(name string) (BuiltinKind, bool) {
 		return KindBool, true
 	case "builtinString":
 		return KindStr, true
+	case "ident":
+		return KindIdent, true
 	}
 	return 0, false
 }
@@ -160,6 +199,7 @@ type lowerer struct {
 	intSort      optSort
 	strSort      optSort
 	boolSort     optSort
+	identSort    optSort
 }
 
 // profile is an operator: its symbol, the sorts of its arguments and its
@@ -225,6 +265,7 @@ func newLowerer(p *ref.Program) *lowerer {
 		return optSort{}
 	}
 	l.intSort, l.strSort, l.boolSort = named("builtinInt"), named("builtinString"), named("bool")
+	l.identSort = named("ident")
 	return l
 }
 
@@ -312,7 +353,13 @@ func (l *lowerer) typeTerm(t ref.Term, expected optSort) (tt, error) {
 		}
 		return tt{kind: ttStr, s: decodeString(t.Codes)}, nil
 	case ref.Ident:
-		return tt{}, unsupported("S7d", "builtin identifiers (sort ident)")
+		if !l.identSort.ok {
+			return tt{}, invalid("identifier without the sort ident")
+		}
+		if err := check(l.identSort.s, "identifier"); err != nil {
+			return tt{}, err
+		}
+		return tt{kind: ttIdent, i: int32(t.Index)}, nil
 	case ref.Fsym:
 		if t.Symbol == callSymbol && len(t.Args) == 1 {
 			if n, ok := t.Args[0].(ref.Int); ok {
@@ -323,8 +370,8 @@ func (l *lowerer) typeTerm(t ref.Term, expected optSort) (tt, error) {
 				// strategy is chosen with the sort when it is applied
 				// ([lowerer.resolveCall]). -1: no strategy has this name
 				if n.Value < 0 {
-					return tt{}, unsupported("S7d", "call \"name\":X of a name that no strategy has "+
-						"(the interpreter stops: `unknown strategy in call used`)")
+					return tt{}, unsupported(NotPlanned, "call \"name\":X of a name that no strategy has "+
+						"(the export writes -1: the name is lost; the interpreter stops: `unknown strategy in call used`; REM crashes)")
 				}
 				full, ok := l.p.StrategyName(uint32(n.Value))
 				if !ok {
@@ -389,6 +436,8 @@ func (l *lowerer) sortOf(t *tt) ref.SortIndex {
 		return l.intSort.s
 	case ttStr:
 		return l.strSort.s
+	case ttIdent:
+		return l.identSort.s
 	}
 	panic("sort of an extension variable")
 }
@@ -480,15 +529,75 @@ func (l *lowerer) run(name string) (*IR, error) {
 	if err != nil {
 		return nil, err
 	}
-	if containsVar(&start) {
-		return nil, unsupported("S7d", "query input: the start term uses the query")
-	}
 
 	r := &reach{seen: map[int]bool{}, sorts: map[ref.SortIndex]bool{}, calls: map[callKey]callTargets{}}
 	l.visit(&start, r)
 	if q.Strategy.Valid {
 		r.reachStrategy(q.Strategy.Index)
 	}
+	if err := l.fixpoint(r); err != nil {
+		return nil, err
+	}
+	sortsOf := func(r *reach) ([]ref.SortIndex, error) {
+		sorts := slices.Sorted(maps.Keys(r.sorts))
+		for _, s := range sorts {
+			n := l.sortName(s)
+			if strings.HasPrefix(n, "intern ") {
+				return nil, unsupported(NotPlanned, "builtin sort %s (a sort of the parser's grammar)", n)
+			}
+		}
+		return sorts, nil
+	}
+	if _, err := sortsOf(r); err != nil {
+		return nil, err
+	}
+
+	// the operators of the query (S7d task 5): those of the grammar rules
+	// that a term of the query's sort can contain; each one that cannot
+	// be compiled is refused when a query uses it
+	grammar, err := Grammar(l.p)
+	if err != nil {
+		return nil, unsupported(NotPlanned, "query grammar: %v (REM does not read it either)", err)
+	}
+	qrules := l.queryRules(grammar)
+	base := r.clone()
+	if !l.reachQuery(r, qrules) {
+		r = base.clone()
+		for i := range qrules {
+			if qrules[i].Kind != QueryOp {
+				continue
+			}
+			snap := r.clone()
+			if err := l.reachQueryOp(r, qrules[i].cand); err != nil {
+				r = snap
+				qrules[i] = queryRule{QueryRule: QueryRule{Kind: QueryUnsupported, Why: err.Error()}}
+			}
+		}
+	}
+	sorts, err := sortsOf(r)
+	if err == nil {
+		var ir *IR
+		ir, err = (&builder{l: l, reach: r, query: qrules, grammar: grammar}).build(name, &start, q, sorts)
+		if err == nil {
+			return ir, nil
+		}
+	}
+	// the program alone, its query refused at run time
+	why := err.Error()
+	for i := range qrules {
+		if qrules[i].Kind == QueryOp || qrules[i].Kind == QueryUmin {
+			qrules[i] = queryRule{QueryRule: QueryRule{Kind: QueryUnsupported, Why: why}}
+		}
+	}
+	sorts, err = sortsOf(base)
+	if err != nil {
+		return nil, err
+	}
+	return (&builder{l: l, reach: base, query: qrules, grammar: grammar}).build(name, &start, q, sorts)
+}
+
+// fixpoint expands what r has reached until nothing new is reached.
+func (l *lowerer) fixpoint(r *reach) error {
 	for {
 		var err error
 		if len(r.todo) > 0 {
@@ -506,26 +615,134 @@ func (l *lowerer) run(name string) (*IR, error) {
 			break
 		}
 		if err != nil {
-			return nil, err
+			return err
 		}
 	}
 	if len(r.errs) > 0 {
-		return nil, r.errs[0]
+		return r.errs[0]
 	}
-	sorts := slices.Sorted(func(yield func(ref.SortIndex) bool) {
-		for s := range r.sorts {
-			if !yield(s) {
-				return
+	return nil
+}
+
+// clone is a copy of r (to undo what a query operator reaches).
+func (r *reach) clone() *reach {
+	c := &reach{
+		cands: slices.Clone(r.cands), seen: maps.Clone(r.seen), todo: slices.Clone(r.todo),
+		sorts: maps.Clone(r.sorts), labels: slices.Clone(r.labels), labelsTodo: slices.Clone(r.labelsTodo),
+		strategies: slices.Clone(r.strategies), strategiesTodo: slices.Clone(r.strategiesTodo),
+		pending: slices.Clone(r.pending), calls: maps.Clone(r.calls), errs: slices.Clone(r.errs),
+	}
+	return c
+}
+
+// queryRule is a QueryRule with the profile of its operator.
+type queryRule struct {
+	QueryRule
+	cand int
+}
+
+// Codes of the query grammar (term/codes.h): the semantic actions of the
+// parser (the lexical rules, built by the parser) and INTCONSTUMIN.
+const (
+	numToTerm      = 67 // NUMTOTERM
+	identToTerm    = 68 // IDENTTOTERM
+	numRule        = 69 // NUMRULE
+	identRule      = 70 // IDENTRULE
+	intConstUminus = 79 // INTCONSTUMIN
+	stringToTerm   = 81 // STRINGTOTERM
+	stringRule     = 82 // STRINGRULE
+)
+
+// parserCode tells whether a rule's code is a semantic action of REM's
+// parser (esemact).
+func parserCode(symbol int32) bool {
+	switch symbol {
+	case numToTerm, identToTerm, numRule, identRule, stringToTerm, stringRule:
+		return true
+	}
+	return false
+}
+
+// lexicalRule tells whether g is a `1:` rule of the .ref, s ::= intern
+// int (67), intern ident (68) or intern string (81), built by the parser
+// (the only rules of the .ref to which the parser applies its action).
+func (l *lowerer) lexicalRule(g *GrammarRule) bool {
+	want := map[int32]string{numToTerm: "intern int", identToTerm: "intern ident", stringToTerm: "intern string"}[g.Symbol]
+	return want != "" && len(g.Rhs) == 1 && g.Rhs[0].Kind == GramSort && l.sortName(ref.SortIndex(g.Rhs[0].Code)) == want
+}
+
+// queryRules says, per grammar rule, how a query builds its term: the
+// rules of the sorts that a term of the query's sort can contain (its
+// sort, and the sorts of the arguments of their rules) are built by
+// their operators.
+func (l *lowerer) queryRules(grammar []GrammarRule) []queryRule {
+	in := map[int32]bool{int32(l.p.Query.Sort): true}
+	for changed := true; changed; {
+		changed = false
+		for _, g := range grammar {
+			if !in[g.Sort] {
+				continue
+			}
+			for _, x := range g.Rhs {
+				if x.Kind == GramSort && !in[x.Code] {
+					in[x.Code], changed = true, true
+				}
 			}
 		}
-	})
-	for _, s := range sorts {
-		n := l.sortName(s)
-		if n == "ident" || strings.HasPrefix(n, "intern ") {
-			return nil, unsupported("S7d", "builtin sort %s", n)
+	}
+	rules := make([]queryRule, len(grammar))
+	for i, g := range grammar {
+		if !in[g.Sort] || l.lexicalRule(&g) {
+			continue
+		}
+		if parserCode(g.Symbol) {
+			// REM's parser applies its action to it (S7d task 8 ruling)
+			rules[i].Kind, rules[i].Why = QueryUnsupported,
+				fmt.Sprintf("code %d is a semantic action of REM's parser, which builds another term", g.Symbol)
+			continue
+		}
+		if g.Symbol == intConstUminus {
+			rules[i].Kind = QueryUmin
+			continue
+		}
+		var args []ref.SortIndex
+		lexical := false
+		for _, x := range g.Rhs {
+			if x.Kind == GramSort {
+				args = append(args, ref.SortIndex(x.Code))
+				lexical = lexical || strings.HasPrefix(l.sortName(ref.SortIndex(x.Code)), "intern ")
+			}
+		}
+		c := slices.IndexFunc(l.bySymbol[ref.SymbolCode(g.Symbol)], func(c int) bool {
+			return slices.Equal(l.cands[c].args, args) && l.cands[c].result == ref.SortIndex(g.Sort)
+		})
+		switch {
+		case lexical:
+			rules[i].Kind, rules[i].Why = QueryUnsupported, fmt.Sprintf("code %d on a lexical sort", g.Symbol)
+		case c < 0:
+			rules[i].Kind, rules[i].Why = QueryUnsupported, fmt.Sprintf("code %d: no operator", g.Symbol)
+		default:
+			rules[i].Kind, rules[i].cand = QueryOp, l.bySymbol[ref.SymbolCode(g.Symbol)][c]
 		}
 	}
-	return (&builder{l: l, reach: r}).build(name, &start, q, sorts)
+	return rules
+}
+
+// reachQuery reaches the operators of the query rules; false if one of
+// them is refused (r is then to be dropped).
+func (l *lowerer) reachQuery(r *reach, rules []queryRule) bool {
+	for _, q := range rules {
+		if q.Kind == QueryOp {
+			r.reach(q.cand)
+		}
+	}
+	return l.fixpoint(r) == nil
+}
+
+// reachQueryOp reaches one operator of the query.
+func (l *lowerer) reachQueryOp(r *reach, c int) error {
+	r.reach(c)
+	return l.fixpoint(r)
 }
 
 func (l *lowerer) visit(t *tt, r *reach) {
@@ -546,6 +763,8 @@ func (l *lowerer) visit(t *tt, r *reach) {
 		r.sorts[l.intSort.s] = true
 	case ttStr:
 		r.sorts[l.strSort.s] = true
+	case ttIdent:
+		r.sorts[l.identSort.s] = true
 	}
 }
 
@@ -579,8 +798,23 @@ func (l *lowerer) expand(c int, r *reach) error {
 	for _, a := range k.args {
 		r.sorts[a] = true
 	}
-	if code := k.semantic; k.semantic != 0 && (133 <= code && code <= 136 || -136 <= code && code <= -133) {
-		return unsupported("S7d", "labels named by strings in a strategy term of META (%s)", l.candDecl(k))
+	if code := k.semantic; code == 135 || code == 136 || code == -135 || code == -136 {
+		// dc/dk("l1" ... "ln"): Strateg[X] over labels named at run
+		// time: every label of X can be named
+		x, ok := metaParam(l.sortName(k.result), "Strateg")
+		if !ok {
+			return invalid("%s: not of sort Strateg[X]", l.candDecl(k))
+		}
+		for _, s := range l.p.Sorts {
+			if s.Name != x {
+				continue
+			}
+			for lb := range l.rulesByLabel {
+				if l.labelFits(lb, s.Index) {
+					r.reachLabel(lb)
+				}
+			}
+		}
 	}
 	switch k.infos {
 	case 0:
@@ -590,7 +824,7 @@ func (l *lowerer) expand(c int, r *reach) error {
 		}
 	default:
 		// (the language has no commutative-only operators: never exported)
-		return unsupported("S7c", "commutative operator %s", l.candDecl(k))
+		return unsupported(NotPlanned, "commutative operator %s (the language has no commutative-only operators)", l.candDecl(k))
 	}
 	if l.boolSort.ok && k.result == l.boolSort.s {
 		// true and false are values of every bool computation
@@ -609,10 +843,10 @@ func (l *lowerer) expand(c int, r *reach) error {
 	}
 	if code, ok := builtinCode(k.semantic); ok {
 		if _, ok := BuiltinFromCode(code); !ok {
-			return unsupported("S7d", "builtin operation code %d (%s)", code, l.candDecl(k))
+			return builtinRefusal(code, l.candDecl(k))
 		}
 		if len(rules) > 0 {
-			return unsupported("S7d", "rules for the builtin operation %s", l.candDecl(k))
+			return unsupported("S7e", "rules for the builtin operation %s (no program has one)", l.candDecl(k))
 		}
 		return nil
 	}
@@ -771,9 +1005,19 @@ func (l *lowerer) visitSeq(seq ref.StrategySeq, sort ref.SortIndex, name string,
 					return err
 				}
 			}
-		case ref.SRepeat, ref.SIterate:
+		case ref.SRepeat, ref.SIterate, ref.STAll, ref.STOne, ref.STSome, ref.SRewrite:
+			// (a traversal applies its body to the arguments of the term,
+			// of any sort: the rules of its labels apply to the terms of
+			// their sort, the strategies it calls are compiled for each
+			// sort they meet when the code is emitted)
 			if err := l.visitSeq(e.Body, sort, name, r); err != nil {
 				return err
+			}
+		case ref.SNormIn, ref.SNormOut:
+			for _, lb := range e.Rules {
+				if l.labelFits(lb, sort) {
+					r.reachLabel(lb)
+				}
 			}
 		case ref.SCall:
 			if d := l.p.Strategy(e.Call); d != nil && d.Sort != sort {
@@ -783,10 +1027,8 @@ func (l *lowerer) visitSeq(seq ref.StrategySeq, sort ref.SortIndex, name string,
 		case ref.SMeta:
 			// the meta_apply terms are reached by the rules that build
 			// them; the strategies of their calls by reachCall
-		case ref.SNormIn, ref.SNormOut, ref.STAll, ref.STOne, ref.STSome, ref.SRewrite:
-			return unsupported("S7d", "strategy %s (in %s)", e.Op, name)
 		case ref.SDcCall, ref.SDkCall:
-			return unsupported("S7d", "strategy %s (external process, in %s)", e.Op, name)
+			return unsupported(NotPlanned, "strategy %s (external processes, in %s: REM has none)", e.Op, name)
 		default:
 			return invalid("unknown strategy %v (in %s)", e.Op, name)
 		}
@@ -813,18 +1055,20 @@ func (l *lowerer) checkWhereStrategy(st ref.StrategyNameIndex, s ref.SortIndex, 
 // of terms (not a builtin family: refused as S7d, see builtinAC), a
 // printing form with its two arguments in order.
 // builtinAC is the refusal of an AC operator on a builtin sort or a sort
-// with an injection of one (S7d): no program of the bench needs it; the
-// oracles order ints as REM's tagged words in Eker's matcher, and strings
+// with an injection of one (not planned, S7d task 7): no program of the
+// bench needs it; the oracles disagree (programs/refused/acbuiltin:
+// pl(pl(1,2),3) for the interpreter, which does not flatten it, pl(1,pl(2,3))
+// for REM), order ints as REM's tagged words in Eker's matcher, and strings
 // under an AC symbol are a fatal error of the interpreter and crash REM's
 // compiler (the S7c plan).
-const builtinAC = "AC operator %s on a builtin sort (no program of the bench has one; strings under an AC symbol make both oracles fail)"
+const builtinAC = "AC operator %s on a builtin sort (the oracles disagree; strings under an AC symbol make both fail)"
 
 func (l *lowerer) checkAC(k *cand) error {
 	if len(k.args) != 2 || k.args[0] != k.result || k.args[1] != k.result {
-		return unsupported("S7c", "AC operator %s whose arguments are not of its result sort (its terms are flattened: (s s) s; no program of the bench declares one)", l.candDecl(k))
+		return unsupported("S7e", "AC operator %s whose arguments are not of its result sort (its terms are flattened: (s s) s; no program of the bench declares one)", l.candDecl(k))
 	}
 	if _, ok := builtinKind(l.sortName(k.result)); ok || isBuiltin(k.semantic) {
-		return unsupported("S7d", builtinAC, l.candDecl(k))
+		return unsupported(NotPlanned, builtinAC, l.candDecl(k))
 	}
 	// (an injection of a builtin sort into the sort makes it a family:
 	// checked when the IR is built)
@@ -835,14 +1079,14 @@ func (l *lowerer) checkAC(k *cand) error {
 		}
 	}
 	if len(args) != 2 {
-		return unsupported("S7c", "AC operator %s printed without its two arguments (REM prints an AC term as a right comb of its form; no program of the bench has one)", l.candDecl(k))
+		return unsupported("S7e", "AC operator %s printed without its two arguments (REM prints an AC term as a right comb of its form; no program of the bench has one)", l.candDecl(k))
 	}
 	return nil
 }
 
 func (l *lowerer) checkRule(r *ref.Rule) error {
 	if _, ok := r.Body.(ref.Plain); !ok {
-		return unsupported("S7d", "rule with a switch/case right-hand side")
+		return unsupported(NotPlanned, "rule with a switch/case right-hand side (SWRULE: the interpreter's parser no longer reads switch, NO_MORE_SWITCH in load/msemact.cc; REM does not read it)")
 	}
 	return nil
 }
@@ -892,7 +1136,17 @@ func (l *lowerer) whereTerms(w ref.Where, ruleCtx string, reach *reach) ([]tt, e
 		r, err := l.typeTop(w.Rhs, optSort{w.Sort, true}, ctx)
 		return []tt{pt, r}, err
 	case ref.Try:
-		return nil, unsupported("S7d", "choose/try conditions in %s", ctx)
+		var ts []tt
+		for _, br := range w.Branches {
+			for _, x := range br {
+				t, err := l.whereTerms(x, ruleCtx, reach)
+				if err != nil {
+					return nil, err
+				}
+				ts = append(ts, t...)
+			}
+		}
+		return ts, nil
 	}
 	return nil, invalid("unknown condition %T", w)
 }
@@ -965,7 +1219,7 @@ func (l *lowerer) reachCall(name string, strateg ref.SortIndex, r *reach) error 
 			return 0, invalid("call %s:%s: no strategy %s", StringText(name), x, name)
 		}
 		if d := l.p.Strategy(s); d.Sort != xs.s {
-			return 0, unsupported("S7d", "call %s:%s finds %s, a strategy of another sort",
+			return 0, unsupported(NotPlanned, "call %s:%s finds %s, a strategy of another sort (both oracles apply it to the term: ill-sorted results)",
 				StringText(name), x, l.strategyName(s))
 		}
 		return s, nil
@@ -975,7 +1229,7 @@ func (l *lowerer) reachCall(name string, strateg ref.SortIndex, r *reach) error 
 		return err
 	}
 	c := callTargets{typed: typed}
-	if k, ok := builtinKind(x); ok && k != KindBool {
+	if k, ok := builtinKind(x); ok && (k == KindInt || k == KindStr) {
 		c.hasUntyped = true
 		u, err := check(l.resolveCall(name, ""))
 		if e, ok := err.(*Unsupported); ok {
@@ -1055,8 +1309,12 @@ type preKind struct {
 }
 
 type builder struct {
-	l       *lowerer
-	reach   *reach
+	l     *lowerer
+	reach *reach
+	// query: how each grammar rule is built (QueryOp: by the operator of
+	// a reached profile)
+	query   []queryRule
+	grammar []GrammarRule
 	opOf    map[int]OpID
 	sortOf  map[ref.SortIndex]SortID
 	labelOf map[ref.RuleNameIndex]LabelID     // labels in table order
@@ -1144,36 +1402,35 @@ func (b *builder) build(name string, start *tt, q *ref.Query, sortIndices []ref.
 	}
 
 	// families: builtin sorts, and the sorts whose only constructor is a
-	// transparent injection of a builtin sort
-	familyOf := map[SortID]FamilyID{}
-	for s := range ir.Sorts {
-		if bk, ok := builtinOf(s); ok {
-			familyOf[s] = len(ir.Families)
-			ir.Families = append(ir.Families, Family{Kind: bk, Base: s, Members: []SortID{s}})
-		}
-	}
-	for s := range ir.Sorts {
-		if _, ok := familyOf[s]; ok {
-			continue
-		}
-		var ctors []OpID
-		for o := range ir.Ops {
-			if ir.Ops[o].Result == s && pre[o].kind == Constructor {
-				ctors = append(ctors, o)
+	// transparent injection of a builtin sort. A builtin operation
+	// computes a value of a builtin sort from values: declared on sorts of
+	// terms (`@ pl @ : (t t) t code 3`), it is a constructor (the
+	// interpreter leaves the term as it is; REM adds the addresses); then
+	// the families are computed again (one more constructor: a sort may no
+	// longer be one), until none changes. The operations on terms
+	// (replace, occurs, matching) take and give any sorts.
+	var familyOf map[SortID]FamilyID
+	for {
+		familyOf = b.families(pre)
+		demoted := false
+		for i := range cs {
+			if pre[i].kind != Builtin || !pre[i].builtin.NeedsValues() {
+				continue
+			}
+			op := &ir.Ops[i]
+			_, ok := familyOf[op.Result]
+			for _, a := range op.Args {
+				if _, isF := familyOf[a]; !isF {
+					ok = false
+				}
+			}
+			if !ok {
+				pre[i] = preKind{kind: Constructor}
+				demoted = true
 			}
 		}
-		if len(ctors) != 1 {
-			continue
-		}
-		op := &ir.Ops[ctors[0]]
-		if len(op.Args) != 1 {
-			continue
-		}
-		if _, ok := builtinOf(op.Args[0]); ok && len(op.Print) == 1 && op.Print[0] == (PrintItem{Kind: PArg, Arg: 0}) {
-			f := familyOf[op.Args[0]]
-			ir.Families[f].Members = append(ir.Families[f].Members, s)
-			familyOf[s] = f
-			pre[ctors[0]] = preKind{kind: Injection}
+		if !demoted {
+			break
 		}
 	}
 	for s, f := range familyOf {
@@ -1181,27 +1438,17 @@ func (b *builder) build(name string, start *tt, q *ref.Query, sortIndices []ref.
 	}
 	for o := range ir.Ops {
 		if op := &ir.Ops[o]; op.AC && ir.Sorts[op.Result].Family >= 0 {
-			return nil, unsupported("S7d", builtinAC, op.Decl)
+			return nil, unsupported(NotPlanned, builtinAC, op.Decl)
 		}
 	}
 
-	// a builtin operation computes a value of a builtin sort, from values
-	// when it needs them: declared on sorts of terms (`@ pl @ : (t t) t
-	// code 3`, the interpreter leaves the term as it is), it is not
-	// compiled
+	// and, or, not and the term equalities give a bool
 	for i, c := range cs {
-		if pre[i].kind != Builtin {
+		if pre[i].kind != Builtin || pre[i].builtin.NeedsValues() || pre[i].builtin.OnTerms() {
 			continue
 		}
-		op := &ir.Ops[i]
-		_, ok := familyOf[op.Result]
-		for _, a := range op.Args {
-			if _, isF := familyOf[a]; !isF && pre[i].builtin.NeedsValues() {
-				ok = false
-			}
-		}
-		if !ok {
-			return nil, unsupported("S7d", "builtin operation %s on sorts that are not builtin (%s)",
+		if _, ok := familyOf[ir.Ops[i].Result]; !ok {
+			return nil, unsupported(NotPlanned, "builtin operation %s on sorts that are not builtin (%s): its result is not a bool",
 				pre[i].builtin, l.candDecl(&l.cands[c]))
 		}
 	}
@@ -1320,11 +1567,53 @@ func (b *builder) build(name string, start *tt, q *ref.Query, sortIndices []ref.
 	}
 	markRecursive(ir)
 
-	startExpr, err := b.expr(start, func(uint32) (VarID, bool) { return 0, false })
+	// the query is the variable of the start term (`start with () s(query)`)
+	usesQuery := containsVar(start)
+	startExpr, err := b.expr(start, func(uint32) (VarID, bool) { return 0, usesQuery })
 	if err != nil {
 		return nil, err
 	}
-	ir.Start = Start{QuerySort: l.sortName(q.Sort), Sort: b.sortOf[l.sortOf(start)], Term: startExpr, Strategy: -1}
+	ir.Start = Start{QuerySort: l.sortName(q.Sort), Sort: b.sortOf[l.sortOf(start)], Term: startExpr, Strategy: -1,
+		UsesQuery: usesQuery}
+	if usesQuery {
+		qs, ok := b.sortOf[q.Sort]
+		if !ok {
+			return nil, invalid("the query's sort %s is not reached", l.sortName(q.Sort))
+		}
+		ir.Start.Vars = []Var{{Name: "query", Sort: qs}}
+	}
+	// the table of identifiers: the parser of the query reads them (and
+	// the identifiers of its grammar rules are their indices)
+	for _, e := range l.p.Identifiers {
+		ir.Idents = append(ir.Idents, Ident{Index: int32(e.Index), Name: e.Name})
+	}
+	if qs, ok := b.sortOf[q.Sort]; ok || !slices.ContainsFunc(b.query, func(r queryRule) bool { return r.Kind == QueryOp }) {
+		named := func(n string, def int32) int32 {
+			for _, s := range l.p.Sorts {
+				if s.Name == n {
+					return int32(s.Index)
+				}
+			}
+			return def
+		}
+		iq := &Query{Sort: int32(q.Sort), SortID: -1, Grammar: b.grammar, SortNames: map[int32]string{},
+			InternIdent: named("intern ident", 220), InternInt: named("intern int", 19),
+			InternString: named("intern string", 351)}
+		if ok {
+			iq.SortID = qs
+		}
+		for _, s := range l.p.Sorts {
+			iq.SortNames[int32(s.Index)] = s.Name
+		}
+		for _, r := range b.query {
+			qr := r.QueryRule
+			if qr.Kind == QueryOp {
+				qr.Op = b.opOf[r.cand]
+			}
+			iq.Rules = append(iq.Rules, qr)
+		}
+		ir.Start.Query = iq
+	}
 	if q.Strategy.Valid {
 		id := b.stratOf[q.Strategy.Index]
 		if st := &ir.Strategies[id]; st.Sort != ir.Start.Sort {
@@ -1334,6 +1623,53 @@ func (b *builder) build(name string, start *tt, q *ref.Query, sortIndices []ref.
 		ir.Start.Strategy = id
 	}
 	return ir, nil
+}
+
+// families computes the builtin families (ir.Families) and the family of
+// each of their sorts: the builtin sorts, and the sorts whose only
+// constructor (pre) is a transparent injection of a builtin sort, marked
+// Injection in pre (the marks of a previous computation undone first).
+func (b *builder) families(pre []preKind) map[SortID]FamilyID {
+	ir := b.ir
+	builtinOf := func(s SortID) (BuiltinKind, bool) { return builtinKind(ir.Sorts[s].Name) }
+	for o := range pre {
+		if pre[o].kind == Injection {
+			pre[o] = preKind{kind: Constructor}
+		}
+	}
+	ir.Families = nil
+	familyOf := map[SortID]FamilyID{}
+	for s := range ir.Sorts {
+		if bk, ok := builtinOf(s); ok {
+			familyOf[s] = len(ir.Families)
+			ir.Families = append(ir.Families, Family{Kind: bk, Base: s, Members: []SortID{s}})
+		}
+	}
+	for s := range ir.Sorts {
+		if _, ok := familyOf[s]; ok {
+			continue
+		}
+		var ctors []OpID
+		for o := range ir.Ops {
+			if ir.Ops[o].Result == s && pre[o].kind == Constructor {
+				ctors = append(ctors, o)
+			}
+		}
+		if len(ctors) != 1 {
+			continue
+		}
+		op := &ir.Ops[ctors[0]]
+		if len(op.Args) != 1 {
+			continue
+		}
+		if _, ok := builtinOf(op.Args[0]); ok && len(op.Print) == 1 && op.Print[0] == (PrintItem{Kind: PArg, Arg: 0}) {
+			f := familyOf[op.Args[0]]
+			ir.Families[f].Members = append(ir.Families[f].Members, s)
+			familyOf[s] = f
+			pre[ctors[0]] = preKind{kind: Injection}
+		}
+	}
+	return familyOf
 }
 
 // strategies builds the labels and the strategies reached, in table order,
@@ -1399,14 +1735,17 @@ func (b *builder) strategies(ir *IR, sig *signatures, usedFuns map[string]bool) 
 			lb := &ir.Labels[i]
 			det := true
 			for _, r := range lb.Rules {
-				for _, c := range r.Conds {
-					if c.Kind == CondApply && !ir.Strategies[c.Strategy].Det {
-						det = false
-					}
-					// an AC matching can give several solutions
-					if c.Kind == CondAC || c.Kind == CondEker {
-						det = false
-					}
+				for i := range r.Conds {
+					r.Conds[i].Walk(func(c *Cond) {
+						if c.Kind == CondApply && !ir.Strategies[c.Strategy].Det {
+							det = false
+						}
+						// an AC matching can give several solutions, and
+						// so can the branches of a choose
+						if c.Kind == CondAC || c.Kind == CondEker || c.Kind == CondChoose && len(c.Branches) > 1 {
+							det = false
+						}
+					})
 				}
 			}
 			if det != lb.RulesDet {
@@ -1455,6 +1794,13 @@ func (b *builder) strategySeq(seq ref.StrategySeq, sort ref.SortIndex) []Strat {
 			s = Strat{Kind: StRepeat, Body: b.strategySeq(e.Body, sort)}
 		case ref.SIterate:
 			s = Strat{Kind: StIterate, Body: b.strategySeq(e.Body, sort)}
+		case ref.STAll, ref.STOne, ref.STSome, ref.SRewrite:
+			k := map[ref.StrategyOp]StratKind{ref.STAll: StTAll, ref.STOne: StTOne, ref.STSome: StTSome, ref.SRewrite: StRewrite}[e.Op]
+			s = Strat{Kind: k, Body: b.strategySeq(e.Body, sort)}
+		case ref.SNormIn:
+			s = Strat{Kind: StNormIn, Labels: labels(e.Rules)}
+		case ref.SNormOut:
+			s = Strat{Kind: StNormOut, Labels: labels(e.Rules)}
 		case ref.SCall:
 			s = Strat{Kind: StCall, Call: b.stratOf[e.Call]}
 		case ref.SMeta:
@@ -1525,9 +1871,54 @@ func (b *builder) metas() error {
 			}
 			slices.SortFunc(ev.Calls, func(a, c MetaCall) int { return strings.Compare(a.Name, c.Name) })
 		}
+		if b.labelsByString(ev.Strateg) {
+			ev.LabelsFun = unique(b.usedFuns, base+"_labels")
+			for l := range p.Labels {
+				if p.Labels[l].Sort != term {
+					continue
+				}
+				name := InterpreterLabelName(p.Labels[l].Name)
+				i := slices.IndexFunc(ev.Labels, func(m MetaLabel) bool { return m.Name == name })
+				if i < 0 {
+					ev.Labels = append(ev.Labels, MetaLabel{Name: name})
+					i = len(ev.Labels) - 1
+				}
+				ev.Labels[i].Labels = append(ev.Labels[i].Labels, l)
+			}
+			slices.SortFunc(ev.Labels, func(a, c MetaLabel) int { return strings.Compare(a.Name, c.Name) })
+		}
 		p.MetaEvals = append(p.MetaEvals, ev)
 	}
 	return nil
+}
+
+// labelsByString tells whether a dc/dk over labels named by strings
+// (Meta_strat codes 135, 136) of sort strateg (Strateg[X]) is reached.
+func (b *builder) labelsByString(strateg SortID) bool {
+	if strateg < 0 {
+		return false
+	}
+	for _, op := range b.ir.Ops {
+		// (the symbol of a Meta_strat[X] operator is its code)
+		if (op.Symbol == 135 || op.Symbol == 136) && op.Result == strateg {
+			return true
+		}
+	}
+	return false
+}
+
+// InterpreterLabelName is the name the interpreter gives a label of the
+// .ref file (label:sort/module!GL): label:sort, the name a string of a
+// Labels[X] term must give (trrules.trruleindex, attach_type).
+func InterpreterLabelName(refName string) string {
+	colon := strings.Index(refName, ":")
+	if colon < 0 {
+		return refName
+	}
+	if slash := strings.Index(refName[colon:], "/"); slash >= 0 {
+		return refName[:colon+slash]
+	}
+	return refName
 }
 
 func (b *builder) lexemTexts(ls []ref.Lexem) []string {
@@ -1597,6 +1988,8 @@ func (b *builder) expr(t *tt, varOf func(uint32) (VarID, bool)) (Expr, error) {
 		return Expr{Kind: ExprInt, Int: t.i}, nil
 	case ttStr:
 		return Expr{Kind: ExprStr, Str: t.s}, nil
+	case ttIdent:
+		return Expr{Kind: ExprIdent, Int: t.i}, nil
 	}
 	return Expr{}, invalid("extension variable in an expression")
 }
@@ -1692,9 +2085,12 @@ func markRecursive(ir *IR) {
 	rules := func(from int, rs []Rule) {
 		for ri := range rs {
 			r := &rs[ri]
+			var all []*Cond
 			for ci := range r.Conds {
-				c := &r.Conds[ci]
-				if c.Kind != CondSame && c.Kind != CondAC && c.Kind != CondEker {
+				r.Conds[ci].Walk(func(c *Cond) { all = append(all, c) })
+			}
+			for _, c := range all {
+				if c.Kind != CondSame && c.Kind != CondAC && c.Kind != CondEker && c.Kind != CondChoose {
 					collect(from, &c.Expr)
 				}
 				if c.Kind == CondEker {
@@ -1720,6 +2116,15 @@ func markRecursive(ir *IR) {
 	}
 	for o := range ir.Ops {
 		rules(o, ir.Ops[o].Rules)
+		if op := &ir.Ops[o]; op.Kind == Builtin && op.Builtin == TermReplace {
+			// the copied path is renormalised by the functions of the
+			// operators that can be stuck (normTerm)
+			for x := range ir.Ops {
+				if ir.Ops[x].Variant && ir.Ops[x].Kind != Constructor {
+					calls[o] = append(calls[o], x)
+				}
+			}
+		}
 	}
 	for l := range ir.Labels {
 		rules(label(l), ir.Labels[l].Rules)
@@ -1735,6 +2140,15 @@ func markRecursive(ir *IR) {
 				seq(from, a)
 			}
 			seq(from, s.Body)
+			if s.Kind.IsTraversal() {
+				// the terms it rebuilds are renormalised by the
+				// functions of the operators that can be stuck (normTerm)
+				for x := range ir.Ops {
+					if ir.Ops[x].Variant && ir.Ops[x].Kind != Constructor {
+						calls[from] = append(calls[from], x)
+					}
+				}
+			}
 			switch s.Kind {
 			case StCall:
 				calls[from] = append(calls[from], strat(s.Call))
@@ -1821,6 +2235,20 @@ type ruleLowerer struct {
 	ekerConds []Cond
 	// err is the first refusal met by pattern
 	err error
+	// shared are the variables bound by the branches of the enclosing
+	// chooses already lowered: a branch binding the same model variable
+	// gets the same variable ([CondChoose])
+	shared map[uint32]VarID
+}
+
+// bindVar is the variable of the first binding of model variable i (in a
+// pattern or a where): the one of another branch of an enclosing choose
+// ([CondChoose]), else a new one.
+func (rl *ruleLowerer) bindVar(i uint32, s ref.SortIndex) VarID {
+	if v, ok := rl.shared[i]; ok {
+		return v
+	}
+	return rl.newVar(i, s)
 }
 
 // freshVar is a new variable of the rule (the subject of an AC pattern).
@@ -1974,7 +2402,7 @@ func (rl *ruleLowerer) acAbstract(t *tt, n *remNode, p Pattern, same *[]Cond) Pa
 
 func (rl *ruleLowerer) refuse(format string, a ...any) {
 	if rl.err == nil {
-		rl.err = unsupported("S7c", format, a...)
+		rl.err = unsupported("S7e", format, a...)
 	}
 }
 
@@ -1995,10 +2423,12 @@ func (rl *ruleLowerer) pattern(t *tt, same *[]Cond) Pattern {
 	switch t.kind {
 	case ttVar:
 		first, bound := rl.varOf[t.index]
-		v := rl.newVar(t.index, t.sort)
+		var v VarID
 		if bound {
+			v = rl.newVar(t.index, t.sort)
 			*same = append(*same, Cond{Kind: CondSame, A: first, B: v})
 		} else {
+			v = rl.bindVar(t.index, t.sort)
 			rl.varOf[t.index] = v
 		}
 		return Pattern{Kind: PatVar, Var: v}
@@ -2026,6 +2456,8 @@ func (rl *ruleLowerer) pattern(t *tt, same *[]Cond) Pattern {
 		return Pattern{Kind: PatInt, Int: t.i}
 	case ttStr:
 		return Pattern{Kind: PatStr, Str: t.s}
+	case ttIdent:
+		return Pattern{Kind: PatIdent, Int: t.i}
 	}
 	panic("rules with extension variables are skipped")
 }
@@ -2062,76 +2494,8 @@ func (rl *ruleLowerer) lower(lhs *tt, whole bool) (Rule, bool, error) {
 	rl.conds = append(rl.conds, same...)
 	body := rl.rule.Body.(ref.Plain)
 	var texts []string
-	for _, w := range body.Wheres {
-		switch w := w.(type) {
-		case ref.If:
-			t, err := l.typeTop(w.Cond, l.boolSort, "condition")
-			if err != nil {
-				return Rule{}, false, err
-			}
-			texts = append(texts, "if "+rl.render(&t))
-			e, err := rl.expr(&t)
-			if err != nil {
-				return Rule{}, false, err
-			}
-			rl.conds = append(rl.conds, Cond{Kind: CondIf, Expr: e})
-		case ref.Assign:
-			r, err := l.typeTop(w.Rhs, varSort(w.Lhs), "where")
-			if err != nil {
-				return Rule{}, false, err
-			}
-			lt, err := l.typeTop(w.Lhs, optSort{l.sortOf(&r), true}, "where")
-			if err != nil {
-				return Rule{}, false, err
-			}
-			e, err := rl.expr(&r)
-			if err != nil {
-				return Rule{}, false, err
-			}
-			texts = append(texts, "where "+rl.render(&lt)+" := ("+rl.strategyText(w.Strategy)+") "+rl.render(&r))
-			if w.Strategy.Valid {
-				var same []Cond
-				p, ek := rl.wherePattern(&lt, &same)
-				rl.conds = append(rl.conds, Cond{Kind: CondApply, Pat: p, Strategy: rl.b.stratOf[w.Strategy.Index], Expr: e})
-				rl.addEker(ek)
-				rl.conds = append(rl.conds, same...)
-			} else if _, bound := rl.varOf[lt.index]; lt.kind == ttVar && !bound {
-				v := rl.newVar(lt.index, lt.sort)
-				rl.varOf[lt.index] = v
-				rl.conds = append(rl.conds, Cond{Kind: CondLet, A: v, Expr: e})
-			} else {
-				var same []Cond
-				p, ek := rl.wherePattern(&lt, &same)
-				rl.conds = append(rl.conds, Cond{Kind: CondMatch, Pat: p, Expr: e})
-				rl.addEker(ek)
-				rl.conds = append(rl.conds, same...)
-			}
-		case ref.Match:
-			r, err := l.typeTop(w.Rhs, optSort{w.Sort, true}, "where")
-			if err != nil {
-				return Rule{}, false, err
-			}
-			pt, err := l.typeTop(w.Pattern, optSort{w.Sort, true}, "where")
-			if err != nil {
-				return Rule{}, false, err
-			}
-			e, err := rl.expr(&r)
-			if err != nil {
-				return Rule{}, false, err
-			}
-			texts = append(texts, "where "+rl.render(&pt)+" := ("+rl.strategyText(w.Strategy)+") "+rl.render(&r))
-			var same []Cond
-			p, ek := rl.wherePattern(&pt, &same)
-			if w.Strategy.Valid {
-				rl.conds = append(rl.conds, Cond{Kind: CondApply, Pat: p, Strategy: rl.b.stratOf[w.Strategy.Index], Expr: e})
-			} else {
-				rl.conds = append(rl.conds, Cond{Kind: CondMatch, Pat: p, Expr: e})
-			}
-			rl.addEker(ek)
-			rl.conds = append(rl.conds, same...)
-		default:
-			panic("refused during reachability")
-		}
+	if err := rl.wheres(body.Wheres, &texts); err != nil {
+		return Rule{}, false, err
 	}
 	rt, err := l.typeTop(body.Rhs, optSort{rl.rule.Sort, true}, "right-hand side")
 	if err != nil {
@@ -2149,6 +2513,131 @@ func (rl *ruleLowerer) lower(lhs *tt, whole bool) (Rule, bool, error) {
 		text += " " + c
 	}
 	return Rule{Text: text, Vars: rl.vars, Lhs: pats, Conds: rl.conds, Rhs: rhs}, true, nil
+}
+
+// wheres lowers the conditions ws of the rule, in order, appending them
+// to rl.conds and their text (comments) to texts.
+func (rl *ruleLowerer) wheres(ws []ref.Where, texts *[]string) error {
+	l := rl.b.l
+	for _, w := range ws {
+		switch w := w.(type) {
+		case ref.If:
+			t, err := l.typeTop(w.Cond, l.boolSort, "condition")
+			if err != nil {
+				return err
+			}
+			*texts = append(*texts, "if "+rl.render(&t))
+			e, err := rl.expr(&t)
+			if err != nil {
+				return err
+			}
+			rl.conds = append(rl.conds, Cond{Kind: CondIf, Expr: e})
+		case ref.Assign:
+			r, err := l.typeTop(w.Rhs, varSort(w.Lhs), "where")
+			if err != nil {
+				return err
+			}
+			lt, err := l.typeTop(w.Lhs, optSort{l.sortOf(&r), true}, "where")
+			if err != nil {
+				return err
+			}
+			e, err := rl.expr(&r)
+			if err != nil {
+				return err
+			}
+			*texts = append(*texts, "where "+rl.render(&lt)+" := ("+rl.strategyText(w.Strategy)+") "+rl.render(&r))
+			if w.Strategy.Valid {
+				var same []Cond
+				p, ek := rl.wherePattern(&lt, &same)
+				rl.conds = append(rl.conds, Cond{Kind: CondApply, Pat: p, Strategy: rl.b.stratOf[w.Strategy.Index], Expr: e})
+				rl.addEker(ek)
+				rl.conds = append(rl.conds, same...)
+			} else if _, bound := rl.varOf[lt.index]; lt.kind == ttVar && !bound {
+				v := rl.bindVar(lt.index, lt.sort)
+				rl.varOf[lt.index] = v
+				rl.conds = append(rl.conds, Cond{Kind: CondLet, A: v, Expr: e})
+			} else {
+				var same []Cond
+				p, ek := rl.wherePattern(&lt, &same)
+				rl.conds = append(rl.conds, Cond{Kind: CondMatch, Pat: p, Expr: e})
+				rl.addEker(ek)
+				rl.conds = append(rl.conds, same...)
+			}
+		case ref.Match:
+			r, err := l.typeTop(w.Rhs, optSort{w.Sort, true}, "where")
+			if err != nil {
+				return err
+			}
+			pt, err := l.typeTop(w.Pattern, optSort{w.Sort, true}, "where")
+			if err != nil {
+				return err
+			}
+			e, err := rl.expr(&r)
+			if err != nil {
+				return err
+			}
+			*texts = append(*texts, "where "+rl.render(&pt)+" := ("+rl.strategyText(w.Strategy)+") "+rl.render(&r))
+			var same []Cond
+			p, ek := rl.wherePattern(&pt, &same)
+			if w.Strategy.Valid {
+				rl.conds = append(rl.conds, Cond{Kind: CondApply, Pat: p, Strategy: rl.b.stratOf[w.Strategy.Index], Expr: e})
+			} else {
+				rl.conds = append(rl.conds, Cond{Kind: CondMatch, Pat: p, Expr: e})
+			}
+			rl.addEker(ek)
+			rl.conds = append(rl.conds, same...)
+		case ref.Try:
+			if err := rl.choose(w, texts); err != nil {
+				return err
+			}
+		default:
+			panic("unknown condition")
+		}
+	}
+	return nil
+}
+
+// choose lowers `choose try b1 ... end` ([CondChoose]): each branch's
+// conditions from the variables bound before it, a model variable bound by
+// several branches being one variable; after end, the variables bound by
+// every branch are bound.
+func (rl *ruleLowerer) choose(w ref.Try, texts *[]string) error {
+	before := maps.Clone(rl.varOf)
+	outer := rl.shared
+	shared := maps.Clone(outer)
+	if shared == nil {
+		shared = map[uint32]VarID{}
+	}
+	conds := rl.conds
+	var branches [][]Cond
+	var everywhere map[uint32]VarID
+	var bt []string
+	for _, br := range w.Branches {
+		rl.varOf, rl.shared, rl.conds = maps.Clone(before), shared, nil
+		var t []string
+		if err := rl.wheres(br, &t); err != nil {
+			return err
+		}
+		bt = append(bt, "try "+strings.Join(t, " "))
+		branches = append(branches, rl.conds)
+		bound := map[uint32]VarID{}
+		for m, v := range rl.varOf {
+			if _, ok := before[m]; !ok {
+				shared[m] = v
+				bound[m] = v
+			}
+		}
+		if everywhere == nil {
+			everywhere = bound
+		} else {
+			maps.DeleteFunc(everywhere, func(m uint32, _ VarID) bool { _, ok := bound[m]; return !ok })
+		}
+	}
+	rl.varOf, rl.shared = before, outer
+	maps.Copy(rl.varOf, everywhere)
+	rl.conds = append(conds, Cond{Kind: CondChoose, Branches: branches})
+	*texts = append(*texts, "choose "+strings.Join(bt, " ")+" end")
+	return nil
 }
 
 // strategyText is the name of the strategy of a where (empty for ()).
@@ -2182,6 +2671,11 @@ func (b *builder) render(t *tt, out *strings.Builder) {
 		fmt.Fprintf(out, "%d", t.i)
 	case ttStr:
 		out.WriteString(StringText(t.s))
+	case ttIdent:
+		if endsAlnum(out.String()) {
+			out.WriteByte(' ')
+		}
+		out.WriteString(b.l.ident(uint32(t.i)))
 	case ttOp:
 		// the declaration's syntax (the printing form may be an alias)
 		i := 0

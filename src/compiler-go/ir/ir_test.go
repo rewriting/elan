@@ -346,14 +346,15 @@ func TestUnsupportedConstructsAreRefusedWhenReachable(t *testing.T) {
 	// not reachable: fine
 	p.lower(t)
 	p.start(f(340, f(341, f(318)), f(341, f(318))), sSet)
-	if st, what := unsupportedStage(t, p); st != "S7c" || !strings.Contains(what, "commutative") {
+	if st, what := unsupportedStage(t, p); st != NotPlanned || !strings.Contains(what, "commutative") {
 		t.Fatalf("%s %s", st, what)
 	}
-	// a start term with the query
+	// a start term with the query: compiled (S7d task 3), the query its
+	// variable (-noInput then prints REM's message)
 	p = peano()
 	p.start(f(319, v(0, sNat)), sNat)
-	if st, _ := unsupportedStage(t, p); st != "S7d" {
-		t.Fatal(st)
+	if x := p.lower(t).Start; !x.UsesQuery || len(x.Vars) != 1 || x.Term.Args[0].Kind != ExprVar {
+		t.Fatalf("%+v", x)
 	}
 	// a strategy over a label without rules: compiled (no result)
 	p = peano()
@@ -363,17 +364,15 @@ func TestUnsupportedConstructsAreRefusedWhenReachable(t *testing.T) {
 	if ir := p.lower(t); len(ir.Strategies) != 1 || len(ir.Labels) != 0 || ir.Start.Strategy != 0 {
 		t.Fatalf("%+v %+v", ir.Strategies, ir.Labels)
 	}
-	// traversals (META: meta_test.go)
-	for op, stage := range map[ref.StrategyOp]string{ref.STAll: "S7d", ref.SNormIn: "S7d"} {
+	// traversals: compiled (S7d task 6; strategy_test.go)
+	for _, op := range []ref.StrategyOp{ref.STAll, ref.SNormIn} {
 		p.p.Strategies[0].Body = ref.StrategySeq{{Op: ref.SId}, {Op: op}}
-		if st, _ := unsupportedStage(t, p); st != stage {
-			t.Fatalf("%v: %s", op, st)
-		}
+		p.lower(t)
 	}
 	// a call "name":X of a name that no strategy has (the export writes -1)
 	p = peano()
 	p.start(f(320, f(144, ref.Int{Value: -1}), f(318)), sNat)
-	if st, what := unsupportedStage(t, p); st != "S7d" || !strings.Contains(what, "no strategy has") {
+	if st, what := unsupportedStage(t, p); st != NotPlanned || !strings.Contains(what, "no strategy has") {
 		t.Fatalf("%s %s", st, what)
 	}
 	// a where with an undefined strategy: an invalid program
@@ -390,8 +389,39 @@ func TestUnsupportedConstructsAreRefusedWhenReachable(t *testing.T) {
 	p = peano()
 	p.op(sNat, 155, "x", []uint32{sNat}, 155, 0)
 	p.start(f(155, f(318)), sNat)
-	if st, what := unsupportedStage(t, p); st != "S7d" || !strings.Contains(what, "code 155") {
+	if st, what := unsupportedStage(t, p); st != "S7e" || !strings.Contains(what, "code 155") {
 		t.Fatalf("%s %s", st, what)
+	}
+	// the kept refusals of the builtin codes (S7d task 7): the stage and
+	// what the operation is
+	for _, c := range []struct {
+		code       int32
+		stage, why string
+	}{
+		{30, NotPlanned, "term order"},
+		{34, NotPlanned, "double"},
+		{113, "S7e", "input/output"},
+		{165, NotPlanned, "ELAN system"},
+		{200, "S7e", "arrays"},
+		{210, NotPlanned, "hash"},
+	} {
+		p = peano()
+		p.op(sNat, 155, "x", []uint32{sNat}, c.code, 0)
+		p.start(f(155, f(318)), sNat)
+		if st, what := unsupportedStage(t, p); st != c.stage || !strings.Contains(what, c.why) {
+			t.Errorf("code %d: %s %s", c.code, st, what)
+		}
+	}
+	// a switch/case right-hand side (SWRULE): the parser no longer reads it
+	p = peano()
+	p.rule(sNat, 0, f(319, f(318)), f(318))
+	p.p.Rules[len(p.p.Rules)-1].Body = ref.NoSwitch{Result: f(318)}
+	p.start(f(319, f(318)), sNat)
+	if st, what := unsupportedStage(t, p); st != NotPlanned || !strings.Contains(what, "switch") {
+		t.Fatalf("%s %s", st, what)
+	}
+	if got := (&Unsupported{Stage: NotPlanned, What: "x"}).Error(); got != "not supported (not planned): x" {
+		t.Fatal(got)
 	}
 	// the codes of strategy terms (strsig/strat, Meta_strat; meta_apply:
 	// meta_test.go) are constructors, not builtins (the interpreter has no reduction
@@ -408,26 +438,57 @@ func TestUnsupportedConstructsAreRefusedWhenReachable(t *testing.T) {
 
 // A builtin operation needs values of builtin sorts: declared on a sort
 // of terms (`@ pl @ : (t t) t code 3;`, the interpreter leaves the term),
-// it is refused (elanc-go crashed on it).
-func TestBuiltinOnASortOfTermsIsRefused(t *testing.T) {
+// it is a constructor (S7d; elanc-go crashed on it, then refused it).
+func TestBuiltinOnASortOfTermsIsAConstructor(t *testing.T) {
 	p := peano()
 	p.op(sNat, 3, "pl", []uint32{sNat, sNat}, 3, 0) // + on nat
 	p.start(f(3, f(318), f(318)), sNat)
-	if st, what := unsupportedStage(t, p); st != "S7d" || !strings.Contains(what, "pl") {
-		t.Fatalf("%s %s", st, what)
+	if x := opNamed(t, p.lower(t), "pl"); x.Kind != Constructor || !x.Variant {
+		t.Fatalf("pl: %+v", x)
 	}
 	// a result of a sort of terms
 	p = peano()
 	p.op(sNat, 150, "len", []uint32{sStr}, 150, 0)
 	p.start(f(150, ref.Str{Codes: []int32{'a'}}), sNat)
-	if st, what := unsupportedStage(t, p); st != "S7d" || !strings.Contains(what, "len") {
-		t.Fatalf("%s %s", st, what)
+	if x := opNamed(t, p.lower(t), "len"); x.Kind != Constructor || !x.Variant {
+		t.Fatalf("len: %+v", x)
 	}
 	// and, or, not, ==, != take any term: fine on a sort of terms
 	p = peano()
 	p.op(sBool, 18, "eq", []uint32{sNat, sNat}, 18, 0)
 	p.start(f(18, f(318), f(318)), sBool)
 	p.lower(t)
+	// but give a bool
+	p = peano()
+	p.op(sNat, 21, "and", []uint32{sNat, sNat}, 21, 0)
+	p.start(f(21, f(318), f(318)), sNat)
+	if st, what := unsupportedStage(t, p); st != NotPlanned || !strings.Contains(what, "and") {
+		t.Fatalf("%s %s", st, what)
+	}
+	// the operations on terms take and give any sorts (replace, occurs,
+	// matching, unification)
+	for _, c := range []struct {
+		code   int32
+		args   []uint32
+		result uint32
+		op     BuiltinOp
+	}{
+		{16, []uint32{sNat, sNat, sNat}, sNat, TermReplace},
+		{17, []uint32{sNat, sNat}, sBool, TermOccurs},
+		{191, []uint32{sNat, sNat, sNat, sNat}, sNat, TermMatch},
+		{175, []uint32{sNat, sNat, sNat, sNat}, sNat, TermUnify},
+	} {
+		p = peano()
+		p.op(c.result, 156, "x", c.args, c.code, 0)
+		args := make([]ref.Term, len(c.args))
+		for i := range args {
+			args[i] = f(318)
+		}
+		p.start(f(156, args...), c.result)
+		if x := opNamed(t, p.lower(t), "x"); x.Kind != Builtin || x.Builtin != c.op || !x.Total || x.Variant {
+			t.Fatalf("code %d: %+v", c.code, x)
+		}
+	}
 }
 
 func TestPrintingFormIsTheLastGrammarRule(t *testing.T) {

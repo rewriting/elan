@@ -1,0 +1,5 @@
+REM applies the rest of a sequence after a traversal to the wrong term:
+its generated code (StrategyTraversalAll.java) leaves v0, the term the next
+strategy reads, at the result of the last argument instead of the rebuilt
+term (REM prints o here). elanc-go applies the rest to the result of the
+traversal (S7d plan, Task 6 rulings): g(s(o),s(s(o))).

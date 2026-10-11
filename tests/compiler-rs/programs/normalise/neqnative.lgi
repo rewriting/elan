@@ -1,0 +1,6 @@
+LPL neqnative description
+  query of sort bool
+  result of sort out
+  import neqnative
+  start with () r(neq_bool(same(true), false), neq_bool(true, true), neq_bool(false, false), eq_bool(false, true), neq_identifier(ab, ab), neq_identifier(ab, ba))
+end

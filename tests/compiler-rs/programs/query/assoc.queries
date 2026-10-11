@@ -1,0 +1,12 @@
+a -- b -- c end
+a ^^ b ^^ c end
+a ;; b ;; c end
+a -- b ** c -- a end
+a -- (b -- c) end
+(a ^^ b) ^^ c end
+f(a) -- f(3) end
+f(f(2) + 1) end
+3 + 4 * 5 - 2 end
+"x" -- a end
+k(zz) U a U k(ab) U b end
+a U (b U a) U c end

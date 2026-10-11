@@ -1,0 +1,32 @@
+module termops
+// The term builtins replace (code 16) and occurs (17) on sorts of terms
+// (replace[X,Y], occur[X,Y]): REM's term_rec_replace and term_occur, the
+// interpreter's stermreplace and occursin agree on these cases (AC
+// sub-multisets: replace_ac). The copied path of a replacement is
+// renormalised (h(a) => b, g(g(x)) => x); unchanged subterms are kept.
+import global bool int string eq[t] replace[t,t] occur[t,t] replace[t,u] occur[t,u]; end
+sort t u; end
+operators global
+  a : t; b : t; c : t; d : t;
+  f(@,@) : (t t) t;
+  g(@) : (t) t;
+  h(@) : (t) t;
+  @ U @ : (t t) t (AC);
+  k(@) : (int) t;
+  s(@) : (string) t;
+  w(@) : (t) u;
+  pair(@,@) : (t t) u;
+  r(@,@,@,@,@,@,@) : (t t t t t t t) u;
+  q(@,@,@,@,@,@,@,@,@) : (bool bool bool bool bool bool bool bool bool) u;
+  rep(@) : (t) t;
+  res(@,@,@,@) : (u u u u) u;
+end
+rules for t
+  x, y : t;
+global
+  [] h(a) => b end
+  [] g(g(x)) => x end
+  // as the bench's rep: the replacement in a where, renormalised
+  [] rep(f(a,x)) => y where y := () replace b by a in x end
+end
+end

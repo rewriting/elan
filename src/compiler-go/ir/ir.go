@@ -173,6 +173,16 @@ type IR struct {
 	// MetaEvals are the evaluators of the Strategy[X] terms, one per X.
 	MetaEvals []MetaEval
 	Start     Start
+	// Idents is the program's table of identifiers (the Identifiers
+	// table of the .ref file) when its terms can have identifiers (sort
+	// ident reached): rt.InitIdents.
+	Idents []Ident
+}
+
+// Ident is an entry of the table of identifiers.
+type Ident struct {
+	Index int32
+	Name  string
 }
 
 // MetaOp is what the META strategy does with an operator of Meta_apply[X]
@@ -223,6 +233,20 @@ type MetaEval struct {
 	Term SortID
 	// Calls are the call "name":X terms of the program, by name.
 	Calls []MetaCall
+	// LabelsFun gives the labels named by a Labels[X] term ("l1" "l2"
+	// ...: dc/dk over labels, Meta_strat codes 133-136); Labels are the
+	// labels of X by name, when such a term can be built.
+	LabelsFun string
+	Labels    []MetaLabel
+}
+
+// MetaLabel is a name a string of a Labels[X] term can give and its
+// labels: the interpreter's name of a label, label:sort (its rule names;
+// the .ref names are localised, label:sort/module!GL), and the labels of
+// that name, in label order (one per module and visibility).
+type MetaLabel struct {
+	Name   string
+	Labels []LabelID
 }
 
 // MetaCall is a call "name":X and the strategies it applies.
@@ -312,18 +336,42 @@ const (
 	// StMeta is META (the strategy of `where x := (META) t`): t is a
 	// meta_apply term ([MetaOp]); its results.
 	StMeta
+	// StTAll is tall(s): s on every argument, each combination of the
+	// results, the term rebuilt (elanrt.TAll; S7d task 6, as REM: the
+	// interpreter does not interpret traversals).
+	StTAll
+	// StTOne is tone(s): each result of s on one argument (elanrt.TOne).
+	StTOne
+	// StTSome is tsome(s): s on some arguments, one at least
+	// (elanrt.TSome).
+	StTSome
+	// StRewrite is rewrite(s): each result of s at the top, then of
+	// rewrite(s) on each argument (REM's term_rewriteStep: DK(s,
+	// tone(rewrite(s)))).
+	StRewrite
+	// StNormIn is normin(l1, ..., ln): the normal form for the rules of
+	// the labels, innermost (elanrt.NormIn); one result.
+	StNormIn
+	// StNormOut is normout(l1, ..., ln): the same, leftmost-outermost
+	// (elanrt.OuterStep); one result.
+	StNormOut
 )
+
+// IsTraversal tells whether k applies a strategy to the arguments of the
+// term (each with the strategy of the argument's sort): tall, tone, tsome,
+// rewrite, normin, normout.
+func (k StratKind) IsTraversal() bool { return k >= StTAll && k <= StNormOut }
 
 // Strat is an elementary strategy (one element of a sequence).
 type Strat struct {
 	Kind StratKind
 	// Choice of StRules and StStrats.
 	Choice Choice
-	// Labels of StRules.
+	// Labels of StRules, StNormIn and StNormOut.
 	Labels []LabelID
 	// Alts of StStrats.
 	Alts [][]Strat
-	// Body of StRepeat and StIterate.
+	// Body of StRepeat, StIterate, StTAll, StTOne, StTSome and StRewrite.
 	Body []Strat
 	// Call is the strategy of StCall.
 	Call StratID
@@ -355,10 +403,13 @@ const (
 	KindBool
 	// KindStr is builtinString: a Go string of bytes (C strings).
 	KindStr
+	// KindIdent is ident: int32, the index of the identifier in the
+	// program's table of identifiers (rt.IdentIndex, S7d task 3).
+	KindIdent
 )
 
 func (k BuiltinKind) String() string {
-	return [...]string{"int", "bool", "string"}[k]
+	return [...]string{"int", "bool", "string", "ident"}[k]
 }
 
 // Family is a builtin sort and the sorts whose only constructor is a
@@ -480,33 +531,42 @@ type BuiltinOp int
 
 // The builtin operations supported.
 const (
-	IntAdd    BuiltinOp = iota // + on builtinInt (code 3)
-	IntSub                     // - (4)
-	IntMul                     // * (5)
-	IntDiv                     // / (6)
-	IntRem                     // % (27)
-	IntAnd                     // & (28)
-	IntOr                      // | (29)
-	IntNeg                     // unary - (20)
-	CmpEq                      // == on builtinInt or bool values (8)
-	CmpNe                      // != (9)
-	CmpLt                      // < (10)
-	CmpLe                      // <= (11)
-	CmpGt                      // > (12)
-	CmpGe                      // >= (13)
-	BoolAnd                    // and (21): a stuck argument counts as false
-	BoolOr                     // or (22)
-	BoolNot                    // not (24)
-	TermEq                     // == on any sort (18): syntactic equality of normal forms
-	TermNeq                    // != on any sort (19)
-	StrLen                     // string_strlen (150)
-	StrCat                     // string_strcat (151)
-	StrIndex                   // s[i] (152)
-	StrModif                   // s[i <- c] (153)
-	StrSubstr                  // string_substr (154)
-	StrSpn                     // string_strspn (156)
-	StrCmp                     // string_strcmp (157)
-	StrOfChar                  // string_string (158)
+	IntAdd        BuiltinOp = iota // + on builtinInt (code 3)
+	IntSub                         // - (4)
+	IntMul                         // * (5)
+	IntDiv                         // / (6)
+	IntRem                         // % (27)
+	IntAnd                         // & (28)
+	IntOr                          // | (29)
+	IntNeg                         // unary - (20)
+	CmpEq                          // == on builtinInt or bool values (8)
+	CmpNe                          // != (9)
+	CmpLt                          // < (10)
+	CmpLe                          // <= (11)
+	CmpGt                          // > (12)
+	CmpGe                          // >= (13)
+	BoolAnd                        // and (21): a stuck argument counts as false
+	BoolOr                         // or (22)
+	BoolNot                        // not (24)
+	TermEq                         // == on any sort (18): syntactic equality of normal forms
+	TermNeq                        // != on any sort (19)
+	StrLen                         // string_strlen (150)
+	StrCat                         // string_strcat (151)
+	StrIndex                       // s[i] (152)
+	StrModif                       // s[i <- c] (153)
+	StrSubstr                      // string_substr (154)
+	StrSpn                         // string_strspn (156)
+	StrCmp                         // string_strcmp (157)
+	StrOfChar                      // string_string (158)
+	BoolToInt                      // btoi (25): 1 or 0 (no oracle: the S7d plan, Task 1)
+	IntToBool                      // itob (26): n != 0
+	TermReplace                    // replace t1 by t2 in t3 on any sorts (16): rt.Replace
+	TermOccurs                     // occurs t1 in t2 on any sorts (17): rt.Occurs
+	TermMatch                      // builtinSyntacticMatching (191): rt.SyntacticMatch
+	TermUnify                      // builtinSyntacticUnification (175): rt.SyntacticUnify
+	IdentEq                        // == on ident (14)
+	IdentNe                        // != on ident (15)
+	IdentToString                  // ident2string (177): the name
 )
 
 var builtinNames = [...]string{
@@ -514,6 +574,8 @@ var builtinNames = [...]string{
 	"CmpEq", "CmpNe", "CmpLt", "CmpLe", "CmpGt", "CmpGe",
 	"BoolAnd", "BoolOr", "BoolNot", "TermEq", "TermNeq",
 	"StrLen", "StrCat", "StrIndex", "StrModif", "StrSubstr", "StrSpn", "StrCmp", "StrOfChar",
+	"BoolToInt", "IntToBool", "TermReplace", "TermOccurs", "TermMatch", "TermUnify",
+	"IdentEq", "IdentNe", "IdentToString",
 }
 
 func (b BuiltinOp) String() string { return builtinNames[b] }
@@ -524,6 +586,8 @@ var builtinCodes = map[int32]BuiltinOp{
 	21: BoolAnd, 22: BoolOr, 24: BoolNot, 18: TermEq, 19: TermNeq,
 	150: StrLen, 151: StrCat, 152: StrIndex, 153: StrModif, 154: StrSubstr,
 	156: StrSpn, 157: StrCmp, 158: StrOfChar,
+	25: BoolToInt, 26: IntToBool, 16: TermReplace, 17: TermOccurs, 191: TermMatch, 175: TermUnify,
+	14: IdentEq, 15: IdentNe, 177: IdentToString,
 }
 
 // BuiltinFromCode is the operation of a semantic code; false when it is not
@@ -534,13 +598,26 @@ func BuiltinFromCode(code int32) (BuiltinOp, bool) {
 }
 
 // NeedsValues tells whether the operation needs values (not stuck terms) as
-// arguments; and, or, not and the term equalities accept any normal form.
+// arguments; and, or, not, the term equalities and the operations on
+// terms ([BuiltinOp.OnTerms]) accept any normal form.
 func (b BuiltinOp) NeedsValues() bool {
 	switch b {
 	case BoolAnd, BoolOr, BoolNot, TermEq, TermNeq:
 		return false
 	}
-	return true
+	return !b.OnTerms()
+}
+
+// OnTerms tells whether the operation works on terms of any sorts, its
+// result too (replace, occurs, syntactic matching and unification):
+// declared on sorts of terms, it is compiled (a value operation on sorts
+// of terms is a constructor).
+func (b BuiltinOp) OnTerms() bool {
+	switch b {
+	case TermReplace, TermOccurs, TermMatch, TermUnify:
+		return true
+	}
+	return false
 }
 
 // Partial tells whether the operation is undefined on some values (the
@@ -594,6 +671,8 @@ const (
 	PatInt
 	// PatStr is a builtinString literal.
 	PatStr
+	// PatIdent is an identifier literal (Int: its index).
+	PatIdent
 	// PatAC is an AC pattern (only in [CondAC]): the AC operator Op, the
 	// element patterns Args (nested patterns of the same operator
 	// flattened; each matches one element), the variables of the AC level
@@ -672,6 +751,20 @@ const (
 	// the oracles; EkerVars[i] is the variable of the pattern's variable
 	// number i.
 	CondEker
+	// CondChoose is `choose try b1 try b2 ... end` (S7d task 2): the
+	// branches (Branches, lists of conditions) are alternatives of the
+	// rest of the rule, as both oracles run them (the interpreter's
+	// TRYCHOICE, rewrite/stateofexecution.cc; REM's Choice.java): branch 1
+	// then the conditions after end and the right-hand side, each of its
+	// solutions in turn; when they are exhausted (or fail), branch 2 and
+	// the rest, and so on. So a condition after end that fails tries the
+	// next branch, a labelled rule gives the results of every branch in
+	// order (dk), and a normalisation keeps the first. A variable bound
+	// by a branch is the same variable in every branch (one VarID); after
+	// end, only those bound by every branch are bound. Under dc, REM stops
+	// a labelled rule after the first branch that gave a result; the
+	// interpreter, followed here, does not (the S7d plan, Task 2).
+	CondChoose
 )
 
 // Cond is a condition or local assignment of a rule.
@@ -689,6 +782,19 @@ type Cond struct {
 	// Eker, EkerVars: the pattern of CondEker and its variables.
 	Eker     *EkerPat
 	EkerVars []VarID
+	// Branches are the branches of CondChoose.
+	Branches [][]Cond
+}
+
+// Walk calls f on c and on the conditions of its branches (CondChoose),
+// depth first.
+func (c *Cond) Walk(f func(*Cond)) {
+	f(c)
+	for _, b := range c.Branches {
+		for i := range b {
+			b[i].Walk(f)
+		}
+	}
 }
 
 // EkerPat is a pattern for Eker's matcher ([CondEker]), in REM's form:
@@ -717,6 +823,8 @@ const (
 	ExprOp
 	ExprInt
 	ExprStr
+	// ExprIdent is an identifier literal (Int: its index).
+	ExprIdent
 )
 
 // Expr is a term to build (right-hand side, condition, start term).
@@ -791,6 +899,8 @@ const (
 	HeadInt
 	// HeadStr is a builtinString literal.
 	HeadStr
+	// HeadIdent is an identifier literal (Int: its index).
+	HeadIdent
 )
 
 // Head is a head tested by a Switch.
@@ -806,10 +916,59 @@ type Start struct {
 	// QuerySort is the sort of the query (printed by the prompt).
 	QuerySort string
 	Sort      SortID
+	// Term is the start term; when it uses the query (UsesQuery), Vars
+	// has one variable, the query (ExprVar 0).
 	Term      Expr
+	UsesQuery bool
+	Vars      []Var
 	// Strategy is the strategy of `start with (S) t`, applied to the
 	// normal form of the term, each result printed; -1 for `()`.
 	Strategy StratID
+	// Query is the query parser: the query is read from the standard
+	// input (without -noInput, S7d task 5).
+	Query *Query
+}
+
+// Query are the tables of the query parser (elanrt/earley): the grammar
+// and, per grammar rule, how the term of its operator is built.
+type Query struct {
+	// Sort is the sort of the query (the .ref sort index: the start
+	// symbol of the parser); SortID its sort in the IR.
+	Sort   int32
+	SortID SortID
+	// Grammar are the grammar rules (REM's gram[]), Rules how each one
+	// is built.
+	Grammar []GrammarRule
+	Rules   []QueryRule
+	// SortNames are the names of the sorts of the grammar (warnings).
+	SortNames map[int32]string
+	// InternIdent, InternInt, InternString are the sorts of the standard
+	// rules (identifier, number and string lexems).
+	InternIdent, InternInt, InternString int32
+}
+
+// QueryKind says how the term of a grammar rule is built.
+type QueryKind uint8
+
+const (
+	// QueryNone: the parser never builds it (a rule of a sort that a
+	// query cannot contain, or a number, identifier or string: built by
+	// the parser).
+	QueryNone QueryKind = iota
+	// QueryOp: the function of the operator Op.
+	QueryOp
+	// QueryUmin: -n of the number read (INTCONSTUMIN, code 79).
+	QueryUmin
+	// QueryUnsupported: the operator is not compiled (Why); a query that
+	// contains it stops the program (status 2).
+	QueryUnsupported
+)
+
+// QueryRule is how the term of a grammar rule is built.
+type QueryRule struct {
+	Kind QueryKind
+	Op   OpID
+	Why  string
 }
 
 // FamilyOf is the family of sort s, nil for a sort of terms.
@@ -839,6 +998,8 @@ func (ir *IR) ExprSort(e *Expr, vars []Var) SortID {
 		return ir.Ops[e.Op].Result
 	case ExprInt:
 		return ir.builtinBase(KindInt)
+	case ExprIdent:
+		return ir.builtinBase(KindIdent)
 	default:
 		return ir.builtinBase(KindStr)
 	}

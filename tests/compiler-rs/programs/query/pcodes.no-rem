@@ -1,0 +1,6 @@
+Operators whose code is a semantic action of the parser (foo code 70,
+IDENTRULE; bar code 67, NUMTOTERM): REM's parser applies the action to
+them (esemact by rule number) and builds another term (bar(a) gives
+false, foo(a) gives a). elanc-go applies the actions only to the standard
+rules and the `1:` rules of the .ref and refuses a query using such an
+operator (status 2, S7d task 8).

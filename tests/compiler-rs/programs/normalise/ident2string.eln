@@ -1,0 +1,13 @@
+module ident2string
+import global ident bool int builtinString; end
+sort out; end
+operators global
+  r(@,@,@) : (builtinString builtinString int) out;
+  name(@) : (ident) builtinString;
+end
+rules for builtinString
+  x : ident;
+global
+  [] name(x) => string_ident2string(x) end
+end
+end

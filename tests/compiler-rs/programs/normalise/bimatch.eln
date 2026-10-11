@@ -1,0 +1,36 @@
+module bimatch
+
+import global int builtinSyntacticMatching[term,term];
+end
+
+sort term;
+end
+
+operators global
+ a      : term;
+ b      : term;
+ c      : term;
+ v1	   : term;
+ var(@)   : (int) term;
+ 
+ match(@)   : (term) term;
+ f(@)   : (term) term;
+
+ @.@    : (term term) term;
+ nil    : term;
+ fail   : term;
+
+end
+
+
+rules for term
+  x,y,z : term;
+global
+  [] match(x) => y 
+	where y:=() builtinSyntacticMatching(f(var(1)),f(x),var(1).nil,fail)
+//	where y:=() builtinSyntacticMatching(f(x),f(var(1)),var(1).nil,fail)
+  end 
+end
+
+
+end

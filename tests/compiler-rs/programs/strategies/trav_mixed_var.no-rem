@@ -1,0 +1,3 @@
+REM is untyped: it applies x => s(x) (x of sort nat) to the argument 3 of
+sort int and prints the ill-sorted h(s(o),s(3)); a labelled rule applies to
+terms of its sort (S7d plan, Task 6 rulings).

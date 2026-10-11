@@ -1,0 +1,4 @@
+<1, "a\"b\\c\td"> end
+<f(2), "x">end
+<1, x> end
+<1, "x" end

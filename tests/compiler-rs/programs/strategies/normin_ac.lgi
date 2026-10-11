@@ -1,0 +1,6 @@
+LPL normin_ac description
+  query of sort bool
+  result of sort elt
+  import travac
+  start with (ninac) k(a u b u b)
+end

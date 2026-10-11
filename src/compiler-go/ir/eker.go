@@ -42,6 +42,11 @@ func (rl *ruleLowerer) remOf(t *tt) *remNode {
 		return &remNode{t: t, rank: 0, code: 1 << 40}
 	case ttVar:
 		return &remNode{t: t, rank: 1, code: int64(t.index)}
+	case ttIdent:
+		if rl.err == nil {
+			rl.err = unsupported("S7e", "an identifier in an AC pattern (REM's order of identifiers among the items of its matchers not reproduced; no program of the bench has one)")
+		}
+		return &remNode{t: t, rank: 0, code: 1<<41 + int64(t.i)}
 	}
 	if rl.isInjection(t.cand) {
 		// (no node: the value itself, as in the runtime)

@@ -1,0 +1,10 @@
+f(3) end
+f(f(-2)) + 1 end
+-5 end
+- 5 end
+3 - -2 end
+2147483647 end
+`a` end
+f( end
+f(a) end
+3 + end

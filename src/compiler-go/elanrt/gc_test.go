@@ -29,7 +29,7 @@ func TestPercentFor(t *testing.T) {
 
 func init() {
 	helpers["gctuner"] = func() {
-		Main("Nat", func(s *Session) {
+		Main("Nat", false, func(s *Session, _ Term) {
 			// GC cycles with a small live heap: the tuner raises the
 			// percentage after them (a cleanup, on another goroutine)
 			wait := 5 * time.Second

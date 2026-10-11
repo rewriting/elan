@@ -1,0 +1,6 @@
+LPL idents_ac description
+  query of sort bool
+  result of sort t
+  import idents_ac
+  start with () r(k(zeta) U k(alpha) U e U k(beta) U k(ab), k(ba) U k(ab))
+end

@@ -1,0 +1,6 @@
+LPL choose_first description
+  query of sort bool
+  result of sort int
+  import chooses
+  start with () p(cfirst(1), cfirst(0))
+end

@@ -1,0 +1,2 @@
+# REM prints s(s(o)) (trav_seq.no-rem)
+result = g(s(o),s(s(o)))

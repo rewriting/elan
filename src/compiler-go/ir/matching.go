@@ -35,6 +35,8 @@ func headOf(p *Pattern) (Head, bool) {
 		return Head{Kind: HeadInt, Int: p.Int}, true
 	case PatStr:
 		return Head{Kind: HeadStr, Str: p.Str}, true
+	case PatIdent:
+		return Head{Kind: HeadIdent, Int: p.Int}, true
 	}
 	return Head{}, false
 }

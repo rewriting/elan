@@ -1,0 +1,5 @@
+# REM looks for the old term among the elements of an AC term only
+# (term_rec_replace, term_occur: src/compiler/runtime/termCommon.c), the
+# interpreter (and elanc-go) also among its sub-multisets (stermreplace,
+# occursin: src/interpreter/term/term.cc): a U b occurs in a U b U c.
+result = res(r(true,true,true,false,false,false,false,false,false),f(d),a U a U d)

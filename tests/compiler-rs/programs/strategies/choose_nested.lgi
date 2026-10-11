@@ -1,0 +1,6 @@
+LPL choose_nested description
+  query of sort bool
+  result of sort int
+  import chooses
+  start with () p(cnested(1), p(cnested(2), cnested(3)))
+end

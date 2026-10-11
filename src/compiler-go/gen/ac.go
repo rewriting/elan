@@ -93,15 +93,18 @@ func (e *emitter) stepFree(x *ir.Expr) bool {
 // condReads tells whether the condition c reads the variable v.
 func condReads(c *ir.Cond, v ir.VarID) bool {
 	vars := map[ir.VarID]bool{}
-	switch c.Kind {
-	case ir.CondSame:
-		vars[c.B] = true
-		vars[c.A] = true
-	case ir.CondAC, ir.CondEker:
-		vars[c.A] = true
-	default:
-		exprVars(&c.Expr, vars)
-	}
+	c.Walk(func(c *ir.Cond) {
+		switch c.Kind {
+		case ir.CondSame:
+			vars[c.B] = true
+			vars[c.A] = true
+		case ir.CondAC, ir.CondEker:
+			vars[c.A] = true
+		case ir.CondChoose:
+		default:
+			exprVars(&c.Expr, vars)
+		}
+	})
 	return vars[v]
 }
 

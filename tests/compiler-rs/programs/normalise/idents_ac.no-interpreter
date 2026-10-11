@@ -1,0 +1,4 @@
+The interpreter prints an AC term as it was built (k(zeta)U k(alpha)U
+c U k(beta)U k(ab)); REM and elanc-go flatten and sort it, identifiers
+by their index (ab 195, zeta 436, alpha 729, beta 1045): the order is
+compared with REM's.

@@ -1,0 +1,3 @@
+REM crashes (status 139): after the traversal it applies first(dk(r), id)
+to the last argument it visited (see trav_bu.no-rem), the tagged int 3.
+elanc-go: h(s(s(o)),3) (r applies to terms of sort nat only).

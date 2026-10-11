@@ -11,6 +11,11 @@ fails when:
 - a case recorded in the expected file of the kind (the cases the
   compiler compiles, with their status) has a worse status, e.g. becomes
   UNSUPPORTED.
+An output may differ from the J snapshot only for a case listed, with the
+reason, in the differences file of the kind (bench_g_differs.tsv:
+`<case id>\t<reason>`, e.g. REM prints identifiers as IDENT(n), elanc-go
+by name as the interpreter); a listed case whose output no longer differs
+is reported (a stale entry).
 UNSUPPORTED cases not recorded (refused until S6b-S6d for elanc-rs,
 S7b-S7d for elanc-go) are counted only.
 Usage: bench_parity.py PREFIX [--kind R|G] [--save]
@@ -64,6 +69,13 @@ def parse(argv):
 def main():
     prefix, kind, save = parse(sys.argv[1:])
     EXPECTED = HERE / f"bench_{kind.lower()}_expected.tsv"
+    DIFFERS = HERE / f"bench_{kind.lower()}_differs.tsv"
+    differs = {}
+    if DIFFERS.exists():
+        for line in DIFFERS.read_text().splitlines():
+            if line and not line.startswith("#"):
+                tid, reason = line.split("\t")[:2]
+                differs[tid] = reason
     base = {}
     for line in (BENCH / "baseline.tsv").read_text().splitlines():
         if line and not line.startswith("#"):
@@ -77,7 +89,7 @@ def main():
                 expected[tid] = st
     p = subprocess.run([sys.executable, str(BENCH / "run_tests.py"), "--prefix", prefix,
                         "--kinds", kind], capture_output=True, text=True)
-    counts, problems, got = Counter(), [], {}
+    counts, problems, got, snapdiffs = Counter(), [], {}, set()
     for line in p.stdout.splitlines():
         m = re.match(r"\[\d+/\d+\]\s+(\S+)\s+(SNAP-\S+\s+)?(\S+::" + kind + r"::\S+)", line)
         if not m:
@@ -86,10 +98,16 @@ def main():
         counts[st] += 1
         got[tid] = st
         if snap == "SNAP-DIFF":
-            problems.append(f"{tid}: output differs from the elanc (J) snapshot")
+            snapdiffs.add(tid)
+            if tid not in differs:
+                problems.append(f"{tid}: output differs from the elanc (J) snapshot")
         j = base.get(tid.replace(f"::{kind}::", "::J::"))
         if st in RANK and j in RANK and RANK[st] > RANK[j]:
             problems.append(f"{tid}: {kind} {st}, J {j}")
+    for tid in differs:
+        if tid not in snapdiffs:
+            problems.append(f"{tid}: listed in {DIFFERS.name} but its output no longer differs "
+                            "from the J snapshot (a stale entry)")
     for tid, st in expected.items():
         now = got.get(tid, "MISSING")
         if RANK.get(now, 99) > RANK.get(st, 99):
@@ -103,7 +121,9 @@ def main():
         print(f"saved {len(rows)} cases in {EXPECTED.name}")
     for prob in problems:
         print("PARITY: " + prob)
-    if p.returncode != 0 and not problems:
+    # (the runner fails on every snapshot difference, the listed ones too)
+    listed_only = snapdiffs and snapdiffs <= differs.keys() and "REGRESSION" not in p.stdout
+    if p.returncode != 0 and not problems and not listed_only:
         problems.append(f"run_tests.py exit status {p.returncode}")
         print(p.stdout[-3000:])
     return 1 if problems or not counts else 0

@@ -1,0 +1,6 @@
+LPL normout_r description
+  query of sort bool
+  result of sort nat
+  import trav
+  start with (nout) f(f(o))
+end

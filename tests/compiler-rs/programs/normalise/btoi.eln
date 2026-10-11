@@ -1,0 +1,13 @@
+module btoi
+// btoi (code 25) and itob (26) of builtinInt: no oracle runs them (the
+// interpreter stops: "BOOLTOINT ... sorry not yet implemented in the
+// interpreted version"; REM's fun_25/fun_26 return their argument, a
+// boolean constant read as a tagged int, and the program crashes):
+// elanc-go gives them C's meaning, btoi(true) = 1, btoi(false) = 0,
+// itob(n) = (n != 0); the result is btoi.expected.
+import global bool int; end
+sort out; end
+operators global
+  r(@,@,@,@,@,@,@) : (int int int bool bool bool bool) out;
+end
+end

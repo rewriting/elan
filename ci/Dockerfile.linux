@@ -2,5 +2,8 @@
 FROM ubuntu:24.04
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
       build-essential clang libclang-rt-18-dev cmake bison flex libfl-dev default-jdk-headless libgc-dev \
-      automake tcsh python3 time git ca-certificates && rm -rf /var/lib/apt/lists/*
+      automake tcsh python3 time git ca-certificates curl && rm -rf /var/lib/apt/lists/*
+# Go >= 1.24 for elanc-go (the CI's actions/setup-go; Ubuntu's golang-go is 1.22)
+RUN curl -fsSL "https://go.dev/dl/go1.24.9.linux-$(dpkg --print-architecture).tar.gz" | tar -C /usr/local -xz
+ENV PATH=/usr/local/go/bin:$PATH
 WORKDIR /work

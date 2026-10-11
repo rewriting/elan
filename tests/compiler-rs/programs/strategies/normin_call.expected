@@ -1,0 +1,2 @@
+# REM: one step at the top, o (normin_call.no-rem); innermost: s(s(o))
+result = s(s(o))

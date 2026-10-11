@@ -1,0 +1,6 @@
+LPL trav_mixed_id description
+  query of sort bool
+  result of sort nat
+  import trav
+  start with (allid) h(f(o), 3)
+end

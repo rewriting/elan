@@ -1,0 +1,6 @@
+LPL idents description
+  query of sort bool
+  result of sort t
+  import idents
+  start with () r(f(alpha), f(gamma), alpha == alpha, alpha != beta, alpha == beta, same(ab, ab), same(ab, ba), g(foo), g(zz), g(bar), delta)
+end

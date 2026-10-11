@@ -58,6 +58,7 @@ package gen
 import (
 	"fmt"
 	"go/format"
+	"maps"
 	"slices"
 	"strconv"
 	"strings"
@@ -96,6 +97,8 @@ type emitter struct {
 	indent int
 	fresh  int  // counter of temporaries in the current function
 	b2i    bool // the helper b2i is needed
+	// normTerm: the normalisation dispatcher normTerm is needed (rt.Replace)
+	normTerm bool
 	// injTests are the injections whose test is needed (injTest)
 	injTests []ir.OpID
 	// labelMode: the rules are those of a label (each result to k)
@@ -118,9 +121,19 @@ type emitter struct {
 	// rest of the elements without an extension (ac.go, restTaker), that
 	// variable, bound after the conditions
 	late *lateRest
+	// chooseRest, inside a branch of a choose, writes the call of the
+	// closure of the rest of the rule at the end of the branch's
+	// conditions (at depth: see conds); nil elsewhere
+	chooseRest func(depth int)
 	// ekerPats are the patterns of Eker's matcher (ac.go), declared at the
 	// end
 	ekerPats []string
+	// the functions of the traversals (traverse.go): their names, the
+	// numbers of the traversal nodes, the names taken, the work list
+	travNames map[travKey]string
+	travNodes map[*ir.Strat]int
+	travUsed  map[string]bool
+	travQueue []travKey
 }
 
 func (e *emitter) line(format string, a ...any) {
@@ -165,7 +178,7 @@ func comment(s string) string {
 
 func goNative(k ir.BuiltinKind) string {
 	switch k {
-	case ir.KindInt:
+	case ir.KindInt, ir.KindIdent:
 		return "int32"
 	case ir.KindBool:
 		return "bool"
@@ -206,6 +219,8 @@ func boxValue(k ir.BuiltinKind, v string) string {
 		return "rt.MkInt(" + v + ")"
 	case ir.KindBool:
 		return "rt.MkBool(" + v + ")"
+	case ir.KindIdent:
+		return "rt.MkIdent(" + v + ")"
 	}
 	return "rt.MkStr(" + v + ")"
 }
@@ -217,7 +232,7 @@ func (e *emitter) unbox(s ir.SortID, t string) string {
 		return t
 	}
 	switch k {
-	case ir.KindInt:
+	case ir.KindInt, ir.KindIdent:
 		return t + ".Int"
 	case ir.KindBool:
 		return t + " == rt.True"
@@ -286,6 +301,9 @@ func (e *emitter) expr(x *ir.Expr, vars []ir.Var) string {
 		return e.fromValue(e.ir.ExprSort(x, vars), goInt(x.Int))
 	case ir.ExprStr:
 		return e.fromValue(e.ir.ExprSort(x, vars), goString(x.Str))
+	case ir.ExprIdent:
+		// an identifier: its index
+		return e.fromValue(e.ir.ExprSort(x, vars), goInt(x.Int))
 	}
 	op := &e.ir.Ops[x.Op]
 	switch op.Kind {
@@ -355,6 +373,12 @@ func (e *emitter) headTest(s ir.SortID, t string, h ir.Head) string {
 			return t + " == " + goString(h.Str)
 		}
 		return "rt.IsStr(" + t + ") && rt.StrOf(" + t + ") == " + goString(h.Str)
+	case ir.HeadIdent:
+		// (identifiers by index)
+		if native {
+			return t + " == " + goInt(h.Int)
+		}
+		return "rt.IsIdent(" + t + ") && " + t + ".Int == " + goInt(h.Int)
 	}
 	op := &e.ir.Ops[h.Op]
 	switch op.Kind {
@@ -435,7 +459,16 @@ func (e *emitter) file() {
 	}
 	e.line("package main")
 	e.line("")
-	e.line(`import rt "elan/elanrt"`)
+	if p.Start.Query != nil {
+		e.open("import (")
+		e.line(`"strconv"`)
+		e.line("")
+		e.line(`rt "elan/elanrt"`)
+		e.line(`"elan/elanrt/earley"`)
+		e.close(")")
+	} else {
+		e.line(`import rt "elan/elanrt"`)
+	}
 	e.line("")
 	e.sorts()
 	e.symbols()
@@ -447,6 +480,7 @@ func (e *emitter) file() {
 	e.labels()
 	e.strategies()
 	e.metas()
+	e.travFuncs()
 	for _, o := range e.injTests {
 		e.injTest(o)
 	}
@@ -460,8 +494,178 @@ func (e *emitter) file() {
 		e.close("}")
 		e.line("")
 	}
+	if e.normTerm {
+		e.normTermFunc()
+	}
 	e.ekerDecls()
+	e.query()
 	e.mainFunc()
+}
+
+// query writes the query parser's tables (S7d task 5): the grammar
+// (REM's gram[]), the names of the sorts, and the functions building the
+// term of each grammar rule (queryOp, queryAC, queryIsAC).
+func (e *emitter) query() {
+	q := e.ir.Start.Query
+	if q == nil {
+		return
+	}
+	p := e.ir
+	e.line("// ==== query ====")
+	e.line("")
+	e.line("// grammar is the grammar of the query parser (REM's gram[]: the grammar")
+	e.line("// rules of the .ref file).")
+	e.open("var grammar = []earley.Rule{")
+	for _, g := range q.Grammar {
+		var rhs []string
+		for _, x := range g.Rhs {
+			rhs = append(rhs, fmt.Sprintf("{Kind: %d, Code: %d}", x.Kind, x.Code))
+		}
+		e.line("{Sort: %d, Symbol: %d, Info: %d, Rhs: []earley.RhsLexem{%s}},", g.Sort, g.Symbol, g.Info, strings.Join(rhs, ", "))
+	}
+	e.close("}")
+	e.line("")
+	e.line("// sortNames are the names of the sorts (warnings of the parser).")
+	e.open("var sortNames = map[int32]string{")
+	names := slices.Sorted(maps.Keys(q.SortNames))
+	for _, s := range names {
+		e.line("%d: %s,", s, goString(q.SortNames[s]))
+	}
+	e.close("}")
+	e.line("")
+	// the rules built by the function of one operator, by operator
+	byOp := map[ir.OpID][]int{}
+	var ops []ir.OpID
+	var umin, unsupported []int
+	for r, x := range q.Rules {
+		switch x.Kind {
+		case ir.QueryOp:
+			if _, ok := byOp[x.Op]; !ok {
+				ops = append(ops, x.Op)
+			}
+			byOp[x.Op] = append(byOp[x.Op], r)
+		case ir.QueryUmin:
+			umin = append(umin, r)
+		case ir.QueryUnsupported:
+			unsupported = append(unsupported, r)
+		}
+	}
+	cases := func(rs []int) string {
+		var c []string
+		for _, r := range rs {
+			c = append(c, strconv.Itoa(r))
+		}
+		return "case " + strings.Join(c, ", ") + ":"
+	}
+	e.line("// queryOp is the normal form of the operator of grammar rule r applied to")
+	e.line("// a (terms in normal form).")
+	e.open("func queryOp(r int, a []rt.Term) rt.Term {")
+	e.line("switch r {")
+	for _, o := range ops {
+		op := &p.Ops[o]
+		if op.AC {
+			continue
+		}
+		e.line("%s // %s", cases(byOp[o]), comment(op.Decl))
+		e.indent++
+		x := ir.Expr{Kind: ir.ExprOp, Op: o}
+		var vars []ir.Var
+		for i, s := range op.Args {
+			x.Args = append(x.Args, ir.Expr{Kind: ir.ExprVar, Var: i})
+			vars = append(vars, ir.Var{Name: e.unbox(s, fmt.Sprintf("a[%d]", i)), Sort: s})
+		}
+		e.line("return %s", e.asTerm(op.Result, e.expr(&x, vars)))
+		e.indent--
+	}
+	if len(umin) > 0 {
+		e.line("%s // - n (INTCONSTUMIN)", cases(umin))
+		e.line("\treturn rt.MkInt(-a[0].Int)")
+	}
+	e.line("}")
+	e.line("queryUnsupported(r)")
+	e.line("return nil")
+	e.close("}")
+	e.line("")
+	e.line("// queryAC is the normal form of the AC operator of grammar rule r applied")
+	e.line("// to the elements a (in normal form).")
+	e.open("func queryAC(r int, a []rt.Term) rt.Term {")
+	e.line("switch r {")
+	var acRules []int
+	for _, o := range ops {
+		op := &p.Ops[o]
+		if !op.AC {
+			continue
+		}
+		acRules = append(acRules, byOp[o]...)
+		e.line("%s // %s", cases(byOp[o]), comment(op.Decl))
+		e.line("\treturn rt.ApplyAC(%s, %s, a...)", symName(op), acFun(op))
+	}
+	e.line("}")
+	e.line("queryUnsupported(r)")
+	e.line("return nil")
+	e.close("}")
+	e.line("")
+	e.line("// queryIsAC tells whether the operator of grammar rule r is AC.")
+	e.open("func queryIsAC(r int) bool {")
+	if len(acRules) > 0 {
+		e.line("switch r {")
+		e.line("%s", cases(acRules))
+		e.line("\treturn true")
+		e.line("}")
+	}
+	e.line("return false")
+	e.close("}")
+	e.line("")
+	e.line("// queryUnsupported stops a query with an operator that is not compiled.")
+	e.open("func queryUnsupported(r int) {")
+	e.line("why := \"\"")
+	if len(unsupported) > 0 {
+		e.line("switch r {")
+		for _, r := range unsupported {
+			e.line("case %d:", r)
+			e.line("\twhy = %s", goString(": "+q.Rules[r].Why))
+		}
+		e.line("}")
+	}
+	e.line("rt.Unsupported(\"a query with the operator of grammar rule \" + strconv.Itoa(r) + why)")
+	e.close("}")
+	e.line("")
+}
+
+// normTermFunc writes normTerm, the normalisation dispatcher of rt.Replace:
+// the normal form of sym(args...), its arguments in normal form (an AC
+// symbol: its elements), by the function of the operator for the symbols
+// of the operators that can be stuck (defined or builtin), else the term
+// (a constructor).
+func (e *emitter) normTermFunc() {
+	p := e.ir
+	e.line("// normTerm is the normal form of sym(a...), a in normal form (the elements")
+	e.line("// of an AC term): the function of its operator, or the term of a")
+	e.line("// constructor (rt.Replace renormalises the path it copies).")
+	e.open("func normTerm(sym int32, a []rt.Term) rt.Term {")
+	e.line("switch sym {")
+	for o := range p.Ops {
+		op := &p.Ops[o]
+		if !op.Variant || op.Kind == ir.Constructor {
+			continue
+		}
+		e.line("case %s:", symName(op))
+		e.indent++
+		if op.AC {
+			e.line("return %s(a)", acFun(op))
+		} else {
+			var args []string
+			for i, s := range op.Args {
+				args = append(args, e.unbox(s, fmt.Sprintf("a[%d]", i)))
+			}
+			e.line("return %s", e.asTerm(op.Result, op.Fun+"("+strings.Join(args, ", ")+")"))
+		}
+		e.indent--
+	}
+	e.line("}")
+	e.line("return rt.MkAny(sym, a)")
+	e.close("}")
+	e.line("")
 }
 
 // sorts writes a comment per sort: its representation.
@@ -532,7 +736,7 @@ func (e *emitter) symbols() {
 	for i, o := range syms {
 		op := &p.Ops[o]
 		if i == 0 {
-			e.line("%s int32 = rt.SymFalse + 1 + iota // %s", symName(op), comment(op.Decl))
+			e.line("%s int32 = rt.FirstSym + iota // %s", symName(op), comment(op.Decl))
 		} else {
 			e.line("%s // %s", symName(op), comment(op.Decl))
 		}
@@ -702,6 +906,26 @@ func (e *emitter) builtinBody(o ir.OpID) {
 	op := &e.ir.Ops[o]
 	b := op.Builtin
 	res := op.Result
+	if b.OnTerms() {
+		// on terms of any sorts: the arguments as terms
+		var args []string
+		for i, s := range op.Args {
+			args = append(args, e.asTerm(s, fmt.Sprintf("a%d", i)))
+		}
+		switch b {
+		case ir.TermReplace:
+			// replace a0 by a1 in a2, the copied path renormalised
+			e.normTerm = true
+			e.line("return %s", e.unbox(res, "rt.Replace("+args[2]+", "+args[0]+", "+args[1]+", normTerm)"))
+		case ir.TermOccurs:
+			e.line("return %s", e.fromValue(res, "rt.Occurs("+args[0]+", "+args[1]+")"))
+		case ir.TermMatch:
+			e.line("return %s", e.unbox(res, "rt.SyntacticMatch("+strings.Join(args, ", ")+")"))
+		case ir.TermUnify:
+			e.line("return %s", e.unbox(res, "rt.SyntacticUnify("+strings.Join(args, ", ")+")"))
+		}
+		return
+	}
 	if !b.NeedsValues() {
 		isTrue := func(i int) string {
 			if _, ok := e.ir.Native(op.Args[i]); ok {
@@ -714,7 +938,7 @@ func (e *emitter) builtinBody(o ir.OpID) {
 		case ir.TermEq:
 			v = e.eqExpr(op.Args[0], "a0", "a1")
 		case ir.TermNeq:
-			v = "!" + e.eqExpr(op.Args[0], "a0", "a1")
+			v = "!(" + e.eqExpr(op.Args[0], "a0", "a1") + ")"
 		case ir.BoolAnd:
 			v = isTrue(0) + " && " + isTrue(1)
 		case ir.BoolOr:
@@ -742,7 +966,7 @@ func (e *emitter) builtinBody(o ir.OpID) {
 			e.line("v%d := %s", i, e.unboxValue(f.Kind, a, op.Fun))
 			continue
 		}
-		get := map[ir.BuiltinKind]string{ir.KindInt: "rt.IntOf", ir.KindBool: "rt.BoolOf", ir.KindStr: "rt.StrValue"}[f.Kind]
+		get := map[ir.BuiltinKind]string{ir.KindInt: "rt.IntOf", ir.KindBool: "rt.BoolOf", ir.KindStr: "rt.StrValue", ir.KindIdent: "rt.IdentOf"}[f.Kind]
 		e.line("v%d, ok%d := %s(%s)", i, i, get, a)
 		oks = append(oks, fmt.Sprintf("!ok%d", i))
 	}
@@ -788,6 +1012,17 @@ func (e *emitter) builtinBody(o ir.OpID) {
 		value = "rt.StrCmp(" + v[0] + ", " + v[1] + ")"
 	case ir.StrOfChar:
 		value = "rt.StrOfChar(" + v[0] + ")"
+	case ir.BoolToInt:
+		value = "b2i(" + v[0] + ")"
+		e.b2i = true
+	case ir.IntToBool:
+		value = v[0] + " != 0"
+	case ir.IdentEq:
+		value = v[0] + " == " + v[1]
+	case ir.IdentNe:
+		value = v[0] + " != " + v[1]
+	case ir.IdentToString:
+		value = "rt.IdentString(" + v[0] + ")"
 	case ir.StrIndex:
 		value = "rt.StrIndex(" + v[0] + ", " + v[1] + ")"
 	case ir.StrModif:
@@ -808,7 +1043,7 @@ func (e *emitter) builtinBody(o ir.OpID) {
 // unboxValue is the value of kind k of the boxed value t received by the
 // function fun (checked: rt.MustInt...).
 func (e *emitter) unboxValue(k ir.BuiltinKind, t, fun string) string {
-	get := map[ir.BuiltinKind]string{ir.KindInt: "rt.MustInt", ir.KindBool: "rt.MustBool", ir.KindStr: "rt.MustStr"}[k]
+	get := map[ir.BuiltinKind]string{ir.KindInt: "rt.MustInt", ir.KindBool: "rt.MustBool", ir.KindStr: "rt.MustStr", ir.KindIdent: "rt.MustIdent"}[k]
 	return fmt.Sprintf("%s(%s, %s)", get, t, goString(fun))
 }
 
@@ -838,14 +1073,18 @@ func usedVars(r *ir.Rule) map[ir.VarID]bool {
 			walk(&x.Args[i])
 		}
 	}
-	for _, c := range r.Conds {
-		if c.Kind == ir.CondSame {
-			used[c.A], used[c.B] = true, true
-		} else if c.Kind == ir.CondAC || c.Kind == ir.CondEker {
-			used[c.A] = true
-		} else {
-			walk(&c.Expr)
-		}
+	for i := range r.Conds {
+		r.Conds[i].Walk(func(c *ir.Cond) {
+			switch c.Kind {
+			case ir.CondSame:
+				used[c.A], used[c.B] = true, true
+			case ir.CondAC, ir.CondEker:
+				used[c.A] = true
+			case ir.CondChoose:
+			default:
+				walk(&c.Expr)
+			}
+		})
 	}
 	walk(&r.Rhs)
 	return used
@@ -1079,7 +1318,16 @@ func (e *emitter) conds(r *ir.Rule, from int, used map[ir.VarID]bool, depth int)
 			// (its code ends with a loop)
 			e.ekerMatch(r, j, used, depth)
 			return true
+		case ir.CondChoose:
+			// (the code after it is reached if a condition before it
+			// fails)
+			return e.choose(r, j, used, depth) || opens > 0
 		}
+	}
+	if e.chooseRest != nil {
+		// the end of a branch of a choose: the rest of the rule
+		e.chooseRest(depth)
+		return true
 	}
 	rhs := ""
 	if e.late != nil {
@@ -1117,6 +1365,133 @@ func (e *emitter) conds(r *ir.Rule, from int, used map[ir.VarID]bool, depth int)
 		e.line("return true")
 	}
 	return opens > 0
+}
+
+// choose writes the condition j of r, `choose try b1 ... end`
+// ([ir.CondChoose]): the rest of the rule (the conditions after end and
+// the right-hand side) as a closure rest<n>, written once, taking the
+// variables bound by every branch (S7d task 8: the rest written per
+// branch made n sequential chooses 2^n copies); then per branch, a block
+// with the branch's conditions ending with the call of rest<n>, whose
+// success ends the rule as its right-hand side would. The closure runs at
+// depth+1 (see conds: a failure returns false; a normalisation function
+// keeps its result in res<n>; a label gives it to k and returns whether
+// to stop). The code of a branch falls into the next one when it fails.
+// It tells whether the code after it is reached.
+func (e *emitter) choose(r *ir.Rule, j int, used map[ir.VarID]bool, depth int) bool {
+	c := &r.Conds[j]
+	n := e.next()
+	name := fmt.Sprintf("rest%d", n)
+	// the parameters: the variables bound by every branch (the others are
+	// not bound after end), that the rule uses
+	var params []ir.VarID
+	for v := range bound(c) {
+		if used[v] {
+			params = append(params, v)
+		}
+	}
+	slices.Sort(params)
+	var decl, args []string
+	for _, v := range params {
+		decl = append(decl, r.Vars[v].Name+" "+e.goType(r.Vars[v].Sort))
+		args = append(args, r.Vars[v].Name)
+	}
+	res := ""
+	saveRes, saveOk := e.res, e.ok
+	if !e.labelMode {
+		res = fmt.Sprintf("res%d", n)
+		e.line("var %s %s", res, e.resType)
+		e.res, e.ok = res, "_"
+	}
+	e.open("%s := func(%s) bool { // the rest of the rule after the choose", name, strings.Join(decl, ", "))
+	rest := *r
+	rest.Conds = r.Conds[j+1:]
+	if e.conds(&rest, 0, used, depth+1) {
+		e.line("return false")
+	}
+	e.close("}")
+	e.res, e.ok = saveRes, saveOk
+	outer := e.chooseRest
+	e.chooseRest = func(d int) {
+		e.open("if %s(%s) {", name, strings.Join(args, ", "))
+		switch {
+		case e.labelMode:
+			e.line("return true")
+		case d == 0:
+			e.ret(res)
+		default:
+			e.line("%s, %s = %s, true", e.res, e.ok, res)
+			e.line("return true")
+		}
+		e.close("}")
+	}
+	defer func() { e.chooseRest = outer }()
+	for i, br := range c.Branches {
+		e.open("{ // choose: try branch %d of %d, then %s", i+1, len(c.Branches), name)
+		sub := *r
+		sub.Conds = br
+		falls := e.conds(&sub, 0, used, depth)
+		e.close("}")
+		if !falls {
+			return false
+		}
+	}
+	return true
+}
+
+// bound are the variables that a choose binds: those bound by every
+// branch.
+func bound(c *ir.Cond) map[ir.VarID]bool {
+	var all map[ir.VarID]bool
+	for _, br := range c.Branches {
+		b := map[ir.VarID]bool{}
+		for i := range br {
+			bindsOf(&br[i], b)
+		}
+		if all == nil {
+			all = b
+			continue
+		}
+		for v := range all {
+			if !b[v] {
+				delete(all, v)
+			}
+		}
+	}
+	return all
+}
+
+// bindsOf adds to into the variables that condition c binds.
+func bindsOf(c *ir.Cond, into map[ir.VarID]bool) {
+	var pat func(p *ir.Pattern)
+	pat = func(p *ir.Pattern) {
+		if p.Kind == ir.PatVar {
+			into[p.Var] = true
+		}
+		for _, v := range p.Vars {
+			into[v.Var] = true
+		}
+		if p.Abs != nil {
+			into[p.Abs.Var] = true
+		}
+		for i := range p.Args {
+			pat(&p.Args[i])
+		}
+	}
+	switch c.Kind {
+	case ir.CondLet:
+		into[c.A] = true
+	case ir.CondMatch, ir.CondApply, ir.CondAC:
+		pat(&c.Pat)
+	case ir.CondEker:
+		for _, v := range c.EkerVars {
+			into[v] = true
+		}
+	case ir.CondChoose:
+		for v := range bound(c) {
+			into[v] = true
+		}
+	}
 }
 
 // simpleCond writes a condition that gives at most one solution and binds
@@ -1209,6 +1584,9 @@ func (e *emitter) patternCheck(p *ir.Pattern, t string, s ir.SortID, r *ir.Rule,
 	case ir.PatStr:
 		e.open("if %s {", e.headTest(s, t, ir.Head{Kind: ir.HeadStr, Str: p.Str}))
 		return 1, true
+	case ir.PatIdent:
+		e.open("if %s {", e.headTest(s, t, ir.Head{Kind: ir.HeadIdent, Int: p.Int}))
+		return 1, true
 	}
 	op := &e.ir.Ops[p.Op]
 	switch {
@@ -1253,23 +1631,50 @@ func (e *emitter) mainFunc() {
 	p := e.ir
 	e.line("// ==== main ====")
 	e.line("")
+	if len(p.Idents) > 0 {
+		e.line("// idents is the table of identifiers of the program (its .ref file): an")
+		e.line("// identifier is its index there.")
+		e.open("var idents = map[int32]string{")
+		for _, id := range p.Idents {
+			e.line("%d: %s,", id.Index, goString(id.Name))
+		}
+		e.close("}")
+		e.line("")
+	}
 	if p.Start.Strategy < 0 {
 		e.line("// main runs the start term of the query (-noInput), normalised and printed.")
 	} else {
 		e.line("// main runs the start term of the query (-noInput), normalised, then each")
 		e.line("// result of the start strategy printed.")
 	}
+	q := "_"
+	if p.Start.UsesQuery {
+		e.line("// The start term uses the query: with -noInput, REM's message (no term).")
+		q = "q"
+	}
 	e.open("func main() {")
-	e.open("rt.Main(%s, func(s *rt.Session) {", goString(p.Start.QuerySort))
+	if len(p.Idents) > 0 {
+		e.line("rt.InitIdents(idents)")
+	}
+	if q := p.Start.Query; q != nil {
+		e.line("rt.SetQuery(&rt.QueryParser{Rules: grammar, Sort: %d, SortNames: sortNames,", q.Sort)
+		e.line("\tInternIdent: %d, InternInt: %d, InternString: %d, Op: queryOp, AC: queryAC, IsAC: queryIsAC})",
+			q.InternIdent, q.InternInt, q.InternString)
+	}
+	e.open("rt.Main(%s, %v, func(s *rt.Session, %s rt.Term) {", goString(p.Start.QuerySort), p.Start.UsesQuery, q)
+	if p.Start.UsesQuery {
+		v := &p.Start.Vars[0]
+		e.line("%s := %s", v.Name, e.unbox(v.Sort, "q"))
+	}
 	result := "Result"
 	if k, ok := p.Native(p.Start.Sort); ok {
-		result = map[ir.BuiltinKind]string{ir.KindInt: "ResultInt", ir.KindBool: "ResultBool", ir.KindStr: "ResultStr"}[k]
+		result = map[ir.BuiltinKind]string{ir.KindInt: "ResultInt", ir.KindBool: "ResultBool", ir.KindStr: "ResultStr", ir.KindIdent: "ResultIdent"}[k]
 	}
 	if p.Start.Strategy < 0 {
-		e.line("s.%s(%s)", result, e.expr(&p.Start.Term, nil))
+		e.line("s.%s(%s)", result, e.expr(&p.Start.Term, p.Start.Vars))
 	} else {
 		st := &p.Strategies[p.Start.Strategy]
-		e.line("t := %s", e.typedExpr(&p.Start.Term, nil))
+		e.line("t := %s", e.typedExpr(&p.Start.Term, p.Start.Vars))
 		e.line("// each result of %s", comment(st.Name))
 		e.open("%s(t, func(r %s) bool {", st.Fun, e.goType(st.Sort))
 		e.line("s.%s(r)", result)

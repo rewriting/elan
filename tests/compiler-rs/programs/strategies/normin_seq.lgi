@@ -1,0 +1,6 @@
+LPL normin_seq description
+  query of sort bool
+  result of sort nat
+  import trav
+  start with (ninseq) g(f(f(o)), o)
+end

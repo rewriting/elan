@@ -1,0 +1,6 @@
+LPL noinput_query description
+  query of sort nat
+  result of sort nat
+  import noinput_query
+  start with () p(s(s(query)))
+end

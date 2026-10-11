@@ -1,0 +1,6 @@
+REM's runtime rebuilds its table of identifiers by adding the names of the
+program in index order (earley/runtimeInit.cc tabofidentInit): the two
+names of collide.eln, of the same hash position 2900, the second one probed
+past the end of the table to 111, are swapped, so the query naming the
+first one gets the index of the second one (REM: r(false,true) for the
+first query; the interpreter and elanc-go: r(true,false)). docs/followups.md.

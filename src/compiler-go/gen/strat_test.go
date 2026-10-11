@@ -197,3 +197,84 @@ func TestNamesOfTheGeneratedCodeInComments(t *testing.T) {
 		}
 	})
 }
+
+// traversals (S7d task 6) on peano with g(nat, nat) and h(nat, builtinInt)
+// (an argument of a native sort: the strategy compiled for builtinInt,
+// where the rules of nat do not apply):
+//
+//	[r7] s(x) => x
+//	st4 = tall(st4) ; DC(dk(r7), id)    bottom-up
+//	st6 = dk(r7)
+//	st15 = DK(st4, tone(dk(r7)), tsome(dk(r7)), rewrite(st6), normin(r7),
+//	          normout(r7))
+//
+// on g(s(o), h(s(s(o)), 3)).
+func traversals() *prog {
+	p := peano()
+	p.op(sNat, 331, "g", []uint32{sNat, sNat}, 0)
+	p.op(sNat, 332, "h", []uint32{sNat, sInt}, 0)
+	p.labelled(7, f(319, v(0, sNat)), v(0, sNat))
+	id := ref.StrategyExpr{Op: ref.SId}
+	dk7 := rules(ref.SDkRules, 7)
+	p.strategy(4, body(ref.STAll, call(4)), strats(ref.SDcStrats, ref.StrategySeq{dk7}, ref.StrategySeq{id}))
+	p.strategy(6, dk7)
+	p.strategy(15, strats(ref.SDkStrats,
+		ref.StrategySeq{call(4)},
+		ref.StrategySeq{body(ref.STOne, dk7)},
+		ref.StrategySeq{body(ref.STSome, dk7)},
+		ref.StrategySeq{body(ref.SRewrite, call(6))},
+		ref.StrategySeq{rules(ref.SNormIn, 7)},
+		ref.StrategySeq{rules(ref.SNormOut, 7)}))
+	p.p.Query.Strategy = ref.Some(15)
+	p.p.Query.StartWith = f(331, f(319, f(318)), f(332, f(319, f(319, f(318))), ref.Int{Value: 3}))
+	return p
+}
+
+func TestTraversals(t *testing.T) {
+	src := traversals().gen(t)
+	for _, want := range []string{
+		"rt.TAll(t, k, normTerm, ",
+		"rt.TOne(t, k, normTerm, ",
+		"rt.TSome(t, k, normTerm, ",
+		"k(rt.NormIn(t, normTerm, ",
+		"rt.OuterStep(t, k, normTerm, ",
+		"func normTerm(sym int32, a []rt.Term) rt.Term {",
+		// st4 on builtinInt: tall of an int is the int, r7 does not apply
+		"func st_st4_4_builtinInt(t int32, k rt.K[int32]) bool {",
+	} {
+		if !strings.Contains(src, want) {
+			t.Errorf("missing %q in\n%s", want, src)
+		}
+	}
+	out := run(t, traversals())
+	var results []string
+	for _, l := range strings.Split(out, "\n") {
+		if r, ok := strings.CutPrefix(l, "result = "); ok {
+			results = append(results, strings.TrimSpace(r))
+		}
+	}
+	want := "g(o,h(o,3)) | g(o,h(s(s(o)),3)) | g(o,h(s(s(o)),3)) | " +
+		"g(o,h(s(s(o)),3)) | g(s(o),h(s(o),3)) | g(s(o),h(s(o),3)) | g(o,h(o,3)) | g(o,h(o,3))"
+	if got := strings.Join(results, " | "); got != want {
+		t.Errorf("results\n%s\nwant\n%s", got, want)
+	}
+}
+
+// A DC whose alternatives have no result (fail) is false, without its
+// state; the continuation of the sequence after it is not declared (Go
+// refuses an unused variable): st23 = dk(r8) ; DC(fail, fail) ; dk(r8).
+func TestDcWithoutResult(t *testing.T) {
+	p := peano()
+	p.labelled(8, v(0, sNat), f(319, v(0, sNat)))
+	fail := ref.StrategyExpr{Op: ref.SFail}
+	p.strategy(23, rules(ref.SDkRules, 8), strats(ref.SDcStrats, ref.StrategySeq{fail}, ref.StrategySeq{fail}),
+		rules(ref.SDkRules, 8))
+	p.p.Query.Strategy = ref.Some(23)
+	p.p.Query.StartWith = f(318)
+	if src := p.gen(t); strings.Contains(src, "rt.NewDc") {
+		t.Errorf("a dc state for DC(fail, fail):\n%s", src)
+	}
+	if got := run(t, p); strings.Contains(got, "result = ") {
+		t.Errorf("st23: %q", got)
+	}
+}

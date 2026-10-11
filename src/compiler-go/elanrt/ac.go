@@ -22,7 +22,8 @@ import (
 // collected and rebuilt is a new node).
 
 // Compare is the canonical total order of terms (REM's Gterm_cmp): ints by
-// value, then strings by bytes, before the other terms; those by the code
+// value, then identifiers by index, then strings by bytes, before the
+// other terms; those by the code
 // of their symbol in the .ref file ([Symbol.Code]), then their arguments
 // from left to right, the elements of an AC term as a multiset (each
 // distinct element, then its multiplicity; a prefix first). Compare(a, b)
@@ -36,9 +37,9 @@ func Compare(a, b Term) int {
 		return cmp.Compare(ka, kb)
 	}
 	switch ka {
-	case 0:
+	case 0, 1:
 		return cmp.Compare(a.Int, b.Int)
-	case 1:
+	case 2:
 		return cmp.Compare(StrOf(a), StrOf(b))
 	}
 	sa, sb := &Syms[a.Sym], &Syms[b.Sym]
@@ -64,15 +65,18 @@ func Compare(a, b Term) int {
 	return cmp.Compare(a.Sym, b.Sym)
 }
 
-// kindRank orders ints, then strings, then the other terms.
+// kindRank orders ints, then identifiers, then strings, then the other
+// terms.
 func kindRank(t Term) int {
 	switch t.Sym {
 	case SymInt:
 		return 0
-	case SymString:
+	case SymIdent:
 		return 1
+	case SymString:
+		return 2
 	}
-	return 2
+	return 3
 }
 
 // compareMultisets compares two sorted multisets as REM compares its AC

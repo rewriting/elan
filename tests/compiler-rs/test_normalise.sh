@@ -25,13 +25,21 @@
 # compared with the interpreter only); <name>.no-interpreter says why the
 # interpreter is not run, <name>.no-rem why REM is not run,
 # <name>.no-<compiler> (e.g. .no-elanc-rs) why the program is not run
-# with that compiler (normalised or refused programs).
+# with that compiler (normalised or refused programs); <name>.expected
+# holds the expected result line of a program that neither oracle runs
+# (its .no-rem and .no-interpreter say why); <name>.stdout the whole
+# expected output of `./a.out -noInput -quiet` (status 0), compared with
+# the compiler's and REM's (the interpreter has no -noInput: .no-interpreter).
+# REM prints an identifier as IDENT(n), n its index in the .ref file: its
+# output is compared with the names put back (rem_idents.py).
 # Outputs are compared as bytes (LC_ALL=C): strings are bytes, and the
 # sources of latin1*.eln are Latin-1.
 # Programs programs/refused/<name>.lgi use constructs of later stages:
 # the compiler must stop with status 2 and a "not supported yet (<stage>)"
 # message, the stage being one of its later ones (S6c, S6d, S6e for
 # elanc-rs; S7c, S7d, S7e for elanc-go: the strategies, S6b/S7b, are done),
+# or "not supported (not planned)" (elanc-go's refusals kept by design,
+# docs/followups.md),
 # and remove the a.out left by a previous compilation.
 #
 # Usage: [ELANC=elanc-go] test_normalise.sh PREFIX [name...]   (an installed
@@ -110,11 +118,43 @@ for lgi in "$HERE"/programs/normalise/*.lgi; do
   fi
   vet "$name" "$d/$W" || continue
   build=$(sed -n "s/^$ELANC: build time //p" "$d/$W/$ELANC.log")
+  # a program with an expected whole output (<name>.stdout): the
+  # compiler's and REM's, byte for byte, status 0
+  stdout=$HERE/programs/normalise/$name.stdout
+  if [ -f "$stdout" ]; then
+    ( cd "$d/$W" && ./a.out -noInput -quiet >run.out 2>run.err )
+    status=$?
+    if [ "$status" = 0 ] && cmp -s "$d/$W/run.out" "$stdout"; then
+      ok "$name: the output of $name.stdout"
+    else
+      fail "$name: status $status, output $(od -c "$d/$W/run.out" | head -3 | tr '\n' ' ') (expected $name.stdout)"
+    fi
+    if [ -n "$HAVE_REM" ] && [ ! -f "$HERE/programs/normalise/$name.no-rem" ]; then
+      if ( cd "$d/rem" && elanc -b -nosplit -quiet "$name" >elanc.log 2>&1 \
+           && make -f "$name.make" >make.log 2>&1 && ./a.out -noInput -quiet >run.out 2>&1 ) \
+         && cmp -s "$d/rem/run.out" "$stdout"; then
+        ok "$name vs REM: the output of $name.stdout"
+      else
+        fail "$name vs REM: not the output of $name.stdout (see $d/rem)"
+      fi
+    fi
+    continue
+  fi
   rs=$( cd "$d/$W" && ./a.out -noInput -quiet 2>"$d/$W/run.err"; echo "status $?" )
   status=$(printf '%s\n' "$rs" | sed -n 's/^status //p')
   rs=$(printf '%s\n' "$rs" | grep '^result = ')
   if [ "$status" != 0 ] || [ -z "$rs" ]; then
     fail "$name: the compiled program failed (status $status, see $d/$W/run.err)"; continue
+  fi
+
+  # the expected result, when no oracle runs the program
+  if [ -f "$HERE/programs/normalise/$name.expected" ]; then
+    expected=$(grep -v '^#' "$HERE/programs/normalise/$name.expected")
+    if [ "$rs" = "$expected" ]; then
+      ok "$name: $rs ($name.expected)"
+    else
+      fail "$name: $ELANC [$rs], expected [$expected] ($name.expected)"
+    fi
   fi
 
   # REM
@@ -124,7 +164,8 @@ for lgi in "$HERE"/programs/normalise/*.lgi; do
     echo "skip $name vs REM ($name.no-rem)"
   elif ( cd "$d/rem" && elanc -b -nosplit -quiet "$name" >elanc.log 2>&1 \
        && make -f "$name.make" >make.log 2>&1 ); then
-    rem=$( cd "$d/rem" && ./a.out -noInput -quiet 2>&1 | grep '^result = ' )
+    rem=$( cd "$d/rem" && ./a.out -noInput -quiet 2>&1 | python3 "$HERE/rem_idents.py" "$name.ref" \
+           | grep '^result = ' )
     known=$HERE/programs/normalise/$name.rem
     if [ -f "$known" ]; then
       expected=$(grep -v '^#' "$known")
@@ -216,11 +257,11 @@ for lgi in "$HERE"/programs/refused/*.lgi; do
   echo stale >"$d/a.out" || exit 2  # a refused program leaves no a.out
   ( cd "$d" && $ELANC $CACHE_OPT "$TARGET" "$name" >$ELANC.log 2>&1 )
   status=$?
-  msg=$(grep -E "not supported yet \($STAGE[c-e]\)" "$d/$ELANC.log")
+  msg=$(grep -E "not supported (yet \($STAGE[c-e]\)|\(not planned\))" "$d/$ELANC.log")
   if [ "$status" = 2 ] && [ -n "$msg" ] && [ ! -e "$d/a.out" ]; then
     ok "refused $name: $msg"
   else
-    fail "refused $name: status $status, expected 2 and a message ($STAGE[c-e]), no a.out (see $d/$ELANC.log)"
+    fail "refused $name: status $status, expected 2 and a message ($STAGE[c-e] or not planned), no a.out (see $d/$ELANC.log)"
   fi
 done
 

@@ -1,0 +1,6 @@
+LPL traversal description
+  query of sort bool
+  result of sort nat
+  import trav
+  start with (all) f(o)
+end

@@ -1,0 +1,6 @@
+LPL choose_second description
+  query of sort bool
+  result of sort int
+  import chooses
+  start with () csecond(5)
+end

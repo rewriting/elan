@@ -1,0 +1,3 @@
+The interpreter does not implement btoi and itob: "[error] ( rtmisc.c) ,
+BOOLTOINT / sorry not yet implemented in the interpreted version",
+internal error (rewrite/rtmisc.cc). The expected result is btoi.expected.

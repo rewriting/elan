@@ -1,0 +1,4 @@
+The interpreter does not interpret traversals, rewrite and normin/normout
+(it prints "Traversal is not intepreted" and fails,
+src/interpreter/rewrite/stateofexecution.cc): REM is the oracle (S7d
+plan, Task 6).

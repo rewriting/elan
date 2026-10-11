@@ -1,0 +1,6 @@
+LPL overload description
+  query of sort int
+  result of sort int
+  import qmod
+  start with () query
+end

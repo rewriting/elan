@@ -1,0 +1,2 @@
+# REM crashes (trav_bu_mixed.no-rem): r does not apply to 3 (sort int)
+result = h(s(s(o)),3)

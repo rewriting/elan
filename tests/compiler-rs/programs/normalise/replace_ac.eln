@@ -1,0 +1,22 @@
+module replace_ac
+// replace and occurs on AC terms (Review Focus 5 of the S7d plan): an
+// element replaced in an AC term makes a term that a rule of the AC
+// operator rewrites (c U c => d, applied modulo an extension): the AC
+// term is flattened again and renormalised (REM's term_rec_replace); an AC
+// sub-multiset is an occurrence (the interpreter's stermreplace and
+// occursin; REM looks at the elements only: replace_ac.rem).
+import global bool eq[t] replace[t,t] occur[t,t]; end
+sort t u; end
+operators global
+  a : t; b : t; c : t; d : t;
+  f(@) : (t) t;
+  g(@,@) : (t t) t;
+  @ U @ : (t t) t (AC);
+  r(@,@,@,@,@,@,@,@,@) : (bool bool bool bool bool bool bool bool bool) u;
+  res(@,@,@) : (u t t) u;
+end
+rules for t
+global
+  [] c U c => d end
+end
+end

@@ -16,4 +16,5 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/go-command DESTINATION share/elan-go)
 # generated programs import the runtime module by a replace directive
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/elanrt/
         DESTINATION share/elan-go/elanrt
-        PATTERN "*_test.go" EXCLUDE)
+        PATTERN "*_test.go" EXCLUDE
+        PATTERN "testdata" EXCLUDE)

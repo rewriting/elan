@@ -94,8 +94,8 @@ func builtinSymbols() []Symbol {
 	var syms []Symbol
 	// (the codes of true and false are those of the .ref file; ints and
 	// strings are ordered apart)
-	for i, name := range []string{"int", "string", "true", "false"} {
-		code := [...]int32{-2, -1, 1, 0}[i]
+	for i, name := range []string{"int", "string", "true", "false", "ident"} {
+		code := [...]int32{-2, -1, 1, 0, -3}[i]
 		syms = append(syms, Symbol{Name: name, Print: prefixLayout(name, 0), Code: code, seed: symbolSeed(name, 0)})
 	}
 	return syms
@@ -107,6 +107,9 @@ const (
 	SymString int32 = 1 // a string value (see strings.go)
 	SymTrue   int32 = 2
 	SymFalse  int32 = 3
+	SymIdent  int32 = 4 // an identifier, its index in the Int field (ident.go)
+	// FirstSym is the code of the first symbol of the program.
+	FirstSym int32 = 5
 )
 
 // The bool terms.

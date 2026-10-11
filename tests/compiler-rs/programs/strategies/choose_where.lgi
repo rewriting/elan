@@ -1,0 +1,6 @@
+LPL choose_where description
+  query of sort bool
+  result of sort int
+  import chooses
+  start with () p(cafter(3), p(cafter(1), cgen(1)))
+end

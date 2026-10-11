@@ -92,6 +92,19 @@ is kept: its outputs are those of the 2004 compiled programs.
 | I | FastCompletion | `ans_completion` + spec | `SAMPLES/sat.inp` | `expected/I-i<spec>.out` | `SAMPLES/i<spec>.out` |
 | J, JO | MinelaComp | `rewritingC` + spec | `SAMPLES/c<x>.inp` | `expected/J-c<x>.out` | `SAMPLES/c<x>.out` |
 | I | MinelaComp | `rewriting` + spec | `SAMPLES/i<x>.inp` | `expected/I-i<x>.out` | `SAMPLES/i<x>.out` |
+| G | FastCompletion | `ans` + spec | `-noInput` (`sat`) | `expected/J-j<spec>.out`, `rewrite_step` excluded | |
+| G | MinelaComp | `rewritingC` + spec | `SAMPLES/c<x>.inp` | `expected/J-c<x>.out`, `rewrite_step` excluded | |
+
+Kind G (the Go compiler `elanc-go`, spec S7; the MinelaComp cases read
+their query with the Earley parser ported to Go, S7d task 5) is not in the
+default kinds:
+`BENCHTHESIS_KINDS=G ../test_benchthesis.sh PREFIX` (run by `make check-go`)
+compiles with `elanc-go` (go build cache `tests/compiler/work/gocache`, or
+`$ELANC_GO_CACHE`) and runs the same commands as J. Its oracle is J's
+expected output without the `rewrite_step` line (the count depends on the
+compilation scheme, as in the bench); the result line shows the time,
+elanc-go's `go build` time and the steps of both (equal to J's in all 22
+cases).
 
 FastCompletion: the 15 specifications of the `jtest` lines of `tst_all`
 (KNZ86 Zeh89 curry exa79 exa80 exa85 expf expoclos furtin gdiv group p2 p8
@@ -134,3 +147,35 @@ Apple M-series, `make check` build: the 64 cases take about 10 s in parallel
 (its interpreter is slower: `furtin` 14 s, `taussky` 9 s). The longest
 compiled case is `p8` (about 20 million rewrite steps, 6 s with the
 reference and with the modern compiler; 47 s for the 64 cases with `BENCHTHESIS_JOBS=1`). No case is skipped.
+
+Kind G (Apple M4 Max, 2026-10-11, S7d tasks 4 and 5). Compiling with
+`elanc-go` (export, Go emission, `go build`; `ans`: a `main.go` of 390 KB
+with the query parser's tables, `rewritingC`: 375-575 KB): 0.35 s for a
+new program when the runtime is in the go build cache (`go build`
+0.28 s), 1.7 s with an empty cache (the runtime compiled too), 0.12 s for
+a program already built (each specification gives another Go module) —
+under the 2 s target of the spec (S7 §2.4). The 22 G cases take 3 s in
+parallel. Run times (`./a.out
+-noInput -quiet`, second run, s):
+
+| spec | steps | elanc-go | REM |
+|---|---|---|---|
+| KNZ86 | 23485 | 0.00 | 0.01 |
+| Zeh89 | 44605 | 0.00 | 0.01 |
+| curry | 36305 | 0.00 | 0.01 |
+| exa79 | 28398 | 0.00 | 0.01 |
+| exa80 | 185672 | 0.01 | 0.05 |
+| exa85 | 367736 | 0.02 | 0.09 |
+| expf | 534549 | 0.00 | 0.10 |
+| expoclos | 145667 | 0.00 | 0.03 |
+| furtin | 1630386 | 0.04 | 0.38 |
+| gdiv | 244890 | 0.01 | 0.06 |
+| group | 181752 | 0.01 | 0.05 |
+| p2 | 417760 | 0.02 | 0.11 |
+| p8 | 21607279 | 0.88 | 5.39 |
+| sample | 2842 | 0.00 | 0.00 |
+| taussky | 795094 | 0.03 | 0.21 |
+
+The steps are those of J (elanc-go tries the same redexes in the same
+order). MinelaComp (`./a.out -quiet < SAMPLES/c<x>.inp`): primes8 0.05 s
+(REM 0.29 s), primes4 0.01 s (0.04), the others under 0.01 s.

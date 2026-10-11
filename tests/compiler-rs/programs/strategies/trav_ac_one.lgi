@@ -1,0 +1,6 @@
+LPL trav_ac_one description
+  query of sort bool
+  result of sort elt
+  import trav
+  start with (oneac) a u b u a
+end

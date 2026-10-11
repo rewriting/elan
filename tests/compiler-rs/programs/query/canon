@@ -1,0 +1,8 @@
+# AC terms compared with the interpreter (test_query.sh): label, then the
+# arguments of ac_canon.py (the AC symbols; --infix: the infix operators,
+# lowest priority first)
+query/assoc	U
+query/newident	U
+examples/poly2	--infix + * -- + *
+examples/poly3	--infix + * -- + *
+examples/unification	--infix & = -- &

@@ -1,0 +1,2 @@
+-noInput is an option of the compiled programs: the interpreter always
+reads a query (with s(o): s(s(o))).

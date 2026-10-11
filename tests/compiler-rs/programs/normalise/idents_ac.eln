@@ -1,0 +1,18 @@
+module idents_ac
+// Identifiers under an AC operator: ordered by their index in the
+// Identifiers table (REM's Gterm_cmp), after the ints, before the terms
+// with a symbol.
+import global ident bool; end
+sort t; end
+operators global
+  k(@) : (ident) t;
+  c : t;
+  @ U @ : (t t) t (AC);
+  r(@,@) : (t t) t;
+  e : t;
+end
+rules for t
+global
+  [] e => c end
+end
+end

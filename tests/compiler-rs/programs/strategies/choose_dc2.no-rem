@@ -1,0 +1,7 @@
+Under dc, REM (Choice.java, isDcApply) stops a labelled rule after the
+first branch of its choose that gave a result (it re-generates a fail
+instead of trying the next branch): 2 3 for (sdc) 1, 7 for (sdc2) 7.
+The interpreter gives the results of every branch of the first rule that
+has one (2 3 12 13; 7 22 23), since the branches are alternatives of one
+rule; elanc-go follows the interpreter (spec S7, §2.3; the S7d plan,
+Task 2 rulings).

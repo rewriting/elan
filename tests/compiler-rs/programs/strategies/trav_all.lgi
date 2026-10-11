@@ -1,0 +1,6 @@
+LPL trav_all description
+  query of sort bool
+  result of sort nat
+  import trav
+  start with (all) g(f(o), f(s(o)))
+end

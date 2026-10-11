@@ -1,0 +1,6 @@
+LPL rewrite_ac description
+  query of sort bool
+  result of sort elt
+  import trav
+  start with (rwac) a u a u b
+end

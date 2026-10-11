@@ -1,0 +1,18 @@
+module collide
+// Two identifiers of the program with the same hash position (the sum of
+// their bytes modulo 3000 is 2900: anagrams), the second probed past the
+// end of the table (2900 + 211 - 3000 = 111): REM's runtime re-adds the
+// names of the program in index order (earley/runtimeInit.cc
+// tabofidentInit), so they swap there, and a query naming one gets the
+// index of the other (S7d task 5, collide.no-rem).
+import global ident bool; end
+sort t; end
+operators global
+  r(@,@) : (bool bool) t;
+  w(@) : (ident) t;
+end
+rules for t
+global
+  [] w(zzzzzzzzzzzzzzzzzzzzzzll) => r(true, false) end
+end
+end

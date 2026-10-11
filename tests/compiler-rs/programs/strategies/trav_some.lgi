@@ -1,0 +1,6 @@
+LPL trav_some description
+  query of sort bool
+  result of sort nat
+  import trav
+  start with (somend) g(o, o)
+end

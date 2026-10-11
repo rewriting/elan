@@ -108,11 +108,11 @@ func TestACShapesOfTask2(t *testing.T) {
 		e.Args[1].Args[0].Var != 1 || r.Vars[r.Conds[1].EkerVars[0]].Name != "x3" {
 		t.Fatalf("where pattern: %+v", e)
 	}
-	// an AC operator on a builtin sort (S7d: no program needs it)
+	// an AC operator on a builtin sort (not planned: the oracles disagree)
 	p := peano()
 	p.op(sInt, 343, "w", []uint32{sInt, sInt}, 0, 2)
 	p.start(f(343, ref.Int{Value: 1}, ref.Int{Value: 2}), sInt)
-	if st, msg := unsupportedStage(t, p); st != "S7d" || !strings.Contains(msg, "builtin sort") {
+	if st, msg := unsupportedStage(t, p); st != NotPlanned || !strings.Contains(msg, "builtin sort") {
 		t.Errorf("%s %s", st, msg)
 	}
 }

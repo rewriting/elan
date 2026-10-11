@@ -42,7 +42,11 @@ func Step() { Steps++ }
 
 // Options are the command-line options of a generated program.
 type Options struct {
-	NoInput  bool     // -noInput: no query is read, the start term of the .lgi is used
+	NoInput bool // -noInput: no query is read, the start term of the .lgi is used
+	// Other is an option asking for another query mode or sort, which
+	// elanc-go does not support (-REFInput, -commandLine, -sort=,
+	// -strategy=; the last query mode given counts, as in C)
+	Other    string
 	Quiet    bool     // -quiet: no timing lines
 	NoOutput bool     // -noOutput: results are not printed
 	Help     bool     // -help, -h
@@ -53,18 +57,31 @@ type Options struct {
 func ParseOptions(args []string) Options {
 	var o Options
 	i := 0
+	mode, eval := "", ""
 	for ; i < len(args) && strings.HasPrefix(args[i], "-"); i++ {
 		switch args[i] {
 		case "-noInput":
-			o.NoInput = true
+			mode = args[i]
+		case "-REFInput", "-commandLine":
+			mode = args[i]
+		case "-sort=", "-strategy=":
+			eval = args[i]
+			i++
 		case "-quiet":
 			o.Quiet = true
 		case "-noOutput":
 			o.NoOutput = true
 		case "-help", "-h":
 			o.Help = true
-		case "-trace", "-sort=", "-strategy=", "-filequery":
+		case "-trace", "-filequery":
 			i++ // options taking a value in the C program
+		}
+	}
+	o.NoInput = mode == "-noInput"
+	if !o.NoInput {
+		o.Other = mode
+		if eval != "" {
+			o.Other = eval
 		}
 	}
 	if i < len(args) {
@@ -110,6 +127,13 @@ func Fatal(msg string) {
 	os.Exit(1)
 }
 
+// Warning writes a warning of the interpreter on the standard error, as
+// is (the output so far first).
+func Warning(msg string) {
+	FlushOutput()
+	fmt.Fprint(os.Stderr, msg)
+}
+
 // Unsupported stops a program that meets a construct the compiler
 // supports only partly: the message on the standard error, status 2 (as a
 // refusal of the compiler).
@@ -148,6 +172,9 @@ func (s *Session) ResultBool(b bool) { s.result(func(w *Writer) { w.Bool(b) }) }
 
 // ResultStr prints a string result.
 func (s *Session) ResultStr(v string) { s.result(func(w *Writer) { w.Str(v) }) }
+
+// ResultIdent prints an identifier result (its index).
+func (s *Session) ResultIdent(i int32) { s.result(func(w *Writer) { w.IdentValue(i) }) }
 
 func (s *Session) result(print func(w *Writer)) {
 	s.results++
@@ -197,10 +224,15 @@ func init() {
 // Main is the main function of a generated program: it parses the options,
 // sets the GC and the stack limit, and runs program on a new goroutine with
 // a session on [Out]; program computes and prints the results
-// (s.Result(t)); the statistics are printed after it returns, then the
-// program exits (status 0). querySort is the sort named in the prompt when
-// a query must be read (not supported yet: status 2).
-func Main(querySort string, program func(s *Session)) {
+// (s.Result(t)) of the start term, the query given as its second argument;
+// the statistics are printed after it returns, then the program exits
+// (status 0). querySort is the sort named in the prompt when a query must
+// be read (without -noInput: not supported yet, status 2). usesQuery: the
+// start term uses the query; under -noInput, the program prints REM's
+// message (rem/compiler/Query.java: "No ground term is defined", "Do not
+// use -noInput in this case") and exits with status 0 without running;
+// else program gets a nil query.
+func Main(querySort string, usesQuery bool, program func(s *Session, query Term)) {
 	o := ParseOptions(os.Args[1:])
 	if o.Help {
 		Out.WriteString(Help)
@@ -222,12 +254,24 @@ func Main(querySort string, program func(s *Session)) {
 			}
 		}()
 		s := NewSession(o, Out)
+		if o.NoInput && usesQuery {
+			Out.WriteString("No ground term is defined\nDo not use -noInput in this case\n")
+			done <- 0
+			return
+		}
+		var query Term
 		if !o.NoInput {
+			if o.Other != "" {
+				Unsupported("the option " + o.Other + " (use -noInput, or give the query on the standard input)")
+			}
 			fmt.Fprintf(Out, "Enter a query term of sort '%s'\n", querySort)
 			FlushOutput()
-			fmt.Fprintln(os.Stderr, "elanrt: reading a query is not supported yet; use -noInput")
-			done <- 2
-			return
+			if queryParser == nil {
+				fmt.Fprintln(os.Stderr, "elanrt: reading a query is not supported yet; use -noInput")
+				done <- 2
+				return
+			}
+			query = readQuery(queryParser)
 		}
 		stop := func() {}
 		if f := os.Getenv("ELAN_CPUPROFILE"); f != "" {
@@ -239,7 +283,7 @@ func Main(querySort string, program func(s *Session)) {
 				writeMemProfile(f)
 			}
 		}
-		program(s)
+		program(s, query)
 		if depth != 0 {
 			// every Guard has its Unguard (generated code: a bug otherwise)
 			panic(fmt.Sprintf("guarded depth %d at the end of the program", depth))

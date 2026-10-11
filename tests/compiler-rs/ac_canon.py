@@ -8,6 +8,9 @@ plan, investigation).
 Usage: ac_canon.py SYMBOL...   (the AC symbols: a prefix one is printed
 F(x,y), an infix one x U y; terms are identifiers with arguments, ints,
 and at most one infix AC symbol, of the lowest priority)
+       ac_canon.py --infix OP... -- SYMBOL...   (the infix operators of the
+terms, AC or not, from the lowest priority to the highest; parentheses
+allowed: (2+(X*6)) and 2+X*6 give the same canonical form)
 
 A canonical term is the prefix form with the arguments of each AC symbol
 flattened and sorted (as text): F(F(c,b),a) and F(a,F(b,c)) both give
@@ -25,6 +28,45 @@ def tokens(s):
         out.append(m.group(1))
         i = m.end()
     return out
+
+def parse_infix(toks, ac, infix):
+    """Precedence climbing over the infix operators (lowest first); an
+    operator used several times at one level gives one n-ary node."""
+    pos = 0
+    def expr(level):
+        nonlocal pos
+        if level == len(infix):
+            return primary()
+        items = [expr(level + 1)]
+        while pos < len(toks) and toks[pos] == infix[level]:
+            pos += 1
+            items.append(expr(level + 1))
+        return items[0] if len(items) == 1 else (infix[level], items)
+    def primary():
+        nonlocal pos
+        name = toks[pos]
+        pos += 1
+        if name == "(":
+            t = expr(0)
+            if toks[pos] != ")":
+                raise ValueError("expected )")
+            pos += 1
+            return t
+        if pos < len(toks) and toks[pos] == "(":
+            pos += 1
+            args = [expr(0)]
+            while toks[pos] == ",":
+                pos += 1
+                args.append(expr(0))
+            if toks[pos] != ")":
+                raise ValueError("expected )")
+            pos += 1
+            return (name, args)
+        return (name, [])
+    t = expr(0)
+    if pos != len(toks):
+        raise ValueError("trailing tokens")
+    return t
 
 def parse(toks, ac):
     pos = 0
@@ -75,11 +117,21 @@ def text(t):
     return name + ("(" + ",".join(text(a) for a in args) + ")" if args else "")
 
 def main():
-    ac = set(sys.argv[1:])
+    args = sys.argv[1:]
+    infix = None
+    if args and args[0] == "--infix":
+        end = args.index("--")
+        infix, args = args[1:end], args[end + 1:]
+    ac = set(args)
     for line in sys.stdin:
         line = line.rstrip("\n")
         try:
-            print(text(canon(parse(tokens(line), ac), ac)))
+            if infix is None:
+                t = parse(tokens(line), ac)
+            else:
+                # a flattened n-ary node is canonical only for AC symbols
+                t = parse_infix(tokens(line), ac, infix)
+            print(text(canon(t, ac)))
         except (ValueError, IndexError):
             print(line)
 

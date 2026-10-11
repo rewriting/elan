@@ -6,7 +6,7 @@
 #   make check-rust      tests of the Rust compiler elanc-rs (when cargo exists)
 #   make check-go        tests of the Go compiler elanc-go and its runtime (when go >= 1.24
 #                        exists): go vet/test, .ref reader, normalisation, strategies, AC,
-#                        depth, bench G
+#                        depth, bench G, query input, BenchThesis G
 #   make check-golden    golden tests: .ref files, -d dump, statistics, errors
 #   make check-compiler  compiled tests (J, JO) only: elanc, REM, runtime libraries
 #   make reference       build the 2004 reference system (reference/install)
@@ -134,7 +134,9 @@ check-go: install
 	  && ELANC=elanc-go tests/compiler-rs/test_strategies.sh "$(PREFIX)" -d strategy_terms \
 	  && ELANC=elanc-go tests/compiler-rs/test_strategies.sh "$(PREFIX)" -d ac \
 	  && ELANC=elanc-go tests/compiler-rs/test_depth.sh "$(PREFIX)" \
-	  && tests/compiler-rs/bench_parity.py "$(PREFIX)" --kind G; \
+	  && tests/compiler-rs/bench_parity.py "$(PREFIX)" --kind G \
+	  && ELANC=elanc-go tests/compiler-rs/test_query.sh "$(PREFIX)" \
+	  && BENCHTHESIS_KINDS=G tests/compiler/test_benchthesis.sh "$(PREFIX)"; \
 	else echo "elanc-go not built (go >= 1.24 missing or -DELAN_GO=OFF): Go tests skipped"; fi
 
 check: smoke test-runner check-arch check-unit check-golden check-rust check-go

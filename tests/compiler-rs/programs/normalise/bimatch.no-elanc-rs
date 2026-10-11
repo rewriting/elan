@@ -1,0 +1,3 @@
+elanc-rs is frozen at the end of S6b (docs/s6-rust-status.md): it refuses
+the term builtins (replace, occurs, syntactic matching and unification,
+btoi/itob: S6d), which elanc-go compiles since S7d.

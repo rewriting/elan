@@ -1,0 +1,4 @@
+REM rebuilds an AC term in one term allocated before the loop and adds
+the new elements to it (genericSetSubterm = term_add_onf_term): on
+backtracking the elements of the previous result stay, it prints b u b then
+b u b u c u c. elanc-go rebuilds each result: b u b, c u c.

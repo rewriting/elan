@@ -1,0 +1,6 @@
+LPL newident description
+  query of sort e
+  result of sort e
+  import qmod
+  start with () query
+end

@@ -1,0 +1,3 @@
+The interpreter applies the parser's actions to these operators as REM
+does (foo(a) gives a, bar(a) no result); the queries refused (status 2)
+are not given to it, and g(a) is checked against pcodes.expected.
