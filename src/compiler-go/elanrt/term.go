@@ -19,6 +19,10 @@ type Node struct {
 	// seen only by the normalisation function of its symbol until
 	// [Intern] makes it the shared node.
 	tmp bool
+	// nf marks a shared AC term that the normalisation function of its
+	// symbol found in normal form without a rewrite step ([NormalForm]):
+	// that function returns it at once the next times.
+	nf bool
 }
 
 // Nodes of arity 1 to 3 carry their arguments inline: one allocation per

@@ -614,16 +614,31 @@ func (e *emitter) opFunc(o ir.OpID) {
 			e.line("// the AC term (shared, or transient until it is a normal form): the")
 			e.line("// only column of the rules")
 			e.line("a0 := rt.ACTerm(%s, e)", symName(op))
+			e.open("if rt.Normal(a0) {")
+			e.line("return a0 // a normal form found before, without a step")
+			e.close("}")
+		}
+		mark := e.b.Len()
+		if op.AC {
+			e.line("steps := rt.Steps")
 		}
 		e.resType = e.goType(op.Result)
-		switch falls := e.decision(op.Tree, op.Rules); {
+		falls := e.decision(op.Tree, op.Rules)
+		if op.AC && (!falls || op.Total) {
+			// steps is not used: no line
+			s := e.b.String()
+			e.b.Reset()
+			e.b.WriteString(s[:mark])
+			e.b.WriteString(s[strings.IndexByte(s[mark:], '\n')+mark+1:])
+		}
+		switch {
 		case !falls:
 			// (the code ends with a return: go vet refuses unreachable code)
 		case op.Total:
 			e.line(`panic("%s: no rule applies to a total operator")`, op.Fun)
 		case op.AC:
 			e.line("// no rule applies: the term is a normal form")
-			e.line("return rt.Intern(a0)")
+			e.line("return rt.NormalForm(a0, steps)")
 		default:
 			e.line("// no rule applies: the term is a normal form")
 			e.line("return %s", e.stuck(o))

@@ -51,6 +51,15 @@ func TestTransientACTerms(t *testing.T) {
 	if Intern(a) != a {
 		t.Fatal("Intern of a shared term")
 	}
+	// NormalForm marks the term only when no step was counted
+	steps := Steps
+	Step()
+	if n := NormalForm(ACTerm(symAnd, MergeAC(symAnd, a, c)), steps); Normal(n) {
+		t.Fatal("marked normal after a step")
+	}
+	if n := NormalForm(ACTerm(symAnd, MergeAC(symAnd, a, c)), Steps); !Normal(n) || n != and(c, a) || !Normal(and(a, c)) {
+		t.Fatal("not marked normal without a step")
+	}
 	// MergeAC as Merge of Elems; Insert as Merge
 	for _, p := range [][2]Term{{a, b}, {b, a}, {x, c}, {c, x}, {x, x}, {a, a}} {
 		want := Merge(Elems(symAnd, p[0]), Elems(symAnd, p[1]))

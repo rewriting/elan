@@ -220,6 +220,25 @@ func ACTerm(sym int32, e []Term) Term {
 	return &Node{Sym: sym, Hash: h, Args: e, tmp: true}
 }
 
+// Normal tells whether t is an AC term known to be a normal form: its
+// normalisation function, given it, returns it at once.
+func Normal(t Term) bool { return t.nf }
+
+// NormalForm returns the shared node of the AC term t that no rule of its
+// symbol rewrites ([Intern]); steps is [Steps] when its normalisation
+// function started on it. If no step was counted since then (no
+// condition or value of a variable rewrote anything: the attempts are
+// pure, and give the same answer the next time), the node is marked
+// ([Normal]): the next normalisations of the term skip the rules, with
+// the same results and the same count of steps.
+func NormalForm(t Term, steps int64) Term {
+	t = Intern(t)
+	if Steps == steps {
+		t.nf = true
+	}
+	return t
+}
+
 // Intern returns the shared node of t: t itself unless it is a transient
 // node of [ACTerm], which then joins the unique table (or gives way to
 // the equal node built meanwhile).
