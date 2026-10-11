@@ -2,6 +2,10 @@ package elanrt
 
 import (
 	"bytes"
+	"compress/gzip"
+	"io"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -129,5 +133,50 @@ func TestMainDepthBalance(t *testing.T) {
 	if st != 1 || out != "\nresult = s(o)\n" ||
 		!strings.HasPrefix(errs, "elanrt: internal error: guarded depth 1 at the end of the program\n") {
 		t.Fatalf("status %d, out %q, err %q", st, out, errs)
+	}
+}
+
+func init() {
+	helpers["profiled"] = func() {
+		Main("Nat", func(s *Session) {
+			s.Result(nat(1))
+			switch os.Getenv("ELANRT_END") {
+			case "fatal":
+				Fatal("elanrt: no rule for f(o)")
+			case "toodeep":
+				TooDeep()
+			case "exit":
+				Exit(0)
+			}
+		})
+	}
+}
+
+// The profiles asked for (ELAN_CPUPROFILE, ELAN_MEMPROFILE) are complete
+// whatever the end of the program: normal, a run-time error, a recursion
+// too deep, an exit.
+func TestProfilesAtEveryExit(t *testing.T) {
+	for _, c := range []struct {
+		end    string
+		status int
+	}{{"", 0}, {"fatal", 1}, {"toodeep", DepthExit}, {"exit", 0}} {
+		dir := t.TempDir()
+		cpu, mem := filepath.Join(dir, "cpu.prof"), filepath.Join(dir, "mem.prof")
+		_, errs, st := runHelper(t, "profiled", []string{"ELANRT_END=" + c.end, "ELAN_CPUPROFILE=" + cpu, "ELAN_MEMPROFILE=" + mem}, "-noInput", "-quiet")
+		if st != c.status {
+			t.Fatalf("%q: status %d, want %d (%s)", c.end, st, c.status, errs)
+		}
+		for _, f := range []string{cpu, mem} {
+			b, err := os.ReadFile(f)
+			if err == nil {
+				var z *gzip.Reader
+				if z, err = gzip.NewReader(bytes.NewReader(b)); err == nil {
+					_, err = io.ReadAll(z)
+				}
+			}
+			if err != nil {
+				t.Errorf("%q: %s: %v", c.end, filepath.Base(f), err)
+			}
+		}
 	}
 }

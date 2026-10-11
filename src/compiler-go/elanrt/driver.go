@@ -10,6 +10,7 @@ import (
 	"runtime/pprof"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -85,14 +86,27 @@ func FlushOutput() { Out.Flush() }
 // Exit flushes the output and ends the program with the status code.
 func Exit(code int) {
 	FlushOutput()
+	endProfiles()
 	os.Exit(code)
 }
+
+// profiles ends the profiles of the run (ELAN_CPUPROFILE, ELAN_MEMPROFILE),
+// set by [Main]: every end of the program writes them complete (a normal
+// end, [Exit], [Fatal], [Unsupported], [TooDeep]).
+var (
+	profiles     = func() {}
+	profilesOnce sync.Once
+)
+
+// endProfiles writes the profiles of the run, once.
+func endProfiles() { profilesOnce.Do(profiles) }
 
 // Fatal is a run-time error of the program (the interpreter's interr()):
 // the output so far, then the message on the standard error, status 1.
 func Fatal(msg string) {
 	FlushOutput()
 	fmt.Fprintln(os.Stderr, msg)
+	endProfiles()
 	os.Exit(1)
 }
 
@@ -102,6 +116,7 @@ func Fatal(msg string) {
 func Unsupported(msg string) {
 	FlushOutput()
 	fmt.Fprintln(os.Stderr, "elanrt: not supported yet: "+msg)
+	endProfiles()
 	os.Exit(2)
 }
 
@@ -218,15 +233,18 @@ func Main(querySort string, program func(s *Session)) {
 		if f := os.Getenv("ELAN_CPUPROFILE"); f != "" {
 			stop = startProfile(f)
 		}
+		profiles = func() {
+			stop()
+			if f := os.Getenv("ELAN_MEMPROFILE"); f != "" {
+				writeMemProfile(f)
+			}
+		}
 		program(s)
 		if depth != 0 {
 			// every Guard has its Unguard (generated code: a bug otherwise)
 			panic(fmt.Sprintf("guarded depth %d at the end of the program", depth))
 		}
-		stop()
-		if f := os.Getenv("ELAN_MEMPROFILE"); f != "" {
-			writeMemProfile(f)
-		}
+		endProfiles()
 		s.Finish()
 		if os.Getenv("ELAN_STATS") == "1" {
 			FlushOutput()

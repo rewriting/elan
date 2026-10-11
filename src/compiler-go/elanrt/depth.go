@@ -220,5 +220,6 @@ func TooDeep() {
 	if os.Getenv("ELAN_STATS") == "1" {
 		fmt.Fprintf(os.Stderr, "elanrt: depth %d, limit %d, stack %d MiB\n", depth, maxDepth, stackBytes()>>20)
 	}
+	endProfiles()
 	os.Exit(DepthExit)
 }
