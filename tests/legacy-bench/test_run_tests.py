@@ -117,6 +117,18 @@ class RustCompilerKindTest(unittest.TestCase):
         e = rt.env()
         self.assertEqual(Path(e["ELANC_RS_TARGET_DIR"]), rt.WORK / "elanc-rs-target")
 
+
+class ResultsPruningTest(unittest.TestCase):
+    def test_keeps_only_the_most_recent_result_directories(self):
+        with tempfile.TemporaryDirectory(dir=rt.HERE) as d:
+            root = Path(d)
+            names = [f"20261010-1200{i:02d}" for i in range(25)]
+            for n in names:
+                (root / n).mkdir()
+                (root / n / "x.txt").write_text("x")
+            rt.prune_results(root, keep=20)
+            self.assertEqual(sorted(p.name for p in root.iterdir()), names[5:])
+
 class ExamplesDiscoveryTest(unittest.TestCase):
     def test_finds_examples_named_after_their_directory(self):
         with tempfile.TemporaryDirectory(dir=rt.HERE) as d:

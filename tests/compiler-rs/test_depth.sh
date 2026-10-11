@@ -162,4 +162,6 @@ for lgi in "$PROGS"/*.lgi; do
 done
 
 echo "$n programs, $fails failures"
+# the run directory is kept only when something failed (to look at it)
+if [ "$fails" -eq 0 ]; then rm -rf "$RUN"; else echo "kept for inspection: $RUN"; fi
 [ "$fails" -eq 0 ]

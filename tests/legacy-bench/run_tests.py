@@ -329,6 +329,13 @@ def compares_snapshot(t, status):
     return t["kind"] not in COMPILER_KINDS or status in ("PASS", "PASS~", "PASS≈", "FAIL")
 
 
+def prune_results(root, keep=20):
+    """Keep only the `keep` most recent result directories (named by date)."""
+    runs = sorted(p for p in Path(root).iterdir() if p.is_dir())
+    for old in runs[:-keep] if keep > 0 else runs:
+        shutil.rmtree(old, ignore_errors=True)
+
+
 def safe(tid):
     # + hash of the exact id: macOS file names are case-insensitive and some
     # applications have both Robot.lgi-based and robot.lgi-based tests
@@ -454,6 +461,7 @@ def main():
     stamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
     outdir = HERE / "results" / stamp
     outdir.mkdir(parents=True)
+    prune_results(HERE / "results", keep=20)
     t0 = time.time()
     results, snapdiff = {}, []
     with cf.ThreadPoolExecutor(a.j) as ex:

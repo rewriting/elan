@@ -74,4 +74,6 @@ while IFS="$TAB" read -r dir lgi spc; do
 done < "$RUN/programs.tsv"
 
 echo "$n programs: $ok ok, $failed failed, $noexport not exported"
+# the run directory is kept only when something failed (to look at it)
+if [ "$failed" -eq 0 ]; then rm -rf "$RUN"; else echo "kept for inspection: $RUN"; fi
 [ "$failed" -eq 0 ]
