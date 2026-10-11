@@ -29,6 +29,7 @@
 #include "commondefs.h"
 #include "termdefs.h"
 #include "module.h"
+#include "intarith.h"
 
 #define ADDNUMMAC(name,val) {lbuffer tmp; lexem lex; \
 	lex.crnumlex(val); tmp.put(lex);addmac(name,tmp); }
@@ -866,6 +867,8 @@ static void deeperr(lstream *f)
 
 #define DEEPTEST() {if (evalstacki>=MAXDEEPCONSTEXP) deeperr(f);}
 
+// The arithmetic is the interpreter's int (base/intarith.h): wrapping, x/0 = 0,
+// x%0 = x (undefined behaviour before; tests/regression/preproc_constexp_div_zero).
 int ppexsemact(int n,lexem l,lstream* f)
 {
   static int evalstack[MAXDEEPCONSTEXP];
@@ -884,26 +887,26 @@ int ppexsemact(int n,lexem l,lstream* f)
 	break;
   case 3 :
 	evalstacki--;
-	evalstack[evalstacki-1]=evalstack[evalstacki-1]+evalstack[evalstacki];
+	evalstack[evalstacki-1]=int_add(evalstack[evalstacki-1],evalstack[evalstacki]);
 	break;
   case 4 :
 	evalstacki--;
-	evalstack[evalstacki-1]=evalstack[evalstacki-1]-evalstack[evalstacki];
+	evalstack[evalstacki-1]=int_sub(evalstack[evalstacki-1],evalstack[evalstacki]);
 	break;
   case 5 :
 	evalstacki--;
-	evalstack[evalstacki-1]=evalstack[evalstacki-1]*evalstack[evalstacki];
+	evalstack[evalstacki-1]=int_mul(evalstack[evalstacki-1],evalstack[evalstacki]);
 	break;
   case 6 :
 	evalstacki--;
-	evalstack[evalstacki-1]=evalstack[evalstacki-1]/evalstack[evalstacki];
+	evalstack[evalstacki-1]=int_div(evalstack[evalstacki-1],evalstack[evalstacki]);
 	break;
   case 7 :
 	evalstacki--;
-	evalstack[evalstacki-1]=evalstack[evalstacki-1]%evalstack[evalstacki];
+	evalstack[evalstacki-1]=int_mod(evalstack[evalstacki-1],evalstack[evalstacki]);
 	break;
   case 8 :
-	evalstack[evalstacki-1]= -evalstack[evalstacki-1];
+	evalstack[evalstacki-1]=int_neg(evalstack[evalstacki-1]);
 	break;
   case 9 :
 	evalstacki--;

@@ -43,7 +43,26 @@ func b2i(b bool) int32 {
 	return 0
 }
 
-// ppexsemact: the semantics of ppexgram, an evaluation stack of C ints.
+// intDiv and intMod are the interpreter's int_div and int_mod
+// (src/interpreter/base/intarith.h): x/0 = 0, x%0 = x; Go's int32 already
+// wraps + - * and unary minus, and gives MinInt32/-1 = MinInt32,
+// MinInt32%-1 = 0 (tests/regression/preproc_constexp_div_zero).
+func intDiv(a, b int32) int32 {
+	if b == 0 {
+		return 0
+	}
+	return a / b
+}
+
+func intMod(a, b int32) int32 {
+	if b == 0 {
+		return a
+	}
+	return a % b
+}
+
+// ppexsemact: the semantics of ppexgram, an evaluation stack of C ints with
+// the interpreter's int arithmetic (base/intarith.h).
 func (s *Stream) ppexsemact(n int, l lex.Lexem) int {
 	st := s.st
 	es := &st.evalStack
@@ -70,9 +89,9 @@ func (s *Stream) ppexsemact(n int, l lex.Lexem) int {
 	case 5:
 		binary(func(a, b int32) int32 { return a * b })
 	case 6:
-		binary(func(a, b int32) int32 { return a / b })
+		binary(intDiv)
 	case 7:
-		binary(func(a, b int32) int32 { return a % b })
+		binary(intMod)
 	case 8:
 		es[st.evalStackI-1] = -es[st.evalStackI-1]
 	case 9:

@@ -1,0 +1,8 @@
+@begin cexpmod.eln
+id 646 module
+id 109 m
+id 311 end
+eos
+@end
+@@stderr
+@@status 0

@@ -34,6 +34,7 @@
 #include "rtdatas.h"
 #include "meta.h"
 #include "command.h"
+#include "intarith.h"
 extern int writewasident;
 extern int no_more_switch;
 
@@ -291,29 +292,10 @@ int GET_LSTREAM(lstream *XXX, int /*pid*/, lexem rtype, term *res)
   else return 0; 
 }
 
-// Integer builtins on C int, with the results the interpreter always gave
-// on two's complement machines (arm64), but defined: + - * and unary minus
-// wrap modulo 2^32 (signed overflow was undefined behaviour), x/0 = 0,
-// x%0 = x, INT_MIN/-1 = INT_MIN, INT_MIN%-1 = 0 (x/0 trapped on x86).
-// tests/regression/int_arith_wraps.
+// Integer builtins: int_add ... int_mod (base/intarith.h) wrap and define
+// x/0, x%0, INT_MIN/-1, INT_MIN%-1 (tests/regression/int_arith_wraps).
 // strcmp: -1, 0 or 1 (C only specifies the sign; tests/regression/strcmp_sign)
 static int int_sign(int c) { return (c > 0) - (c < 0); }
-static int int_add(int a, int b) { return (int)((unsigned)a + (unsigned)b); }
-static int int_sub(int a, int b) { return (int)((unsigned)a - (unsigned)b); }
-static int int_mul(int a, int b) { return (int)((unsigned)a * (unsigned)b); }
-static int int_neg(int a)        { return (int)(0u - (unsigned)a); }
-static int int_div(int a, int b)
-{
-  if (b == 0) return 0;
-  if (b == -1) return int_neg(a);
-  return a / b;
-}
-static int int_mod(int a, int b)
-{
-  if (b == 0) return a;
-  if (b == -1) return 0;
-  return a % b;
-}
 
 static int standardreduction(term &t)
 {

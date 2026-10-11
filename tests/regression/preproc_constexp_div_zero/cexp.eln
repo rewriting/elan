@@ -1,0 +1,27 @@
+module cexp
+// Constant expressions of the preprocessor ({ ... }~(e) repeats e times):
+// x/0 = 0, x%0 = x, MIN/-1 = MIN, MIN%-1 = 0, + - * and unary minus wrap
+// modulo 2^32, as the interpreter's int (rewrite/rtmisc.cc); they were
+// undefined behaviour (x/0 traps on x86).
+// tests/regression/preproc_constexp_div_zero.
+import global int; end
+operators global
+  divzero : int;
+  modzero : int;
+  minbyminus1 : int;
+  minmodminus1 : int;
+  addwraps : int;
+  negwraps : int;
+  mulwraps : int;
+end
+rules for int
+global
+  [] divzero => 0 { + 1 }~(5 / 0 + 2) end
+  [] modzero => 0 { + 1 }~(7 % 0) end
+  [] minbyminus1 => 0 { + 1 }~((0 - 2147483647 - 1) / (0 - 1) + 2147483647 + 3) end
+  [] minmodminus1 => 0 { + 1 }~((0 - 2147483647 - 1) % (0 - 1) + 1) end
+  [] addwraps => 0 { + 1 }~(2147483647 + 1 + 2147483647 + 2) end
+  [] negwraps => 0 { + 1 }~(-(0 - 2147483647 - 1) + 2147483647 + 2) end
+  [] mulwraps => 0 { + 1 }~(65536 * 65536 + 3) end
+end
+end

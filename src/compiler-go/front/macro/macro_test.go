@@ -318,3 +318,17 @@ func TestForEachSolutions(t *testing.T) {
 		t.Fatalf("trace %q\nwant %q", got, want)
 	}
 }
+
+// The constant-expression arithmetic is the interpreter's int
+// (base/intarith.h): x/0 = 0, x%0 = x, MIN/-1 = MIN, MIN%-1 = 0, wrapping.
+func TestIntArith(t *testing.T) {
+	const min = -2147483648
+	for _, c := range []struct{ got, want int32 }{
+		{intDiv(5, 0), 0}, {intMod(5, 0), 5}, {intDiv(-7, 0), 0}, {intMod(-7, 0), -7},
+		{intDiv(min, -1), min}, {intMod(min, -1), 0}, {intDiv(-7, 2), -3}, {intMod(-7, 3), -1},
+	} {
+		if c.got != c.want {
+			t.Errorf("got %d, want %d", c.got, c.want)
+		}
+	}
+}
