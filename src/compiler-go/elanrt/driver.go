@@ -149,6 +149,9 @@ func (s *Session) ResultBool(b bool) { s.result(func(w *Writer) { w.Bool(b) }) }
 // ResultStr prints a string result.
 func (s *Session) ResultStr(v string) { s.result(func(w *Writer) { w.Str(v) }) }
 
+// ResultIdent prints an identifier result (its index).
+func (s *Session) ResultIdent(i int32) { s.result(func(w *Writer) { w.IdentValue(i) }) }
+
 func (s *Session) result(print func(w *Writer)) {
 	s.results++
 	if s.Options.NoOutput {
@@ -197,10 +200,15 @@ func init() {
 // Main is the main function of a generated program: it parses the options,
 // sets the GC and the stack limit, and runs program on a new goroutine with
 // a session on [Out]; program computes and prints the results
-// (s.Result(t)); the statistics are printed after it returns, then the
-// program exits (status 0). querySort is the sort named in the prompt when
-// a query must be read (not supported yet: status 2).
-func Main(querySort string, program func(s *Session)) {
+// (s.Result(t)) of the start term, the query given as its second argument;
+// the statistics are printed after it returns, then the program exits
+// (status 0). querySort is the sort named in the prompt when a query must
+// be read (without -noInput: not supported yet, status 2). usesQuery: the
+// start term uses the query; under -noInput, the program prints REM's
+// message (rem/compiler/Query.java: "No ground term is defined", "Do not
+// use -noInput in this case") and exits with status 0 without running;
+// else program gets a nil query.
+func Main(querySort string, usesQuery bool, program func(s *Session, query Term)) {
 	o := ParseOptions(os.Args[1:])
 	if o.Help {
 		Out.WriteString(Help)
@@ -222,6 +230,11 @@ func Main(querySort string, program func(s *Session)) {
 			}
 		}()
 		s := NewSession(o, Out)
+		if o.NoInput && usesQuery {
+			Out.WriteString("No ground term is defined\nDo not use -noInput in this case\n")
+			done <- 0
+			return
+		}
 		if !o.NoInput {
 			fmt.Fprintf(Out, "Enter a query term of sort '%s'\n", querySort)
 			FlushOutput()
@@ -239,7 +252,7 @@ func Main(querySort string, program func(s *Session)) {
 				writeMemProfile(f)
 			}
 		}
-		program(s)
+		program(s, nil)
 		if depth != 0 {
 			// every Guard has its Unguard (generated code: a bug otherwise)
 			panic(fmt.Sprintf("guarded depth %d at the end of the program", depth))

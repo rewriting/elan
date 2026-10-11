@@ -1,0 +1,17 @@
+module neqnative
+// The term inequality (!= of eq[X], code 19) on a sort whose values are
+// native in elanc-go (bool, the identifiers of identifier): elanc-go
+// emitted `!a0 == a1`, (!a0) == a1 in Go: a wrong bool, a Go compile
+// error on ints and identifiers (found by S7d task 3).
+import global bool identifier eq[bool]; end
+sort out; end
+operators global
+  r(@,@,@,@,@,@) : (bool bool bool bool bool bool) out;
+  same(@) : (bool) bool;
+end
+rules for bool
+  x : bool;
+global
+  [] same(x) => x end
+end
+end

@@ -26,6 +26,7 @@ elan/sources/Compiler.2.1/Test::G::dcfail2:no:-:dcfail2	PASS
 elan/sources/Compiler.2.1/Test::G::dcfail3:no:-:dcfail3	PASS≈
 elan/sources/Compiler.2.1/Test::G::enum2:no:-:enum2	PASS≈
 elan/sources/Compiler.2.1/Test::G::enum:no:-:enum	PASS≈
+elan/sources/Compiler.2.1/Test::G::ident1:no:-:ident1	FAIL
 elan/sources/Compiler.2.1/Test::G::manySortedSet1:no:-:manySortedSet1	PASS
 elan/sources/Compiler.2.1/Test::G::manySortedSet2:no:-:manySortedSet2	PASS
 elan/sources/Compiler.2.1/Test::G::manySortedSet3:no:-:manySortedSet3	PASS
@@ -60,6 +61,7 @@ elan/sources/Compiler.3.0/Test::G::dcfail2:no:-:dcfail2	PASS
 elan/sources/Compiler.3.0/Test::G::dcfail3:no:-:dcfail3	PASS≈
 elan/sources/Compiler.3.0/Test::G::enum2:no:-:enum2	PASS≈
 elan/sources/Compiler.3.0/Test::G::enum:no:-:enum	PASS≈
+elan/sources/Compiler.3.0/Test::G::ident1:no:-:ident1	FAIL
 elan/sources/Compiler.3.0/Test::G::manySortedSet1:no:-:manySortedSet1	PASS
 elan/sources/Compiler.3.0/Test::G::manySortedSet2:no:-:manySortedSet2	PASS
 elan/sources/Compiler.3.0/Test::G::manySortedSet3:no:-:manySortedSet3	PASS
@@ -93,6 +95,7 @@ elan/sources/Compiler.3.2/Test::G::dcfail2:no:-:dcfail2	PASS
 elan/sources/Compiler.3.2/Test::G::dcfail3:no:-:dcfail3	PASS≈
 elan/sources/Compiler.3.2/Test::G::enum2:no:-:enum2	PASS≈
 elan/sources/Compiler.3.2/Test::G::enum:no:-:enum	PASS≈
+elan/sources/Compiler.3.2/Test::G::ident1:no:-:ident1	FAIL
 elan/sources/Compiler.3.2/Test::G::manySortedSet1:no:-:manySortedSet1	PASS
 elan/sources/Compiler.3.2/Test::G::manySortedSet2:no:-:manySortedSet2	PASS
 elan/sources/Compiler.3.2/Test::G::manySortedSet3:no:-:manySortedSet3	PASS
@@ -125,6 +128,7 @@ elan/sources/Compiler.4.0/Test::G::dcfail2:no:-:dcfail2	PASS
 elan/sources/Compiler.4.0/Test::G::dcfail3:no:-:dcfail3	PASS≈
 elan/sources/Compiler.4.0/Test::G::enum2:no:-:enum2	PASS≈
 elan/sources/Compiler.4.0/Test::G::enum:no:-:enum	PASS≈
+elan/sources/Compiler.4.0/Test::G::ident1:no:-:ident1	FAIL
 elan/sources/Compiler.4.0/Test::G::manySortedSet1:no:-:manySortedSet1	PASS
 elan/sources/Compiler.4.0/Test::G::manySortedSet2:no:-:manySortedSet2	PASS
 elan/sources/Compiler.4.0/Test::G::manySortedSet3:no:-:manySortedSet3	PASS

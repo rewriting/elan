@@ -1,0 +1,6 @@
+LPL ident2string description
+  query of sort bool
+  result of sort out
+  import ident2string
+  start with () r(string_ident2string(hello), name(world), string_strlen(name(abc)))
+end

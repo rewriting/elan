@@ -78,6 +78,13 @@ sub-project (S1–S5b). Each item says where it comes from.
   `stermreplace`/`occursin`), REM the elements only (`term_rec_replace`,
   `term_occur`); elanc-go follows the interpreter
   (`programs/normalise/replace_ac.rem`).
+- **REM prints identifiers as `IDENT(n)`** (`src/compiler/runtime/termOut.c`,
+  n the index of the identifier in the `.ref` Identifiers table): the J
+  snapshots of `ident1` (Compiler 2.1/3.0/4.0) are `result = IDENT(454)`,
+  the interpreter and elanc-go print `toto`
+  (`tests/compiler-rs/bench_g_differs.tsv`; `test_normalise.sh` puts the
+  names back in REM's output, `rem_idents.py`). REM needs at least one
+  rule in a program (`ParseException: Encountered "EndDef"`).
 - **REM: Meta_strat terms** (`call`, sequences... built as `Strategy[X]`
   terms) give C that does not compile (`fun_143`), found by S6b
   (`tests/compiler-rs/programs/strategy_terms/ms_*`, `.no-rem`).

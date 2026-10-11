@@ -1,0 +1,16 @@
+module noinput_query
+// A start term that uses the query (start with () p(s(s(query)))): run with
+// -noInput, the compiled program has no term to start from.
+import global bool; end
+sort nat; end
+operators global
+  o : nat;
+  s(@) : (nat) nat;
+  p(@) : (nat) nat;
+end
+rules for nat
+  x : nat;
+global
+  [] p(s(x)) => x end
+end
+end

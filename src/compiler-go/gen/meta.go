@@ -177,7 +177,7 @@ func (e *emitter) metaCase(op *ir.Op, ev *ir.MetaEval) {
 		}
 		// the sort of t is unknown for a number or a string (no symbol)
 		typed := "true"
-		if f := p.FamilyOf(x); f != nil && f.Base == x && f.Kind != ir.KindBool {
+		if f := p.FamilyOf(x); f != nil && f.Base == x && (f.Kind == ir.KindInt || f.Kind == ir.KindStr) {
 			switch {
 			case !f.Boxed():
 				typed = "false"

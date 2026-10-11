@@ -63,21 +63,26 @@ func TestOptions(t *testing.T) {
 
 func init() {
 	helpers["main"] = func() {
-		Main("Nat", func(s *Session) {
+		Main("Nat", false, func(s *Session, _ Term) {
 			for i := range 3 {
 				Step()
 				s.Result(nat(i))
 			}
 		})
 	}
+	helpers["usesquery"] = func() {
+		Main("Nat", true, func(s *Session, q Term) {
+			s.Result(Mk1(symS, q))
+		})
+	}
 	helpers["panic"] = func() {
-		Main("Nat", func(s *Session) {
+		Main("Nat", false, func(s *Session, _ Term) {
 			s.Result(nat(1))
 			panic("plus_320: no rule applies to a total operator")
 		})
 	}
 	helpers["fatal"] = func() {
-		Main("Nat", func(s *Session) {
+		Main("Nat", false, func(s *Session, _ Term) {
 			s.Result(nat(1))
 			Fatal("elanrt: no rule for f(o)")
 		})
@@ -102,6 +107,18 @@ func TestMainProgram(t *testing.T) {
 	if st != 2 || out != "Enter a query term of sort 'Nat'\n" || !strings.Contains(errs, "use -noInput") {
 		t.Fatalf("query: status %d, out %q, err %q", st, out, errs)
 	}
+	// a start term that uses the query, run with -noInput: REM's message
+	// (Query.java), status 0, the program not run
+	for _, args := range [][]string{{"-noInput", "-quiet"}, {"-noInput"}} {
+		out, errs, st = runHelper(t, "usesquery", nil, args...)
+		if st != 0 || errs != "" || out != "No ground term is defined\nDo not use -noInput in this case\n" {
+			t.Fatalf("query under %v: status %d, out %q, err %q", args, st, out, errs)
+		}
+	}
+	out, errs, st = runHelper(t, "usesquery", nil, "-quiet")
+	if st != 2 || out != "Enter a query term of sort 'Nat'\n" || !strings.Contains(errs, "use -noInput") {
+		t.Fatalf("query: status %d, out %q, err %q", st, out, errs)
+	}
 	// a run-time error: the results printed before, then the message
 	out, errs, st = runHelper(t, "fatal", nil, "-noInput", "-quiet")
 	if st != 1 || out != "\nresult = s(o)\n" || errs != "elanrt: no rule for f(o)\n" {
@@ -118,7 +135,7 @@ func TestMainProgram(t *testing.T) {
 
 func init() {
 	helpers["unbalanced"] = func() {
-		Main("Nat", func(s *Session) {
+		Main("Nat", false, func(s *Session, _ Term) {
 			s.Result(nat(1))
 			Guard() // without its Unguard: a bug of the generated code
 		})
@@ -138,7 +155,7 @@ func TestMainDepthBalance(t *testing.T) {
 
 func init() {
 	helpers["profiled"] = func() {
-		Main("Nat", func(s *Session) {
+		Main("Nat", false, func(s *Session, _ Term) {
 			s.Result(nat(1))
 			switch os.Getenv("ELANRT_END") {
 			case "fatal":

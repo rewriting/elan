@@ -101,6 +101,7 @@ const (
 	ttEVar
 	ttInt
 	ttStr
+	ttIdent // an identifier literal (i: its index)
 )
 
 // tt is a typed term: operators resolved to candidates.
@@ -127,6 +128,8 @@ func builtinKind(name string) (BuiltinKind, bool) {
 		return KindBool, true
 	case "builtinString":
 		return KindStr, true
+	case "ident":
+		return KindIdent, true
 	}
 	return 0, false
 }
@@ -161,6 +164,7 @@ type lowerer struct {
 	intSort      optSort
 	strSort      optSort
 	boolSort     optSort
+	identSort    optSort
 }
 
 // profile is an operator: its symbol, the sorts of its arguments and its
@@ -226,6 +230,7 @@ func newLowerer(p *ref.Program) *lowerer {
 		return optSort{}
 	}
 	l.intSort, l.strSort, l.boolSort = named("builtinInt"), named("builtinString"), named("bool")
+	l.identSort = named("ident")
 	return l
 }
 
@@ -313,7 +318,13 @@ func (l *lowerer) typeTerm(t ref.Term, expected optSort) (tt, error) {
 		}
 		return tt{kind: ttStr, s: decodeString(t.Codes)}, nil
 	case ref.Ident:
-		return tt{}, unsupported("S7d", "builtin identifiers (sort ident)")
+		if !l.identSort.ok {
+			return tt{}, invalid("identifier without the sort ident")
+		}
+		if err := check(l.identSort.s, "identifier"); err != nil {
+			return tt{}, err
+		}
+		return tt{kind: ttIdent, i: int32(t.Index)}, nil
 	case ref.Fsym:
 		if t.Symbol == callSymbol && len(t.Args) == 1 {
 			if n, ok := t.Args[0].(ref.Int); ok {
@@ -390,6 +401,8 @@ func (l *lowerer) sortOf(t *tt) ref.SortIndex {
 		return l.intSort.s
 	case ttStr:
 		return l.strSort.s
+	case ttIdent:
+		return l.identSort.s
 	}
 	panic("sort of an extension variable")
 }
@@ -481,9 +494,6 @@ func (l *lowerer) run(name string) (*IR, error) {
 	if err != nil {
 		return nil, err
 	}
-	if containsVar(&start) {
-		return nil, unsupported("S7d", "query input: the start term uses the query")
-	}
 
 	r := &reach{seen: map[int]bool{}, sorts: map[ref.SortIndex]bool{}, calls: map[callKey]callTargets{}}
 	l.visit(&start, r)
@@ -522,7 +532,7 @@ func (l *lowerer) run(name string) (*IR, error) {
 	})
 	for _, s := range sorts {
 		n := l.sortName(s)
-		if n == "ident" || strings.HasPrefix(n, "intern ") {
+		if strings.HasPrefix(n, "intern ") {
 			return nil, unsupported("S7d", "builtin sort %s", n)
 		}
 	}
@@ -547,6 +557,8 @@ func (l *lowerer) visit(t *tt, r *reach) {
 		r.sorts[l.intSort.s] = true
 	case ttStr:
 		r.sorts[l.strSort.s] = true
+	case ttIdent:
+		r.sorts[l.identSort.s] = true
 	}
 }
 
@@ -986,7 +998,7 @@ func (l *lowerer) reachCall(name string, strateg ref.SortIndex, r *reach) error 
 		return err
 	}
 	c := callTargets{typed: typed}
-	if k, ok := builtinKind(x); ok && k != KindBool {
+	if k, ok := builtinKind(x); ok && (k == KindInt || k == KindStr) {
 		c.hasUntyped = true
 		u, err := check(l.resolveCall(name, ""))
 		if e, ok := err.(*Unsupported); ok {
@@ -1320,11 +1332,26 @@ func (b *builder) build(name string, start *tt, q *ref.Query, sortIndices []ref.
 	}
 	markRecursive(ir)
 
-	startExpr, err := b.expr(start, func(uint32) (VarID, bool) { return 0, false })
+	// the query is the variable of the start term (`start with () s(query)`)
+	usesQuery := containsVar(start)
+	startExpr, err := b.expr(start, func(uint32) (VarID, bool) { return 0, usesQuery })
 	if err != nil {
 		return nil, err
 	}
-	ir.Start = Start{QuerySort: l.sortName(q.Sort), Sort: b.sortOf[l.sortOf(start)], Term: startExpr, Strategy: -1}
+	ir.Start = Start{QuerySort: l.sortName(q.Sort), Sort: b.sortOf[l.sortOf(start)], Term: startExpr, Strategy: -1,
+		UsesQuery: usesQuery}
+	if usesQuery {
+		qs, ok := b.sortOf[q.Sort]
+		if !ok {
+			return nil, invalid("the query's sort %s is not reached", l.sortName(q.Sort))
+		}
+		ir.Start.Vars = []Var{{Name: "query", Sort: qs}}
+	}
+	if _, ok := b.sortOf[l.identSort.s]; ok && l.identSort.ok {
+		for _, e := range l.p.Identifiers {
+			ir.Idents = append(ir.Idents, Ident{Index: int32(e.Index), Name: e.Name})
+		}
+	}
 	if q.Strategy.Valid {
 		id := b.stratOf[q.Strategy.Index]
 		if st := &ir.Strategies[id]; st.Sort != ir.Start.Sort {
@@ -1647,6 +1674,8 @@ func (b *builder) expr(t *tt, varOf func(uint32) (VarID, bool)) (Expr, error) {
 		return Expr{Kind: ExprInt, Int: t.i}, nil
 	case ttStr:
 		return Expr{Kind: ExprStr, Str: t.s}, nil
+	case ttIdent:
+		return Expr{Kind: ExprIdent, Int: t.i}, nil
 	}
 	return Expr{}, invalid("extension variable in an expression")
 }
@@ -2104,6 +2133,8 @@ func (rl *ruleLowerer) pattern(t *tt, same *[]Cond) Pattern {
 		return Pattern{Kind: PatInt, Int: t.i}
 	case ttStr:
 		return Pattern{Kind: PatStr, Str: t.s}
+	case ttIdent:
+		return Pattern{Kind: PatIdent, Int: t.i}
 	}
 	panic("rules with extension variables are skipped")
 }
@@ -2317,6 +2348,11 @@ func (b *builder) render(t *tt, out *strings.Builder) {
 		fmt.Fprintf(out, "%d", t.i)
 	case ttStr:
 		out.WriteString(StringText(t.s))
+	case ttIdent:
+		if endsAlnum(out.String()) {
+			out.WriteByte(' ')
+		}
+		out.WriteString(b.l.ident(uint32(t.i)))
 	case ttOp:
 		// the declaration's syntax (the printing form may be an alias)
 		i := 0

@@ -131,10 +131,10 @@ func StrOfChar(c int32) string { return CString(string([]byte{byte(c)})) }
 // ---------------------------------------------------------------------------
 // Values of builtin sorts that can be stuck (see the package comment above)
 
-// IsValue tells whether t is a builtin value (int, bool or string), not a
-// stuck term.
+// IsValue tells whether t is a builtin value (int, bool, string or
+// identifier), not a stuck term.
 func IsValue(t Term) bool {
-	return t.Sym == SymInt || t.Sym == SymString || t == True || t == False
+	return t.Sym == SymInt || t.Sym == SymString || t.Sym == SymIdent || t == True || t == False
 }
 
 // IntOf returns the value of an int term; false if t is stuck.

@@ -173,6 +173,16 @@ type IR struct {
 	// MetaEvals are the evaluators of the Strategy[X] terms, one per X.
 	MetaEvals []MetaEval
 	Start     Start
+	// Idents is the program's table of identifiers (the Identifiers
+	// table of the .ref file) when its terms can have identifiers (sort
+	// ident reached): rt.InitIdents.
+	Idents []Ident
+}
+
+// Ident is an entry of the table of identifiers.
+type Ident struct {
+	Index int32
+	Name  string
 }
 
 // MetaOp is what the META strategy does with an operator of Meta_apply[X]
@@ -355,10 +365,13 @@ const (
 	KindBool
 	// KindStr is builtinString: a Go string of bytes (C strings).
 	KindStr
+	// KindIdent is ident: int32, the index of the identifier in the
+	// program's table of identifiers (rt.IdentIndex, S7d task 3).
+	KindIdent
 )
 
 func (k BuiltinKind) String() string {
-	return [...]string{"int", "bool", "string"}[k]
+	return [...]string{"int", "bool", "string", "ident"}[k]
 }
 
 // Family is a builtin sort and the sorts whose only constructor is a
@@ -480,39 +493,42 @@ type BuiltinOp int
 
 // The builtin operations supported.
 const (
-	IntAdd      BuiltinOp = iota // + on builtinInt (code 3)
-	IntSub                       // - (4)
-	IntMul                       // * (5)
-	IntDiv                       // / (6)
-	IntRem                       // % (27)
-	IntAnd                       // & (28)
-	IntOr                        // | (29)
-	IntNeg                       // unary - (20)
-	CmpEq                        // == on builtinInt or bool values (8)
-	CmpNe                        // != (9)
-	CmpLt                        // < (10)
-	CmpLe                        // <= (11)
-	CmpGt                        // > (12)
-	CmpGe                        // >= (13)
-	BoolAnd                      // and (21): a stuck argument counts as false
-	BoolOr                       // or (22)
-	BoolNot                      // not (24)
-	TermEq                       // == on any sort (18): syntactic equality of normal forms
-	TermNeq                      // != on any sort (19)
-	StrLen                       // string_strlen (150)
-	StrCat                       // string_strcat (151)
-	StrIndex                     // s[i] (152)
-	StrModif                     // s[i <- c] (153)
-	StrSubstr                    // string_substr (154)
-	StrSpn                       // string_strspn (156)
-	StrCmp                       // string_strcmp (157)
-	StrOfChar                    // string_string (158)
-	BoolToInt                    // btoi (25): 1 or 0 (no oracle: the S7d plan, Task 1)
-	IntToBool                    // itob (26): n != 0
-	TermReplace                  // replace t1 by t2 in t3 on any sorts (16): rt.Replace
-	TermOccurs                   // occurs t1 in t2 on any sorts (17): rt.Occurs
-	TermMatch                    // builtinSyntacticMatching (191): rt.SyntacticMatch
-	TermUnify                    // builtinSyntacticUnification (175): rt.SyntacticUnify
+	IntAdd        BuiltinOp = iota // + on builtinInt (code 3)
+	IntSub                         // - (4)
+	IntMul                         // * (5)
+	IntDiv                         // / (6)
+	IntRem                         // % (27)
+	IntAnd                         // & (28)
+	IntOr                          // | (29)
+	IntNeg                         // unary - (20)
+	CmpEq                          // == on builtinInt or bool values (8)
+	CmpNe                          // != (9)
+	CmpLt                          // < (10)
+	CmpLe                          // <= (11)
+	CmpGt                          // > (12)
+	CmpGe                          // >= (13)
+	BoolAnd                        // and (21): a stuck argument counts as false
+	BoolOr                         // or (22)
+	BoolNot                        // not (24)
+	TermEq                         // == on any sort (18): syntactic equality of normal forms
+	TermNeq                        // != on any sort (19)
+	StrLen                         // string_strlen (150)
+	StrCat                         // string_strcat (151)
+	StrIndex                       // s[i] (152)
+	StrModif                       // s[i <- c] (153)
+	StrSubstr                      // string_substr (154)
+	StrSpn                         // string_strspn (156)
+	StrCmp                         // string_strcmp (157)
+	StrOfChar                      // string_string (158)
+	BoolToInt                      // btoi (25): 1 or 0 (no oracle: the S7d plan, Task 1)
+	IntToBool                      // itob (26): n != 0
+	TermReplace                    // replace t1 by t2 in t3 on any sorts (16): rt.Replace
+	TermOccurs                     // occurs t1 in t2 on any sorts (17): rt.Occurs
+	TermMatch                      // builtinSyntacticMatching (191): rt.SyntacticMatch
+	TermUnify                      // builtinSyntacticUnification (175): rt.SyntacticUnify
+	IdentEq                        // == on ident (14)
+	IdentNe                        // != on ident (15)
+	IdentToString                  // ident2string (177): the name
 )
 
 var builtinNames = [...]string{
@@ -521,6 +537,7 @@ var builtinNames = [...]string{
 	"BoolAnd", "BoolOr", "BoolNot", "TermEq", "TermNeq",
 	"StrLen", "StrCat", "StrIndex", "StrModif", "StrSubstr", "StrSpn", "StrCmp", "StrOfChar",
 	"BoolToInt", "IntToBool", "TermReplace", "TermOccurs", "TermMatch", "TermUnify",
+	"IdentEq", "IdentNe", "IdentToString",
 }
 
 func (b BuiltinOp) String() string { return builtinNames[b] }
@@ -532,6 +549,7 @@ var builtinCodes = map[int32]BuiltinOp{
 	150: StrLen, 151: StrCat, 152: StrIndex, 153: StrModif, 154: StrSubstr,
 	156: StrSpn, 157: StrCmp, 158: StrOfChar,
 	25: BoolToInt, 26: IntToBool, 16: TermReplace, 17: TermOccurs, 191: TermMatch, 175: TermUnify,
+	14: IdentEq, 15: IdentNe, 177: IdentToString,
 }
 
 // BuiltinFromCode is the operation of a semantic code; false when it is not
@@ -615,6 +633,8 @@ const (
 	PatInt
 	// PatStr is a builtinString literal.
 	PatStr
+	// PatIdent is an identifier literal (Int: its index).
+	PatIdent
 	// PatAC is an AC pattern (only in [CondAC]): the AC operator Op, the
 	// element patterns Args (nested patterns of the same operator
 	// flattened; each matches one element), the variables of the AC level
@@ -765,6 +785,8 @@ const (
 	ExprOp
 	ExprInt
 	ExprStr
+	// ExprIdent is an identifier literal (Int: its index).
+	ExprIdent
 )
 
 // Expr is a term to build (right-hand side, condition, start term).
@@ -839,6 +861,8 @@ const (
 	HeadInt
 	// HeadStr is a builtinString literal.
 	HeadStr
+	// HeadIdent is an identifier literal (Int: its index).
+	HeadIdent
 )
 
 // Head is a head tested by a Switch.
@@ -854,7 +878,11 @@ type Start struct {
 	// QuerySort is the sort of the query (printed by the prompt).
 	QuerySort string
 	Sort      SortID
+	// Term is the start term; when it uses the query (UsesQuery), Vars
+	// has one variable, the query (ExprVar 0).
 	Term      Expr
+	UsesQuery bool
+	Vars      []Var
 	// Strategy is the strategy of `start with (S) t`, applied to the
 	// normal form of the term, each result printed; -1 for `()`.
 	Strategy StratID
@@ -887,6 +915,8 @@ func (ir *IR) ExprSort(e *Expr, vars []Var) SortID {
 		return ir.Ops[e.Op].Result
 	case ExprInt:
 		return ir.builtinBase(KindInt)
+	case ExprIdent:
+		return ir.builtinBase(KindIdent)
 	default:
 		return ir.builtinBase(KindStr)
 	}

@@ -1,0 +1,35 @@
+module idents
+// Identifiers (sort ident, S7d task 3): literals in left-hand sides and
+// right-hand sides, == and != (codes 14, 15), a non-linear left-hand side,
+// the injection of identifier (noquote/identifier.eln, a sort whose
+// values are identifiers: native in elanc-go) and its != (code 19). The
+// interpreter prints an identifier by its name, REM as IDENT(n) (n its
+// index in the Identifiers table of the .ref file): test_normalise.sh
+// prints REM's with the names.
+import global ident identifier bool; end
+sort t; end
+operators global
+  k(@) : (ident) t;
+  f(@) : (ident) t;
+  g(@) : (identifier) t;
+  c : t;
+  d : t;
+  same(@,@) : (ident ident) bool;
+  r(@,@,@,@,@,@,@,@,@,@,@) : (t t bool bool bool bool bool t t t ident) t;
+end
+rules for t
+  x : ident;
+  y : identifier;
+global
+  [] f(alpha) => k(beta) end
+  [] f(x) => k(x) end
+  [] g(foo) => c end
+  [] g(y) => d if neq_identifier(y, bar) end
+end
+rules for bool
+  x, y : ident;
+global
+  [] same(x, x) => true end
+  [] same(x, y) => false end
+end
+end

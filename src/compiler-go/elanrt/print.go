@@ -113,6 +113,11 @@ func (w *Writer) NumCode(s string) {
 // Int writes a builtin int; the spacing flag is unchanged.
 func (w *Writer) Int(v int32) { w.buf = strconv.AppendInt(w.buf, int64(v), 10) }
 
+// IdentValue writes the identifier of index i (a value of sort ident) by
+// its name, an identifier token, as the interpreter prints it (REM prints
+// IDENT(i)).
+func (w *Writer) IdentValue(i int32) { w.Ident(IdentName(i)) }
+
 // Bool writes true or false (identifier tokens).
 func (w *Writer) Bool(b bool) {
 	if b {
@@ -203,6 +208,9 @@ func (w *Writer) head(t Term, after *[][]PrintItem) Term {
 		return nil
 	case SymString:
 		w.Str(StrOf(t))
+		return nil
+	case SymIdent:
+		w.IdentValue(t.Int)
 		return nil
 	}
 	s := &Syms[t.Sym]

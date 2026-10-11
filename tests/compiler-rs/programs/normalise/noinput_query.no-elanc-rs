@@ -1,0 +1,3 @@
+elanc-rs is frozen at the end of S6b (docs/s6-rust-status.md): it refuses
+identifiers and start terms using the query (S6d), which elanc-go
+compiles since S7d.

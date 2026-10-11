@@ -349,11 +349,12 @@ func TestUnsupportedConstructsAreRefusedWhenReachable(t *testing.T) {
 	if st, what := unsupportedStage(t, p); st != "S7c" || !strings.Contains(what, "commutative") {
 		t.Fatalf("%s %s", st, what)
 	}
-	// a start term with the query
+	// a start term with the query: compiled (S7d task 3), the query its
+	// variable (-noInput then prints REM's message)
 	p = peano()
 	p.start(f(319, v(0, sNat)), sNat)
-	if st, _ := unsupportedStage(t, p); st != "S7d" {
-		t.Fatal(st)
+	if x := p.lower(t).Start; !x.UsesQuery || len(x.Vars) != 1 || x.Term.Args[0].Kind != ExprVar {
+		t.Fatalf("%+v", x)
 	}
 	// a strategy over a label without rules: compiled (no result)
 	p = peano()

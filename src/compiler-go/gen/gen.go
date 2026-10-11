@@ -167,7 +167,7 @@ func comment(s string) string {
 
 func goNative(k ir.BuiltinKind) string {
 	switch k {
-	case ir.KindInt:
+	case ir.KindInt, ir.KindIdent:
 		return "int32"
 	case ir.KindBool:
 		return "bool"
@@ -208,6 +208,8 @@ func boxValue(k ir.BuiltinKind, v string) string {
 		return "rt.MkInt(" + v + ")"
 	case ir.KindBool:
 		return "rt.MkBool(" + v + ")"
+	case ir.KindIdent:
+		return "rt.MkIdent(" + v + ")"
 	}
 	return "rt.MkStr(" + v + ")"
 }
@@ -219,7 +221,7 @@ func (e *emitter) unbox(s ir.SortID, t string) string {
 		return t
 	}
 	switch k {
-	case ir.KindInt:
+	case ir.KindInt, ir.KindIdent:
 		return t + ".Int"
 	case ir.KindBool:
 		return t + " == rt.True"
@@ -288,6 +290,9 @@ func (e *emitter) expr(x *ir.Expr, vars []ir.Var) string {
 		return e.fromValue(e.ir.ExprSort(x, vars), goInt(x.Int))
 	case ir.ExprStr:
 		return e.fromValue(e.ir.ExprSort(x, vars), goString(x.Str))
+	case ir.ExprIdent:
+		// an identifier: its index
+		return e.fromValue(e.ir.ExprSort(x, vars), goInt(x.Int))
 	}
 	op := &e.ir.Ops[x.Op]
 	switch op.Kind {
@@ -357,6 +362,12 @@ func (e *emitter) headTest(s ir.SortID, t string, h ir.Head) string {
 			return t + " == " + goString(h.Str)
 		}
 		return "rt.IsStr(" + t + ") && rt.StrOf(" + t + ") == " + goString(h.Str)
+	case ir.HeadIdent:
+		// (identifiers by index)
+		if native {
+			return t + " == " + goInt(h.Int)
+		}
+		return "rt.IsIdent(" + t + ") && " + t + ".Int == " + goInt(h.Int)
 	}
 	op := &e.ir.Ops[h.Op]
 	switch op.Kind {
@@ -573,7 +584,7 @@ func (e *emitter) symbols() {
 	for i, o := range syms {
 		op := &p.Ops[o]
 		if i == 0 {
-			e.line("%s int32 = rt.SymFalse + 1 + iota // %s", symName(op), comment(op.Decl))
+			e.line("%s int32 = rt.FirstSym + iota // %s", symName(op), comment(op.Decl))
 		} else {
 			e.line("%s // %s", symName(op), comment(op.Decl))
 		}
@@ -775,7 +786,7 @@ func (e *emitter) builtinBody(o ir.OpID) {
 		case ir.TermEq:
 			v = e.eqExpr(op.Args[0], "a0", "a1")
 		case ir.TermNeq:
-			v = "!" + e.eqExpr(op.Args[0], "a0", "a1")
+			v = "!(" + e.eqExpr(op.Args[0], "a0", "a1") + ")"
 		case ir.BoolAnd:
 			v = isTrue(0) + " && " + isTrue(1)
 		case ir.BoolOr:
@@ -803,7 +814,7 @@ func (e *emitter) builtinBody(o ir.OpID) {
 			e.line("v%d := %s", i, e.unboxValue(f.Kind, a, op.Fun))
 			continue
 		}
-		get := map[ir.BuiltinKind]string{ir.KindInt: "rt.IntOf", ir.KindBool: "rt.BoolOf", ir.KindStr: "rt.StrValue"}[f.Kind]
+		get := map[ir.BuiltinKind]string{ir.KindInt: "rt.IntOf", ir.KindBool: "rt.BoolOf", ir.KindStr: "rt.StrValue", ir.KindIdent: "rt.IdentOf"}[f.Kind]
 		e.line("v%d, ok%d := %s(%s)", i, i, get, a)
 		oks = append(oks, fmt.Sprintf("!ok%d", i))
 	}
@@ -854,6 +865,12 @@ func (e *emitter) builtinBody(o ir.OpID) {
 		e.b2i = true
 	case ir.IntToBool:
 		value = v[0] + " != 0"
+	case ir.IdentEq:
+		value = v[0] + " == " + v[1]
+	case ir.IdentNe:
+		value = v[0] + " != " + v[1]
+	case ir.IdentToString:
+		value = "rt.IdentString(" + v[0] + ")"
 	case ir.StrIndex:
 		value = "rt.StrIndex(" + v[0] + ", " + v[1] + ")"
 	case ir.StrModif:
@@ -874,7 +891,7 @@ func (e *emitter) builtinBody(o ir.OpID) {
 // unboxValue is the value of kind k of the boxed value t received by the
 // function fun (checked: rt.MustInt...).
 func (e *emitter) unboxValue(k ir.BuiltinKind, t, fun string) string {
-	get := map[ir.BuiltinKind]string{ir.KindInt: "rt.MustInt", ir.KindBool: "rt.MustBool", ir.KindStr: "rt.MustStr"}[k]
+	get := map[ir.BuiltinKind]string{ir.KindInt: "rt.MustInt", ir.KindBool: "rt.MustBool", ir.KindStr: "rt.MustStr", ir.KindIdent: "rt.MustIdent"}[k]
 	return fmt.Sprintf("%s(%s, %s)", get, t, goString(fun))
 }
 
@@ -1302,6 +1319,9 @@ func (e *emitter) patternCheck(p *ir.Pattern, t string, s ir.SortID, r *ir.Rule,
 	case ir.PatStr:
 		e.open("if %s {", e.headTest(s, t, ir.Head{Kind: ir.HeadStr, Str: p.Str}))
 		return 1, true
+	case ir.PatIdent:
+		e.open("if %s {", e.headTest(s, t, ir.Head{Kind: ir.HeadIdent, Int: p.Int}))
+		return 1, true
 	}
 	op := &e.ir.Ops[p.Op]
 	switch {
@@ -1346,23 +1366,45 @@ func (e *emitter) mainFunc() {
 	p := e.ir
 	e.line("// ==== main ====")
 	e.line("")
+	if len(p.Idents) > 0 {
+		e.line("// idents is the table of identifiers of the program (its .ref file): an")
+		e.line("// identifier is its index there.")
+		e.open("var idents = map[int32]string{")
+		for _, id := range p.Idents {
+			e.line("%d: %s,", id.Index, goString(id.Name))
+		}
+		e.close("}")
+		e.line("")
+	}
 	if p.Start.Strategy < 0 {
 		e.line("// main runs the start term of the query (-noInput), normalised and printed.")
 	} else {
 		e.line("// main runs the start term of the query (-noInput), normalised, then each")
 		e.line("// result of the start strategy printed.")
 	}
+	q := "_"
+	if p.Start.UsesQuery {
+		e.line("// The start term uses the query: with -noInput, REM's message (no term).")
+		q = "q"
+	}
 	e.open("func main() {")
-	e.open("rt.Main(%s, func(s *rt.Session) {", goString(p.Start.QuerySort))
+	if len(p.Idents) > 0 {
+		e.line("rt.InitIdents(idents)")
+	}
+	e.open("rt.Main(%s, %v, func(s *rt.Session, %s rt.Term) {", goString(p.Start.QuerySort), p.Start.UsesQuery, q)
+	if p.Start.UsesQuery {
+		v := &p.Start.Vars[0]
+		e.line("%s := %s", v.Name, e.unbox(v.Sort, "q"))
+	}
 	result := "Result"
 	if k, ok := p.Native(p.Start.Sort); ok {
-		result = map[ir.BuiltinKind]string{ir.KindInt: "ResultInt", ir.KindBool: "ResultBool", ir.KindStr: "ResultStr"}[k]
+		result = map[ir.BuiltinKind]string{ir.KindInt: "ResultInt", ir.KindBool: "ResultBool", ir.KindStr: "ResultStr", ir.KindIdent: "ResultIdent"}[k]
 	}
 	if p.Start.Strategy < 0 {
-		e.line("s.%s(%s)", result, e.expr(&p.Start.Term, nil))
+		e.line("s.%s(%s)", result, e.expr(&p.Start.Term, p.Start.Vars))
 	} else {
 		st := &p.Strategies[p.Start.Strategy]
-		e.line("t := %s", e.typedExpr(&p.Start.Term, nil))
+		e.line("t := %s", e.typedExpr(&p.Start.Term, p.Start.Vars))
 		e.line("// each result of %s", comment(st.Name))
 		e.open("%s(t, func(r %s) bool {", st.Fun, e.goType(st.Sort))
 		e.line("s.%s(r)", result)

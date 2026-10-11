@@ -1,0 +1,5 @@
+# G cases whose output may differ from the J (elanc) snapshot, and why
+# (read by bench_parity.py --kind G)
+elan/sources/Compiler.2.1/Test::G::ident1:no:-:ident1	REM prints an identifier as IDENT(n) (its index in the .ref file): result = IDENT(454); the interpreter and elanc-go by name: result = toto
+elan/sources/Compiler.3.0/Test::G::ident1:no:-:ident1	REM prints an identifier as IDENT(n) (its index in the .ref file): result = IDENT(454); the interpreter and elanc-go by name: result = toto
+elan/sources/Compiler.4.0/Test::G::ident1:no:-:ident1	REM prints an identifier as IDENT(n) (its index in the .ref file): result = IDENT(454); the interpreter and elanc-go by name: result = toto

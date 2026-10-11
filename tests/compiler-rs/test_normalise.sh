@@ -27,7 +27,11 @@
 # <name>.no-<compiler> (e.g. .no-elanc-rs) why the program is not run
 # with that compiler (normalised or refused programs); <name>.expected
 # holds the expected result line of a program that neither oracle runs
-# (its .no-rem and .no-interpreter say why).
+# (its .no-rem and .no-interpreter say why); <name>.stdout the whole
+# expected output of `./a.out -noInput -quiet` (status 0), compared with
+# the compiler's and REM's (the interpreter has no -noInput: .no-interpreter).
+# REM prints an identifier as IDENT(n), n its index in the .ref file: its
+# output is compared with the names put back (rem_idents.py).
 # Outputs are compared as bytes (LC_ALL=C): strings are bytes, and the
 # sources of latin1*.eln are Latin-1.
 # Programs programs/refused/<name>.lgi use constructs of later stages:
@@ -112,6 +116,28 @@ for lgi in "$HERE"/programs/normalise/*.lgi; do
   fi
   vet "$name" "$d/$W" || continue
   build=$(sed -n "s/^$ELANC: build time //p" "$d/$W/$ELANC.log")
+  # a program with an expected whole output (<name>.stdout): the
+  # compiler's and REM's, byte for byte, status 0
+  stdout=$HERE/programs/normalise/$name.stdout
+  if [ -f "$stdout" ]; then
+    ( cd "$d/$W" && ./a.out -noInput -quiet >run.out 2>run.err )
+    status=$?
+    if [ "$status" = 0 ] && cmp -s "$d/$W/run.out" "$stdout"; then
+      ok "$name: the output of $name.stdout"
+    else
+      fail "$name: status $status, output $(od -c "$d/$W/run.out" | head -3 | tr '\n' ' ') (expected $name.stdout)"
+    fi
+    if [ -n "$HAVE_REM" ] && [ ! -f "$HERE/programs/normalise/$name.no-rem" ]; then
+      if ( cd "$d/rem" && elanc -b -nosplit -quiet "$name" >elanc.log 2>&1 \
+           && make -f "$name.make" >make.log 2>&1 && ./a.out -noInput -quiet >run.out 2>&1 ) \
+         && cmp -s "$d/rem/run.out" "$stdout"; then
+        ok "$name vs REM: the output of $name.stdout"
+      else
+        fail "$name vs REM: not the output of $name.stdout (see $d/rem)"
+      fi
+    fi
+    continue
+  fi
   rs=$( cd "$d/$W" && ./a.out -noInput -quiet 2>"$d/$W/run.err"; echo "status $?" )
   status=$(printf '%s\n' "$rs" | sed -n 's/^status //p')
   rs=$(printf '%s\n' "$rs" | grep '^result = ')
@@ -136,7 +162,8 @@ for lgi in "$HERE"/programs/normalise/*.lgi; do
     echo "skip $name vs REM ($name.no-rem)"
   elif ( cd "$d/rem" && elanc -b -nosplit -quiet "$name" >elanc.log 2>&1 \
        && make -f "$name.make" >make.log 2>&1 ); then
-    rem=$( cd "$d/rem" && ./a.out -noInput -quiet 2>&1 | grep '^result = ' )
+    rem=$( cd "$d/rem" && ./a.out -noInput -quiet 2>&1 | python3 "$HERE/rem_idents.py" "$name.ref" \
+           | grep '^result = ' )
     known=$HERE/programs/normalise/$name.rem
     if [ -f "$known" ]; then
       expected=$(grep -v '^#' "$known")
