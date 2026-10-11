@@ -276,9 +276,9 @@ Parity is reached (finding 6). Decided by the spec, independent of the switch.
 
 **Files:** `CMakeLists.txt` (`option(ELAN_RUST ... OFF)`), `Makefile` (`check-rust`: runs `cargo test` and the scripts only when `$(PREFIX)/bin/elanc-rs` exists, i.e. a `-DELAN_RUST=ON` build; else prints `elanc-rs not built (-DELAN_RUST=OFF, the default since S7e): Rust tests skipped`), `tests/compiler-rs/test_normalise.sh`, `test_strategies.sh`, `test_depth.sh` (default `ELANC=elanc-go`), `bench_parity.py` (default kind G), `README.md` (the elanc-rs paragraph), `docs/s6-rust-status.md`, spec G7 ("done in S7e")
 
-- [ ] **Step 1: Evidence of parity** recorded in this plan: `bench_r_expected.tsv` cases vs their G status in `bench_g_expected.tsv` (each G status equal or better); programs with `.no-elanc-go` (must be none that elanc-rs passes).
-- [ ] **Step 2: Change** the defaults; **Step 3:** `make install && make check` — Expected: green, the Rust tests skipped with the message; `make CMAKE_FLAGS=-DELAN_RUST=ON check-rust` — Expected: green (the Rust tests still pass when asked for).
-- [ ] **Step 4: Commit** (`build: the Rust compiler is optional, ELAN_RUST=OFF by default (S7e task 8, G7)`).
+- [x] **Step 1: Evidence of parity** recorded in this plan: `bench_r_expected.tsv` cases vs their G status in `bench_g_expected.tsv` (each G status equal or better); programs with `.no-elanc-go` (must be none that elanc-rs passes).
+- [x] **Step 2: Change** the defaults; **Step 3:** `make install && make check` — Expected: green, the Rust tests skipped with the message; `make CMAKE_FLAGS=-DELAN_RUST=ON check-rust` — Expected: green (the Rust tests still pass when asked for).
+- [x] **Step 4: Commit** (`build: the Rust compiler is optional, ELAN_RUST=OFF by default (S7e task 8, G7)`).
 
 ### Task 9: Tests independent of the name `elanc`; REM also installed as `elanc-rem`
 
@@ -473,3 +473,16 @@ Performance (the same generated code built against each runtime, interleaved bes
 ### Tasks 4-7: check
 
 `make check` (macOS, after `make install`): legacy bench 0 regressions, 0 snapshot differences; `bench_parity.py --kind G` PASS=78 PASS~=1 PASS≈=53 FAIL=13 (no `PARITY:` line, no UNSUPPORTED); BenchThesis G 22 ok (steps equal to J's); `test_query.sh` 49 programs / 152 queries, `test_depth.sh` 20, `test_strategies.sh` (strategies, strategy_terms, ac, io 12, arrays 17): 0 failures. `bench_perf.sh build/install 5 --check`: exit 0 (nqueens 12 0.73 s, deeplist3m 1.26 s, propc 3 0.28 s, efib 200 0.07 s).
+
+### Task 8 results
+
+Evidence of parity (Step 1): the 79 cases of `bench_r_expected.tsv` (36 PASS, 1 PASS~, 27 PASS≈, 15 ERROR) all have the same status in `bench_g_expected.tsv` (160 cases: 78 PASS, 1 PASS~, 53 PASS≈, 13 FAIL, 15 ERROR); none worse, none missing. The only `.no-elanc-go` program is `programs/refused/ac`, a refusal of elanc-rs (AC) that elanc-go compiles.
+
+Changed: `CMakeLists.txt` `option(ELAN_RUST ... OFF)`; `Makefile` `check-rust` runs `cargo test`, the round trip (`rust` reader) and the scripts (`ELANC=elanc-rs`, `bench_parity.py --kind R`) only when `$(PREFIX)/bin/elanc-rs` exists, else prints `elanc-rs not built (-DELAN_RUST=OFF, the default since S7e): Rust tests skipped`; `ELAN_CONFIG_EPOCH` in the configuration key (a build directory configured before has `ELAN_RUST=ON` in its CMake cache: it is recreated once); `test_normalise.sh`, `test_strategies.sh`, `test_depth.sh` default to `ELANC=elanc-go`, `bench_parity.py` to `--kind G`; CI: a `workflow_dispatch` input `rust` (`gh workflow run ci.yml -f rust=true`) adds a step `make BUILD=build-rust ... CMAKE_FLAGS=-DELAN_RUST=ON check-rust`; README (elanc-rs paragraph), `docs/s6-rust-status.md`, spec G7.
+
+How to run the Rust tests: `make BUILD=build-rust CMAKE_FLAGS=-DELAN_RUST=ON check-rust` (or `check`; a separate `BUILD` keeps `build/`, since changing `CMAKE_FLAGS` recreates the build directory).
+
+Checked: `make install` (build/ recreated by the epoch: `bin/` has elan, elanc, elanc-go, no elanc-rs), `make check-rust`: the skip message; `make BUILD=build-rust CMAKE_FLAGS=-DELAN_RUST=ON check-rust`: exit 0 (cargo test 16 suites ok, round trip ok, test_normalise 23 programs, test_strategies 39, strategy_terms 95, test_depth 19: 0 failures; bench R PASS=36 PASS~=1 PASS≈=27 ERROR=15, as `bench_r_expected.tsv`).
+
+- Ruling: the Rust tests in CI run only on demand (`workflow_dispatch`, input `rust`), not on every push — why: G7 makes them optional, and a second build per runner doubles CI time for frozen code — cost if wrong: a change breaking elanc-rs is seen only when someone runs the workflow with `rust`.
+- Ruling: the configuration key gets an epoch so that existing build directories pick up the new default — why: `option()` keeps the cached ON, so `make check` on an existing `build/` would still build and test elanc-rs — cost if wrong: one full rebuild of each existing build directory.

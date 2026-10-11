@@ -2,7 +2,8 @@
 # Strategies compiled by a new compiler (elanc-rs, S6b; elanc-go, S7b)
 # compared with the interpreter and with REM.
 #
-# The compiler is $ELANC: elanc-rs (default) or elanc-go; below, "the
+# The compiler is $ELANC: elanc-go (default since S7e) or elanc-rs (built
+# only with -DELAN_RUST=ON); below, "the
 # compiler" is that one.
 #
 # Programs: programs/strategies/<name>.lgi, each with a ground start term
@@ -60,7 +61,7 @@
 # for elanc-rs, S7c-S7e for elanc-go) fails, the refusal quoted.
 # Outputs are compared as bytes (LC_ALL=C).
 #
-# Usage: [ELANC=elanc-go] test_strategies.sh PREFIX [-d DIR] [name...]   (an
+# Usage: [ELANC=elanc-rs] test_strategies.sh PREFIX [-d DIR] [name...]   (an
 # installed ELAN with the compiler; the names select programs, default all)
 # The work directory is tests/compiler-rs/work/DIR.XXXXXX for elanc-rs,
 # DIR-go.XXXXXX for elanc-go (kept, git-ignored); the build cache is shared
@@ -72,7 +73,7 @@ PREFIX=${1:?usage: test_strategies.sh PREFIX}
 PREFIX=$(cd "$PREFIX" && pwd) || exit 2
 HERE=$(cd "$(dirname "$0")" && pwd)
 export ELANLIB=$PREFIX PATH=$PREFIX/bin:$PATH LC_ALL=C
-ELANC=${ELANC:-elanc-rs}
+ELANC=${ELANC:-elanc-go}
 # per compiler: the build cache and its option, the stage of the refusals,
 # the suffix of the work directory, the subdirectory of each program
 case $ELANC in

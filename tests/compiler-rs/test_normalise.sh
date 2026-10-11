@@ -2,7 +2,8 @@
 # Normalisation by a new compiler (elanc-rs, S6a; elanc-go, S7a) compared
 # with REM and with the interpreter.
 #
-# The compiler is $ELANC: elanc-rs (default) or elanc-go; below, "the
+# The compiler is $ELANC: elanc-go (default since S7e) or elanc-rs (built
+# only with -DELAN_RUST=ON); below, "the
 # compiler" is that one.
 #
 # Programs: programs/normalise/<name>.lgi (+ .eln), each with a start term
@@ -42,7 +43,7 @@
 # docs/followups.md),
 # and remove the a.out left by a previous compilation.
 #
-# Usage: [ELANC=elanc-go] test_normalise.sh PREFIX [name...]   (an installed
+# Usage: [ELANC=elanc-rs] test_normalise.sh PREFIX [name...]   (an installed
 # ELAN with the compiler; the names select programs, default all)
 # The work directory is tests/compiler-rs/work/normalise.XXXXXX for
 # elanc-rs, normalise-go.XXXXXX for elanc-go (kept, git-ignored); the build
@@ -55,7 +56,7 @@ PREFIX=${1:?usage: test_normalise.sh PREFIX}
 PREFIX=$(cd "$PREFIX" && pwd) || exit 2
 HERE=$(cd "$(dirname "$0")" && pwd)
 export ELANLIB=$PREFIX PATH=$PREFIX/bin:$PATH LC_ALL=C
-ELANC=${ELANC:-elanc-rs}
+ELANC=${ELANC:-elanc-go}
 # per compiler: the build cache and its option, the stage of the refusals,
 # the suffix of the work directory, the subdirectory of each program
 case $ELANC in

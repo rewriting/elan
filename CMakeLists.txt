@@ -29,8 +29,9 @@ if(ELAN_COMPILER)
   add_subdirectory(src/compiler)
 endif()
 
-# The compiler in Rust (spec S6): only when cargo is found.
-option(ELAN_RUST "Build the Rust compiler elanc-rs (needs cargo)" ON)
+# The compiler in Rust (spec S6): optional since S7e (spec G7: elanc-go has
+# reached parity), built with -DELAN_RUST=ON when cargo is found.
+option(ELAN_RUST "Build the Rust compiler elanc-rs (needs cargo)" OFF)
 if(ELAN_RUST)
   find_program(ELAN_CARGO cargo)
   if(ELAN_CARGO)

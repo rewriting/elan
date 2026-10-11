@@ -3,7 +3,9 @@
 #   make install         install into $(PREFIX)
 #   make check           unit tests of the runner + golden tests + interpreter tests (I, A)
 #                        of the bench + compiled tests (J, JO) + check-rust + check-go
-#   make check-rust      tests of the Rust compiler elanc-rs (when cargo exists)
+#   make check-rust      tests of the Rust compiler elanc-rs, only in a build with
+#                        -DELAN_RUST=ON (OFF by default since S7e), e.g.
+#                        make BUILD=build-rust CMAKE_FLAGS=-DELAN_RUST=ON check
 #   make check-go        tests of the Go compiler elanc-go and its runtime (when go >= 1.24
 #                        exists): go vet/test, .ref reader, normalisation, strategies, AC,
 #                        depth, bench G, query input, BenchThesis G
@@ -44,7 +46,11 @@ toolchain:
 # options such as the sanitizers) is recorded in $(BUILD)/.elan-configure; when
 # it changes, the build directory is recreated (CMake cannot switch compilers
 # in place, and a stale sanitizer build would give misleading results).
-ELAN_CONFIG = $(ELAN_CC)|$(ELAN_CXX)|$(PREFIX)|$(CMAKE_FLAGS)
+# ELAN_CONFIG_EPOCH changes when a default of CMakeLists.txt changes, so that
+# existing build directories (whose CMake cache keeps the old default) are
+# recreated: 2 = ELAN_RUST OFF by default (S7e).
+ELAN_CONFIG_EPOCH = 2
+ELAN_CONFIG = $(ELAN_CONFIG_EPOCH)|$(ELAN_CC)|$(ELAN_CXX)|$(PREFIX)|$(CMAKE_FLAGS)
 configure: toolchain
 	@case "$(BUILD)" in ""|.|..|/|"$(CURDIR)") echo "ERROR: refusing BUILD='$(BUILD)'"; exit 1;; esac
 	@case "$(PREFIX)" in ""|/|*" "*) echo "ERROR: refusing PREFIX='$(PREFIX)' (empty, / or containing spaces)"; exit 1;; esac
@@ -109,18 +115,22 @@ check-golden: install
 	cd tests/golden && python3 test_run_golden.py
 	python3 tests/golden/run_golden.py --prefix $(PREFIX)
 
-# Tests of the Rust compiler (src/compiler-rs, spec S6), when cargo exists.
+# Tests of the Rust compiler (src/compiler-rs, spec S6): optional since S7e
+# (spec G7, elanc-go has reached parity), they run only when elanc-rs is
+# installed, i.e. in a build configured with -DELAN_RUST=ON (and cargo):
+#   make BUILD=build-rust CMAKE_FLAGS=-DELAN_RUST=ON check-rust   (or check)
+# (a separate BUILD keeps build/: changing CMAKE_FLAGS recreates the build
+# directory).
 check-rust: install
-	@if command -v cargo >/dev/null 2>&1; then \
+	@if [ -x "$(PREFIX)/bin/elanc-rs" ]; then \
 	  (cd src/compiler-rs && CARGO_TARGET_DIR=$(CURDIR)/$(BUILD)/src/compiler-rs/target cargo test --offline --quiet) \
-	  && tests/compiler-rs/test_ref_roundtrip.sh "$(PREFIX)" \
-	  && if [ -x "$(PREFIX)/bin/elanc-rs" ]; then tests/compiler-rs/test_normalise.sh "$(PREFIX)" \
-	       && tests/compiler-rs/test_strategies.sh "$(PREFIX)" \
-	       && tests/compiler-rs/test_strategies.sh "$(PREFIX)" -d strategy_terms \
-	       && tests/compiler-rs/test_depth.sh "$(PREFIX)" \
-	       && tests/compiler-rs/bench_parity.py "$(PREFIX)"; \
-	     else echo "elanc-rs not installed (-DELAN_RUST=OFF): compiled Rust tests skipped"; fi; \
-	else echo "cargo not found: Rust tests skipped"; fi
+	  && CARGO_TARGET_DIR=$(CURDIR)/$(BUILD)/src/compiler-rs/target tests/compiler-rs/test_ref_roundtrip.sh "$(PREFIX)" rust \
+	  && ELANC=elanc-rs tests/compiler-rs/test_normalise.sh "$(PREFIX)" \
+	  && ELANC=elanc-rs tests/compiler-rs/test_strategies.sh "$(PREFIX)" \
+	  && ELANC=elanc-rs tests/compiler-rs/test_strategies.sh "$(PREFIX)" -d strategy_terms \
+	  && ELANC=elanc-rs tests/compiler-rs/test_depth.sh "$(PREFIX)" \
+	  && tests/compiler-rs/bench_parity.py "$(PREFIX)" --kind R; \
+	else echo "elanc-rs not built (-DELAN_RUST=OFF, the default since S7e): Rust tests skipped"; fi
 
 # Tests of the Go compiler (src/compiler-go, spec S7), when go >= 1.24 exists.
 GO_ENV = GOTOOLCHAIN=local GOFLAGS=-mod=mod GOPROXY=off GOWORK=off GOCACHE=$(CURDIR)/$(BUILD)/src/compiler-go/gocache

@@ -113,7 +113,9 @@ runtime (`str_eval`) instead of the compiled `eval` rules; with
 (both are compared with the interpreter by
 `tests/compiler/test_runtime_strategies.sh`).
 
-`elanc-rs` (built when cargo is found, see `docs/s6-rust-status.md`)
+`elanc-rs` (built only with `-DELAN_RUST=ON`, e.g.
+`make install CMAKE_FLAGS=-DELAN_RUST=ON`, and cargo; frozen, see
+`docs/s6-rust-status.md`)
 compiles a program through Rust instead: `elanc-rs -b enum` exports the
 program, writes a cargo crate in `.elan-rs.enum/` and builds `./a.out`
 (`elanc-rs -help` lists the options). It exits with 0 on success, 2 when the
