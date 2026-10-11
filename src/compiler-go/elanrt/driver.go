@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"runtime"
 	"runtime/debug"
 	"runtime/pprof"
 	"strconv"
@@ -166,6 +167,17 @@ const MaxStack = 2_000_000_000
 // runs hundreds of collections (spike G2: propc 3, 0.68 s at 100, 0.43 s
 // at 400).
 const GCPercent = 400
+
+// Go samples the allocations for its memory profile (one per 512 KiB by
+// default), each sample unwinding the stack: with the deep recursions of
+// the programs and their allocation rates, a few per cent of the time
+// (propc 3: 0.77 -> 0.75 s). Off unless a
+// profile is asked for (ELAN_MEMPROFILE).
+func init() {
+	if os.Getenv("ELAN_MEMPROFILE") == "" {
+		runtime.MemProfileRate = 0
+	}
+}
 
 // Main is the main function of a generated program: it parses the options,
 // sets the GC and the stack limit, and runs program on a new goroutine with
