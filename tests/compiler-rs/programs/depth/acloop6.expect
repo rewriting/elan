@@ -1,0 +1,6 @@
+# repeat* of an AC rule, 3 x 10^6 turns: constant memory
+status 0
+result c(0)U a U b
+maxrss 64
+small 3000000 1000
+compilers elanc-go

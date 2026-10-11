@@ -1,0 +1,26 @@
+module acloop
+// A long loop on an AC term (S7c task 3): repeat* of a labelled rule
+// matched modulo AC, one step per turn; the terms of the turns before are
+// collected (the memory stays constant).
+import global int; end
+sort Bag; end
+operators global
+  @ U @ : (Bag Bag) Bag (AC);
+  c(@) : (int) Bag;
+  a : Bag;
+  b : Bag;
+end
+stratop global
+  acloop : <Bag> bs;
+end
+rules for Bag
+  n : int;
+  S : Bag;
+global
+  [acstep] c(n) U S => c(n - 1) U S if n > 0 end
+end
+strategies for Bag
+implicit
+  [] acloop => repeat*(dc one(acstep)) end
+end
+end
