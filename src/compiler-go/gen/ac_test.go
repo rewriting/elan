@@ -75,16 +75,22 @@ func TestEkerProgramRuns(t *testing.T) {
 	p.op(sNat, 343, "pick", []uint32{sSet}, 0)
 	p.op(sNat, 344, "three", []uint32{sSet}, 0)
 	p.op(sNat, 345, "twice", []uint32{sSet}, 0)
+	p.op(sSet, 346, "w", []uint32{sSet, sSet}, 0)
+	p.setAC(346)
 	n, s, y, z := v(1, sNat), v(2, sSet), v(3, sSet), v(4, sSet)
 	// pick(s) => n where u(single(n), u(y, z)) :=() s
 	p.rule(sNat, f(343, s), n, ref.Match{Sort: sSet, Pattern: f(340, f(341, n), f(340, y, z)), Rhs: s})
 	// three(u(y, u(z, single(n)))) => n
 	p.rule(sNat, f(344, f(340, y, f(340, z, f(341, n)))), n)
-	// twice(u(y, u(y, single(n)))) => n
-	p.rule(sNat, f(345, f(340, y, f(340, y, f(341, n)))), n)
+	// twice(w(y, w(y, single(n)))) => n (w: AC, no rule)
+	p.rule(sNat, f(345, f(346, y, f(346, y, f(341, n)))), n)
 	o, so, sso := f(318), f(319, f(318)), f(319, f(319, f(318)))
 	set := f(340, f(341, o), f(340, f(341, so), f(341, sso)))
-	twice := f(340, f(341, so), f(340, f(341, so), f(341, o)))
+	// w(single(s(o)), single(o), single(s(s(o))), single(o), single(s(o))):
+	// y = w(single(o), single(s(o))), n = s(s(o)), the only solution;
+	// w(single(o), single(s(o)), single(s(s(o)))): no solution
+	twice := f(346, f(341, so), f(346, f(341, o), f(346, f(341, sso), f(346, f(341, o), f(341, so)))))
+	odd := f(346, f(341, o), f(346, f(341, so), f(341, sso)))
 	p.p.Query.StartWith = f(400, set, f(343, set), f(344, set))
 	src := p.gen(t)
 	for _, want := range []string{"rt.NewEker(ekerPat0, 3, ", "ekerPat1 = ", "func acNorm(", "rt.ACSubject(sym_u_340, "} {
@@ -104,10 +110,10 @@ func TestEkerProgramRuns(t *testing.T) {
 	if got := run(t, p); !strings.HasPrefix(got, want) {
 		t.Errorf("got %q, want %q", got, want)
 	}
-	// (u is idempotent here: u(x, x) => x; the shape is tested end to end
-	// in tests/compiler-rs/programs/ac)
-	p.p.Query.StartWith = f(400, twice, f(345, set), f(345, set))
-	if got := run(t, p); !strings.HasPrefix(got, "\nresult = r(u(single(o),single(s(o))),twice(") {
-		t.Errorf("x U x U y: %q", got)
+	// x U x U y: y twice and an element
+	p.p.Query.StartWith = f(400, f(340, f(341, o), f(341, so)), f(345, twice), f(345, odd))
+	want = "\nresult = r(u(single(o),single(s(o))),s(s(o)),twice(w(single(o),w(single(s(o)),single(s(s(o)))))))\n"
+	if got := run(t, p); !strings.HasPrefix(got, want) {
+		t.Errorf("x U x U y: got %q, want %q", got, want)
 	}
 }

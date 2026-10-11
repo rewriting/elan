@@ -1,3 +1,6 @@
-The interpreter enumerates x U x U y U y with Eker's matcher, elanc-go in
-REM's order (REM's maximal extract for y, the rest twice x: g_x2y2u): the
-same solutions, in reverse order.
+The interpreter enumerates x U x U y U y with Eker's matcher: x by
+decreasing size (b U c U c, a U b U c, a U c U c, b U c, ...); elanc-go in
+REM's order (REM's maximal extract for y, from the largest down, the rest
+twice x: g_x2y2u): y = b U c U c, a U b U c, b U c, a U b, b, a U c U c, ...
+The same solutions in another order (not the reverse of the
+interpreter's: checked on this program).

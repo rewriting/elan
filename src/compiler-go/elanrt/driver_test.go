@@ -111,3 +111,23 @@ func TestMainProgram(t *testing.T) {
 		t.Fatalf("panic: status %d, out %q, err %q", st, out, errs)
 	}
 }
+
+func init() {
+	helpers["unbalanced"] = func() {
+		Main("Nat", func(s *Session) {
+			s.Result(nat(1))
+			Guard() // without its Unguard: a bug of the generated code
+		})
+	}
+}
+
+// rt.Main checks that every Guard had its Unguard: an unbalanced depth at
+// the end of the program is an internal error (status 1), the results
+// printed before kept.
+func TestMainDepthBalance(t *testing.T) {
+	out, errs, st := runHelper(t, "unbalanced", nil, "-noInput", "-quiet")
+	if st != 1 || out != "\nresult = s(o)\n" ||
+		!strings.HasPrefix(errs, "elanrt: internal error: guarded depth 1 at the end of the program\n") {
+		t.Fatalf("status %d, out %q, err %q", st, out, errs)
+	}
+}
