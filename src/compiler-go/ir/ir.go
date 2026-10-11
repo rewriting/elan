@@ -63,8 +63,41 @@
 //     to itself in tail position ([IR.TailCalls]): deterministic repeat*,
 //     iterate* and tail-recursive strategies are loops.
 //
-// Strategy terms built at run time (strat[X], defined strategies with
-// parameters, call "name":X, META) are refused as "S7b task 2".
+// # Strategy terms (S7b task 2, as elanc-rs's S6b task 2)
+//
+// Strategies built at run time ([S]t, `where x := [S]t`, defined
+// strategies with parameters `[] app(s) => s`, if-then-else, the labels as
+// strategy constants) are terms of the strategy sorts <X> (<X->X>) and
+// StrList[X,X] of strsig[X,Y]/strat[X] (elanlib/strategy). The
+// interpreter has no builtin evaluation of them: the codes of their
+// operators (DS_*, -179..-190, -205..-208, term/codes.h) are never used by
+// its rewriting (standardreduction, rewrite/rtmisc.cc); the defstrat word
+// of their grammar rules is only exported for REM. Their semantics is
+// ordinary ELAN code, which the .ref file contains in full: the strategy
+// eval:X/strat[X] (a `where x := [S]t` is exported as `where x := (eval)
+// [S]t`), the labelled rules of strat[X] ([DK], [DC], [IF1], [CONST]...)
+// and the rules the interpreter generates when it loads the program
+// (load/msemact.cc): [LAB] per label used as a strategy constant, [DSTR]
+// per defined strategy, [FSYM] congruences. So the strategy sorts are
+// ordinary sorts of terms, their operators constructors ([@]@ included: a
+// normal form keeps [S]t), and eval an ordinary named strategy: the
+// results and their order are the interpreter's by construction. The
+// labelled rules whose left-hand side has an operator that no term of the
+// program builds are not compiled (the traversal [TONE] when no tone(S)
+// is built, the [FSYM] congruences of operators never applied to
+// strategies).
+//
+// `call "name":X` (Meta_strat[X]) has a builtin evaluation: the META
+// strategy of set_of (Meta_apply[X], used by setof of strapply[X])
+// interprets a meta_apply term ([MetaOp]), whose first argument, a term of
+// sort Strategy[X], denotes a strategy (term2strategy, meta/meta.cc). Its
+// sorts are ordinary sorts too; the function of META on a sort
+// ([MetaApply]) and the evaluator of the Strategy[X] terms ([MetaEval])
+// are generated. The strategy of a call is chosen as the interpreter does
+// it when it evaluates the term (Strategyname_to_ref_index, commit
+// 93ec493): by its name and the sort of the term, known at compile time
+// (X), not by the index of the export (any sort: the 2004 behaviour that
+// REM keeps). Labels named by strings in Strategy[X] terms are S7d.
 //
 // # Extension points
 //
@@ -113,7 +146,75 @@ type IR struct {
 	// Strategies are the reachable named strategies, in the order of the
 	// strategy names of the .ref file.
 	Strategies []Strategy
-	Start      Start
+	// MetaApplies are the functions of the META strategy, one per sort it
+	// is applied to.
+	MetaApplies []MetaApply
+	// MetaEvals are the evaluators of the Strategy[X] terms, one per X.
+	MetaEvals []MetaEval
+	Start     Start
+}
+
+// MetaOp is what the META strategy does with an operator of Meta_apply[X]
+// (strbuiltins, rewrite/stateofexecution.cc); elsewhere the operator is a
+// constructor.
+type MetaOp int
+
+const (
+	// MetaNone: not a meta_apply operator.
+	MetaNone MetaOp = iota
+	// MetaList is meta_apply(s, t.l, from, n) (NEW_META_APPLY, code 128,
+	// set_of): one result, the list of the results of s on t, from number
+	// from (0 first), n of them (all when n is 0).
+	MetaList
+	// MetaAll is meta_apply(s, t) (META_APPL, 129): every result of s on t.
+	MetaAll
+	// MetaNth is meta_apply(s, t, n) (META_APPLY, 130): result number n of
+	// s on t (0 first), if any.
+	MetaNth
+)
+
+// MetaApply is the function of the META strategy on terms of one sort:
+// `func(t T, k rt.K[T]) bool` over the meta_apply terms of that sort whose
+// Strategy[X] has an evaluator; any other term is the interpreter's fatal
+// error "[META-built] META strategy over wrong term".
+type MetaApply struct {
+	Fun  string
+	Sort SortID
+}
+
+// MetaEval is the evaluation of the terms of sort Strategy[X]
+// (Meta_strat[X]) by META: term2strategy of meta/meta.cc, compiled to
+// `func(s rt.Term, t T, typed bool, k rt.K[T]) bool` applying the strategy
+// denoted by s to the term t of sort X: a sequence (@ 141, @ @ 142) of id
+// (143), call "name":X (144), dc/dk of strategies (137, 138 over 131,
+// 132), repeat (139) and iterate (140). typed: the sort of the term is
+// known (false for a number or a string, which the interpreter cannot
+// type); it chooses the strategy of a call.
+type MetaEval struct {
+	// Fun evaluates the Strategy[X] terms, StrategFun the Strateg[X] terms
+	// (its elements), ListFun the Strategies[X] terms (the strategies of a
+	// dc or dk).
+	Fun, StrategFun, ListFun string
+	// Strategy is Strategy[X]; Strateg and Strategies are Strateg[X] and
+	// Strategies[X], -1 when not reached.
+	Strategy, Strateg, Strategies SortID
+	// Term is X.
+	Term SortID
+	// Calls are the call "name":X terms of the program, by name.
+	Calls []MetaCall
+}
+
+// MetaCall is a call "name":X and the strategies it applies.
+type MetaCall struct {
+	Name string
+	// Typed is the strategy for a term whose sort is known (X).
+	Typed StratID
+	// Untyped is, for a term whose sort is unknown (X builtinInt or
+	// builtinString, a number or a string), the strategy; -1 when there is
+	// none (X has a symbol) or when it is refused (UntypedWhy: a strategy
+	// of another sort; the program stops with status 2 if it happens).
+	Untyped    StratID
+	UntypedWhy string
 }
 
 // Label is the labelled rules of one label (a localised rule name of the
@@ -187,6 +288,9 @@ const (
 	StIterate
 	// StCall is a call of a named strategy.
 	StCall
+	// StMeta is META (the strategy of `where x := (META) t`): t is a
+	// meta_apply term ([MetaOp]); its results.
+	StMeta
 )
 
 // Strat is an elementary strategy (one element of a sequence).
@@ -202,6 +306,8 @@ type Strat struct {
 	Body []Strat
 	// Call is the strategy of StCall.
 	Call StratID
+	// Meta is the function of StMeta (an index in [IR.MetaApplies]).
+	Meta int
 }
 
 // Sort is a reachable sort.
@@ -306,6 +412,8 @@ type Op struct {
 	Skipped []string
 	// Tree is the decision tree of a Defined operator.
 	Tree *Decision
+	// Meta is the evaluation of a meta_apply operator by META.
+	Meta MetaOp
 	// Recursive: the function is on a cycle of the call graph (it calls
 	// itself, directly or not), so it can recurse as deep as the data: the
 	// generated function guards its depth.

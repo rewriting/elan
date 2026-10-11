@@ -363,18 +363,18 @@ func TestUnsupportedConstructsAreRefusedWhenReachable(t *testing.T) {
 	if ir := p.lower(t); len(ir.Strategies) != 1 || len(ir.Labels) != 0 || ir.Start.Strategy != 0 {
 		t.Fatalf("%+v %+v", ir.Strategies, ir.Labels)
 	}
-	// traversals, META
-	for op, stage := range map[ref.StrategyOp]string{ref.STAll: "S7d", ref.SNormIn: "S7d", ref.SMeta: "S7b task 2"} {
+	// traversals (META: meta_test.go)
+	for op, stage := range map[ref.StrategyOp]string{ref.STAll: "S7d", ref.SNormIn: "S7d"} {
 		p.p.Strategies[0].Body = ref.StrategySeq{{Op: ref.SId}, {Op: op}}
 		if st, _ := unsupportedStage(t, p); st != stage {
 			t.Fatalf("%v: %s", op, st)
 		}
 	}
-	// a strategy call in a term: a strategy term (task 2)
+	// a call "name":X of a name that no strategy has (the export writes -1)
 	p = peano()
-	p.start(f(320, f(144, ref.Int{Value: 2}), f(318)), sNat)
-	if st, _ := unsupportedStage(t, p); st != "S7b task 2" {
-		t.Fatal(st)
+	p.start(f(320, f(144, ref.Int{Value: -1}), f(318)), sNat)
+	if st, what := unsupportedStage(t, p); st != "S7d" || !strings.Contains(what, "no strategy has") {
+		t.Fatalf("%s %s", st, what)
 	}
 	// a where with an undefined strategy: an invalid program
 	p = peano()
@@ -393,14 +393,15 @@ func TestUnsupportedConstructsAreRefusedWhenReachable(t *testing.T) {
 	if st, what := unsupportedStage(t, p); st != "S7d" || !strings.Contains(what, "code 155") {
 		t.Fatalf("%s %s", st, what)
 	}
-	// the codes of strategy terms (strsig/strat, Meta_strat, meta_apply)
-	// are strategy terms (S7b task 2), not builtins
-	for _, code := range []int32{128, 147, -180, 179, 190, -205, 208} {
+	// the codes of strategy terms (strsig/strat, Meta_strat; meta_apply:
+	// meta_test.go) are constructors, not builtins (the interpreter has no reduction
+	// for them)
+	for _, code := range []int32{131, 147, -180, 179, 190, -205, 208} {
 		p = peano()
 		p.op(sNat, 156, "x", []uint32{sNat}, code, 0)
 		p.start(f(156, f(318)), sNat)
-		if st, what := unsupportedStage(t, p); st != "S7b task 2" || !strings.Contains(what, "strategy term") {
-			t.Fatalf("code %d: %s %s", code, st, what)
+		if x := opNamed(t, p.lower(t), "x"); x.Kind != Constructor || !x.Variant {
+			t.Fatalf("code %d: %+v", code, x)
 		}
 	}
 }

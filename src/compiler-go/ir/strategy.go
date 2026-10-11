@@ -21,7 +21,8 @@ import "strings"
 //     at most, deterministic;
 //   - repeat*(s): s deterministic; iterate*(s): s contains fail (iterate*
 //     gives the term itself and every result after it);
-//   - a call: the called strategy.
+//   - a call: the called strategy;
+//   - META: no (meta_apply(s, t) gives every result of s).
 func StrategyDet(s *Strat, rulesDet func(LabelID) bool, nRules func(LabelID) int, stratDet func(StratID) bool) bool {
 	seq := func(v []Strat) bool {
 		for i := range v {
@@ -220,6 +221,8 @@ func (ir *IR) SeqText(seq []Strat) string {
 			parts = append(parts, "iterate*("+ir.SeqText(s.Body)+")")
 		case StCall:
 			parts = append(parts, BaseName(ir.Strategies[s.Call].Name))
+		case StMeta:
+			parts = append(parts, "META")
 		}
 	}
 	return strings.Join(parts, " ; ")

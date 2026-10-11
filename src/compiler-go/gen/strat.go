@@ -226,6 +226,8 @@ func (e *emitter) stratExpr(hoist *[]string, s *ir.Strat, sort ir.SortID, t, k s
 			return "again(" + t + ")"
 		}
 		return p.Strategies[s.Call].Fun + "(" + t + ", " + k + ")"
+	case ir.StMeta:
+		return p.MetaApplies[s.Meta].Fun + "(" + t + ", " + k + ")"
 	case ir.StRules:
 		if len(s.Labels) == 0 {
 			return "false"

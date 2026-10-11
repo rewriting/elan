@@ -41,11 +41,15 @@ import (
 //     left-hand side), and which of them give at most one result (greatest
 //     fixpoint, [StrategyDet]). A labelled rule whose left-hand side has an
 //     operator that no term of the program contains is not compiled
-//     ([lowerer.lhsPossible]).
+//     ([lowerer.lhsPossible]). Strategy terms (strat[X]) need nothing more:
+//     their sorts are ordinary sorts, their evaluation the rules and
+//     strategies of strat[X] in the .ref file (see the package comment,
+//     "Strategy terms"). `call "name":X` terms are resolved by name and sort
+//     ([lowerer.resolveCall]); META gets a function per sort and an
+//     evaluator of the Strategy[X] terms per X ([builder.metas]).
 
-// Unsupported is a construct of a later stage: Stage is S7b task 2
-// (strategy terms built at run time), S7c (AC) or S7d (query input and the
-// rest). The compiler exits with status 2.
+// Unsupported is a construct of a later stage: Stage is S7c (AC) or S7d
+// (query input and the rest). The compiler exits with status 2.
 type Unsupported struct {
 	Stage string
 	What  string
@@ -58,11 +62,6 @@ func (e *Unsupported) Error() string { return "not supported yet (" + e.Stage + 
 type Invalid struct{ Msg string }
 
 func (e *Invalid) Error() string { return "invalid program: " + e.Msg }
-
-// task2 is the stage of the strategy terms built at run time (strat[X]
-// terms, defined strategies with parameters, call "name":X, META, strategy
-// calls in terms, default strategies of operators).
-const task2 = "S7b task 2"
 
 func unsupported(stage, format string, a ...any) error {
 	return &Unsupported{Stage: stage, What: fmt.Sprintf(format, a...)}
@@ -317,13 +316,26 @@ func (l *lowerer) typeTerm(t ref.Term, expected optSort) (tt, error) {
 	case ref.Fsym:
 		if t.Symbol == callSymbol && len(t.Args) == 1 {
 			if n, ok := t.Args[0].(ref.Int); ok {
-				name := "?"
-				if n.Value >= 0 {
-					if s, ok := l.p.StrategyName(uint32(n.Value)); ok {
-						name = s
-					}
+				// call "name":X (`call @':'X : (builtinString)
+				// Strateg[X]`): the export replaces the string by the index
+				// of the strategy it finds for the name, any sort
+				// (ref/ref.cc); the term holds the name again, the
+				// strategy is chosen with the sort when it is applied
+				// ([lowerer.resolveCall]). -1: no strategy has this name
+				if n.Value < 0 {
+					return tt{}, unsupported("S7d", "call \"name\":X of a name that no strategy has "+
+						"(the interpreter stops: `unknown strategy in call used`)")
 				}
-				return tt{}, unsupported(task2, "strategy call %s in a term", name)
+				full, ok := l.p.StrategyName(uint32(n.Value))
+				if !ok {
+					return tt{}, invalid("call of strategy %d: no name", n.Value)
+				}
+				name, _, _ := strings.Cut(full, ":")
+				codes := make([]int32, len(name))
+				for i := range len(name) {
+					codes[i] = int32(int8(name[i]))
+				}
+				return l.typeTerm(ref.Fsym{Symbol: callSymbol, Args: []ref.Term{ref.Str{Codes: codes}}}, expected)
 			}
 		}
 		why := fmt.Sprintf("symbol %d has no profile", t.Symbol)
@@ -409,6 +421,23 @@ type reach struct {
 	// pending are the labelled rules of reached labels whose left-hand side
 	// cannot match yet ([lowerer.lhsPossible])
 	pending []pendingRule
+	// calls are the call "name":X terms reached, by name and Strateg[X]
+	calls map[callKey]callTargets
+	// errs are the refusals met by visit (reported after the others)
+	errs []error
+}
+
+type callKey struct {
+	name    string
+	strateg ref.SortIndex
+}
+
+// callTargets are the strategies of a call "name":X (see [MetaCall]).
+type callTargets struct {
+	typed      ref.StrategyNameIndex
+	untyped    ref.StrategyNameIndex
+	hasUntyped bool   // X is builtinInt or builtinString
+	untypedWhy string // the untyped strategy is refused
 }
 
 type pendingRule struct {
@@ -455,7 +484,7 @@ func (l *lowerer) run(name string) (*IR, error) {
 		return nil, unsupported("S7d", "query input: the start term uses the query")
 	}
 
-	r := &reach{seen: map[int]bool{}, sorts: map[ref.SortIndex]bool{}}
+	r := &reach{seen: map[int]bool{}, sorts: map[ref.SortIndex]bool{}, calls: map[callKey]callTargets{}}
 	l.visit(&start, r)
 	if q.Strategy.Valid {
 		r.reachStrategy(q.Strategy.Index)
@@ -480,6 +509,9 @@ func (l *lowerer) run(name string) (*IR, error) {
 			return nil, err
 		}
 	}
+	if len(r.errs) > 0 {
+		return nil, r.errs[0]
+	}
 	sorts := slices.Sorted(func(yield func(ref.SortIndex) bool) {
 		for s := range r.sorts {
 			if !yield(s) {
@@ -500,6 +532,11 @@ func (l *lowerer) visit(t *tt, r *reach) {
 	switch t.kind {
 	case ttOp:
 		r.reach(t.cand)
+		if k := &l.cands[t.cand]; k.symbol == callSymbol && len(t.args) == 1 && t.args[0].kind == ttStr {
+			if err := l.reachCall(t.args[0].s, k.result, r); err != nil {
+				r.errs = append(r.errs, err)
+			}
+		}
 		for i := range t.args {
 			l.visit(&t.args[i], r)
 		}
@@ -522,6 +559,19 @@ func strategyTermCode(code int32) bool {
 	return 128 <= code && code <= 147 || 179 <= code && code <= 190 || 205 <= code && code <= 208
 }
 
+// builtinCode is the code of a builtin operation (the absolute value of the
+// semantic code), false for an operator without one or with the code of a
+// strategy term constructor ([strategyTermCode]), which is a constructor.
+func builtinCode(semantic int32) (int32, bool) {
+	code := semantic
+	if code < 0 {
+		code = -code
+	}
+	return code, code != 0 && !strategyTermCode(code)
+}
+
+func isBuiltin(semantic int32) bool { _, ok := builtinCode(semantic); return ok }
+
 // expand checks a newly reached operator, then reaches what its rules use.
 func (l *lowerer) expand(c int, r *reach) error {
 	k := &l.cands[c]
@@ -539,9 +589,6 @@ func (l *lowerer) expand(c int, r *reach) error {
 	default:
 		return unsupported("S7c", "commutative operator %s", l.candDecl(k))
 	}
-	if k.defstrat.Kind != ref.DSNone {
-		return unsupported(task2, "operator with a default strategy %s", l.candDecl(k))
-	}
 	if l.boolSort.ok && k.result == l.boolSort.s {
 		// true and false are values of every bool computation
 		for _, sym := range []ref.SymbolCode{0, 1} {
@@ -557,14 +604,7 @@ func (l *lowerer) expand(c int, r *reach) error {
 	if err != nil {
 		return err
 	}
-	if k.semantic != 0 {
-		code := k.semantic
-		if code < 0 {
-			code = -code
-		}
-		if strategyTermCode(code) {
-			return unsupported(task2, "strategy term operator %s (code %d)", l.candDecl(k), k.semantic)
-		}
+	if code, ok := builtinCode(k.semantic); ok {
 		if _, ok := BuiltinFromCode(code); !ok {
 			return unsupported("S7d", "builtin operation code %d (%s)", code, l.candDecl(k))
 		}
@@ -738,7 +778,8 @@ func (l *lowerer) visitSeq(seq ref.StrategySeq, sort ref.SortIndex, name string,
 			}
 			r.reachStrategy(e.Call)
 		case ref.SMeta:
-			return unsupported(task2, "the META strategy (in %s)", name)
+			// the meta_apply terms are reached by the rules that build
+			// them; the strategies of their calls by reachCall
 		case ref.SNormIn, ref.SNormOut, ref.STAll, ref.STOne, ref.STSome, ref.SRewrite:
 			return unsupported("S7d", "strategy %s (in %s)", e.Op, name)
 		case ref.SDcCall, ref.SDkCall:
@@ -825,6 +866,123 @@ func (l *lowerer) whereTerms(w ref.Where, ruleCtx string, reach *reach) ([]tt, e
 	return nil, invalid("unknown condition %T", w)
 }
 
+// resolveCall is the strategy that call "name":X applies to a term of sort
+// sort (sort empty: unknown), as the interpreter finds it when it evaluates
+// a META strategy (Strategyname_to_ref_index, meta/meta.cc, fixed in commit
+// 93ec493): the last strategy (in table order) named exactly
+// name:sort/..., else the last named name:... of any sort. Its third step,
+// when no strategy has the name: the last strategy whose name starts with
+// name (in hash order) gives a sort and a module, but the name stays name,
+// still undefined: the interpreter stops with `unknown strategy in call
+// used` (status 1). The export (ref/ref.cc, the same lookup without the
+// sort) then writes -1, refused by typeTerm; otherwise the index of a
+// strategy named exactly name, looked up again here with the sort.
+func (l *lowerer) resolveCall(name, sort string) (ref.StrategyNameIndex, bool) {
+	entries := slices.Clone(l.p.StrategyNames)
+	slices.SortFunc(entries, func(a, b ref.TableEntry) int { return cmp.Compare(a.Index, b.Index) })
+	find := func(sort string) (ref.StrategyNameIndex, bool) {
+		for i := len(entries) - 1; i >= 0; i-- {
+			e := &entries[i]
+			rest, ok := strings.CutPrefix(e.Name, name+":")
+			if !ok || l.p.Strategy(e.Index) == nil {
+				continue
+			}
+			if sort == "" || strings.HasPrefix(rest, sort+"/") {
+				return e.Index, true
+			}
+		}
+		return 0, false
+	}
+	if sort != "" {
+		if s, ok := find(sort); ok {
+			return s, true
+		}
+	}
+	return find("")
+}
+
+// reachCall reaches the strategies of a call "name":X term (strateg is
+// Strateg[X]). The term is applied to terms of sort X (the interpreter
+// takes the sort of the head symbol of the term): a term of unknown sort
+// only when X is builtinInt or builtinString (a number or a string has no
+// symbol, NEW_META_APPLY in rewrite/stateofexecution.cc). The strategy
+// found must be of sort X (the interpreter would apply a strategy of
+// another sort to the term): refused; for a term of unknown sort, only if
+// it happens, at run time, since a stuck term of sort builtinInt has a
+// symbol.
+func (l *lowerer) reachCall(name string, strateg ref.SortIndex, r *reach) error {
+	key := callKey{name, strateg}
+	if _, ok := r.calls[key]; ok {
+		return nil
+	}
+	sname := l.sortName(strateg)
+	x, ok := metaParam(sname, "Strateg")
+	if !ok {
+		return invalid("call %s of sort %s, not Strateg[X]", StringText(name), sname)
+	}
+	var xs optSort
+	for _, s := range l.p.Sorts {
+		if s.Name == x {
+			xs = optSort{s.Index, true}
+		}
+	}
+	if !xs.ok {
+		return invalid("call %s:%s: no sort %s", StringText(name), x, x)
+	}
+	check := func(s ref.StrategyNameIndex, found bool) (ref.StrategyNameIndex, error) {
+		if !found {
+			return 0, invalid("call %s:%s: no strategy %s", StringText(name), x, name)
+		}
+		if d := l.p.Strategy(s); d.Sort != xs.s {
+			return 0, unsupported("S7d", "call %s:%s finds %s, a strategy of another sort",
+				StringText(name), x, l.strategyName(s))
+		}
+		return s, nil
+	}
+	typed, err := check(l.resolveCall(name, x))
+	if err != nil {
+		return err
+	}
+	c := callTargets{typed: typed}
+	if k, ok := builtinKind(x); ok && k != KindBool {
+		c.hasUntyped = true
+		u, err := check(l.resolveCall(name, ""))
+		if e, ok := err.(*Unsupported); ok {
+			c.untypedWhy = e.What
+		} else if err != nil {
+			return err
+		} else {
+			c.untyped = u
+			r.reachStrategy(u)
+		}
+	}
+	r.reachStrategy(typed)
+	r.calls[key] = c
+	return nil
+}
+
+// metaParam is X for a sort base[X] (Strateg[X], Strategy[X]).
+func metaParam(sort, base string) (string, bool) {
+	rest, ok := strings.CutPrefix(sort, base+"[")
+	if !ok || !strings.HasSuffix(rest, "]") {
+		return "", false
+	}
+	return rest[:len(rest)-1], true
+}
+
+// metaOp is what META does with an operator of semantic code semantic.
+func metaOp(semantic int32) MetaOp {
+	switch semantic {
+	case 128, -128:
+		return MetaList
+	case 129, -129:
+		return MetaAll
+	case 130, -130:
+		return MetaNth
+	}
+	return MetaNone
+}
+
 type typedRule struct {
 	rule *ref.Rule
 	lhs  tt
@@ -872,6 +1030,9 @@ type builder struct {
 	sortOf  map[ref.SortIndex]SortID
 	labelOf map[ref.RuleNameIndex]LabelID     // labels in table order
 	stratOf map[ref.StrategyNameIndex]StratID // strategies in table order
+	ir      *IR
+	// usedFuns are the names of the functions (unique)
+	usedFuns map[string]bool
 }
 
 // neverBuilt is the reason a labelled rule is not compiled.
@@ -890,6 +1051,7 @@ func (b *builder) build(name string, start *tt, q *ref.Query, sortIndices []ref.
 		b.stratOf[x] = i
 	}
 	ir := &IR{Program: name}
+	b.ir = ir
 	for _, s := range sortIndices {
 		b.sortOf[s] = len(ir.Sorts)
 		ir.Sorts = append(ir.Sorts, Sort{Index: s, Name: l.sortName(s), Family: -1})
@@ -901,6 +1063,7 @@ func (b *builder) build(name string, start *tt, q *ref.Query, sortIndices []ref.
 		return cmp.Or(cmp.Compare(a.symbol, c.symbol), cmp.Compare(a.result, c.result), slices.Compare(a.args, c.args))
 	})
 	usedFuns := map[string]bool{}
+	b.usedFuns = usedFuns
 	for _, c := range cs {
 		b.opOf[c] = len(ir.Ops)
 		k := &l.cands[c]
@@ -913,6 +1076,7 @@ func (b *builder) build(name string, start *tt, q *ref.Query, sortIndices []ref.
 			Print:  b.printItems(k),
 			Decl:   l.candDecl(k),
 			Kind:   Constructor,
+			Meta:   metaOp(k.semantic),
 		}
 		for _, a := range k.args {
 			op.Args = append(op.Args, b.sortOf[a])
@@ -931,11 +1095,8 @@ func (b *builder) build(name string, start *tt, q *ref.Query, sortIndices []ref.
 		}
 		bk, isB := builtinOf(ir.Ops[i].Result)
 		switch {
-		case k.semantic != 0:
-			code := k.semantic
-			if code < 0 {
-				code = -code
-			}
+		case isBuiltin(k.semantic):
+			code, _ := builtinCode(k.semantic)
 			op, _ := BuiltinFromCode(code)
 			pre[i] = preKind{kind: Builtin, builtin: op}
 		case len(rules) > 0:
@@ -1097,6 +1258,9 @@ func (b *builder) build(name string, start *tt, q *ref.Query, sortIndices []ref.
 	if err := b.strategies(ir, sig, usedFuns); err != nil {
 		return nil, err
 	}
+	if err := b.metas(); err != nil {
+		return nil, err
+	}
 	markRecursive(ir)
 
 	startExpr, err := b.expr(start, func(uint32) (VarID, bool) { return 0, false })
@@ -1232,12 +1396,77 @@ func (b *builder) strategySeq(seq ref.StrategySeq, sort ref.SortIndex) []Strat {
 			s = Strat{Kind: StIterate, Body: b.strategySeq(e.Body, sort)}
 		case ref.SCall:
 			s = Strat{Kind: StCall, Call: b.stratOf[e.Call]}
+		case ref.SMeta:
+			s = Strat{Kind: StMeta, Meta: b.metaApply(b.sortOf[sort])}
 		default:
 			panic("refused during reachability")
 		}
 		out = append(out, s)
 	}
 	return out
+}
+
+// metaApply is the function of META on sort s (created when first used).
+func (b *builder) metaApply(s SortID) int {
+	for i, m := range b.ir.MetaApplies {
+		if m.Sort == s {
+			return i
+		}
+	}
+	b.ir.MetaApplies = append(b.ir.MetaApplies, MetaApply{
+		Fun:  unique(b.usedFuns, "meta_"+OpBaseName([]string{b.ir.Sorts[s].Name})),
+		Sort: s,
+	})
+	return len(b.ir.MetaApplies) - 1
+}
+
+// metas builds the evaluators of the Strategy[X] terms of the reachable
+// meta_apply operators, with the call "name":X terms reached.
+func (b *builder) metas() error {
+	p := b.ir
+	byName := func(n string) SortID {
+		return slices.IndexFunc(p.Sorts, func(s Sort) bool { return s.Name == n })
+	}
+	for o := range p.Ops {
+		op := &p.Ops[o]
+		if op.Meta == MetaNone || slices.ContainsFunc(p.MetaEvals, func(m MetaEval) bool { return m.Strategy == op.Args[0] }) {
+			continue
+		}
+		sname := p.Sorts[op.Args[0]].Name
+		x, ok := metaParam(sname, "Strategy")
+		if !ok {
+			return invalid("%s: a strategy of sort %s", op.Decl, sname)
+		}
+		term := byName(x)
+		if term < 0 {
+			return invalid("%s: sort %s not reached", op.Decl, x)
+		}
+		base := "ev_" + OpBaseName([]string{sname})
+		ev := MetaEval{
+			Fun:        unique(b.usedFuns, base),
+			StrategFun: unique(b.usedFuns, base+"_step"),
+			ListFun:    unique(b.usedFuns, base+"_list"),
+			Strategy:   op.Args[0],
+			Strateg:    byName("Strateg[" + x + "]"),
+			Strategies: byName("Strategies[" + x + "]"),
+			Term:       term,
+		}
+		if ev.Strateg >= 0 {
+			for key, c := range b.reach.calls {
+				if key.strateg != p.Sorts[ev.Strateg].Index {
+					continue
+				}
+				mc := MetaCall{Name: key.name, Typed: b.stratOf[c.typed], Untyped: -1, UntypedWhy: c.untypedWhy}
+				if c.hasUntyped && c.untypedWhy == "" {
+					mc.Untyped = b.stratOf[c.untyped]
+				}
+				ev.Calls = append(ev.Calls, mc)
+			}
+			slices.SortFunc(ev.Calls, func(a, c MetaCall) int { return strings.Compare(a.Name, c.Name) })
+		}
+		p.MetaEvals = append(p.MetaEvals, ev)
+	}
+	return nil
 }
 
 func (b *builder) lexemTexts(ls []ref.Lexem) []string {
@@ -1431,8 +1660,19 @@ func markRecursive(ir *IR) {
 				seq(from, a)
 			}
 			seq(from, s.Body)
-			if s.Kind == StCall {
+			switch s.Kind {
+			case StCall:
 				calls[from] = append(calls[from], strat(s.Call))
+			case StMeta:
+				// META applies the strategies of the call "name":X terms
+				for _, ev := range ir.MetaEvals {
+					for _, c := range ev.Calls {
+						calls[from] = append(calls[from], strat(c.Typed))
+						if c.Untyped >= 0 {
+							calls[from] = append(calls[from], strat(c.Untyped))
+						}
+					}
+				}
 			}
 		}
 	}

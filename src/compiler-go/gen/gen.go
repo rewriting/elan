@@ -31,6 +31,10 @@
 //     the runtime (rt.RepeatStarDet/IterateStarDet loops for a
 //     deterministic step); a deterministic strategy calling itself in tail
 //     position is a loop ([ir.IR.TailCalls]);
+//   - strategy terms (strat[X]) need nothing more: eval and the rules of
+//     strat[X] are ordinary strategies and labels; META (set_of) and the
+//     evaluation of the Strategy[X] terms of call "name":X are generated
+//     functions (meta.go);
 //   - the functions that can recurse (strategies, labels, the
 //     normalisation of the operators of a cycle) start with rt.Guard();
 //   - conditions `where p := (S) t`: the rest of the rule in the
@@ -370,6 +374,7 @@ func (e *emitter) file() {
 	}
 	e.labels()
 	e.strategies()
+	e.metas()
 	for _, o := range e.injTests {
 		e.injTest(o)
 	}
