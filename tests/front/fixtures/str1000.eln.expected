@@ -1,0 +1,5 @@
+@begin str1000.eln
+@@stderr
+
+string constant too long
+@@status 1

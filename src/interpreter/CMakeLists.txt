@@ -84,6 +84,16 @@ elan_cxx_target(elan)
 target_link_libraries(elan PRIVATE elan_core)
 
 install(TARGETS elan RUNTIME DESTINATION bin)
+
+# --- elan-lextrace: the lexem-stream harness of the Go front end (S8a) -------
+# Its own compilation of lex/mlstream.cc with the test-only trace hooks
+# (ELAN_LEXTRACE, spec S8-11, decision D2); elan is unchanged
+# (tests/front/check_lextrace_hooks.sh). Built, not installed.
+add_executable(elan-lextrace ${PROJECT_SOURCE_DIR}/tests/front/lextrace/elan-lextrace.cc lex/mlstream.cc)
+elan_cxx_target(elan-lextrace)
+target_compile_definitions(elan-lextrace PRIVATE ELAN_LEXTRACE)
+target_include_directories(elan-lextrace PRIVATE ${ELAN_GEN_DIR})
+target_link_libraries(elan-lextrace PRIVATE elan_core)
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/src/lib/elanlib/
         DESTINATION share/elanlib)
 

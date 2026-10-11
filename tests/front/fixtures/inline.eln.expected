@@ -1,0 +1,10 @@
+@begin inline.eln
+id 646 module
+@inline  some code 
+id 109 m
+id 120 x
+id 311 end
+eos
+@end
+@@stderr
+@@status 0

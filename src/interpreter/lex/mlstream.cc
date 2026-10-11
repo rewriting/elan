@@ -36,6 +36,68 @@
 extern int ppexsyntan(lstream &,int,void (*ltol)(lexem,lexem&));
 			 //body in ppexparser.c gener. from ppexgram.t
 
+#ifdef ELAN_LEXTRACE
+// Test-only trace hooks (S8a, spec S8-11, decision D2 of the user): compiled
+// only into the harness elan-lextrace (tests/front/lextrace), with its own
+// compilation of this file under -DELAN_LEXTRACE; never into elan
+// (tests/front/check_lextrace_hooks.sh). They only write to lextrace_out
+// (NULL: off) and add no member to any class. Format (tests/front/README.md):
+// one line per lexem returned by the outermost mlstream::ilex, then the
+// markers that became pending during that call; "@begin NAME" before the
+// priming read of an mlstream (not traced), "@end" in its destructor.
+#include <string>
+#include <vector>
+FILE *lextrace_out = NULL;
+static int lextrace_depth = 0;                  // nesting of mlstream::ilex
+static std::vector<std::string> lextrace_pending;
+
+void lextrace_chars(FILE *f, const char *s, size_t n)
+{
+  for (size_t i = 0; i < n; i++) {
+    unsigned char c = (unsigned char)s[i];
+    if (c == '\\') fputs("\\\\", f);
+    else if (c == '\n') fputs("\\n", f);
+    else if (c == '\t') fputs("\\t", f);
+    else if (c == '"') fputs("\\\"", f);
+    else if (c < 32 || c >= 127) fprintf(f, "\\%03o", c);
+    else fputc(c, f);
+  }
+}
+
+void lextrace_lexem(FILE *f, lexem l)
+{
+  int raw = l.numval();                         // numval() is the raw code
+  if (l.isendofstream()) fputs("eos", f);
+  else if (raw >= 0) fprintf(f, "num %d", raw);
+  else if (l.ischar()) fprintf(f, "char %d", l.charval());
+  else if (l.isrealid()) {
+    const char *s = tabofident.ide(l.idval());
+    fprintf(f, "id %d ", l.idval());
+    if (s) lextrace_chars(f, s, strlen(s));
+  } else if (l.isrealstring()) {
+    const char *s = l.stringval();
+    fprintf(f, "str %d ", BOFSTRING - raw);
+    lextrace_chars(f, s, strlen(s));
+  } else fprintf(f, "other %d", raw);
+  fputc('\n', f);
+}
+
+static void lextrace_mark(const char *m)
+{
+  if (lextrace_out) lextrace_pending.push_back(m);
+}
+
+static void lextrace_emit(lexem l)
+{
+  if (lextrace_out) {
+    lextrace_lexem(lextrace_out, l);
+    for (size_t i = 0; i < lextrace_pending.size(); i++)
+      fprintf(lextrace_out, "%s\n", lextrace_pending[i].c_str());
+  }
+  lextrace_pending.clear();
+}
+#endif
+
 static lexem RWFOR,RWEACH,RWSUCH,RWTHAT,RWAND,RWANDIF,RWTHEN,RWIN,RWIF;
 
 static lexem vartypetab[MAXNOFVAR];
@@ -62,12 +124,22 @@ mlstream::mlstream(char *name)
   RWAND.cridlex(tabofident.addstr("AND"));
   RWANDIF.cridlex(tabofident.addstr("ANDIF"));
   RWIF.cridlex(tabofident.addstr("IF"));
+#ifdef ELAN_LEXTRACE
+  if (lextrace_out) fprintf(lextrace_out, "@begin %s\n", name);
+  lextrace_depth++;                             // the priming read is not traced
+#endif
   ilex(l);
+#ifdef ELAN_LEXTRACE
+  lextrace_depth--;
+#endif
 }
 
 mlstream::~mlstream()
 {
   int i;
+#ifdef ELAN_LEXTRACE
+  if (lextrace_out) fputs("@end\n", lextrace_out);
+#endif
   DELETE1(mactab);
   for(i=0; i<MAXNOFMAC; i++) macb[i].clear();
   for(i=0; i<macactstacki; i++) {
@@ -124,6 +196,9 @@ void mlstream::pilex(lexem &l)
 
 void mlstream::ilex(lexem &l)
 {
+#ifdef ELAN_LEXTRACE
+  lextrace_depth++;
+#endif
   pilex(l);
   if (macroexp()) {
     collident();
@@ -132,6 +207,9 @@ void mlstream::ilex(lexem &l)
   }
   else
     collident();
+#ifdef ELAN_LEXTRACE
+  if (--lextrace_depth == 0) lextrace_emit(l);
+#endif
 }
 
 
@@ -369,6 +447,9 @@ int mlstream::buffilex(lexem &l)
                      acte.actdata.nextmatch.substarray,
                      acte.actdata.nextmatch.lastws,0,
                      acte.actdata.nextmatch.varnum)) {
+#ifdef ELAN_LEXTRACE
+		  lextrace_mark("@foreach-end");
+#endif
 		  deleteforeachmacs(acte.actdata.nextmatch.varnames,
 		                    acte.actdata.nextmatch.varnum);
 		  freeWhereBacktrack(acte.actdata.nextmatch.varnum,
@@ -672,6 +753,9 @@ int mlstream::macroexp()
         expect('{');
 	fillmacbuf(tmpb);
 	mflex.crblanklex();
+#ifdef ELAN_LEXTRACE
+	lextrace_mark("@foreach-begin");
+#endif
 	addforeach(tmpb,ssnm,bvarnamesi);
         vartabi = bvartabi;
 	varnamesi = bvarnamesi;

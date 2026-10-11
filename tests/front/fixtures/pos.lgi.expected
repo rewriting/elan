@@ -1,0 +1,14 @@
+id 646 module
+id 109 m
+id 120 x
+id 121 y
+@inline  b 
+id 122 z
+id 311 end
+eos
+@@stderr
+
+[warning] :file=pos.lgi	line=2	pos=14
+	two succesives inline definitions,
+	previous one will be lost
+@@status 0

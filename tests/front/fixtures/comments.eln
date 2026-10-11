@@ -1,0 +1,4 @@
+// a line comment
+module /* block
+ comment */ m /**/ x // trailing
+end

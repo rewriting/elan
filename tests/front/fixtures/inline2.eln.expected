@@ -1,0 +1,14 @@
+@begin inline2.eln
+id 646 module
+@inline  second 
+id 109 m
+id 120 x
+id 311 end
+eos
+@end
+@@stderr
+
+[warning] :file=inline2.eln	line=0	pos=23
+	two succesives inline definitions,
+	previous one will be lost
+@@status 0

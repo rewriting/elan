@@ -1,0 +1,9 @@
+@begin str.eln
+id 646 module
+id 115 s
+str 0 a\"b\\c\nd\te\\q
+id 311 end
+eos
+@end
+@@stderr
+@@status 0

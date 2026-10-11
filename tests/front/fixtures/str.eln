@@ -1,0 +1,1 @@
+module s "a\"b\\c\nd\te\q" end

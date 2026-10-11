@@ -1,0 +1,5 @@
+@begin backquoteerr.eln
+@@stderr
+
+wrong string constant
+@@status 1

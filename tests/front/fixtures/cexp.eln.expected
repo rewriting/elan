@@ -1,0 +1,15 @@
+@begin cexp.eln
+id 646 module
+id 109 m
+id 98 b
+id 98 b
+id 98 b
+id 98 b
+id 99 c
+id 99 c
+id 99 c
+id 311 end
+eos
+@end
+@@stderr
+@@status 0

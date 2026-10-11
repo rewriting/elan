@@ -1,0 +1,6 @@
+@begin commenteof.eln
+@@stderr
+
+[error] :file=commenteof.eln	line=1	pos=1
+[lexan] comment throw end of input stream
+@@status 1

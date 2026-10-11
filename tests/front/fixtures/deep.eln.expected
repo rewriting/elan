@@ -1,0 +1,9 @@
+@begin deep.eln
+id 646 module
+id 109 m
+id 97 a
+id 311 end
+eos
+@end
+@@stderr
+@@status 0

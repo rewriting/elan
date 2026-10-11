@@ -1,0 +1,15 @@
+@begin backquote.eln
+id 646 module
+id 109 m
+num 97
+num 10
+num 9
+num 92
+num 34
+num 49
+id 120 x
+id 311 end
+eos
+@end
+@@stderr
+@@status 0

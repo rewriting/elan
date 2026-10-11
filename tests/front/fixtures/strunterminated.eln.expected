@@ -1,0 +1,5 @@
+@begin strunterminated.eln
+@@stderr
+
+string constant too long
+@@status 1

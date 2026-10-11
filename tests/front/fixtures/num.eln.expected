@@ -1,0 +1,10 @@
+@begin num.eln
+id 646 module
+id 336 num
+num 7
+char 1
+id 311 end
+eos
+@end
+@@stderr
+@@status 0

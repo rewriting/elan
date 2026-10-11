@@ -1,0 +1,8 @@
+@begin missingbrace.eln
+id 646 module
+@@stderr
+
+[error] :file=missingbrace.eln	line=1	pos=1
+macro construction buffer throw end of file
+	 did you forget a '}' somewhere ?
+@@status 1

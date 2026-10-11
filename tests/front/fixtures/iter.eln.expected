@@ -1,0 +1,40 @@
+@begin iter.eln
+id 646 module
+id 109 m
+id 102 f
+char 40
+num 1
+char 41
+id 102 f
+char 40
+num 2
+char 41
+id 102 f
+char 40
+num 3
+char 41
+id 264 x_1
+char 44
+char 46
+char 46
+char 46
+char 44
+id 266 x_3
+id 265 y_1
+char 59
+id 477 y_2
+char 59
+id 267 y_3
+id 478 z_2
+char 44
+id 268 z_3
+id 104 h
+id 104 h
+id 104 h
+id 107 k
+id 107 k
+id 311 end
+eos
+@end
+@@stderr
+@@status 0

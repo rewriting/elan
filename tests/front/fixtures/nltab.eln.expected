@@ -1,0 +1,12 @@
+@begin nltab.eln
+id 646 module
+id 109 m
+id 10 \n
+id 9 \t
+char 92
+id 120 x
+id 311 end
+eos
+@end
+@@stderr
+@@status 0

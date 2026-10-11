@@ -1,0 +1,10 @@
+@begin latin1.eln
+id 646 module
+id 109 m
+char 233
+str 0 caf\351
+id 311 end
+eos
+@end
+@@stderr
+@@status 0

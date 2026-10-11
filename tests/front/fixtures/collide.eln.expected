@@ -1,0 +1,13 @@
+@begin collide.eln
+id 646 module
+id 109 m
+id 290 a_b
+id 228 T_1
+id 229 T_2
+id 649 c_1_d
+id 298 e_f
+id 311 end
+eos
+@end
+@@stderr
+@@status 0

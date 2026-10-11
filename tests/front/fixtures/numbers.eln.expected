@@ -1,0 +1,14 @@
+@begin numbers.eln
+id 646 module
+id 109 m
+num 0
+num 2147483647
+other -2147483648
+char 1
+num 0
+num 7
+id 311 end
+eos
+@end
+@@stderr
+@@status 0

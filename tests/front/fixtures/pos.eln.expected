@@ -1,0 +1,16 @@
+@begin pos.eln
+id 646 module
+id 109 m
+@inline  b 
+id 120 x
+id 121 y
+id 122 z
+id 311 end
+eos
+@end
+@@stderr
+
+[warning] :file=pos.eln	line=2	pos=14
+	two succesives inline definitions,
+	previous one will be lost
+@@status 0
