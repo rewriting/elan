@@ -123,6 +123,15 @@ fi
 
 # 7. CMake: the fallback to rem when elanc-go is not built, the errors
 if [ "${CMAKE_CHECK:-}" = 1 ]; then
+  # the Makefile's ELANC_KIND (what check-elanc expects) reads the forms of
+  # -DELAN_ELANC=rem that CMake accepts
+  for flags in "-DELAN_ELANC=rem" "-DELAN_ELANC:STRING=rem" "-D ELAN_ELANC=rem" \
+               "-DX=1 -D  ELAN_ELANC:STRING=rem" "-DELAN_ELANC=go" "-DELAN_GO=OFF" ""; do
+    case $flags in *rem*) want=rem ;; *) want=go ;; esac
+    got=$(MAKEFLAGS= make -s --no-print-directory -C "$REPO" CMAKE_FLAGS="$flags" elanc-kind 2>&1)
+    if [ "$got" = "$want" ]; then ok "make_elanc_kind [$flags]"
+    else fail "make_elanc_kind [$flags]: $got, expected $want"; fi
+  done
   configure() { # configure <name> <cmake options>: its output in $WORK/<name>.log
     n=$1; shift
     rm -rf "$WORK/cfg-$n"

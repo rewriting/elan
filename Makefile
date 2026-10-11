@@ -35,7 +35,7 @@ else
   ELAN_CXX ?= g++
 endif
 
-.PHONY: manual manual-update all configure install check check-rust check-go check-compiler check-elanc check-elanc-rem check-golden check-sanitize check-arch check-unit test-runner smoke reference check-reference clean toolchain
+.PHONY: manual manual-update all configure install check check-rust check-go check-compiler check-elanc check-elanc-rem elanc-kind check-golden check-sanitize check-arch check-unit test-runner smoke reference check-reference clean toolchain
 
 all: configure
 	cmake --build $(BUILD) -j $(JOBS)
@@ -118,7 +118,13 @@ check-compiler: install
 # default; elanc-rem when elanc-go is not built) or to elanc-rem
 # (CMAKE_FLAGS=-DELAN_ELANC=rem); CMAKE_CHECK=1 also configures scratch build
 # directories for the fallback and the errors of ELAN_ELANC.
-ELANC_KIND = $(if $(findstring -DELAN_ELANC=rem,$(CMAKE_FLAGS)),rem,go)
+# (the forms CMake accepts: -DELAN_ELANC=rem, -DELAN_ELANC:STRING=rem,
+# -D ELAN_ELANC=rem; `make elanc-kind` prints it)
+EMPTY :=
+SPACE := $(EMPTY) $(EMPTY)
+ELANC_KIND = $(if $(filter -DELAN_ELANC=rem -DELAN_ELANC:STRING=rem,$(subst -D$(SPACE),-D,$(strip $(CMAKE_FLAGS)))),rem,go)
+elanc-kind:
+	@echo $(ELANC_KIND)
 check-elanc: install
 	CMAKE_CHECK=1 tests/compiler/test_elanc_switch.sh "$(PREFIX)" $(ELANC_KIND)
 # the rem variant, in its own build directory (a full build), removed after
