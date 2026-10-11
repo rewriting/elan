@@ -30,7 +30,7 @@ else
   ELAN_CXX ?= g++
 endif
 
-.PHONY: manual manual-update all configure install check check-rust check-go check-compiler check-golden check-sanitize check-arch check-unit test-runner smoke reference check-reference clean toolchain
+.PHONY: front-tables manual manual-update all configure install check check-rust check-go check-compiler check-golden check-sanitize check-arch check-unit test-runner smoke reference check-reference clean toolchain
 
 all: configure
 	cmake --build $(BUILD) -j $(JOBS)
@@ -138,6 +138,13 @@ check-go: install
 	  && ELANC=elanc-go tests/compiler-rs/test_query.sh "$(PREFIX)" \
 	  && BENCHTHESIS_KINDS=G tests/compiler/test_benchthesis.sh "$(PREFIX)"; \
 	else echo "elanc-go not built (go >= 1.24 missing or -DELAN_GO=OFF): Go tests skipped"; fi
+
+# The MACC tables of the Go front end (spec S8, S8-4): regenerate
+# src/compiler-go/front/lr/tables_gen.go and front/tables/keywords_gen.go from
+# the build's generated parsers (checked in; ELAN_GENERATED_DIR=... go test
+# ./front/lr/gen checks that they are up to date).
+front-tables: all
+	cd src/compiler-go && $(GO_ENV) go run ./front/lr/gen -in $(CURDIR)/$(BUILD)/src/interpreter/generated -out .
 
 check: smoke test-runner check-arch check-unit check-golden check-rust check-go
 	$(BENCH) --prefix $(PREFIX) --kinds I,A

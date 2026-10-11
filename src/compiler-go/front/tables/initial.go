@@ -36,3 +36,14 @@ func NewBuiltinModules(d *diag.D) *StringTab {
 		"builtinHashTerm",
 		"builtinEqMolecule")
 }
+
+// NewTabOfIdent is tabofident (the generated tabofident.cc): the identifier
+// table, MaxNofIdent, preloaded with the reserved words of the three MACC
+// grammars in their order (keywords_gen.go).
+func NewTabOfIdent(d *diag.D) *StringTab {
+	return NewStringTab(d, MaxNofIdent, reservedWords...)
+}
+
+// NewMRWT is mrwt (the generated tabofident.cc): the positions of the
+// reserved words in tabofident, MRWTSize, a word of two grammars counted twice.
+func NewMRWT(d *diag.D) *MiTab { return NewMiTab(d, MRWTSize, mrwtInit...) }
