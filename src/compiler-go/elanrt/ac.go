@@ -383,7 +383,12 @@ func DivAC(e []Term, m int) ([]Term, bool) {
 // a U b.
 //
 //	for s := rt.NewSplit(e); s.Next(); { x, y := s.X(), s.Y() ... }
+//
+// The first solution (x the last element, y the others) is given without
+// counting the distinct elements: a rule without conditions takes it.
 type Split struct {
+	e     []Term
+	first bool // at the first solution, the counters not made
 	d     []Term
 	max   []int
 	count []int
@@ -392,13 +397,21 @@ type Split struct {
 }
 
 // NewSplit starts the enumeration over e (sorted).
-func NewSplit(e []Term) Split {
-	d, ints := distinct(e, 1)
-	return Split{d: d, max: ints[:len(d)], count: ints[len(d):], total: len(e)}
-}
+func NewSplit(e []Term) Split { return Split{e: e, total: len(e)} }
 
 // Next moves to the next solution; false at the end.
 func (s *Split) Next() bool {
+	if s.d == nil {
+		if !s.first {
+			s.first = true
+			return s.total >= 2
+		}
+		// the counters, at the first solution
+		s.first = false
+		d, ints := distinct(s.e, 1)
+		s.d, s.max, s.count = d, ints[:len(d)], ints[len(d):]
+		s.count[len(d)-1], s.n = 1, 1
+	}
 	for i := len(s.count) - 1; i >= 0; i-- {
 		if s.count[i] < s.max[i] {
 			s.count[i]++
@@ -411,11 +424,21 @@ func (s *Split) Next() bool {
 	return false
 }
 
-// X is the counter's part (sorted, non-empty).
-func (s *Split) X() []Term { return s.part(false) }
+// X is the counter's part (sorted, non-empty; it may share e's array).
+func (s *Split) X() []Term {
+	if s.first {
+		return s.e[len(s.e)-1:]
+	}
+	return s.part(false)
+}
 
-// Y is the complement (sorted, non-empty).
-func (s *Split) Y() []Term { return s.part(true) }
+// Y is the complement (sorted, non-empty; it may share e's array).
+func (s *Split) Y() []Term {
+	if s.first {
+		return s.e[:len(s.e)-1]
+	}
+	return s.part(true)
+}
 
 func (s *Split) part(complement bool) []Term {
 	n := s.n
@@ -443,7 +466,12 @@ func (s *Split) part(complement bool) []Term {
 // m = 1: x is the whole multiset, E empty).
 //
 //	for s := rt.NewDown(e, m); s.Next(); { x, rest := s.X(), s.Rest() ... }
+//
+// With m = 1, the first solution is given without counting the distinct
+// elements (x is e): a rule without conditions takes it.
 type Down struct {
+	e       []Term
+	first   bool // m = 1, at the first solution, the counters not made
 	d       []Term
 	mult    []int
 	max     []int
@@ -454,16 +482,25 @@ type Down struct {
 
 // NewDown starts the enumeration over e (sorted).
 func NewDown(e []Term, m int) Down {
-	if m > 1 && !hasMult(e, m) {
+	if m == 1 {
+		return Down{e: e, m: 1}
+	}
+	if !hasMult(e, m) {
 		return Down{started: true} // no solution
 	}
+	s := Down{m: m}
+	s.counters(e)
+	return s
+}
+
+// counters makes the distinct elements and the counters of e.
+func (s *Down) counters(e []Term) {
 	d, ints := distinct(e, 2)
 	k := len(d)
-	s := Down{d: d, mult: ints[:k], max: ints[k : 2*k], count: ints[2*k:], m: m}
+	s.d, s.mult, s.max, s.count = d, ints[:k], ints[k:2*k], ints[2*k:]
 	for i, n := range s.mult {
-		s.max[i] = n / m
+		s.max[i] = n / s.m
 	}
-	return s
 }
 
 // hasMult tells whether an element of the sorted multiset e occurs m
@@ -487,8 +524,18 @@ func hasMult(e []Term, m int) bool {
 func (s *Down) Next() bool {
 	if !s.started {
 		s.started = true
+		if s.m == 1 {
+			s.first = true
+			return len(s.e) > 0
+		}
 		copy(s.count, s.max)
 	} else {
+		if s.first {
+			// the counters, at the first solution
+			s.first = false
+			s.counters(s.e)
+			copy(s.count, s.max)
+		}
 		i := len(s.count) - 1
 		for ; i >= 0; i-- {
 			if s.count[i] > 0 {
@@ -509,8 +556,11 @@ func (s *Down) Next() bool {
 	return false // x would be empty: the end
 }
 
-// X is the variable's value (sorted, non-empty).
+// X is the variable's value (sorted, non-empty; it may be e itself).
 func (s *Down) X() []Term {
+	if s.first {
+		return s.e
+	}
 	n := 0
 	for _, k := range s.count {
 		n += k
@@ -526,6 +576,9 @@ func (s *Down) X() []Term {
 
 // Rest is the extension E (sorted, possibly empty).
 func (s *Down) Rest() []Term {
+	if s.first {
+		return nil
+	}
 	n := 0
 	for i, k := range s.mult {
 		n += k - s.m*s.count[i]
