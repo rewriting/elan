@@ -283,3 +283,22 @@ func TestDownAndDiv(t *testing.T) {
 		t.Error("DivAC of an odd multiplicity")
 	}
 }
+
+// TestACSubject: a part of an AC term given to a matcher is the element
+// itself, the shared node when the term exists, else a transient node
+// (outside the unique table: AC terms enter it only as normal forms).
+func TestACSubject(t *testing.T) {
+	a, b, c := atom(51), atom(52), atom(53)
+	if ACSubject(symAnd, []Term{a}) != a {
+		t.Fatal("one element: the element itself")
+	}
+	created := Created
+	x := ACSubject(symAnd, MergeAC(symAnd, a, b))
+	if !x.isTmp() || Created != created || Format(x) != "and(p(51),p(52))" {
+		t.Fatalf("a new multiset: %s, transient %v, %d nodes created", Format(x), x.isTmp(), Created-created)
+	}
+	y := and(b, c)
+	if z := ACSubject(symAnd, MergeAC(symAnd, c, b)); z != y || z.isTmp() {
+		t.Fatal("an existing term: not its shared node")
+	}
+}

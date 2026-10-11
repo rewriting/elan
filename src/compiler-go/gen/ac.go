@@ -268,8 +268,11 @@ func (e *emitter) acVars(r *ir.Rule, c *ir.Cond, el string, pos []string, n int,
 		case p.Abs != nil && v == p.Abs.Var:
 			// the subject of Eker's matcher: the elements as they are (a
 			// part of a term being normalised can be reducible; the
-			// interpreter matches it as it is, REM normalises it first)
-			e.line("%s := rt.MkAC(%s, %s)", r.Vars[v].Name, symName(&e.ir.Ops[p.Op]), m)
+			// interpreter matches it as it is, REM normalises it first),
+			// a transient node: it never enters the unique table (AC
+			// terms enter it only as normal forms), and the values the
+			// matcher gives are elements or normal forms (acNorm)
+			e.line("%s := rt.ACSubject(%s, %s)", r.Vars[v].Name, symName(&e.ir.Ops[p.Op]), m)
 		case used[v]:
 			e.line("%s := %s", r.Vars[v].Name, e.acValue(p.Op, m))
 		}

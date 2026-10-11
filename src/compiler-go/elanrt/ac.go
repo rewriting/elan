@@ -210,7 +210,8 @@ func MergeAC(sym int32, a, b Term) []Term {
 // unique table. The normalisation function of an AC symbol matches its
 // rules on it, then returns [Intern] of it if no rule applies: a term
 // that rewrites never pays for a node of the table (a weak pointer, ~0.25
-// us). A transient node never leaves that function.
+// us). A transient node never leaves the function that made it (that
+// function, or a generated one giving it to a matcher: [ACSubject]).
 func ACTerm(sym int32, e []Term) Term {
 	h := nodeHash(sym, 0, e)
 	if n := lookup(h, sym, 0, e); n != nil {
@@ -218,6 +219,19 @@ func ACTerm(sym int32, e []Term) Term {
 		return n
 	}
 	return &Node{Sym: sym, Hash: h | flagTmp, Args: e}
+}
+
+// ACSubject returns the AC term sym(e...) (e sorted, non-empty; kept) as
+// the subject of a matcher: the element itself if there is one, else
+// [ACTerm] (the shared node if the term exists, else a transient node).
+// The elements of a part of a term being normalised can make a reducible
+// term, which must not enter the unique table (AC terms enter it only as
+// normal forms); the matcher's values are its elements or normal forms.
+func ACSubject(sym int32, e []Term) Term {
+	if len(e) == 1 {
+		return e[0]
+	}
+	return ACTerm(sym, e)
 }
 
 // Normal tells whether t is an AC term known to be a normal form: its

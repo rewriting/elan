@@ -87,10 +87,16 @@ func TestEkerProgramRuns(t *testing.T) {
 	twice := f(340, f(341, so), f(340, f(341, so), f(341, o)))
 	p.p.Query.StartWith = f(400, set, f(343, set), f(344, set))
 	src := p.gen(t)
-	for _, want := range []string{"rt.NewEker(ekerPat0, 3, ", "ekerPat1 = ", "func acNorm("} {
+	for _, want := range []string{"rt.NewEker(ekerPat0, 3, ", "ekerPat1 = ", "func acNorm(", "rt.ACSubject(sym_u_340, "} {
 		if !strings.Contains(src, want) {
 			t.Errorf("no %s in\n%s", want, src)
 		}
+	}
+	// the abstracted part of three's pattern, a part of a term of u (which
+	// has rules) given to Eker's matcher: a transient node, never a node of
+	// the table (AC terms enter it only as normal forms)
+	if strings.Contains(src, "rt.MkAC(sym_u_340, ") {
+		t.Errorf("rt.MkAC of u, an operator with rules, in\n%s", src)
 	}
 	// Eker: the subjects in descending order (single(o) first: a constant
 	// argument comes after a function), the element pattern first
