@@ -179,7 +179,80 @@ func IterateStarDet[T any](t T, k K[T], step func(T) (T, bool)) bool {
 }
 
 // DetStep turns a strategy into the step function of a deterministic
-// strategy (its first result).
+// strategy (its first result). The continuation that keeps the result is
+// allocated once, not at each step (the step function is not reentrant:
+// s stops at its first result, which does not call the step again).
 func DetStep[T any](s Strat[T]) func(T) (T, bool) {
-	return func(t T) (T, bool) { return FirstResult(t, s) }
+	var res T
+	found := false
+	keep := func(r T) bool {
+		res, found = r, true
+		return true
+	}
+	return func(t T) (T, bool) {
+		found = false
+		s(t, keep)
+		r := res
+		var zero T
+		res = zero // not kept alive by the step
+		return r, found
+	}
+}
+
+// The state of the choices of the generated code (an expression per
+// strategy, its results passed to a continuation).
+
+// OneChoice keeps the first result of a search (`one`, `ONE`, `first one`): its
+// continuation K keeps the first result and stops the search; [OneChoice.Pass]
+// then gives it to the continuation k of the choice.
+type OneChoice[T any] struct {
+	// K is the continuation of the alternatives: it keeps its argument
+	// and stops.
+	K   K[T]
+	k   K[T]
+	res T
+	ok  bool
+}
+
+// NewOne starts a one whose result goes to k.
+func NewOne[T any](k K[T]) *OneChoice[T] {
+	o := &OneChoice[T]{k: k}
+	o.K = func(r T) bool {
+		o.res, o.ok = r, true
+		return true
+	}
+	return o
+}
+
+// Pass ends a one, stop being what the search returned: the result kept,
+// if any, goes to k; without one, stop is returned. A search without a
+// result stops only on a tail call of a strategy compiled as a loop (the
+// next term is set): the alternatives after the one must not run then
+// (elanc-rs S6b, a tail call under a ONE under a DC).
+func (o *OneChoice[T]) Pass(stop bool) bool {
+	if o.ok {
+		return o.k(o.res)
+	}
+	return stop
+}
+
+// DcChoice is a `dc`/`DC` over several alternatives: its continuation K passes
+// each result to k and records that one was found; the alternatives after
+// the first that has a result are not tried (generated code:
+// `a1(t, d.K) || !d.Found && a2(t, d.K) || ...`).
+type DcChoice[T any] struct {
+	// K is the continuation of the alternatives.
+	K K[T]
+	// Found: an alternative gave a result.
+	Found bool
+}
+
+// NewDc starts a dc whose results go to k.
+func NewDc[T any](k K[T]) *DcChoice[T] {
+	d := &DcChoice[T]{}
+	d.K = func(r T) bool {
+		d.Found = true
+		return k(r)
+	}
+	return d
 }

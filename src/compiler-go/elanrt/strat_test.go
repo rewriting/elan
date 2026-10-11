@@ -117,3 +117,56 @@ func TestStrategiesOverTerms(t *testing.T) {
 		t.Fatalf("iterate*(pred): %d results", n)
 	}
 }
+
+// The choices of the generated code (OneChoice, DcChoice) give the
+// results of One and First, and stop as they do.
+func TestChoicesOfTheGeneratedCode(t *testing.T) {
+	dc := func(t int32, k K[int32], ss ...Strat[int32]) bool {
+		d := NewDc(k)
+		stop := false
+		for _, s := range ss {
+			if stop = s(t, d.K); stop || d.Found {
+				break
+			}
+		}
+		return stop
+	}
+	one := func(t int32, k K[int32], ss ...Strat[int32]) bool {
+		o := NewOne(k)
+		stop := false
+		for _, s := range ss {
+			if stop = s(t, o.K); stop {
+				break
+			}
+		}
+		return o.Pass(stop)
+	}
+	for _, c := range []struct {
+		name string
+		s    Strat[int32]
+		want []int32
+	}{
+		{"dc(c,b)", func(t int32, k K[int32]) bool { return dc(t, k, ruleC, ruleB) }, []int32{11}},
+		{"dc(c,dk)", func(t int32, k K[int32]) bool { return dc(t, k, ruleC, dkAB) }, []int32{10, 11}},
+		{"dc(c,c)", func(t int32, k K[int32]) bool { return dc(t, k, ruleC, ruleC) }, nil},
+		{"one(c,dk)", func(t int32, k K[int32]) bool { return one(t, k, ruleC, dkAB) }, []int32{10}},
+		{"one(c)", func(t int32, k K[int32]) bool { return one(t, k, ruleC) }, nil},
+	} {
+		if got := results(c.s); !slices.Equal(got, c.want) {
+			t.Errorf("%s: %v, want %v", c.name, got, c.want)
+		}
+	}
+	// a stop without a result (a tail call) is passed on by Pass
+	o := NewOne(func(int32) bool { t.Fatal("no result expected"); return false })
+	if !o.Pass(true) || o.Pass(false) {
+		t.Fatal("Pass")
+	}
+	// the step of a deterministic strategy: its first result, each time
+	step := DetStep(dkAB)
+	for _, c := range []struct{ in, out int32 }{{1, 10}, {10, 100}, {100, 0}} {
+		r, ok := step(c.in)
+		if ok != (c.out != 0) || ok && r != c.out {
+			t.Fatalf("step(%d) = %d, %v", c.in, r, ok)
+		}
+	}
+}
