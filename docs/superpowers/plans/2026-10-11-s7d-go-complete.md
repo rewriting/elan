@@ -114,6 +114,28 @@ The parser is driven by `int gram[]`, which REM writes while reading the `.ref` 
 - Ruling: `normin(l1, ..., ln)` gives one result, the normal form for the rules of the labels, innermost (the arguments first, left to right, then the first result of the first rule that applies at the top, in the labels' order: `normin(lb, la)` gives `lb`'s result, as REM), and `normout` leftmost-outermost, from the top again after each step (`norm_4`: `f(e)` gives `o`); the term itself when no rule applies — as REM when normin/normout is the start strategy; elsewhere REM runs the step function of the start strategy (`strTab[(strTabSize-1)/2 + strCall]`, `strCall` the query strategy: one step at the top at most) — cost if wrong: `normin_call`, `normin_seq` (`.no-rem`). elanc-go also goes into AC terms under normout (REM's `norm_4` does not); no program checks it.
 - Ruling: determinism: tall as its body, normin/normout one result, tone/tsome/rewrite several; totality left false for traversals (conservative: only tail-call loops depend on it).
 
+**Results (Task 7).** Labels named by strings in Meta_strat (codes 133-136) are compiled as the interpreter (`meta/meta.cc` term2labels): a string names a label by the interpreter's name `label:sort` (`trrules.trruleindex`; the `.ref` names are localised, `label:sort/module!GL`; `"inc1"` or `"inc1:int/ms"` name nothing), `dc(...)` gives the results of the first rule of these labels that has one, `dk(...)` all of them, an unknown name prints the interpreter's warning on stderr (`\n[warning] non existing rule 'X' used\n\n`, byte-identical) and gives no rule. When such a term can be built, every label of X is compiled (`ir.MetaEval.Labels`, `LabelsFun`; `gen/meta.go` metaLabels; `rt.Warning`). Tests (RED then GREEN): `ir` TestLabelsNamedByStrings, `gen` TestMetaLabelsNamedByStrings (shape and run), `programs/strategy_terms/ms_labels_{dk,dc,dc_next,unknown,seq}` (results equal to the interpreter's; `.no-rem`: REM's C for the Meta_strat constructors does not compile). The remaining refusals were inventoried (`grep -n 'unsupported(' src/compiler-go/ir/*.go`, 18 sites, and the run-time ones of `elanrt`/`gen`) and each one kept with its reason under a stage that says why: `NotPlanned` ("not supported (not planned)", accepted by `test_normalise.sh` and `test_strategies.sh`) or S7e; the builtin codes by family (`builtinRefusal`); the list is in `docs/followups.md` "elanc-go: kept refusals" and below. Tests: TestUnsupportedConstructsAreRefusedWhenReachable (stages of every kept refusal, the codes by family, a SWRULE rule, the message), the `refused/` programs (acbuiltin, callother, callunknown not planned; acnested, acallrep S7e).
+
+**Kept refusals (Task 7)** (stage — construct — reason):
+- not planned — commutative-only operator — the language has none (never exported).
+- not planned — `switch/case` right-hand side (SWRULE) — the interpreter's parser no longer reads `switch` (NO_MORE_SWITCH, `load/msemact.cc`; the manual's section is commented out; `l => switch case ...` is a syntax error), REM's parser does not read SWRULE: no program can have one, no oracle runs one. (The plan asked to implement it as the interpreter; Ruling below.)
+- not planned — builtin sort `intern ...`; a String lexem in a grammar — parser internals; REM does not read them.
+- not planned — AC operator on a builtin sort — the oracles disagree (`refused/acbuiltin`); strings under AC: both fail.
+- not planned — `call "name":X` finding a strategy of another sort only — both oracles apply it to an ill-sorted term (`refused/callother`, `plus(st(1),1)`).
+- not planned — `call "name":X` of a name no strategy has — the export writes -1 (the name is lost; the exporter is out of scope); the interpreter stops with a run-time error, REM crashes (`refused/callunknown`).
+- not planned — `and`/`or`/`not`/`==` declared with a result that is not a bool (Task 1 ruling).
+- not planned — dccall/dkcall — external processes; REM has none.
+- not planned — builtin codes 30-33 (`cmp[X]` order: REM has none, the interpreter's `term::tcmp` orders by its own symbol indices), 34-78 (doubles: REM has none), 90-112 (the interpreter's top-level commands), 160-174 (calls of the ELAN system), 210 (hash of a term), 215 (equality of molecules).
+- S7e — AC shapes REM transforms before matching (`refused/acnested`, `acallrep`; both oracles agree), AC operators whose arguments are not of the result sort or printed without two arguments, an AC where pattern of a builtin sort, an identifier in an AC pattern — possible, no program of the tests needs them.
+- S7e — builtin codes 113-123 (I/O) and 200-203 (arrays; the interpreter uses 300-303), rules for a builtin operation, any other code — REM has some of them; no program of the tests uses them.
+- run time (status 2) — a META call of a number or a string finding a strategy of another sort; a query with an operator whose compilation was refused; REM's options `-sort=`, `-strategy=`, `-REFInput`, `-commandLine`.
+
+**Rulings (Task 7).**
+- Ruling: a string of a Labels[X] term names a label by the interpreter's name `label:sort` (the label of every module with that name, in label order), not the `.ref` name — the interpreter finds `"inc1:int"` and warns for `"inc1"` and `"inc1:int/ms"` (run on `ms.eln`) — cost if wrong: the `ms_labels_*` programs.
+- Ruling: every label of X is compiled when a dc/dk over labels of X can be built (a string can be computed at run time) — cost if wrong: compile time and size of such programs only.
+- Ruling: the warning for an unknown name is printed when the Labels term is evaluated, before the strategy runs (the interpreter prints it when the dc/dk reaches that label: with a dk, the warning of a later name could come after results of earlier labels are computed; the results are not printed before the end, so stdout is the same) — cost if wrong: the order of stderr lines only.
+- Ruling: switch/case rules stay refused (not planned) instead of implemented as the interpreter, as the plan asked — no ELAN program can produce SWRULE with the current parser (evidence above), so nothing could test it against an oracle — cost if wrong: a refusal of a `.ref` file written by an older interpreter.
+
 ## File structure
 
 | file | responsibility |
@@ -262,11 +284,11 @@ Bench: ident1 (4) leaves UNSUPPORTED (4 → 0).
 
 **Files:** `ir/lower.go` (each remaining `unsupported("S7d", ...)`), `gen/meta.go`, `tests/compiler-rs/programs/{strategy_terms,refused}`, `docs/followups.md`
 
-- [ ] **Step 1: Inventory.** `grep -n 'unsupported("S7d"' src/compiler-go/ir/*.go`; for each: an oracle (interpreter, REM) and a program, or a reason to keep the refusal.
-- [ ] **Step 2: Labels named by strings in Meta_strat** (codes 133-136, `ms_*` programs of `programs/strategy_terms`): implement as the interpreter (`meta/meta.cc` term2strategy); test with `-d strategy_terms`.
-- [ ] **Step 3: switch/case rule bodies** (SWRULE; REM cannot read them: `.no-rem`): implement as the interpreter; `programs/normalise/switch.lgi`.
-- [ ] **Step 4: Kept refusals, renamed with a stage that says why** (`unsupported("S7e", ...)` or a "not planned" stage the scripts accept): builtin operations of native sorts under AC (`refused/acbuiltin`: strings under AC make both oracles fail), doubles (codes 34-78: REM has none), I/O and arrays (113-123, 200-203), meta/ref (160-174), `call` of another sort (`refused/callother`, interpreter bug), `call` whose name is a variable (exporter fatal). Each listed in `docs/followups.md`.
-- [ ] **Step 5: Run** `make check-go` — green; commit (`elanc-go: labels by strings in META, switch rules; the kept refusals (S7d task 7)`).
+- [x] **Step 1: Inventory.** `grep -n 'unsupported("S7d"' src/compiler-go/ir/*.go`; for each: an oracle (interpreter, REM) and a program, or a reason to keep the refusal.
+- [x] **Step 2: Labels named by strings in Meta_strat** (codes 133-136, `ms_*` programs of `programs/strategy_terms`): implement as the interpreter (`meta/meta.cc` term2strategy); test with `-d strategy_terms`.
+- [x] **Step 3: switch/case rule bodies** (SWRULE; REM cannot read them: `.no-rem`): implement as the interpreter; `programs/normalise/switch.lgi`.
+- [x] **Step 4: Kept refusals, renamed with a stage that says why** (`unsupported("S7e", ...)` or a "not planned" stage the scripts accept): builtin operations of native sorts under AC (`refused/acbuiltin`: strings under AC make both oracles fail), doubles (codes 34-78: REM has none), I/O and arrays (113-123, 200-203), meta/ref (160-174), `call` of another sort (`refused/callother`, interpreter bug), `call` whose name is a variable (exporter fatal). Each listed in `docs/followups.md`.
+- [x] **Step 5: Run** `make check-go` — green; commit (`elanc-go: labels by strings in META, switch rules; the kept refusals (S7d task 7)`).
 
 ### Task 8: Bench, review, documentation
 

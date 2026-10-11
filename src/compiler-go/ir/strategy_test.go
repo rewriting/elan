@@ -323,16 +323,10 @@ func TestRecursionThroughStrategies(t *testing.T) {
 	}
 }
 
-// META, labels named by strings, strategies of another sort.
+// A strategy of another sort.
 func TestStrategyRefusals(t *testing.T) {
-	p := peano()
-	p.op(sNat, 156, "x", []uint32{sNat}, -134, 0) // a label named by a string
-	p.start(f(156, f(318)), sNat)
-	if st, what := unsupportedStage(t, p); st != "S7d" || !strings.Contains(what, "labels named by strings") {
-		t.Fatalf("%s %s", st, what)
-	}
 	// start with (S) of another sort
-	p = peano()
+	p := peano()
 	p.strategy(3, id)
 	p.p.Strategies[0].Sort = sSet
 	p.p.Query.Strategy = ref.Some(3)

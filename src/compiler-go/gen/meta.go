@@ -31,6 +31,10 @@ const (
 	codeStrategySeq    = 142 // @ @ : (Strateg[X] Strategy[X]) Strategy[X]
 	codeId             = 143 // id : Strateg[X]
 	codeCall           = 144 // call @':'X : (builtinString) Strateg[X]
+	codeLabelsOne      = 133 // @ : (builtinString) Labels[X]
+	codeLabelsMore     = 134 // @ @ : (builtinString Labels[X]) Labels[X]
+	codeDcLabels       = 135 // dc(@) : (Labels[X]) Strateg[X]
+	codeDkLabels       = 136 // dk(@) : (Labels[X]) Strateg[X]
 )
 
 // The run-time errors of META, as the interpreter's.
@@ -38,6 +42,7 @@ const (
 	metaWrongTerm = "[META-built] META strategy over wrong term"
 	metaInternal  = "term2strategy internal error"
 	metaUnknown   = "[META] call of an unknown strategy"
+	metaLabels    = "term2labels internal error"
 )
 
 // opOf is the operator with symbol code and result sort s that can be at
@@ -303,6 +308,16 @@ func (e *emitter) metaEval(ev *ir.MetaEval) {
 		e.line("\tbody := s.Args[0]")
 		e.line("\treturn rt.IterateStar(t, k, %s)", body(ev.Fun))
 	}
+	if ev.LabelsFun != "" {
+		if o := e.opOf(codeDcLabels, ev.Strateg); o >= 0 {
+			e.line("case %s: // dc(\"l1\" ... \"ln\"): the results of the first rule of these labels that has one", symName(&p.Ops[o]))
+			e.line("\treturn rt.First(t, k, %s(s.Args[0], true)...)", ev.LabelsFun)
+		}
+		if o := e.opOf(codeDkLabels, ev.Strateg); o >= 0 {
+			e.line("case %s: // dk(\"l1\" ... \"ln\"): the results of every rule of these labels", symName(&p.Ops[o]))
+			e.line("\treturn rt.Dk(t, k, %s(s.Args[0], false)...)", ev.LabelsFun)
+		}
+	}
 	if lists {
 		if o := e.opOf(codeDc, ev.Strateg); o >= 0 {
 			e.line("case %s: // dc(s1, ..., sn): the results of the first si that has one", symName(&p.Ops[o]))
@@ -317,6 +332,9 @@ func (e *emitter) metaEval(ev *ir.MetaEval) {
 	e.line("return metaFatal(%q)", metaInternal)
 	e.close("}")
 	e.line("")
+	if ev.LabelsFun != "" {
+		e.metaLabels(ev)
+	}
 	if !lists {
 		return
 	}
@@ -341,6 +359,58 @@ func (e *emitter) metaEval(ev *ir.MetaEval) {
 	e.line("metaFatal(%q)", metaInternal)
 	e.close("}")
 	e.line("return append(ss, strat(l.Args[0]))")
+	e.close("}")
+	e.line("")
+}
+
+// metaLabels writes the function giving the labels named by a Labels[X]
+// term ("l1" "l2" ... "ln"), each as a strategy: its rules (first: the
+// results of the first rule that has one, for dc). A name is the
+// interpreter's, label:sort (meta.cc term2labels, trrules.trruleindex);
+// an unknown name gives the interpreter's warning and no rule.
+func (e *emitter) metaLabels(ev *ir.MetaEval) {
+	p := e.ir
+	tx := e.goType(ev.Term)
+	var labels ir.SortID = -1
+	for _, c := range []int32{codeDcLabels, codeDkLabels} {
+		if o := e.opOf(c, ev.Strateg); o >= 0 {
+			labels = p.Ops[o].Args[0]
+		}
+	}
+	e.line("// %s: the labels named by the strings of l, a term of sort Labels[%s]", ev.LabelsFun, comment(p.Sorts[ev.Term].Name))
+	e.line("// (\"l1\" ... \"ln\", each label:sort), each as a strategy (first: the results")
+	e.line("// of its first rule that has one).")
+	e.open("func %s(l rt.Term, first bool) []rt.Strat[%s] {", ev.LabelsFun, tx)
+	e.line("var ss []rt.Strat[%s]", tx)
+	e.open("add := func(name string) {")
+	e.line("switch name {")
+	for _, ml := range ev.Labels {
+		e.line("case %s:", goString(ml.Name))
+		e.indent++
+		for _, l := range ml.Labels {
+			e.line("ss = append(ss, func(t %s, k rt.K[%s]) bool { return %s(t, k, first) })", tx, tx, p.Labels[l].Fun)
+		}
+		e.indent--
+	}
+	e.line("default:")
+	e.line("\trt.Warning(\"\\n[warning] non existing rule '\" + name + \"' used\\n\\n\")")
+	e.line("}")
+	e.close("}")
+	if more := e.opOf(codeLabelsMore, labels); labels >= 0 && more >= 0 {
+		e.open("for l.Sym == %s {", symName(&p.Ops[more]))
+		e.line("add(metaStr(l.Args[0]))")
+		e.line("l = l.Args[1]")
+		e.close("}")
+	}
+	end := "true"
+	if one := e.opOf(codeLabelsOne, labels); labels >= 0 && one >= 0 {
+		end = "l.Sym != " + symName(&p.Ops[one])
+	}
+	e.open("if %s {", end)
+	e.line("metaFatal(%q)", metaLabels)
+	e.close("}")
+	e.line("add(metaStr(l.Args[0]))")
+	e.line("return ss")
 	e.close("}")
 	e.line("")
 }

@@ -135,6 +135,43 @@ sub-project (S1–S5b). Each item says where it comes from.
   compilers (pre-ANSI multi-line string); `elanc -noC` links a non-existent
   `-lelan` (S5b).
 
+- **elanc-go: kept refusals** (S7d task 7; status 2, "not supported
+  (not planned)" or "not supported yet (S7e)"; the inventory of
+  `unsupported(` in `src/compiler-go/ir`):
+  - not planned — no program can reach it: a commutative-only operator
+    (the language has none); a `switch/case` right-hand side (SWRULE: the
+    interpreter's parser no longer reads `switch`, NO_MORE_SWITCH in
+    `load/msemact.cc`, the manual's section is commented out; REM does not
+    read it); a builtin sort `intern ...` of the parser's grammar; a String
+    lexem in a grammar (REM does not read it either);
+  - not planned — the oracles do not compute it, or disagree: an AC
+    operator on a builtin sort (`programs/refused/acbuiltin`: the
+    interpreter `pl(pl(1,2),3)`, REM `pl(1,pl(2,3))`; strings under AC
+    make both fail); `call "name":X` finding only a strategy of another
+    sort (`refused/callother`: both apply it to the term, ill-sorted
+    `plus(st(1),1)`); `call "name":X` of an unknown name (`refused/
+    callunknown`: the export writes -1 and loses the name; the interpreter
+    stops with `unknown strategy in call used`, REM crashes); `and`, `or`,
+    `not`, `==` declared with a result that is not a bool; dccall/dkcall
+    (external processes, REM has none); builtin codes 30-33 (`cmp[X]`
+    term order: REM has none, the interpreter's `term::tcmp` uses its own
+    symbol indices), 34-78 (doubles: REM has none), 90-112 (the
+    interpreter's top-level commands), 160-174 (calls of the ELAN system),
+    210 (hash of a term: representation-dependent), 215 (equality of
+    molecules, one application's builtin);
+  - S7e — possible later, no program of the tests needs it: AC shapes
+    REM transforms before matching (`refused/acnested`, `acallrep`: both
+    oracles agree, e2 and e1), an AC operator whose arguments are not of
+    its result sort or printed without its two arguments, a where pattern
+    with an AC operator of a builtin sort, an identifier in an AC pattern;
+    builtin codes 113-123 (input/output: REM has them) and 200-203
+    (arrays: REM has them, the interpreter uses the codes 300-303); rules
+    for a builtin operation; any other builtin code;
+  - at run time (status 2): a META call of a number or a string whose
+    strategy is of another sort; a query using an operator whose
+    compilation was refused (Task 5); the options `-sort=`, `-strategy=`,
+    `-REFInput`, `-commandLine` of REM's programs.
+
 ## Performance
 
 - **Tail-call loops of elanc-go allocate every turn** (review of S7b,

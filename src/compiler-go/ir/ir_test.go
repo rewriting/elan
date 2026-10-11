@@ -346,7 +346,7 @@ func TestUnsupportedConstructsAreRefusedWhenReachable(t *testing.T) {
 	// not reachable: fine
 	p.lower(t)
 	p.start(f(340, f(341, f(318)), f(341, f(318))), sSet)
-	if st, what := unsupportedStage(t, p); st != "S7c" || !strings.Contains(what, "commutative") {
+	if st, what := unsupportedStage(t, p); st != NotPlanned || !strings.Contains(what, "commutative") {
 		t.Fatalf("%s %s", st, what)
 	}
 	// a start term with the query: compiled (S7d task 3), the query its
@@ -372,7 +372,7 @@ func TestUnsupportedConstructsAreRefusedWhenReachable(t *testing.T) {
 	// a call "name":X of a name that no strategy has (the export writes -1)
 	p = peano()
 	p.start(f(320, f(144, ref.Int{Value: -1}), f(318)), sNat)
-	if st, what := unsupportedStage(t, p); st != "S7d" || !strings.Contains(what, "no strategy has") {
+	if st, what := unsupportedStage(t, p); st != NotPlanned || !strings.Contains(what, "no strategy has") {
 		t.Fatalf("%s %s", st, what)
 	}
 	// a where with an undefined strategy: an invalid program
@@ -389,8 +389,39 @@ func TestUnsupportedConstructsAreRefusedWhenReachable(t *testing.T) {
 	p = peano()
 	p.op(sNat, 155, "x", []uint32{sNat}, 155, 0)
 	p.start(f(155, f(318)), sNat)
-	if st, what := unsupportedStage(t, p); st != "S7d" || !strings.Contains(what, "code 155") {
+	if st, what := unsupportedStage(t, p); st != "S7e" || !strings.Contains(what, "code 155") {
 		t.Fatalf("%s %s", st, what)
+	}
+	// the kept refusals of the builtin codes (S7d task 7): the stage and
+	// what the operation is
+	for _, c := range []struct {
+		code       int32
+		stage, why string
+	}{
+		{30, NotPlanned, "term order"},
+		{34, NotPlanned, "double"},
+		{113, "S7e", "input/output"},
+		{165, NotPlanned, "ELAN system"},
+		{200, "S7e", "arrays"},
+		{210, NotPlanned, "hash"},
+	} {
+		p = peano()
+		p.op(sNat, 155, "x", []uint32{sNat}, c.code, 0)
+		p.start(f(155, f(318)), sNat)
+		if st, what := unsupportedStage(t, p); st != c.stage || !strings.Contains(what, c.why) {
+			t.Errorf("code %d: %s %s", c.code, st, what)
+		}
+	}
+	// a switch/case right-hand side (SWRULE): the parser no longer reads it
+	p = peano()
+	p.rule(sNat, 0, f(319, f(318)), f(318))
+	p.p.Rules[len(p.p.Rules)-1].Body = ref.NoSwitch{Result: f(318)}
+	p.start(f(319, f(318)), sNat)
+	if st, what := unsupportedStage(t, p); st != NotPlanned || !strings.Contains(what, "switch") {
+		t.Fatalf("%s %s", st, what)
+	}
+	if got := (&Unsupported{Stage: NotPlanned, What: "x"}).Error(); got != "not supported (not planned): x" {
+		t.Fatal(got)
 	}
 	// the codes of strategy terms (strsig/strat, Meta_strat; meta_apply:
 	// meta_test.go) are constructors, not builtins (the interpreter has no reduction
@@ -431,7 +462,7 @@ func TestBuiltinOnASortOfTermsIsAConstructor(t *testing.T) {
 	p = peano()
 	p.op(sNat, 21, "and", []uint32{sNat, sNat}, 21, 0)
 	p.start(f(21, f(318), f(318)), sNat)
-	if st, what := unsupportedStage(t, p); st != "S7d" || !strings.Contains(what, "and") {
+	if st, what := unsupportedStage(t, p); st != NotPlanned || !strings.Contains(what, "and") {
 		t.Fatalf("%s %s", st, what)
 	}
 	// the operations on terms take and give any sorts (replace, occurs,

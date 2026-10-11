@@ -1,0 +1,6 @@
+LPL ms_labels_dc_next description
+  query of sort int
+  result of sort list[int]
+  import ms
+  start with () set_of(dc("hlf:int" "inc1:int"), 7)
+end

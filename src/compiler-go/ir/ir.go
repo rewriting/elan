@@ -233,6 +233,20 @@ type MetaEval struct {
 	Term SortID
 	// Calls are the call "name":X terms of the program, by name.
 	Calls []MetaCall
+	// LabelsFun gives the labels named by a Labels[X] term ("l1" "l2"
+	// ...: dc/dk over labels, Meta_strat codes 133-136); Labels are the
+	// labels of X by name, when such a term can be built.
+	LabelsFun string
+	Labels    []MetaLabel
+}
+
+// MetaLabel is a name a string of a Labels[X] term can give and its
+// labels: the interpreter's name of a label, label:sort (its rule names;
+// the .ref names are localised, label:sort/module!GL), and the labels of
+// that name, in label order (one per module and visibility).
+type MetaLabel struct {
+	Name   string
+	Labels []LabelID
 }
 
 // MetaCall is a call "name":X and the strategies it applies.

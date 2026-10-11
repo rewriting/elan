@@ -104,3 +104,32 @@ func TestMetaRuns(t *testing.T) {
 		t.Errorf("got %q, want %q", got, want)
 	}
 }
+
+// Labels named by strings (S7d task 7): set_of(dk("nolabel:nat" "r8:nat"
+// "r7:nat"), s(o)): the results s(s(o)) (r8) and o (r7), the unknown
+// name a warning (the interpreter's); from number 1: cons(o, nil).
+func TestMetaLabelsNamedByStrings(t *testing.T) {
+	const sLabels = 514 // Labels[nat]
+	p := metaProg()
+	p.p.Sorts = append(p.p.Sorts, ref.Sort{Index: sLabels, Name: "Labels[nat]"})
+	p.op(sLabels, 133, "name", []uint32{sStr}, 133)
+	p.op(sLabels, 134, "names", []uint32{sStr, sLabels}, 134)
+	p.op(sStrateg, 135, "dcl", []uint32{sLabels}, 135)
+	p.op(sStrateg, 136, "dkl", []uint32{sLabels}, 136)
+	names := f(134, str("nolabel:nat"), f(134, str("r8:nat"), f(133, str("r7:nat"))))
+	p.p.Query.StartWith = f(332, f(141, f(136, names)), f(319, f(318)))
+	src := p.gen(t)
+	for _, want := range []string{
+		"return rt.Dk(t, k, ev_Strategy_nat_labels(s.Args[0], false)...)",
+		"case \"r7:nat\":",
+		"return rl_r7_7(t, k, first)",
+		"rt.Warning(\"\\n[warning] non existing rule '\" + name + \"' used\\n\\n\")",
+	} {
+		if !strings.Contains(src, want) {
+			t.Errorf("missing %q in\n%s", want, src)
+		}
+	}
+	if got, want := run(t, p), "\nresult = cons(o,nil)\n"; !strings.HasPrefix(got, want) {
+		t.Errorf("got %q, want %q", got, want)
+	}
+}

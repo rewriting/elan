@@ -144,7 +144,7 @@ for lgi in "$PROGS"/*.lgi; do
   ( cd "$d/$W" && $ELANC -v -b -nosplit -quiet $CACHE_OPT "$TARGET" "$name" >$ELANC.log 2>&1 )
   cstatus=$?
   if [ "$cstatus" != 0 ]; then
-    refusal=$(grep -E "not supported yet \($STAGE[c-e]\)" "$d/$W/$ELANC.log" | head -1)
+    refusal=$(grep -E "not supported (yet \($STAGE[c-e]\)|\(not planned\))" "$d/$W/$ELANC.log" | head -1)
     if [ "$cstatus" = 2 ] && [ -n "$refusal" ]; then
       fail "$name: refused by $ELANC: $refusal"
     else

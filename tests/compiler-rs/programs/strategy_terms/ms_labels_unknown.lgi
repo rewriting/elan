@@ -1,0 +1,6 @@
+LPL ms_labels_unknown description
+  query of sort int
+  result of sort list[int]
+  import ms
+  start with () set_of(dk("nolabel:int" "inc1:int" "inc1"), 6)
+end

@@ -127,6 +127,13 @@ func Fatal(msg string) {
 	os.Exit(1)
 }
 
+// Warning writes a warning of the interpreter on the standard error, as
+// is (the output so far first).
+func Warning(msg string) {
+	FlushOutput()
+	fmt.Fprint(os.Stderr, msg)
+}
+
 // Unsupported stops a program that meets a construct the compiler
 // supports only partly: the message on the standard error, status 2 (as a
 // refusal of the compiler).

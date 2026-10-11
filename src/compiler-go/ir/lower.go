@@ -56,7 +56,42 @@ type Unsupported struct {
 	What  string
 }
 
-func (e *Unsupported) Error() string { return "not supported yet (" + e.Stage + "): " + e.What }
+func (e *Unsupported) Error() string {
+	if e.Stage == NotPlanned {
+		return "not supported (" + NotPlanned + "): " + e.What
+	}
+	return "not supported yet (" + e.Stage + "): " + e.What
+}
+
+// NotPlanned is the stage of a refusal kept by design (S7d task 7): a
+// construct no program can reach, one that the oracles do not compute
+// (or compute differently), or one outside the compiled language (the
+// reasons in docs/followups.md, "elanc-go: kept refusals").
+const NotPlanned = "not planned"
+
+// builtinRefusal is the refusal of a builtin operation code that elanc-go
+// does not compile, by family of codes (the library's declarations).
+func builtinRefusal(code int32, decl string) error {
+	switch {
+	case 30 <= code && code <= 33:
+		return unsupported(NotPlanned, "builtin operation code %d (%s): the term order of cmp[X] (REM has none: its C does not compile; the interpreter's term::tcmp orders function symbols by its own indices and compares AC terms by matching)", code, decl)
+	case 34 <= code && code <= 78:
+		return unsupported(NotPlanned, "builtin operation code %d (%s): doubles (REM has none)", code, decl)
+	case 90 <= code && code <= 112:
+		return unsupported(NotPlanned, "builtin operation code %d (%s): a command of the interpreter's top level (Query[I,O,P])", code, decl)
+	case 113 <= code && code <= 123:
+		return unsupported("S7e", "builtin operation code %d (%s): input/output (stdio, files; REM's fun_113..123; no program of the tests uses them)", code, decl)
+	case 160 <= code && code <= 174:
+		return unsupported(NotPlanned, "builtin operation code %d (%s): a call of the ELAN system (meta-level: parsing, .ref of a program; REM has none)", code, decl)
+	case 200 <= code && code <= 203:
+		return unsupported("S7e", "builtin operation code %d (%s): arrays (REM's fun_200..203; the interpreter uses the codes 300-303: no oracle for the library's declarations)", code, decl)
+	case code == 210:
+		return unsupported(NotPlanned, "builtin operation code %d (%s): the hash of a term (REM's value depends on its representation)", code, decl)
+	case code == 215:
+		return unsupported(NotPlanned, "builtin operation code %d (%s): equality of molecules (a builtin of one application of REM)", code, decl)
+	}
+	return unsupported("S7e", "builtin operation code %d (%s)", code, decl)
+}
 
 // Invalid is a .ref file that is not what the compiler expects (a bug or a
 // misread field).
@@ -335,8 +370,8 @@ func (l *lowerer) typeTerm(t ref.Term, expected optSort) (tt, error) {
 				// strategy is chosen with the sort when it is applied
 				// ([lowerer.resolveCall]). -1: no strategy has this name
 				if n.Value < 0 {
-					return tt{}, unsupported("S7d", "call \"name\":X of a name that no strategy has "+
-						"(the interpreter stops: `unknown strategy in call used`)")
+					return tt{}, unsupported(NotPlanned, "call \"name\":X of a name that no strategy has "+
+						"(the export writes -1: the name is lost; the interpreter stops: `unknown strategy in call used`; REM crashes)")
 				}
 				full, ok := l.p.StrategyName(uint32(n.Value))
 				if !ok {
@@ -508,7 +543,7 @@ func (l *lowerer) run(name string) (*IR, error) {
 		for _, s := range sorts {
 			n := l.sortName(s)
 			if strings.HasPrefix(n, "intern ") {
-				return nil, unsupported("S7d", "builtin sort %s", n)
+				return nil, unsupported(NotPlanned, "builtin sort %s (a sort of the parser's grammar)", n)
 			}
 		}
 		return sorts, nil
@@ -522,7 +557,7 @@ func (l *lowerer) run(name string) (*IR, error) {
 	// be compiled is refused when a query uses it
 	grammar, err := Grammar(l.p)
 	if err != nil {
-		return nil, unsupported("S7d", "query grammar: %v", err)
+		return nil, unsupported(NotPlanned, "query grammar: %v (REM does not read it either)", err)
 	}
 	qrules := l.queryRules(grammar)
 	base := r.clone()
@@ -735,8 +770,23 @@ func (l *lowerer) expand(c int, r *reach) error {
 	for _, a := range k.args {
 		r.sorts[a] = true
 	}
-	if code := k.semantic; k.semantic != 0 && (133 <= code && code <= 136 || -136 <= code && code <= -133) {
-		return unsupported("S7d", "labels named by strings in a strategy term of META (%s)", l.candDecl(k))
+	if code := k.semantic; code == 135 || code == 136 || code == -135 || code == -136 {
+		// dc/dk("l1" ... "ln"): Strateg[X] over labels named at run
+		// time: every label of X can be named
+		x, ok := metaParam(l.sortName(k.result), "Strateg")
+		if !ok {
+			return invalid("%s: not of sort Strateg[X]", l.candDecl(k))
+		}
+		for _, s := range l.p.Sorts {
+			if s.Name != x {
+				continue
+			}
+			for lb := range l.rulesByLabel {
+				if l.labelFits(lb, s.Index) {
+					r.reachLabel(lb)
+				}
+			}
+		}
 	}
 	switch k.infos {
 	case 0:
@@ -746,7 +796,7 @@ func (l *lowerer) expand(c int, r *reach) error {
 		}
 	default:
 		// (the language has no commutative-only operators: never exported)
-		return unsupported("S7c", "commutative operator %s", l.candDecl(k))
+		return unsupported(NotPlanned, "commutative operator %s (the language has no commutative-only operators)", l.candDecl(k))
 	}
 	if l.boolSort.ok && k.result == l.boolSort.s {
 		// true and false are values of every bool computation
@@ -765,10 +815,10 @@ func (l *lowerer) expand(c int, r *reach) error {
 	}
 	if code, ok := builtinCode(k.semantic); ok {
 		if _, ok := BuiltinFromCode(code); !ok {
-			return unsupported("S7d", "builtin operation code %d (%s)", code, l.candDecl(k))
+			return builtinRefusal(code, l.candDecl(k))
 		}
 		if len(rules) > 0 {
-			return unsupported("S7d", "rules for the builtin operation %s", l.candDecl(k))
+			return unsupported("S7e", "rules for the builtin operation %s (no program has one)", l.candDecl(k))
 		}
 		return nil
 	}
@@ -950,7 +1000,7 @@ func (l *lowerer) visitSeq(seq ref.StrategySeq, sort ref.SortIndex, name string,
 			// the meta_apply terms are reached by the rules that build
 			// them; the strategies of their calls by reachCall
 		case ref.SDcCall, ref.SDkCall:
-			return unsupported("S7d", "strategy %s (external process, in %s)", e.Op, name)
+			return unsupported(NotPlanned, "strategy %s (external processes, in %s: REM has none)", e.Op, name)
 		default:
 			return invalid("unknown strategy %v (in %s)", e.Op, name)
 		}
@@ -977,18 +1027,20 @@ func (l *lowerer) checkWhereStrategy(st ref.StrategyNameIndex, s ref.SortIndex, 
 // of terms (not a builtin family: refused as S7d, see builtinAC), a
 // printing form with its two arguments in order.
 // builtinAC is the refusal of an AC operator on a builtin sort or a sort
-// with an injection of one (S7d): no program of the bench needs it; the
-// oracles order ints as REM's tagged words in Eker's matcher, and strings
+// with an injection of one (not planned, S7d task 7): no program of the
+// bench needs it; the oracles disagree (programs/refused/acbuiltin:
+// pl(pl(1,2),3) for the interpreter, which does not flatten it, pl(1,pl(2,3))
+// for REM), order ints as REM's tagged words in Eker's matcher, and strings
 // under an AC symbol are a fatal error of the interpreter and crash REM's
 // compiler (the S7c plan).
-const builtinAC = "AC operator %s on a builtin sort (no program of the bench has one; strings under an AC symbol make both oracles fail)"
+const builtinAC = "AC operator %s on a builtin sort (the oracles disagree; strings under an AC symbol make both fail)"
 
 func (l *lowerer) checkAC(k *cand) error {
 	if len(k.args) != 2 || k.args[0] != k.result || k.args[1] != k.result {
-		return unsupported("S7c", "AC operator %s whose arguments are not of its result sort (its terms are flattened: (s s) s; no program of the bench declares one)", l.candDecl(k))
+		return unsupported("S7e", "AC operator %s whose arguments are not of its result sort (its terms are flattened: (s s) s; no program of the bench declares one)", l.candDecl(k))
 	}
 	if _, ok := builtinKind(l.sortName(k.result)); ok || isBuiltin(k.semantic) {
-		return unsupported("S7d", builtinAC, l.candDecl(k))
+		return unsupported(NotPlanned, builtinAC, l.candDecl(k))
 	}
 	// (an injection of a builtin sort into the sort makes it a family:
 	// checked when the IR is built)
@@ -999,14 +1051,14 @@ func (l *lowerer) checkAC(k *cand) error {
 		}
 	}
 	if len(args) != 2 {
-		return unsupported("S7c", "AC operator %s printed without its two arguments (REM prints an AC term as a right comb of its form; no program of the bench has one)", l.candDecl(k))
+		return unsupported("S7e", "AC operator %s printed without its two arguments (REM prints an AC term as a right comb of its form; no program of the bench has one)", l.candDecl(k))
 	}
 	return nil
 }
 
 func (l *lowerer) checkRule(r *ref.Rule) error {
 	if _, ok := r.Body.(ref.Plain); !ok {
-		return unsupported("S7d", "rule with a switch/case right-hand side")
+		return unsupported(NotPlanned, "rule with a switch/case right-hand side (SWRULE: the interpreter's parser no longer reads switch, NO_MORE_SWITCH in load/msemact.cc; REM does not read it)")
 	}
 	return nil
 }
@@ -1139,7 +1191,7 @@ func (l *lowerer) reachCall(name string, strateg ref.SortIndex, r *reach) error 
 			return 0, invalid("call %s:%s: no strategy %s", StringText(name), x, name)
 		}
 		if d := l.p.Strategy(s); d.Sort != xs.s {
-			return 0, unsupported("S7d", "call %s:%s finds %s, a strategy of another sort",
+			return 0, unsupported(NotPlanned, "call %s:%s finds %s, a strategy of another sort (both oracles apply it to the term: ill-sorted results)",
 				StringText(name), x, l.strategyName(s))
 		}
 		return s, nil
@@ -1358,7 +1410,7 @@ func (b *builder) build(name string, start *tt, q *ref.Query, sortIndices []ref.
 	}
 	for o := range ir.Ops {
 		if op := &ir.Ops[o]; op.AC && ir.Sorts[op.Result].Family >= 0 {
-			return nil, unsupported("S7d", builtinAC, op.Decl)
+			return nil, unsupported(NotPlanned, builtinAC, op.Decl)
 		}
 	}
 
@@ -1368,7 +1420,7 @@ func (b *builder) build(name string, start *tt, q *ref.Query, sortIndices []ref.
 			continue
 		}
 		if _, ok := familyOf[ir.Ops[i].Result]; !ok {
-			return nil, unsupported("S7d", "builtin operation %s on sorts that are not builtin (%s)",
+			return nil, unsupported(NotPlanned, "builtin operation %s on sorts that are not builtin (%s): its result is not a bool",
 				pre[i].builtin, l.candDecl(&l.cands[c]))
 		}
 	}
@@ -1791,9 +1843,54 @@ func (b *builder) metas() error {
 			}
 			slices.SortFunc(ev.Calls, func(a, c MetaCall) int { return strings.Compare(a.Name, c.Name) })
 		}
+		if b.labelsByString(ev.Strateg) {
+			ev.LabelsFun = unique(b.usedFuns, base+"_labels")
+			for l := range p.Labels {
+				if p.Labels[l].Sort != term {
+					continue
+				}
+				name := InterpreterLabelName(p.Labels[l].Name)
+				i := slices.IndexFunc(ev.Labels, func(m MetaLabel) bool { return m.Name == name })
+				if i < 0 {
+					ev.Labels = append(ev.Labels, MetaLabel{Name: name})
+					i = len(ev.Labels) - 1
+				}
+				ev.Labels[i].Labels = append(ev.Labels[i].Labels, l)
+			}
+			slices.SortFunc(ev.Labels, func(a, c MetaLabel) int { return strings.Compare(a.Name, c.Name) })
+		}
 		p.MetaEvals = append(p.MetaEvals, ev)
 	}
 	return nil
+}
+
+// labelsByString tells whether a dc/dk over labels named by strings
+// (Meta_strat codes 135, 136) of sort strateg (Strateg[X]) is reached.
+func (b *builder) labelsByString(strateg SortID) bool {
+	if strateg < 0 {
+		return false
+	}
+	for _, op := range b.ir.Ops {
+		// (the symbol of a Meta_strat[X] operator is its code)
+		if (op.Symbol == 135 || op.Symbol == 136) && op.Result == strateg {
+			return true
+		}
+	}
+	return false
+}
+
+// InterpreterLabelName is the name the interpreter gives a label of the
+// .ref file (label:sort/module!GL): label:sort, the name a string of a
+// Labels[X] term must give (trrules.trruleindex, attach_type).
+func InterpreterLabelName(refName string) string {
+	colon := strings.Index(refName, ":")
+	if colon < 0 {
+		return refName
+	}
+	if slash := strings.Index(refName[colon:], "/"); slash >= 0 {
+		return refName[:colon+slash]
+	}
+	return refName
 }
 
 func (b *builder) lexemTexts(ls []ref.Lexem) []string {
@@ -2277,7 +2374,7 @@ func (rl *ruleLowerer) acAbstract(t *tt, n *remNode, p Pattern, same *[]Cond) Pa
 
 func (rl *ruleLowerer) refuse(format string, a ...any) {
 	if rl.err == nil {
-		rl.err = unsupported("S7c", format, a...)
+		rl.err = unsupported("S7e", format, a...)
 	}
 }
 
