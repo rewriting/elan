@@ -1,0 +1,62 @@
+@begin top.eln
+id module
+id top
+id import
+id global
+id l
+@begin l.eln
+id module
+id l
+id import
+id global
+id b
+@begin b.eln
+id module
+id b
+id end
+@end
+char 59
+id end
+id end
+@end
+id r
+@begin r.eln
+id module
+id r
+id import
+id global
+id b
+char 59
+id end
+id end
+@end
+char 59
+id end
+id sort
+id s
+char 59
+id end
+id operators
+id global
+id c
+char 58
+id s
+char 59
+id end
+id end
+@end
+@begin usep.eln
+id module
+id usep
+id import
+id global
+id P1
+char 59
+id end
+id end
+@end
+@begin bool.eln
+id module
+id bool
+id end
+@end

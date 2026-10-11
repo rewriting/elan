@@ -1,0 +1,4 @@
+module m
+import global bool; end
+IF true ANDIF true : { }
+end

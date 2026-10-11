@@ -1,0 +1,4 @@
+@@stderr
+[error] can't open input file 'b.eln'
+	fatal
+@@status 1

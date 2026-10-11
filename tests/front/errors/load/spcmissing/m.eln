@@ -1,0 +1,9 @@
+module m
+import global bool; end
+sort s; end
+operators global
+ a : s;
+ b : s;
+ c : s;
+end
+end

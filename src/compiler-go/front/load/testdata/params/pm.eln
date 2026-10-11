@@ -1,0 +1,9 @@
+module pm[N,S,L]
+import global S; end
+operators global
+  {f_I : S;}_I=1...N
+  g(@,@,@) : (S~N) S;
+  h(@) : (L) S;
+  k_1,...,k_N : S;
+end
+end

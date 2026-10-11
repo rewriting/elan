@@ -1,0 +1,7 @@
+@@stderr
+
+[error] :file=m.eln	line=2	pos=1
+number of actual and formal parameters for module 
+[error] :file=m.eln	line=2	pos=1
+m[1] doesn't correspond
+@@status 1

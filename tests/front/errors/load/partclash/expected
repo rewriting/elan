@@ -1,0 +1,5 @@
+@@stderr
+
+[error] :file=sp.spc	line=1	pos=2
+	 name of axiom 'm' clash with a name of module
+@@status 1

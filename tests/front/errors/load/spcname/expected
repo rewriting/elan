@@ -1,0 +1,5 @@
+@@stderr
+
+[error] :file=sp.spc	line=1	pos=0
+name of specification doesn't match the name of file
+@@status 0

@@ -1,0 +1,10 @@
+LPL p description
+  specification description
+    part m of sort s import m
+    part P2 of sort s import m
+  end
+  query of sort s
+  result of sort s
+  import m
+  start with () c
+end

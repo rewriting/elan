@@ -7,7 +7,8 @@
 # statuses equal. Files marked `loaded` (FOR EACH/IF) cannot be read
 # standalone: they count as covered only when test_front_load.sh found them
 # in a passing loader comparison (tests/front/work/loaded-files.txt), else
-# they are listed as UNCOVERED and fail.
+# they are listed as UNCOVERED and fail, unless unloadable.tsv says why no
+# program elan loads can reach them (UNLOADABLE, reported).
 # Usage: tests/front/test_front_lex.sh [PREFIX] [--only EXT,...]
 #   PREFIX: an installed ELAN (default build/install); the harness is
 #   $BUILD/src/interpreter/elan-lextrace, BUILD = dirname PREFIX unless set.
@@ -65,11 +66,13 @@ for r in "$RUN"/res/*; do
   if head -1 "$r" | grep -q '^ok '; then ok=$((ok + 1)); else failed=$((failed + 1)); cat "$r"; fi
 done
 LOADED=$HERE/work/loaded-files.txt
+unloadable=0
 while IFS="$TAB" read -r f k; do
   [ "$k" = loaded ] || continue
   if [ -f "$LOADED" ] && grep -qxF "$f" "$LOADED"; then covered=$((covered + 1))
+  elif grep -q "^$f$TAB" "$HERE/unloadable.tsv"; then echo "UNLOADABLE $f"; unloadable=$((unloadable + 1))
   else echo "UNCOVERED $f"; uncovered=$((uncovered + 1)); fi
 done < "$RUN/sel.tsv"
-echo "$total files: $ok ok, $failed failed; loaded files: $covered covered, $uncovered UNCOVERED"
+echo "$total files: $ok ok, $failed failed; loaded files: $covered covered, $unloadable UNLOADABLE (unloadable.tsv), $uncovered UNCOVERED"
 if [ $failed -eq 0 ] && [ $uncovered -eq 0 ]; then rm -rf "$RUN"; exit 0; fi
 echo "work directory: $RUN"; exit 1

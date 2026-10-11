@@ -1,0 +1,7 @@
+@@stderr
+
+[error] :file=m.eln	line=2	pos=23
+[earley] syntax error on symbol 'ANDIF'
+	one of ('greatereq_bool' 'greater_bool' 'lesseq_bool' 'less_bool' 'neq_bool' 'eq_bool' 'false' 'true' 'not' '(') expected
+	in context  >>>ANDIF<<< true : 
+@@status 1

@@ -1,0 +1,7 @@
+@@stderr
+
+[error] :file=p.lgi	line=1	pos=0
+[PARSER] syntax error 	on symbol 'descriptio'
+	 before  query of sort s result of sort  
+	one of ( 'description' ) expected 
+@@status 1

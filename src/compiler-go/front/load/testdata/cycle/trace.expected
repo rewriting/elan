@@ -1,0 +1,36 @@
+@begin ca.eln
+id module
+id ca
+id import
+id global
+id cb
+@begin cb.eln
+id module
+id cb
+id import
+id global
+id ca
+char 59
+id end
+id end
+@end
+char 59
+id end
+id sort
+id s
+char 59
+id end
+id operators
+id global
+id c
+char 58
+id s
+char 59
+id end
+id end
+@end
+@begin bool.eln
+id module
+id bool
+id end
+@end

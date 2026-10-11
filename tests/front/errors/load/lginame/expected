@@ -1,0 +1,5 @@
+@@stderr
+
+[error] :file=p.lgi	line=1	pos=0
+ name of logic doesn't correspond to name of file
+@@status 1

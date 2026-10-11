@@ -1,0 +1,6 @@
+@@stderr
+
+[error] :file=a.eln	line=2	pos=1
+[PARSER] semaction error 	on symbol 'end'
+	 before  ENDOFLSTREAM 
+@@status 1

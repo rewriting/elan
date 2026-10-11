@@ -1,0 +1,4 @@
+module r
+import global b;
+end
+end

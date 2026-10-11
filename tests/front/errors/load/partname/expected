@@ -1,0 +1,6 @@
+@@stderr
+
+[error] :file=sp.spc	line=2	pos=0
+bad name of specification part
+	 'P1' expected
+@@status 1

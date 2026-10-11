@@ -11,7 +11,13 @@
 // (and SECONDELANLIB, default ..): the Go front end has no compiled-in prefix.
 // A .eln is read through the preprocessor (macro.Lex) with the standalone
 // evaluator macro.Refuse: a FOR EACH or IF condition is refused where the
-// standalone C++ would need a grammar. `load` comes with task 8.
+// standalone C++ would need a grammar.
+//
+// `load` is the loader skeleton (front/load) on elan's options and files:
+// --tree prints the module tree (`handling module`/`end of`, as elan
+// without -b; -b still suppresses it), --trace FILE writes the lexem trace
+// of every module (the harness's load mode), --refuse refuses FOR EACH/IF
+// (macro.Refuse) instead of reading them without evaluation (macro.Mark).
 package main
 
 import (
@@ -22,6 +28,7 @@ import (
 
 	"elan/front/diag"
 	"elan/front/lex"
+	"elan/front/load"
 	"elan/front/macro"
 	"elan/front/tables"
 )
@@ -35,8 +42,7 @@ func run(args []string) int {
 		return lexFile(args[1])
 	}
 	if len(args) >= 1 && args[0] == "load" {
-		fmt.Fprintln(os.Stderr, "front-trace: load is not implemented (S8a task 8)")
-		return 3
+		return loadProgram(args[1:])
 	}
 	fmt.Fprintln(os.Stderr, "usage: front-trace lex FILE\n       front-trace load [--tree] [--trace FILE] [--refuse] [elan options] prog.lgi [spec]")
 	return 2
@@ -69,4 +75,58 @@ func lexFile(name string) int {
 			}
 		}
 	})
+}
+
+func loadProgram(args []string) int {
+	tree, refuse, trace := false, false, ""
+	for len(args) > 0 {
+		switch args[0] {
+		case "--tree":
+			tree = true
+		case "--refuse":
+			refuse = true
+		case "--trace":
+			if len(args) < 2 {
+				fmt.Fprintln(os.Stderr, "front-trace: --trace needs a file")
+				return 2
+			}
+			trace = args[1]
+			args = args[1:]
+		default:
+			goto opts
+		}
+		args = args[1:]
+	}
+opts:
+	o, files, err := load.ParseArgs(args)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "front-trace:", err)
+		return 2
+	}
+	if !tree {
+		o.Batch = true
+	}
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+	o.Out, o.Err = out, os.Stderr
+	o.Eval = macro.Mark{}
+	if refuse {
+		o.Eval = macro.Refuse{}
+	}
+	if trace != "" {
+		f, err := os.Create(trace)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "front-trace:", err)
+			return 2
+		}
+		defer f.Close()
+		w := bufio.NewWriter(f)
+		defer w.Flush()
+		o.TraceTo = w
+	}
+	spec := ""
+	if len(files) == 2 {
+		spec = files[1]
+	}
+	return load.Load(o, files[0], spec)
 }

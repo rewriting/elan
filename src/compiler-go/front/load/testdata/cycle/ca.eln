@@ -1,0 +1,5 @@
+module ca
+import global cb; end
+sort s; end
+operators global c : s; end
+end

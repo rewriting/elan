@@ -1,0 +1,4 @@
+@@stderr
+[error] can't open input file 'sp.spc'
+	fatal
+@@status 1

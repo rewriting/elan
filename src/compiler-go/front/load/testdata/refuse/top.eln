@@ -1,0 +1,5 @@
+module top
+import global bool; end
+sort s; end
+IF 1 == 1 : { operators global c : s; end }
+end

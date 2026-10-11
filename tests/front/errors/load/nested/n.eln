@@ -1,0 +1,3 @@
+module n[Y,Z]
+import global Y; end
+end

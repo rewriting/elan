@@ -1,0 +1,6 @@
+module top
+import global l r;
+end
+sort s; end
+operators global c : s; end
+end

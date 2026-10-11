@@ -1,0 +1,4 @@
+module l
+import global b;
+end
+end

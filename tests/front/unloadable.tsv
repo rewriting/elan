@@ -1,0 +1,8 @@
+# Files with FOR EACH/IF (read only in loader mode) that no program elan
+# loads can reach: test_front_lex.sh counts them as UNLOADABLE, not UNCOVERED
+# (plan S8a, task 8 ruling). path<TAB>reason
+src/lib/elanlib/ref/ref_read.eln	imports io[...], absent from the library (finding 6); its IF form is covered by programs/ifparam
+src/lib/elanlib/ref/ref_write.eln	imports io[...], absent from the library (finding 6); its IF form is covered by programs/ifparam
+tests/compiler/benchthesis/MinelaComp/typeCheck.eln	imports msTerm[...]: no msTerm.eln anywhere (commented out of test.lgi and builtIn.eln)
+tests/compiler/benchthesis/MinelaComp/typeExt.eln	syntax error in its body (line 15, elan rejects it); imported by no .lgi
+tests/compiler/benchthesis/MinelaComp/labelExt.eln	syntax error in its body (line 8, `op`), elan rejects it; imported by no .lgi
