@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -10,6 +11,10 @@ import (
 )
 
 func TestMain(m *testing.M) {
+	if os.Getenv("ELANC_GO_TEST_MAIN") == "1" {
+		main()
+		os.Exit(0)
+	}
 	if os.Getenv("ELANC_GO_TEST_PANIC") == "1" {
 		guarded(func() { panic("boom") })
 		os.Exit(0)
@@ -25,6 +30,7 @@ func TestInternalErrorExitsWith1(t *testing.T) {
 		t.Fatal(err)
 	}
 	cmd := exec.Command(exe)
+	cmd.Args[0] = "elanc-go"
 	cmd.Env = append(os.Environ(), "ELANC_GO_TEST_PANIC=1")
 	out, err := cmd.CombinedOutput()
 	ee, ok := err.(*exec.ExitError)
@@ -40,9 +46,9 @@ func TestRemOptionsAreIgnored(t *testing.T) {
 		!slices.Equal(o.ignored, []string{"-nosplit", "-quiet"}) {
 		t.Fatalf("%+v %v", o, err)
 	}
-	o, err = parseArgs([]string{"-strategy", "foo", "-O2", "-split", "-bar", "-noC", "p", "s.spc"})
+	o, err = parseArgs([]string{"-strategy", "0", "-O2", "-split", "-bar", "-optimiseChoicePoint", "p", "s.spc"})
 	if err != nil || o.lgi != "p" || o.spec != "s.spc" || !slices.Equal(o.elanOptions, []string{"-b"}) ||
-		!slices.Equal(o.ignored, []string{"-strategy foo", "-O2", "-split", "-bar", "-noC"}) {
+		!slices.Equal(o.ignored, []string{"-strategy 0", "-O2", "-split", "-bar", "-optimiseChoicePoint"}) {
 		t.Fatalf("%+v %v", o, err)
 	}
 }
@@ -96,5 +102,90 @@ func TestDefaultGoCommand(t *testing.T) {
 	}
 	if g := defaultGo(pre); g != goExe {
 		t.Fatalf("recorded go: %q, want %q", g, goExe)
+	}
+}
+
+// The options of REM that change the result or the files written (S7e task
+// 11): refused under any name, with a message naming elanc-rem.
+func TestRemOnlyOptionsAreRefused(t *testing.T) {
+	cases := [][]string{{"-coq"}, {"-proofterm"}, {"-lib"}, {"-debug"}, {"-onlyC"}, {"-noC"},
+		{"-nocode"}, {"-strategy", "1"}, {"-strategy", "2"}}
+	for _, c := range cases {
+		_, err := parseArgs(append(append([]string{"-nosplit"}, c...), "prog"))
+		var r *remOnlyError
+		if !errors.As(err, &r) || r.option != strings.Join(c, " ") {
+			t.Fatalf("%v: %v", c, err)
+		}
+		if msg := err.Error(); msg != "option "+strings.Join(c, " ")+" is REM's: use elanc-rem" {
+			t.Fatalf("%v: message %q", c, msg)
+		}
+	}
+}
+
+// The command exits with 2 and names elanc-rem; its name in the messages is
+// the one it was invoked by (elanc after the switch).
+func TestRemOnlyOptionExitsWith2(t *testing.T) {
+	exe, err := os.Executable()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, c := range [][]string{{"-coq"}, {"-strategy", "2"}} {
+		cmd := exec.Command(exe, append(c, "enum")...)
+		cmd.Args[0] = "elanc"
+		cmd.Dir = t.TempDir()
+		cmd.Env = append(os.Environ(), "ELANC_GO_TEST_MAIN=1")
+		if err := os.WriteFile(filepath.Join(cmd.Dir, "a.out"), nil, 0o755); err != nil {
+			t.Fatal(err)
+		}
+		out, err := cmd.CombinedOutput()
+		ee, ok := err.(*exec.ExitError)
+		want := "elanc: option " + strings.Join(c, " ") + " is REM's: use elanc-rem\n"
+		if !ok || ee.ExitCode() != 2 || string(out) != want {
+			t.Fatalf("%v: %v\n%q, want %q", c, err, out, want)
+		}
+		if _, err := os.Stat(filepath.Join(cmd.Dir, "a.out")); !errors.Is(err, os.ErrNotExist) {
+			t.Fatalf("%v: a previous a.out survives the refusal (%v)", c, err)
+		}
+	}
+}
+
+func TestUsageNamesTheCommand(t *testing.T) {
+	for _, name := range []string{"elanc", "elanc-go"} {
+		if u := usageText(name); !strings.HasPrefix(u, "usage: "+name+" [options] program[.lgi]") ||
+			!strings.Contains(u, "use elanc-rem") {
+			t.Fatalf("%s: %s", name, u)
+		}
+	}
+}
+
+// bin/elanc is a symlink to elanc-go (ELAN_ELANC=go): the prefix is the one
+// of the file it designates.
+func TestPrefixThroughASymlink(t *testing.T) {
+	tmp, err := filepath.EvalSymlinks(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	pre := filepath.Join(tmp, "pre")
+	bin := filepath.Join(pre, "bin")
+	other := filepath.Join(tmp, "other", "bin")
+	for _, d := range []string{bin, other} {
+		if err := os.MkdirAll(d, 0o755); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := os.WriteFile(filepath.Join(bin, "elanc-go"), []byte("x"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink("elanc-go", filepath.Join(bin, "elanc")); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink(filepath.Join(bin, "elanc"), filepath.Join(other, "elanc")); err != nil {
+		t.Fatal(err)
+	}
+	for _, exe := range []string{filepath.Join(bin, "elanc-go"), filepath.Join(bin, "elanc"),
+		filepath.Join(other, "elanc")} {
+		if p := prefixOf(exe); p != pre {
+			t.Fatalf("%s: %q, want %q", exe, p, pre)
+		}
 	}
 }

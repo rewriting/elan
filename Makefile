@@ -11,6 +11,9 @@
 #                        depth, bench G, query input, BenchThesis G
 #   make check-golden    golden tests: .ref files, -d dump, statistics, errors
 #   make check-compiler  compiled tests (J, JO) only: elanc-rem, REM, runtime libraries
+#   make check-elanc     what bin/elanc is (ELAN_ELANC: go by default, rem), CMake's fallback
+#   make check-elanc-rem the same test in a build with -DELAN_ELANC=rem (build-elanc-rem/,
+#                        removed afterwards)
 #   make reference       build the 2004 reference system (reference/install)
 #   make check-reference full bench (778 tests) against the reference
 BUILD   ?= build
@@ -32,7 +35,7 @@ else
   ELAN_CXX ?= g++
 endif
 
-.PHONY: manual manual-update all configure install check check-rust check-go check-compiler check-golden check-sanitize check-arch check-unit test-runner smoke reference check-reference clean toolchain
+.PHONY: manual manual-update all configure install check check-rust check-go check-compiler check-elanc check-elanc-rem check-golden check-sanitize check-arch check-unit test-runner smoke reference check-reference clean toolchain
 
 all: configure
 	cmake --build $(BUILD) -j $(JOBS)
@@ -62,9 +65,9 @@ configure: toolchain
 	fi
 
 # Files removed from the sources must not linger in PREFIX: the library, the
-# compiler's classes, its runtime headers and elanc (also installed as
-# elanc-rem) are reinstalled from scratch (the last three only when the
-# compiler is built, -DELAN_COMPILER=ON, the default).
+# compiler's classes, its runtime headers, elanc-rem, elanc-go and the
+# symlink elanc (to elanc-go or elanc-rem, ELAN_ELANC) are reinstalled from
+# scratch.
 install: all
 	rm -rf "$(PREFIX)/share/elanlib" "$(PREFIX)/classes" "$(PREFIX)/include/elan-compiler" "$(PREFIX)/bin/elanc-rem" \
 	       "$(PREFIX)/bin/elanc-rs" "$(PREFIX)/share/elan-rs" "$(PREFIX)/bin/elanc-go" "$(PREFIX)/share/elan-go"
@@ -111,6 +114,19 @@ CHECK_COMPILER = if [ -x "$(PREFIX)/bin/elanc-rem" ]; then \
 check-compiler: install
 	$(CHECK_COMPILER)
 
+# What bin/elanc is (S7e task 11): a symlink to elanc-go (ELAN_ELANC=go, the
+# default; elanc-rem when elanc-go is not built) or to elanc-rem
+# (CMAKE_FLAGS=-DELAN_ELANC=rem); CMAKE_CHECK=1 also configures scratch build
+# directories for the fallback and the errors of ELAN_ELANC.
+ELANC_KIND = $(if $(findstring -DELAN_ELANC=rem,$(CMAKE_FLAGS)),rem,go)
+check-elanc: install
+	CMAKE_CHECK=1 tests/compiler/test_elanc_switch.sh "$(PREFIX)" $(ELANC_KIND)
+# the rem variant, in its own build directory (a full build), removed after
+check-elanc-rem:
+	$(MAKE) BUILD=build-elanc-rem CMAKE_FLAGS=-DELAN_ELANC=rem install \
+	  && tests/compiler/test_elanc_switch.sh "$(CURDIR)/build-elanc-rem/install" rem; \
+	st=$$?; rm -rf build-elanc-rem; exit $$st
+
 # Golden tests (tests/golden): what the bench does not compare, byte for
 # byte (.ref files, the -d dump, the statistics, stderr and exit status of
 # errors), against the installed interpreter.
@@ -154,7 +170,7 @@ check-go: install
 	  && BENCHTHESIS_KINDS=G tests/compiler/test_benchthesis.sh "$(PREFIX)"; \
 	else echo "elanc-go not built (go >= 1.24 missing or -DELAN_GO=OFF): Go tests skipped"; fi
 
-check: smoke test-runner check-arch check-unit check-golden check-rust check-go
+check: smoke test-runner check-arch check-unit check-golden check-rust check-go check-elanc
 	$(BENCH) --prefix $(PREFIX) --kinds I,A
 	@$(CHECK_COMPILER)
 

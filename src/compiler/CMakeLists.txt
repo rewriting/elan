@@ -162,7 +162,6 @@ string(REPLACE "__ELAN_SANITIZE__" "${ELAN_COMPILER_SANITIZE_FLAGS}" ELANC "${EL
 file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/elanc "${ELANC}")
 set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
              ${CMAKE_CURRENT_SOURCE_DIR}/scripts/elanc.src)
-install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/elanc DESTINATION bin)
-# the same driver as elanc-rem (S7e task 9): the tests call REM by this name,
-# whatever bin/elanc is
+# REM's driver is installed as elanc-rem (S7e): bin/elanc is a symlink to
+# elanc-go or to elanc-rem, chosen by ELAN_ELANC (CMakeLists.txt at the top)
 install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/elanc DESTINATION bin RENAME elanc-rem)
