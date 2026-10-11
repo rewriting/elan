@@ -1,0 +1,6 @@
+LPL acallrep description
+  query of sort bool
+  result of sort elt
+  import acnext
+  start with () allrep(e1 + e2 + g(e1) + e1 + e2 + g(e1))
+end

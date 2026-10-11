@@ -1,0 +1,17 @@
+module acdecl
+// Variables declared in another order than written: REM orders the
+// variables of an AC level by their number in the .ref file.
+import global acsyms; end
+stratop global
+  s_decl : <T -> T> bs;
+end
+rules for T
+  z, w, y, x : T;
+global
+  [decl] F(x, F(y, F(z, w))) => h(h(x, y), h(z, w)) end
+end
+strategies for T
+implicit
+  [] s_decl => dk(decl) end
+end
+end

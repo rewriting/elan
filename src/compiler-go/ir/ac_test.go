@@ -1,6 +1,6 @@
 package ir
 
-// AC operators and AC patterns (S7c task 1).
+// AC operators and AC patterns (S7c tasks 1 and 2).
 
 import (
 	"strings"
@@ -55,32 +55,64 @@ func TestACOperatorAndItsRules(t *testing.T) {
 	}
 }
 
-func TestACShapesOfTask2AreRefused(t *testing.T) {
-	cases := map[string]func(p *prog){
-		"more than two variables": func(p *prog) {
-			p.rule(sNat, 3, f(342, v(0, sNat), f(340, v(1, sSet), f(340, v(2, sSet), v(3, sSet)))), f(318))
-		},
-		"one of them repeated": func(p *prog) {
-			p.rule(sNat, 3, f(342, v(0, sNat), f(340, v(1, sSet), f(340, v(1, sSet), v(2, sSet)))), f(318))
-		},
-		"in a where": func(p *prog) {
-			p.rule(sNat, 3, f(342, v(0, sNat), v(1, sSet)), f(318),
-				ref.Match{Sort: sSet, Pattern: f(340, f(341, v(0, sNat)), v(2, sSet)), Rhs: v(1, sSet)})
-		},
-	}
-	for what, add := range cases {
+// S7c task 2: the shapes REM matches with Eker's matcher or its
+// Diophantine code.
+func TestACShapesOfTask2(t *testing.T) {
+	lower := func(add func(p *prog)) *Rule {
 		p := acProg()
 		add(p)
 		p.start(f(342, f(318), f(340, f(341, f(318)), f(341, f(318)))), sNat)
-		if st, msg := unsupportedStage(t, p); st != "S7c" || !strings.Contains(msg, what) || !strings.Contains(msg, "task 2") {
-			t.Errorf("%s: %s %s", what, st, msg)
-		}
+		ir := p.lower(t)
+		return &opNamed(t, ir, "mem").Rules[0]
 	}
-	// an AC operator on a builtin sort
+	// three variables: F(x1, X) where F(x2, x3) :=() X (REM's
+	// transformation3_1: the first variable in REM's order stays)
+	r := lower(func(p *prog) {
+		p.rule(sNat, 3, f(342, v(0, sNat), f(340, v(3, sSet), f(340, v(2, sSet), v(1, sSet)))), f(318))
+	})
+	if len(r.Conds) != 2 || r.Conds[0].Kind != CondAC || r.Conds[1].Kind != CondEker {
+		t.Fatalf("three variables: %+v", r.Conds)
+	}
+	pat, ek := r.Conds[0].Pat, r.Conds[1]
+	if pat.Abs == nil || len(pat.Vars) != 1 || r.Vars[pat.Vars[0].Var].Name != "x1" || ek.A != pat.Abs.Var {
+		t.Fatalf("three variables: %+v", pat)
+	}
+	if e := ek.Eker; e.Kind != PatAC || len(e.Args) != 2 || e.Args[0].Var != 0 || e.Args[1].Var != 1 ||
+		r.Vars[ek.EkerVars[0]].Name != "x2" || r.Vars[ek.EkerVars[1]].Name != "x3" {
+		t.Fatalf("the abstracted part: %+v %v", e, ek.EkerVars)
+	}
+	// x U x U y: x (repeated) first, REM's maximal extract; x^2 U y^2: the
+	// variable REM does not abstract first
+	r = lower(func(p *prog) {
+		p.rule(sNat, 3, f(342, v(0, sNat), f(340, v(2, sSet), f(340, v(1, sSet), v(1, sSet)))), f(318))
+	})
+	if vs := r.Conds[0].Pat.Vars; len(vs) != 2 || vs[0].Mult != 2 || vs[1].Mult != 1 || r.Conds[0].Pat.Abs != nil {
+		t.Fatalf("x U x U y: %+v", vs)
+	}
+	r = lower(func(p *prog) {
+		p.rule(sNat, 3, f(342, v(0, sNat), f(340, f(340, v(1, sSet), v(1, sSet)), f(340, v(2, sSet), v(2, sSet)))), f(318))
+	})
+	if vs := r.Conds[0].Pat.Vars; len(vs) != 2 || r.Vars[vs[0].Var].Name != "x2" || r.Vars[vs[1].Var].Name != "x1" {
+		t.Fatalf("x U x U y U y: %+v", vs)
+	}
+	// a where: the whole pattern matched by Eker's matcher, its variables
+	// numbered in REM's order (the variable before the symbol)
+	r = lower(func(p *prog) {
+		p.rule(sNat, 3, f(342, v(0, sNat), v(1, sSet)), f(318),
+			ref.Match{Sort: sSet, Pattern: f(340, f(341, v(2, sNat)), v(3, sSet)), Rhs: v(1, sSet)})
+	})
+	if len(r.Conds) != 2 || r.Conds[0].Kind != CondMatch || r.Conds[0].Pat.Kind != PatVar || r.Conds[1].Kind != CondEker {
+		t.Fatalf("where: %+v", r.Conds)
+	}
+	if e := r.Conds[1].Eker; e.Args[0].Kind != PatVar || e.Args[0].Var != 0 || e.Args[1].Kind != PatOp ||
+		e.Args[1].Args[0].Var != 1 || r.Vars[r.Conds[1].EkerVars[0]].Name != "x3" {
+		t.Fatalf("where pattern: %+v", e)
+	}
+	// an AC operator on a builtin sort (S7d: no program needs it)
 	p := peano()
 	p.op(sInt, 343, "w", []uint32{sInt, sInt}, 0, 2)
 	p.start(f(343, ref.Int{Value: 1}, ref.Int{Value: 2}), sInt)
-	if st, msg := unsupportedStage(t, p); st != "S7c" || !strings.Contains(msg, "builtin sort") {
+	if st, msg := unsupportedStage(t, p); st != "S7d" || !strings.Contains(msg, "builtin sort") {
 		t.Errorf("%s %s", st, msg)
 	}
 }

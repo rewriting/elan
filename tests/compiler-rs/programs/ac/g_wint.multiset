@@ -1,0 +1,5 @@
+Both oracles use Eker's matcher in a where, but order ints differently in
+it: REM (and elanc-go) by their tagged words (0, 1, 2, ..., then -3, -1:
+make_term with GsetIntegerTag, compared as unsigned words), the interpreter
+0, 1, -1, 2, ... (its flatten.c order): the same solutions, in another
+order (S7c plan, Task 2 findings).

@@ -1,0 +1,2 @@
+REM gives 15 wrong solutions for x^3 U y^2 (the values undivided, see
+g_x2y2u.no-rem); the interpreter and elanc-go the only one.

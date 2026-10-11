@@ -1,0 +1,6 @@
+LPL g_decl description
+  query of sort bool
+  result of sort T
+  import acdecl
+  start with (s_decl) F(a, F(b, F(c, d)))
+end

@@ -66,3 +66,42 @@ func TestACProgramRuns(t *testing.T) {
 		t.Errorf("got %q, want %q", got, want)
 	}
 }
+
+// S7c task 2: a where pattern matched by Eker's matcher; three variables
+// at an AC level (REM's transformation into a where); x U x U y compiles.
+func TestEkerProgramRuns(t *testing.T) {
+	const sSet = 401
+	p := acSets()
+	p.op(sNat, 343, "pick", []uint32{sSet}, 0)
+	p.op(sNat, 344, "three", []uint32{sSet}, 0)
+	p.op(sNat, 345, "twice", []uint32{sSet}, 0)
+	n, s, y, z := v(1, sNat), v(2, sSet), v(3, sSet), v(4, sSet)
+	// pick(s) => n where u(single(n), u(y, z)) :=() s
+	p.rule(sNat, f(343, s), n, ref.Match{Sort: sSet, Pattern: f(340, f(341, n), f(340, y, z)), Rhs: s})
+	// three(u(y, u(z, single(n)))) => n
+	p.rule(sNat, f(344, f(340, y, f(340, z, f(341, n)))), n)
+	// twice(u(y, u(y, single(n)))) => n
+	p.rule(sNat, f(345, f(340, y, f(340, y, f(341, n)))), n)
+	o, so, sso := f(318), f(319, f(318)), f(319, f(319, f(318)))
+	set := f(340, f(341, o), f(340, f(341, so), f(341, sso)))
+	twice := f(340, f(341, so), f(340, f(341, so), f(341, o)))
+	p.p.Query.StartWith = f(400, set, f(343, set), f(344, set))
+	src := p.gen(t)
+	for _, want := range []string{"rt.NewEker(ekerPat0, 3, ", "ekerPat1 = ", "func acNorm("} {
+		if !strings.Contains(src, want) {
+			t.Errorf("no %s in\n%s", want, src)
+		}
+	}
+	// Eker: the subjects in descending order (single(o) first: a constant
+	// argument comes after a function), the element pattern first
+	want := "\nresult = r(u(single(o),u(single(s(o)),single(s(s(o))))),o,o)\n"
+	if got := run(t, p); !strings.HasPrefix(got, want) {
+		t.Errorf("got %q, want %q", got, want)
+	}
+	// (u is idempotent here: u(x, x) => x; the shape is tested end to end
+	// in tests/compiler-rs/programs/ac)
+	p.p.Query.StartWith = f(400, twice, f(345, set), f(345, set))
+	if got := run(t, p); !strings.HasPrefix(got, "\nresult = r(u(single(o),single(s(o))),twice(") {
+		t.Errorf("x U x U y: %q", got)
+	}
+}

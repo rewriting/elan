@@ -1,0 +1,9 @@
+module acint
+// An AC operator on the sort int of the library (it has then two
+// constructors, the injection of builtin ints and this one: its terms are
+// nodes); ints are ordered by value (REM's Gterm_cmp).
+import global int bool; end
+operators global
+  pl(@,@) : (int int) int (AC);
+end
+end

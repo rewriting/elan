@@ -1,0 +1,5 @@
+The interpreter enumerates the solutions with Eker's matcher; REM (and
+elanc-go, in REM's order) matches the variables of the AC level with Eker's
+matcher only after abstracting them (RewriteRule.java transformation3_1:
+F(x, X) where F(y, z) :=() X, x by REM's counter, on a multiset with
+multiplicities): the same solutions, in another order (S7c plan, Task 2).

@@ -107,6 +107,9 @@ type emitter struct {
 	// ext is, inside the matching of a rule applied modulo an extension,
 	// the extension (ac.go)
 	ext *extension
+	// ekerPats are the patterns of Eker's matcher (ac.go), declared at the
+	// end
+	ekerPats []string
 }
 
 func (e *emitter) line(format string, a ...any) {
@@ -427,6 +430,7 @@ func (e *emitter) file() {
 		e.close("}")
 		e.line("")
 	}
+	e.ekerDecls()
 	e.mainFunc()
 }
 
@@ -748,7 +752,7 @@ func usedVars(r *ir.Rule) map[ir.VarID]bool {
 	for _, c := range r.Conds {
 		if c.Kind == ir.CondSame {
 			used[c.A], used[c.B] = true, true
-		} else if c.Kind == ir.CondAC {
+		} else if c.Kind == ir.CondAC || c.Kind == ir.CondEker {
 			used[c.A] = true
 		} else {
 			walk(&c.Expr)
@@ -981,6 +985,10 @@ func (e *emitter) conds(r *ir.Rule, from int, used map[ir.VarID]bool, depth int)
 		case ir.CondAC:
 			// (its code ends with an if or a loop)
 			e.acMatch(r, j, used, depth)
+			return true
+		case ir.CondEker:
+			// (its code ends with a loop)
+			e.ekerMatch(r, j, used, depth)
 			return true
 		}
 	}

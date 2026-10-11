@@ -1,0 +1,4 @@
+The interpreter enumerates the solutions with Eker's matcher, elanc-go
+abstracts the two variables of the outer level as REM does for three items
+(Eker's matcher on F(z, w) after the element pattern G(x, y)): the same
+solutions, in another order.

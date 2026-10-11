@@ -1,0 +1,6 @@
+LPL g_wint description
+  query of sort bool
+  result of sort T
+  import acgen
+  start with (s_wint) g(F(n(2), F(n(-1), F(n(0), F(n(1), n(-3))))))
+end

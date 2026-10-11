@@ -1,0 +1,6 @@
+LPL g_x3y2v description
+  query of sort bool
+  result of sort T
+  import acext
+  start with (s_x3y2u) g(F(a, F(a, F(a, F(b, F(b, F(b, F(c, F(c, F(c, F(c, F(c, c))))))))))))
+end

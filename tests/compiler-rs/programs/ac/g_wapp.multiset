@@ -1,0 +1,3 @@
+The strategy of the where (dk(three)) gives its results in REM's order in
+elanc-go, in Eker's order in the interpreter (g_three.multiset): the same
+results, in another order.

@@ -1,0 +1,83 @@
+module acgen
+// AC shapes of S7c task 2: patterns of wheres (Eker's matcher in both
+// oracles), three variables or more at an AC level and several variables
+// with element patterns (REM: Eker's matcher on the abstracted part),
+// x U x U y and x U x U y U y (REM's Diophantine code), rules of an AC
+// operator with several variables applied modulo an extension.
+import global acsyms; end
+operators global
+  G(@,@) : (T T) T (AC);
+  K(@,@) : (T T) T (AC);
+  k(@,@,@) : (T T T) T;
+  ok(@) : (T) bool;
+end
+stratop global
+  s_three : <T -> T> bs;
+  s_elt2 : <T -> T> bs;
+  s_xxy : <T -> T> bs;
+  s_xxyy : <T -> T> bs;
+  s_nl3 : <T -> T> bs;
+  s_decl : <T -> T> bs;
+  s_w2 : <T -> T> bs;
+  s_wg : <T -> T> bs;
+  s_wnest : <T -> T> bs;
+  s_wint : <T -> T> bs;
+  s_wxx : <T -> T> bs;
+  s_inner : <T -> T> bs;
+  s_rep : <T -> T> bs;
+end
+rules for bool
+  x : T;
+global
+  [] ok(a) => false end
+  [] ok(x) => true end
+end
+rules for T
+  x, y, z, w : T;
+  i, j : int;
+global
+  // three variables (REM: F(x, X) where F(y, z) :=() X)
+  [three] F(x, F(y, z)) => k(x, y, z) end
+  // an element pattern and two variables (F(g(x), X) where F(y, z) :=() X)
+  [elt2] F(g(x), F(y, z)) => k(x, y, z) end
+  // a repeated variable and another one (REM's maximal extract)
+  [xxy] F(x, F(x, y)) => h(x, y) end
+  // two repeated variables
+  [xxyy] F(x, F(x, F(y, F(y, y)))) => h(x, y) end
+  // non-linear: x bound by the other argument, the AC level abstracted
+  [nl3] h(x, F(x, F(y, z))) => k(x, y, z) end
+  // a where: the whole pattern by Eker's matcher
+  [w2] g(z) => h(x, y) where (T) F(x, y) :=() z end
+  [wg] g(z) => h(x, y) where (T) F(g(x), y) :=() z end
+  // AC nested in an element, and a free symbol around
+  [wnest] g(w) => k(x, y, z) where (T) g(F(h(x, y U d), z)) :=() g(w) end
+  // ints in the elements (Eker's order of ints: 0, 1, 2, ..., then -1, ...)
+  [wint] g(z) => n(i) where (T) F(n(i), F(n(j), y)) :=() z if i < j end
+  // x U x U y in a where
+  [wxx] g(z) => h(x, y) where (T) F(x, F(x, y)) :=() z end
+  // a label with several results per term under repeat* (each branch)
+  [pick] F(x, y) => x end
+  // an AC pattern nested in an element, the outer level abstracted
+  [inner] F(G(x, y), F(z, w)) => k(h(x, y), z, w) end
+  // modulo an extension, several variables: a unique solution whose
+  // condition holds (the interpreter's semantics; REM never matches these
+  // rules on the whole term, the S7c plan)
+  [] G(x, G(y, b)) => K(x, y) if ok(x) and not(ok(y)) end
+  [] K(x, K(x, y)) => K(x, y) end
+end
+strategies for T
+implicit
+  [] s_three => dk(three) end
+  [] s_elt2 => dk(elt2) end
+  [] s_xxy => dk(xxy) end
+  [] s_xxyy => dk(xxyy) end
+  [] s_nl3 => dk(nl3) end
+  [] s_w2 => dk(w2) end
+  [] s_wg => dk(wg) end
+  [] s_wnest => dk(wnest) end
+  [] s_wint => dk(wint) end
+  [] s_wxx => dk(wxx) end
+  [] s_inner => dk(inner) end
+  [] s_rep => repeat*(pick) end
+end
+end

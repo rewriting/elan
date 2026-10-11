@@ -1,0 +1,3 @@
+The interpreter enumerates x U x U y U y with Eker's matcher, elanc-go in
+REM's order (REM's maximal extract for y, the rest twice x: g_x2y2u): the
+same solutions, in reverse order.

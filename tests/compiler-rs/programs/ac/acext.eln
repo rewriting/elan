@@ -1,0 +1,39 @@
+module acext
+// x^n U y^m (n, m > 1: REM abstracts x^n, then its Diophantine code), and
+// rules of AC operators with several variables applied modulo an
+// extension (S7c task 2).
+import global acsyms; end
+operators global
+  M(@,@) : (T T) T (AC);
+  N(@,@) : (T T) T (AC);
+  pair(@,@) : (T T) bool;
+end
+stratop global
+  s_x2y2 : <T -> T> bs;
+  s_x2y2u : <T -> T> bs;
+  s_x3y2u : <T -> T> bs;
+end
+rules for bool
+  x, y : T;
+global
+  [] pair(a, b) => true end
+  [] pair(x, y) => false end
+end
+rules for T
+  x, y : T;
+global
+  [x2y2] F(x, F(x, F(y, y))) => h(x, y) end
+  [x2y2u] g(F(x, F(x, F(y, y)))) => h(x, y) end
+  [x3y2u] g(F(x, F(x, F(x, F(y, y))))) => h(x, y) end
+  // two variables modulo an extension (REM: no extension for F(x, y))
+  [] M(x, y) => g(h(x, y)) if pair(x, y) end
+  // x U x U y modulo an extension
+  [] N(x, N(x, y)) => g(h(x, y)) if pair(x, y) end
+end
+strategies for T
+implicit
+  [] s_x2y2 => dk(x2y2) end
+  [] s_x2y2u => dk(x2y2u) end
+  [] s_x3y2u => dk(x3y2u) end
+end
+end

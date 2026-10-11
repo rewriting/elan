@@ -1,0 +1,6 @@
+LPL acnested description
+  query of sort bool
+  result of sort elt
+  import acnext
+  start with () nested(g(e1 + e2) + e1 + e2 + g(e1 + e2))
+end

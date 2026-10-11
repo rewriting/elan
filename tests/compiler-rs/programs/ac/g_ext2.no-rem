@@ -1,0 +1,4 @@
+REM matches the rule M(x, y) of an AC operator without an extension
+(RewriteRule.java transformation3_2: nothing for F(x, y)), so it does not
+rewrite M(a, b, c, d) where only x = a, y = b satisfies the condition; the
+interpreter and elanc-go apply the rule modulo an extension.

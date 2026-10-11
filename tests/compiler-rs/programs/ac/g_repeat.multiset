@@ -1,0 +1,4 @@
+repeat*(pick) where the label pick has several results per term (an AC
+matching): each branch to its end. The interpreter enumerates the
+solutions of F(x, y) with Eker's matcher, REM and elanc-go with REM's
+counter: the same results, in another order (S7c plan, Task 2 findings).

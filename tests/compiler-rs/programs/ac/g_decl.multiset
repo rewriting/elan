@@ -1,0 +1,5 @@
+REM orders the variables of an AC level by their number in the .ref file
+(here the declaration order z, w, y, x), keeps the first one at the level
+and gives the others to Eker's matcher (F(z, X) where F(w, y, x) :=() X);
+elanc-go too. The interpreter enumerates them with Eker's matcher: the same
+solutions, in another order (S7c plan, Task 2 findings).
