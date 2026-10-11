@@ -39,8 +39,15 @@ are not written):
 | `eos` | end of stream |
 | `other <raw>` | anything else, raw code (e.g. `2147483648` wraps to -2147483648) |
 | `@begin NAME` / `@end` | an `mlstream` opened (before its priming read, not traced) / closed |
-| `@foreach-begin` / `@foreach-end` | a `FOR EACH`/`IF` expansion starts / has no more solution |
+| `@foreach-begin` / `@foreach-end` | a `FOR EACH`/`IF` expansion starts / has no more solution (see below) |
 | `@inline <chars>` | (`lex` mode) an inline `/# ... #/` was read while reading the previous lexem |
+
+The end of the solutions is found while the stream reads one lexem ahead,
+during the `ilex` call that returns the body's next-to-last lexem; when the
+expansion delivered a lexem, `@foreach-end` becomes pending only once the
+next `mlstream::ilex` call (at any depth: a `FOR EACH` inside a condition is
+read by Earley) has completed, so a region holds its whole body (plan S8a,
+task 8 ruling). The Go tracer (`front/macro`) does the same.
 
 Texts are escaped: `\\`, `\n`, `\t`, `\"`, other bytes < 32 or >= 127 as
 `\ooo`. A marker is written after the lexem of the outermost call during
@@ -55,6 +62,12 @@ which it became pending.
 | `python3 test_tracecmp.py` | unit tests of `tracecmp.py` |
 | `test_front_lex.sh PREFIX [--only lgi,spc]` | every file of `list_files.py`: harness and `front-trace lex` compared exactly |
 | `test_front_load.sh PREFIX` | every program of `list_programs.py`: module tree of `elan` (no `-b`) and harness trace against `front-trace load` |
+| `test_front_errors.sh PREFIX [--save]` | the error corpus `errors/lex/*` (harness `lex`) and `errors/load/<case>/` (`elan ARGS`, `args` holds them) against `front-trace`: stdout, stderr, status; `--save` writes the expected outputs from the C++ |
+
+`make check-front` runs them all (and `go vet`/`go test ./front/...`), in
+`make check`. `unloadable.tsv` lists the `FOR EACH`/`IF` files that no
+program `elan` loads can reach, with the reason: `test_front_lex.sh` reports
+them as `UNLOADABLE` instead of failing on them as `UNCOVERED`.
 
 `tracecmp.py --mode lex|load C GO`: `lex` compares line for line; `load`
 removes, and counts, only (1) on the C++ side, the lines strictly inside an

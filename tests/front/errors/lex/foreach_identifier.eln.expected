@@ -1,0 +1,8 @@
+@begin foreach_identifier.eln
+id 646 module
+@@stderr
+
+[error] :file=foreach_identifier.eln	line=0	pos=25
+[mlstream] identifier expected instead of 1
+	 before  1 : bool SUCH THAT y : 
+@@status 1

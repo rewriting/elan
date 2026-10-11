@@ -1,0 +1,7 @@
+@begin too_many_variables.eln
+id 646 module
+@@stderr
+
+ too much variables in 'FOR EACH'
+more then MAXNOFVAR=49
+@@status 1

@@ -1,0 +1,5 @@
+id 1377 specification
+@@stderr
+
+string constant too long
+@@status 1

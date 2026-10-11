@@ -1,0 +1,8 @@
+@begin dot_expected.eln
+id 646 module
+@@stderr
+
+[error] :file=dot_expected.eln	line=1	pos=0
+[mlstream] '.' expected  instead of 3
+	 before  3 end ENDOFLSTREAM 
+@@status 1

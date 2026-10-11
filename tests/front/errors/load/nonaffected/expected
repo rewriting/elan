@@ -1,0 +1,9 @@
+@@stderr
+
+[error] :file=m.eln	line=3	pos=0
+[preprocessor] non affected variable y in FOR EACH
+	 before  
+[error] :file=m.eln	line=4	pos=1
+[mlstream::ilex] syntax error in macro construction
+	 before  end ENDOFLSTREAM 
+@@status 1

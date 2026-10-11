@@ -1,0 +1,11 @@
+@begin variable_expected.eln
+id 646 module
+@@stderr
+
+[error] :file=variable_expected.eln	line=0	pos=39
+[preprocesor] variable name expected after SUCH THAT or AND instead of y
+	 before  : = ( ) f 
+[error] :file=variable_expected.eln	line=1	pos=1
+[mlstream::ilex] syntax error in macro construction
+	 before  end ENDOFLSTREAM 
+@@status 1

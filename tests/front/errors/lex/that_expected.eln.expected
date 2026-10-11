@@ -1,0 +1,11 @@
+@begin that_expected.eln
+id 646 module
+@@stderr
+
+[error] :file=that_expected.eln	line=0	pos=44
+	THAT expected  instead of x
+	 before  x : = ( ) f 
+[error] :file=that_expected.eln	line=1	pos=1
+[mlstream::ilex] syntax error in macro construction
+	 before  end ENDOFLSTREAM 
+@@status 1

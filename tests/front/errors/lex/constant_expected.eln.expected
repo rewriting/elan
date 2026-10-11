@@ -1,0 +1,8 @@
+@begin constant_expected.eln
+id 646 module
+@@stderr
+
+[error] :file=constant_expected.eln	line=1	pos=0
+[preprocessor] constant or '(' expected
+	 before  x end ENDOFLSTREAM 
+@@status 1

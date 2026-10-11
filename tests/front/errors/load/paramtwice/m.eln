@@ -1,0 +1,5 @@
+module m[X,X]
+import global bool; end
+sort s; end
+operators global c : s; end
+end

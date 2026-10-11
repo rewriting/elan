@@ -1,0 +1,6 @@
+@begin inline_eof.eln
+@@stderr
+
+[error] :file=inline_eof.eln	line=1	pos=1
+[lexan] inline throw end of input stream
+@@status 1

@@ -1,0 +1,7 @@
+id 232 LPL
+id 112 p
+@@stderr
+
+[error] :file=comment_eof.lgi	line=1	pos=1
+[lexan] comment throw end of input stream
+@@status 1

@@ -1,0 +1,9 @@
+@begin constexp_syntax2.eln
+id 646 module
+@@stderr
+
+[error] :file=constexp_syntax2.eln	line=1	pos=0
+[PARSER] syntax error 	on symbol ')'
+	 before  end ENDOFLSTREAM 
+	one of ( 'NUMBER'  '-'  '(' ) expected 
+@@status 1

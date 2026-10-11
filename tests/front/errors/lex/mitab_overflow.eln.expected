@@ -1,0 +1,6 @@
+@begin mitab_overflow.eln
+id 646 module
+@@stderr
+[addn] ERROR, mi tab overflowed over 50
+ int.err.
+@@status 1

@@ -1,0 +1,8 @@
+@begin foreach_colon.eln
+id 646 module
+@@stderr
+
+[error] :file=foreach_colon.eln	line=0	pos=35
+[mlstream] ':' expected  instead of bool
+	 before  bool SUCH THAT y : = ( 
+@@status 1

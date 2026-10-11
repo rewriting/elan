@@ -1,0 +1,8 @@
+@begin macro_syntax.eln
+id 646 module
+@@stderr
+
+[error] :file=macro_syntax.eln	line=1	pos=0
+[mlstream::ilex] syntax error in macro construction
+	 before  b end ENDOFLSTREAM 
+@@status 1

@@ -1,0 +1,8 @@
+@begin identifier_expected.eln
+id 646 module
+@@stderr
+
+[error] :file=identifier_expected.eln	line=0	pos=18
+[mlstream] identifier expected instead of 1
+	 before  1 = 1 . . . 2 
+@@status 1

@@ -7,6 +7,9 @@
 #   make check-go        tests of the Go compiler elanc-go and its runtime (when go >= 1.24
 #                        exists): go vet/test, .ref reader, normalisation, strategies, AC,
 #                        depth, bench G, query input, BenchThesis G
+#   make check-front     tests of the Go front end (src/compiler-go/front, spec S8,
+#                        when go >= 1.24 exists): go vet/test, the harness
+#                        elan-lextrace, lexem streams, module trees, error corpus
 #   make check-golden    golden tests: .ref files, -d dump, statistics, errors
 #   make check-compiler  compiled tests (J, JO) only: elanc, REM, runtime libraries
 #   make reference       build the 2004 reference system (reference/install)
@@ -30,7 +33,7 @@ else
   ELAN_CXX ?= g++
 endif
 
-.PHONY: front-tables manual manual-update all configure install check check-rust check-go check-compiler check-golden check-sanitize check-arch check-unit test-runner smoke reference check-reference clean toolchain
+.PHONY: front-tables check-front manual manual-update all configure install check check-rust check-go check-compiler check-golden check-sanitize check-arch check-unit test-runner smoke reference check-reference clean toolchain
 
 all: configure
 	cmake --build $(BUILD) -j $(JOBS)
@@ -146,7 +149,22 @@ check-go: install
 front-tables: all
 	cd src/compiler-go && $(GO_ENV) go run ./front/lr/gen -in $(CURDIR)/$(BUILD)/src/interpreter/generated -out .
 
-check: smoke test-runner check-arch check-unit check-golden check-rust check-go
+# Tests of the Go front end (src/compiler-go/front, spec S8, plan S8a), when
+# go >= 1.24 exists: against the C++ through the harness elan-lextrace
+# (tests/front/README.md).
+check-front: install
+	@if [ -x "$(PREFIX)/bin/elanc-go" ]; then \
+	  (cd src/compiler-go && $(GO_ENV) go vet ./front/... \
+	     && ELANLIB=$(PREFIX) ELAN_GENERATED_DIR=$(CURDIR)/$(BUILD)/src/interpreter/generated $(GO_ENV) go test ./front/...) \
+	  && tests/front/check_lextrace_hooks.sh $(BUILD) \
+	  && tests/front/test_lextrace_harness.sh $(BUILD) \
+	  && python3 tests/front/test_tracecmp.py \
+	  && tests/front/test_front_load.sh $(PREFIX) \
+	  && tests/front/test_front_lex.sh $(PREFIX) \
+	  && tests/front/test_front_errors.sh $(PREFIX); \
+	else echo "elanc-go not built (go >= 1.24 missing or -DELAN_GO=OFF): front tests skipped"; fi
+
+check: smoke test-runner check-arch check-unit check-golden check-rust check-go check-front
 	$(BENCH) --prefix $(PREFIX) --kinds I,A
 	@$(CHECK_COMPILER)
 

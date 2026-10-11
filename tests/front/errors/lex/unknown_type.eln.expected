@@ -1,0 +1,8 @@
+@begin unknown_type.eln
+id 646 module
+@@stderr
+
+[error] :file=unknown_type.eln	line=0	pos=53
+[preprocessor] unknown type list[pair[int,bool]] used
+	 before  SUCH THAT x : = ( ) 
+@@status 1

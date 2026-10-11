@@ -1,0 +1,1 @@
+module m FOR EACH x,y:bool;z:ident SUCH x:=() f :{ g(x) } end

@@ -1,0 +1,4 @@
+module m
+import global bool; end
+FOR EACH x,y:bool SUCH THAT x:=() true :{ }
+end

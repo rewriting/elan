@@ -1,0 +1,1 @@
+module m FOR EACH x:list[pair[int,bool]] SUCH THAT x:=() f :{ g(x) } end
