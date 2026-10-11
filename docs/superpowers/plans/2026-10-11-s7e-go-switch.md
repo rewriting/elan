@@ -205,7 +205,7 @@ Target: nqueens 11 <= 0.15 s, nqueens 12 <= 0.80 s (S7c: 0.13 / 0.74), every row
 
 Ruling (to confirm in Step 4): refuse such queries rather than compile two copies of the query's operators (one boxed, for the query only) — the query's value is dropped when the start term does not use it, only its normalisation steps are visible; cost if wrong: status 2 for a query naming such an operator in such a program.
 
-### Task 3: A guard without Unguard (readings every N calls)
+### Task 3: A guard without Unguard (readings every N calls) — tried, not kept (see Task 3 results)
 
 Target: nqueens 12 <= 0.67 s after Task 2 (measured upper bound without any guard: 0.64 s), deeplist3m and propc 3 not slower; `test_depth.sh` unchanged (statuses, messages, results).
 
@@ -367,7 +367,25 @@ Found on the way (own commit 8ea6e94): `strategy_terms/ms_labels_seq` stopped wi
 | propc 3 | 0.29 | 0.28 | 1.28 |
 | deeplist3m | 1.33 | 1.27 | 1.9 |
 
-Steps unchanged everywhere; `bench_perf.sh --check` exit 0. Compile time: nqueens 0.05-0.07 s (a build per query operator: 40 operators), FastCompletion p8 (unchanged program) 0.11 s as before (its query set fails to reach as a whole, so the cheap pass runs first; a first version that built per operator there took 0.44 s). `test_query.sh`: 49 programs, 152 queries, 0 failures — only `queryonly`'s query is refused by the rule (of the 49 programs only `start_term/ground` and `queryonly` have a start term without the query). `bench_parity.py --kind G`: PASS=78 PASS~=1 PASS≈=53 FAIL=13, no `PARITY:` line; BenchThesis G 22 ok; `make check-go` green.
+Steps unchanged everywhere; `bench_perf.sh --check` exit 0. Compile time: nqueens 0.05-0.07 s (one build per query operator not in the program, as before within noise), FastCompletion p8 (unchanged program) 0.11 s as before (its query set fails to reach as a whole, so the cheap pass runs first; a first version that built per operator there took 0.44 s). `test_query.sh`: 49 programs, 152 queries, 0 failures — only `queryonly`'s query is refused by the rule (of the 49 programs only `start_term/ground` and `queryonly` have a start term without the query). `bench_parity.py --kind G`: PASS=78 PASS~=1 PASS≈=53 FAIL=13, no `PARITY:` line; BenchThesis G 22 ok; `make check-go` green.
 
 - Ruling (confirmed): refuse such a query (status 2) rather than compile the query's operators twice (boxed for the query only) — why: when the start term does not use the query its value is dropped, only its normalisation steps would be visible, and none of the 152 test queries is affected — cost if wrong: status 2 for a query naming such an operator in a program whose start term ignores the query (REM accepts it).
 - Ruling: "native in the program alone" is checked per sort (a member of a family, e.g. `int`, included), and the message names the first such sort in sort order (`a : int` names builtinInt, which it boxes too) — why: a sort leaving its family changes the generated signatures as much as a boxed family — cost if wrong: a message naming builtinInt where int is meant.
+
+### Task 3 results — tried, not kept
+
+Implemented as planned (`Guard` counts its calls and reads the stack every `ReadEvery` = 1024 calls; the anchor's use bounded by C/2 + ReadEvery x MaxFrame (16 KiB); stop past 3C/4; re-anchor when a reading sees the stack below the ceiling; every `Unguard`/`defer rt.Unguard()` removed from the runtime and the emitted code; Main's end-of-program depth check removed). Tests RED → GREEN: `depth_test.go` recursions without exit call (RED: status 1, "guarded depth 1000000 at the end of the program"), new `TestGuardReadsEveryReadEvery` (RED: does not compile), `TestGuardShallowCalls` (10^8 guarded calls at depth 1: no stop, 0.40 ns per call above the bare loop), GOMAXPROCS=1 cases in `TestDepthGuard`; gen `TestNoUnguard` and the shapes of `gen_test`/`strat_test`/`meta_test` (RED: Unguard emitted). All green, also on Linux (golang:1.25-alpine, arm64, `go test -run 'DepthGuard|GuardReads|GuardShallow'`); `test_depth.sh` 20 programs, 0 failures, with the default GOMAXPROCS and GOMAXPROCS=1 (same statuses, messages, results; RSS within 1-5 %: count8 1783 vs 1799 MB, upto7 2598 vs 2471 MB). Stop depths (ELAN_STATS): list 9.86 M levels (before 8.4 M), native ints 24.6 M (16.8 M), CPS iterate* 5.48 M (5.0 M), 4 KiB frames 193 K (180 K).
+
+Measured (nqueens 12, generated code of this branch, interleaved best of 7, Python wall time):
+
+| variant | s |
+|---|---|
+| Task 2 (Guard + Unguard) | 0.741 |
+| Task 3 (Guard every 1024 calls, no Unguard) | 0.705 |
+| Guard = a load and a branch only (`if flag { ... }`, never true; no counter) | 0.689 |
+| the same without a call in the branch | 0.700 |
+| no guard at all (unsafe) | 0.640 |
+
+`bench_perf.sh build/install 5 --check` with Task 3: nqueens 12 0.70 s, nqueens 11 0.12, deeplist3m 1.27, propc 3 0.28, efib 200 0.07 (exit 0: all within the criterion-4 limits). nqueens 12 makes 107.5 M guarded calls; any check at a function entry costs ~0.5 ns there (a load and a branch alone: 0.05 s; the inlining decisions are the same with and without the guard, `-gcflags=-m`). The target (<= 0.67 s) assumed the no-guard figure minus a little; it is out of reach for any per-call guard.
+
+- Ruling: Task 3 reverted on `s7e-go-switch` (the plan's rule: a change that does not reach its target is reverted), kept as commit 96f18ec on the local branch `s7e-task3-guard-tried` (`git cherry-pick 96f18ec` restores it, tests included) — why: 0.705 s > 0.67 s; the gain (-5 % on nqueens 12, nothing elsewhere) does not reach the target the plan set, and the depth guard is safety-critical code that should change only for a clear gain — cost if wrong: 0.036 s on nqueens 12 (5 %) and slightly smaller depth limits (8.4 M instead of 9.9 M list levels) left on the table; the user may decide to take it at the gate (Task 10) with a revised target.

@@ -205,6 +205,14 @@ sub-project (S1–S5b). Each item says where it comes from.
 
 ## Performance
 
+- **Depth guard without Unguard** (S7e task 3, tried, not kept): a guard
+  reading the stack every 1024 calls (no exit call) gives nqueens 12
+  0.705 s instead of 0.741 s (no guard: 0.640 s), short of the target
+  0.67 s; kept on the local branch `s7e-task3-guard-tried` (96f18ec, tests
+  included). Any check at a function entry costs ~0.5 ns per call there
+  (107 M guarded calls); a further gain needs fewer guarded calls (e.g.
+  self tail calls of normalisation functions as loops).
+
 - **Tail-call loops of elanc-go allocate every turn** (review of S7b,
   `gen/strat.go`, `strategies`): the closures `again` and those of the
   body (the rest of the sequences, the steps of repeat*/iterate*) and the
