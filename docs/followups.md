@@ -126,7 +126,7 @@ sub-project (S1–S5b). Each item says where it comes from.
   interpret traversals at all ("Traversal is not intepreted").
 - **REM's compiler crashes on `rewrite(dk(...))`** (found by the S7d
   review): `rewrite` whose body is not a named strategy, e.g.
-  `repeat*(rewrite(dk(cyc)))` or `rewrite(dk(cyc)) ; rr`, stops elanc with
+  `repeat*(rewrite(dk(cyc)))` or `rewrite(dk(cyc)) ; rr`, stops elanc-rem with
   `java.lang.ClassCastException: StrategyDkRule cannot be cast to
   StrategyCall` (`StrategyRewriteStep.compile`, StrategyRewriteStep.java:53):
   REM compiles `rewrite(s)` only for a named s. elanc-go compiles any body
@@ -147,8 +147,8 @@ sub-project (S1–S5b). Each item says where it comes from.
   `norm_4` now returns `t` where 2004 returned an undefined value (S5b).
 - **Very long names (> ~1000 characters)**: `snprintf` truncates where
   `sprintf` overflowed; only `attach_type_modu` fails loudly (S2).
-- **`main_coq_skeleton.c`** (`elanc -coq`) does not compile with current
-  compilers (pre-ANSI multi-line string); `elanc -noC` links a non-existent
+- **`main_coq_skeleton.c`** (`elanc-rem -coq`) does not compile with current
+  compilers (pre-ANSI multi-line string); `elanc-rem -noC` links a non-existent
   `-lelan` (S5b).
 
 - **elanc-go: I/O builtins** (S7e task 6, codes 113, 114, 116, 118-122
@@ -191,7 +191,11 @@ sub-project (S1–S5b). Each item says where it comes from.
   fails (9999); `open` gives `Error(errno)` on a failure, which `stdio`'s
   `iserr([x])` does not recognise (`rb(false,errno([2]))`, REM
   `rb(true,1)`). Regression programs: `programs/io/*.no-interpreter`.
-- **elanc-go: kept refusals** (S7d task 7, closed in S7e; status 2,
+- **elanc (Go): differences from elanc-rem — the kept refusals** (since
+  the S7e decision of 2026-10-11, `elanc` is elanc-go and REM is
+  `elanc-rem`: what follows is what `elanc` refuses and `elanc-rem`
+  compiles, or neither does; the options of REM only are listed in the
+  README, "Differences from REM's driver") (S7d task 7, closed in S7e; status 2,
   "not supported (not planned)" — since S7e no refusal names a stage,
   `ir` `TestKeptRefusalsAreNotPlanned` checks it; the inventory of
   `unsupported(` in `src/compiler-go/ir`):
@@ -289,7 +293,7 @@ sub-project (S1–S5b). Each item says where it comes from.
 - `ELAN_CC`/`ELAN_CXX` mean both the build compilers and the generated
   Makefiles' defaults (environment override) (S5a).
 - `-lfl` (Linux, generated programs) is not checked by CMake (S5a).
-- Installs are not relocatable (absolute paths in `elanc`, `elan`) (S5a).
+- Installs are not relocatable (absolute paths in `elanc-rem`, `elan`) (S5a).
 - `CMAKE_BUILD_TYPE` changes the runtime library flags (S5a).
 - `check_limits.py` does not strip `/* */` blocks or `#if` branches and skips
   names missing from one copy (S3b review).

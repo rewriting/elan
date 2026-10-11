@@ -32,6 +32,19 @@ puts it in `build/install/bin/elan`; it finds its library by itself):
     elan <name>.lgi [<spec>.spc]                   # interactive
 
 The 2004 reference build is used the same way after `source reference/env.sh`.
+
+The compiler `elanc` (the Go compiler since S7e; `elanc-rem` is REM) builds
+a native program that reads one query (a line `... end`) on the standard
+input and prints its results as REM's compiled programs do (`result = ...`,
+`rewrite_step = ...`), not as `elan -b`:
+
+    elanc <name> [<spec>.spc]                      # builds ./a.out (work directory .elan-go.<name>/)
+    head -1 input.inp | ./a.out -quiet             # the first query of input.inp
+    elanc-rem -nosplit -quiet <name> [<spec>.spc] && make -f <name>.make   # the same with REM
+
+`tests/compiler-rs/test_query.sh` (in `make check`) compiles every example
+with `elanc-go` and `elanc-rem` and compares each query's results with the
+interpreter's.
 In batch mode each result is printed as `<term> end` and the results of a
 query are closed by ` end end` / `end`. `make check` runs every example and
 requires the modern output to be identical to `expected.out`.

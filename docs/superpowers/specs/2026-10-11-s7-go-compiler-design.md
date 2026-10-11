@@ -24,7 +24,8 @@ to generate.
 
 ## 2. Goal and success criteria
 
-`elanc-go` next to `elanc` and `elanc-rs` (REM stays until the switch):
+`elanc-go` next to `elanc` and `elanc-rs` (REM stays until the switch) (in this section `elanc` is REM's driver;
+since the switch of S7e, `elanc` is `elanc-go` and REM is `elanc-rem`):
 
 1. `elanc-go prog [spec]` reads the program through `elan --cexport` (the
    `.ref` contract), generates a Go module, builds it with `go build`
@@ -114,6 +115,12 @@ runtime sources (`$PREFIX/share/elan-go/runtime`), built with a shared
   median 5.4 vs 2.9 MB, binaries of 3.3 MB, the REM-only options lost — the
   user decided "Switch to Go": `elanc` is the Go compiler, REM stays
   installed as `elanc-rem`, reversible with `-DELAN_ELANC=rem`.
+  Done (S7e tasks 11-12): the CMake variable `ELAN_ELANC` (`go` by default,
+  `rem`) makes `bin/elanc` a symlink to `elanc-go` or `elanc-rem`; `go`
+  falls back to `rem` with a message when elanc-go is not built (no Go
+  >= 1.24); REM's options that change the result are refused by `elanc`
+  (status 2, naming `elanc-rem`); README, CONTRIBUTING, followups and
+  examples describe `elanc` as the Go compiler.
 
 ## 6. Risks
 
