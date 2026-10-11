@@ -45,11 +45,22 @@ extern int ppexsyntan(lstream &,int,void (*ltol)(lexem,lexem&));
 // one line per lexem returned by the outermost mlstream::ilex, then the
 // markers that became pending during that call; "@begin NAME" before the
 // priming read of an mlstream (not traced), "@end" in its destructor.
+// "@foreach-end" is due when a FOR EACH/IF action has no more solution;
+// that is found while reading one lexem ahead (macroexp, collident) during
+// the ilex call that returns the body's next-to-last lexem: when the action
+// delivered a body lexem, the marker becomes pending only once the next
+// mlstream::ilex call (at any depth: a FOR EACH in a condition is read by
+// Earley) has returned the body's last lexem, so a region holds its body.
+#include <set>
 #include <string>
+#include <utility>
 #include <vector>
 FILE *lextrace_out = NULL;
 static int lextrace_depth = 0;                  // nesting of mlstream::ilex
 static std::vector<std::string> lextrace_pending;
+static long lextrace_returned = 0;              // mlstream::ilex calls completed
+static std::vector<std::pair<long, std::string> > lextrace_deferred; // (due at, marker)
+static std::set<const void *> lextrace_delivered;  // FOR EACH actions that gave a lexem
 
 void lextrace_chars(FILE *f, const char *s, size_t n)
 {
@@ -95,6 +106,29 @@ static void lextrace_emit(lexem l)
       fprintf(lextrace_out, "%s\n", lextrace_pending[i].c_str());
   }
   lextrace_pending.clear();
+}
+
+// an mlstream::ilex call completed: the deferred markers that are due
+// become pending
+static void lextrace_returned_one()
+{
+  lextrace_returned++;
+  for (size_t i = 0; i < lextrace_deferred.size();) {
+    if (lextrace_deferred[i].first <= lextrace_returned) {
+      lextrace_mark(lextrace_deferred[i].second.c_str());
+      lextrace_deferred.erase(lextrace_deferred.begin() + i);
+    } else i++;
+  }
+}
+
+// the end of a FOR EACH/IF action: after the next completed ilex call when
+// it delivered a lexem (the call in progress returns the next-to-last one)
+static void lextrace_foreach_end(const void *acte)
+{
+  if (lextrace_delivered.erase(acte)) {
+    if (lextrace_out)
+      lextrace_deferred.push_back(std::make_pair(lextrace_returned + 2, std::string("@foreach-end")));
+  } else lextrace_mark("@foreach-end");
 }
 #endif
 
@@ -208,6 +242,7 @@ void mlstream::ilex(lexem &l)
   else
     collident();
 #ifdef ELAN_LEXTRACE
+  lextrace_returned_one();
   if (--lextrace_depth == 0) lextrace_emit(l);
 #endif
 }
@@ -448,7 +483,7 @@ int mlstream::buffilex(lexem &l)
                      acte.actdata.nextmatch.lastws,0,
                      acte.actdata.nextmatch.varnum)) {
 #ifdef ELAN_LEXTRACE
-		  lextrace_mark("@foreach-end");
+		  lextrace_foreach_end(&acte);
 #endif
 		  deleteforeachmacs(acte.actdata.nextmatch.varnames,
 		                    acte.actdata.nextmatch.varnum);
@@ -475,6 +510,9 @@ int mlstream::buffilex(lexem &l)
      }
   }
   acte.currentb.get(l);
+#ifdef ELAN_LEXTRACE
+  if (acte.whichaction == NEXTMATCHACTION) lextrace_delivered.insert(&acte);
+#endif
   return(acte.whichaction != SIMPLECOPYACTION);
 }
 

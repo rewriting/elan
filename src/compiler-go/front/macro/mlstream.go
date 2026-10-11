@@ -33,6 +33,7 @@ type action struct {
 	ch        int   // iditer.ch (a C char: signed)
 	sol       Solutions
 	varNames  []int // nextmatch.varnames
+	delivered bool  // the trace hooks: a body lexem was read from it
 	actionbuf lex.Buffer
 }
 
@@ -52,8 +53,17 @@ type State struct {
 
 	rwFor, rwEach, rwSuch, rwThat, rwAnd, rwAndIf, rwIf lex.Lexem
 
-	depth   int      // lextrace_depth
-	pending []string // lextrace_pending
+	depth    int      // lextrace_depth
+	pending  []string // lextrace_pending
+	returned int      // lextrace_returned: Ilex calls completed
+	deferred []deferredMarker
+}
+
+// deferredMarker is a marker that becomes pending when `returned` reaches
+// at (lextrace_deferred).
+type deferredMarker struct {
+	at int
+	m  string
 }
 
 // NewState is a fresh preprocessor state (one per load).
@@ -182,6 +192,7 @@ func (s *Stream) Ilex() lex.Lexem {
 	} else {
 		s.collident()
 	}
+	s.returnedOne()
 	s.st.depth--
 	if s.st.depth == 0 {
 		if s.tr != nil {
@@ -193,6 +204,23 @@ func (s *Stream) Ilex() lex.Lexem {
 		s.st.pending = s.st.pending[:0]
 	}
 	return l
+}
+
+// returnedOne is lextrace_returned_one: an Ilex call completed, the
+// deferred markers that are due become pending.
+func (s *Stream) returnedOne() {
+	st := s.st
+	st.returned++
+	k := 0
+	for _, d := range st.deferred {
+		if d.at <= st.returned {
+			s.mark(d.m)
+		} else {
+			st.deferred[k] = d
+			k++
+		}
+	}
+	st.deferred = st.deferred[:k]
 }
 
 func (s *Stream) mark(m string) {
@@ -310,6 +338,7 @@ func (s *Stream) addForEach(buf *lex.Buffer, sol Solutions, bvarnamesi int) {
 	a := s.push()
 	a.which = nextMatchAction
 	a.sol = sol
+	a.delivered = false
 	n := s.st.varTabI - bvarnamesi
 	a.varNames = make([]int, n)
 	for i := 0; i < n; i++ {
@@ -371,7 +400,19 @@ func (s *Stream) buffilex() int {
 		case nextMatchAction:
 			vals, ok := a.sol.Next()
 			if !ok {
-				s.mark("@foreach-end")
+				// the end is found while reading one lexem ahead, during
+				// the Ilex call that returns the body's next-to-last lexem:
+				// when the action delivered a lexem, the marker becomes
+				// pending after the next completed Ilex call, at any depth
+				// (lextrace_foreach_end)
+				if a.delivered {
+					a.delivered = false
+					if s.tr != nil {
+						s.st.deferred = append(s.st.deferred, deferredMarker{s.st.returned + 2, "@foreach-end"})
+					}
+				} else {
+					s.mark("@foreach-end")
+				}
 				s.deleteForEachMacs(a.varNames)
 				return s.pop(a)
 			}
@@ -385,6 +426,9 @@ func (s *Stream) buffilex() int {
 		}
 	}
 	s.mflex = a.currentb.Get(s.Ctx().D)
+	if a.which == nextMatchAction {
+		a.delivered = true
+	}
 	if a.which != simpleCopyAction {
 		return 1
 	}

@@ -304,15 +304,16 @@ func (l *listSols) Next() ([][]lex.Lexem, bool) {
 	return v, true
 }
 
-// @foreach-end is pending during the call that returns the body's
-// next-to-last lexem: the stream reads one lexem ahead (macroexp, collident),
-// as the C++ (programs/foreach: `@foreach-end` before the body's last `;`).
+// The end of the solutions is found during the call that returns the body's
+// next-to-last lexem (the stream reads one lexem ahead: macroexp,
+// collident); the marker is deferred by one lexem, after the body's last one
+// (the harness's hook, mlstream.cc lextrace_foreach_end).
 func TestForEachSolutions(t *testing.T) {
 	s, tr, _, errb := stream(t, "module m FOR EACH x:int SUCH THAT x:=() a :{ f(x) } x end", &twoSols{})
 	if st := drain(s); st != 0 {
 		t.Fatalf("status %d %s", st, errb)
 	}
-	want := "@begin t.eln\nid module\nid m\n@foreach-begin\nid f\nchar 40\nnum 1\nchar 41\nid f\nchar 40\nnum 2\nchar 43\n@foreach-end\nchar 41\nid x\nid end\neos\n@end\n"
+	want := "@begin t.eln\nid module\nid m\n@foreach-begin\nid f\nchar 40\nnum 1\nchar 41\nid f\nchar 40\nnum 2\nchar 43\nchar 41\n@foreach-end\nid x\nid end\neos\n@end\n"
 	if got := noPos(tr.String()); got != want {
 		t.Fatalf("trace %q\nwant %q", got, want)
 	}
