@@ -412,3 +412,34 @@ func (s *Down) Rest() []Term {
 	}
 	return out
 }
+
+// NormAC returns the normal form of the AC term of sym over the multiset e
+// (non-empty, sorted), f being the normalisation function of sym (it
+// flattens its arguments and applies the rules of sym): the element itself
+// if there is one, else f(e[0], the others). The elements left over by an
+// AC match can make a reducible term (and(x, t) on and(a, a, t) with
+// and(x, x) => x).
+func NormAC(sym int32, e []Term, f func(a, b Term) Term) Term {
+	if len(e) == 1 {
+		return e[0]
+	}
+	return f(e[0], MkAC(sym, e[1:]))
+}
+
+// ApplyAC returns the normal form of the AC term sym(args...) (the args
+// in normal form), normalised as a whole: f is the normalisation function
+// of sym.
+func ApplyAC(sym int32, f func(a, b Term) Term, args ...Term) Term {
+	return NormAC(sym, Flatten(sym, args...), f)
+}
+
+// ExtendAC returns the result of a rule applied modulo an extension:
+// sym(args..., rest...) normalised as a whole (args: the right-hand side,
+// or its arguments when sym is at its top), the right-hand side itself
+// when rest is empty and args is one term.
+func ExtendAC(sym int32, f func(a, b Term) Term, rest []Term, args ...Term) Term {
+	if len(rest) == 0 && len(args) == 1 {
+		return args[0]
+	}
+	return NormAC(sym, Merge(Flatten(sym, args...), rest), f)
+}

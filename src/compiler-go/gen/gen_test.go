@@ -327,7 +327,7 @@ func TestGeneratedProgramsVet(t *testing.T) {
 	for name, p := range map[string]*prog{
 		"peano": peano(), "builtins": builtins(), "wherePatterns": wherePatterns(),
 		"boxedInts": boxedInts(), "strategies": strategies(), "meta": metaProg(),
-		"commentNames": commentNames(21), "totalInts": totalInts(),
+		"commentNames": commentNames(21), "totalInts": totalInts(), "acSets": acSets(),
 	} {
 		t.Run(name, func(t *testing.T) {
 			dir, src := module(t, p)

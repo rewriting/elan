@@ -101,7 +101,23 @@
 //
 // # Extension points
 //
-//   - S7c (AC): [Pattern] gets an AC case, [Decision] an AC matching node.
+//   - S7c (AC, task 2): the general matcher (nested AC patterns under AC
+//     patterns, several variables).
+//
+// # AC operators (S7c task 1)
+//
+// An AC operator ([Op.AC]) builds canonical terms: its function flattens
+// and sorts its arguments (rt.MkAC2: REM's order, see the S7c plan) and
+// applies its unlabelled rules to the result, which is the only column of
+// its decision tree. An AC pattern ([PatAC]) in a left-hand side or in a
+// where is replaced, for the decision tree, by a fresh variable; a
+// [CondAC] condition then matches the term bound to it (each solution in
+// turn, the conditions after it backtracking into the matching): the
+// element patterns one element each, in source order, each over the
+// subject's elements in canonical order (each distinct choice once), then
+// the variables of the AC level ([ACVar]). An unlabelled rule with its AC
+// operator at the top is applied modulo an extension ([Pattern.Ext]), as
+// the interpreter does with the extension rules it exports.
 //   - S7d (query): [Start] gets the query variable and the parser tables.
 package ir
 
@@ -414,6 +430,9 @@ type Op struct {
 	Tree *Decision
 	// Meta is the evaluation of a meta_apply operator by META.
 	Meta MetaOp
+	// AC: the operator is associative-commutative (infos 2): its terms are
+	// flattened and canonically sorted multisets of two or more elements.
+	AC bool
 	// Recursive: the function is on a cycle of the call graph (it calls
 	// itself, directly or not), so it can recurse as deep as the data: the
 	// generated function guards its depth.
@@ -567,7 +586,20 @@ const (
 	PatInt
 	// PatStr is a builtinString literal.
 	PatStr
+	// PatAC is an AC pattern (only in [CondAC]): the AC operator Op, the
+	// element patterns Args (nested patterns of the same operator
+	// flattened; each matches one element), the variables of the AC level
+	// Vars, and Ext.
+	PatAC
 )
+
+// ACVar is a variable of the AC level of an AC pattern: it takes a
+// non-empty sub-multiset, Mult times (x U x: Mult 2). With two variables,
+// the first is REM's counter variable ([rt.Split]).
+type ACVar struct {
+	Var  VarID
+	Mult int
+}
 
 // Pattern is a pattern of a left-hand side or of a where.
 type Pattern struct {
@@ -577,6 +609,12 @@ type Pattern struct {
 	Args []Pattern
 	Int  int32
 	Str  string
+	// Vars are the variables of the AC level of a PatAC (at most two).
+	Vars []ACVar
+	// Ext: the pattern is the left-hand side of an unlabelled rule of its
+	// AC operator, applied modulo an extension E (the elements left over,
+	// possibly none): the result is then op(rhs, E) normalised.
+	Ext bool
 }
 
 // CondKind is the kind of a [Cond].
@@ -596,16 +634,21 @@ const (
 	// t`): each result of strategy S applied to the normal form of t that
 	// matches p, in order (backtracking).
 	CondApply
+	// CondAC: the term of variable A matches the AC pattern Pat; each
+	// solution in turn (the conditions after it backtrack into the
+	// matching).
+	CondAC
 )
 
 // Cond is a condition or local assignment of a rule.
 type Cond struct {
 	Kind CondKind
-	// A, B are the variables of CondSame; A is the variable of CondLet.
+	// A, B are the variables of CondSame; A is the variable of CondLet
+	// and the subject of CondAC.
 	A, B VarID
 	// Expr is the term of CondIf, CondLet, CondMatch, CondApply.
 	Expr Expr
-	// Pat is the pattern of CondMatch and CondApply.
+	// Pat is the pattern of CondMatch, CondApply and CondAC.
 	Pat Pattern
 	// Strategy is the strategy of CondApply.
 	Strategy StratID

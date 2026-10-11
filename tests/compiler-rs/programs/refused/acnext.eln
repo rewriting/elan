@@ -1,0 +1,26 @@
+module acnext
+// AC shapes of S7c task 2, which elanc-go refuses (task 1 compiles the
+// others, tests/compiler-rs/programs/ac); elanc-rs refuses every AC
+// operator (S6c).
+import global int bool; end
+sort elt; end
+operators global
+  e1 : elt;
+  e2 : elt;
+  e3 : elt;
+  @ + @ : (elt elt) elt (AC);
+  three(@) : (elt) elt;
+  inwhere(@) : (elt) elt;
+  repeated(@) : (elt) elt;
+end
+rules for elt
+  x, y, z : elt;
+global
+  // three variables at the AC level
+  [] three(x + y + z) => x end
+  // an AC pattern in a where (both oracles use Eker's matcher there)
+  [] inwhere(x) => y where (elt) y + e1 :=() x end
+  // two variables, one of them repeated
+  [] repeated(x + x + y) => y end
+end
+end

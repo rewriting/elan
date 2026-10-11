@@ -41,6 +41,11 @@
 //     continuation of S (a closure), so that a failing condition asks S
 //     for its next result (`return false`); in a normalisation function
 //     the first result for which the rule applies is kept;
+//   - AC operators (S7c, ac.go): their function builds the canonical term
+//     (rt.MkAC2) and applies their rules to it; an AC pattern is matched
+//     by loops over the elements of its subject (each solution passed to
+//     the rest of the rule, the conditions pruning as soon as their
+//     variables are bound);
 //   - main: the start term, normalised and printed by the runtime driver
 //     (rt.Main: options, output, exit statuses), or each result of the
 //     start strategy applied to it.
@@ -99,6 +104,9 @@ type emitter struct {
 	// used are the Go variables that the strategy code emitted so far uses
 	// (see use)
 	used map[string]bool
+	// ext is, inside the matching of a rule applied modulo an extension,
+	// the extension (ac.go)
+	ext *extension
 }
 
 func (e *emitter) line(format string, a ...any) {
@@ -208,6 +216,10 @@ func symName(op *ir.Op) string { return "sym_" + op.Fun }
 // mk is the construction of the term o(args), args being terms.
 func (e *emitter) mk(o ir.OpID, args []string) string {
 	sym := symName(&e.ir.Ops[o])
+	if e.ir.Ops[o].AC {
+		// flattened and sorted
+		return "rt.MkAC2(" + sym + ", " + strings.Join(args, ", ") + ")"
+	}
 	switch len(args) {
 	case 0:
 		return "rt.Mk0(" + sym + ")"
@@ -255,11 +267,35 @@ func (e *emitter) expr(x *ir.Expr, vars []ir.Var) string {
 		}
 		return "rt.False"
 	}
+	if op.AC {
+		if args := e.acArgs(x, vars); len(args) > 2 {
+			// one AC term: normalised once, as a whole
+			return fmt.Sprintf("rt.ApplyAC(%s, %s, %s)", symName(op), op.Fun, strings.Join(args, ", "))
+		}
+	}
 	var args []string
 	for i := range x.Args {
 		args = append(args, e.expr(&x.Args[i], vars))
 	}
 	return op.Fun + "(" + strings.Join(args, ", ") + ")"
+}
+
+// acArgs are the expressions of the arguments of the AC operator at the
+// top of x, the nested applications of the same operator flattened: the
+// interpreter flattens an AC term before normalising it (its subterms of
+// the same operator are not redexes of their own: F(a, F(b, c)) is
+// normalised as the multiset a, b, c, as REM does).
+func (e *emitter) acArgs(x *ir.Expr, vars []ir.Var) []string {
+	var args []string
+	for i := range x.Args {
+		a := &x.Args[i]
+		if a.Kind == ir.ExprOp && a.Op == x.Op {
+			args = append(args, e.acArgs(a, vars)...)
+		} else {
+			args = append(args, e.expr(a, vars))
+		}
+	}
+	return args
 }
 
 // typedExpr is expr, an int literal typed int32 (for `x := ...`).
@@ -476,14 +512,15 @@ func (e *emitter) symbols() {
 		for _, it := range op.Print {
 			items = append(items, printItem(it))
 		}
-		e.line("declare(%s, %q, %d, %s)", symName(op), op.Fun, len(op.Args), strings.Join(items, ", "))
+		e.line("declare(%s, %q, %d, %v, %d, %s)", symName(op), op.Fun, len(op.Args), op.AC, op.Symbol, strings.Join(items, ", "))
 	}
 	e.close("}")
 	e.line("")
-	e.line("// declare adds a symbol and its printing form to the runtime's table, at")
-	e.line("// the code of its constant.")
-	e.open("func declare(code int32, name string, arity int, layout ...rt.PrintItem) {")
-	e.open("if rt.DeclareSym(rt.Symbol{Name: name, Arity: arity, Print: layout}) != code {")
+	e.line("// declare adds a symbol (AC or not, its code in the .ref file: the order of")
+	e.line("// terms) and its printing form to the runtime's table, at the code of its")
+	e.line("// constant.")
+	e.open("func declare(code int32, name string, arity int, ac bool, refCode int32, layout ...rt.PrintItem) {")
+	e.open("if rt.DeclareSym(rt.Symbol{Name: name, Arity: arity, AC: ac, Code: refCode, Print: layout}) != code {")
 	e.line(`panic("symbol " + name + " declared out of order")`)
 	e.close("}")
 	e.close("}")
@@ -546,12 +583,19 @@ func (e *emitter) opFunc(o ir.OpID) {
 			e.line("rt.Guard()")
 			e.line("defer rt.Unguard()")
 		}
+		if op.AC {
+			e.line("// the canonical term (flattened, sorted): the only column of the rules")
+			e.line("a0 = %s", e.stuck(o))
+		}
 		e.resType = e.goType(op.Result)
 		switch falls := e.decision(op.Tree, op.Rules); {
 		case !falls:
 			// (the code ends with a return: go vet refuses unreachable code)
 		case op.Total:
 			e.line(`panic("%s: no rule applies to a total operator")`, op.Fun)
+		case op.AC:
+			e.line("// no rule applies: the term is a normal form")
+			e.line("return a0")
 		default:
 			e.line("// no rule applies: the term is a normal form")
 			e.line("return %s", e.stuck(o))
@@ -704,6 +748,8 @@ func usedVars(r *ir.Rule) map[ir.VarID]bool {
 	for _, c := range r.Conds {
 		if c.Kind == ir.CondSame {
 			used[c.A], used[c.B] = true, true
+		} else if c.Kind == ir.CondAC {
+			used[c.A] = true
 		} else {
 			walk(&c.Expr)
 		}
@@ -909,22 +955,8 @@ func (e *emitter) conds(r *ir.Rule, from int, used map[ir.VarID]bool, depth int)
 	for j := from; j < len(r.Conds); j++ {
 		c := r.Conds[j]
 		switch c.Kind {
-		case ir.CondSame:
-			e.open("if %s == %s {", r.Vars[c.A].Name, r.Vars[c.B].Name)
-			opens++
-		case ir.CondIf:
-			x := e.expr(&c.Expr, r.Vars)
-			if _, ok := e.ir.Native(e.ir.ExprSort(&c.Expr, r.Vars)); !ok {
-				x += " == rt.True"
-			}
-			e.open("if %s {", x)
-			opens++
-		case ir.CondLet:
-			if used[c.A] {
-				e.line("%s := %s", r.Vars[c.A].Name, e.typedExpr(&c.Expr, r.Vars))
-			} else {
-				e.line("_ = %s", e.expr(&c.Expr, r.Vars))
-			}
+		case ir.CondSame, ir.CondIf, ir.CondLet:
+			opens += e.simpleCond(&c, r, used)
 		case ir.CondMatch:
 			s := e.ir.ExprSort(&c.Expr, r.Vars)
 			if c.Pat.Kind == ir.PatVar {
@@ -946,10 +978,24 @@ func (e *emitter) conds(r *ir.Rule, from int, used map[ir.VarID]bool, depth int)
 			// (its code ends with an if)
 			e.apply(r, j, used, depth)
 			return true
+		case ir.CondAC:
+			// (its code ends with an if or a loop)
+			e.acMatch(r, j, used, depth)
+			return true
 		}
 	}
 	e.line("rt.Step()")
 	rhs := e.expr(&r.Rhs, r.Vars)
+	if e.ext != nil {
+		// modulo an extension: op(E, rhs), the arguments of rhs merged
+		// with E when op is at its top
+		op := &e.ir.Ops[e.ext.op]
+		args := []string{rhs}
+		if r.Rhs.Kind == ir.ExprOp && r.Rhs.Op == e.ext.op {
+			args = e.acArgs(&r.Rhs, r.Vars)
+		}
+		rhs = fmt.Sprintf("rt.ExtendAC(%s, %s, %s, %s)", symName(op), op.Fun, e.ext.rest, strings.Join(args, ", "))
+	}
 	switch {
 	case e.labelMode && depth == 0:
 		e.line("found = true")
@@ -967,6 +1013,32 @@ func (e *emitter) conds(r *ir.Rule, from int, used map[ir.VarID]bool, depth int)
 		e.line("return true")
 	}
 	return opens > 0
+}
+
+// simpleCond writes a condition that gives at most one solution and binds
+// no pattern variable (CondSame, CondIf, CondLet); it returns the number of
+// ifs it opens.
+func (e *emitter) simpleCond(c *ir.Cond, r *ir.Rule, used map[ir.VarID]bool) int {
+	switch c.Kind {
+	case ir.CondSame:
+		e.open("if %s == %s {", r.Vars[c.A].Name, r.Vars[c.B].Name)
+		return 1
+	case ir.CondIf:
+		x := e.expr(&c.Expr, r.Vars)
+		if _, ok := e.ir.Native(e.ir.ExprSort(&c.Expr, r.Vars)); !ok {
+			x += " == rt.True"
+		}
+		e.open("if %s {", x)
+		return 1
+	case ir.CondLet:
+		if used[c.A] {
+			e.line("%s := %s", r.Vars[c.A].Name, e.typedExpr(&c.Expr, r.Vars))
+		} else {
+			e.line("_ = %s", e.expr(&c.Expr, r.Vars))
+		}
+		return 0
+	}
+	panic("not a simple condition")
 }
 
 // apply writes the condition j of r, `where p := (S) t`, and the rest of
