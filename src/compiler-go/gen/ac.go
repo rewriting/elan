@@ -396,10 +396,10 @@ type lateRest struct {
 // e.late is not empty (an if, left open) and the binding of its variable;
 // it returns the right-hand side when it builds it (the variable an
 // argument of the AC operator at its top and nowhere else: the rest is
-// merged with the other arguments, normalised as a whole, as REM and the
-// interpreter do), else "". Elsewhere the variable is the normal form of
-// the rest (REM and the interpreter keep the rest as it is: their counts
-// of steps differ when the rest of a normal form is reducible).
+// merged with the other arguments, normalised as a whole, as REM does:
+// the rest alone is not normalised, programs/ac steps_if3), else "".
+// Elsewhere the variable is the normal form of the rest (REM normalises
+// it too: steps_rest3).
 func (e *emitter) lateBind(r *ir.Rule, used map[ir.VarID]bool) string {
 	l := e.late
 	e.open("if len(%s) > 0 { // the variable of the AC level is not empty", l.rest)
