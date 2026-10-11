@@ -422,3 +422,27 @@ func TestChooseLinear(t *testing.T) {
 		t.Errorf("go vet: %v\n%s\n%s", err, out, numbered(src))
 	}
 }
+
+// TestQueryOnlyOperatorsKeepIntsNative (S7e task 2): a program shaped as
+// nqueens (a partial bool operator over native ints, a constant a : int
+// and btoi that only the query can contain, a start term without the
+// query) keeps its ints native: noattack takes int32s.
+func TestQueryOnlyOperatorsKeepIntsNative(t *testing.T) {
+	const sInts = 331
+	p := newProg()
+	p.p.Sorts = append(p.p.Sorts, ref.Sort{Index: sInts, Name: "int"})
+	p.op(sInt, 3, "+", []uint32{sInt, sInt}, 3, true)
+	p.op(sInt, 25, "btoi", []uint32{sBool}, 25)
+	p.op(sInts, 300, "", []uint32{sInt}, 0)
+	p.op(sInts, 303, "a", nil, 0)
+	p.op(sNat, 318, "nil", nil, 0)
+	p.op(sNat, 319, "cons", []uint32{sInts, sNat}, 0)
+	p.op(sBool, 402, "noattack", []uint32{sInts, sInts, sNat}, 0)
+	p.rule(sBool, f(402, v(0, sInts), v(1, sInts), f(318)), f(1))
+	p.p.Query.Sort, p.p.Query.ResultSort = sInts, sBool
+	p.p.Query.StartWith = f(402, f(300, ref.Int{Value: 1}), f(300, ref.Int{Value: 2}), f(319, f(300, ref.Int{Value: 3}), f(318)))
+	src := p.gen(t)
+	if !strings.Contains(src, "func noattack_402(a0 int32, a1 int32, a2 rt.Term)") {
+		t.Errorf("noattack does not take native ints in\n%s", src)
+	}
+}

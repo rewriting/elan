@@ -1,0 +1,7 @@
+The start term f(3) does not use the query; the constant a : int and the
+operators of the query grammar of int that take a bool (btoi, itob...)
+are not used by the program. elanc-go compiles the query's operators only
+when they keep the program's native families native (S7e task 2): a query
+containing a, which would make int a sort of terms in the whole program,
+is refused (status 2, the reason on stderr). REM accepts it (and prints
+the result of f(3)); queryonly.expected holds elanc-go's stdout.

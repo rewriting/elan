@@ -186,7 +186,22 @@ sub-project (S1–S5b). Each item says where it comes from.
   - at run time (status 2): a META call of a number or a string whose
     strategy is of another sort; a query using an operator whose
     compilation was refused (Task 5); the options `-sort=`, `-strategy=`,
-    `-REFInput`, `-commandLine` of REM's programs.
+    `-REFInput`, `-commandLine` of REM's programs;
+  - at run time (status 2), S7e task 2: when the start term does not use
+    the query, a query containing an operator that only the query reaches
+    and that would make a sort native in the program alone a sort of
+    terms (a constant `a : int` that no rule uses; `btoi` over a bool that
+    a partial operator can leave stuck): `the query operator <decl> would
+    make <sort> a sort of terms in the whole program (the start term does
+    not use the query)` (`programs/query/queryonly`, `.no-rem`: REM
+    accepts it and prints the start term's result). Ruling: refuse such a
+    query rather than compile the query's operators twice (boxed for the
+    query only) — the query's value is dropped when the start term does
+    not use it, only its normalisation steps are visible; the cost was
+    every program with a partial bool operator or a stray constant of a
+    builtin family boxing its ints (nqueens 12 4.6 s instead of 0.74 s).
+    Cost if wrong: status 2 for such a query in such a program (none of
+    the 152 queries of `test_query.sh` but `queryonly`'s own).
 
 ## Performance
 

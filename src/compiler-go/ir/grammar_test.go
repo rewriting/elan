@@ -139,3 +139,83 @@ func TestQueryRulesParserCodes(t *testing.T) {
 		t.Errorf("%d user rules", n)
 	}
 }
+
+// queryOnly is ints() with operators that only a query can contain (S7e
+// task 2): a constant a : int (a second constructor of int) and, in the
+// builtinInt grammar, btoi(@) : (bool) builtinInt (code 25), with p(@) :
+// (int) bool partial (p(0) => true only, so a bool can be stuck); the
+// query is of sort int, the start term 1 + 1 is ground.
+func queryOnly() *prog {
+	p := ints()
+	p.op(sInts, 303, "a", nil, 0, 0)
+	p.op(sInt, 25, "btoi", []uint32{sBool}, 25, 0)
+	p.op(sBool, 304, "p", []uint32{sInts}, 0, 0)
+	p.rule(sBool, 0, f(304, f(300, ref.Int{Value: 0})), f(1))
+	one := f(300, ref.Int{Value: 1})
+	p.start(f(301, one, one), sInts)
+	p.p.Query.Sort = sInts
+	return p
+}
+
+// queryRuleOf is the query rule of the grammar rule of symbol sym.
+func queryRuleOf(t *testing.T, ir *IR, sym int32) QueryRule {
+	t.Helper()
+	q := ir.Start.Query
+	for i, g := range q.Grammar {
+		if g.Symbol == sym {
+			return q.Rules[i]
+		}
+	}
+	t.Fatalf("no grammar rule of symbol %d", sym)
+	return QueryRule{}
+}
+
+// TestQueryOnlyOperatorsKeepIntNative: when the start term does not use
+// the query, an operator that only the query reaches does not box a
+// family native in the program: its rule is refused (QueryUnsupported,
+// status 2 at run time) with the reason.
+func TestQueryOnlyOperatorsKeepIntNative(t *testing.T) {
+	ir := queryOnly().lower(t)
+	for _, n := range []string{"int", "builtinInt"} {
+		s, _ := sortNamed(t, ir, n)
+		if k, ok := ir.Native(s); !ok || k != KindInt {
+			t.Errorf("%s is boxed", n)
+		}
+	}
+	a := queryRuleOf(t, ir, 303)
+	if a.Kind != QueryUnsupported || a.Why != "the query operator a : int would make int a sort of terms in the whole program (the start term does not use the query)" {
+		t.Errorf("a: %+v", a)
+	}
+	// btoi takes a bool that p can leave stuck: btoi or p (whichever the
+	// query grammar adds last) is refused, for builtinInt or bool
+	b, pr := queryRuleOf(t, ir, 25), queryRuleOf(t, ir, 304)
+	refused := func(r QueryRule) bool {
+		return r.Kind == QueryUnsupported && strings.HasPrefix(r.Why, "the query operator ") &&
+			strings.HasSuffix(r.Why, "a sort of terms in the whole program (the start term does not use the query)")
+	}
+	if !refused(b) && !refused(pr) {
+		t.Errorf("btoi %+v, p %+v", b, pr)
+	}
+	// the others are compiled
+	if r := queryRuleOf(t, ir, 301); r.Kind != QueryOp {
+		t.Errorf("plus: %+v", r)
+	}
+}
+
+// TestQueryUsedKeepsBoxing: when the start term uses the query, the
+// query's operators are compiled as before (S7d task 5): int is boxed.
+func TestQueryUsedKeepsBoxing(t *testing.T) {
+	p := queryOnly()
+	p.start(f(301, v(0, sInts), f(300, ref.Int{Value: 1})), sInts)
+	ir := p.lower(t)
+	s, _ := sortNamed(t, ir, "int")
+	if _, ok := ir.Native(s); ok {
+		t.Error("int is native")
+	}
+	if r := queryRuleOf(t, ir, 303); r.Kind != QueryOp {
+		t.Errorf("a: %+v", r)
+	}
+	if r := queryRuleOf(t, ir, 25); r.Kind != QueryOp {
+		t.Errorf("btoi: %+v", r)
+	}
+}

@@ -561,18 +561,88 @@ func (l *lowerer) run(name string) (*IR, error) {
 	}
 	qrules := l.queryRules(grammar)
 	base := r.clone()
-	if !l.reachQuery(r, qrules) {
+	// build builds what r reaches, with the query rules qs whose operators
+	// r reaches (the others: none)
+	build := func(r *reach, qs []queryRule) (*IR, error) {
+		sorts, err := sortsOf(r)
+		if err != nil {
+			return nil, err
+		}
+		qs = slices.Clone(qs)
+		for i := range qs {
+			if qs[i].Kind == QueryOp && !r.seen[qs[i].cand] {
+				qs[i] = queryRule{}
+			}
+		}
+		return (&builder{l: l, reach: r, query: qs, grammar: grammar}).build(name, &start, q, sorts)
+	}
+	// When the start term does not use the query (S7e task 2), the query's
+	// value is dropped (only its normalisation is visible): a query
+	// operator is compiled only if it leaves every sort native in the
+	// program alone native (else, e.g. a constant a : int that no rule
+	// uses, or btoi over a bool that can be stuck, would box the ints of
+	// the whole program: nqueens 12 4.6 s instead of 0.74 s); a query
+	// containing it is refused at run time (status 2). When the start
+	// term uses the query, its value flows into the program: every query
+	// operator is compiled (correctness first).
+	apart := !containsVar(&start)
+	var lost func(ir *IR) string // a sort native in the program alone, not in ir
+	if apart {
+		if bir, err := build(base, qrules); err == nil {
+			native := map[ref.SortIndex]BuiltinKind{}
+			for s := range bir.Sorts {
+				if k, ok := bir.Native(s); ok {
+					native[bir.Sorts[s].Index] = k
+				}
+			}
+			lost = func(ir *IR) string {
+				for s := range ir.Sorts {
+					if k, was := native[ir.Sorts[s].Index]; was {
+						if k2, ok := ir.Native(s); !ok || k2 != k {
+							return ir.Sorts[s].Name
+						}
+					}
+				}
+				return ""
+			}
+		}
+	}
+	// one by one: an operator refused (check), the others kept
+	oneByOne := func(check func(r *reach, c int) error) {
 		r = base.clone()
 		for i := range qrules {
-			if qrules[i].Kind != QueryOp {
+			if qrules[i].Kind != QueryOp || base.seen[qrules[i].cand] {
 				continue
 			}
 			snap := r.clone()
-			if err := l.reachQueryOp(r, qrules[i].cand); err != nil {
+			err := l.reachQueryOp(r, qrules[i].cand)
+			if err == nil && check != nil {
+				err = check(r, qrules[i].cand)
+			}
+			if err != nil {
 				r = snap
 				qrules[i] = queryRule{QueryRule: QueryRule{Kind: QueryUnsupported, Why: err.Error()}}
 			}
 		}
+	}
+	if !l.reachQuery(r, qrules) {
+		oneByOne(nil)
+	}
+	if lost != nil {
+		if ir, err := build(r, qrules); err == nil && lost(ir) == "" {
+			return ir, nil
+		}
+		// a build per operator (only in this case: a build costs)
+		oneByOne(func(r *reach, c int) error {
+			ir, err := build(r, qrules)
+			if err == nil {
+				if s := lost(ir); s != "" {
+					err = fmt.Errorf("the query operator %s would make %s a sort of terms in the whole program (the start term does not use the query)",
+						l.candDecl(&l.cands[c]), s)
+				}
+			}
+			return err
+		})
 	}
 	sorts, err := sortsOf(r)
 	if err == nil {
