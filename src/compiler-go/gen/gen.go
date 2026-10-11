@@ -923,6 +923,27 @@ func (e *emitter) builtinBody(o ir.OpID) {
 			e.line("return %s", e.unbox(res, "rt.SyntacticMatch("+strings.Join(args, ", ")+")"))
 		case ir.TermUnify:
 			e.line("return %s", e.unbox(res, "rt.SyntacticUnify("+strings.Join(args, ", ")+")"))
+		case ir.IOWrite, ir.IORead:
+			// the file number: a value (else the term stays)
+			pid := "a0"
+			if f := e.ir.FamilyOf(op.Args[0]); f.Boxed() {
+				if op.Total {
+					pid = e.unboxValue(f.Kind, "a0", op.Fun)
+				} else {
+					e.line("pid, ok := rt.IntOf(a0)")
+					e.open("if !ok {")
+					e.line("return %s // a stuck argument", e.stuck(o))
+					e.close("}")
+					pid = "pid"
+				}
+			}
+			if b == ir.IOWrite {
+				e.line("return %s", e.unbox(res, "rt.WriteTerm("+pid+", "+args[1]+")"))
+			} else {
+				// a term of the result's sort (REM: of the sort of the
+				// second argument's operator, the same)
+				e.line("return %s", e.unbox(res, fmt.Sprintf("rt.ReadTerm(%s, %d)", pid, e.ir.Sorts[res].Index)))
+			}
 		}
 		return
 	}
@@ -1023,6 +1044,18 @@ func (e *emitter) builtinBody(o ir.OpID) {
 		value = v[0] + " != " + v[1]
 	case ir.IdentToString:
 		value = "rt.IdentString(" + v[0] + ")"
+	case ir.IOGetc:
+		value = "rt.Getc(" + v[0] + ")"
+	case ir.IOPutc:
+		value = "rt.Putc(" + v[0] + ", " + v[1] + ")"
+	case ir.IOOpen:
+		value = "rt.Open(" + v[0] + ", " + v[1] + ")"
+	case ir.IOClose:
+		value = "rt.Close(" + v[0] + ")"
+	case ir.IOFlush:
+		value = "rt.Flush(" + v[0] + ")"
+	case ir.IOPid:
+		value = v[0]
 	case ir.StrIndex:
 		value = "rt.StrIndex(" + v[0] + ", " + v[1] + ")"
 	case ir.StrModif:

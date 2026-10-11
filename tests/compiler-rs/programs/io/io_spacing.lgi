@@ -1,0 +1,6 @@
+LPL io_spacing description
+  query of sort bool
+  result of sort out
+  import iotest
+  start with () re(write(stdout, a), 0)
+end

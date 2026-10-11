@@ -400,7 +400,9 @@ func TestUnsupportedConstructsAreRefusedWhenReachable(t *testing.T) {
 	}{
 		{30, NotPlanned, "term order"},
 		{34, NotPlanned, "double"},
-		{113, "S7e", "input/output"},
+		{115, NotPlanned, "external process"},
+		{117, NotPlanned, "external process"},
+		{123, NotPlanned, "error constructor"},
 		{165, NotPlanned, "ELAN system"},
 		{200, "S7e", "arrays"},
 		{210, NotPlanned, "hash"},
@@ -559,5 +561,31 @@ func TestOpBaseNames(t *testing.T) {
 	used := map[string]bool{}
 	if unique(used, "a") != "a" || unique(used, "a") != "a_2" {
 		t.Fatal("unique")
+	}
+}
+
+// The I/O builtins (S7e task 6): value operations on builtinInt and
+// builtinString, except write and read, operations on terms whose first
+// argument is a file number.
+func TestIOBuiltins(t *testing.T) {
+	p := ints()
+	p.op(sInt, 330, "getc", []uint32{sInt}, 113, 0)
+	p.op(sInt, 331, "putc", []uint32{sInt, sInt}, 114, 0)
+	p.op(sInt, 332, "open", []uint32{sStr, sStr}, 116, 0)
+	p.op(sInt, 333, "close", []uint32{sInt}, 118, 0)
+	p.op(sInt, 334, "flush", []uint32{sInt}, 122, 0)
+	p.op(sNat, 335, "write", []uint32{sInt, sNat}, 119, 0)
+	p.op(sInts, 336, "r", []uint32{sInt, sInt, sInt, sInt, sInt, sNat}, 0, 0)
+	p.start(f(336, f(330, ref.Int{Value: 0}), f(331, ref.Int{Value: 1}, ref.Int{Value: 65}),
+		f(332, ref.Str{Codes: []int32{'f'}}, ref.Str{Codes: []int32{'w'}}), f(333, ref.Int{Value: 3}),
+		f(334, ref.Int{Value: 3}), f(335, ref.Int{Value: 1}, f(318))), sInts)
+	ir := p.lower(t)
+	for sym, want := range map[int32]BuiltinOp{330: IOGetc, 331: IOPutc, 332: IOOpen, 333: IOClose, 334: IOFlush, 335: IOWrite} {
+		if op := opBySymbol(t, ir, sym); op.Kind != Builtin || op.Builtin != want {
+			t.Errorf("%d: %v %v, want %v", sym, op.Kind, op.Builtin, want)
+		}
+	}
+	if !IOWrite.OnTerms() || !IOWrite.FileArg() || IOGetc.OnTerms() || !IOGetc.NeedsValues() {
+		t.Error("kinds")
 	}
 }

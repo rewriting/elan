@@ -30,6 +30,12 @@
 #    tries the same redexes in the same order as REM), except for a
 #    program with a <name>.steps saying why its count differs (elsewhere
 #    it depends on the compilation scheme).
+# Both compiled programs read /dev/null as their standard input. When DIR
+# has a file `output` (programs/io), the whole output of each program
+# (standard output without its rewrite_step line, and standard error) is
+# compared with REM's byte for byte, and the files listed in <name>.files
+# (written by the program in its directory) with REM's; the files of
+# DIR/data are copied next to each program.
 # A program without result fails (both sides empty prove nothing), unless
 # it has a <name>.none saying why no result is expected (it then fails if
 # the compiler gives one).
@@ -100,6 +106,8 @@ RUN=$(mktemp -d "$HERE/work/$DIR$SUFFIX.XXXXXX") || exit 2
 echo "work directory: $RUN ($ELANC)"
 
 HAVE_REM=; command -v elanc >/dev/null 2>&1 && HAVE_REM=1
+# the programs read an empty standard input (getc(stdin): -1)
+NULL=/dev/null
 fails=0 n=0
 ok()   { echo "ok   $1"; }
 fail() { echo "FAIL $1"; fails=$((fails+1)); }
@@ -138,6 +146,7 @@ for lgi in "$PROGS"/*.lgi; do
   mkdir "$d" "$d/$W" "$d/rem" "$d/int" || exit 2
   for w in $W rem int; do
     cp "$lgi" "$PROGS"/*.eln "$d/$w/" || exit 2
+    if [ -d "$PROGS/data" ]; then cp "$PROGS"/data/* "$d/$w/" || exit 2; fi
   done
 
   # the compiler
@@ -154,7 +163,7 @@ for lgi in "$PROGS"/*.lgi; do
   fi
   vet "$name" "$d/$W" || continue
   build=$(sed -n "s/^$ELANC: build time //p" "$d/$W/$ELANC.log")
-  out=$( cd "$d/$W" && ./a.out -noInput -quiet 2>"$d/$W/run.err"; echo "status $?" )
+  out=$( cd "$d/$W" && ./a.out -noInput -quiet <"$NULL" >run.out 2>run.err; s=$?; cat run.out; echo; echo "status $s" )
   status=$(printf '%s\n' "$out" | sed -n 's/^status //p')
   rs=$(printf '%s\n' "$out" | grep '^result = ')
   if [ "$status" != 0 ] || ! printf '%s\n' "$out" | grep -q '^rewrite_step = '; then
@@ -206,7 +215,7 @@ for lgi in "$PROGS"/*.lgi; do
     echo "skip $name vs REM ($name.no-rem)"
   elif ( cd "$d/rem" && elanc -b -nosplit -quiet "$name" >elanc.log 2>&1 \
        && make -f "$name.make" >make.log 2>&1 ); then
-    rout=$( cd "$d/rem" && ./a.out -noInput -quiet 2>&1; echo "status $?" )
+    rout=$( cd "$d/rem" && ./a.out -noInput -quiet <"$NULL" >run.out 2>run.err; s=$?; cat run.out run.err; echo; echo "status $s" )
     rstatus=$(printf '%s\n' "$rout" | sed -n 's/^status //p')
     rem=$(printf '%s\n' "$rout" | grep '^result = ')
     if [ "$rstatus" != 0 ]; then
@@ -223,6 +232,18 @@ for lgi in "$PROGS"/*.lgi; do
       fi
     else
       ok "$name vs REM: $count results"
+    fi
+    # the whole output and the files written, as REM's (DIR/output)
+    if [ "$rstatus" = 0 ] && [ -f "$PROGS/output" ]; then
+      same=1
+      grep -v '^rewrite_step = ' "$d/$W/run.out" >"$d/$W/run.out.cmp"
+      grep -v '^rewrite_step = ' "$d/rem/run.out" >"$d/rem/run.out.cmp"
+      for f in run.out.cmp run.err $(cat "$PROGS/$name.files" 2>/dev/null); do
+        if ! cmp -s "$d/$W/$f" "$d/rem/$f"; then
+          fail "$name vs REM: $f differs (see $d)"; same=
+        fi
+      done
+      [ -n "$same" ] && ok "$name vs REM: the same output, error output$( [ -f "$PROGS/$name.files" ] && printf ' and files (%s)' "$(cat "$PROGS/$name.files" | tr '\n' ' ' | sed 's/ $//')")"
     fi
   else
     fail "$name: elanc or make failed (see $d/rem/*.log)"

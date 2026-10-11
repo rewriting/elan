@@ -52,34 +52,46 @@ func (queryBuilder) Str(s string) Term         { return MkStr(s) }
 // EarleyParser: the term built and normalised, then a newline; an error
 // stops the program.
 func readQuery(q *QueryParser) Term {
-	t := &earley.Tables{Rules: q.Rules, IdentIndex: IdentIndex, IdentName: IdentName,
-		SortName:    func(s int32) string { return q.SortNames[s] },
-		InternIdent: q.InternIdent, InternInt: q.InternInt, InternString: q.InternString}
-	fatal := func(err error) {
-		FlushOutput()
-		var f *earley.Fatal
-		if errors.As(err, &f) {
-			os.Stderr.WriteString(f.Msg)
-			Exit(f.Status)
-		}
-		Exit(1)
-	}
-	tree, err := earley.Parse(os.Stdin, t, q.Sort, os.Stderr)
+	tree, err := earley.Parse(stdin, queryTables(q), q.Sort, os.Stderr)
 	if err != nil {
-		fatal(err)
+		parseFatal(err)
 	}
-	query := func() Term {
-		defer func() {
-			if x := recover(); x != nil {
-				f, ok := x.(*earley.Fatal)
-				if !ok {
-					panic(x)
-				}
-				fatal(f)
-			}
-		}()
-		return earley.Build[Term](tree, queryBuilder{q})
-	}()
+	query := buildQuery(tree, q)
 	Out.WriteString("\n")
 	return query
+}
+
+// queryTables are the tables of the parser of q.
+func queryTables(q *QueryParser) *earley.Tables {
+	return &earley.Tables{Rules: q.Rules, IdentIndex: IdentIndex, IdentName: IdentName,
+		SortName:    func(s int32) string { return q.SortNames[s] },
+		InternIdent: q.InternIdent, InternInt: q.InternInt, InternString: q.InternString}
+}
+
+// parseFatal stops the program after an error of the parser: the message
+// of an *earley.Fatal and its status, else status 1 (the parser wrote
+// its message).
+func parseFatal(err error) {
+	FlushOutput()
+	var f *earley.Fatal
+	if errors.As(err, &f) {
+		os.Stderr.WriteString(f.Msg)
+		Exit(f.Status)
+	}
+	Exit(1)
+}
+
+// buildQuery builds the term of the derivation tree (an *earley.Fatal
+// raised by a builder stops the program).
+func buildQuery(tree *earley.Tree, q *QueryParser) Term {
+	defer func() {
+		if x := recover(); x != nil {
+			f, ok := x.(*earley.Fatal)
+			if !ok {
+				panic(x)
+			}
+			parseFatal(f)
+		}
+	}()
+	return earley.Build[Term](tree, queryBuilder{q})
 }

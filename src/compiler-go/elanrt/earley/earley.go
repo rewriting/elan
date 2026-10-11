@@ -576,6 +576,13 @@ func (g *grammar) writegrrule(b *strings.Builder, gr *grule) {
 // (REM's message) has been written on stderr (*SyntaxError), or a *Fatal
 // error (not written). The ambiguity warnings are written on stderr.
 func Parse(r io.Reader, t *Tables, sort int32, stderr io.Writer) (tree *Tree, err error) {
+	return ParseFile(r, "standard input", t, sort, stderr)
+}
+
+// ParseFile is [Parse] from the input named name in the messages (REM:
+// "standard input" for the query, "file input" for a term read by a
+// program, term_read).
+func ParseFile(r io.Reader, name string, t *Tables, sort int32, stderr io.Writer) (tree *Tree, err error) {
 	defer func() {
 		if x := recover(); x != nil {
 			f, ok := x.(*Fatal)
@@ -587,7 +594,7 @@ func Parse(r io.Reader, t *Tables, sort int32, stderr io.Writer) (tree *Tree, er
 	}()
 	g := newGrammar(t)
 	g.stderr = stderr
-	g.f = newLstream(newIchstream(r, "standard input"), t, stderr)
+	g.f = newLstream(newIchstream(r, name), t, stderr)
 	choose := g.earley(TypeLex(sort))
 	if choose == nil {
 		return nil, ErrSyntax

@@ -567,6 +567,14 @@ const (
 	IdentEq                        // == on ident (14)
 	IdentNe                        // != on ident (15)
 	IdentToString                  // ident2string (177): the name
+	IOGetc                         // getc_builtinStdio (113): rt.Getc (S7e task 6)
+	IOPutc                         // putc_builtinStdio (114): rt.Putc
+	IOOpen                         // open_builtinStdio (116): rt.Open
+	IOClose                        // close_builtinStdio (118): rt.Close
+	IOWrite                        // write_builtinIO (119): rt.WriteTerm, (builtinInt X) X
+	IORead                         // read_builtinIO (120): rt.ReadTerm, (builtinInt X) X
+	IOPid                          // the injection of builtinStdio's Pid (121): its argument
+	IOFlush                        // flush_builtinStdio (122): rt.Flush
 )
 
 var builtinNames = [...]string{
@@ -576,6 +584,7 @@ var builtinNames = [...]string{
 	"StrLen", "StrCat", "StrIndex", "StrModif", "StrSubstr", "StrSpn", "StrCmp", "StrOfChar",
 	"BoolToInt", "IntToBool", "TermReplace", "TermOccurs", "TermMatch", "TermUnify",
 	"IdentEq", "IdentNe", "IdentToString",
+	"IOGetc", "IOPutc", "IOOpen", "IOClose", "IOWrite", "IORead", "IOPid", "IOFlush",
 }
 
 func (b BuiltinOp) String() string { return builtinNames[b] }
@@ -588,6 +597,7 @@ var builtinCodes = map[int32]BuiltinOp{
 	156: StrSpn, 157: StrCmp, 158: StrOfChar,
 	25: BoolToInt, 26: IntToBool, 16: TermReplace, 17: TermOccurs, 191: TermMatch, 175: TermUnify,
 	14: IdentEq, 15: IdentNe, 177: IdentToString,
+	113: IOGetc, 114: IOPutc, 116: IOOpen, 118: IOClose, 119: IOWrite, 120: IORead, 121: IOPid, 122: IOFlush,
 }
 
 // BuiltinFromCode is the operation of a semantic code; false when it is not
@@ -609,16 +619,22 @@ func (b BuiltinOp) NeedsValues() bool {
 }
 
 // OnTerms tells whether the operation works on terms of any sorts, its
-// result too (replace, occurs, syntactic matching and unification):
+// result too (replace, occurs, syntactic matching and unification; write
+// and read, whose first argument is a file number, [BuiltinOp.FileArg]):
 // declared on sorts of terms, it is compiled (a value operation on sorts
 // of terms is a constructor).
 func (b BuiltinOp) OnTerms() bool {
 	switch b {
-	case TermReplace, TermOccurs, TermMatch, TermUnify:
+	case TermReplace, TermOccurs, TermMatch, TermUnify, IOWrite, IORead:
 		return true
 	}
 	return false
 }
+
+// FileArg tells whether the operation on terms takes a file number (a
+// builtinInt value) as its first argument: it stays a term when that
+// argument is not a value.
+func (b BuiltinOp) FileArg() bool { return b == IOWrite || b == IORead }
 
 // Partial tells whether the operation is undefined on some values (the
 // term stays).

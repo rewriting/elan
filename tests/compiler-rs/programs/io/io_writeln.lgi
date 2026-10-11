@@ -1,0 +1,6 @@
+LPL io_writeln description
+  query of sort bool
+  result of sort Expr
+  import iotest
+  start with () writeln(stdout, f(1, a))
+end

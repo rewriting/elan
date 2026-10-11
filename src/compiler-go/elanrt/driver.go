@@ -97,8 +97,12 @@ const Help = "  Options:\n    -noInput\n    -noOutput\n    -quiet\n    -help\n"
 // program goroutine; [Exit] flushes it.
 var Out = bufio.NewWriterSize(os.Stdout, 1<<16)
 
-// FlushOutput writes what Out holds to the standard output.
-func FlushOutput() { Out.Flush() }
+// FlushOutput writes what Out holds to the standard output (and what the
+// files opened by the program hold, as C's exit).
+func FlushOutput() {
+	flushFiles()
+	Out.Flush()
+}
 
 // Exit flushes the output and ends the program with the status code.
 func Exit(code int) {
@@ -155,7 +159,9 @@ type Session struct {
 
 // NewSession starts a session writing to out ([Out] in a program).
 func NewSession(o Options, out io.Writer) *Session {
-	return &Session{Options: o, out: out, start: time.Now()}
+	s := &Session{Options: o, out: out, start: time.Now()}
+	printer = &s.W // the terms written by the program (WriteTerm) share its spacing state
+	return s
 }
 
 // Results is the number of results so far.

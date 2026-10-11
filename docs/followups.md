@@ -151,6 +151,26 @@ sub-project (S1–S5b). Each item says where it comes from.
   compilers (pre-ANSI multi-line string); `elanc -noC` links a non-existent
   `-lelan` (S5b).
 
+- **elanc-go: I/O builtins** (S7e task 6, codes 113, 114, 116, 118-122
+  as REM's fun_113..122, `elanrt/io.go`, `programs/io`): REM's output,
+  error output and files byte for byte. Differences from REM: a file
+  number that is not open stops the program (status 1, `getc_builtinStdio:
+  file 7 is not open`), where REM reads an invalid `FILE *` (a
+  segmentation fault, `getc(-1)` after a failed open); getc gives C's
+  signed char as REM on macOS and x86 (REM on Linux arm64, whose char is
+  unsigned, gives 0-255). The interpreter is not an oracle for most of
+  them (its bugs below).
+- **Interpreter: I/O builtins** (found in S7e task 6, not fixed; the
+  interpreter does not change in S7e): `write` (code 119) crashes with a
+  segmentation fault after writing its term (`write(stdout, 5)`, status
+  139); code 122 is `flush` in the library (`builtinStdio.eln`) but the
+  interpreter's `BUILTERRORPIPCONSTR` (`term/codes.h`), so `flush(f)`
+  stays a term; `getc` on a file opened for reading reads after the line
+  that the lexer stream made at `open` has buffered (`programs/io/
+  io_getfile`: 102 for the first char of `A\351f(...`), and `read` there
+  fails (9999); `open` gives `Error(errno)` on a failure, which `stdio`'s
+  `iserr([x])` does not recognise (`rb(false,errno([2]))`, REM
+  `rb(true,1)`). Regression programs: `programs/io/*.no-interpreter`.
 - **elanc-go: kept refusals** (S7d task 7; status 2, "not supported
   (not planned)" or "not supported yet (S7e)"; the inventory of
   `unsupported(` in `src/compiler-go/ir`):
@@ -174,14 +194,16 @@ sub-project (S1–S5b). Each item says where it comes from.
     symbol indices), 34-78 (doubles: REM has none), 90-112 (the
     interpreter's top-level commands), 160-174 (calls of the ELAN system),
     210 (hash of a term: representation-dependent), 215 (equality of
-    molecules, one application's builtin);
+    molecules, one application's builtin), 115 and 117 (create a process)
+    and 123 (the interpreter's I/O error constructor `Error(e)` of
+    builtinIO): REM has no fun_115, 117, 123 (S7e task 6);
   - S7e — possible later, no program of the tests needs it: AC shapes
     REM transforms before matching (`refused/acnested`, `acallrep`: both
     oracles agree, e2 and e1), an AC operator whose arguments are not of
     its result sort or printed without its two arguments, a where pattern
     with an AC operator of a builtin sort, an identifier in an AC pattern;
-    builtin codes 113-123 (input/output: REM has them) and 200-203
-    (arrays: REM has them, the interpreter uses the codes 300-303); rules
+    builtin codes 200-203 (arrays: REM has them, the interpreter uses the
+    codes 300-303); rules
     for a builtin operation; any other builtin code;
   - at run time (status 2): a META call of a number or a string whose
     strategy is of another sort; a query using an operator whose

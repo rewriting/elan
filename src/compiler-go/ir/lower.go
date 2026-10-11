@@ -79,8 +79,10 @@ func builtinRefusal(code int32, decl string) error {
 		return unsupported(NotPlanned, "builtin operation code %d (%s): doubles (REM has none)", code, decl)
 	case 90 <= code && code <= 112:
 		return unsupported(NotPlanned, "builtin operation code %d (%s): a command of the interpreter's top level (Query[I,O,P])", code, decl)
-	case 113 <= code && code <= 123:
-		return unsupported("S7e", "builtin operation code %d (%s): input/output (stdio, files; REM's fun_113..123; no program of the tests uses them)", code, decl)
+	case code == 115 || code == 117:
+		return unsupported(NotPlanned, "builtin operation code %d (%s): an external process (REM has none: no fun_%d in its builtin.h)", code, decl, code)
+	case code == 123:
+		return unsupported(NotPlanned, "builtin operation code %d (%s): the I/O error constructor of the interpreter (REM has none: no fun_123 in its builtin.h)", code, decl)
 	case 160 <= code && code <= 174:
 		return unsupported(NotPlanned, "builtin operation code %d (%s): a call of the ELAN system (meta-level: parsing, .ref of a program; REM has none)", code, decl)
 	case 200 <= code && code <= 203:
@@ -559,7 +561,15 @@ func (l *lowerer) run(name string) (*IR, error) {
 	if err != nil {
 		return nil, unsupported(NotPlanned, "query grammar: %v (REM does not read it either)", err)
 	}
-	qrules := l.queryRules(grammar)
+	// the sorts of the terms the program reads (read_builtinIO, S7e task
+	// 6): parsed with the query's grammar, from those sorts too
+	var readSorts []ref.SortIndex
+	for _, c := range r.cands {
+		if code, ok := builtinCode(l.cands[c].semantic); ok && code == 120 {
+			readSorts = append(readSorts, l.cands[c].result)
+		}
+	}
+	qrules := l.queryRules(grammar, readSorts)
 	base := r.clone()
 	// build builds what r reaches, with the query rules qs whose operators
 	// r reaches (the others: none)
@@ -585,7 +595,9 @@ func (l *lowerer) run(name string) (*IR, error) {
 	// containing it is refused at run time (status 2). When the start
 	// term uses the query, its value flows into the program: every query
 	// operator is compiled (correctness first).
-	apart := !containsVar(&start)
+	// (a term read by the program flows into it as a query used by the
+	// start term: every operator of its sorts is compiled)
+	apart := !containsVar(&start) && len(readSorts) == 0
 	var lost func(ir *IR) string // a sort native in the program alone, not in ir
 	if apart {
 		if bir, err := build(base, qrules); err == nil {
@@ -742,11 +754,15 @@ func (l *lowerer) lexicalRule(g *GrammarRule) bool {
 }
 
 // queryRules says, per grammar rule, how a query builds its term: the
-// rules of the sorts that a term of the query's sort can contain (its
-// sort, and the sorts of the arguments of their rules) are built by
-// their operators.
-func (l *lowerer) queryRules(grammar []GrammarRule) []queryRule {
+// rules of the sorts that a term of the query's sort or of one of
+// readSorts (the sorts the program reads) can contain (those sorts, and
+// the sorts of the arguments of their rules) are built by their
+// operators.
+func (l *lowerer) queryRules(grammar []GrammarRule, readSorts []ref.SortIndex) []queryRule {
 	in := map[int32]bool{int32(l.p.Query.Sort): true}
+	for _, s := range readSorts {
+		in[int32(s)] = true
+	}
 	for changed := true; changed; {
 		changed = false
 		for _, g := range grammar {
@@ -1584,6 +1600,9 @@ func (b *builder) build(name string, start *tt, q *ref.Query, sortIndices []ref.
 			case Builtin:
 				bo := pre[o].builtin
 				next[o] = !bo.Partial()
+				if bo.FileArg() && !sig.valuesOnly(ir.Ops[o].Args[0]) {
+					next[o] = false
+				}
 				if bo.NeedsValues() {
 					for _, a := range ir.Ops[o].Args {
 						if !sig.valuesOnly(a) {

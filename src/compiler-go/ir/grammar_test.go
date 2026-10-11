@@ -74,7 +74,7 @@ func TestQueryRules(t *testing.T) {
 	p := peano()
 	p.op(sNat, 321, "double", []uint32{sNat}, 0, 0)
 	p.rule(sNat, 1, f(321, v(0, sNat)), f(320, v(0, sNat), v(0, sNat)))
-	p.op(sNat, 322, "io", []uint32{sNat}, 113, 0) // a builtin not supported
+	p.op(sNat, 322, "io", []uint32{sNat}, 115, 0) // a builtin not supported
 	p.op(sSet, 341, "single", []uint32{sNat}, 0, 0)
 	ir := p.lower(t)
 	q := ir.Start.Query
@@ -89,7 +89,7 @@ func TestQueryRules(t *testing.T) {
 				t.Errorf("rule %d (symbol %d): %+v", i, g.Symbol, r)
 			}
 		case 322:
-			if r.Kind != QueryUnsupported || !strings.Contains(r.Why, "113") {
+			if r.Kind != QueryUnsupported || !strings.Contains(r.Why, "115") {
 				t.Errorf("io: %+v", r)
 			}
 		default:
@@ -217,5 +217,31 @@ func TestQueryUsedKeepsBoxing(t *testing.T) {
 	}
 	if r := queryRuleOf(t, ir, 25); r.Kind != QueryOp {
 		t.Errorf("btoi: %+v", r)
+	}
+}
+
+// TestReadSortsAreParsed: the sorts of the terms a program reads
+// (read_builtinIO, code 120, S7e task 6) are parsed with the query's
+// grammar: their operators are compiled even when the query's sort
+// cannot contain them, as for a query that the start term uses.
+func TestReadSortsAreParsed(t *testing.T) {
+	p := peano()
+	p.p.Query.Sort = sBool
+	p.op(sNat, 330, "rd", []uint32{sInt, sNat}, 120, 0)
+	p.start(f(330, ref.Int{Value: 3}, f(318)), sNat)
+	ir := p.lower(t)
+	q := ir.Start.Query
+	if q == nil || q.Sort != sBool {
+		t.Fatalf("%+v", q)
+	}
+	for i, g := range q.Grammar {
+		if g.Symbol == 319 || g.Symbol == 320 {
+			if r := q.Rules[i]; r.Kind != QueryOp || ir.Ops[r.Op].Symbol != g.Symbol {
+				t.Errorf("rule %d (symbol %d): %+v", i, g.Symbol, r)
+			}
+		}
+	}
+	if rd := opBySymbol(t, ir, 330); rd.Kind != Builtin || rd.Builtin != IORead || !rd.Total {
+		t.Errorf("rd: %+v", rd)
 	}
 }
