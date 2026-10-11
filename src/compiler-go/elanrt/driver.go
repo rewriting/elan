@@ -165,14 +165,14 @@ const MaxStack = 2_000_000_000
 // GCPercent is the GC setting of [Main] when GOGC is not set: the live
 // heap of a program with weak unique tables is small, the default (100)
 // runs hundreds of collections (spike G2: propc 3, 0.68 s at 100, 0.43 s
-// at 400).
+// at 400); larger while the live heap is below [MinHeap] (gc.go).
 const GCPercent = 400
 
 // Go samples the allocations for its memory profile (one per 512 KiB by
 // default), each sample unwinding the stack: with the deep recursions of
 // the programs and their allocation rates, a few per cent of the time
-// (propc 3: 0.77 -> 0.75 s). Off unless a
-// profile is asked for (ELAN_MEMPROFILE).
+// (propc 3: 0.77 -> 0.75 s). Off unless a profile is asked for
+// (ELAN_MEMPROFILE).
 func init() {
 	if os.Getenv("ELAN_MEMPROFILE") == "" {
 		runtime.MemProfileRate = 0
@@ -193,6 +193,7 @@ func Main(querySort string, program func(s *Session)) {
 	}
 	if os.Getenv("GOGC") == "" {
 		debug.SetGCPercent(GCPercent)
+		startGCTuner()
 	}
 	SetMaxStack(MaxStack)
 	done := make(chan int)
@@ -271,5 +272,7 @@ func Stats() string {
 		", live " + strconv.Itoa(LiveTerms()) +
 		", table " + strconv.Itoa(TableSize()) +
 		", rebuilds " + strconv.FormatInt(Rebuilds, 10) +
-		", forced GCs " + strconv.FormatInt(ForcedGCs, 10) + ", gc cycles " + strconv.FormatUint(gcCycles(), 10)
+		", forced GCs " + strconv.FormatInt(ForcedGCs, 10) +
+		", GC cycles " + strconv.FormatUint(gcCycles(), 10) +
+		", GC tunings " + strconv.FormatInt(GCTunings.Load(), 10)
 }
