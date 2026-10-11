@@ -91,7 +91,7 @@ fi
 
 PREFIX=${1:?usage: test_front_load.sh PREFIX}
 case "$PREFIX" in /*) ;; *) PREFIX=$REPO/$PREFIX ;; esac
-BUILD=${BUILD:-$(dirname "$PREFIX")}
+BUILD=$(cd "${BUILD:-$(dirname "$PREFIX")}" && pwd) || exit 2   # absolute: used after cd
 H=$BUILD/src/interpreter/elan-lextrace
 [ -x "$H" ] || { echo "test_front_load: $H not built"; exit 2; }
 export ELANLIB=$PREFIX PATH=$PREFIX/bin:$PATH

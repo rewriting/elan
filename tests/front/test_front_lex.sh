@@ -39,7 +39,7 @@ PREFIX=${1:-build/install}
 case "$PREFIX" in /*) ;; *) PREFIX=$REPO/$PREFIX ;; esac
 ONLY=
 [ "${2:-}" = --only ] && ONLY=${3:?--only EXT,...}
-BUILD=${BUILD:-$(dirname "$PREFIX")}
+BUILD=$(cd "${BUILD:-$(dirname "$PREFIX")}" && pwd) || exit 2   # absolute: used after cd
 H=$BUILD/src/interpreter/elan-lextrace
 [ -x "$H" ] || { echo "test_front_lex: $H not built"; exit 2; }
 export ELANLIB=$PREFIX

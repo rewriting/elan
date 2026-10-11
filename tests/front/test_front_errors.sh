@@ -21,7 +21,7 @@ REPO=$(cd "$HERE/../.." && pwd)
 PREFIX=${1:-build/install}
 SAVE=${2:-}
 case "$PREFIX" in /*) ;; *) PREFIX=$REPO/$PREFIX ;; esac
-BUILD=${BUILD:-$(dirname "$PREFIX")}
+BUILD=$(cd "${BUILD:-$(dirname "$PREFIX")}" && pwd) || exit 2   # absolute: used after cd
 H=$BUILD/src/interpreter/elan-lextrace
 ELAN=$PREFIX/bin/elan
 [ -x "$H" ] || { echo "test_front_errors: $H not built"; exit 2; }
