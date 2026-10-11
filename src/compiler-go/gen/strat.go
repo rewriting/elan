@@ -2,6 +2,7 @@ package gen
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
 	"elan/ir"
@@ -44,9 +45,10 @@ func (e *emitter) labels() {
 			e.line("found := false // a rule gave a result")
 		}
 		e.labelMode = true
-		e.decision(l.Tree, l.Rules)
+		if e.decision(l.Tree, l.Rules) {
+			e.line("return false")
+		}
 		e.labelMode = false
-		e.line("return false")
 		e.close("}")
 		e.line("")
 	}
@@ -199,6 +201,16 @@ func (e *emitter) use(name string) string {
 	return name
 }
 
+// or is the disjunction of xs without the alternatives false (which have
+// no result: go vet refuses false || false).
+func or(xs []string) string {
+	xs = slices.DeleteFunc(slices.Clone(xs), func(x string) bool { return x == "false" })
+	if len(xs) == 0 {
+		return "false"
+	}
+	return strings.Join(xs, " || ")
+}
+
 // closure is a function literal of the parameters params, made of the
 // statements body and the return of ret.
 func closure(params string, body []string, ret string) string {
@@ -262,7 +274,7 @@ func (e *emitter) stratExpr(hoist *[]string, s *ir.Strat, sort ir.SortID, t, k s
 		}
 		switch s.Choice {
 		case ir.Dk:
-			return strings.Join(alts(k), " || ")
+			return or(alts(k))
 		case ir.Dc:
 			if len(s.Alts) == 1 {
 				return e.seqExpr(hoist, s.Alts[0], sort, t, k)
@@ -271,7 +283,7 @@ func (e *emitter) stratExpr(hoist *[]string, s *ir.Strat, sort ir.SortID, t, k s
 			return strings.Join(alts(d+".K"), " || !"+d+".Found && ")
 		}
 		o := e.one(hoist, k, s)
-		return o + ".Pass(" + strings.Join(alts(o+".K"), " || ") + ")"
+		return o + ".Pass(" + or(alts(o+".K")) + ")"
 	case ir.StRepeat, ir.StIterate:
 		det := p.SeqDet(s.Body)
 		n := e.next()

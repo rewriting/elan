@@ -10,6 +10,8 @@
 #  - the compiler builds it (shared build cache, see TARGET below; the REM
 #    options of the bench, -b -nosplit -quiet, are ignored) and
 #    `./a.out -noInput -quiet` prints `result = t`;
+#    with elanc-go, `go vet` on the generated module (.elan-go.<name>)
+#    must report nothing;
 #  - REM: `elanc -b -nosplit -quiet` + make + `./a.out -noInput -quiet`:
 #    the `result = ` lines must be byte-identical (the `rewrite_step` line
 #    is not compared: it depends on the compilation scheme);
@@ -66,6 +68,20 @@ HAVE_REM=; command -v elanc >/dev/null 2>&1 && HAVE_REM=1
 fails=0 n=0
 ok()   { echo "ok   $1"; }
 fail() { echo "FAIL $1"; fails=$((fails+1)); }
+# vet NAME DIR: with elanc-go, go vet on the generated module
+# DIR/.elan-go.NAME must report nothing (e.g. no unreachable code); the go
+# command is the one elanc-go uses (share/elan-go/go-command, else go).
+GO=go
+[ -x "$(cat "$PREFIX/share/elan-go/go-command" 2>/dev/null)" ] && GO=$(cat "$PREFIX/share/elan-go/go-command")
+vet() {
+  [ "$ELANC" = elanc-go ] || return 0
+  if v=$(cd "$2/.elan-go.$1" && GOTOOLCHAIN=local GOFLAGS=-mod=mod GOPROXY=off GOWORK=off \
+         GOCACHE="$TARGET" "$GO" vet . 2>&1); then
+    return 0
+  fi
+  fail "$1: go vet: $(printf '%s\n' "$v" | grep -v '^#' | head -3 | tr '\n' ' ')(module in $2/.elan-go.$1)"
+  return 1
+}
 
 shift
 selected() {  # selected NAME: NAME is one of the names given
@@ -92,6 +108,7 @@ for lgi in "$HERE"/programs/normalise/*.lgi; do
   if ! ( cd "$d/$W" && $ELANC -v -b -nosplit -quiet $CACHE_OPT "$TARGET" "$name" >$ELANC.log 2>&1 ); then
     fail "$name: $ELANC failed (see $d/$W/$ELANC.log)"; continue
   fi
+  vet "$name" "$d/$W" || continue
   build=$(sed -n "s/^$ELANC: build time //p" "$d/$W/$ELANC.log")
   rs=$( cd "$d/$W" && ./a.out -noInput -quiet 2>"$d/$W/run.err"; echo "status $?" )
   status=$(printf '%s\n' "$rs" | sed -n 's/^status //p')

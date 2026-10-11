@@ -547,9 +547,9 @@ func (e *emitter) opFunc(o ir.OpID) {
 			e.line("defer rt.Unguard()")
 		}
 		e.resType = e.goType(op.Result)
-		e.decision(op.Tree, op.Rules)
-		switch {
-		case terminates(op.Tree, op.Rules):
+		switch falls := e.decision(op.Tree, op.Rules); {
+		case !falls:
+			// (the code ends with a return: go vet refuses unreachable code)
 		case op.Total:
 			e.line(`panic("%s: no rule applies to a total operator")`, op.Fun)
 		default:
@@ -559,18 +559,6 @@ func (e *emitter) opFunc(o ir.OpID) {
 		e.close("}")
 	}
 	e.line("")
-}
-
-// terminates tells whether the code of d always returns (it ends with an
-// unconditional rule).
-func terminates(d *ir.Decision, rules []ir.Rule) bool {
-	for d.Kind == ir.Try {
-		if rules[d.Rule].Unconditional() {
-			return true
-		}
-		d = d.Next
-	}
-	return false
 }
 
 func (e *emitter) builtinBody(o ir.OpID) {
@@ -749,20 +737,25 @@ func usedOccs(d *ir.Decision, rules []ir.Rule, into map[string]bool, all bool) {
 	}
 }
 
-func (e *emitter) decision(d *ir.Decision, rules []ir.Rule) {
+// decision writes the code of d; it tells whether the end of that code can
+// be reached (it does not always return; a "terminating statement" in Go's
+// terms): the code after it is emitted only then (go vet refuses
+// unreachable code, Go a function without a final return).
+func (e *emitter) decision(d *ir.Decision, rules []ir.Rule) bool {
 	switch d.Kind {
 	case ir.Try:
-		e.tryRule(d, rules)
-		if e.labelMode || !rules[d.Rule].Unconditional() {
-			e.decision(d.Next, rules)
+		if !e.tryRule(d, rules) {
+			// the rule always applies: the next ones are never tried
+			return false
 		}
+		return e.decision(d.Next, rules)
 	case ir.Switch:
 		if e.ir.FamilyOf(d.Sort) == nil {
-			e.symSwitch(d, rules)
-		} else {
-			e.familySwitch(d, rules)
+			return e.symSwitch(d, rules)
 		}
+		return e.familySwitch(d, rules)
 	}
+	return true
 }
 
 // children binds the children of the head op at position occ (a term)
@@ -779,31 +772,38 @@ func (e *emitter) children(occ ir.Occ, o ir.OpID, then *ir.Decision, rules []ir.
 	}
 }
 
-// symSwitch is a switch on the head symbol of a term of a sort of terms.
-func (e *emitter) symSwitch(d *ir.Decision, rules []ir.Rule) {
+// symSwitch is a switch on the head symbol of a term of a sort of terms
+// (see decision for the result).
+func (e *emitter) symSwitch(d *ir.Decision, rules []ir.Rule) bool {
 	name := occName(d.Occ)
 	e.line("switch %s.Sym {", name)
+	falls := false
 	for _, c := range d.Cases {
 		op := &e.ir.Ops[c.Head.Op]
 		e.line("case %s:", symName(op))
 		e.indent++
 		e.children(d.Occ, c.Head.Op, c.Then, rules)
-		e.decision(c.Then, rules)
+		falls = e.decision(c.Then, rules) || falls
 		e.indent--
 	}
 	if d.Default != nil && d.Default.Kind != ir.Fail {
 		e.line("default:")
 		e.indent++
-		e.decision(d.Default, rules)
+		falls = e.decision(d.Default, rules) || falls
 		e.indent--
+	} else {
+		// no default: the other symbols go on after the switch
+		falls = true
 	}
 	e.line("}")
+	return falls
 }
 
-// familySwitch is a chain of tests on a value or term of a builtin family.
-func (e *emitter) familySwitch(d *ir.Decision, rules []ir.Rule) {
+// familySwitch is a chain of tests on a value or term of a builtin family
+// (see decision for the result).
+func (e *emitter) familySwitch(d *ir.Decision, rules []ir.Rule) bool {
 	name := occName(d.Occ)
-	started, closed := false, false
+	started, closed, falls := false, false, false
 	for _, c := range d.Cases {
 		test := e.headTest(d.Sort, name, c.Head)
 		switch {
@@ -832,7 +832,7 @@ func (e *emitter) familySwitch(d *ir.Decision, rules []ir.Rule) {
 				e.children(d.Occ, c.Head.Op, c.Then, rules)
 			}
 		}
-		e.decision(c.Then, rules)
+		falls = e.decision(c.Then, rules) || falls
 		if test == "" {
 			// the other cases and the default are never reached
 			e.close("}")
@@ -841,7 +841,8 @@ func (e *emitter) familySwitch(d *ir.Decision, rules []ir.Rule) {
 		}
 	}
 	if closed {
-		return
+		// a block or a chain ending with an else
+		return falls
 	}
 	if d.Default != nil && d.Default.Kind != ir.Fail {
 		if started {
@@ -850,19 +851,23 @@ func (e *emitter) familySwitch(d *ir.Decision, rules []ir.Rule) {
 		} else {
 			e.open("{")
 		}
-		e.decision(d.Default, rules)
+		falls = e.decision(d.Default, rules) || falls
 		e.close("}")
+		return falls
 	} else if started {
 		e.close("}")
 	}
+	// no else: the other values go on after the tests
+	return true
 }
 
 // tryRule applies a rule whose left-hand side matches, if its conditions
 // hold: a block of nested ifs ending with the return of its right-hand
 // side (normalisation) or its result passed to k (a label, which then
 // goes on with the next rules; with first, it stops after the first rule
-// that has a result).
-func (e *emitter) tryRule(d *ir.Decision, rules []ir.Rule) {
+// that has a result). It tells whether the code after it is reached (see
+// decision).
+func (e *emitter) tryRule(d *ir.Decision, rules []ir.Rule) bool {
 	r := &rules[d.Rule]
 	used := usedVars(r)
 	e.line("// %s", comment(r.Text))
@@ -876,7 +881,7 @@ func (e *emitter) tryRule(d *ir.Decision, rules []ir.Rule) {
 			e.line("%s := %s", r.Vars[b.Var].Name, occName(b.Occ))
 		}
 	}
-	e.conds(r, 0, used, 0)
+	falls := e.conds(r, 0, used, 0)
 	if block {
 		e.close("}")
 	}
@@ -884,14 +889,17 @@ func (e *emitter) tryRule(d *ir.Decision, rules []ir.Rule) {
 		e.open("if first && found {")
 		e.line("return false // dc: the results of the first rule that has one")
 		e.close("}")
+		return true
 	}
+	return falls
 }
 
 // conds writes the conditions of rule r from the i-th on, then its
 // application; depth is the number of enclosing continuations (closures
 // of `where p := (S) t`), where a failing condition returns false (S then
-// gives its next result).
-func (e *emitter) conds(r *ir.Rule, from int, used map[ir.VarID]bool, depth int) {
+// gives its next result). It tells whether the code after it is reached:
+// a condition that may fail opens an if, after which the code goes on.
+func (e *emitter) conds(r *ir.Rule, from int, used map[ir.VarID]bool, depth int) bool {
 	opens := 0
 	defer func() {
 		for range opens {
@@ -935,8 +943,9 @@ func (e *emitter) conds(r *ir.Rule, from int, used map[ir.VarID]bool, depth int)
 				e.line("_ = %s // the pattern reads nothing of it", m)
 			}
 		case ir.CondApply:
+			// (its code ends with an if)
 			e.apply(r, j, used, depth)
-			return
+			return true
 		}
 	}
 	e.line("rt.Step()")
@@ -947,6 +956,7 @@ func (e *emitter) conds(r *ir.Rule, from int, used map[ir.VarID]bool, depth int)
 		e.open("if k(%s) {", rhs)
 		e.line("return true")
 		e.close("}")
+		return true
 	case e.labelMode:
 		e.line("found = true")
 		e.line("return k(%s)", rhs)
@@ -956,6 +966,7 @@ func (e *emitter) conds(r *ir.Rule, from int, used map[ir.VarID]bool, depth int)
 		e.line("%s, %s = %s, true", e.res, e.ok, rhs)
 		e.line("return true")
 	}
+	return opens > 0
 }
 
 // apply writes the condition j of r, `where p := (S) t`, and the rest of
@@ -981,11 +992,13 @@ func (e *emitter) apply(r *ir.Rule, j int, used map[ir.VarID]bool, depth int) {
 		e.open("if %s(%s, func(%s %s) bool {", st.Fun, m, y, ty)
 	}
 	opens, _ := e.patternCheck(&c.Pat, y, st.Sort, r, used)
-	e.conds(r, j+1, used, depth+1)
+	falls := e.conds(r, j+1, used, depth+1)
 	for range opens {
 		e.close("}")
 	}
-	e.line("return false")
+	if falls || opens > 0 {
+		e.line("return false")
+	}
 	if keepFirst {
 		e.close("})")
 		e.open("if %s {", e.ok)

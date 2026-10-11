@@ -6,6 +6,7 @@ package gen
 // compiler are tests/compiler-rs/test_normalise.sh with ELANC=elanc-go.
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -181,13 +182,12 @@ func TestBuiltinsNativeAndBoxed(t *testing.T) {
 
 // run builds the generated program with the runtime of this tree and runs
 // it with -noInput -quiet.
-func run(t *testing.T, p *prog) string {
+// module writes the generated program p in a new Go module, returned with
+// its directory.
+func module(t *testing.T, p *prog) (dir, src string) {
 	t.Helper()
-	if testing.Short() {
-		t.Skip("go build")
-	}
-	src := p.gen(t)
-	dir := t.TempDir()
+	src = p.gen(t)
+	dir = t.TempDir()
 	runtime, err := filepath.Abs("../elanrt")
 	if err != nil {
 		t.Fatal(err)
@@ -198,9 +198,24 @@ func run(t *testing.T, p *prog) string {
 	if err := os.WriteFile(filepath.Join(dir, "main.go"), []byte(src), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	build := exec.Command("go", "build", "-trimpath", "-buildvcs=false", "-o", "prog", ".")
-	build.Dir = dir
-	build.Env = append(os.Environ(), "GOTOOLCHAIN=local", "GOFLAGS=-mod=mod", "GOPROXY=off", "GOWORK=off")
+	return dir, src
+}
+
+// goCmd is the go command args in the directory dir, offline.
+func goCmd(dir string, args ...string) *exec.Cmd {
+	c := exec.Command("go", args...)
+	c.Dir = dir
+	c.Env = append(os.Environ(), "GOTOOLCHAIN=local", "GOFLAGS=-mod=mod", "GOPROXY=off", "GOWORK=off")
+	return c
+}
+
+func run(t *testing.T, p *prog) string {
+	t.Helper()
+	if testing.Short() {
+		t.Skip("go build")
+	}
+	dir, src := module(t, p)
+	build := goCmd(dir, "build", "-trimpath", "-buildvcs=false", "-o", "prog", ".")
 	if out, err := build.CombinedOutput(); err != nil {
 		t.Fatalf("go build: %v\n%s\n%s", err, out, src)
 	}
@@ -284,4 +299,50 @@ func TestTotalBuiltinReadsBoxedValuesChecked(t *testing.T) {
 	if got := run(t, boxedInts()); got != "\nresult = r(3,g(s(o)))\n\nrewrite_step = 1\n" {
 		t.Errorf("boxed ints: %q", got)
 	}
+}
+
+// totalInts has a total operator on int (an injection of builtinInt, a
+// native family): plus(x, y) => x + y; its code ends with the return of
+// its rule, in the blocks of the variable patterns (nothing after them).
+func totalInts() *prog {
+	const sInts = 331
+	p := newProg()
+	p.p.Sorts = append(p.p.Sorts, ref.Sort{Index: sInts, Name: "int"})
+	p.op(sInt, 3, "+", []uint32{sInt, sInt}, 3, true)
+	p.op(sInts, 300, "", []uint32{sInt}, 0)
+	p.op(sInts, 301, "plus", []uint32{sInts, sInts}, 0)
+	p.rule(sInts, f(301, f(300, v(0, sInt)), f(300, v(1, sInt))), f(300, f(3, v(0, sInt), v(1, sInt))))
+	p.p.Query.Sort, p.p.Query.ResultSort = sInts, sInts
+	p.p.Query.StartWith = f(301, f(300, ref.Int{Value: 1}), f(300, ref.Int{Value: 2}))
+	return p
+}
+
+// TestGeneratedProgramsVet: go vet finds nothing in the generated programs
+// (e.g. no unreachable code: a `return false` after the `return` of a
+// closure, a panic after the last return of a total operator).
+func TestGeneratedProgramsVet(t *testing.T) {
+	if testing.Short() {
+		t.Skip("go vet")
+	}
+	for name, p := range map[string]*prog{
+		"peano": peano(), "builtins": builtins(), "wherePatterns": wherePatterns(),
+		"boxedInts": boxedInts(), "strategies": strategies(), "meta": metaProg(),
+		"commentNames": commentNames(21), "totalInts": totalInts(),
+	} {
+		t.Run(name, func(t *testing.T) {
+			dir, src := module(t, p)
+			if out, err := goCmd(dir, "vet", ".").CombinedOutput(); err != nil {
+				t.Errorf("go vet: %v\n%s\n%s", err, out, numbered(src))
+			}
+		})
+	}
+}
+
+// numbered is src with its line numbers.
+func numbered(src string) string {
+	var b strings.Builder
+	for i, l := range strings.Split(src, "\n") {
+		fmt.Fprintf(&b, "%4d %s\n", i+1, l)
+	}
+	return b.String()
 }

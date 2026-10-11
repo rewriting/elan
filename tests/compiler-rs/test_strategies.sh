@@ -18,6 +18,8 @@
 # start term ignores it, but it must parse), else `true end`. For each
 # program:
 #  - the compiler builds it (shared build cache, see TARGET below) and `./a.out -noInput -quiet` prints one `result = t` line per result;
+#    with elanc-go, `go vet` on the generated module (.elan-go.<name>)
+#    must report nothing;
 #  - the interpreter: `elan -b` with the query `true end` (ignored by the
 #    start term) prints ` t end` per result: the sequences of results must
 #    be equal, in order (the leading spaces of the compiled programs'
@@ -75,6 +77,20 @@ HAVE_REM=; command -v elanc >/dev/null 2>&1 && HAVE_REM=1
 fails=0 n=0
 ok()   { echo "ok   $1"; }
 fail() { echo "FAIL $1"; fails=$((fails+1)); }
+# vet NAME DIR: with elanc-go, go vet on the generated module
+# DIR/.elan-go.NAME must report nothing (e.g. no unreachable code); the go
+# command is the one elanc-go uses (share/elan-go/go-command, else go).
+GO=go
+[ -x "$(cat "$PREFIX/share/elan-go/go-command" 2>/dev/null)" ] && GO=$(cat "$PREFIX/share/elan-go/go-command")
+vet() {
+  [ "$ELANC" = elanc-go ] || return 0
+  if v=$(cd "$2/.elan-go.$1" && GOTOOLCHAIN=local GOFLAGS=-mod=mod GOPROXY=off GOWORK=off \
+         GOCACHE="$TARGET" "$GO" vet . 2>&1); then
+    return 0
+  fi
+  fail "$1: go vet: $(printf '%s\n' "$v" | grep -v '^#' | head -3 | tr '\n' ' ')(module in $2/.elan-go.$1)"
+  return 1
+}
 
 selected() {  # selected NAME: NAME is one of the names given
   for s in $SELECTION; do [ "$s" = "$1" ] && return 0; done
@@ -110,6 +126,7 @@ for lgi in "$PROGS"/*.lgi; do
     fi
     continue
   fi
+  vet "$name" "$d/$W" || continue
   build=$(sed -n "s/^$ELANC: build time //p" "$d/$W/$ELANC.log")
   out=$( cd "$d/$W" && ./a.out -noInput -quiet 2>"$d/$W/run.err"; echo "status $?" )
   status=$(printf '%s\n' "$out" | sed -n 's/^status //p')
