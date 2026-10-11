@@ -14,10 +14,14 @@
 # warnings of stderr. Files of passing programs are written, as paths relative
 # to the repository, to tests/front/work/loaded-files.txt (test_front_lex.sh
 # counts the `loaded` files found there as covered).
+# The run fails unless it compared at least MIN_OK programs, with at most
+# MAX_NOLOAD NOLOAD, MIN_STRCONC strconc subtrees and MIN_FOREACH FOR EACH
+# regions removed, and one result per program (the S8a figures).
 # Usage: tests/front/test_front_load.sh PREFIX     (FRONT_JOBS=n: parallel runs)
 HERE=$(cd "$(dirname "$0")" && pwd)
 REPO=$(cd "$HERE/../.." && pwd)
 TREE='^ +(handling module|end of) '
+MIN_OK=538 MAX_NOLOAD=30 MIN_STRCONC=102 MIN_FOREACH=371
 
 if [ "${1:-}" = --one ]; then   # worker: --one RUN H FT N KIND DIR LGI SPC
   RUN=$2 H=$3 FT=$4 n=$5 kind=$6 dir=$7 lgi=$8 spc=$9
@@ -99,5 +103,17 @@ for r in "$RUN"/res/*; do
 done
 cat "$RUN"/files/* 2>/dev/null | sort -u > "$HERE/work/loaded-files.txt"
 echo "$total programs: $ok ok, $failed failed, $noload NOLOAD; strconc subtrees removed: $strconc; FOR EACH regions excluded: $foreach"
+# The run must have compared something: a broken ELANLIB or elan makes every
+# program NOLOAD, which compares nothing (minimums: the figures of 4785698).
+nprog=$(wc -l < "$RUN/programs.tsv")
+short=
+[ "$total" -eq "$nprog" ] || short="$short $total results for $nprog programs;"
+[ "$ok" -ge "$MIN_OK" ] || short="$short ok $ok < $MIN_OK;"
+[ "$noload" -le "$MAX_NOLOAD" ] || short="$short NOLOAD $noload > $MAX_NOLOAD;"
+[ "$strconc" -ge "$MIN_STRCONC" ] || short="$short strconc subtrees $strconc < $MIN_STRCONC;"
+[ "$foreach" -ge "$MIN_FOREACH" ] || short="$short FOR EACH regions $foreach < $MIN_FOREACH;"
+if [ -n "$short" ]; then
+  echo "test_front_load: FAIL: too little compared:$short (ELANLIB=$ELANLIB)"; failed=$((failed + 1))
+fi
 if [ $failed -eq 0 ]; then rm -rf "$RUN"; exit 0; fi
 echo "work directory: $RUN"; exit 1

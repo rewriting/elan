@@ -14,8 +14,12 @@
 #   $BUILD/src/interpreter/elan-lextrace, BUILD = dirname PREFIX unless set.
 #   --only lgi,spc: only the files with these extensions.
 #   FRONT_JOBS=n parallel runs (default: number of CPUs).
+# The run fails unless it compared one result per standalone file and at
+# least MIN_ALL files (MIN_LGI_SPC with --only lgi,spc, 1 with another
+# --only), and, in a full run, covered at least MIN_COVERED loaded files.
 HERE=$(cd "$(dirname "$0")" && pwd)
 REPO=$(cd "$HERE/../.." && pwd)
+MIN_ALL=599 MIN_LGI_SPC=402 MIN_COVERED=15
 
 if [ "${1:-}" = --one ]; then   # worker: --one RUN H FT N FILE
   RUN=$2 H=$3 FT=$4 n=$5 f=$6
@@ -74,5 +78,19 @@ while IFS="$TAB" read -r f k; do
   else echo "UNCOVERED $f"; uncovered=$((uncovered + 1)); fi
 done < "$RUN/sel.tsv"
 echo "$total files: $ok ok, $failed failed; loaded files: $covered covered, $unloadable UNLOADABLE (unloadable.tsv), $uncovered UNCOVERED"
+# The run must have compared something: one result per standalone file, and
+# at least the S8a figures (599 standalone files, 402 with --only lgi,spc;
+# 15 loaded files covered by test_front_load.sh in a full run).
+nsel=$(awk -F'\t' '$2 == "standalone"' "$RUN/sel.tsv" | wc -l)
+case "$ONLY" in
+  "") min=$MIN_ALL ;;
+  lgi,spc|spc,lgi) min=$MIN_LGI_SPC ;;
+  *) min=1 ;;
+esac
+short=
+[ "$total" -eq "$nsel" ] || short="$short $total results for $nsel standalone files;"
+[ "$ok" -ge "$min" ] || short="$short ok $ok < $min;"
+[ -n "$ONLY" ] || [ "$covered" -ge "$MIN_COVERED" ] || short="$short loaded files covered $covered < $MIN_COVERED;"
+if [ -n "$short" ]; then echo "test_front_lex: FAIL: too little compared:$short"; failed=$((failed + 1)); fi
 if [ $failed -eq 0 ] && [ $uncovered -eq 0 ]; then rm -rf "$RUN"; exit 0; fi
 echo "work directory: $RUN"; exit 1
