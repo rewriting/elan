@@ -233,7 +233,7 @@ Target: nqueens 12 <= 0.67 s after Task 2 (measured upper bound without any guar
 - [x] **Step 2: Failing test.** A gen test that runs a tail-recursive strategy loop 10^6 turns and checks `testing.AllocsPerRun` per turn <= 1 (today: the count of closures + states).
 - [x] **Step 3: Implement** (closures and states hoisted out of the `for`, reset each turn), **Step 4:** tests (`go test ./gen`, `test_strategies.sh`, `test_depth.sh`) green, **Step 5:** measure, **Step 6:** commit (`elanc-go: tail-call loops allocate once (S7e task 4)`).
 
-### Task 5: Spike — the weak pointer per node (time-boxed, keep/drop)
+### Task 5: Spike — the weak pointer per node (time-boxed, keep/drop) — tried, not kept (see Task 5 results)
 
 Measured: the weak pointer is half of deeplist3m (1.24 → 0.59 s with strong pointers) and 19 % of nqueens 12, but strong pointers keep every node (nqueens 143 MB instead of 10). Time box: one day of work; decision rule below.
 
@@ -408,3 +408,36 @@ Tests RED → GREEN: `elanrt` `TestChoicesOfTheGeneratedCode` (Reset: RED, does 
 taildc keeps one allocation per turn: its `ONE(taildc)` is the state of a continuation closure (`k2`), made at each call of the closure, not a state of the loop's body; not hoisted (a closure may run several times in a turn, each needing its own state) — recorded in followups.
 
 - Ruling: the states are reset by name, the top-level hoisted declarations matching `^(dc|one)N := rt.New(Dc|One)(` — why: the declarations removed while emitting (a dc whose alternatives all fail) never get a reset that would name an undeclared variable, and the states inside closures keep their per-call creation — cost if wrong: a state left unreset would keep a previous turn's result; `TestTailLoopsAllocateOnce` checks both kinds and `test_depth`/`test_strategies` the results.
+
+### Task 5 results — tried, not kept
+
+Profile (`GOMAXPROCS=1`, `ELAN_CPUPROFILE`, go1.27.1): the weak cost is in `weak.Make` (`runtime.getOrAddWeakHandle`: a special record from a fixalloc under the global `speciallock`, a padded 16-byte handle allocated, `addspecial` and `specialFindSplicePoint` walking the span's sorted specials list), not in `Value()` (`makeStrongFromWeak` 3 % of deeplist3m). deeplist3m: weak.Make 13 % of the samples, `madvise` of the growing heap 41 %, the GC's mark 26 %; nqueens 12: weak.Make 9 % of the samples (a third of the mutator once the scheduler's idle `kevent` is left out), `specialFindSplicePoint` 7 %.
+
+Variants tried (each alone):
+- (a) padding to fewer nodes per span: not measured further — the list walk is only part of the cost (the lock, the handle and the record are per weak pointer), and any padding multiplies the node size (deeplist's RSS rule).
+- (b) interning only the nodes compared or looked up again: the IR cannot tell (a node built by a right-hand side may be matched non-linearly, compared by `==` or rebuilt equal later, nqueens: 10.1 M table hits for 0.86 M nodes); a runtime-only variant needs pointer equality to fall back to structural equality — a change of G2, not a spike.
+- (c) **slabs**: nodes of arity 0-3 of free symbols allocated in slabs of N `node3`s, the table holding one weak pointer per slab (`weak.Make` once per slab) and the node's index in the top bits of the slot's hash. Complete (a slab lives while any of its nodes is reachable: interior pointers keep the whole object; a dead node of a live slab is still a valid node and may be found again), dead slabs freed. Local branch `s7e-task5-slabs-tried` (65cc5ec, N = 3; the table's unit tests not adapted).
+
+Slab size (the same binary, slabs on/off by a variable; best of 3 with `/usr/bin/time`, s / max RSS MB; off: nqueens 12 0.75 / 10, deeplist3m 1.30 / 901):
+
+| N | 1 | 2 | 3 | 4 | 8 | 16 | 64 |
+|---|---|---|---|---|---|---|---|
+| nqueens 12 | 0.75 / 10 | 0.67 / 10 | 0.66 / 13 | 0.65 / 18 | 0.64 / 55 | 0.64 / 63 | 0.65 / 71 |
+| deeplist3m | 1.30 / 901 | 0.92 / 830 | 0.85 / 809 | 0.79 / 795 | 0.76 / 784 | 0.71 / 790 | 0.67 / 790 |
+
+nqueens's RSS grows with N because a slab holding one long-lived node (a partial board shared by a subtree of the search) keeps its other nodes alive: with N = 64, 326 K live table entries at the end instead of 6.7 K.
+
+The candidate N = 3 (no variable, `node3` slabs of 192 bytes) against s7e-go-switch at 5107ad1, the same generated code built against each runtime, interleaved best of 9 (ms / max RSS MB):
+
+| case | weak per node | slabs of 3 | change |
+|---|---|---|---|
+| nqueens 12 | 737 / 9.8 | 672 / 13.1 | -8.8 %, RSS 1.34x |
+| nqueens 11 | 132 / 9.4 | 122 / 10.7 | -7.6 % |
+| deeplist3m | 1263 / 901 | 828 / 809 | -34 % |
+| propc 3 | 289 / 42.9 | 289 / 42.8 | 0 |
+| propc 2 | 82 / 40.5 | 82 / 40.4 | 0 |
+| efib 200 | 78 / 38.8 | 77 / 38.9 | 0 |
+
+Decision rule: deeplist3m <= 0.9 s (yes, 0.83), nqueens 12 >= 10 % (no: 8.8 %; N = 4 gives 12 % but 18 MB, 1.8x > 1.5x), RSS <= 1.5x (yes for N = 3). No variant meets all three.
+
+- Ruling: weak table kept as G2 decided; the slab variant is not merged (plan rule), kept on `s7e-task5-slabs-tried` (`git cherry-pick 65cc5ec`, then adapt the table tests) — why: nqueens 12 gains 8.8 %, under the 10 % the plan set, and every N that reaches 10 % breaks the memory rule — cost if wrong: deeplist3m 0.43 s (34 %) and nqueens 12 0.065 s left on the table; the user may take it at the gate with a revised rule (the memory cost is a slab kept by one live node, at most N = 3 nodes per live node).

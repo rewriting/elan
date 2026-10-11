@@ -213,6 +213,14 @@ sub-project (S1–S5b). Each item says where it comes from.
   (107 M guarded calls); a further gain needs fewer guarded calls (e.g.
   self tail calls of normalisation functions as loops).
 
+- **Weak pointer per node** (S7e task 5, tried, not kept): nodes in slabs
+  of 3 with one weak pointer per slab (local branch
+  `s7e-task5-slabs-tried`, 65cc5ec) give deeplist3m 1.26 → 0.83 s and
+  nqueens 12 0.737 → 0.672 s (-8.8 %, short of the 10 % rule) at 1.34x
+  its RSS; larger slabs gain more time (N = 4: -12 %) but keep dead
+  nodes with a live slab-mate (N = 4: 1.8x RSS, N = 64: 7x). The weak
+  table stays as G2 decided; figures in the S7e plan, Task 5 results.
+
 - **Tail-call loops of elanc-go allocated every turn** (review of S7b):
   done in S7e task 4 (`gen/strat.go`: the closures and the dc/one states
   of a loop are made once per call, the states reset at each turn; tail
