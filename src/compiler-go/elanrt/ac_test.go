@@ -33,11 +33,11 @@ func TestCanonicalFormIsIndependentOfGroupingAndOrder(t *testing.T) {
 func TestTransientACTerms(t *testing.T) {
 	a, b, c := atom(41), atom(42), atom(43)
 	x := ACTerm(symAnd, MergeAC(symAnd, a, b))
-	if !x.tmp || Format(x) != "and(p(41),p(42))" {
-		t.Fatalf("transient %s (tmp %v)", Format(x), x.tmp)
+	if !x.isTmp() || Format(x) != "and(p(41),p(42))" {
+		t.Fatalf("transient %s (tmp %v)", Format(x), x.isTmp())
 	}
 	created := Created
-	if y := Intern(x); y != x || y.tmp || and(a, b) != x || Created != created+1 {
+	if y := Intern(x); y != x || y.isTmp() || and(a, b) != x || Created != created+1 {
 		t.Fatal("Intern of a new term: the node itself, shared")
 	}
 	if ACTerm(symAnd, MergeAC(symAnd, b, a)) != x {

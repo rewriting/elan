@@ -2,8 +2,10 @@ package elanrt
 
 import (
 	"runtime"
+	"slices"
 	"testing"
 	"time"
+	"unsafe"
 )
 
 func TestSameStructureIsTheSamePointer(t *testing.T) {
@@ -160,5 +162,39 @@ func TestIntsAreComparedByValue(t *testing.T) {
 	}
 	if x := MkAC(symU, Flatten(symU, a, b, MkInt(big+1))); MkAC(symU, Flatten(symU, b, MkInt(big+1), a)) != x {
 		t.Fatal("AC terms of equal ints: one node")
+	}
+}
+
+// TestNodeSizes: the flags of a node (transient, normal form) take no
+// room of their own: the nodes stay in the 40/48/56/64-byte layouts (the
+// size classes 48 and 64 of the allocator for the inline arities).
+func TestNodeSizes(t *testing.T) {
+	if unsafe.Sizeof(uintptr(0)) != 8 {
+		t.Skip("64-bit layout")
+	}
+	sizes := []uintptr{unsafe.Sizeof(Node{}), unsafe.Sizeof(node1{}), unsafe.Sizeof(node2{}), unsafe.Sizeof(node3{})}
+	if want := []uintptr{40, 48, 56, 64}; !slices.Equal(sizes, want) {
+		t.Fatalf("Node, node1, node2, node3: %v bytes, want %v", sizes, want)
+	}
+}
+
+// TestFlagsKeepHash: marking a term transient or in normal form changes
+// neither its hash nor the hashes of the terms built on it.
+func TestFlagsKeepHash(t *testing.T) {
+	e := []Term{Mk1(symP, MkInt(1)), Mk1(symP, MkInt(2)), Mk1(symP, MkInt(77001))}
+	x := ACTerm(symAnd, slices.Clone(e))
+	if !x.isTmp() {
+		t.Fatal("ACTerm of a new multiset: not transient")
+	}
+	h := x.hash()
+	x = NormalForm(x, Steps)
+	if x.isTmp() || !Normal(x) || x.hash() != h {
+		t.Fatalf("NormalForm: tmp %v nf %v hash %x, was %x", x.isTmp(), Normal(x), x.hash(), h)
+	}
+	if y := MkAC(symAnd, slices.Clone(e)); y != x {
+		t.Fatal("the shared node of a normal form is not found again")
+	}
+	if g := Mk1(symNot, x); g.hash() != nodeHash(symNot, 0, []Term{x}) || g != Mk1(symNot, MkAC(symAnd, slices.Clone(e))) {
+		t.Fatal("the hash of a term over a marked one changed")
 	}
 }

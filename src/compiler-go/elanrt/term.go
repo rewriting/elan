@@ -18,19 +18,34 @@ func Eq(a, b Term) bool { return a == b || a.Sym == SymInt && b.Sym == SymInt &&
 // [MkInt], [MkStr], [MkAC]; never with a composite literal (the node would
 // not be shared).
 type Node struct {
-	Sym  int32  // symbol code (an index into the symbol table)
-	Int  int32  // payload of an int node (SymInt); of a string node: its slot in the string table
-	Hash uint64 // structural hash: from the symbol's name and arity, the payload and the arguments' hashes
+	Sym int32 // symbol code (an index into the symbol table)
+	Int int32 // payload of an int node (SymInt); of a string node: its slot in the string table
+	// Hash is the structural hash (from the symbol's name and arity, the
+	// payload and the arguments' hashes) in its low 62 bits ([Node.hash]),
+	// and two flags of AC terms in its top bits (no room of their own: a
+	// node of arity 1 stays in the allocator's 48-byte class):
+	// flagTmp marks a transient AC term ([ACTerm]): not in the unique
+	// table, seen only by the normalisation function of its symbol until
+	// [Intern] makes it the shared node; flagNF marks a shared AC term
+	// that the normalisation function of its symbol found in normal form
+	// without a rewrite step ([NormalForm]): that function returns it at
+	// once the next times.
+	Hash uint64
 	Args []Term // arguments; for an AC symbol, n >= 2 flattened elements in canonical order
-	// tmp marks a transient AC term ([ACTerm]): not in the unique table,
-	// seen only by the normalisation function of its symbol until
-	// [Intern] makes it the shared node.
-	tmp bool
-	// nf marks a shared AC term that the normalisation function of its
-	// symbol found in normal form without a rewrite step ([NormalForm]):
-	// that function returns it at once the next times.
-	nf bool
 }
+
+// The flags in the top bits of [Node.Hash].
+const (
+	flagTmp  uint64 = 1 << 63
+	flagNF   uint64 = 1 << 62
+	hashMask        = flagNF - 1
+)
+
+// hash is the structural hash of n (without its flags).
+func (n *Node) hash() uint64 { return n.Hash & hashMask }
+
+// isTmp tells whether n is a transient AC term ([ACTerm]).
+func (n *Node) isTmp() bool { return n.Hash&flagTmp != 0 }
 
 // Nodes of arity 1 to 3 carry their arguments inline: one allocation per
 // node instead of two.
@@ -143,14 +158,15 @@ func mix(h uint64) uint64 {
 }
 
 // nodeHash is the structural hash of the node (sym, iv, args); never 0
-// (0 marks an empty slot of the unique table).
+// (0 marks an empty slot of the unique table), its top bits clear (the
+// flags of [Node.Hash]).
 func nodeHash(sym, iv int32, args []Term) uint64 {
 	h := Syms[sym].seed ^ uint64(uint32(iv))*0xC2B2AE3D27D4EB4F
 	for _, a := range args {
-		h = (h ^ a.Hash) * 0x100000001B3
+		h = (h ^ a.hash()) * 0x100000001B3
 		h ^= h >> 29
 	}
-	return mix(h) | 1
+	return mix(h)&hashMask | 1
 }
 
 // ---------------------------------------------------------------------------

@@ -217,12 +217,12 @@ func ACTerm(sym int32, e []Term) Term {
 		Hits++
 		return n
 	}
-	return &Node{Sym: sym, Hash: h, Args: e, tmp: true}
+	return &Node{Sym: sym, Hash: h | flagTmp, Args: e}
 }
 
 // Normal tells whether t is an AC term known to be a normal form: its
 // normalisation function, given it, returns it at once.
-func Normal(t Term) bool { return t.nf }
+func Normal(t Term) bool { return t.Hash&flagNF != 0 }
 
 // NormalForm returns the shared node of the AC term t that no rule of its
 // symbol rewrites ([Intern]); steps is [Steps] when its normalisation
@@ -234,7 +234,7 @@ func Normal(t Term) bool { return t.nf }
 func NormalForm(t Term, steps int64) Term {
 	t = Intern(t)
 	if Steps == steps {
-		t.nf = true
+		t.Hash |= flagNF
 	}
 	return t
 }
@@ -243,14 +243,14 @@ func NormalForm(t Term, steps int64) Term {
 // node of [ACTerm], which then joins the unique table (or gives way to
 // the equal node built meanwhile).
 func Intern(t Term) Term {
-	if !t.tmp {
+	if !t.isTmp() {
 		return t
 	}
-	if n := lookup(t.Hash, t.Sym, t.Int, t.Args); n != nil {
+	if n := lookup(t.hash(), t.Sym, t.Int, t.Args); n != nil {
 		Hits++
 		return n
 	}
-	t.tmp = false
+	t.Hash &^= flagTmp
 	Created++
 	insert(t)
 	return t
