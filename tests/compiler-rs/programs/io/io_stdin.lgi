@@ -1,0 +1,6 @@
+LPL io_stdin description
+  query of sort bool
+  result of sort int
+  import iotest
+  start with () getc(stdin)
+end

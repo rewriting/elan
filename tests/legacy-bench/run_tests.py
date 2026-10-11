@@ -11,7 +11,7 @@ Test kinds (same semantics as the original scripts):
   I  itest  : elan -b LGI.lgi [SPC.spc] < SAMPLES/INP.inp       == SAMPLES/OUT.out
   A  aitest : elan -b --export LGI.ref LGI.lgi [SPC.spc];
               elan -b --import LGI.ref < SAMPLES/INP.inp         == SAMPLES/OUT.out
-  J  jtest  : elanc -b -nosplit -quiet LGI [SPC]; make; a.out -noInput -quiet == SAMPLES/OUT.out
+  J  jtest  : elanc-rem -b -nosplit -quiet LGI [SPC]; make; a.out -noInput -quiet == SAMPLES/OUT.out
               (-noInput = evaluate the compiled `start with` query; it was the default
               when the reference outputs were produced)
   JO jtest  : same with -optimiseChoicePoint (second half of the original jtest)
@@ -278,10 +278,10 @@ def run_test(t, timeout):
             rc, out, err = run(["./a.out", "-noInput", "-quiet"], wd, None, timeout)
         else:  # J, JO
             opts = ["-b", "-nosplit", "-quiet"] + (["-optimiseChoicePoint"] if k == "JO" else [])
-            rc, o1, e1 = run(["elanc", *opts, *flags, t["lgi"], *spc], wd, None, timeout)
+            rc, o1, e1 = run(["elanc-rem", *opts, *flags, t["lgi"], *spc], wd, None, timeout)
             mk = wd / f"{t['lgi']}.make"
             if not mk.exists():
-                return "ERROR", f"elanc rc={rc}\n{o1[-1500:]}\n{e1[-1500:]}", ""
+                return "ERROR", f"elanc-rem rc={rc}\n{o1[-1500:]}\n{e1[-1500:]}", ""
             rc, o2, e2 = run(["make", "-f", mk.name], wd, None, timeout * 3)
             if rc != 0 or not (wd / "a.out").exists():
                 return "ERROR", f"make rc={rc}\n{(o2 + e2)[-3000:]}", ""

@@ -1,0 +1,80 @@
+module iotest
+// The I/O builtins of common/builtinStdio.eln and builtinIO.eln (codes
+// 113, 114, 116, 118-122) through the library modules stdio and IO[X], as
+// a user imports them (S7e task 6). REM is the oracle (fun_113..122 of
+// src/compiler/runtime/builtin.h); the interpreter runs only putc (see
+// the .no-interpreter files). The `where`s sequence the effects.
+import global bool int string stdio expr IO[Expr] IO[int]; end
+sort out; end
+operators global
+  r(@,@,@)        : (int int int) out;
+  rg(@,@,@,@,@,@) : (int int int int File int) out;
+  rf(@,@,@,@)     : (File File int int) out;
+  rr(@,@,@,@,@,@) : (int int Expr int int int) out;
+  re(@,@)         : (Expr int) out;
+  rb(@,@)         : (bool int) out;
+  putfile         : out;
+  getfile         : out;
+  readfile        : out;
+  nofile          : out;
+  readbad         : out;
+  bt              : <int -> int> bs;
+end
+rules for out
+  w, w2, w3 : File; c1, c2, c3, c4, c5 : int; e : Expr;
+global
+  // write two chars and a term to a new file, flush, close
+  [] putfile => rf(w2, w3, c1, c2)
+       where w  := () open("io_out.txt", "w")
+       where c1 := () putc(w, 65)
+       where c2 := () putc(w, 10)
+       where e  := () write(w, f(1, f(2, a)))
+       where w2 := () flush(w)
+       where w3 := () close(w)
+       end
+  // the bytes of data/in.txt: A, \351 (a negative char, as REM's C
+  // char), f, (; closed, opened again: the same file number (the first
+  // free one), read from the start
+  [] getfile => rg(c1, c2, c3, c4, w3, c5)
+       where w  := () open("in.txt", "r")
+       where c1 := () getc(w)
+       where c2 := () getc(w)
+       where c3 := () getc(w)
+       where c4 := () getc(w)
+       where w2 := () close(w)
+       where w3 := () open("in.txt", "r")
+       where c5 := () getc(w3)
+       end
+  // two chars, a term up to `end` (and the newline after it), two
+  // chars, the end of the file (-1)
+  [] readfile => rr(c1, c2, e, c3, c4, c5)
+       where w  := () open("in.txt", "r")
+       where c1 := () getc(w)
+       where c2 := () getc(w)
+       where e  := () read(w)
+       where c3 := () getc(w)
+       where c4 := () getc(w)
+       where c5 := () getc(w)
+       end
+  // a term that does not parse: REM's messages, status 1
+  [] readbad => re(e, 0)
+       where w := () open("bad.txt", "r")
+       where e := () read(w)
+       end
+  // a file that cannot be opened: -1 (REM's message on stderr)
+  [] nofile => rb(iserr(w), errno(w))
+       where w := () open("io_none/x.txt", "r")
+       end
+end
+// effects are not undone by backtracking: l1 prints A, then fails
+rules for int
+  x, c, d : int;
+global
+  [l1] x => x where c := () putc(stdout, 65) where d := () putc(stdout, 10) if c == 0 end
+  [l2] x => x + 1 end
+end
+strategies for int
+implicit
+  [] bt => first(dk(l1), dk(l2)) end
+end
+end

@@ -2,7 +2,8 @@
 # Normalisation by a new compiler (elanc-rs, S6a; elanc-go, S7a) compared
 # with REM and with the interpreter.
 #
-# The compiler is $ELANC: elanc-rs (default) or elanc-go; below, "the
+# The compiler is $ELANC: elanc-go (default since S7e) or elanc-rs (built
+# only with -DELAN_RUST=ON); below, "the
 # compiler" is that one.
 #
 # Programs: programs/normalise/<name>.lgi (+ .eln), each with a start term
@@ -12,7 +13,7 @@
 #    `./a.out -noInput -quiet` prints `result = t`;
 #    with elanc-go, `go vet` on the generated module (.elan-go.<name>)
 #    must report nothing;
-#  - REM: `elanc -b -nosplit -quiet` + make + `./a.out -noInput -quiet`:
+#  - REM: `elanc-rem -b -nosplit -quiet` + make + `./a.out -noInput -quiet`:
 #    the `result = ` lines must be byte-identical (the `rewrite_step` line
 #    is not compared: it depends on the compilation scheme);
 #  - the interpreter: `elan -b` with the query `true end` (ignored by the
@@ -34,15 +35,14 @@
 # output is compared with the names put back (rem_idents.py).
 # Outputs are compared as bytes (LC_ALL=C): strings are bytes, and the
 # sources of latin1*.eln are Latin-1.
-# Programs programs/refused/<name>.lgi use constructs of later stages:
-# the compiler must stop with status 2 and a "not supported yet (<stage>)"
-# message, the stage being one of its later ones (S6c, S6d, S6e for
-# elanc-rs; S7c, S7d, S7e for elanc-go: the strategies, S6b/S7b, are done),
-# or "not supported (not planned)" (elanc-go's refusals kept by design,
-# docs/followups.md),
+# Programs programs/refused/<name>.lgi use constructs the compiler refuses:
+# it must stop with status 2 and a "not supported (not planned)" message
+# (refusals kept by design, docs/followups.md; since S7e the only kind for
+# elanc-go) or, for elanc-rs, a "not supported yet (<stage>)" message, the
+# stage being one of its later ones (S6c, S6d, S6e),
 # and remove the a.out left by a previous compilation.
 #
-# Usage: [ELANC=elanc-go] test_normalise.sh PREFIX [name...]   (an installed
+# Usage: [ELANC=elanc-rs] test_normalise.sh PREFIX [name...]   (an installed
 # ELAN with the compiler; the names select programs, default all)
 # The work directory is tests/compiler-rs/work/normalise.XXXXXX for
 # elanc-rs, normalise-go.XXXXXX for elanc-go (kept, git-ignored); the build
@@ -55,16 +55,18 @@ PREFIX=${1:?usage: test_normalise.sh PREFIX}
 PREFIX=$(cd "$PREFIX" && pwd) || exit 2
 HERE=$(cd "$(dirname "$0")" && pwd)
 export ELANLIB=$PREFIX PATH=$PREFIX/bin:$PATH LC_ALL=C
-ELANC=${ELANC:-elanc-rs}
-# per compiler: the build cache and its option, the stage of the refusals,
+ELANC=${ELANC:-elanc-go}
+# per compiler: the build cache and its option, the refusal messages,
 # the suffix of the work directory, the subdirectory of each program
 case $ELANC in
   elanc-rs)
     TARGET=${ELANC_RS_TARGET_DIR:-$HERE/work/target}
-    CACHE_OPT=--target-dir STAGE=S6 SUFFIX= W=rs ;;
+    CACHE_OPT=--target-dir SUFFIX= W=rs
+    REFUSED='not supported (yet \(S6[c-e]\)|\(not planned\))' ;;
   elanc-go)
     TARGET=${ELANC_GO_CACHE:-$HERE/work/gocache}
-    CACHE_OPT=--gocache STAGE=S7 SUFFIX=-go W=go ;;
+    # since S7e every refusal of elanc-go is kept by design
+    CACHE_OPT=--gocache SUFFIX=-go W=go REFUSED='not supported \(not planned\)' ;;
   *) echo "unknown compiler ELANC=$ELANC (elanc-rs or elanc-go)" >&2; exit 2 ;;
 esac
 
@@ -72,7 +74,7 @@ mkdir -p "$HERE/work" "$TARGET" || exit 2
 RUN=$(mktemp -d "$HERE/work/normalise$SUFFIX.XXXXXX") || exit 2
 echo "work directory: $RUN ($ELANC)"
 
-HAVE_REM=; command -v elanc >/dev/null 2>&1 && HAVE_REM=1
+HAVE_REM=; command -v elanc-rem >/dev/null 2>&1 && HAVE_REM=1
 fails=0 n=0
 ok()   { echo "ok   $1"; }
 fail() { echo "FAIL $1"; fails=$((fails+1)); }
@@ -130,7 +132,7 @@ for lgi in "$HERE"/programs/normalise/*.lgi; do
       fail "$name: status $status, output $(od -c "$d/$W/run.out" | head -3 | tr '\n' ' ') (expected $name.stdout)"
     fi
     if [ -n "$HAVE_REM" ] && [ ! -f "$HERE/programs/normalise/$name.no-rem" ]; then
-      if ( cd "$d/rem" && elanc -b -nosplit -quiet "$name" >elanc.log 2>&1 \
+      if ( cd "$d/rem" && elanc-rem -b -nosplit -quiet "$name" >elanc.log 2>&1 \
            && make -f "$name.make" >make.log 2>&1 && ./a.out -noInput -quiet >run.out 2>&1 ) \
          && cmp -s "$d/rem/run.out" "$stdout"; then
         ok "$name vs REM: the output of $name.stdout"
@@ -159,10 +161,10 @@ for lgi in "$HERE"/programs/normalise/*.lgi; do
 
   # REM
   if [ -z "$HAVE_REM" ]; then
-    echo "skip $name vs REM (elanc not installed)"
+    echo "skip $name vs REM (elanc-rem not installed)"
   elif [ -f "$HERE/programs/normalise/$name.no-rem" ]; then
     echo "skip $name vs REM ($name.no-rem)"
-  elif ( cd "$d/rem" && elanc -b -nosplit -quiet "$name" >elanc.log 2>&1 \
+  elif ( cd "$d/rem" && elanc-rem -b -nosplit -quiet "$name" >elanc.log 2>&1 \
        && make -f "$name.make" >make.log 2>&1 ); then
     rem=$( cd "$d/rem" && ./a.out -noInput -quiet 2>&1 | python3 "$HERE/rem_idents.py" "$name.ref" \
            | grep '^result = ' )
@@ -180,7 +182,7 @@ for lgi in "$HERE"/programs/normalise/*.lgi; do
       fail "$name vs REM: $ELANC [$rs], REM [$rem]"
     fi
   else
-    fail "$name: elanc or make failed (see $d/rem/*.log)"
+    fail "$name: elanc-rem or make failed (see $d/rem/*.log)"
   fi
 
   # interpreter
@@ -257,11 +259,11 @@ for lgi in "$HERE"/programs/refused/*.lgi; do
   echo stale >"$d/a.out" || exit 2  # a refused program leaves no a.out
   ( cd "$d" && $ELANC $CACHE_OPT "$TARGET" "$name" >$ELANC.log 2>&1 )
   status=$?
-  msg=$(grep -E "not supported (yet \($STAGE[c-e]\)|\(not planned\))" "$d/$ELANC.log")
+  msg=$(grep -E "$REFUSED" "$d/$ELANC.log")
   if [ "$status" = 2 ] && [ -n "$msg" ] && [ ! -e "$d/a.out" ]; then
     ok "refused $name: $msg"
   else
-    fail "refused $name: status $status, expected 2 and a message ($STAGE[c-e] or not planned), no a.out (see $d/$ELANC.log)"
+    fail "refused $name: status $status, expected 2 and a message ($REFUSED), no a.out (see $d/$ELANC.log)"
   fi
 done
 

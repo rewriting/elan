@@ -1,0 +1,1 @@
+the interpreter's open gives Error(errno) on a failure, which stdio's iserr does not recognise: rb(false,errno([2])) (REM: -1, rb(true,1))

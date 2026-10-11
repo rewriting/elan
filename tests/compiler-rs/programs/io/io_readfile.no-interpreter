@@ -1,0 +1,1 @@
+the interpreter's getc after open reads after the line its lexer stream has buffered, and its read of the term fails (9999): rr(102,40,9999,49,44,32)

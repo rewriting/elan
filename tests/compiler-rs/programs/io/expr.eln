@@ -1,0 +1,9 @@
+module expr
+// A sort of terms for the I/O programs (write and read of IO[Expr]).
+import global int; end
+sort Expr; end
+operators global
+  f(@,@)  : (int Expr) Expr;
+  a       : Expr;
+end
+end

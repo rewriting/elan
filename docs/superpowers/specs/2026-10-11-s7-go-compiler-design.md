@@ -24,7 +24,8 @@ to generate.
 
 ## 2. Goal and success criteria
 
-`elanc-go` next to `elanc` and `elanc-rs` (REM stays until the switch):
+`elanc-go` next to `elanc` and `elanc-rs` (REM stays until the switch) (in this section `elanc` is REM's driver;
+since the switch of S7e, `elanc` is `elanc-go` and REM is `elanc-rem`):
 
 1. `elanc-go prog [spec]` reads the program through `elan --cexport` (the
    `.ref` contract), generates a Go module, builds it with `go build`
@@ -82,7 +83,7 @@ runtime sources (`$PREFIX/share/elan-go/runtime`), built with a shared
 | G4 | Strategies: success continuations `func(t T) bool` (true = stop), as S6 D3; deterministic strategies (`repeat*`, tail-recursive `first one`) compiled as loops (S6b task 3 rules); recursion depth: goroutine stacks grow, but a Go stack overflow is a fatal, unrecoverable crash, so the program runs on a goroutine with `debug.SetMaxStack(2e9)` (1 GiB usable: stacks double, the default 1e9 limit gives 512 MiB) and a depth guard at strategy and recursive-operator entry stops cleanly with status 3 before the limit (a Go stack overflow is fatal and exits with status 2, which means "unsupported" here: it must never happen); the printer is iterative on lists. | Same semantics and guarantees as S6b, simpler mechanism. |
 | G5 | AC: as S6 D4 (canonical sorted multisets, specialised matching for common shapes, a general matcher), following the S6c plan. The general matcher is a port of Eker's AC matcher, the one both oracles use (patterns of wheres, REM's abstracted AC levels), given terms and patterns in REM's form so that its solutions come in the oracles' order (S7c plan, Task 2 findings). | Unchanged design; the oracles' order. |
 | G6 | Tests are shared: the scripts of `tests/compiler-rs` take the compiler as a parameter (`ELANC=elanc-go`); the bench gets a kind `G` like `R`; a G case may not be worse than J. | No duplicated oracles; the Rust results stay a second reference. |
-| G7 | The Rust compiler is kept, frozen at the end of S6b, built and tested while useful (`ELAN_RUST`); its remaining work is listed in `docs/s6-rust-status.md`. When `elanc-go` reaches parity, the Rust tests become optional (`ELAN_RUST=OFF` by default), the code stays in the tree. | The user asked to keep it. |
+| G7 | The Rust compiler is kept, frozen at the end of S6b, built and tested while useful (`ELAN_RUST`); its remaining work is listed in `docs/s6-rust-status.md`. When `elanc-go` reaches parity, the Rust tests become optional (`ELAN_RUST=OFF` by default), the code stays in the tree. Done in S7e (task 8): `-DELAN_RUST=ON` builds and tests it (`make BUILD=build-rust CMAKE_FLAGS=-DELAN_RUST=ON check-rust`). | The user asked to keep it. |
 | G8 | Go toolchain: >= 1.24 (weak, unique); CI installs it with `actions/setup-go` (Ubuntu 24.04's golang-go is 1.22). | Standard library features needed. |
 | G9 | Not in scope (as S6 D7): `-coq`, `-proofterm`, `-lib`, `-aterm`. | Broken or experimental. |
 
@@ -106,6 +107,20 @@ runtime sources (`$PREFIX/share/elan-go/runtime`), built with a shared
   all J/JO cases, BenchThesis.
 * **S7e — performance and switch**: benchmarks, compile times, the decision
   to make `elanc` the Go compiler.
+  Outcome (decision gate of 2026-10-11, plan
+  `docs/superpowers/plans/2026-10-11-s7e-go-switch.md` Task 10): on the
+  evidence — the 145 bench programs built by both compilers give the same
+  results and steps, elanc-go is 4-14x faster on every case above 20 ms,
+  compile time median 0.11 s vs 0.19 s (elanc + make); costs: peak memory
+  median 5.4 vs 2.9 MB, binaries of 3.3 MB, the REM-only options lost — the
+  user decided "Switch to Go": `elanc` is the Go compiler, REM stays
+  installed as `elanc-rem`, reversible with `-DELAN_ELANC=rem`.
+  Done (S7e tasks 11-12): the CMake variable `ELAN_ELANC` (`go` by default,
+  `rem`) makes `bin/elanc` a symlink to `elanc-go` or `elanc-rem`; `go`
+  falls back to `rem` with a message when elanc-go is not built (no Go
+  >= 1.24); REM's options that change the result are refused by `elanc`
+  (status 2, naming `elanc-rem`); README, CONTRIBUTING, followups and
+  examples describe `elanc` as the Go compiler.
 
 ## 6. Risks
 

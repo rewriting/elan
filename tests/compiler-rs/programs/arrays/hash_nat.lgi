@@ -1,0 +1,6 @@
+LPL hash_nat description
+  query of sort bool
+  result of sort out
+  import hashnat
+  start with () go
+end

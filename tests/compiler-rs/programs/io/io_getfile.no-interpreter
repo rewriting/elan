@@ -1,0 +1,1 @@
+the interpreter's getc after open reads after the line its lexer stream (opened with the file) has buffered: rg(102,40,49,44,[3],102)

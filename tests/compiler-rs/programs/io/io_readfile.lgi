@@ -1,0 +1,6 @@
+LPL io_readfile description
+  query of sort bool
+  result of sort out
+  import iotest
+  start with () readfile
+end

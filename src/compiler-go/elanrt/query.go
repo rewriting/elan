@@ -3,6 +3,7 @@ package elanrt
 import (
 	"errors"
 	"os"
+	"slices"
 
 	"elan/elanrt/earley"
 )
@@ -31,6 +32,10 @@ type QueryParser struct {
 	Op   func(r int, a []Term) Term
 	AC   func(r int, e []Term) Term
 	IsAC func(r int) bool
+	// Uncompiled tells, when the start term does not use the query,
+	// whether the operator of grammar rule r is not compiled (nil: all
+	// are): a query containing one is parsed, not built
+	Uncompiled func(r int) bool
 }
 
 var queryParser *QueryParser
@@ -50,36 +55,82 @@ func (queryBuilder) Str(s string) Term         { return MkStr(s) }
 
 // readQuery reads the query from the standard input, as REM's
 // EarleyParser: the term built and normalised, then a newline; an error
-// stops the program.
-func readQuery(q *QueryParser) Term {
-	t := &earley.Tables{Rules: q.Rules, IdentIndex: IdentIndex, IdentName: IdentName,
-		SortName:    func(s int32) string { return q.SortNames[s] },
-		InternIdent: q.InternIdent, InternInt: q.InternInt, InternString: q.InternString}
-	fatal := func(err error) {
-		FlushOutput()
-		var f *earley.Fatal
-		if errors.As(err, &f) {
-			os.Stderr.WriteString(f.Msg)
-			Exit(f.Status)
-		}
-		Exit(1)
-	}
-	tree, err := earley.Parse(os.Stdin, t, q.Sort, os.Stderr)
+// stops the program. When the start term does not use the query (used
+// false) and the query contains an operator that is not compiled
+// (q.Uncompiled), its derivation is read (the same errors) but no term is
+// built: nil (S7e task 13; REM builds and normalises it, its steps and
+// effects then missing here).
+func readQuery(q *QueryParser, used bool) Term {
+	tree, err := earley.Parse(stdin, queryTables(q), q.Sort, os.Stderr)
 	if err != nil {
-		fatal(err)
+		parseFatal(err)
 	}
-	query := func() Term {
-		defer func() {
-			if x := recover(); x != nil {
-				f, ok := x.(*earley.Fatal)
-				if !ok {
-					panic(x)
-				}
-				fatal(f)
-			}
-		}()
-		return earley.Build[Term](tree, queryBuilder{q})
-	}()
+	var query Term
+	if used || !needsUncompiled(tree, q) {
+		query = buildQuery(tree, q)
+	}
 	Out.WriteString("\n")
 	return query
 }
+
+// queryTables are the tables of the parser of q.
+func queryTables(q *QueryParser) *earley.Tables {
+	return &earley.Tables{Rules: q.Rules, IdentIndex: IdentIndex, IdentName: IdentName,
+		SortName:    func(s int32) string { return q.SortNames[s] },
+		InternIdent: q.InternIdent, InternInt: q.InternInt, InternString: q.InternString}
+}
+
+// parseFatal stops the program after an error of the parser: the message
+// of an *earley.Fatal and its status, else status 1 (the parser wrote
+// its message).
+func parseFatal(err error) {
+	FlushOutput()
+	var f *earley.Fatal
+	if errors.As(err, &f) {
+		os.Stderr.WriteString(f.Msg)
+		Exit(f.Status)
+	}
+	Exit(1)
+}
+
+// buildQuery builds the term of the derivation tree (an *earley.Fatal
+// raised by a builder stops the program).
+func buildQuery(tree *earley.Tree, q *QueryParser) Term {
+	defer stopOnFatal()
+	return earley.Build[Term](tree, queryBuilder{q})
+}
+
+// needsUncompiled tells whether the derivation tree contains an operator
+// that q.Uncompiled says is not compiled (read as buildQuery reads it,
+// building nothing).
+func needsUncompiled(tree *earley.Tree, q *QueryParser) bool {
+	if q.Uncompiled == nil {
+		return false
+	}
+	defer stopOnFatal()
+	return earley.Build[bool](tree, uncompiledFinder{q.Uncompiled})
+}
+
+// stopOnFatal, deferred, stops the program on an *earley.Fatal.
+func stopOnFatal() {
+	if x := recover(); x != nil {
+		f, ok := x.(*earley.Fatal)
+		if !ok {
+			panic(x)
+		}
+		parseFatal(f)
+	}
+}
+
+// uncompiledFinder finds an uncompiled operator in a derivation
+// (earley.Builder): a term is true when it contains one.
+type uncompiledFinder struct{ uncompiled func(r int) bool }
+
+func (f uncompiledFinder) Op(r int, a []bool) bool {
+	return r >= 0 && f.uncompiled(r) || slices.Contains(a, true)
+}
+func (f uncompiledFinder) AC(r int, e []bool) bool { return f.Op(r, e) }
+func (uncompiledFinder) IsAC(int) bool             { return false }
+func (uncompiledFinder) Int(int32) bool            { return false }
+func (uncompiledFinder) Ident(int32) bool          { return false }
+func (uncompiledFinder) Str(string) bool           { return false }

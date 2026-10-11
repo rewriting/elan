@@ -10,7 +10,7 @@
 # For each program and query, the results of the compiled program
 # (`result = t` lines) must equal the interpreter's (`elan -b`, one ` t end`
 # line per result).
-# Usage: test_start_term.sh PREFIX     (an installed ELAN with elanc)
+# Usage: test_start_term.sh PREFIX     (an installed ELAN with elanc-rem)
 PREFIX=${1:?usage: test_start_term.sh PREFIX}
 HERE=$(cd "$(dirname "$0")" && pwd)
 WORK=$HERE/work/start-term
@@ -24,9 +24,9 @@ fail() { echo "FAIL $1"; fails=$((fails+1)); }
 check() {
   dir=$1 label=$2 lgi=$3 spc=$4 input=$5
   if ! ( cd "$dir" && rm -rf a.out ".elan.$lgi" \
-         && elanc -b -nosplit -quiet "$lgi" $spc >"$lgi.elanc.log" 2>&1 \
+         && elanc-rem -b -nosplit -quiet "$lgi" $spc >"$lgi.elanc.log" 2>&1 \
          && make -f "$lgi.make" >"$lgi.make.log" 2>&1 ); then
-    fail "$label (elanc or make failed, see $dir/$lgi.*.log)"; return
+    fail "$label (elanc-rem or make failed, see $dir/$lgi.*.log)"; return
   fi
   spcfile=; [ -n "$spc" ] && spcfile=$spc.spc
   expected=$( cd "$dir" && printf '%s\n' "$input" | elan -b "$lgi.lgi" $spcfile 2>&1 \

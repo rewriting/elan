@@ -5,7 +5,7 @@
 # (an ELAN-in-ELAN rewriting engine with proof terms, 6 specifications).
 #
 # Kinds, as in tests/legacy-bench/run_tests.py:
-#   J   elanc -b -nosplit -quiet LGI SPC; make -f LGI.make; ./a.out ...
+#   J   elanc-rem -b -nosplit -quiet LGI SPC; make -f LGI.make; ./a.out ...
 #   JO  same with -optimiseChoicePoint
 #   I   elan -b LGI.lgi SPC.spc < SAMPLES/INP.inp
 #   G   elanc-go -v -b LGI SPC (go build cache $ELANC_GO_CACHE, default
@@ -21,7 +21,7 @@
 # exactly (the historical outputs SAMPLES/<OUT>.out of 2000 differ in
 # printing; the README records how).
 #
-# Usage: test_benchthesis.sh PREFIX     (an installed ELAN with elanc)
+# Usage: test_benchthesis.sh PREFIX     (an installed ELAN with elanc-rem)
 #        BENCHTHESIS_KINDS="J JO I"  the kinds run (default J JO I; G is
 #                            run by make check-go)
 #        BENCHTHESIS_SKIP="name..."  cases not run (names APP-KIND-OUT as
@@ -53,9 +53,9 @@ if [ "$2" = --one ]; then
     I) elan -b "$lgi.lgi" "$spc.spc" < "SAMPLES/$inp.inp" > got.out 2> got.err ;;
     J|JO)
       opt=; [ "$kind" = JO ] && opt=-optimiseChoicePoint
-      if ! elanc -b -nosplit -quiet $opt "$lgi" "$spc" > elanc.log 2>&1 \
+      if ! elanc-rem -b -nosplit -quiet $opt "$lgi" "$spc" > elanc.log 2>&1 \
          || ! make -f "$lgi.make" > make.log 2>&1 || [ ! -x a.out ]; then
-        echo "FAIL $name (elanc or make failed, see $wd/*.log)"; exit 0
+        echo "FAIL $name (elanc-rem or make failed, see $wd/*.log)"; exit 0
       fi
       if [ "$inp" = - ]; then ./a.out -noInput -quiet > got.out 2> got.err
       else ./a.out -quiet < "SAMPLES/$inp.inp" > got.out 2> got.err; fi

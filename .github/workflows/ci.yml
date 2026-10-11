@@ -2,6 +2,14 @@ name: ci
 on:
   push:
   pull_request:
+  # The Rust compiler's tests are optional since S7e (spec G7): run them with
+  # "Run workflow" and rust = true (gh workflow run ci.yml -f rust=true).
+  workflow_dispatch:
+    inputs:
+      rust:
+        description: 'Also build elanc-rs (-DELAN_RUST=ON) and run make check-rust'
+        type: boolean
+        default: false
 
 jobs:
   build-and-test:
@@ -80,6 +88,10 @@ jobs:
       - name: Modern interpreter, make check (macOS Homebrew GCC)
         if: runner.os == 'macOS'
         run: make -C "$ELAN_WS" BUILD=build-gcc ELAN_CC="$ELAN_CC" ELAN_CXX="$ELAN_CXX" PREFIX="$ELAN_WS/build-gcc/install" check
+
+      - name: Rust compiler elanc-rs (-DELAN_RUST=ON; only when asked, see workflow_dispatch)
+        if: inputs.rust
+        run: make -C "$ELAN_WS" BUILD=build-rust PREFIX="$ELAN_WS/build-rust/install" CMAKE_FLAGS=-DELAN_RUST=ON check-rust
 
       - name: Bench results
         if: failure()

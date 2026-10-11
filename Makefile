@@ -3,7 +3,9 @@
 #   make install         install into $(PREFIX)
 #   make check           unit tests of the runner + golden tests + interpreter tests (I, A)
 #                        of the bench + compiled tests (J, JO) + check-rust + check-go
-#   make check-rust      tests of the Rust compiler elanc-rs (when cargo exists)
+#   make check-rust      tests of the Rust compiler elanc-rs, only in a build with
+#                        -DELAN_RUST=ON (OFF by default since S7e), e.g.
+#                        make BUILD=build-rust CMAKE_FLAGS=-DELAN_RUST=ON check
 #   make check-go        tests of the Go compiler elanc-go and its runtime (when go >= 1.24
 #                        exists): go vet/test, .ref reader, normalisation, strategies, AC,
 #                        depth, bench G, query input, BenchThesis G
@@ -11,7 +13,10 @@
 #                        when go >= 1.24 exists): go vet/test, the harness
 #                        elan-lextrace, lexem streams, module trees, error corpus
 #   make check-golden    golden tests: .ref files, -d dump, statistics, errors
-#   make check-compiler  compiled tests (J, JO) only: elanc, REM, runtime libraries
+#   make check-compiler  compiled tests (J, JO) only: elanc-rem, REM, runtime libraries
+#   make check-elanc     what bin/elanc is (ELAN_ELANC: go by default, rem), CMake's fallback
+#   make check-elanc-rem the same test in a build with -DELAN_ELANC=rem (build-elanc-rem/,
+#                        removed afterwards)
 #   make reference       build the 2004 reference system (reference/install)
 #   make check-reference full bench (778 tests) against the reference
 BUILD   ?= build
@@ -33,7 +38,7 @@ else
   ELAN_CXX ?= g++
 endif
 
-.PHONY: front-tables check-front manual manual-update all configure install check check-rust check-go check-compiler check-golden check-sanitize check-arch check-unit test-runner smoke reference check-reference clean toolchain
+.PHONY: front-tables check-front manual manual-update all configure install check check-rust check-go check-compiler check-elanc check-elanc-rem elanc-kind check-golden check-sanitize check-arch check-unit test-runner smoke reference check-reference clean toolchain
 
 all: configure
 	cmake --build $(BUILD) -j $(JOBS)
@@ -47,7 +52,11 @@ toolchain:
 # options such as the sanitizers) is recorded in $(BUILD)/.elan-configure; when
 # it changes, the build directory is recreated (CMake cannot switch compilers
 # in place, and a stale sanitizer build would give misleading results).
-ELAN_CONFIG = $(ELAN_CC)|$(ELAN_CXX)|$(PREFIX)|$(CMAKE_FLAGS)
+# ELAN_CONFIG_EPOCH changes when a default of CMakeLists.txt changes, so that
+# existing build directories (whose CMake cache keeps the old default) are
+# recreated: 2 = ELAN_RUST OFF by default (S7e).
+ELAN_CONFIG_EPOCH = 2
+ELAN_CONFIG = $(ELAN_CONFIG_EPOCH)|$(ELAN_CC)|$(ELAN_CXX)|$(PREFIX)|$(CMAKE_FLAGS)
 configure: toolchain
 	@case "$(BUILD)" in ""|.|..|/|"$(CURDIR)") echo "ERROR: refusing BUILD='$(BUILD)'"; exit 1;; esac
 	@case "$(PREFIX)" in ""|/|*" "*) echo "ERROR: refusing PREFIX='$(PREFIX)' (empty, / or containing spaces)"; exit 1;; esac
@@ -59,12 +68,13 @@ configure: toolchain
 	fi
 
 # Files removed from the sources must not linger in PREFIX: the library, the
-# compiler's classes, its runtime headers and elanc are reinstalled from
-# scratch (the last three only when the compiler is built, -DELAN_COMPILER=ON,
-# the default).
+# compiler's classes, its runtime headers, elanc-rem, elanc-go and the
+# symlink elanc (to elanc-go or elanc-rem, ELAN_ELANC) are reinstalled from
+# scratch.
 install: all
-	rm -rf "$(PREFIX)/share/elanlib" "$(PREFIX)/classes" "$(PREFIX)/include/elan-compiler" "$(PREFIX)/bin/elanc" \
+	rm -rf "$(PREFIX)/share/elanlib" "$(PREFIX)/classes" "$(PREFIX)/include/elan-compiler" "$(PREFIX)/bin/elanc-rem" \
 	       "$(PREFIX)/bin/elanc-rs" "$(PREFIX)/share/elan-rs" "$(PREFIX)/bin/elanc-go" "$(PREFIX)/share/elan-go"
+	rm -f "$(PREFIX)/bin/elanc"  # bare-elanc-ok: the install removes what bin/elanc was
 	cmake --install $(BUILD)
 
 test-runner:
@@ -78,25 +88,27 @@ smoke: install
 	if grep -q 's(o)' $$d/out; then echo "smoke: elan finds its library without ELANLIB"; rm -rf $$d; \
 	else cat $$d/out; rm -rf $$d; exit 1; fi
 
-# Module dependency rules (tests/architecture, S3a spec D2), and the
-# compiler's copies of the interpreter's limits and codes (REF contract)
+# Module dependency rules (tests/architecture, S3a spec D2), the
+# compiler's copies of the interpreter's limits and codes (REF contract), and
+# no script calling the bare elanc (REM is elanc-rem, S7e task 9)
 check-arch:
-	cd tests/architecture && python3 test_check_deps.py && python3 test_check_limits.py
+	cd tests/architecture && python3 test_check_deps.py && python3 test_check_limits.py && python3 test_check_rem_name.py
 	python3 tests/architecture/check_deps.py
 	python3 tests/architecture/check_limits.py
+	python3 tests/architecture/check_rem_name.py
 
 # C++ unit tests of the interpreter modules (tests/unit, CTest)
 check-unit: all
 	cd $(BUILD) && ctest --output-on-failure --no-tests=error
 
-# Compiled tests of the bench (spec S5a, D4): elanc -> make -> a.out, against
+# Compiled tests of the bench (spec S5a, D4): elanc-rem -> make -> a.out, against
 # the installed compiler (the generated programs are built with the
 # compilers of this build, see src/compiler/CMakeLists.txt), after the tests
-# of elanc, of the strategies evaluated at run time and of the BenchThesis
+# of elanc-rem, of the strategies evaluated at run time and of the BenchThesis
 # programs ported to ELAN 3 (tests/compiler).
 # The compiled tests run only when the compiler is installed (not with
 # -DELAN_COMPILER=OFF).
-CHECK_COMPILER = if [ -x "$(PREFIX)/bin/elanc" ]; then \
+CHECK_COMPILER = if [ -x "$(PREFIX)/bin/elanc-rem" ]; then \
 	  tests/compiler/test_elanc.sh "$(PREFIX)" && tests/compiler/test_runtime_strategies.sh "$(PREFIX)" \
 	  && tests/compiler/test_start_term.sh "$(PREFIX)" \
 	  && tests/compiler/test_benchthesis.sh "$(PREFIX)" \
@@ -105,6 +117,25 @@ CHECK_COMPILER = if [ -x "$(PREFIX)/bin/elanc" ]; then \
 check-compiler: install
 	$(CHECK_COMPILER)
 
+# What bin/elanc is (S7e task 11): a symlink to elanc-go (ELAN_ELANC=go, the
+# default; elanc-rem when elanc-go is not built) or to elanc-rem
+# (CMAKE_FLAGS=-DELAN_ELANC=rem); CMAKE_CHECK=1 also configures scratch build
+# directories for the fallback and the errors of ELAN_ELANC.
+# (the forms CMake accepts: -DELAN_ELANC=rem, -DELAN_ELANC:STRING=rem,
+# -D ELAN_ELANC=rem; `make elanc-kind` prints it)
+EMPTY :=
+SPACE := $(EMPTY) $(EMPTY)
+ELANC_KIND = $(if $(filter -DELAN_ELANC=rem -DELAN_ELANC:STRING=rem,$(subst -D$(SPACE),-D,$(strip $(CMAKE_FLAGS)))),rem,go)
+elanc-kind:
+	@echo $(ELANC_KIND)
+check-elanc: install
+	CMAKE_CHECK=1 tests/compiler/test_elanc_switch.sh "$(PREFIX)" $(ELANC_KIND)
+# the rem variant, in its own build directory (a full build), removed after
+check-elanc-rem:
+	$(MAKE) BUILD=build-elanc-rem CMAKE_FLAGS=-DELAN_ELANC=rem install \
+	  && tests/compiler/test_elanc_switch.sh "$(CURDIR)/build-elanc-rem/install" rem; \
+	st=$$?; rm -rf build-elanc-rem; exit $$st
+
 # Golden tests (tests/golden): what the bench does not compare, byte for
 # byte (.ref files, the -d dump, the statistics, stderr and exit status of
 # errors), against the installed interpreter.
@@ -112,18 +143,22 @@ check-golden: install
 	cd tests/golden && python3 test_run_golden.py
 	python3 tests/golden/run_golden.py --prefix $(PREFIX)
 
-# Tests of the Rust compiler (src/compiler-rs, spec S6), when cargo exists.
+# Tests of the Rust compiler (src/compiler-rs, spec S6): optional since S7e
+# (spec G7, elanc-go has reached parity), they run only when elanc-rs is
+# installed, i.e. in a build configured with -DELAN_RUST=ON (and cargo):
+#   make BUILD=build-rust CMAKE_FLAGS=-DELAN_RUST=ON check-rust   (or check)
+# (a separate BUILD keeps build/: changing CMAKE_FLAGS recreates the build
+# directory).
 check-rust: install
-	@if command -v cargo >/dev/null 2>&1; then \
+	@if [ -x "$(PREFIX)/bin/elanc-rs" ]; then \
 	  (cd src/compiler-rs && CARGO_TARGET_DIR=$(CURDIR)/$(BUILD)/src/compiler-rs/target cargo test --offline --quiet) \
-	  && tests/compiler-rs/test_ref_roundtrip.sh "$(PREFIX)" \
-	  && if [ -x "$(PREFIX)/bin/elanc-rs" ]; then tests/compiler-rs/test_normalise.sh "$(PREFIX)" \
-	       && tests/compiler-rs/test_strategies.sh "$(PREFIX)" \
-	       && tests/compiler-rs/test_strategies.sh "$(PREFIX)" -d strategy_terms \
-	       && tests/compiler-rs/test_depth.sh "$(PREFIX)" \
-	       && tests/compiler-rs/bench_parity.py "$(PREFIX)"; \
-	     else echo "elanc-rs not installed (-DELAN_RUST=OFF): compiled Rust tests skipped"; fi; \
-	else echo "cargo not found: Rust tests skipped"; fi
+	  && CARGO_TARGET_DIR=$(CURDIR)/$(BUILD)/src/compiler-rs/target tests/compiler-rs/test_ref_roundtrip.sh "$(PREFIX)" rust \
+	  && ELANC=elanc-rs tests/compiler-rs/test_normalise.sh "$(PREFIX)" \
+	  && ELANC=elanc-rs tests/compiler-rs/test_strategies.sh "$(PREFIX)" \
+	  && ELANC=elanc-rs tests/compiler-rs/test_strategies.sh "$(PREFIX)" -d strategy_terms \
+	  && ELANC=elanc-rs tests/compiler-rs/test_depth.sh "$(PREFIX)" \
+	  && tests/compiler-rs/bench_parity.py "$(PREFIX)" --kind R; \
+	else echo "elanc-rs not built (-DELAN_RUST=OFF, the default since S7e): Rust tests skipped"; fi
 
 # Tests of the Go compiler (src/compiler-go, spec S7), when go >= 1.24 exists.
 GO_ENV = GOTOOLCHAIN=local GOFLAGS=-mod=mod GOPROXY=off GOWORK=off GOCACHE=$(CURDIR)/$(BUILD)/src/compiler-go/gocache
@@ -136,6 +171,8 @@ check-go: install
 	  && ELANC=elanc-go tests/compiler-rs/test_strategies.sh "$(PREFIX)" \
 	  && ELANC=elanc-go tests/compiler-rs/test_strategies.sh "$(PREFIX)" -d strategy_terms \
 	  && ELANC=elanc-go tests/compiler-rs/test_strategies.sh "$(PREFIX)" -d ac \
+	  && ELANC=elanc-go tests/compiler-rs/test_strategies.sh "$(PREFIX)" -d io \
+	  && ELANC=elanc-go tests/compiler-rs/test_strategies.sh "$(PREFIX)" -d arrays \
 	  && ELANC=elanc-go tests/compiler-rs/test_depth.sh "$(PREFIX)" \
 	  && tests/compiler-rs/bench_parity.py "$(PREFIX)" --kind G \
 	  && ELANC=elanc-go tests/compiler-rs/test_query.sh "$(PREFIX)" \
@@ -165,7 +202,7 @@ check-front: install
 	  && tests/front/test_front_errors.sh $(PREFIX); \
 	else echo "elanc-go not built (go >= 1.24 missing or -DELAN_GO=OFF): front tests skipped"; fi
 
-check: smoke test-runner check-arch check-unit check-golden check-rust check-go check-front
+check: smoke test-runner check-arch check-unit check-golden check-rust check-go check-elanc check-front
 	$(BENCH) --prefix $(PREFIX) --kinds I,A
 	@$(CHECK_COMPILER)
 

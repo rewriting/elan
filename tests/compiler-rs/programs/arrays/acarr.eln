@@ -1,0 +1,27 @@
+module acarr
+// An AC term holding an array (S7e review, task 13): u(h(t), x) is a
+// normal form while t[0] is a, not once t[0] is b (set mutates t in
+// place): the normal form of an AC term holding an array is not cached.
+import global bool builtinInt builtinArray[Term]; end
+sort Term S; end
+operators global
+  a        : Term;
+  b        : Term;
+  x        : S;
+  done     : S;
+  h(@)     : (builtinArray[Term]) S;
+  u(@,@)   : (S S) S (AC);
+  go(@)    : (builtinArray[Term]) S;
+  k(@,@)   : (bool bool) S;
+  eqs(@,@) : (S S) bool code 18;
+  eqt(@,@) : (Term Term) bool code 18;
+end
+rules for S
+  t, v : builtinArray[Term];
+  X : S;
+  p, q : S;
+global
+  [] u(h(t), X) => done if eqt(t.get(0), b) end
+  [] go(t) => k(eqs(p, done), eqs(q, done)) where p := () u(h(t), x) where v := () t.set(0, b) where q := () u(h(t), x) end
+end
+end

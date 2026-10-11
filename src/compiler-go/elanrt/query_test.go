@@ -1,6 +1,7 @@
 package elanrt
 
 import (
+	"strconv"
 	"strings"
 	"testing"
 
@@ -38,6 +39,21 @@ func init() {
 		SetQuery(natQuery())
 		Main("Nat", false, func(s *Session, _ Term) { s.Result(nat(0)) })
 	}
+	// s not compiled (only the query reaches it, the start term ignores
+	// the query): a query containing it is parsed, not built
+	helpers["queryignorednoop"] = func() {
+		q := natQuery()
+		q.Op = func(r int, a []Term) Term {
+			if r == 0 {
+				return Mk0(symO)
+			}
+			Unsupported("a query with the operator of grammar rule " + strconv.Itoa(r))
+			return nil
+		}
+		q.Uncompiled = func(r int) bool { return r == 1 }
+		SetQuery(q)
+		Main("Nat", false, func(s *Session, _ Term) { s.Result(nat(0)) })
+	}
 }
 
 // A query read from the standard input (REM's termParser, query mode 2):
@@ -51,10 +67,23 @@ func TestMainQuery(t *testing.T) {
 	if st != 0 || errs != "" || out != prompt+"\n\nresult = s(s(s(o)))\n\nrewrite_step = 2\n" {
 		t.Fatalf("status %d, out %q, err %q", st, out, errs)
 	}
-	// the query is read (and normalised) even when the start term does
-	// not use it
-	out, errs, st = runHelperIn(t, "queryignored", nil, "s(o)", "-quiet")
-	if st != 0 || errs != "" || out != prompt+"\n\nresult = o\n\nrewrite_step = 1\n" {
+	// the query is built and normalised even when the start term does not
+	// use it (its steps counted, as REM), unless it contains an operator
+	// that is not compiled (S7e task 13): then parsed only (no step, no
+	// refusal); its syntax errors are reported either way
+	for _, c := range []struct{ helper, steps string }{{"queryignored", "2"}, {"queryignorednoop", "0"}} {
+		out, errs, st = runHelperIn(t, c.helper, nil, "s(s(o)) end", "-quiet")
+		if st != 0 || errs != "" || out != prompt+"\n\nresult = o\n\nrewrite_step = "+c.steps+"\n" {
+			t.Fatalf("%s: status %d, out %q, err %q", c.helper, st, out, errs)
+		}
+		out, errs, st = runHelperIn(t, c.helper, nil, "s(o end\n", "-quiet")
+		if st != 1 || out != prompt || !strings.Contains(errs, "syntax error on symbol 'end'") {
+			t.Fatalf("%s: status %d, out %q, err %q", c.helper, st, out, errs)
+		}
+	}
+	// a query of compiled operators only is built
+	out, errs, st = runHelperIn(t, "queryignorednoop", nil, "o end", "-quiet")
+	if st != 0 || errs != "" || out != prompt+"\n\nresult = o\n\nrewrite_step = 0\n" {
 		t.Fatalf("status %d, out %q, err %q", st, out, errs)
 	}
 	out, errs, st = runHelperIn(t, "query", nil, "s(o end\n", "-quiet")
@@ -75,7 +104,7 @@ func TestMainQuery(t *testing.T) {
 	}
 	for _, args := range [][]string{{"-sort=", "nat"}, {"-strategy=", "s:nat"}, {"-REFInput"}, {"-commandLine"}} {
 		out, errs, st = runHelperIn(t, "query", nil, "o end", args...)
-		if st != 2 || !strings.Contains(errs, "not supported") {
+		if st != 2 || !strings.HasPrefix(errs, "elanrt: not supported (not planned): the option ") {
 			t.Fatalf("%v: status %d, out %q, err %q", args, st, out, errs)
 		}
 	}

@@ -80,7 +80,7 @@ func GoMod(program, runtime string) string {
 
 // Main is the main.go of a generated program, formatted by go/format.
 func Main(p *ir.IR) ([]byte, error) {
-	e := &emitter{ir: p}
+	e := &emitter{ir: p, holdsArray: p.HoldsArray()}
 	e.file()
 	src := []byte(e.b.String())
 	out, err := format.Source(src)
@@ -92,11 +92,13 @@ func Main(p *ir.IR) ([]byte, error) {
 
 // emitter writes Go source, indented by tabs.
 type emitter struct {
-	ir     *ir.IR
-	b      strings.Builder
-	indent int
-	fresh  int  // counter of temporaries in the current function
-	b2i    bool // the helper b2i is needed
+	ir *ir.IR
+	// holdsArray: the sorts whose terms can hold an array (ir.HoldsArray)
+	holdsArray []bool
+	b          strings.Builder
+	indent     int
+	fresh      int  // counter of temporaries in the current function
+	b2i        bool // the helper b2i is needed
 	// normTerm: the normalisation dispatcher normTerm is needed (rt.Replace)
 	normTerm bool
 	// injTests are the injections whose test is needed (injTest)
@@ -247,6 +249,10 @@ func symName(op *ir.Op) string { return "sym_" + op.Fun }
 func (e *emitter) eqExpr(s ir.SortID, a, b string) string {
 	if _, ok := e.ir.Native(s); ok {
 		return a + " == " + b
+	}
+	if strings.HasPrefix(e.ir.Sorts[s].Name, "builtinArray[") {
+		// arrays: by contents (S7e task 7)
+		return "rt.ArrayEq(" + a + ", " + b + ")"
 	}
 	return "rt.Eq(" + a + ", " + b + ")"
 }
@@ -630,6 +636,30 @@ func (e *emitter) query() {
 	e.line("rt.Unsupported(\"a query with the operator of grammar rule \" + strconv.Itoa(r) + why)")
 	e.close("}")
 	e.line("")
+	if p.Start.UsesQuery {
+		return
+	}
+	// the start term ignores the query: a query is built unless it
+	// contains an operator that is not compiled
+	var skipped []int
+	for r, x := range q.Rules {
+		if x.Kind == ir.QueryUncompiled || x.Kind == ir.QueryUnsupported {
+			skipped = append(skipped, r)
+		}
+	}
+	e.line("// queryUncompiled tells whether the operator of grammar rule r is not")
+	e.line("// compiled: a query containing it is parsed, not built (the start term")
+	e.line("// does not use the query).")
+	e.open("func queryUncompiled(r int) bool {")
+	if len(skipped) > 0 {
+		e.line("switch r {")
+		e.line("%s", cases(skipped))
+		e.line("\treturn true")
+		e.line("}")
+	}
+	e.line("return false")
+	e.close("}")
+	e.line("")
 }
 
 // normTermFunc writes normTerm, the normalisation dispatcher of rt.Replace:
@@ -751,6 +781,18 @@ func (e *emitter) symbols() {
 			items = append(items, printItem(it))
 		}
 		e.line("declare(%s, %q, %d, %v, %d, %s)", symName(op), op.Fun, len(op.Args), op.AC, op.Symbol, strings.Join(items, ", "))
+		// the injections over builtin values of its arguments (REM's
+		// nodes, hashed by rt.HashTerm)
+		inj := make([]string, len(op.Args))
+		some := false
+		for i, s := range op.Args {
+			c := p.InjectionCode(s)
+			inj[i] = strconv.Itoa(int(c))
+			some = some || c != 0
+		}
+		if some {
+			e.line("rt.Syms[%s].ArgInj = []int32{%s}", symName(op), strings.Join(inj, ", "))
+		}
 	}
 	e.close("}")
 	e.line("")
@@ -836,18 +878,20 @@ func (e *emitter) opFunc(o ir.OpID) {
 			e.line("// the AC term (shared, or transient until it is a normal form): the")
 			e.line("// only column of the rules")
 			e.line("a0 := rt.ACTerm(%s, e)", symName(op))
-			e.open("if rt.Normal(a0) {")
-			e.line("// a normal form found before, without a step")
-			e.ret("a0")
-			e.close("}")
+			if !e.holdsArray[op.Result] {
+				e.open("if rt.Normal(a0) {")
+				e.line("// a normal form found before, without a step")
+				e.ret("a0")
+				e.close("}")
+			}
 		}
 		mark := e.b.Len()
-		if op.AC {
+		if op.AC && !e.holdsArray[op.Result] {
 			e.line("steps := rt.Steps")
 		}
 		e.resType = e.goType(op.Result)
 		falls := e.decision(op.Tree, op.Rules)
-		if op.AC && (!falls || op.Total) {
+		if op.AC && !e.holdsArray[op.Result] && (!falls || op.Total) {
 			// steps is not used: no line
 			s := e.b.String()
 			e.b.Reset()
@@ -859,6 +903,10 @@ func (e *emitter) opFunc(o ir.OpID) {
 			// (the code ends with a return: go vet refuses unreachable code)
 		case op.Total:
 			e.line(`panic("%s: no rule applies to a total operator")`, op.Fun)
+		case op.AC && e.holdsArray[op.Result]:
+			e.line("// no rule applies: the term is a normal form (not cached: it")
+			e.line("// can hold an array, mutated in place)")
+			e.ret("rt.Intern(a0)")
 		case op.AC:
 			e.line("// no rule applies: the term is a normal form")
 			e.ret("rt.NormalForm(a0, steps)")
@@ -907,10 +955,29 @@ func (e *emitter) builtinBody(o ir.OpID) {
 	b := op.Builtin
 	res := op.Result
 	if b.OnTerms() {
-		// on terms of any sorts: the arguments as terms
-		var args []string
+		// on terms of any sorts: the arguments as terms, except the int
+		// values (a file number, an index, a size: the term stays when
+		// one is not a value)
+		args := make([]string, len(op.Args))
 		for i, s := range op.Args {
-			args = append(args, e.asTerm(s, fmt.Sprintf("a%d", i)))
+			args[i] = e.asTerm(s, fmt.Sprintf("a%d", i))
+		}
+		for _, i := range b.IntArgs() {
+			a := fmt.Sprintf("a%d", i)
+			args[i] = a
+			f := e.ir.FamilyOf(op.Args[i])
+			if !f.Boxed() {
+				continue
+			}
+			if op.Total {
+				args[i] = e.unboxValue(f.Kind, a, op.Fun)
+				continue
+			}
+			args[i] = fmt.Sprintf("v%d", i)
+			e.line("v%d, ok%d := rt.IntOf(%s)", i, i, a)
+			e.open("if !ok%d {", i)
+			e.line("return %s // a stuck argument", e.stuck(o))
+			e.close("}")
 		}
 		switch b {
 		case ir.TermReplace:
@@ -923,6 +990,27 @@ func (e *emitter) builtinBody(o ir.OpID) {
 			e.line("return %s", e.unbox(res, "rt.SyntacticMatch("+strings.Join(args, ", ")+")"))
 		case ir.TermUnify:
 			e.line("return %s", e.unbox(res, "rt.SyntacticUnify("+strings.Join(args, ", ")+")"))
+		case ir.IOWrite:
+			e.line("return %s", e.unbox(res, "rt.WriteTerm("+args[0]+", "+args[1]+")"))
+		case ir.IORead:
+			// a term of the result's sort (REM: of the sort of the
+			// second argument's operator, the same)
+			e.line("return %s", e.unbox(res, fmt.Sprintf("rt.ReadTerm(%s, %d)", args[0], e.ir.Sorts[res].Index)))
+		case ir.ArrayNew:
+			e.line("return %s", e.unbox(res, "rt.NewArray("+args[0]+", "+args[1]+")"))
+		case ir.ArrayGet:
+			e.line("return %s", e.unbox(res, "rt.ArrayGet("+args[0]+", "+args[1]+")"))
+		case ir.ArraySet:
+			e.line("return %s", e.unbox(res, "rt.ArraySet("+strings.Join(args, ", ")+")"))
+		case ir.ArrayLength:
+			e.line("return %s", e.fromValue(res, "rt.ArrayLength("+args[0]+")"))
+		case ir.TermHash:
+			h := "rt.HashTerm(" + args[0] + ")"
+			if c := e.ir.InjectionCode(op.Args[0]); c != 0 {
+				// REM hashes the injection's node over a value
+				h = fmt.Sprintf("rt.HashTermInj(%s, %d)", args[0], c)
+			}
+			e.line("return %s", e.fromValue(res, h))
 		}
 		return
 	}
@@ -1023,6 +1111,18 @@ func (e *emitter) builtinBody(o ir.OpID) {
 		value = v[0] + " != " + v[1]
 	case ir.IdentToString:
 		value = "rt.IdentString(" + v[0] + ")"
+	case ir.IOGetc:
+		value = "rt.Getc(" + v[0] + ")"
+	case ir.IOPutc:
+		value = "rt.Putc(" + v[0] + ", " + v[1] + ")"
+	case ir.IOOpen:
+		value = "rt.Open(" + v[0] + ", " + v[1] + ")"
+	case ir.IOClose:
+		value = "rt.Close(" + v[0] + ")"
+	case ir.IOFlush:
+		value = "rt.Flush(" + v[0] + ")"
+	case ir.IOPid:
+		value = v[0]
 	case ir.StrIndex:
 		value = "rt.StrIndex(" + v[0] + ", " + v[1] + ")"
 	case ir.StrModif:
@@ -1658,8 +1758,12 @@ func (e *emitter) mainFunc() {
 	}
 	if q := p.Start.Query; q != nil {
 		e.line("rt.SetQuery(&rt.QueryParser{Rules: grammar, Sort: %d, SortNames: sortNames,", q.Sort)
-		e.line("\tInternIdent: %d, InternInt: %d, InternString: %d, Op: queryOp, AC: queryAC, IsAC: queryIsAC})",
-			q.InternIdent, q.InternInt, q.InternString)
+		uncompiled := ""
+		if !p.Start.UsesQuery {
+			uncompiled = ", Uncompiled: queryUncompiled"
+		}
+		e.line("\tInternIdent: %d, InternInt: %d, InternString: %d, Op: queryOp, AC: queryAC, IsAC: queryIsAC%s})",
+			q.InternIdent, q.InternInt, q.InternString, uncompiled)
 	}
 	e.open("rt.Main(%s, %v, func(s *rt.Session, %s rt.Term) {", goString(p.Start.QuerySort), p.Start.UsesQuery, q)
 	if p.Start.UsesQuery {

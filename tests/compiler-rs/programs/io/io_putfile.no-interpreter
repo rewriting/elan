@@ -1,0 +1,1 @@
+the interpreter's write (code 119) crashes (segmentation fault) after writing the term; its code 122 is not flush but the constructor of its pipe errors (BUILTERRORPIPCONSTR)

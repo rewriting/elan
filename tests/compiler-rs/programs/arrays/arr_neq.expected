@@ -1,0 +1,2 @@
+# the same array, then different contents
+result = rb(true,false)

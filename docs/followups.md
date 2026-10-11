@@ -126,7 +126,7 @@ sub-project (S1–S5b). Each item says where it comes from.
   interpret traversals at all ("Traversal is not intepreted").
 - **REM's compiler crashes on `rewrite(dk(...))`** (found by the S7d
   review): `rewrite` whose body is not a named strategy, e.g.
-  `repeat*(rewrite(dk(cyc)))` or `rewrite(dk(cyc)) ; rr`, stops elanc with
+  `repeat*(rewrite(dk(cyc)))` or `rewrite(dk(cyc)) ; rr`, stops elanc-rem with
   `java.lang.ClassCastException: StrategyDkRule cannot be cast to
   StrategyCall` (`StrategyRewriteStep.compile`, StrategyRewriteStep.java:53):
   REM compiles `rewrite(s)` only for a named s. elanc-go compiles any body
@@ -147,12 +147,63 @@ sub-project (S1–S5b). Each item says where it comes from.
   `norm_4` now returns `t` where 2004 returned an undefined value (S5b).
 - **Very long names (> ~1000 characters)**: `snprintf` truncates where
   `sprintf` overflowed; only `attach_type_modu` fails loudly (S2).
-- **`main_coq_skeleton.c`** (`elanc -coq`) does not compile with current
-  compilers (pre-ANSI multi-line string); `elanc -noC` links a non-existent
+- **`main_coq_skeleton.c`** (`elanc-rem -coq`) does not compile with current
+  compilers (pre-ANSI multi-line string); `elanc-rem -noC` links a non-existent
   `-lelan` (S5b).
 
-- **elanc-go: kept refusals** (S7d task 7; status 2, "not supported
-  (not planned)" or "not supported yet (S7e)"; the inventory of
+- **elanc-go: I/O builtins** (S7e task 6, codes 113, 114, 116, 118-122
+  as REM's fun_113..122, `elanrt/io.go`, `programs/io`): REM's output,
+  error output and files byte for byte. Differences from REM: a file
+  number that is not open stops the program (status 1, `getc_builtinStdio:
+  file 7 is not open`), where REM reads an invalid `FILE *` (a
+  segmentation fault, `getc(-1)` after a failed open); getc gives C's
+  signed char as REM on macOS and x86 (REM on Linux arm64, whose char is
+  unsigned, gives 0-255). The interpreter is not an oracle for most of
+  them (its bugs below).
+- **elanc-go: arrays and builtinHashTerm** (S7e task 7, codes 200-203
+  and 210, `elanrt/array.go`, `hash.go`, `programs/arrays`: the five
+  programs of legacy `Compiler.4.0/Work` that REM runs, testArray,
+  testVector, testMatrice, testHashSet, testMatrix, give REM's results and
+  rewrite steps): REM's errors and output byte for byte (out of range, not
+  an array, an array printed: REM's message on stdout, status 1), REM's
+  hash values on ints, identifiers, terms and AC terms. Differences from
+  REM: `==` on two arrays compares their sizes and elements (REM finds any
+  two arrays equal, below); that equality is structural only at the top
+  level (`==` and non-linear patterns of an array sort): inside a term,
+  arrays compare by identity (a term holding an array is shared by the
+  array's identity, so `h(new(1,a)) == h(new(1,a))` is false); the hash of
+  a string or of an array is elanc-go's (REM's reads memory). The normal
+  form of an AC term that can hold an array is not cached (S7e task 13:
+  `set` can make it reducible, `programs/arrays/arr_ac`), and the hash of
+  a value of an injection family is that of REM's injection node (task
+  13, `hash_nat`, `hash_inj`).
+- **REM: arrays and hashes** (found in S7e task 7, not fixed; REM does
+  not change in S7e): `==` (code 18) on two arrays is always true
+  (`term_notDestructEqual`: equal hashes and the arity of the symbol
+  CODE_ARRAY, 0, end the comparison: `new(1,a) == new(3,b)` is true,
+  `programs/arrays/arr_neq.no-rem`); `hashTerm` of a string term hashes
+  its length and its address read as terms (a value of its memory), of a
+  term of 12 arguments or more reads its last arguments at a wrong address
+  (`GgetArgument(k+t, i)`); `new(n, x)` with n < 0 asks the GC for a huge
+  block (warnings), the first get then reports `size = -1`.
+- **Interpreter: I/O builtins** (found in S7e task 6, not fixed; the
+  interpreter does not change in S7e): `write` (code 119) crashes with a
+  segmentation fault after writing its term (`write(stdout, 5)`, status
+  139); code 122 is `flush` in the library (`builtinStdio.eln`) but the
+  interpreter's `BUILTERRORPIPCONSTR` (`term/codes.h`), so `flush(f)`
+  stays a term; `getc` on a file opened for reading reads after the line
+  that the lexer stream made at `open` has buffered (`programs/io/
+  io_getfile`: 102 for the first char of `A\351f(...`), and `read` there
+  fails (9999); `open` gives `Error(errno)` on a failure, which `stdio`'s
+  `iserr([x])` does not recognise (`rb(false,errno([2]))`, REM
+  `rb(true,1)`). Regression programs: `programs/io/*.no-interpreter`.
+- **elanc (Go): differences from elanc-rem — the kept refusals** (since
+  the S7e decision of 2026-10-11, `elanc` is elanc-go and REM is
+  `elanc-rem`: what follows is what `elanc` refuses and `elanc-rem`
+  compiles, or neither does; the options of REM only are listed in the
+  README, "Differences from REM's driver") (S7d task 7, closed in S7e; status 2,
+  "not supported (not planned)" — since S7e no refusal names a stage,
+  `ir` `TestKeptRefusalsAreNotPlanned` checks it; the inventory of
   `unsupported(` in `src/compiler-go/ir`):
   - not planned — no program can reach it: a commutative-only operator
     (the language has none); a `switch/case` right-hand side (SWRULE: the
@@ -173,29 +224,75 @@ sub-project (S1–S5b). Each item says where it comes from.
     term order: REM has none, the interpreter's `term::tcmp` uses its own
     symbol indices), 34-78 (doubles: REM has none), 90-112 (the
     interpreter's top-level commands), 160-174 (calls of the ELAN system),
-    210 (hash of a term: representation-dependent), 215 (equality of
-    molecules, one application's builtin);
-  - S7e — possible later, no program of the tests needs it: AC shapes
-    REM transforms before matching (`refused/acnested`, `acallrep`: both
-    oracles agree, e2 and e1), an AC operator whose arguments are not of
-    its result sort or printed without its two arguments, a where pattern
-    with an AC operator of a builtin sort, an identifier in an AC pattern;
-    builtin codes 113-123 (input/output: REM has them) and 200-203
-    (arrays: REM has them, the interpreter uses the codes 300-303); rules
-    for a builtin operation; any other builtin code;
+    215 (equality of molecules, one application's builtin), 115 and 117
+    (create a process) and 123 (the interpreter's I/O error constructor
+    `Error(e)` of builtinIO): REM has no fun_115, 117, 123 (S7e task 6);
+  - not planned (S7e, were "S7e" refusals) — possible, but no program
+    of the tests, of the bench or of the library needs it, and each would
+    port a piece of REM for no program:
+    - AC shapes REM transforms before matching (`refused/acnested`,
+      `acallrep`: both oracles agree, e2 and e1; a port of REM's
+      bipartite matcher and of `RewriteRule.java` transformation2) and a
+      where pattern with an AC operator of a builtin sort (its value is
+      native: only a stuck term could match);
+    - an identifier in an AC pattern (REM's order of a tagged identifier
+      among its matchers' items is not established; no oracle program);
+    - an AC operator whose arguments are not of its result sort (REM and
+      Eker's matcher flatten `(s s) s` only; no program declares one);
+    - rules for a builtin operation (whether the builtin or the rules
+      come first in each oracle is not established; no program has one);
+    - any other builtin code: no module of the library declares one (REM's
+      ASF list codes 192-199, the interpreter's 79-82, 155, 179-190,
+      205-208); the I/O codes and the arrays are compiled since S7e tasks
+      6-7, builtinHashTerm too;
+    - (removed: "an AC operator printed without its two arguments" could
+      not happen — a candidate's arguments are those of its printing form.)
   - at run time (status 2): a META call of a number or a string whose
     strategy is of another sort; a query using an operator whose
     compilation was refused (Task 5); the options `-sort=`, `-strategy=`,
-    `-REFInput`, `-commandLine` of REM's programs.
+    `-REFInput`, `-commandLine` of REM's programs;
+  - (removed, S7e task 13: the run-time refusal of task 2 — a query
+    containing an operator that only the query reaches and that would
+    box a family native in the program, when the start term does not
+    use the query.) When the start term does not use the query, the
+    query operators that the program reaches are compiled and a query of
+    them is built and normalised as in REM (its steps in `rewrite_step`,
+    its effects: `programs/query/queryignored`, `.steps`); the others are
+    not compiled (the native families stay native) and a query
+    containing one is parsed (the same syntax errors and warnings) but
+    neither built nor normalised: nothing is refused and the start
+    term's result is printed as REM does (`programs/query/queryonly`).
+    What differs from REM for such a query only: REM builds and
+    normalises it, so its `rewrite_step` counts the query's steps (not
+    compared by `test_query.sh` for `queryonly`), and a query whose
+    normalisation does not end or stops the program (an array error, a
+    write) does so in REM only. The run-time refusals left are worded
+    `elanrt: not supported (not planned): ...`.
 
 ## Performance
 
-- **Tail-call loops of elanc-go allocate every turn** (review of S7b,
-  `gen/strat.go`, `strategies`): the closures `again` and those of the
-  body (the rest of the sequences, the steps of repeat*/iterate*) and the
-  DC/ONE states (`rt.NewOne`, `rt.NewDc`) are created inside the `for`,
-  once per iteration. Hoist them out of the loop and reset the states at
-  each turn (S7e, with the other optimisations).
+- **Depth guard without Unguard** (S7e task 3, tried, not kept): a guard
+  reading the stack every 1024 calls (no exit call) gives nqueens 12
+  0.705 s instead of 0.741 s (no guard: 0.640 s), short of the target
+  0.67 s; kept on the local branch `s7e-task3-guard-tried` (96f18ec, tests
+  included). Any check at a function entry costs ~0.5 ns per call there
+  (107 M guarded calls); a further gain needs fewer guarded calls (e.g.
+  self tail calls of normalisation functions as loops).
+
+- **Weak pointer per node** (S7e task 5, tried, not kept): nodes in slabs
+  of 3 with one weak pointer per slab (local branch
+  `s7e-task5-slabs-tried`, 65cc5ec) give deeplist3m 1.26 → 0.83 s and
+  nqueens 12 0.737 → 0.672 s (-8.8 %, short of the 10 % rule) at 1.34x
+  its RSS; larger slabs gain more time (N = 4: -12 %) but keep dead
+  nodes with a live slab-mate (N = 4: 1.8x RSS, N = 64: 7x). The weak
+  table stays as G2 decided; figures in the S7e plan, Task 5 results.
+
+- **Tail-call loops of elanc-go allocated every turn** (review of S7b):
+  done in S7e task 4 (`gen/strat.go`: the closures and the dc/one states
+  of a loop are made once per call, the states reset at each turn; tail
+  10^7 0.24 → 0.03 s). Left: a ONE/dc inside a continuation closure of the
+  loop (`dc(dk(dec) ; dc one(taildc), id)`: `one3` in `k2`) is still made
+  at each call of the closure (taildc 10^7 0.13 s, one object per turn).
 
 ## Build, tests, tooling
 
@@ -204,7 +301,7 @@ sub-project (S1–S5b). Each item says where it comes from.
 - `ELAN_CC`/`ELAN_CXX` mean both the build compilers and the generated
   Makefiles' defaults (environment override) (S5a).
 - `-lfl` (Linux, generated programs) is not checked by CMake (S5a).
-- Installs are not relocatable (absolute paths in `elanc`, `elan`) (S5a).
+- Installs are not relocatable (absolute paths in `elanc-rem`, `elan`) (S5a).
 - `CMAKE_BUILD_TYPE` changes the runtime library flags (S5a).
 - `check_limits.py` does not strip `/* */` blocks or `#if` branches and skips
   names missing from one copy (S3b review).

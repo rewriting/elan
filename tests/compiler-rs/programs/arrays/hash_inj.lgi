@@ -1,0 +1,6 @@
+LPL hash_inj description
+  query of sort bool
+  result of sort out
+  import hashinj
+  start with () go
+end

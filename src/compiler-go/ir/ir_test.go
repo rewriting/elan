@@ -6,7 +6,10 @@ package ir
 
 import (
 	"errors"
+	"os"
+	"path/filepath"
 	"reflect"
+	"regexp"
 	"slices"
 	"strings"
 	"testing"
@@ -389,7 +392,7 @@ func TestUnsupportedConstructsAreRefusedWhenReachable(t *testing.T) {
 	p = peano()
 	p.op(sNat, 155, "x", []uint32{sNat}, 155, 0)
 	p.start(f(155, f(318)), sNat)
-	if st, what := unsupportedStage(t, p); st != "S7e" || !strings.Contains(what, "code 155") {
+	if st, what := unsupportedStage(t, p); st != NotPlanned || !strings.Contains(what, "code 155") {
 		t.Fatalf("%s %s", st, what)
 	}
 	// the kept refusals of the builtin codes (S7d task 7): the stage and
@@ -400,10 +403,10 @@ func TestUnsupportedConstructsAreRefusedWhenReachable(t *testing.T) {
 	}{
 		{30, NotPlanned, "term order"},
 		{34, NotPlanned, "double"},
-		{113, "S7e", "input/output"},
+		{115, NotPlanned, "external process"},
+		{117, NotPlanned, "external process"},
+		{123, NotPlanned, "error constructor"},
 		{165, NotPlanned, "ELAN system"},
-		{200, "S7e", "arrays"},
-		{210, NotPlanned, "hash"},
 	} {
 		p = peano()
 		p.op(sNat, 155, "x", []uint32{sNat}, c.code, 0)
@@ -559,5 +562,108 @@ func TestOpBaseNames(t *testing.T) {
 	used := map[string]bool{}
 	if unique(used, "a") != "a" || unique(used, "a") != "a_2" {
 		t.Fatal("unique")
+	}
+}
+
+// The I/O builtins (S7e task 6): value operations on builtinInt and
+// builtinString, except write and read, operations on terms whose first
+// argument is a file number.
+func TestIOBuiltins(t *testing.T) {
+	p := ints()
+	p.op(sInt, 330, "getc", []uint32{sInt}, 113, 0)
+	p.op(sInt, 331, "putc", []uint32{sInt, sInt}, 114, 0)
+	p.op(sInt, 332, "open", []uint32{sStr, sStr}, 116, 0)
+	p.op(sInt, 333, "close", []uint32{sInt}, 118, 0)
+	p.op(sInt, 334, "flush", []uint32{sInt}, 122, 0)
+	p.op(sNat, 335, "write", []uint32{sInt, sNat}, 119, 0)
+	p.op(sInts, 336, "r", []uint32{sInt, sInt, sInt, sInt, sInt, sNat}, 0, 0)
+	p.start(f(336, f(330, ref.Int{Value: 0}), f(331, ref.Int{Value: 1}, ref.Int{Value: 65}),
+		f(332, ref.Str{Codes: []int32{'f'}}, ref.Str{Codes: []int32{'w'}}), f(333, ref.Int{Value: 3}),
+		f(334, ref.Int{Value: 3}), f(335, ref.Int{Value: 1}, f(318))), sInts)
+	ir := p.lower(t)
+	for sym, want := range map[int32]BuiltinOp{330: IOGetc, 331: IOPutc, 332: IOOpen, 333: IOClose, 334: IOFlush, 335: IOWrite} {
+		if op := opBySymbol(t, ir, sym); op.Kind != Builtin || op.Builtin != want {
+			t.Errorf("%d: %v %v, want %v", sym, op.Kind, op.Builtin, want)
+		}
+	}
+	if !IOWrite.OnTerms() || !slices.Equal(IOWrite.IntArgs(), []int{0}) || IOGetc.OnTerms() || !IOGetc.NeedsValues() {
+		t.Error("kinds")
+	}
+}
+
+// Arrays and builtinHashTerm (S7e task 7, hashSet[X] of Compiler.4.0/
+// Work): operations on terms (the array and its elements
+// are terms of any sorts), their index and size builtinInt values; total
+// when those are values.
+func TestArrayBuiltins(t *testing.T) {
+	const sArr = 410
+	p := ints()
+	p.p.Sorts = append(p.p.Sorts, ref.Sort{Index: sArr, Name: "builtinArray[nat]"})
+	p.op(sArr, 340, "new", []uint32{sInt, sNat}, 200, 0)
+	p.op(sNat, 341, "get", []uint32{sArr, sInt}, 201, 0)
+	p.op(sArr, 342, "set", []uint32{sArr, sInt, sNat}, 202, 0)
+	p.op(sInt, 343, "length", []uint32{sArr}, 203, 0)
+	p.op(sInt, 345, "builtinHashTerm", []uint32{sNat}, 210, 0)
+	p.op(sInts, 344, "r", []uint32{sNat, sInt, sInt}, 0, 0)
+	arr := f(342, f(340, ref.Int{Value: 2}, f(318)), ref.Int{Value: 1}, f(319, f(318)))
+	p.start(f(344, f(341, arr, ref.Int{Value: 1}), f(343, arr), f(345, f(318))), sInts)
+	ir := p.lower(t)
+	for sym, want := range map[int32]BuiltinOp{340: ArrayNew, 341: ArrayGet, 342: ArraySet, 343: ArrayLength, 345: TermHash} {
+		if op := opBySymbol(t, ir, sym); op.Kind != Builtin || op.Builtin != want || !op.Total {
+			t.Errorf("%d: %v %v total %v, want %v", sym, op.Kind, op.Builtin, op.Total, want)
+		}
+	}
+	for b, want := range map[BuiltinOp][]int{ArrayNew: {0}, ArrayGet: {1}, ArraySet: {1}, ArrayLength: nil, TermHash: nil} {
+		if !b.OnTerms() || !slices.Equal(b.IntArgs(), want) {
+			t.Errorf("%v: on terms %v, int arguments %v", b, b.OnTerms(), b.IntArgs())
+		}
+	}
+}
+
+// The refusals kept at the end of S7e are all "not planned" (S7e
+// acceptance): a builtin code no module declares, rules for a builtin
+// operation, an AC operator of another profile; and no refusal of the
+// IR names a stage (S7c-S7e) any more.
+func TestKeptRefusalsAreNotPlanned(t *testing.T) {
+	for _, c := range []struct {
+		name  string
+		build func(p *prog)
+		why   string
+	}{
+		{"rules for a builtin operation", func(p *prog) {
+			p.op(sInt, 344, "x", []uint32{sInt, sInt}, 5, 0) // + on builtinInt
+			p.rule(sInt, 2, f(344, v(0, sInt), v(1, sInt)), v(0, sInt))
+			p.start(f(344, ref.Int{Value: 1}, ref.Int{Value: 2}), sInt)
+		}, "rules for the builtin operation"},
+		{"AC operator of another profile", func(p *prog) {
+			p.op(sSet, 345, "w", []uint32{sNat, sSet}, 0, 2)
+			p.op(sSet, 346, "e", nil, 0, 0)
+			p.start(f(345, f(318), f(346)), sSet)
+		}, "not of its result sort"},
+	} {
+		p := peano()
+		c.build(p)
+		if st, what := unsupportedStage(t, p); st != NotPlanned || !strings.Contains(what, c.why) {
+			t.Errorf("%s: %s %s", c.name, st, what)
+		}
+	}
+	files, err := filepath.Glob("*.go")
+	if err != nil {
+		t.Fatal(err)
+	}
+	stage := regexp.MustCompile(`unsupported\("S7[a-e]"`)
+	for _, name := range files {
+		if strings.HasSuffix(name, "_test.go") {
+			continue
+		}
+		b, err := os.ReadFile(name)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for i, line := range strings.Split(string(b), "\n") {
+			if stage.MatchString(line) {
+				t.Errorf("%s:%d: a refusal of a later stage: %s", name, i+1, strings.TrimSpace(line))
+			}
+		}
 	}
 }

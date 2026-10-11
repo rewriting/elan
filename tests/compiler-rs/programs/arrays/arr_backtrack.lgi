@@ -1,0 +1,6 @@
+LPL arr_backtrack description
+  query of sort bool
+  result of sort Term
+  import arrtest
+  start with (bt) w(new(1, a))
+end

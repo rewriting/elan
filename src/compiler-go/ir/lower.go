@@ -49,8 +49,9 @@ import (
 //     ([lowerer.resolveCall]); META gets a function per sort and an
 //     evaluator of the Strategy[X] terms per X ([builder.metas]).
 
-// Unsupported is a construct of a later stage: Stage is S7c (AC) or S7d
-// (query input and the rest). The compiler exits with status 2.
+// Unsupported is a construct elanc-go does not compile; the compiler exits
+// with status 2. Stage is NotPlanned since S7e (until then a later stage,
+// S7c-S7e, could name the stage that would compile it).
 type Unsupported struct {
 	Stage string
 	What  string
@@ -79,18 +80,16 @@ func builtinRefusal(code int32, decl string) error {
 		return unsupported(NotPlanned, "builtin operation code %d (%s): doubles (REM has none)", code, decl)
 	case 90 <= code && code <= 112:
 		return unsupported(NotPlanned, "builtin operation code %d (%s): a command of the interpreter's top level (Query[I,O,P])", code, decl)
-	case 113 <= code && code <= 123:
-		return unsupported("S7e", "builtin operation code %d (%s): input/output (stdio, files; REM's fun_113..123; no program of the tests uses them)", code, decl)
+	case code == 115 || code == 117:
+		return unsupported(NotPlanned, "builtin operation code %d (%s): an external process (REM has none: no fun_%d in its builtin.h)", code, decl, code)
+	case code == 123:
+		return unsupported(NotPlanned, "builtin operation code %d (%s): the I/O error constructor of the interpreter (REM has none: no fun_123 in its builtin.h)", code, decl)
 	case 160 <= code && code <= 174:
 		return unsupported(NotPlanned, "builtin operation code %d (%s): a call of the ELAN system (meta-level: parsing, .ref of a program; REM has none)", code, decl)
-	case 200 <= code && code <= 203:
-		return unsupported("S7e", "builtin operation code %d (%s): arrays (REM's fun_200..203; the interpreter uses the codes 300-303: no oracle for the library's declarations)", code, decl)
-	case code == 210:
-		return unsupported(NotPlanned, "builtin operation code %d (%s): the hash of a term (REM's value depends on its representation)", code, decl)
 	case code == 215:
 		return unsupported(NotPlanned, "builtin operation code %d (%s): equality of molecules (a builtin of one application of REM)", code, decl)
 	}
-	return unsupported("S7e", "builtin operation code %d (%s)", code, decl)
+	return unsupported(NotPlanned, "builtin operation code %d (%s): no module of the library declares it, no program uses it (REM's list codes 192-199, the interpreter's 79-82, 155, 179-190, 205-208)", code, decl)
 }
 
 // Invalid is a .ref file that is not what the compiler expects (a bug or a
@@ -559,12 +558,55 @@ func (l *lowerer) run(name string) (*IR, error) {
 	if err != nil {
 		return nil, unsupported(NotPlanned, "query grammar: %v (REM does not read it either)", err)
 	}
-	qrules := l.queryRules(grammar)
+	// the sorts of the terms the program reads (read_builtinIO, S7e task
+	// 6): parsed with the query's grammar, from those sorts too
+	var readSorts []ref.SortIndex
+	for _, c := range r.cands {
+		if code, ok := builtinCode(l.cands[c].semantic); ok && code == 120 {
+			readSorts = append(readSorts, l.cands[c].result)
+		}
+	}
+	qrules := l.queryRules(grammar, readSorts)
 	base := r.clone()
-	if !l.reachQuery(r, qrules) {
+	// build builds what r reaches, with the query rules qs whose operators
+	// r reaches (the others: none)
+	build := func(r *reach, qs []queryRule) (*IR, error) {
+		sorts, err := sortsOf(r)
+		if err != nil {
+			return nil, err
+		}
+		qs = slices.Clone(qs)
+		for i := range qs {
+			if qs[i].Kind == QueryOp && !r.seen[qs[i].cand] {
+				qs[i] = queryRule{}
+			}
+		}
+		return (&builder{l: l, reach: r, query: qs, grammar: grammar}).build(name, &start, q, sorts)
+	}
+	// When the start term does not use the query (S7e task 13, replacing
+	// task 2's refusal), its value is not used: the query operators that
+	// the program reaches are compiled (a query of them is built and
+	// normalised as in REM: its steps, its effects), the others are not
+	// (QueryUncompiled: the program's native families stay native), and
+	// a query containing one is parsed but not built (rt.Main). When the
+	// start term uses the query, its value flows into the program: every
+	// query operator is compiled (correctness first).
+	// (a term read by the program flows into it as a query used by the
+	// start term: every operator of its sorts is compiled)
+	if !containsVar(&start) && len(readSorts) == 0 {
+		qs := slices.Clone(qrules)
+		for i := range qs {
+			if qs[i].Kind == QueryOp && !base.seen[qs[i].cand] {
+				qs[i] = queryRule{QueryRule: QueryRule{Kind: QueryUncompiled}}
+			}
+		}
+		return build(base, qs)
+	}
+	// one by one: an operator refused (check), the others kept
+	oneByOne := func() {
 		r = base.clone()
 		for i := range qrules {
-			if qrules[i].Kind != QueryOp {
+			if qrules[i].Kind != QueryOp || base.seen[qrules[i].cand] {
 				continue
 			}
 			snap := r.clone()
@@ -573,6 +615,9 @@ func (l *lowerer) run(name string) (*IR, error) {
 				qrules[i] = queryRule{QueryRule: QueryRule{Kind: QueryUnsupported, Why: err.Error()}}
 			}
 		}
+	}
+	if !l.reachQuery(r, qrules) {
+		oneByOne()
 	}
 	sorts, err := sortsOf(r)
 	if err == nil {
@@ -672,11 +717,15 @@ func (l *lowerer) lexicalRule(g *GrammarRule) bool {
 }
 
 // queryRules says, per grammar rule, how a query builds its term: the
-// rules of the sorts that a term of the query's sort can contain (its
-// sort, and the sorts of the arguments of their rules) are built by
-// their operators.
-func (l *lowerer) queryRules(grammar []GrammarRule) []queryRule {
+// rules of the sorts that a term of the query's sort or of one of
+// readSorts (the sorts the program reads) can contain (those sorts, and
+// the sorts of the arguments of their rules) are built by their
+// operators.
+func (l *lowerer) queryRules(grammar []GrammarRule, readSorts []ref.SortIndex) []queryRule {
 	in := map[int32]bool{int32(l.p.Query.Sort): true}
+	for _, s := range readSorts {
+		in[int32(s)] = true
+	}
 	for changed := true; changed; {
 		changed = false
 		for _, g := range grammar {
@@ -846,7 +895,7 @@ func (l *lowerer) expand(c int, r *reach) error {
 			return builtinRefusal(code, l.candDecl(k))
 		}
 		if len(rules) > 0 {
-			return unsupported("S7e", "rules for the builtin operation %s (no program has one)", l.candDecl(k))
+			return unsupported(NotPlanned, "rules for the builtin operation %s (no program has one; the oracles' order of the builtin and the rules is not established)", l.candDecl(k))
 		}
 		return nil
 	}
@@ -1065,22 +1114,14 @@ const builtinAC = "AC operator %s on a builtin sort (the oracles disagree; strin
 
 func (l *lowerer) checkAC(k *cand) error {
 	if len(k.args) != 2 || k.args[0] != k.result || k.args[1] != k.result {
-		return unsupported("S7e", "AC operator %s whose arguments are not of its result sort (its terms are flattened: (s s) s; no program of the bench declares one)", l.candDecl(k))
+		return unsupported(NotPlanned, "AC operator %s whose arguments are not of its result sort (its terms are flattened: (s s) s; no program declares one)", l.candDecl(k))
 	}
 	if _, ok := builtinKind(l.sortName(k.result)); ok || isBuiltin(k.semantic) {
 		return unsupported(NotPlanned, builtinAC, l.candDecl(k))
 	}
 	// (an injection of a builtin sort into the sort makes it a family:
-	// checked when the IR is built)
-	var args []int64
-	for _, x := range l.printForm[profileOf(k.symbol, k.args, k.result)] {
-		if x.Kind == ref.LexType {
-			args = append(args, x.N)
-		}
-	}
-	if len(args) != 2 {
-		return unsupported("S7e", "AC operator %s printed without its two arguments (REM prints an AC term as a right comb of its form; no program of the bench has one)", l.candDecl(k))
-	}
+	// checked when the IR is built; the printing form of the profile has
+	// the two arguments: a candidate's arguments are its form's)
 	return nil
 }
 
@@ -1514,6 +1555,11 @@ func (b *builder) build(name string, start *tt, q *ref.Query, sortIndices []ref.
 			case Builtin:
 				bo := pre[o].builtin
 				next[o] = !bo.Partial()
+				for _, i := range bo.IntArgs() {
+					if !sig.valuesOnly(ir.Ops[o].Args[i]) {
+						next[o] = false
+					}
+				}
 				if bo.NeedsValues() {
 					for _, a := range ir.Ops[o].Args {
 						if !sig.valuesOnly(a) {
@@ -2400,9 +2446,12 @@ func (rl *ruleLowerer) acAbstract(t *tt, n *remNode, p Pattern, same *[]Cond) Pa
 	return p
 }
 
+// refuse records a kept refusal of the rule being lowered (not planned:
+// an AC shape REM transforms before matching, docs/followups.md); the
+// first one is reported.
 func (rl *ruleLowerer) refuse(format string, a ...any) {
 	if rl.err == nil {
-		rl.err = unsupported("S7e", format, a...)
+		rl.err = unsupported(NotPlanned, format, a...)
 	}
 }
 

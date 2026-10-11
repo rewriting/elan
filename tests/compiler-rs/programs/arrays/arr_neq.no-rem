@@ -1,0 +1,4 @@
+REM's == on two arrays is always true (term_notDestructEqual: the
+symbol CODE_ARRAY has arity 0 there, so any two arrays with the same hash
+are equal: new(1,a) == new(3,b) gives true); elanc-go compares their
+contents (arr_neq.expected), as the interpreter compares the terms new(...)
