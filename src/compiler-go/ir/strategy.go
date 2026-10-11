@@ -156,6 +156,15 @@ func (ir *IR) TotalStrategies() []bool {
 // [IR.TotalStrategies]): else its failure would let the next alternatives
 // run. The nodes are returned by address (the emission recognises them
 // while it walks the same body).
+//
+// The loop gives the same results in the same order as the interpreter,
+// but it may terminate where the interpreter does not: its one.K stops the
+// search after the single result, so the alternatives that would run after
+// it (and could loop for ever without a result) are never started. With
+// `me => first(dc(dec) ; me, iterate*(spin ; fail))` and
+// `spin => dc(inc) ; spin` on 3, elanc-go and elanc-rs print 0 and exit;
+// `elan -b` prints 0, then searches the iterate* of the outer calls for
+// ever (docs/followups.md).
 func (ir *IR) TailCalls(me StratID, total []bool) map[*Strat]bool {
 	out := map[*Strat]bool{}
 	if ir.Strategies[me].Det {

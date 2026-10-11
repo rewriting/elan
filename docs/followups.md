@@ -37,6 +37,16 @@ sub-project (S1–S5b). Each item says where it comes from.
   exists, applies the int strategy to a state and prints the ill-sorted
   `cons_state(plus(st(1),1),nil)` (`tests/compiler-rs/programs/refused/callother`);
   elanc-rs refuses it.
+- **Tail-call loops may terminate where the interpreter does not**
+  (elanc-go S7b, elanc-rs S6b; `ir.TailCalls`, `Ir::tail_calls`): the loop
+  of a deterministic strategy calling itself in tail position stops the
+  search after its single result, so the alternatives that would run after
+  it are never started. `me => first(dc(dec) ; me, iterate*(spin ; fail))`
+  with `spin => dc(inc) ; spin`, on 3: both compilers print 0 and exit;
+  `elan -b` prints 0 then loops for ever (the `iterate*` of the outer
+  calls never ends). Same results, in the same order; documented, not
+  changed (the interpreter's search after the last result is unobservable
+  except by non-termination).
 - **REM: Meta_strat terms** (`call`, sequences... built as `Strategy[X]`
   terms) give C that does not compile (`fun_143`), found by S6b
   (`tests/compiler-rs/programs/strategy_terms/ms_*`, `.no-rem`).
