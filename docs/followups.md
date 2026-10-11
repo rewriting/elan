@@ -168,9 +168,15 @@ sub-project (S1–S5b). Each item says where it comes from.
   an array, an array printed: REM's message on stdout, status 1), REM's
   hash values on ints, identifiers, terms and AC terms. Differences from
   REM: `==` on two arrays compares their sizes and elements (REM finds any
-  two arrays equal, below); a term holding an array is shared by the
-  array's identity, so `h(new(1,a)) == h(new(1,a))` is false; the hash of
-  a string or of an array is elanc-go's (REM's reads memory).
+  two arrays equal, below); that equality is structural only at the top
+  level (`==` and non-linear patterns of an array sort): inside a term,
+  arrays compare by identity (a term holding an array is shared by the
+  array's identity, so `h(new(1,a)) == h(new(1,a))` is false); the hash of
+  a string or of an array is elanc-go's (REM's reads memory). The normal
+  form of an AC term that can hold an array is not cached (S7e task 13:
+  `set` can make it reducible, `programs/arrays/arr_ac`), and the hash of
+  a value of an injection family is that of REM's injection node (task
+  13, `hash_nat`, `hash_inj`).
 - **REM: arrays and hashes** (found in S7e task 7, not fixed; REM does
   not change in S7e): `==` (code 18) on two arrays is always true
   (`term_notDestructEqual`: equal hashes and the arity of the symbol
