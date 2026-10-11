@@ -246,15 +246,26 @@ func RemoveOne(e []Term, x Term) ([]Term, bool) {
 // AC pattern, "the rest"; spec S7c task 1)
 
 // distinct returns the distinct elements of the sorted multiset e and
-// their multiplicities.
-func distinct(e []Term) ([]Term, []int) {
-	var d []Term
-	var m []int
-	for i := 0; i < len(e); i += Mult(e, i) {
-		d = append(d, e[i])
-		m = append(m, Mult(e, i))
+// their multiplicities, with room for extra ints after the
+// multiplicities (ints[:len(d)] are the multiplicities, ints holds
+// (1+extra) x len(d) ints: one allocation for the counters of the
+// enumerators).
+func distinct(e []Term, extra int) (d []Term, ints []int) {
+	k := 0
+	for i := range e {
+		if i == 0 || e[i] != e[i-1] {
+			k++
+		}
 	}
-	return d, m
+	d = make([]Term, 0, k)
+	ints = make([]int, k*(1+extra))
+	for i := 0; i < len(e); i++ {
+		if i == 0 || e[i] != e[i-1] {
+			d = append(d, e[i])
+		}
+		ints[len(d)-1]++
+	}
+	return d, ints
 }
 
 // DivAC returns the multiset x such that m copies of x make e (a variable
@@ -299,9 +310,9 @@ type Split struct {
 }
 
 // NewSplit starts the enumeration over e (sorted).
-func NewSplit(e []Term) *Split {
-	d, m := distinct(e)
-	return &Split{d: d, max: m, count: make([]int, len(d)), total: len(e)}
+func NewSplit(e []Term) Split {
+	d, ints := distinct(e, 1)
+	return Split{d: d, max: ints[:len(d)], count: ints[len(d):], total: len(e)}
 }
 
 // Next moves to the next solution; false at the end.
@@ -325,7 +336,11 @@ func (s *Split) X() []Term { return s.part(false) }
 func (s *Split) Y() []Term { return s.part(true) }
 
 func (s *Split) part(complement bool) []Term {
-	var out []Term
+	n := s.n
+	if complement {
+		n = s.total - s.n
+	}
+	out := make([]Term, 0, n)
 	for i, x := range s.d {
 		k := s.count[i]
 		if complement {
@@ -356,13 +371,34 @@ type Down struct {
 }
 
 // NewDown starts the enumeration over e (sorted).
-func NewDown(e []Term, m int) *Down {
-	d, mult := distinct(e)
-	s := &Down{d: d, mult: mult, max: make([]int, len(d)), count: make([]int, len(d)), m: m}
-	for i, k := range mult {
-		s.max[i] = k / m
+func NewDown(e []Term, m int) Down {
+	if m > 1 && !hasMult(e, m) {
+		return Down{started: true} // no solution
+	}
+	d, ints := distinct(e, 2)
+	k := len(d)
+	s := Down{d: d, mult: ints[:k], max: ints[k : 2*k], count: ints[2*k:], m: m}
+	for i, n := range s.mult {
+		s.max[i] = n / m
 	}
 	return s
+}
+
+// hasMult tells whether an element of the sorted multiset e occurs m
+// times or more.
+func hasMult(e []Term, m int) bool {
+	run := 0
+	for i := range e {
+		if i > 0 && e[i] == e[i-1] {
+			run++
+		} else {
+			run = 1
+		}
+		if run >= m {
+			return true
+		}
+	}
+	return false
 }
 
 // Next moves to the next solution; false at the end.
@@ -393,7 +429,11 @@ func (s *Down) Next() bool {
 
 // X is the variable's value (sorted, non-empty).
 func (s *Down) X() []Term {
-	var out []Term
+	n := 0
+	for _, k := range s.count {
+		n += k
+	}
+	out := make([]Term, 0, n)
 	for i, x := range s.d {
 		for range s.count[i] {
 			out = append(out, x)
@@ -404,7 +444,14 @@ func (s *Down) X() []Term {
 
 // Rest is the extension E (sorted, possibly empty).
 func (s *Down) Rest() []Term {
-	var out []Term
+	n := 0
+	for i, k := range s.mult {
+		n += k - s.m*s.count[i]
+	}
+	if n == 0 {
+		return nil
+	}
+	out := make([]Term, 0, n)
 	for i, x := range s.d {
 		for range s.mult[i] - s.m*s.count[i] {
 			out = append(out, x)

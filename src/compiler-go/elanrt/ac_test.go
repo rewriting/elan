@@ -202,13 +202,16 @@ func TestSplitOrder(t *testing.T) {
 	if g := strings.Join(got, ","); g != "nil,o,o U nil,o U o" {
 		t.Errorf("multiplicities: %s", g)
 	}
-	if NewSplit([]Term{a}).Next() {
+	if s := NewSplit([]Term{a}); s.Next() {
 		t.Error("one element: no solution")
 	}
 }
 
 func TestDownAndDiv(t *testing.T) {
 	a, b := Mk0(symO), Mk0(symNil)
+	if s := NewDown(Flatten(symU, a, b), 2); s.Next() {
+		t.Error("x U x U E on a U b: no solution")
+	}
 	var got []string
 	for s := NewDown(Flatten(symU, a, a, b), 1); s.Next(); {
 		got = append(got, fmtMS(s.X())+"|"+fmtMS(s.Rest()))
