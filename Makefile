@@ -157,6 +157,7 @@ check-front: install
 	  (cd src/compiler-go && $(GO_ENV) go vet ./front/... \
 	     && ELANLIB=$(PREFIX) ELAN_GENERATED_DIR=$(CURDIR)/$(BUILD)/src/interpreter/generated $(GO_ENV) go test ./front/...) \
 	  && tests/front/check_lextrace_hooks.sh $(BUILD) \
+	  && tests/front/test_check_lextrace_hooks.sh $(BUILD) \
 	  && tests/front/test_lextrace_harness.sh $(BUILD) \
 	  && python3 tests/front/test_tracecmp.py \
 	  && tests/front/test_front_load.sh $(PREFIX) \

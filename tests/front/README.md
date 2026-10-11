@@ -13,7 +13,9 @@ through a harness.
 own compilation of `src/interpreter/lex/mlstream.cc` under `-DELAN_LEXTRACE`:
 the trace hooks there are compiled into the harness only, never into `elan`
 (decision D2 of the user; `check_lextrace_hooks.sh` proves that `mlstream.cc`
-preprocessed without the macro is token-identical to `main`'s).
+preprocessed without the macro, with elan's own compile flags, has no
+`lextrace` token, and that every source line mentioning `lextrace` is inside
+an `#ifdef ELAN_LEXTRACE` block).
 
     elan-lextrace lex FILE                                # one file
     elan-lextrace load TRACE [elan options] prog.lgi [spec]   # elan_main, every module
@@ -57,7 +59,8 @@ which it became pending.
 
 | script | what |
 |---|---|
-| `check_lextrace_hooks.sh [BUILD]` | the guard of D2 |
+| `check_lextrace_hooks.sh [--file F] [BUILD] [BASE]` | the guard of D2 (flags from `BUILD/compile_commands.json`, else CMake's `flags.make` of `elan_core`); with `BASE`, also token-identical to BASE's copy |
+| `test_check_lextrace_hooks.sh [BUILD]` | the guard passes on `mlstream.cc` and fails on temp copies with an unguarded hook (declaration, comment, `#else` branch) or without hooks |
 | `test_lextrace_harness.sh [BUILD] [--save]` | the harness on `fixtures/*` (`<f>.expected`: stdout, `@@stderr`, stderr, `@@status N`) and on `examples/unification` in loader mode |
 | `python3 test_tracecmp.py` | unit tests of `tracecmp.py` |
 | `test_front_lex.sh PREFIX [--only lgi,spc]` | every file of `list_files.py`: harness and `front-trace lex` compared exactly |
