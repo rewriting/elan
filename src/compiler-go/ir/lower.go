@@ -500,6 +500,69 @@ func (l *lowerer) run(name string) (*IR, error) {
 	if q.Strategy.Valid {
 		r.reachStrategy(q.Strategy.Index)
 	}
+	if err := l.fixpoint(r); err != nil {
+		return nil, err
+	}
+	sortsOf := func(r *reach) ([]ref.SortIndex, error) {
+		sorts := slices.Sorted(maps.Keys(r.sorts))
+		for _, s := range sorts {
+			n := l.sortName(s)
+			if strings.HasPrefix(n, "intern ") {
+				return nil, unsupported("S7d", "builtin sort %s", n)
+			}
+		}
+		return sorts, nil
+	}
+	if _, err := sortsOf(r); err != nil {
+		return nil, err
+	}
+
+	// the operators of the query (S7d task 5): those of the grammar rules
+	// that a term of the query's sort can contain; each one that cannot
+	// be compiled is refused when a query uses it
+	grammar, err := Grammar(l.p)
+	if err != nil {
+		return nil, unsupported("S7d", "query grammar: %v", err)
+	}
+	qrules := l.queryRules(grammar)
+	base := r.clone()
+	if !l.reachQuery(r, qrules) {
+		r = base.clone()
+		for i := range qrules {
+			if qrules[i].Kind != QueryOp {
+				continue
+			}
+			snap := r.clone()
+			if err := l.reachQueryOp(r, qrules[i].cand); err != nil {
+				r = snap
+				qrules[i] = queryRule{QueryRule: QueryRule{Kind: QueryUnsupported, Why: err.Error()}}
+			}
+		}
+	}
+	sorts, err := sortsOf(r)
+	if err == nil {
+		var ir *IR
+		ir, err = (&builder{l: l, reach: r, query: qrules, grammar: grammar}).build(name, &start, q, sorts)
+		if err == nil {
+			return ir, nil
+		}
+	}
+	// the program alone, its query refused at run time
+	why := err.Error()
+	for i := range qrules {
+		if qrules[i].Kind == QueryOp || qrules[i].Kind == QueryUmin {
+			qrules[i] = queryRule{QueryRule: QueryRule{Kind: QueryUnsupported, Why: why}}
+		}
+	}
+	sorts, err = sortsOf(base)
+	if err != nil {
+		return nil, err
+	}
+	return (&builder{l: l, reach: base, query: qrules, grammar: grammar}).build(name, &start, q, sorts)
+}
+
+// fixpoint expands what r has reached until nothing new is reached.
+func (l *lowerer) fixpoint(r *reach) error {
 	for {
 		var err error
 		if len(r.todo) > 0 {
@@ -517,26 +580,106 @@ func (l *lowerer) run(name string) (*IR, error) {
 			break
 		}
 		if err != nil {
-			return nil, err
+			return err
 		}
 	}
 	if len(r.errs) > 0 {
-		return nil, r.errs[0]
+		return r.errs[0]
 	}
-	sorts := slices.Sorted(func(yield func(ref.SortIndex) bool) {
-		for s := range r.sorts {
-			if !yield(s) {
-				return
+	return nil
+}
+
+// clone is a copy of r (to undo what a query operator reaches).
+func (r *reach) clone() *reach {
+	c := &reach{
+		cands: slices.Clone(r.cands), seen: maps.Clone(r.seen), todo: slices.Clone(r.todo),
+		sorts: maps.Clone(r.sorts), labels: slices.Clone(r.labels), labelsTodo: slices.Clone(r.labelsTodo),
+		strategies: slices.Clone(r.strategies), strategiesTodo: slices.Clone(r.strategiesTodo),
+		pending: slices.Clone(r.pending), calls: maps.Clone(r.calls), errs: slices.Clone(r.errs),
+	}
+	return c
+}
+
+// queryRule is a QueryRule with the profile of its operator.
+type queryRule struct {
+	QueryRule
+	cand int
+}
+
+// Lexical rules of the query grammar (term/codes.h): built by the parser.
+const (
+	numToTerm      = 67 // NUMTOTERM
+	identToTerm    = 68 // IDENTTOTERM
+	intConstUminus = 79 // INTCONSTUMIN
+	stringToTerm   = 81 // STRINGTOTERM
+)
+
+// queryRules says, per grammar rule, how a query builds its term: the
+// rules of the sorts that a term of the query's sort can contain (its
+// sort, and the sorts of the arguments of their rules) are built by
+// their operators.
+func (l *lowerer) queryRules(grammar []GrammarRule) []queryRule {
+	in := map[int32]bool{int32(l.p.Query.Sort): true}
+	for changed := true; changed; {
+		changed = false
+		for _, g := range grammar {
+			if !in[g.Sort] {
+				continue
+			}
+			for _, x := range g.Rhs {
+				if x.Kind == GramSort && !in[x.Code] {
+					in[x.Code], changed = true, true
+				}
 			}
 		}
-	})
-	for _, s := range sorts {
-		n := l.sortName(s)
-		if strings.HasPrefix(n, "intern ") {
-			return nil, unsupported("S7d", "builtin sort %s", n)
+	}
+	rules := make([]queryRule, len(grammar))
+	for i, g := range grammar {
+		if !in[g.Sort] || g.Symbol == numToTerm || g.Symbol == identToTerm || g.Symbol == stringToTerm {
+			continue
+		}
+		if g.Symbol == intConstUminus {
+			rules[i].Kind = QueryUmin
+			continue
+		}
+		var args []ref.SortIndex
+		lexical := false
+		for _, x := range g.Rhs {
+			if x.Kind == GramSort {
+				args = append(args, ref.SortIndex(x.Code))
+				lexical = lexical || strings.HasPrefix(l.sortName(ref.SortIndex(x.Code)), "intern ")
+			}
+		}
+		c := slices.IndexFunc(l.bySymbol[ref.SymbolCode(g.Symbol)], func(c int) bool {
+			return slices.Equal(l.cands[c].args, args) && l.cands[c].result == ref.SortIndex(g.Sort)
+		})
+		switch {
+		case lexical:
+			rules[i].Kind, rules[i].Why = QueryUnsupported, fmt.Sprintf("code %d on a lexical sort", g.Symbol)
+		case c < 0:
+			rules[i].Kind, rules[i].Why = QueryUnsupported, fmt.Sprintf("code %d: no operator", g.Symbol)
+		default:
+			rules[i].Kind, rules[i].cand = QueryOp, l.bySymbol[ref.SymbolCode(g.Symbol)][c]
 		}
 	}
-	return (&builder{l: l, reach: r}).build(name, &start, q, sorts)
+	return rules
+}
+
+// reachQuery reaches the operators of the query rules; false if one of
+// them is refused (r is then to be dropped).
+func (l *lowerer) reachQuery(r *reach, rules []queryRule) bool {
+	for _, q := range rules {
+		if q.Kind == QueryOp {
+			r.reach(q.cand)
+		}
+	}
+	return l.fixpoint(r) == nil
+}
+
+// reachQueryOp reaches one operator of the query.
+func (l *lowerer) reachQueryOp(r *reach, c int) error {
+	r.reach(c)
+	return l.fixpoint(r)
 }
 
 func (l *lowerer) visit(t *tt, r *reach) {
@@ -1078,8 +1221,12 @@ type preKind struct {
 }
 
 type builder struct {
-	l       *lowerer
-	reach   *reach
+	l     *lowerer
+	reach *reach
+	// query: how each grammar rule is built (QueryOp: by the operator of
+	// a reached profile)
+	query   []queryRule
+	grammar []GrammarRule
 	opOf    map[int]OpID
 	sortOf  map[ref.SortIndex]SortID
 	labelOf map[ref.RuleNameIndex]LabelID     // labels in table order
@@ -1347,10 +1494,37 @@ func (b *builder) build(name string, start *tt, q *ref.Query, sortIndices []ref.
 		}
 		ir.Start.Vars = []Var{{Name: "query", Sort: qs}}
 	}
-	if _, ok := b.sortOf[l.identSort.s]; ok && l.identSort.ok {
-		for _, e := range l.p.Identifiers {
-			ir.Idents = append(ir.Idents, Ident{Index: int32(e.Index), Name: e.Name})
+	// the table of identifiers: the parser of the query reads them (and
+	// the identifiers of its grammar rules are their indices)
+	for _, e := range l.p.Identifiers {
+		ir.Idents = append(ir.Idents, Ident{Index: int32(e.Index), Name: e.Name})
+	}
+	if qs, ok := b.sortOf[q.Sort]; ok || !slices.ContainsFunc(b.query, func(r queryRule) bool { return r.Kind == QueryOp }) {
+		named := func(n string, def int32) int32 {
+			for _, s := range l.p.Sorts {
+				if s.Name == n {
+					return int32(s.Index)
+				}
+			}
+			return def
 		}
+		iq := &Query{Sort: int32(q.Sort), SortID: -1, Grammar: b.grammar, SortNames: map[int32]string{},
+			InternIdent: named("intern ident", 220), InternInt: named("intern int", 19),
+			InternString: named("intern string", 351)}
+		if ok {
+			iq.SortID = qs
+		}
+		for _, s := range l.p.Sorts {
+			iq.SortNames[int32(s.Index)] = s.Name
+		}
+		for _, r := range b.query {
+			qr := r.QueryRule
+			if qr.Kind == QueryOp {
+				qr.Op = b.opOf[r.cand]
+			}
+			iq.Rules = append(iq.Rules, qr)
+		}
+		ir.Start.Query = iq
 	}
 	if q.Strategy.Valid {
 		id := b.stratOf[q.Strategy.Index]

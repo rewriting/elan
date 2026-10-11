@@ -58,6 +58,7 @@ package gen
 import (
 	"fmt"
 	"go/format"
+	"maps"
 	"slices"
 	"strconv"
 	"strings"
@@ -448,7 +449,16 @@ func (e *emitter) file() {
 	}
 	e.line("package main")
 	e.line("")
-	e.line(`import rt "elan/elanrt"`)
+	if p.Start.Query != nil {
+		e.open("import (")
+		e.line(`"strconv"`)
+		e.line("")
+		e.line(`rt "elan/elanrt"`)
+		e.line(`"elan/elanrt/earley"`)
+		e.close(")")
+	} else {
+		e.line(`import rt "elan/elanrt"`)
+	}
 	e.line("")
 	e.sorts()
 	e.symbols()
@@ -477,7 +487,138 @@ func (e *emitter) file() {
 		e.normTermFunc()
 	}
 	e.ekerDecls()
+	e.query()
 	e.mainFunc()
+}
+
+// query writes the query parser's tables (S7d task 5): the grammar
+// (REM's gram[]), the names of the sorts, and the functions building the
+// term of each grammar rule (queryOp, queryAC, queryIsAC).
+func (e *emitter) query() {
+	q := e.ir.Start.Query
+	if q == nil {
+		return
+	}
+	p := e.ir
+	e.line("// ==== query ====")
+	e.line("")
+	e.line("// grammar is the grammar of the query parser (REM's gram[]: the grammar")
+	e.line("// rules of the .ref file).")
+	e.open("var grammar = []earley.Rule{")
+	for _, g := range q.Grammar {
+		var rhs []string
+		for _, x := range g.Rhs {
+			rhs = append(rhs, fmt.Sprintf("{Kind: %d, Code: %d}", x.Kind, x.Code))
+		}
+		e.line("{Sort: %d, Symbol: %d, Info: %d, Rhs: []earley.RhsLexem{%s}},", g.Sort, g.Symbol, g.Info, strings.Join(rhs, ", "))
+	}
+	e.close("}")
+	e.line("")
+	e.line("// sortNames are the names of the sorts (warnings of the parser).")
+	e.open("var sortNames = map[int32]string{")
+	names := slices.Sorted(maps.Keys(q.SortNames))
+	for _, s := range names {
+		e.line("%d: %s,", s, goString(q.SortNames[s]))
+	}
+	e.close("}")
+	e.line("")
+	// the rules built by the function of one operator, by operator
+	byOp := map[ir.OpID][]int{}
+	var ops []ir.OpID
+	var umin, unsupported []int
+	for r, x := range q.Rules {
+		switch x.Kind {
+		case ir.QueryOp:
+			if _, ok := byOp[x.Op]; !ok {
+				ops = append(ops, x.Op)
+			}
+			byOp[x.Op] = append(byOp[x.Op], r)
+		case ir.QueryUmin:
+			umin = append(umin, r)
+		case ir.QueryUnsupported:
+			unsupported = append(unsupported, r)
+		}
+	}
+	cases := func(rs []int) string {
+		var c []string
+		for _, r := range rs {
+			c = append(c, strconv.Itoa(r))
+		}
+		return "case " + strings.Join(c, ", ") + ":"
+	}
+	e.line("// queryOp is the normal form of the operator of grammar rule r applied to")
+	e.line("// a (terms in normal form).")
+	e.open("func queryOp(r int, a []rt.Term) rt.Term {")
+	e.line("switch r {")
+	for _, o := range ops {
+		op := &p.Ops[o]
+		if op.AC {
+			continue
+		}
+		e.line("%s // %s", cases(byOp[o]), comment(op.Decl))
+		e.indent++
+		x := ir.Expr{Kind: ir.ExprOp, Op: o}
+		var vars []ir.Var
+		for i, s := range op.Args {
+			x.Args = append(x.Args, ir.Expr{Kind: ir.ExprVar, Var: i})
+			vars = append(vars, ir.Var{Name: e.unbox(s, fmt.Sprintf("a[%d]", i)), Sort: s})
+		}
+		e.line("return %s", e.asTerm(op.Result, e.expr(&x, vars)))
+		e.indent--
+	}
+	if len(umin) > 0 {
+		e.line("%s // - n (INTCONSTUMIN)", cases(umin))
+		e.line("\treturn rt.MkInt(-a[0].Int)")
+	}
+	e.line("}")
+	e.line("queryUnsupported(r)")
+	e.line("return nil")
+	e.close("}")
+	e.line("")
+	e.line("// queryAC is the normal form of the AC operator of grammar rule r applied")
+	e.line("// to the elements a (in normal form).")
+	e.open("func queryAC(r int, a []rt.Term) rt.Term {")
+	e.line("switch r {")
+	var acRules []int
+	for _, o := range ops {
+		op := &p.Ops[o]
+		if !op.AC {
+			continue
+		}
+		acRules = append(acRules, byOp[o]...)
+		e.line("%s // %s", cases(byOp[o]), comment(op.Decl))
+		e.line("\treturn rt.ApplyAC(%s, %s, a...)", symName(op), acFun(op))
+	}
+	e.line("}")
+	e.line("queryUnsupported(r)")
+	e.line("return nil")
+	e.close("}")
+	e.line("")
+	e.line("// queryIsAC tells whether the operator of grammar rule r is AC.")
+	e.open("func queryIsAC(r int) bool {")
+	if len(acRules) > 0 {
+		e.line("switch r {")
+		e.line("%s", cases(acRules))
+		e.line("\treturn true")
+		e.line("}")
+	}
+	e.line("return false")
+	e.close("}")
+	e.line("")
+	e.line("// queryUnsupported stops a query with an operator that is not compiled.")
+	e.open("func queryUnsupported(r int) {")
+	e.line("why := \"\"")
+	if len(unsupported) > 0 {
+		e.line("switch r {")
+		for _, r := range unsupported {
+			e.line("case %d:", r)
+			e.line("\twhy = %s", goString(": "+q.Rules[r].Why))
+		}
+		e.line("}")
+	}
+	e.line("rt.Unsupported(\"a query with the operator of grammar rule \" + strconv.Itoa(r) + why)")
+	e.close("}")
+	e.line("")
 }
 
 // normTermFunc writes normTerm, the normalisation dispatcher of rt.Replace:
@@ -1390,6 +1531,11 @@ func (e *emitter) mainFunc() {
 	e.open("func main() {")
 	if len(p.Idents) > 0 {
 		e.line("rt.InitIdents(idents)")
+	}
+	if q := p.Start.Query; q != nil {
+		e.line("rt.SetQuery(&rt.QueryParser{Rules: grammar, Sort: %d, SortNames: sortNames,", q.Sort)
+		e.line("\tInternIdent: %d, InternInt: %d, InternString: %d, Op: queryOp, AC: queryAC, IsAC: queryIsAC})",
+			q.InternIdent, q.InternInt, q.InternString)
 	}
 	e.open("rt.Main(%s, %v, func(s *rt.Session, %s rt.Term) {", goString(p.Start.QuerySort), p.Start.UsesQuery, q)
 	if p.Start.UsesQuery {

@@ -886,6 +886,51 @@ type Start struct {
 	// Strategy is the strategy of `start with (S) t`, applied to the
 	// normal form of the term, each result printed; -1 for `()`.
 	Strategy StratID
+	// Query is the query parser: the query is read from the standard
+	// input (without -noInput, S7d task 5).
+	Query *Query
+}
+
+// Query are the tables of the query parser (elanrt/earley): the grammar
+// and, per grammar rule, how the term of its operator is built.
+type Query struct {
+	// Sort is the sort of the query (the .ref sort index: the start
+	// symbol of the parser); SortID its sort in the IR.
+	Sort   int32
+	SortID SortID
+	// Grammar are the grammar rules (REM's gram[]), Rules how each one
+	// is built.
+	Grammar []GrammarRule
+	Rules   []QueryRule
+	// SortNames are the names of the sorts of the grammar (warnings).
+	SortNames map[int32]string
+	// InternIdent, InternInt, InternString are the sorts of the standard
+	// rules (identifier, number and string lexems).
+	InternIdent, InternInt, InternString int32
+}
+
+// QueryKind says how the term of a grammar rule is built.
+type QueryKind uint8
+
+const (
+	// QueryNone: the parser never builds it (a rule of a sort that a
+	// query cannot contain, or a number, identifier or string: built by
+	// the parser).
+	QueryNone QueryKind = iota
+	// QueryOp: the function of the operator Op.
+	QueryOp
+	// QueryUmin: -n of the number read (INTCONSTUMIN, code 79).
+	QueryUmin
+	// QueryUnsupported: the operator is not compiled (Why); a query that
+	// contains it stops the program (status 2).
+	QueryUnsupported
+)
+
+// QueryRule is how the term of a grammar rule is built.
+type QueryRule struct {
+	Kind QueryKind
+	Op   OpID
+	Why  string
 }
 
 // FamilyOf is the family of sort s, nil for a sort of terms.

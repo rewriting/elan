@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strings"
 	"testing"
 )
 
@@ -70,6 +71,12 @@ func TestMain(m *testing.M) {
 // status.
 func runHelper(t *testing.T, name string, env []string, args ...string) (string, string, int) {
 	t.Helper()
+	return runHelperIn(t, name, env, "", args...)
+}
+
+// runHelperIn is runHelper with stdin as the standard input.
+func runHelperIn(t *testing.T, name string, env []string, stdin string, args ...string) (string, string, int) {
+	t.Helper()
 	exe, err := os.Executable()
 	if err != nil {
 		t.Fatal(err)
@@ -78,6 +85,7 @@ func runHelper(t *testing.T, name string, env []string, args ...string) (string,
 	cmd.Env = append(append(os.Environ(), "ELANRT_HELPER="+name), env...)
 	var out, errb bytes.Buffer
 	cmd.Stdout, cmd.Stderr = &out, &errb
+	cmd.Stdin = strings.NewReader(stdin)
 	err = cmd.Run()
 	status := 0
 	if ee, ok := err.(*exec.ExitError); ok {

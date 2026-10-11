@@ -42,7 +42,11 @@ func Step() { Steps++ }
 
 // Options are the command-line options of a generated program.
 type Options struct {
-	NoInput  bool     // -noInput: no query is read, the start term of the .lgi is used
+	NoInput bool // -noInput: no query is read, the start term of the .lgi is used
+	// Other is an option asking for another query mode or sort, which
+	// elanc-go does not support (-REFInput, -commandLine, -sort=,
+	// -strategy=; the last query mode given counts, as in C)
+	Other    string
 	Quiet    bool     // -quiet: no timing lines
 	NoOutput bool     // -noOutput: results are not printed
 	Help     bool     // -help, -h
@@ -53,18 +57,31 @@ type Options struct {
 func ParseOptions(args []string) Options {
 	var o Options
 	i := 0
+	mode, eval := "", ""
 	for ; i < len(args) && strings.HasPrefix(args[i], "-"); i++ {
 		switch args[i] {
 		case "-noInput":
-			o.NoInput = true
+			mode = args[i]
+		case "-REFInput", "-commandLine":
+			mode = args[i]
+		case "-sort=", "-strategy=":
+			eval = args[i]
+			i++
 		case "-quiet":
 			o.Quiet = true
 		case "-noOutput":
 			o.NoOutput = true
 		case "-help", "-h":
 			o.Help = true
-		case "-trace", "-sort=", "-strategy=", "-filequery":
+		case "-trace", "-filequery":
 			i++ // options taking a value in the C program
+		}
+	}
+	o.NoInput = mode == "-noInput"
+	if !o.NoInput {
+		o.Other = mode
+		if eval != "" {
+			o.Other = eval
 		}
 	}
 	if i < len(args) {
@@ -235,12 +252,19 @@ func Main(querySort string, usesQuery bool, program func(s *Session, query Term)
 			done <- 0
 			return
 		}
+		var query Term
 		if !o.NoInput {
+			if o.Other != "" {
+				Unsupported("the option " + o.Other + " (use -noInput, or give the query on the standard input)")
+			}
 			fmt.Fprintf(Out, "Enter a query term of sort '%s'\n", querySort)
 			FlushOutput()
-			fmt.Fprintln(os.Stderr, "elanrt: reading a query is not supported yet; use -noInput")
-			done <- 2
-			return
+			if queryParser == nil {
+				fmt.Fprintln(os.Stderr, "elanrt: reading a query is not supported yet; use -noInput")
+				done <- 2
+				return
+			}
+			query = readQuery(queryParser)
 		}
 		stop := func() {}
 		if f := os.Getenv("ELAN_CPUPROFILE"); f != "" {
@@ -252,7 +276,7 @@ func Main(querySort string, usesQuery bool, program func(s *Session, query Term)
 				writeMemProfile(f)
 			}
 		}
-		program(s, nil)
+		program(s, query)
 		if depth != 0 {
 			// every Guard has its Unguard (generated code: a bug otherwise)
 			panic(fmt.Sprintf("guarded depth %d at the end of the program", depth))

@@ -346,3 +346,28 @@ func numbered(src string) string {
 	}
 	return b.String()
 }
+
+// The query parser (S7d task 5): the grammar table (REM's gram[]), the
+// function building the term of each grammar rule (the operator's
+// function, its arguments unboxed and its result boxed), rt.SetQuery
+// before rt.Main; an operator that is not compiled stops the program when
+// a query contains it.
+func TestQueryParserCode(t *testing.T) {
+	p := peano()
+	p.op(sNat, 321, "io", []uint32{sNat}, 113) // a builtin not supported
+	src := p.gen(t)
+	for _, want := range []string{
+		`import (`,
+		`"elan/elanrt/earley"`,
+		"var grammar = []earley.Rule{",
+		"{Sort: 323, Symbol: 318, Info: 32768, Rhs: []earley.RhsLexem{{Kind: 0, Code: 3}}},",
+		"func queryOp(r int, a []rt.Term) rt.Term {",
+		"return plus_320(a[0], a[1])",
+		`rt.Unsupported("a query with the operator of grammar rule `,
+		"rt.SetQuery(&rt.QueryParser{Rules: grammar, Sort: 323,",
+	} {
+		if !strings.Contains(src, want) {
+			t.Errorf("missing %q in\n%s", want, src)
+		}
+	}
+}
