@@ -5,8 +5,8 @@ import "testing"
 // Sanity of the converted MACC tables (plan S8a, finding 1).
 func TestConvertedTables(t *testing.T) {
 	for _, c := range []struct {
-		tab                     *Table
-		name                    string
+		tab                    *Table
+		name                   string
 		states, actions, gotos int
 	}{
 		{ModGram, "modgram", 646, 2728, 1141},
