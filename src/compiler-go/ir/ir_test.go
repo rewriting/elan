@@ -404,8 +404,6 @@ func TestUnsupportedConstructsAreRefusedWhenReachable(t *testing.T) {
 		{117, NotPlanned, "external process"},
 		{123, NotPlanned, "error constructor"},
 		{165, NotPlanned, "ELAN system"},
-		{200, "S7e", "arrays"},
-		{210, NotPlanned, "hash"},
 	} {
 		p = peano()
 		p.op(sNat, 155, "x", []uint32{sNat}, c.code, 0)
@@ -585,7 +583,36 @@ func TestIOBuiltins(t *testing.T) {
 			t.Errorf("%d: %v %v, want %v", sym, op.Kind, op.Builtin, want)
 		}
 	}
-	if !IOWrite.OnTerms() || !IOWrite.FileArg() || IOGetc.OnTerms() || !IOGetc.NeedsValues() {
+	if !IOWrite.OnTerms() || !slices.Equal(IOWrite.IntArgs(), []int{0}) || IOGetc.OnTerms() || !IOGetc.NeedsValues() {
 		t.Error("kinds")
+	}
+}
+
+// Arrays and builtinHashTerm (S7e task 7, hashSet[X] of Compiler.4.0/
+// Work): operations on terms (the array and its elements
+// are terms of any sorts), their index and size builtinInt values; total
+// when those are values.
+func TestArrayBuiltins(t *testing.T) {
+	const sArr = 410
+	p := ints()
+	p.p.Sorts = append(p.p.Sorts, ref.Sort{Index: sArr, Name: "builtinArray[nat]"})
+	p.op(sArr, 340, "new", []uint32{sInt, sNat}, 200, 0)
+	p.op(sNat, 341, "get", []uint32{sArr, sInt}, 201, 0)
+	p.op(sArr, 342, "set", []uint32{sArr, sInt, sNat}, 202, 0)
+	p.op(sInt, 343, "length", []uint32{sArr}, 203, 0)
+	p.op(sInt, 345, "builtinHashTerm", []uint32{sNat}, 210, 0)
+	p.op(sInts, 344, "r", []uint32{sNat, sInt, sInt}, 0, 0)
+	arr := f(342, f(340, ref.Int{Value: 2}, f(318)), ref.Int{Value: 1}, f(319, f(318)))
+	p.start(f(344, f(341, arr, ref.Int{Value: 1}), f(343, arr), f(345, f(318))), sInts)
+	ir := p.lower(t)
+	for sym, want := range map[int32]BuiltinOp{340: ArrayNew, 341: ArrayGet, 342: ArraySet, 343: ArrayLength, 345: TermHash} {
+		if op := opBySymbol(t, ir, sym); op.Kind != Builtin || op.Builtin != want || !op.Total {
+			t.Errorf("%d: %v %v total %v, want %v", sym, op.Kind, op.Builtin, op.Total, want)
+		}
+	}
+	for b, want := range map[BuiltinOp][]int{ArrayNew: {0}, ArrayGet: {1}, ArraySet: {1}, ArrayLength: nil, TermHash: nil} {
+		if !b.OnTerms() || !slices.Equal(b.IntArgs(), want) {
+			t.Errorf("%v: on terms %v, int arguments %v", b, b.OnTerms(), b.IntArgs())
+		}
 	}
 }

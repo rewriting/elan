@@ -575,6 +575,11 @@ const (
 	IORead                         // read_builtinIO (120): rt.ReadTerm, (builtinInt X) X
 	IOPid                          // the injection of builtinStdio's Pid (121): its argument
 	IOFlush                        // flush_builtinStdio (122): rt.Flush
+	ArrayNew                       // new of builtinArray[X] (200): rt.NewArray (S7e task 7)
+	ArrayGet                       // @.get(@), @[@] (201): rt.ArrayGet
+	ArraySet                       // @.set(@,@), @[@]<-@ (202): rt.ArraySet, in place
+	ArrayLength                    // @.length (203): rt.ArrayLength
+	TermHash                       // builtinHashTerm (210): rt.HashTerm, REM's hashTerm
 )
 
 var builtinNames = [...]string{
@@ -585,6 +590,7 @@ var builtinNames = [...]string{
 	"BoolToInt", "IntToBool", "TermReplace", "TermOccurs", "TermMatch", "TermUnify",
 	"IdentEq", "IdentNe", "IdentToString",
 	"IOGetc", "IOPutc", "IOOpen", "IOClose", "IOWrite", "IORead", "IOPid", "IOFlush",
+	"ArrayNew", "ArrayGet", "ArraySet", "ArrayLength", "TermHash",
 }
 
 func (b BuiltinOp) String() string { return builtinNames[b] }
@@ -598,6 +604,7 @@ var builtinCodes = map[int32]BuiltinOp{
 	25: BoolToInt, 26: IntToBool, 16: TermReplace, 17: TermOccurs, 191: TermMatch, 175: TermUnify,
 	14: IdentEq, 15: IdentNe, 177: IdentToString,
 	113: IOGetc, 114: IOPutc, 116: IOOpen, 118: IOClose, 119: IOWrite, 120: IORead, 121: IOPid, 122: IOFlush,
+	200: ArrayNew, 201: ArrayGet, 202: ArraySet, 203: ArrayLength, 210: TermHash,
 }
 
 // BuiltinFromCode is the operation of a semantic code; false when it is not
@@ -620,21 +627,30 @@ func (b BuiltinOp) NeedsValues() bool {
 
 // OnTerms tells whether the operation works on terms of any sorts, its
 // result too (replace, occurs, syntactic matching and unification; write
-// and read, whose first argument is a file number, [BuiltinOp.FileArg]):
-// declared on sorts of terms, it is compiled (a value operation on sorts
-// of terms is a constructor).
+// and read; the operations on arrays; the hash of a term), some of its arguments being
+// builtinInt values ([BuiltinOp.IntArgs]): declared on sorts of terms, it
+// is compiled (a value operation on sorts of terms is a constructor).
 func (b BuiltinOp) OnTerms() bool {
 	switch b {
-	case TermReplace, TermOccurs, TermMatch, TermUnify, IOWrite, IORead:
+	case TermReplace, TermOccurs, TermMatch, TermUnify, IOWrite, IORead,
+		ArrayNew, ArrayGet, ArraySet, ArrayLength, TermHash:
 		return true
 	}
 	return false
 }
 
-// FileArg tells whether the operation on terms takes a file number (a
-// builtinInt value) as its first argument: it stays a term when that
-// argument is not a value.
-func (b BuiltinOp) FileArg() bool { return b == IOWrite || b == IORead }
+// IntArgs are the positions of the arguments of an operation on terms
+// that are builtinInt values (a file number, the size of an array, an
+// index): the term stays when one of them is not a value.
+func (b BuiltinOp) IntArgs() []int {
+	switch b {
+	case IOWrite, IORead, ArrayNew:
+		return []int{0}
+	case ArrayGet, ArraySet:
+		return []int{1}
+	}
+	return nil
+}
 
 // Partial tells whether the operation is undefined on some values (the
 // term stays).

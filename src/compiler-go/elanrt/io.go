@@ -234,6 +234,11 @@ func Flush(pid int32) int32 {
 // and returns t (fun_119).
 func WriteTerm(pid int32, t Term) Term {
 	f := file(pid, "write")
+	if on := printer.onArray; on != nil {
+		// an array: what was printed goes to the file (REM's printer)
+		printer.onArray = func(w *Writer) { arrayPrintedStop(w, writerFunc(f.writeBytes)) }
+		defer func() { printer.onArray = on }()
+	}
 	printer.Term(t)
 	f.writeBytes(printer.Take())
 	return t
@@ -263,4 +268,12 @@ func ReadTerm(pid int32, sort int32) Term {
 	t := buildQuery(tree, q)
 	Out.WriteString("\n")
 	return t
+}
+
+// writerFunc is an io.Writer writing with a function.
+type writerFunc func([]byte)
+
+func (f writerFunc) Write(b []byte) (int, error) {
+	f(b)
+	return len(b), nil
 }

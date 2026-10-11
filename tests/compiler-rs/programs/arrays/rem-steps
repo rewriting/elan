@@ -1,0 +1,3 @@
+The rewrite steps are compared with REM's: the array operations count no
+step in either (Compiler.4.0/Work: testArray 2, testVector 21, testMatrice
+10, testHashSet 8).

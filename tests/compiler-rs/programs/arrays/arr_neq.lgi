@@ -1,0 +1,6 @@
+LPL arr_neq description
+  query of sort bool
+  result of sort Term
+  import arrtest
+  start with () neqs(new(1, a))
+end

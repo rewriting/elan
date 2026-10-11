@@ -85,10 +85,6 @@ func builtinRefusal(code int32, decl string) error {
 		return unsupported(NotPlanned, "builtin operation code %d (%s): the I/O error constructor of the interpreter (REM has none: no fun_123 in its builtin.h)", code, decl)
 	case 160 <= code && code <= 174:
 		return unsupported(NotPlanned, "builtin operation code %d (%s): a call of the ELAN system (meta-level: parsing, .ref of a program; REM has none)", code, decl)
-	case 200 <= code && code <= 203:
-		return unsupported("S7e", "builtin operation code %d (%s): arrays (REM's fun_200..203; the interpreter uses the codes 300-303: no oracle for the library's declarations)", code, decl)
-	case code == 210:
-		return unsupported(NotPlanned, "builtin operation code %d (%s): the hash of a term (REM's value depends on its representation)", code, decl)
 	case code == 215:
 		return unsupported(NotPlanned, "builtin operation code %d (%s): equality of molecules (a builtin of one application of REM)", code, decl)
 	}
@@ -1600,8 +1596,10 @@ func (b *builder) build(name string, start *tt, q *ref.Query, sortIndices []ref.
 			case Builtin:
 				bo := pre[o].builtin
 				next[o] = !bo.Partial()
-				if bo.FileArg() && !sig.valuesOnly(ir.Ops[o].Args[0]) {
-					next[o] = false
+				for _, i := range bo.IntArgs() {
+					if !sig.valuesOnly(ir.Ops[o].Args[i]) {
+						next[o] = false
+					}
 				}
 				if bo.NeedsValues() {
 					for _, a := range ir.Ops[o].Args {

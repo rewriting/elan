@@ -1,0 +1,10 @@
+LPL testVector  description
+
+query of sort  Term
+result of sort Term
+	  
+import testVector int
+start with () go
+
+end
+

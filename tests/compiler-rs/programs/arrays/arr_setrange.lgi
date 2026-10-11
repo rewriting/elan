@@ -1,0 +1,6 @@
+LPL arr_setrange description
+  query of sort bool
+  result of sort builtinArray[Term]
+  import arrtest
+  start with () new(2, a)[-1]<-b
+end

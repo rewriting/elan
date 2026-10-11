@@ -11,7 +11,7 @@ import "slices"
 type Term = *Node
 
 // Eq tells whether a and b are the same term: the same node, or ints of
-// the same value.
+// the same value (arrays: [ArrayEq]).
 func Eq(a, b Term) bool { return a == b || a.Sym == SymInt && b.Sym == SymInt && a.Int == b.Int }
 
 // Node is an immutable term node. Build nodes with [Mk0]..[Mk3], [Mk],
@@ -94,8 +94,8 @@ func builtinSymbols() []Symbol {
 	var syms []Symbol
 	// (the codes of true and false are those of the .ref file; ints and
 	// strings are ordered apart)
-	for i, name := range []string{"int", "string", "true", "false", "ident"} {
-		code := [...]int32{-2, -1, 1, 0, -3}[i]
+	for i, name := range []string{"int", "string", "true", "false", "ident", "array"} {
+		code := [...]int32{-2, -1, 1, 0, -3, 204}[i]
 		syms = append(syms, Symbol{Name: name, Print: prefixLayout(name, 0), Code: code, seed: symbolSeed(name, 0)})
 	}
 	return syms
@@ -108,8 +108,9 @@ const (
 	SymTrue   int32 = 2
 	SymFalse  int32 = 3
 	SymIdent  int32 = 4 // an identifier, its index in the Int field (ident.go)
+	SymArray  int32 = 5 // an array (array.go; REM's CODE_ARRAY, 204)
 	// FirstSym is the code of the first symbol of the program.
-	FirstSym int32 = 5
+	FirstSym int32 = 6
 )
 
 // The bool terms.

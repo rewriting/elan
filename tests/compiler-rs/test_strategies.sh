@@ -35,7 +35,10 @@
 # (standard output without its rewrite_step line, and standard error) is
 # compared with REM's byte for byte, and the files listed in <name>.files
 # (written by the program in its directory) with REM's; the files of
-# DIR/data are copied next to each program.
+# DIR/data are copied next to each program. A program with a
+# <name>.status (a run-time error of REM's: arrays out of range) must stop
+# with that status, REM's program too; their whole outputs are then
+# compared (DIR/output), nothing else.
 # A program without result fails (both sides empty prove nothing), unless
 # it has a <name>.none saying why no result is expected (it then fails if
 # the compiler gives one).
@@ -132,6 +135,25 @@ selected() {  # selected NAME: NAME is one of the names given
 }
 SELECTION="$*"
 
+# same_output NAME D: with DIR/output, the whole output of the compiled
+# program in D/$W (standard output without its rewrite_step line, standard
+# error) and the files of NAME.files are REM's (in D/rem), byte for byte
+same_output() {
+  [ -f "$PROGS/output" ] || return 0
+  same=1
+  grep -v '^rewrite_step = ' "$2/$W/run.out" >"$2/$W/run.out.cmp"
+  grep -v '^rewrite_step = ' "$2/rem/run.out" >"$2/rem/run.out.cmp"
+  for f in run.out.cmp run.err $(cat "$PROGS/$1.files" 2>/dev/null); do
+    if ! cmp -s "$2/$W/$f" "$2/rem/$f"; then
+      fail "$1 vs REM: $f differs (see $2)"; same=
+    fi
+  done
+  files=
+  [ -f "$PROGS/$1.files" ] && files=" and files ($(tr '\n' ' ' <"$PROGS/$1.files" | sed 's/ $//'))"
+  [ -n "$same" ] && ok "$1 vs REM: the same output, error output$files"
+  return 0
+}
+
 # results on one line: `a | b | c`
 oneline() { tr '\n' '|' | sed -e 's/|$//' -e 's/|/ | /g'; }
 
@@ -166,6 +188,30 @@ for lgi in "$PROGS"/*.lgi; do
   out=$( cd "$d/$W" && ./a.out -noInput -quiet <"$NULL" >run.out 2>run.err; s=$?; cat run.out; echo; echo "status $s" )
   status=$(printf '%s\n' "$out" | sed -n 's/^status //p')
   rs=$(printf '%s\n' "$out" | grep '^result = ')
+  # a program stopped by a run-time error of REM's (<name>.status): the
+  # status, and the whole output as REM's
+  if [ -f "$PROGS/$name.status" ]; then
+    want=$(cat "$PROGS/$name.status")
+    if [ "$status" != "$want" ]; then
+      fail "$name: status $status, expected $want ($name.status, see $d/$W)"; continue
+    fi
+    ok "$name: status $want ($name.status)"
+    if [ -n "$HAVE_REM" ] && [ ! -f "$PROGS/$name.no-rem" ]; then
+      if ( cd "$d/rem" && elanc -b -nosplit -quiet "$name" >elanc.log 2>&1 \
+           && make -f "$name.make" >make.log 2>&1 ); then
+        ( cd "$d/rem" && ./a.out -noInput -quiet <"$NULL" >run.out 2>run.err )
+        rstatus=$?
+        if [ "$rstatus" != "$want" ]; then
+          fail "$name: the REM program's status $rstatus, expected $want"
+        else
+          same_output "$name" "$d"
+        fi
+      else
+        fail "$name: elanc or make failed (see $d/rem/*.log)"
+      fi
+    fi
+    continue
+  fi
   if [ "$status" != 0 ] || ! printf '%s\n' "$out" | grep -q '^rewrite_step = '; then
     fail "$name: the compiled program failed (status $status, see $d/$W/run.err)"; continue
   fi
@@ -233,18 +279,7 @@ for lgi in "$PROGS"/*.lgi; do
     else
       ok "$name vs REM: $count results"
     fi
-    # the whole output and the files written, as REM's (DIR/output)
-    if [ "$rstatus" = 0 ] && [ -f "$PROGS/output" ]; then
-      same=1
-      grep -v '^rewrite_step = ' "$d/$W/run.out" >"$d/$W/run.out.cmp"
-      grep -v '^rewrite_step = ' "$d/rem/run.out" >"$d/rem/run.out.cmp"
-      for f in run.out.cmp run.err $(cat "$PROGS/$name.files" 2>/dev/null); do
-        if ! cmp -s "$d/$W/$f" "$d/rem/$f"; then
-          fail "$name vs REM: $f differs (see $d)"; same=
-        fi
-      done
-      [ -n "$same" ] && ok "$name vs REM: the same output, error output$( [ -f "$PROGS/$name.files" ] && printf ' and files (%s)' "$(cat "$PROGS/$name.files" | tr '\n' ' ' | sed 's/ $//')")"
-    fi
+    if [ "$rstatus" = 0 ]; then same_output "$name" "$d"; fi
   else
     fail "$name: elanc or make failed (see $d/rem/*.log)"
   fi

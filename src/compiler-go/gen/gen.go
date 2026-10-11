@@ -248,6 +248,10 @@ func (e *emitter) eqExpr(s ir.SortID, a, b string) string {
 	if _, ok := e.ir.Native(s); ok {
 		return a + " == " + b
 	}
+	if strings.HasPrefix(e.ir.Sorts[s].Name, "builtinArray[") {
+		// arrays: by contents (S7e task 7)
+		return "rt.ArrayEq(" + a + ", " + b + ")"
+	}
 	return "rt.Eq(" + a + ", " + b + ")"
 }
 
@@ -907,10 +911,29 @@ func (e *emitter) builtinBody(o ir.OpID) {
 	b := op.Builtin
 	res := op.Result
 	if b.OnTerms() {
-		// on terms of any sorts: the arguments as terms
-		var args []string
+		// on terms of any sorts: the arguments as terms, except the int
+		// values (a file number, an index, a size: the term stays when
+		// one is not a value)
+		args := make([]string, len(op.Args))
 		for i, s := range op.Args {
-			args = append(args, e.asTerm(s, fmt.Sprintf("a%d", i)))
+			args[i] = e.asTerm(s, fmt.Sprintf("a%d", i))
+		}
+		for _, i := range b.IntArgs() {
+			a := fmt.Sprintf("a%d", i)
+			args[i] = a
+			f := e.ir.FamilyOf(op.Args[i])
+			if !f.Boxed() {
+				continue
+			}
+			if op.Total {
+				args[i] = e.unboxValue(f.Kind, a, op.Fun)
+				continue
+			}
+			args[i] = fmt.Sprintf("v%d", i)
+			e.line("v%d, ok%d := rt.IntOf(%s)", i, i, a)
+			e.open("if !ok%d {", i)
+			e.line("return %s // a stuck argument", e.stuck(o))
+			e.close("}")
 		}
 		switch b {
 		case ir.TermReplace:
@@ -923,27 +946,22 @@ func (e *emitter) builtinBody(o ir.OpID) {
 			e.line("return %s", e.unbox(res, "rt.SyntacticMatch("+strings.Join(args, ", ")+")"))
 		case ir.TermUnify:
 			e.line("return %s", e.unbox(res, "rt.SyntacticUnify("+strings.Join(args, ", ")+")"))
-		case ir.IOWrite, ir.IORead:
-			// the file number: a value (else the term stays)
-			pid := "a0"
-			if f := e.ir.FamilyOf(op.Args[0]); f.Boxed() {
-				if op.Total {
-					pid = e.unboxValue(f.Kind, "a0", op.Fun)
-				} else {
-					e.line("pid, ok := rt.IntOf(a0)")
-					e.open("if !ok {")
-					e.line("return %s // a stuck argument", e.stuck(o))
-					e.close("}")
-					pid = "pid"
-				}
-			}
-			if b == ir.IOWrite {
-				e.line("return %s", e.unbox(res, "rt.WriteTerm("+pid+", "+args[1]+")"))
-			} else {
-				// a term of the result's sort (REM: of the sort of the
-				// second argument's operator, the same)
-				e.line("return %s", e.unbox(res, fmt.Sprintf("rt.ReadTerm(%s, %d)", pid, e.ir.Sorts[res].Index)))
-			}
+		case ir.IOWrite:
+			e.line("return %s", e.unbox(res, "rt.WriteTerm("+args[0]+", "+args[1]+")"))
+		case ir.IORead:
+			// a term of the result's sort (REM: of the sort of the
+			// second argument's operator, the same)
+			e.line("return %s", e.unbox(res, fmt.Sprintf("rt.ReadTerm(%s, %d)", args[0], e.ir.Sorts[res].Index)))
+		case ir.ArrayNew:
+			e.line("return %s", e.unbox(res, "rt.NewArray("+args[0]+", "+args[1]+")"))
+		case ir.ArrayGet:
+			e.line("return %s", e.unbox(res, "rt.ArrayGet("+args[0]+", "+args[1]+")"))
+		case ir.ArraySet:
+			e.line("return %s", e.unbox(res, "rt.ArraySet("+strings.Join(args, ", ")+")"))
+		case ir.ArrayLength:
+			e.line("return %s", e.fromValue(res, "rt.ArrayLength("+args[0]+")"))
+		case ir.TermHash:
+			e.line("return %s", e.fromValue(res, "rt.HashTerm("+args[0]+")"))
 		}
 		return
 	}

@@ -160,6 +160,26 @@ sub-project (S1–S5b). Each item says where it comes from.
   signed char as REM on macOS and x86 (REM on Linux arm64, whose char is
   unsigned, gives 0-255). The interpreter is not an oracle for most of
   them (its bugs below).
+- **elanc-go: arrays and builtinHashTerm** (S7e task 7, codes 200-203
+  and 210, `elanrt/array.go`, `hash.go`, `programs/arrays`: the five
+  programs of legacy `Compiler.4.0/Work` that REM runs, testArray,
+  testVector, testMatrice, testHashSet, testMatrix, give REM's results and
+  rewrite steps): REM's errors and output byte for byte (out of range, not
+  an array, an array printed: REM's message on stdout, status 1), REM's
+  hash values on ints, identifiers, terms and AC terms. Differences from
+  REM: `==` on two arrays compares their sizes and elements (REM finds any
+  two arrays equal, below); a term holding an array is shared by the
+  array's identity, so `h(new(1,a)) == h(new(1,a))` is false; the hash of
+  a string or of an array is elanc-go's (REM's reads memory).
+- **REM: arrays and hashes** (found in S7e task 7, not fixed; REM does
+  not change in S7e): `==` (code 18) on two arrays is always true
+  (`term_notDestructEqual`: equal hashes and the arity of the symbol
+  CODE_ARRAY, 0, end the comparison: `new(1,a) == new(3,b)` is true,
+  `programs/arrays/arr_neq.no-rem`); `hashTerm` of a string term hashes
+  its length and its address read as terms (a value of its memory), of a
+  term of 12 arguments or more reads its last arguments at a wrong address
+  (`GgetArgument(k+t, i)`); `new(n, x)` with n < 0 asks the GC for a huge
+  block (warnings), the first get then reports `size = -1`.
 - **Interpreter: I/O builtins** (found in S7e task 6, not fixed; the
   interpreter does not change in S7e): `write` (code 119) crashes with a
   segmentation fault after writing its term (`write(stdout, 5)`, status
@@ -193,18 +213,17 @@ sub-project (S1–S5b). Each item says where it comes from.
     term order: REM has none, the interpreter's `term::tcmp` uses its own
     symbol indices), 34-78 (doubles: REM has none), 90-112 (the
     interpreter's top-level commands), 160-174 (calls of the ELAN system),
-    210 (hash of a term: representation-dependent), 215 (equality of
-    molecules, one application's builtin), 115 and 117 (create a process)
-    and 123 (the interpreter's I/O error constructor `Error(e)` of
-    builtinIO): REM has no fun_115, 117, 123 (S7e task 6);
+    215 (equality of molecules, one application's builtin), 115 and 117
+    (create a process) and 123 (the interpreter's I/O error constructor
+    `Error(e)` of builtinIO): REM has no fun_115, 117, 123 (S7e task 6);
   - S7e — possible later, no program of the tests needs it: AC shapes
     REM transforms before matching (`refused/acnested`, `acallrep`: both
     oracles agree, e2 and e1), an AC operator whose arguments are not of
     its result sort or printed without its two arguments, a where pattern
     with an AC operator of a builtin sort, an identifier in an AC pattern;
-    builtin codes 200-203 (arrays: REM has them, the interpreter uses the
-    codes 300-303); rules
-    for a builtin operation; any other builtin code;
+    rules for a builtin operation; any other builtin code (the I/O codes
+    and the arrays are compiled since S7e tasks 6-7, builtinHashTerm
+    too);
   - at run time (status 2): a META call of a number or a string whose
     strategy is of another sort; a query using an operator whose
     compilation was refused (Task 5); the options `-sort=`, `-strategy=`,

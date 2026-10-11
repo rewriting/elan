@@ -1,0 +1,6 @@
+LPL arr_range description
+  query of sort bool
+  result of sort Term
+  import arrtest
+  start with () new(2, a)[5]
+end

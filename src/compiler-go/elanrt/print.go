@@ -73,6 +73,10 @@ type Writer struct {
 	// Quoted prints strings as the interpreter does ("a b", with \" and
 	// \\); false (the default) prints them raw, as the compiled C programs.
 	Quoted bool
+	// onArray, when set (the printer of a session), is called on an array
+	// and stops the program as REM's printer (array.go); else an array
+	// prints as array(n)
+	onArray func(w *Writer)
 }
 
 func isAlnum(c byte) bool {
@@ -211,6 +215,12 @@ func (w *Writer) head(t Term, after *[][]PrintItem) Term {
 		return nil
 	case SymIdent:
 		w.IdentValue(t.Int)
+		return nil
+	case SymArray:
+		if w.onArray != nil {
+			w.onArray(w) // (stops the program)
+		}
+		w.Raw("array(" + strconv.Itoa(int(t.Int)) + ")")
 		return nil
 	}
 	s := &Syms[t.Sym]

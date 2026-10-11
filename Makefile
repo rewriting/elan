@@ -134,6 +134,7 @@ check-go: install
 	  && ELANC=elanc-go tests/compiler-rs/test_strategies.sh "$(PREFIX)" -d strategy_terms \
 	  && ELANC=elanc-go tests/compiler-rs/test_strategies.sh "$(PREFIX)" -d ac \
 	  && ELANC=elanc-go tests/compiler-rs/test_strategies.sh "$(PREFIX)" -d io \
+	  && ELANC=elanc-go tests/compiler-rs/test_strategies.sh "$(PREFIX)" -d arrays \
 	  && ELANC=elanc-go tests/compiler-rs/test_depth.sh "$(PREFIX)" \
 	  && tests/compiler-rs/bench_parity.py "$(PREFIX)" --kind G \
 	  && ELANC=elanc-go tests/compiler-rs/test_query.sh "$(PREFIX)" \

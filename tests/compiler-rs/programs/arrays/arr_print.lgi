@@ -1,0 +1,6 @@
+LPL arr_print description
+  query of sort bool
+  result of sort builtinArray[Term]
+  import arrtest
+  start with () new(2, a)
+end

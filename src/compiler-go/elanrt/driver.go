@@ -160,6 +160,7 @@ type Session struct {
 // NewSession starts a session writing to out ([Out] in a program).
 func NewSession(o Options, out io.Writer) *Session {
 	s := &Session{Options: o, out: out, start: time.Now()}
+	s.W.onArray = func(w *Writer) { arrayPrintedStop(w, s.out) }
 	printer = &s.W // the terms written by the program (WriteTerm) share its spacing state
 	return s
 }

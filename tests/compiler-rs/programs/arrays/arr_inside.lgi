@@ -1,0 +1,6 @@
+LPL arr_inside description
+  query of sort bool
+  result of sort Holder
+  import arrtest
+  start with () h(new(1, a))
+end

@@ -1,0 +1,6 @@
+LPL arr_stuck description
+  query of sort bool
+  result of sort Term
+  import arrtest
+  start with () stuck[0]
+end

@@ -1,0 +1,4 @@
+The whole output of each program (standard output without its
+rewrite_step line, standard error) is compared with REM's byte for byte
+(test_strategies.sh); the programs with a <name>.status stop with that
+status (REM's errors), their output compared the same way.

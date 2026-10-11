@@ -1,0 +1,6 @@
+LPL arr_hash description
+  query of sort bool
+  result of sort out
+  import hashtest
+  start with () r(builtinHashTerm(a), builtinHashTerm(f(1, a)), builtinHashTerm(5), builtinHashTerm(-7), builtinHashTerm(f(2, f(1, a))), builtinHashTerm(a u b u a u f(3, b)))
+end
