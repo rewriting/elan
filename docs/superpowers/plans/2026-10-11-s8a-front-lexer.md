@@ -324,3 +324,7 @@ Hooks (all in `mlstream.cc`, ~40 lines): `@begin NAME` in the constructor before
 - Acceptance: `tests/front/test_front_lex.sh build/install --only lgi,spc` → **`402 files: 402 ok, 0 failed`** (373 `.lgi` + 29 `.spc`; streams with positions, stderr and status identical), 3.3 s.
 - `front-trace lex FILE` reads `.lgi`/`.spc` (and any non-`.eln` file); a `.eln` answers `needs the preprocessor (S8a task 7)`, status 3; it needs `ELANLIB` (no compiled-in prefix).
 - **Ruling:** small interface adjustments to the plan's list — `NewLib` returns `(Lib, error)` (the "error to the caller" made explicit), `Buffer.Get(d *diag.D)` (the fatal message needs the streams), and helpers `TraceInline`, `Stream.Chars`, `StringTab.Used/Size`, `MiTab.Count/Len`, `diag.D.Errs/Outs` — why: the plan's signatures had no way to report these errors; nothing else changes — cost if wrong: a rename in tasks 6-8, none outside `front/`.
+
+### Check after Task 5
+
+`make check` (worktree root, own `build/`): exit 0 — smoke, unit (5/5), golden 55/0 failed, round trip 145 ok / 30 not exported (Rust and Go readers), `go test` of `elan/...` and `elanrt` green (with `front/...`), BenchThesis 22 G + 64 J/JO/I ok, legacy bench I/A and J/JO: 0 regressions, 0 snapshot differences. S8a: `check_lextrace_hooks.sh` ok, `test_lextrace_harness.sh` 33 fixtures + unification ok, `test_tracecmp.py` 13 OK, `ELAN_GENERATED_DIR=… go test ./front/...` ok, `test_front_lex.sh --only lgi,spc` 402/402.
