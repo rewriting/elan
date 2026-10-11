@@ -371,3 +371,54 @@ func TestQueryParserCode(t *testing.T) {
 		}
 	}
 }
+
+// chooses: c(x0) => s(xn) where, n times in sequence, `choose try where
+// s(xi) := () x(i-1) try where o := () x(i-1) where xi := () x(i-1) end`
+// (each branch may fail): c(s(s(o))) = s(o) (two predecessors, then the
+// second branches). With sure, the second branch is `where xi := ()
+// x(i-1)` (it never fails; the choose after the pattern of a first branch
+// is still followed by the second branch).
+func chooses(n int, sure ...bool) *prog {
+	p := newProg()
+	p.op(sNat, 318, "o", nil, 0)
+	p.op(sNat, 319, "s", []uint32{sNat}, 0)
+	p.op(sNat, 320, "c", []uint32{sNat}, 0)
+	var wheres []ref.Where
+	for i := 1; i <= n; i++ {
+		prev, x := v(uint32(i-1), sNat), v(uint32(i), sNat)
+		wheres = append(wheres, ref.Try{Branches: [][]ref.Where{
+			{ref.Match{Pattern: f(319, x), Sort: sNat, Strategy: ref.None, Rhs: prev}},
+			{ref.Match{Pattern: f(318), Sort: sNat, Strategy: ref.None, Rhs: prev}, ref.Assign{Lhs: x, Strategy: ref.None, Rhs: prev}},
+		}})
+		if len(sure) > 0 {
+			// the second branch never fails: where xi := () x(i-1)
+			wheres[i-1].(ref.Try).Branches[1] = []ref.Where{ref.Assign{Lhs: x, Strategy: ref.None, Rhs: prev}}
+		}
+	}
+	p.rule(sNat, f(320, v(0, sNat)), f(319, v(uint32(n), sNat)), wheres...)
+	p.p.Query.StartWith = f(320, f(319, f(319, f(318))))
+	return p
+}
+
+// TestChooseLinear: the rest of the rule after a choose is written once
+// (not once per branch): n sequential chooses give code linear in n.
+func TestChooseLinear(t *testing.T) {
+	size := func(n int) int { return len(chooses(n).gen(t)) }
+	s0, s6, s12 := size(0), size(6), size(12)
+	if s12-s0 > 3*(s6-s0) {
+		t.Errorf("12 chooses: %d bytes, 6: %d, none: %d (not linear)", s12, s6, s0)
+	}
+	if testing.Short() {
+		return
+	}
+	if got := run(t, chooses(12)); got != "\nresult = s(o)\n\nrewrite_step = 1\n" {
+		t.Errorf("chooses: %q", got)
+	}
+	if got := run(t, chooses(2, true)); got != "\nresult = s(o)\n\nrewrite_step = 1\n" {
+		t.Errorf("chooses (sure): %q", got)
+	}
+	dir, src := module(t, chooses(3))
+	if out, err := goCmd(dir, "vet", ".").CombinedOutput(); err != nil {
+		t.Errorf("go vet: %v\n%s\n%s", err, out, numbered(src))
+	}
+}

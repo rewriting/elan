@@ -121,6 +121,10 @@ type emitter struct {
 	// rest of the elements without an extension (ac.go, restTaker), that
 	// variable, bound after the conditions
 	late *lateRest
+	// chooseRest, inside a branch of a choose, writes the call of the
+	// closure of the rest of the rule at the end of the branch's
+	// conditions (at depth: see conds); nil elsewhere
+	chooseRest func(depth int)
 	// ekerPats are the patterns of Eker's matcher (ac.go), declared at the
 	// end
 	ekerPats []string
@@ -1315,8 +1319,15 @@ func (e *emitter) conds(r *ir.Rule, from int, used map[ir.VarID]bool, depth int)
 			e.ekerMatch(r, j, used, depth)
 			return true
 		case ir.CondChoose:
-			return e.choose(r, j, used, depth)
+			// (the code after it is reached if a condition before it
+			// fails)
+			return e.choose(r, j, used, depth) || opens > 0
 		}
+	}
+	if e.chooseRest != nil {
+		// the end of a branch of a choose: the rest of the rule
+		e.chooseRest(depth)
+		return true
 	}
 	rhs := ""
 	if e.late != nil {
@@ -1357,17 +1368,68 @@ func (e *emitter) conds(r *ir.Rule, from int, used map[ir.VarID]bool, depth int)
 }
 
 // choose writes the condition j of r, `choose try b1 ... end`
-// ([ir.CondChoose]): per branch, a block with the branch's conditions then
-// the rest of the rule (its code repeated in each branch); the code of a
-// branch falls into the next one when it fails. It tells whether the code
-// after it is reached: the branches after one that always returns are
-// not written (unreachable).
+// ([ir.CondChoose]): the rest of the rule (the conditions after end and
+// the right-hand side) as a closure rest<n>, written once, taking the
+// variables bound by every branch (S7d task 8: the rest written per
+// branch made n sequential chooses 2^n copies); then per branch, a block
+// with the branch's conditions ending with the call of rest<n>, whose
+// success ends the rule as its right-hand side would. The closure runs at
+// depth+1 (see conds: a failure returns false; a normalisation function
+// keeps its result in res<n>; a label gives it to k and returns whether
+// to stop). The code of a branch falls into the next one when it fails.
+// It tells whether the code after it is reached.
 func (e *emitter) choose(r *ir.Rule, j int, used map[ir.VarID]bool, depth int) bool {
 	c := &r.Conds[j]
+	n := e.next()
+	name := fmt.Sprintf("rest%d", n)
+	// the parameters: the variables bound by every branch (the others are
+	// not bound after end), that the rule uses
+	var params []ir.VarID
+	for v := range bound(c) {
+		if used[v] {
+			params = append(params, v)
+		}
+	}
+	slices.Sort(params)
+	var decl, args []string
+	for _, v := range params {
+		decl = append(decl, r.Vars[v].Name+" "+e.goType(r.Vars[v].Sort))
+		args = append(args, r.Vars[v].Name)
+	}
+	res := ""
+	saveRes, saveOk := e.res, e.ok
+	if !e.labelMode {
+		res = fmt.Sprintf("res%d", n)
+		e.line("var %s %s", res, e.resType)
+		e.res, e.ok = res, "_"
+	}
+	e.open("%s := func(%s) bool { // the rest of the rule after the choose", name, strings.Join(decl, ", "))
+	rest := *r
+	rest.Conds = r.Conds[j+1:]
+	if e.conds(&rest, 0, used, depth+1) {
+		e.line("return false")
+	}
+	e.close("}")
+	e.res, e.ok = saveRes, saveOk
+	outer := e.chooseRest
+	e.chooseRest = func(d int) {
+		e.open("if %s(%s) {", name, strings.Join(args, ", "))
+		switch {
+		case e.labelMode:
+			e.line("return true")
+		case d == 0:
+			e.ret(res)
+		default:
+			e.line("%s, %s = %s, true", e.res, e.ok, res)
+			e.line("return true")
+		}
+		e.close("}")
+	}
+	defer func() { e.chooseRest = outer }()
 	for i, br := range c.Branches {
-		e.open("{ // choose: try branch %d of %d, then the rest of the rule", i+1, len(c.Branches))
+		e.open("{ // choose: try branch %d of %d, then %s", i+1, len(c.Branches), name)
 		sub := *r
-		sub.Conds = append(slices.Clone(br), r.Conds[j+1:]...)
+		sub.Conds = br
 		falls := e.conds(&sub, 0, used, depth)
 		e.close("}")
 		if !falls {
@@ -1375,6 +1437,61 @@ func (e *emitter) choose(r *ir.Rule, j int, used map[ir.VarID]bool, depth int) b
 		}
 	}
 	return true
+}
+
+// bound are the variables that a choose binds: those bound by every
+// branch.
+func bound(c *ir.Cond) map[ir.VarID]bool {
+	var all map[ir.VarID]bool
+	for _, br := range c.Branches {
+		b := map[ir.VarID]bool{}
+		for i := range br {
+			bindsOf(&br[i], b)
+		}
+		if all == nil {
+			all = b
+			continue
+		}
+		for v := range all {
+			if !b[v] {
+				delete(all, v)
+			}
+		}
+	}
+	return all
+}
+
+// bindsOf adds to into the variables that condition c binds.
+func bindsOf(c *ir.Cond, into map[ir.VarID]bool) {
+	var pat func(p *ir.Pattern)
+	pat = func(p *ir.Pattern) {
+		if p.Kind == ir.PatVar {
+			into[p.Var] = true
+		}
+		for _, v := range p.Vars {
+			into[v.Var] = true
+		}
+		if p.Abs != nil {
+			into[p.Abs.Var] = true
+		}
+		for i := range p.Args {
+			pat(&p.Args[i])
+		}
+	}
+	switch c.Kind {
+	case ir.CondLet:
+		into[c.A] = true
+	case ir.CondMatch, ir.CondApply, ir.CondAC:
+		pat(&c.Pat)
+	case ir.CondEker:
+		for _, v := range c.EkerVars {
+			into[v] = true
+		}
+	case ir.CondChoose:
+		for v := range bound(c) {
+			into[v] = true
+		}
+	}
 }
 
 // simpleCond writes a condition that gives at most one solution and binds
