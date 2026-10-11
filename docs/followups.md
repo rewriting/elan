@@ -47,6 +47,11 @@ sub-project (S1–S5b). Each item says where it comes from.
   calls never ends). Same results, in the same order; documented, not
   changed (the interpreter's search after the last result is unobservable
   except by non-termination).
+- **`call` whose name is a variable** (`[] mk(s) => call s : int`, review
+  of S7b): `elan --cexport` stops with `[fatal] Call type name not found`
+  (exporter, `src/interpreter/ref/ref.cc`), so elanc-go and elanc-rs exit
+  with status 1 instead of refusing the program (status 2, "not supported
+  yet"); the interpreter runs it. To do with the calls by name, S7d (S6d).
 - **REM: Meta_strat terms** (`call`, sequences... built as `Strategy[X]`
   terms) give C that does not compile (`fun_143`), found by S6b
   (`tests/compiler-rs/programs/strategy_terms/ms_*`, `.no-rem`).
@@ -58,6 +63,15 @@ sub-project (S1–S5b). Each item says where it comes from.
 - **`main_coq_skeleton.c`** (`elanc -coq`) does not compile with current
   compilers (pre-ANSI multi-line string); `elanc -noC` links a non-existent
   `-lelan` (S5b).
+
+## Performance
+
+- **Tail-call loops of elanc-go allocate every turn** (review of S7b,
+  `gen/strat.go`, `strategies`): the closures `again` and those of the
+  body (the rest of the sequences, the steps of repeat*/iterate*) and the
+  DC/ONE states (`rt.NewOne`, `rt.NewDc`) are created inside the `for`,
+  once per iteration. Hoist them out of the loop and reset the states at
+  each turn (S7e, with the other optimisations).
 
 ## Build, tests, tooling
 
