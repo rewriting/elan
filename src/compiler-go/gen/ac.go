@@ -23,13 +23,17 @@ import (
 // AC operator (the rest of a normal form can be reducible: and(x, t) on
 // and(a, a, t) with and(x, x) => x).
 //
-// The conditions after the matching that give at most one solution and
-// bind nothing (non-linearity checks, ifs, local assignments) are written
-// as soon as the variables they read are bound, in their order (the
-// matching is pruned: efib's compute rule tests n1 == n2 + 1 before
-// choosing the third element); the others after the whole match. Every
-// failure falls through to the next iteration: the solutions are tried in
-// order, each one passed to the rest of the rule.
+// The conditions after the matching that give at most one solution, bind
+// nothing and take no rewrite step (non-linearity checks, ifs and local
+// assignments of builtin operations) are written as soon as the variables
+// they read are bound, in their order (the matching is pruned: efib's
+// compute rule tests n1 == n2 + 1 before choosing the third element); the
+// others after the whole match, as REM evaluates them (once per solution:
+// the same rewrite steps). Every failure falls through to the next
+// iteration: the solutions are tried in order, each one passed to the
+// rest of the rule. F(x, t1, ..., tm) at the top of an unlabelled rule,
+// x read by no condition, is matched as REM matches it: x takes the rest,
+// without an extension (restTaker).
 
 // extension is the extension of a rule applied modulo an extension: the
 // AC operator and the Go variable of the elements left over.
@@ -71,9 +75,43 @@ func exprVars(x *ir.Expr, into map[ir.VarID]bool) {
 	}
 }
 
+// stepFree tells whether evaluating x takes no rewrite step: it applies
+// no operator with rules (constructors, injections, booleans and builtin
+// operations only).
+func (e *emitter) stepFree(x *ir.Expr) bool {
+	if x.Kind == ir.ExprOp && e.ir.Ops[x.Op].Kind == ir.Defined {
+		return false
+	}
+	for i := range x.Args {
+		if !e.stepFree(&x.Args[i]) {
+			return false
+		}
+	}
+	return true
+}
+
+// condReads tells whether the condition c reads the variable v.
+func condReads(c *ir.Cond, v ir.VarID) bool {
+	vars := map[ir.VarID]bool{}
+	switch c.Kind {
+	case ir.CondSame:
+		vars[c.B] = true
+		vars[c.A] = true
+	case ir.CondAC, ir.CondEker:
+		vars[c.A] = true
+	default:
+		exprVars(&c.Expr, vars)
+	}
+	return vars[v]
+}
+
 // hoist writes the conditions from *next on that can be written now: those
-// of [emitter.simpleCond] whose variables are not pending, in order (it
-// stops at the first other one). It returns the number of ifs opened.
+// of [emitter.simpleCond] whose variables are not pending and that take no
+// rewrite step, in order (it stops at the first other one). It returns the
+// number of ifs opened. A condition that can take steps waits for the
+// whole match, as in REM (it evaluates the conditions once per solution of
+// the whole AC match: the rewrite steps are counted as REM counts them);
+// the hoisted ones only prune the enumeration.
 func (e *emitter) hoist(r *ir.Rule, next *int, pending map[ir.VarID]bool, used map[ir.VarID]bool) int {
 	opens := 0
 	for ; *next < len(r.Conds); *next++ {
@@ -83,6 +121,9 @@ func (e *emitter) hoist(r *ir.Rule, next *int, pending map[ir.VarID]bool, used m
 		case ir.CondSame:
 			vars[c.A], vars[c.B] = true, true
 		case ir.CondIf, ir.CondLet:
+			if !e.stepFree(&c.Expr) {
+				return opens
+			}
 			exprVars(&c.Expr, vars)
 		default:
 			return opens
@@ -159,6 +200,10 @@ func (e *emitter) acLevel(r *ir.Rule, i, end int, next *int, pending, used map[i
 	if p.Abs != nil {
 		least++
 	}
+	if restTaker(r, p) {
+		// (the rest can be empty during the match, as in REM)
+		least = k0
+	}
 	if len(p.Vars) == 0 && p.Abs == nil && !p.Ext {
 		open("if %s.Sym == %s && len(%s.Args) == %d {", subject, symName(op), subject, k0)
 	} else {
@@ -229,7 +274,7 @@ func (e *emitter) acVars(r *ir.Rule, c *ir.Cond, el string, pos []string, n int,
 			e.line("%s := %s", r.Vars[v].Name, e.acValue(p.Op, m))
 		}
 	}
-	saved := e.ext
+	saved, savedLate := e.ext, e.late
 	ext := p.Ext
 	if ext && (len(p.Vars) == 2 || p.Abs != nil) {
 		d := fmt.Sprintf("d%d", n)
@@ -255,6 +300,9 @@ func (e *emitter) acVars(r *ir.Rule, c *ir.Cond, el string, pos []string, n int,
 		case p.Abs != nil:
 			open("if len(%s) > 0 {", rest)
 			bind(v.Var, rest)
+		case restTaker(r, p):
+			// the rest, bound after the conditions (lateBind)
+			e.late = &lateRest{v: v.Var, op: p.Op, rest: rest}
 		case ext:
 			d := fmt.Sprintf("d%d", n)
 			open("for %s := rt.NewDown(%s, %d); %s.Next(); {", d, rest, v.Mult, d)
@@ -309,10 +357,88 @@ func (e *emitter) acVars(r *ir.Rule, c *ir.Cond, el string, pos []string, n int,
 	}
 	opens += e.hoist(r, next, pending, used)
 	k()
-	e.ext = saved
+	e.ext, e.late = saved, savedLate
 	for range opens {
 		e.close("}")
 	}
+}
+
+// restTaker tells whether the AC pattern p of rule r is matched as REM
+// matches F(x, t1, ..., tm) at the top of an unlabelled rule when no
+// condition reads x (RewriteRule.java transformation3_2 adds no extension
+// variable then: x is not "constrained"): the element patterns t1, ...,
+// tm, then x takes the rest, without an extension (the extensions the
+// interpreter would try after it give the same result: the conditions do
+// not read x). As in REM's code, the rest can be empty during the match:
+// the conditions are evaluated (their rewrite steps counted), then the
+// rule fails before its right-hand side ("Avoid an empty instance"; the
+// interpreter's x is never empty either).
+func restTaker(r *ir.Rule, p *ir.Pattern) bool {
+	if !p.Ext || p.Abs != nil || len(p.Vars) != 1 || p.Vars[0].Mult != 1 || len(p.Args) == 0 {
+		return false
+	}
+	x := p.Vars[0].Var
+	return !slices.ContainsFunc(r.Conds, func(c ir.Cond) bool { return c.Kind != ir.CondAC && condReads(&c, x) })
+}
+
+// lateRest is the variable of a [restTaker] pattern: v takes the elements
+// rest of the AC operator op.
+type lateRest struct {
+	v    ir.VarID
+	op   ir.OpID
+	rest string
+}
+
+// lateBind writes, after the conditions of r, the test that the rest of
+// e.late is not empty (an if, left open) and the binding of its variable;
+// it returns the right-hand side when it builds it (the variable an
+// argument of the AC operator at its top and nowhere else: the rest is
+// merged with the other arguments, normalised as a whole, as REM and the
+// interpreter do), else "". Elsewhere the variable is the normal form of
+// the rest (REM and the interpreter keep the rest as it is: their counts
+// of steps differ when the rest of a normal form is reducible).
+func (e *emitter) lateBind(r *ir.Rule, used map[ir.VarID]bool) string {
+	l := e.late
+	e.open("if len(%s) > 0 { // the variable of the AC level is not empty", l.rest)
+	op := &e.ir.Ops[l.op]
+	if x := &r.Rhs; x.Kind == ir.ExprOp && x.Op == l.op && varCount(x, l.v) == 1 {
+		var args []string
+		direct := false
+		var flat func(x *ir.Expr)
+		flat = func(x *ir.Expr) {
+			for i := range x.Args {
+				a := &x.Args[i]
+				switch {
+				case a.Kind == ir.ExprOp && a.Op == l.op:
+					flat(a)
+				case a.Kind == ir.ExprVar && a.Var == l.v:
+					direct = true
+				default:
+					args = append(args, e.expr(a, r.Vars))
+				}
+			}
+		}
+		flat(x)
+		if direct {
+			return fmt.Sprintf("rt.ExtendAC(%s, %s, %s, %s)", symName(op), acFun(op), l.rest, strings.Join(args, ", "))
+		}
+	}
+	if used[l.v] {
+		e.line("%s := %s", r.Vars[l.v].Name, e.acValue(l.op, l.rest))
+	}
+	return ""
+}
+
+// varCount is the number of occurrences of the variable v in x.
+func varCount(x *ir.Expr, v ir.VarID) int {
+	n := 0
+	if x.Kind == ir.ExprVar && x.Var == v {
+		n++
+	}
+	for i := range x.Args {
+		n += varCount(&x.Args[i], v)
+	}
+	return n
 }
 
 // ekerMatch writes the CondEker j: each solution of Eker's matcher (the

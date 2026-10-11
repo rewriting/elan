@@ -25,8 +25,11 @@
 #    be equal, in order (the leading spaces of the compiled programs'
 #    token spacing are not compared, nor the quotes of strings);
 #  - REM: `elanc -b -nosplit -quiet` + make + `./a.out -noInput -quiet`:
-#    the `result = ` lines must be byte-identical (the `rewrite_step` line
-#    is not compared: it depends on the compilation scheme).
+#    the `result = ` lines must be byte-identical; the `rewrite_step` line
+#    is compared only when DIR has a file rem-steps (programs/ac: elanc-go
+#    tries the same redexes in the same order as REM), except for a
+#    program with a <name>.steps saying why its count differs (elsewhere
+#    it depends on the compilation scheme).
 # A program without result fails (both sides empty prove nothing), unless
 # it has a <name>.none saying why no result is expected (it then fails if
 # the compiler gives one).
@@ -196,10 +199,18 @@ for lgi in "$PROGS"/*.lgi; do
     rem=$(printf '%s\n' "$rout" | grep '^result = ')
     if [ "$rstatus" != 0 ]; then
       fail "$name: the REM program failed (status $rstatus)"
-    elif [ "$rs" = "$rem" ]; then
-      ok "$name vs REM: $count results"
-    else
+    elif [ "$rs" != "$rem" ]; then
       fail "$name vs REM: $ELANC [$(printf '%s\n' "$rs" | oneline)], REM [$(printf '%s\n' "$rem" | oneline)]"
+    elif [ -f "$PROGS/rem-steps" ] && [ ! -f "$PROGS/$name.steps" ]; then
+      csteps=$(printf '%s\n' "$out" | sed -n 's/^rewrite_step = //p')
+      rsteps=$(printf '%s\n' "$rout" | sed -n 's/^rewrite_step = //p')
+      if [ "$csteps" = "$rsteps" ]; then
+        ok "$name vs REM: $count results, $csteps rewrite steps"
+      else
+        fail "$name vs REM: rewrite steps $ELANC $csteps, REM $rsteps"
+      fi
+    else
+      ok "$name vs REM: $count results"
     fi
   else
     fail "$name: elanc or make failed (see $d/rem/*.log)"

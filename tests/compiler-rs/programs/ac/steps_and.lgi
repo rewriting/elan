@@ -1,0 +1,6 @@
+LPL steps_and description
+  query of sort bool
+  result of sort T
+  import acsteps
+  start with () G(n(1), G(n(2), G(n(5), n(6))))
+end

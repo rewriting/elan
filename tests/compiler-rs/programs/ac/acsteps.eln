@@ -1,0 +1,34 @@
+module acsteps
+// Conditional rules of AC operators applied modulo an extension, with
+// conditions that take rewrite steps (big): REM evaluates the conditions
+// once per solution of the whole match, the variable of the AC level
+// taking the rest (no enumeration of the extension); the rewrite steps
+// are compared with REM's (steps_*).
+import global int bool eq[T]; end
+sort T; end
+operators global
+  n(@) : (int) T;
+  F(@,@) : (T T) T (AC);
+  G(@,@) : (T T) T (AC);
+  K(@,@) : (T T) T (AC);
+  M(@,@) : (T T) T (AC);
+  h(@,@) : (T T) T;
+  big(@) : (int) bool;
+end
+rules for bool
+  i : int;
+global
+  [] big(i) => true if i > 3 end
+  [] big(i) => false end
+end
+rules for T
+  x : T;
+  i, j : int;
+global
+  [] F(n(i), F(n(j), x)) => F(n(i + j), x) if big(i) if big(j) end
+  [] G(n(i), G(n(j), x)) => G(n(i + j), x) if big(i) and big(j) end
+  // the rest as the right-hand side (reducible), the rest dropped
+  [] K(n(i), x) => x if big(i) end
+  [] M(n(i), x) => n(i) if big(i) end
+end
+end

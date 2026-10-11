@@ -114,6 +114,10 @@ type emitter struct {
 	// ext is, inside the matching of a rule applied modulo an extension,
 	// the extension (ac.go)
 	ext *extension
+	// late is, inside the matching of a rule whose AC variable takes the
+	// rest of the elements without an extension (ac.go, restTaker), that
+	// variable, bound after the conditions
+	late *lateRest
 	// ekerPats are the patterns of Eker's matcher (ac.go), declared at the
 	// end
 	ekerPats []string
@@ -1077,8 +1081,15 @@ func (e *emitter) conds(r *ir.Rule, from int, used map[ir.VarID]bool, depth int)
 			return true
 		}
 	}
+	rhs := ""
+	if e.late != nil {
+		rhs = e.lateBind(r, used)
+		opens++
+	}
 	e.line("rt.Step()")
-	rhs := e.expr(&r.Rhs, r.Vars)
+	if rhs == "" {
+		rhs = e.expr(&r.Rhs, r.Vars)
+	}
 	if e.ext != nil {
 		// modulo an extension: op(E, rhs), the arguments of rhs merged
 		// with E when op is at its top
