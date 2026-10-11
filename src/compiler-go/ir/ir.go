@@ -1011,6 +1011,39 @@ func (ir *IR) FamilyOf(s SortID) *Family {
 	return nil
 }
 
+// HoldsArray tells, for each sort, whether its terms can hold an array
+// (builtinArray[X], mutated in place by set: S7e task 13): an array sort,
+// or a sort with a variant (or, for a family, a stuck operator) having an
+// argument of such a sort. The normal form of an AC term of such a sort
+// is not cached (rt.Normal): the term can rewrite once an array it holds
+// changes.
+func (ir *IR) HoldsArray() []bool {
+	holds := make([]bool, len(ir.Sorts))
+	for s := range ir.Sorts {
+		holds[s] = strings.HasPrefix(ir.Sorts[s].Name, "builtinArray[")
+	}
+	for changed := true; changed; {
+		changed = false
+		for s := range ir.Sorts {
+			if holds[s] {
+				continue
+			}
+			ops := ir.Sorts[s].Variants
+			if f := ir.FamilyOf(s); f != nil {
+				ops = append(ops[:len(ops):len(ops)], f.Stuck...)
+			}
+			for _, o := range ops {
+				for _, a := range ir.Ops[o].Args {
+					if holds[a] && !holds[s] {
+						holds[s], changed = true, true
+					}
+				}
+			}
+		}
+	}
+	return holds
+}
+
 // Native returns the native kind of the terms of sort s, and false when
 // they are elanrt.Terms (a sort of terms or a boxed family).
 func (ir *IR) Native(s SortID) (BuiltinKind, bool) {

@@ -80,7 +80,7 @@ func GoMod(program, runtime string) string {
 
 // Main is the main.go of a generated program, formatted by go/format.
 func Main(p *ir.IR) ([]byte, error) {
-	e := &emitter{ir: p}
+	e := &emitter{ir: p, holdsArray: p.HoldsArray()}
 	e.file()
 	src := []byte(e.b.String())
 	out, err := format.Source(src)
@@ -92,11 +92,13 @@ func Main(p *ir.IR) ([]byte, error) {
 
 // emitter writes Go source, indented by tabs.
 type emitter struct {
-	ir     *ir.IR
-	b      strings.Builder
-	indent int
-	fresh  int  // counter of temporaries in the current function
-	b2i    bool // the helper b2i is needed
+	ir *ir.IR
+	// holdsArray: the sorts whose terms can hold an array (ir.HoldsArray)
+	holdsArray []bool
+	b          strings.Builder
+	indent     int
+	fresh      int  // counter of temporaries in the current function
+	b2i        bool // the helper b2i is needed
 	// normTerm: the normalisation dispatcher normTerm is needed (rt.Replace)
 	normTerm bool
 	// injTests are the injections whose test is needed (injTest)
@@ -840,18 +842,20 @@ func (e *emitter) opFunc(o ir.OpID) {
 			e.line("// the AC term (shared, or transient until it is a normal form): the")
 			e.line("// only column of the rules")
 			e.line("a0 := rt.ACTerm(%s, e)", symName(op))
-			e.open("if rt.Normal(a0) {")
-			e.line("// a normal form found before, without a step")
-			e.ret("a0")
-			e.close("}")
+			if !e.holdsArray[op.Result] {
+				e.open("if rt.Normal(a0) {")
+				e.line("// a normal form found before, without a step")
+				e.ret("a0")
+				e.close("}")
+			}
 		}
 		mark := e.b.Len()
-		if op.AC {
+		if op.AC && !e.holdsArray[op.Result] {
 			e.line("steps := rt.Steps")
 		}
 		e.resType = e.goType(op.Result)
 		falls := e.decision(op.Tree, op.Rules)
-		if op.AC && (!falls || op.Total) {
+		if op.AC && !e.holdsArray[op.Result] && (!falls || op.Total) {
 			// steps is not used: no line
 			s := e.b.String()
 			e.b.Reset()
@@ -863,6 +867,10 @@ func (e *emitter) opFunc(o ir.OpID) {
 			// (the code ends with a return: go vet refuses unreachable code)
 		case op.Total:
 			e.line(`panic("%s: no rule applies to a total operator")`, op.Fun)
+		case op.AC && e.holdsArray[op.Result]:
+			e.line("// no rule applies: the term is a normal form (not cached: it")
+			e.line("// can hold an array, mutated in place)")
+			e.ret("rt.Intern(a0)")
 		case op.AC:
 			e.line("// no rule applies: the term is a normal form")
 			e.ret("rt.NormalForm(a0, steps)")
