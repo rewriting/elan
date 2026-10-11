@@ -11,7 +11,8 @@
 #        elanc-rem); elanc-rem and its make still work
 #   rem: bin/elanc -> elanc-rem, REM's driver
 # CMAKE_CHECK=1 also configures scratch build directories to check the
-# fallback and the errors of ELAN_ELANC (cmake only, nothing built).
+# fallback and the errors of ELAN_ELANC (cmake only, nothing built), the
+# default with the go of the PATH, a fake go1.22 and no go.
 PREFIX=${1:?usage: test_elanc_switch.sh PREFIX [go|rem]}
 WANT=${2:-go}
 HERE=$(cd "$(dirname "$0")" && pwd)
@@ -132,11 +133,48 @@ if [ "${CMAKE_CHECK:-}" = 1 ]; then
   else
     fail "cmake_falls_back_to_rem_without_go"
   fi
-  if configure go && grep -q 'bin/elanc is elanc-go (ELAN_ELANC=go)' "$WORK/go.log"; then  # bare-elanc-ok: the name in a message
-    ok "cmake_elanc_is_go_by_default"
-  else
-    fail "cmake_elanc_is_go_by_default"
-  fi
+  # the default (ELAN_ELANC=go): elanc-go when the go of the PATH is
+  # >= 1.24, else the fallback; checked with the PATH as it is, with a
+  # fake old go first in the PATH, and with a PATH without go (a directory
+  # of links to the programs of the PATH, go and gofmt left out; CMake's
+  # system prefixes not searched)
+  mkdir -p "$WORK/oldgo" "$WORK/nogo"
+  printf '#!/bin/sh\n[ "$1 $2" = "env GOVERSION" ] && echo go1.22.0\n' > "$WORK/oldgo/go"
+  chmod +x "$WORK/oldgo/go"
+  (IFS=:; for d in $PATH; do
+     for f in "$d"/*; do
+       b=${f##*/}
+       case $b in go|gofmt) continue ;; esac
+       [ -x "$f" ] && [ ! -d "$f" ] && [ ! -e "$WORK/nogo/$b" ] && ln -s "$f" "$WORK/nogo/$b"
+     done
+   done)
+  go_ok() { # whether the go of the PATH is >= 1.24 (CMake's test)
+    v=$(GOTOOLCHAIN=local go env GOVERSION 2>/dev/null) || return 1
+    v=${v#go}; maj=${v%%.*}; min=${v#*.}; min=${min%%[!0-9]*}
+    [ -n "$maj" ] && [ -n "$min" ] || return 1
+    [ "$maj" -gt 1 ] || { [ "$maj" -eq 1 ] && [ "$min" -ge 24 ]; }
+  }
+  default_case() { # default_case <name> <PATH> <cmake options>
+    n=$1 p=$2; shift 2
+    if (PATH=$p; go_ok); then
+      expect='bin/elanc is elanc-go (ELAN_ELANC=go)'  # bare-elanc-ok: the name in a message
+    else
+      expect='ELAN_ELANC=go but elanc-go is not built: bin/elanc is elanc-rem'  # bare-elanc-ok: the name in a message
+    fi
+    if (PATH=$p; configure "$n" "$@") && grep -qF "$expect" "$WORK/$n.log"; then
+      ok "cmake_elanc_default_$n"
+    else
+      fail "cmake_elanc_default_$n (expected: $expect)"
+    fi
+  }
+  default_case go "$PATH"
+  default_case oldgo "$WORK/oldgo:$PATH"
+  # (CMake's find_program also looks in its system prefixes: off)
+  default_case nogo "$WORK/nogo" -DCMAKE_FIND_USE_CMAKE_SYSTEM_PATH=OFF
+  if grep -q 'go1.22.0 is older than go1.24: elanc-go is not built' "$WORK/oldgo.log"; then ok "cmake_sees_an_old_go"
+  else fail "cmake_sees_an_old_go"; fi
+  if grep -q 'go not found: elanc-go is not built' "$WORK/nogo.log"; then ok "cmake_sees_no_go"
+  else fail "cmake_sees_no_go"; fi
   if configure bogus -DELAN_ELANC=java; then fail "cmake_refuses_a_bad_value"
   elif grep -q 'ELAN_ELANC must be go or rem' "$WORK/bogus.log"; then ok "cmake_refuses_a_bad_value"
   else fail "cmake_refuses_a_bad_value (another error)"; fi
