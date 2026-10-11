@@ -32,8 +32,8 @@
 # not run, <name>.no-interpreter why the interpreter is not run,
 # <name>.no-<compiler> (e.g. .no-elanc-go) why the program is not run with
 # that compiler. A program that the compiler refuses (status 2, "not
-# supported yet (<stage>)", the stage being one of its own: S6... for
-# elanc-rs, S7... for elanc-go) fails, the refusal quoted.
+# supported yet (<stage>)", the stage being one of its later ones: S6c-S6e
+# for elanc-rs, S7c-S7e for elanc-go) fails, the refusal quoted.
 # Outputs are compared as bytes (LC_ALL=C).
 #
 # Usage: [ELANC=elanc-go] test_strategies.sh PREFIX [-d DIR] [name...]   (an
@@ -102,7 +102,7 @@ for lgi in "$PROGS"/*.lgi; do
   ( cd "$d/$W" && $ELANC -v -b -nosplit -quiet $CACHE_OPT "$TARGET" "$name" >$ELANC.log 2>&1 )
   cstatus=$?
   if [ "$cstatus" != 0 ]; then
-    refusal=$(grep -E "not supported yet \($STAGE[b-e]( task [0-9])?\)" "$d/$W/$ELANC.log" | head -1)
+    refusal=$(grep -E "not supported yet \($STAGE[c-e]\)" "$d/$W/$ELANC.log" | head -1)
     if [ "$cstatus" = 2 ] && [ -n "$refusal" ]; then
       fail "$name: refused by $ELANC: $refusal"
     else

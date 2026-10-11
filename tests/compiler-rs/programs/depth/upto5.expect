@@ -1,7 +1,6 @@
 # a defined strategy with parameters nesting 10^5 strategy terms
-# (elanc-go: strategy terms built at run time, S7b task 2)
 query 0 end
 status 0
 result 100000
 small 100000 100
-compilers elanc-rs
+compilers elanc-rs elanc-go

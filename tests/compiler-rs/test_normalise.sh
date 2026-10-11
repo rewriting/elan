@@ -28,9 +28,9 @@
 # sources of latin1*.eln are Latin-1.
 # Programs programs/refused/<name>.lgi use constructs of later stages:
 # the compiler must stop with status 2 and a "not supported yet (<stage>)"
-# message, the stage being one of its own (S6b... for elanc-rs, S7b... for
-# elanc-go, "S7b task 2" included), and remove the a.out left by a previous
-# compilation.
+# message, the stage being one of its later ones (S6c, S6d, S6e for
+# elanc-rs; S7c, S7d, S7e for elanc-go: the strategies, S6b/S7b, are done),
+# and remove the a.out left by a previous compilation.
 #
 # Usage: [ELANC=elanc-go] test_normalise.sh PREFIX [name...]   (an installed
 # ELAN with the compiler; the names select programs, default all)
@@ -199,11 +199,11 @@ for lgi in "$HERE"/programs/refused/*.lgi; do
   echo stale >"$d/a.out" || exit 2  # a refused program leaves no a.out
   ( cd "$d" && $ELANC $CACHE_OPT "$TARGET" "$name" >$ELANC.log 2>&1 )
   status=$?
-  msg=$(grep -E "not supported yet \($STAGE[b-e]( task [0-9])?\)" "$d/$ELANC.log")
+  msg=$(grep -E "not supported yet \($STAGE[c-e]\)" "$d/$ELANC.log")
   if [ "$status" = 2 ] && [ -n "$msg" ] && [ ! -e "$d/a.out" ]; then
     ok "refused $name: $msg"
   else
-    fail "refused $name: status $status, expected 2 and a message ($STAGE...), no a.out (see $d/$ELANC.log)"
+    fail "refused $name: status $status, expected 2 and a message ($STAGE[c-e]), no a.out (see $d/$ELANC.log)"
   fi
 done
 
