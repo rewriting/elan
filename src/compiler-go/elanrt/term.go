@@ -46,7 +46,12 @@ type Symbol struct {
 	// nil is replaced by the prefix layout name(a1,...,an) when declared.
 	// The layout of an AC symbol has two arguments.
 	Print []PrintItem
-	seed  uint64 // hash of name and arity
+	// Code is the symbol's code in the .ref file (REM's code): the order
+	// of terms ([Compare]) compares it first. 0 when declared: the
+	// runtime code plus 1000 (tests); the generated programs give the
+	// .ref code (never 0: false, a builtin).
+	Code int32
+	seed uint64 // hash of name and arity
 }
 
 // Syms is the symbol table, indexed by symbol code; the builtin symbols
@@ -57,8 +62,11 @@ var Syms = builtinSymbols()
 
 func builtinSymbols() []Symbol {
 	var syms []Symbol
-	for _, name := range []string{"int", "string", "true", "false"} {
-		syms = append(syms, Symbol{Name: name, Print: prefixLayout(name, 0), seed: symbolSeed(name, 0)})
+	// (the codes of true and false are those of the .ref file; ints and
+	// strings are ordered apart)
+	for i, name := range []string{"int", "string", "true", "false"} {
+		code := [...]int32{-2, -1, 1, 0}[i]
+		syms = append(syms, Symbol{Name: name, Print: prefixLayout(name, 0), Code: code, seed: symbolSeed(name, 0)})
 	}
 	return syms
 }
@@ -84,6 +92,9 @@ func DeclareSym(s Symbol) int32 {
 	s.seed = symbolSeed(s.Name, s.Arity)
 	if s.Print == nil {
 		s.Print = prefixLayout(s.Name, s.Arity)
+	}
+	if s.Code == 0 {
+		s.Code = int32(len(Syms)) + 1000
 	}
 	Syms = append(Syms, s)
 	return int32(len(Syms) - 1)

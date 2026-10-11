@@ -11,51 +11,94 @@ import (
 // element slices ("multisets"); the helpers below never modify their
 // arguments and return fresh slices.
 //
-// The order is history-independent: it depends only on the structure of
-// the terms (their stored structural hash, then a structural comparison
-// for the rare equal hashes), never on creation order or addresses. With a
-// garbage collector, a term that is collected and rebuilt is a new node; an
-// order by creation would make outputs and step counts depend on GC timing.
+// The order is REM's (Gterm_cmp, src/compiler/runtime/termBase.c): the
+// order of the AC arguments is visible in the output (an AC term prints as
+// its elements in that order, right-nested) and in the order of the
+// solutions of AC matching, so elanc-go keeps the order of the compiled
+// programs of the reference (spec S7, G3 as amended by S7c). It is
+// history-independent: it depends only on the structure of the terms (the
+// symbols' codes in the .ref file, ints by value, strings by bytes), never
+// on creation order or addresses (with a garbage collector, a term that is
+// collected and rebuilt is a new node).
 
-// Compare is the canonical total order of terms: by structural hash, then
-// (two different terms with the same hash) by structure. Compare(a, b) == 0
-// if and only if a == b.
+// Compare is the canonical total order of terms (REM's Gterm_cmp): ints by
+// value, then strings by bytes, before the other terms; those by the code
+// of their symbol in the .ref file ([Symbol.Code]), then their arguments
+// from left to right, the elements of an AC term as a multiset (each
+// distinct element, then its multiplicity; a prefix first). Compare(a, b)
+// == 0 if and only if a == b.
 func Compare(a, b Term) int {
 	if a == b {
 		return 0
 	}
-	if a.Hash != b.Hash {
-		return cmp.Compare(a.Hash, b.Hash)
+	ka, kb := kindRank(a), kindRank(b)
+	if ka != kb {
+		return cmp.Compare(ka, kb)
 	}
-	return compareStructure(a, b)
+	switch ka {
+	case 0:
+		return cmp.Compare(a.Int, b.Int)
+	case 1:
+		return cmp.Compare(StrOf(a), StrOf(b))
+	}
+	sa, sb := &Syms[a.Sym], &Syms[b.Sym]
+	if sa.Code != sb.Code {
+		return cmp.Compare(sa.Code, sb.Code)
+	}
+	if sa.AC && sb.AC {
+		if c := compareMultisets(a.Args, b.Args); c != 0 {
+			return c
+		}
+	} else {
+		for i := 0; i < len(a.Args) && i < len(b.Args); i++ {
+			if c := Compare(a.Args[i], b.Args[i]); c != 0 {
+				return c
+			}
+		}
+		if c := cmp.Compare(len(a.Args), len(b.Args)); c != 0 {
+			return c
+		}
+	}
+	// two symbols with the same code (a builtin code shared by several
+	// profiles): by runtime code
+	return cmp.Compare(a.Sym, b.Sym)
 }
 
-// compareStructure orders two different terms with the same hash: symbol
-// name and arity, payload (the bytes for strings), then the arguments from
-// left to right. Recursion only follows equal hashes, which differ almost
-// always at the first level.
-func compareStructure(a, b Term) int {
-	sa, sb := &Syms[a.Sym], &Syms[b.Sym]
-	if c := cmp.Compare(sa.Name, sb.Name); c != 0 {
-		return c
+// kindRank orders ints, then strings, then the other terms.
+func kindRank(t Term) int {
+	switch t.Sym {
+	case SymInt:
+		return 0
+	case SymString:
+		return 1
 	}
-	if c := cmp.Compare(len(a.Args), len(b.Args)); c != 0 {
-		return c
-	}
-	if a.Sym == SymString && b.Sym == SymString {
-		if c := cmp.Compare(StrOf(a), StrOf(b)); c != 0 {
+	return 2
+}
+
+// compareMultisets compares two sorted multisets as REM compares its AC
+// lists of (element, multiplicity) pairs: the first different distinct
+// element, else the first different multiplicity; a prefix first.
+func compareMultisets(a, b []Term) int {
+	i, j := 0, 0
+	for {
+		if i == len(a) {
+			if j == len(b) {
+				return 0
+			}
+			return -1
+		}
+		if j == len(b) {
+			return 1
+		}
+		if c := Compare(a[i], b[j]); c != 0 {
 			return c
 		}
-	} else if c := cmp.Compare(a.Int, b.Int); c != 0 {
-		return c
-	}
-	for i := range a.Args {
-		if c := Compare(a.Args[i], b.Args[i]); c != 0 {
-			return c
+		ma, mb := Mult(a, i), Mult(b, j)
+		if ma != mb {
+			return cmp.Compare(ma, mb)
 		}
+		i, j = i+ma, j+mb
 	}
-	// two symbols with the same name and arity (different sorts)
-	return cmp.Compare(a.Sym, b.Sym)
 }
 
 // SortAC sorts elements in canonical order, in place.
@@ -196,4 +239,176 @@ func RemoveOne(e []Term, x Term) ([]Term, bool) {
 		return nil, false
 	}
 	return Rest(e, i), true
+}
+
+// ---------------------------------------------------------------------------
+// AC-level variables (the elements not taken by the element patterns of an
+// AC pattern, "the rest"; spec S7c task 1)
+
+// distinct returns the distinct elements of the sorted multiset e and
+// their multiplicities.
+func distinct(e []Term) ([]Term, []int) {
+	var d []Term
+	var m []int
+	for i := 0; i < len(e); i += Mult(e, i) {
+		d = append(d, e[i])
+		m = append(m, Mult(e, i))
+	}
+	return d, m
+}
+
+// DivAC returns the multiset x such that m copies of x make e (a variable
+// of multiplicity m, x U ... U x, takes the whole rest e), and false when
+// there is none (e empty, or a multiplicity not divisible by m).
+func DivAC(e []Term, m int) ([]Term, bool) {
+	if len(e) == 0 || len(e)%m != 0 {
+		return nil, false
+	}
+	if m == 1 {
+		return e, true
+	}
+	x := make([]Term, 0, len(e)/m)
+	for i := 0; i < len(e); {
+		k := Mult(e, i)
+		if k%m != 0 {
+			return nil, false
+		}
+		for range k / m {
+			x = append(x, e[i])
+		}
+		i += k
+	}
+	return x, true
+}
+
+// Split enumerates the solutions of two variables x U y (each once, both
+// non-empty) against a multiset, in REM's order (next_minimal_extract,
+// src/compiler/runtime/ac_tools.c): x takes a counter over the distinct
+// elements in canonical order, each digit up to its multiplicity, the
+// last element least significant, from 1 up to the whole multiset minus
+// one; y takes the complement. On a U b U c: x = c, b, b U c, a, a U c,
+// a U b.
+//
+//	for s := rt.NewSplit(e); s.Next(); { x, y := s.X(), s.Y() ... }
+type Split struct {
+	d     []Term
+	max   []int
+	count []int
+	n     int // elements in count
+	total int
+}
+
+// NewSplit starts the enumeration over e (sorted).
+func NewSplit(e []Term) *Split {
+	d, m := distinct(e)
+	return &Split{d: d, max: m, count: make([]int, len(d)), total: len(e)}
+}
+
+// Next moves to the next solution; false at the end.
+func (s *Split) Next() bool {
+	for i := len(s.count) - 1; i >= 0; i-- {
+		if s.count[i] < s.max[i] {
+			s.count[i]++
+			s.n++
+			return s.n < s.total
+		}
+		s.n -= s.count[i]
+		s.count[i] = 0
+	}
+	return false
+}
+
+// X is the counter's part (sorted, non-empty).
+func (s *Split) X() []Term { return s.part(false) }
+
+// Y is the complement (sorted, non-empty).
+func (s *Split) Y() []Term { return s.part(true) }
+
+func (s *Split) part(complement bool) []Term {
+	var out []Term
+	for i, x := range s.d {
+		k := s.count[i]
+		if complement {
+			k = s.max[i] - k
+		}
+		for range k {
+			out = append(out, x)
+		}
+	}
+	return out
+}
+
+// Down enumerates the solutions of a variable of multiplicity m with an
+// extension (x U ... U x U E against e, x non-empty, E possibly empty):
+// from the largest x (each element's multiplicity divided by m) down, a
+// counter over the distinct elements, the last one least significant (as
+// REM's next_maximal_extract), so the first solution takes the most (with
+// m = 1: x is the whole multiset, E empty).
+//
+//	for s := rt.NewDown(e, m); s.Next(); { x, rest := s.X(), s.Rest() ... }
+type Down struct {
+	d       []Term
+	mult    []int
+	max     []int
+	count   []int
+	m       int
+	started bool
+}
+
+// NewDown starts the enumeration over e (sorted).
+func NewDown(e []Term, m int) *Down {
+	d, mult := distinct(e)
+	s := &Down{d: d, mult: mult, max: make([]int, len(d)), count: make([]int, len(d)), m: m}
+	for i, k := range mult {
+		s.max[i] = k / m
+	}
+	return s
+}
+
+// Next moves to the next solution; false at the end.
+func (s *Down) Next() bool {
+	if !s.started {
+		s.started = true
+		copy(s.count, s.max)
+	} else {
+		i := len(s.count) - 1
+		for ; i >= 0; i-- {
+			if s.count[i] > 0 {
+				s.count[i]--
+				break
+			}
+			s.count[i] = s.max[i]
+		}
+		if i < 0 {
+			return false
+		}
+	}
+	for _, k := range s.count {
+		if k > 0 {
+			return true
+		}
+	}
+	return false // x would be empty: the end
+}
+
+// X is the variable's value (sorted, non-empty).
+func (s *Down) X() []Term {
+	var out []Term
+	for i, x := range s.d {
+		for range s.count[i] {
+			out = append(out, x)
+		}
+	}
+	return out
+}
+
+// Rest is the extension E (sorted, possibly empty).
+func (s *Down) Rest() []Term {
+	var out []Term
+	for i, x := range s.d {
+		for range s.mult[i] - s.m*s.count[i] {
+			out = append(out, x)
+		}
+	}
+	return out
 }

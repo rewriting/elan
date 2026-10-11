@@ -25,14 +25,15 @@ func TestMixfixPrinting(t *testing.T) {
 	}
 }
 
-// AC terms print with the layout of their binary symbol, repeated.
+// AC terms print as REM prints them: right nested in the layout of their
+// binary symbol.
 func TestACPrinting(t *testing.T) {
-	x := MkAC(symAnd, Flatten(symAnd, atom(1), atom(1), atom(2)))
-	if got := Format(x); len(got) != len("and(p(1),p(1),p(2))") || got[:4] != "and(" {
+	x := MkAC(symAnd, Flatten(symAnd, atom(2), atom(1), atom(1)))
+	if got := Format(x); got != "and(p(1),and(p(1),p(2)))" {
 		t.Errorf("prefix AC: %q", got)
 	}
-	u := MkAC2(symU, Mk0(symO), Mk0(symNil))
-	if got := Format(u); got != "o U nil" && got != "nil U o" {
+	u := MkAC(symU, Flatten(symU, Mk0(symNil), Mk0(symO), nat(1)))
+	if got := Format(u); got != "o U s(o)U nil" {
 		t.Errorf("infix AC: %q", got)
 	}
 }

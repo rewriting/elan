@@ -230,9 +230,10 @@ func (w *Writer) head(t Term, after *[][]PrintItem) Term {
 	return t.Args[items[last].Arg]
 }
 
-// acHead writes the elements e of an AC term with the layout of its binary
-// symbol (before @ middle @ after): before e1 middle e2 middle ... en after;
-// it returns en.
+// acHead writes the elements e of an AC term as REM prints them: right
+// nested in the layout of the binary symbol (before @ middle @ after),
+// before e1 middle before e2 middle ... en after ... after (n-1 times
+// after: F(a,F(b,c)), a U b U c); it returns en.
 func (w *Writer) acHead(e []Term, items []PrintItem, after *[][]PrintItem) Term {
 	first := -1
 	for i, it := range items {
@@ -242,17 +243,17 @@ func (w *Writer) acHead(e []Term, items []PrintItem, after *[][]PrintItem) Term 
 		}
 	}
 	last := lastArgItem(items)
-	for _, it := range items[:first] {
-		w.item(it)
-	}
 	for _, x := range e[:len(e)-1] {
+		for _, it := range items[:first] {
+			w.item(it)
+		}
 		w.subterm(x)
 		for _, it := range items[first+1 : last] {
 			w.item(it)
 		}
-	}
-	if last+1 < len(items) {
-		*after = append(*after, items[last+1:])
+		if last+1 < len(items) {
+			*after = append(*after, items[last+1:])
+		}
 	}
 	return e[len(e)-1]
 }
