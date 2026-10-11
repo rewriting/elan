@@ -1,0 +1,6 @@
+LPL commentnames description
+  query of sort bool
+  result of sort int
+  import commentnames
+  start with (me) 5
+end

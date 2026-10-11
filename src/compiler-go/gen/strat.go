@@ -93,9 +93,10 @@ func (e *emitter) strategies() {
 		e.line("defer rt.Unguard()")
 		var hoist []string
 		x := ""
+		e.used = map[string]bool{}
 		if len(e.tail) > 0 {
 			x = e.seqExpr(&hoist, st.Body, st.Sort, "t", "one.K")
-			if !mentions(strings.Join(hoist, "\n")+"\n"+x, "again") {
+			if !e.used["again"] {
 				// the tail calls are never reached (after a fail): no loop
 				e.tail, e.fresh, hoist = nil, 0, nil
 			}
@@ -125,7 +126,7 @@ func (e *emitter) strategies() {
 		}
 		e.close("}")
 		e.line("")
-		e.tail = nil
+		e.tail, e.used = nil, nil
 	}
 }
 
@@ -153,7 +154,7 @@ func paren(x string) string {
 func (e *emitter) seqExpr(hoist *[]string, seq []ir.Strat, sort ir.SortID, t, k string) string {
 	switch {
 	case len(seq) == 0:
-		return k + "(" + t + ")"
+		return e.use(k) + "(" + t + ")"
 	case len(seq) == 1:
 		return e.stratExpr(hoist, &seq[0], sort, t, k)
 	case seq[0].Kind == ir.StId:
@@ -165,40 +166,37 @@ func (e *emitter) seqExpr(hoist *[]string, seq []ir.Strat, sort ir.SortID, t, k 
 	n := e.next()
 	r, kn := fmt.Sprintf("r%d", n), fmt.Sprintf("k%d", n)
 	var body []string
+	// the names the rest uses count only if its closure is kept
+	outer := e.used
+	e.used = map[string]bool{}
 	rest := e.seqExpr(&body, seq[1:], sort, r, k)
+	inner := e.used
+	e.used = outer
 	at := len(*hoist)
 	*hoist = append(*hoist, "")
 	first := e.stratExpr(hoist, &seq[0], sort, t, kn)
-	if !mentions(strings.Join((*hoist)[at+1:], "\n")+"\n"+first, kn) {
+	if !e.used[kn] {
 		// the rest is never reached (fail ; ...): Go refuses an unused
 		// variable
 		*hoist = append((*hoist)[:at], (*hoist)[at+1:]...)
 		return first
+	}
+	for n := range inner {
+		e.used[n] = true
 	}
 	(*hoist)[at] = fmt.Sprintf("// %s: then %s\n%s := %s", kn, comment(e.ir.SeqText(seq[1:])), kn,
 		closure(r+" "+e.goType(sort), body, rest))
 	return first
 }
 
-// mentions tells whether the Go code uses the identifier name.
-func mentions(code, name string) bool {
-	for i := 0; ; {
-		j := strings.Index(code[i:], name)
-		if j < 0 {
-			return false
-		}
-		j += i
-		end := j + len(name)
-		// (not a field: x.name)
-		if (j == 0 || !isIdent(code[j-1]) && code[j-1] != '.') && (end == len(code) || !isIdent(code[end])) {
-			return true
-		}
-		i = end
-	}
-}
-
-func isIdent(c byte) bool {
-	return c == '_' || '0' <= c && c <= '9' || 'a' <= c && c <= 'z' || 'A' <= c && c <= 'Z'
+// use records that the generated code uses the Go variable name (a
+// continuation, again) and returns it: a closure or a loop that nothing uses
+// is not emitted, Go refusing an unused variable. (The usage is recorded
+// while emitting, not searched for in the code: its comments quote ELAN
+// names, which may be again or k1.)
+func (e *emitter) use(name string) string {
+	e.used[name] = true
+	return name
 }
 
 // closure is a function literal of the parameters params, made of the
@@ -218,16 +216,16 @@ func (e *emitter) stratExpr(hoist *[]string, s *ir.Strat, sort ir.SortID, t, k s
 	p := e.ir
 	switch s.Kind {
 	case ir.StId:
-		return k + "(" + t + ")"
+		return e.use(k) + "(" + t + ")"
 	case ir.StFail:
 		return "false"
 	case ir.StCall:
 		if e.tail[s] {
-			return "again(" + t + ")"
+			return e.use("again") + "(" + t + ")"
 		}
-		return p.Strategies[s.Call].Fun + "(" + t + ", " + k + ")"
+		return p.Strategies[s.Call].Fun + "(" + t + ", " + e.use(k) + ")"
 	case ir.StMeta:
-		return p.MetaApplies[s.Meta].Fun + "(" + t + ", " + k + ")"
+		return p.MetaApplies[s.Meta].Fun + "(" + t + ", " + e.use(k) + ")"
 	case ir.StRules:
 		if len(s.Labels) == 0 {
 			return "false"
@@ -241,10 +239,10 @@ func (e *emitter) stratExpr(hoist *[]string, s *ir.Strat, sort ir.SortID, t, k s
 		}
 		switch s.Choice {
 		case ir.Dk:
-			return strings.Join(calls(k, false), " || ")
+			return strings.Join(calls(e.use(k), false), " || ")
 		case ir.Dc:
 			if len(s.Labels) == 1 {
-				return calls(k, true)[0]
+				return calls(e.use(k), true)[0]
 			}
 			d := e.dc(hoist, k, s)
 			return strings.Join(calls(d+".K", true), " || !"+d+".Found && ")
@@ -291,6 +289,7 @@ func (e *emitter) stratExpr(hoist *[]string, s *ir.Strat, sort ir.SortID, t, k s
 		}
 		*hoist = append(*hoist, fmt.Sprintf("// %s: the step of %s(%s)%s\n%s := %s", step, what,
 			comment(p.SeqText(s.Body)), how, step, closure(ts+" "+ty+", "+ks+" rt.K["+ty+"]", body, x)))
+		e.use(k)
 		switch {
 		case s.Kind == ir.StRepeat && det:
 			return k + "(rt.RepeatStarDet(" + t + ", rt.DetStep(" + step + ")))"
@@ -309,7 +308,7 @@ func (e *emitter) stratExpr(hoist *[]string, s *ir.Strat, sort ir.SortID, t, k s
 func (e *emitter) dc(hoist *[]string, k string, s *ir.Strat) string {
 	d := fmt.Sprintf("dc%d", e.next())
 	*hoist = append(*hoist, fmt.Sprintf("%s := rt.NewDc(%s) // %s: the results of the first alternative with one",
-		d, k, comment(e.ir.SeqText([]ir.Strat{*s}))))
+		d, e.use(k), comment(e.ir.SeqText([]ir.Strat{*s}))))
 	return d
 }
 
@@ -317,6 +316,6 @@ func (e *emitter) dc(hoist *[]string, k string, s *ir.Strat) string {
 func (e *emitter) one(hoist *[]string, k string, s *ir.Strat) string {
 	o := fmt.Sprintf("one%d", e.next())
 	*hoist = append(*hoist, fmt.Sprintf("%s := rt.NewOne(%s) // %s: the first result",
-		o, k, comment(e.ir.SeqText([]ir.Strat{*s}))))
+		o, e.use(k), comment(e.ir.SeqText([]ir.Strat{*s}))))
 	return o
 }

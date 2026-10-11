@@ -1,0 +1,23 @@
+module commentnames
+// Labels and strategies named like the Go identifiers of the generated
+// code (again, k1): the names appear in its comments, which must not keep
+// an unused closure or tail loop alive (Go refuses unused variables).
+import global int bool; end
+stratop global
+  me : <int -> int> bs;
+  k1 : <int -> int> bs;
+  s : <int -> int> bs;
+end
+rules for int
+  x : int;
+global
+  [again] x => x - 1 if x > 0 end
+  [l] x => x + 1 end
+end
+strategies for int
+implicit
+  [] me => first(dc(again), fail ; me) end
+  [] k1 => id end
+  [] s => dk(dk(l) ; fail ; k1) ; dk(l) end
+end
+end

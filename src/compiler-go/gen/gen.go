@@ -96,6 +96,9 @@ type emitter struct {
 	res, ok, resType string
 	// tail are the tail calls of the strategy emitted as a loop
 	tail map[*ir.Strat]bool
+	// used are the Go variables that the strategy code emitted so far uses
+	// (see use)
+	used map[string]bool
 }
 
 func (e *emitter) line(format string, a ...any) {

@@ -145,3 +145,55 @@ func TestStrategiesRun(t *testing.T) {
 		t.Errorf("h(o): %q", got)
 	}
 }
+
+// commentNames has a label and a strategy named like Go identifiers of the
+// generated code, which its comments quote (again, k1): a comment must not
+// keep an unused tail loop or closure alive (Go refuses an unused variable).
+//
+//	[again] s(x) => x    (r7)          [r8] x => s(x)
+//	st20 (named k1) = id
+//	st21 = DC(dc(again), fail ; st21)  s(o) on s(s(o)): the tail call is never reached
+//	st22 = DK(dk(r8) ; fail ; k1) ; dk(r8)   none
+func commentNames(start uint32) *prog {
+	p := peano()
+	p.labelled(7, f(319, v(0, sNat)), v(0, sNat))
+	p.labelled(8, v(0, sNat), f(319, v(0, sNat)))
+	for i := range p.p.RuleNames {
+		if p.p.RuleNames[i].Index == 7 {
+			p.p.RuleNames[i].Name = "again:nat/m!GL"
+		}
+	}
+	fail := ref.StrategyExpr{Op: ref.SFail}
+	p.strategy(20, ref.StrategyExpr{Op: ref.SId})
+	p.p.StrategyNames[len(p.p.StrategyNames)-1].Name = "k1:nat/m"
+	p.strategy(21, strats(ref.SDcStrats, ref.StrategySeq{rules(ref.SDcRules, 7)}, ref.StrategySeq{fail, call(21)}))
+	p.strategy(22, strats(ref.SDkStrats, ref.StrategySeq{rules(ref.SDkRules, 8), fail, call(20)}),
+		rules(ref.SDkRules, 8))
+	p.p.Query.Strategy = ref.Some(start)
+	p.p.Query.StartWith = f(319, f(319, f(318)))
+	return p
+}
+
+func TestNamesOfTheGeneratedCodeInComments(t *testing.T) {
+	src := commentNames(21).gen(t)
+	// (the names are in the comments)
+	if want := "label again:nat/m!GL"; !strings.Contains(src, want) {
+		t.Errorf("missing %q in\n%s", want, src)
+	}
+	if src, want := commentNames(22).gen(t), "then fail ; k1"; !strings.Contains(src, want) {
+		t.Errorf("missing %q in\n%s", want, src)
+	}
+	if strings.Contains(src, "// tail-recursive") {
+		t.Errorf("a loop for a tail call never reached:\n%s", src)
+	}
+	t.Run("again", func(t *testing.T) {
+		if got := run(t, commentNames(21)); !strings.Contains(got, "result = s(o)\n") || strings.Count(got, "result = ") != 1 {
+			t.Errorf("st21: %q", got)
+		}
+	})
+	t.Run("k1", func(t *testing.T) {
+		if got := run(t, commentNames(22)); strings.Contains(got, "result = ") {
+			t.Errorf("st22: %q", got)
+		}
+	})
+}
