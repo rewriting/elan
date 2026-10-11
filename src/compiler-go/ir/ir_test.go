@@ -355,30 +355,36 @@ func TestUnsupportedConstructsAreRefusedWhenReachable(t *testing.T) {
 	if st, _ := unsupportedStage(t, p); st != "S7d" {
 		t.Fatal(st)
 	}
-	// a strategy
+	// a strategy over a label without rules: compiled (no result)
 	p = peano()
 	p.p.Query.Strategy = ref.Some(3)
 	p.p.Strategies = append(p.p.Strategies, ref.StrategyDef{Name: 3, Sort: sNat, Module: 1,
 		Body: ref.StrategySeq{{Op: ref.SDkRules, Rules: []uint32{1}}}})
-	if st, _ := unsupportedStage(t, p); st != "S7b" {
-		t.Fatal(st)
+	if ir := p.lower(t); len(ir.Strategies) != 1 || len(ir.Labels) != 0 || ir.Start.Strategy != 0 {
+		t.Fatalf("%+v %+v", ir.Strategies, ir.Labels)
 	}
-	// `start with (id)` is a normalisation
-	p.p.Strategies[0].Body = ref.StrategySeq{{Op: ref.SId}}
-	p.lower(t)
-	// a strategy call in a term, a where with a strategy
+	// traversals, META
+	for op, stage := range map[ref.StrategyOp]string{ref.STAll: "S7d", ref.SNormIn: "S7d", ref.SMeta: "S7b task 2"} {
+		p.p.Strategies[0].Body = ref.StrategySeq{{Op: ref.SId}, {Op: op}}
+		if st, _ := unsupportedStage(t, p); st != stage {
+			t.Fatalf("%v: %s", op, st)
+		}
+	}
+	// a strategy call in a term: a strategy term (task 2)
 	p = peano()
 	p.start(f(320, f(144, ref.Int{Value: 2}), f(318)), sNat)
-	if st, _ := unsupportedStage(t, p); st != "S7b" {
+	if st, _ := unsupportedStage(t, p); st != "S7b task 2" {
 		t.Fatal(st)
 	}
+	// a where with an undefined strategy: an invalid program
 	p = peano()
 	p.op(sNat, 330, "h", []uint32{sNat}, 0, 0)
 	p.rule(sNat, 2, f(330, v(0, sNat)), v(1, sNat),
 		ref.Assign{Lhs: v(1, sNat), Strategy: ref.Some(4), Rhs: v(0, sNat)})
 	p.start(f(330, f(318)), sNat)
-	if st, _ := unsupportedStage(t, p); st != "S7b" {
-		t.Fatal(st)
+	var inv *Invalid
+	if _, err := Lower(&p.p, "test"); !errors.As(err, &inv) || !strings.Contains(inv.Msg, "not defined") {
+		t.Fatal(err)
 	}
 	// an unsupported builtin code
 	p = peano()
@@ -388,12 +394,12 @@ func TestUnsupportedConstructsAreRefusedWhenReachable(t *testing.T) {
 		t.Fatalf("%s %s", st, what)
 	}
 	// the codes of strategy terms (strsig/strat, Meta_strat, meta_apply)
-	// are strategies (S7b), not builtins
+	// are strategy terms (S7b task 2), not builtins
 	for _, code := range []int32{128, 147, -180, 179, 190, -205, 208} {
 		p = peano()
 		p.op(sNat, 156, "x", []uint32{sNat}, code, 0)
 		p.start(f(156, f(318)), sNat)
-		if st, what := unsupportedStage(t, p); st != "S7b" || !strings.Contains(what, "strategy term") {
+		if st, what := unsupportedStage(t, p); st != "S7b task 2" || !strings.Contains(what, "strategy term") {
 			t.Fatalf("code %d: %s %s", code, st, what)
 		}
 	}

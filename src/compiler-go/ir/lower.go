@@ -34,10 +34,18 @@ import (
 //     runtime symbol for their stuck terms.
 //  6. Decision trees of the defined operators (matching.go), and the call
 //     graph (recursive operators guard their depth).
+//  7. Strategies (S7b, as elanc-rs S6b): the named strategies reachable
+//     from the query (`start with (S)`) and from the `where x := (S) t` of
+//     the reachable rules, the labels they use (all the labelled rules of a
+//     localised rule name, in source order, a decision tree over the whole
+//     left-hand side), and which of them give at most one result (greatest
+//     fixpoint, [StrategyDet]). A labelled rule whose left-hand side has an
+//     operator that no term of the program contains is not compiled
+//     ([lowerer.lhsPossible]).
 
-// Unsupported is a construct of a later stage: Stage is S7b (strategies),
-// S7c (AC) or S7d (query input and the rest). The compiler exits with
-// status 2.
+// Unsupported is a construct of a later stage: Stage is S7b task 2
+// (strategy terms built at run time), S7c (AC) or S7d (query input and the
+// rest). The compiler exits with status 2.
 type Unsupported struct {
 	Stage string
 	What  string
@@ -50,6 +58,11 @@ func (e *Unsupported) Error() string { return "not supported yet (" + e.Stage + 
 type Invalid struct{ Msg string }
 
 func (e *Invalid) Error() string { return "invalid program: " + e.Msg }
+
+// task2 is the stage of the strategy terms built at run time (strat[X]
+// terms, defined strategies with parameters, call "name":X, META, strategy
+// calls in terms, default strategies of operators).
+const task2 = "S7b task 2"
 
 func unsupported(stage, format string, a ...any) error {
 	return &Unsupported{Stage: stage, What: fmt.Sprintf(format, a...)}
@@ -142,9 +155,12 @@ type lowerer struct {
 	bySymbol      map[ref.SymbolCode][]int
 	printForm     map[profile][]ref.Lexem // the last grammar rule of each profile
 	rulesBySymbol map[ref.SymbolCode][]*ref.Rule
-	intSort       optSort
-	strSort       optSort
-	boolSort      optSort
+	// rulesByLabel are the labelled rules of each localised label, in file
+	// order.
+	rulesByLabel map[ref.RuleNameIndex][]*ref.Rule
+	intSort      optSort
+	strSort      optSort
+	boolSort     optSort
 }
 
 // profile is an operator: its symbol, the sorts of its arguments and its
@@ -166,6 +182,7 @@ func newLowerer(p *ref.Program) *lowerer {
 		bySymbol:      map[ref.SymbolCode][]int{},
 		printForm:     map[profile][]ref.Lexem{},
 		rulesBySymbol: map[ref.SymbolCode][]*ref.Rule{},
+		rulesByLabel:  map[ref.RuleNameIndex][]*ref.Rule{},
 	}
 	for _, r := range p.Operators() {
 		o := r.Op
@@ -190,9 +207,10 @@ func newLowerer(p *ref.Program) *lowerer {
 	}
 	for i := range p.Rules {
 		r := &p.Rules[i]
-		// labelled rules: strategies only (S7b); the visibility (infos,
-		// global or local) is ignored for normalisation, as REM does
+		// labelled rules: strategies only; the visibility (infos, global
+		// or local) is ignored for normalisation, as REM does
 		if r.Name.Valid {
+			l.rulesByLabel[r.Name.Index] = append(l.rulesByLabel[r.Name.Index], r)
 			continue
 		}
 		if f, ok := r.Lhs.(ref.Fsym); ok {
@@ -305,7 +323,7 @@ func (l *lowerer) typeTerm(t ref.Term, expected optSort) (tt, error) {
 						name = s
 					}
 				}
-				return tt{}, unsupported("S7b", "strategy call %s in a term", name)
+				return tt{}, unsupported(task2, "strategy call %s in a term", name)
 			}
 		}
 		why := fmt.Sprintf("symbol %d has no profile", t.Symbol)
@@ -385,6 +403,18 @@ type reach struct {
 	seen  map[int]bool
 	todo  []int
 	sorts map[ref.SortIndex]bool
+	// the labels and strategies reached, and those still to expand
+	labels, labelsTodo         []ref.RuleNameIndex
+	strategies, strategiesTodo []ref.StrategyNameIndex
+	// pending are the labelled rules of reached labels whose left-hand side
+	// cannot match yet ([lowerer.lhsPossible])
+	pending []pendingRule
+}
+
+type pendingRule struct {
+	rule *ref.Rule
+	lhs  tt
+	ctx  string
 }
 
 func (r *reach) reach(c int) {
@@ -395,17 +425,28 @@ func (r *reach) reach(c int) {
 	}
 }
 
+func (r *reach) reachLabel(l ref.RuleNameIndex) {
+	if !slices.Contains(r.labels, l) {
+		r.labels = append(r.labels, l)
+		r.labelsTodo = append(r.labelsTodo, l)
+	}
+}
+
+func (r *reach) reachStrategy(s ref.StrategyNameIndex) {
+	if !slices.Contains(r.strategies, s) {
+		r.strategies = append(r.strategies, s)
+		r.strategiesTodo = append(r.strategiesTodo, s)
+	}
+}
+
+func pop[T any](v *[]T) T {
+	x := (*v)[len(*v)-1]
+	*v = (*v)[:len(*v)-1]
+	return x
+}
+
 func (l *lowerer) run(name string) (*IR, error) {
 	q := &l.p.Query
-	// `start with (S) t`: only normalisation (or the identity) in S7a
-	if q.Strategy.Valid {
-		d := l.p.Strategy(q.Strategy.Index)
-		identity := d != nil && len(d.Body) == 1 && d.Body[0].Op == ref.SId
-		if !identity {
-			n, _ := l.p.StrategyName(q.Strategy.Index)
-			return nil, unsupported("S7b", "strategies: start with (%s)", n)
-		}
-	}
 	start, err := l.typeTop(q.StartWith, optSort{q.ResultSort, true}, "start term")
 	if err != nil {
 		return nil, err
@@ -416,10 +457,26 @@ func (l *lowerer) run(name string) (*IR, error) {
 
 	r := &reach{seen: map[int]bool{}, sorts: map[ref.SortIndex]bool{}}
 	l.visit(&start, r)
-	for len(r.todo) > 0 {
-		c := r.todo[len(r.todo)-1]
-		r.todo = r.todo[:len(r.todo)-1]
-		if err := l.expand(c, r); err != nil {
+	if q.Strategy.Valid {
+		r.reachStrategy(q.Strategy.Index)
+	}
+	for {
+		var err error
+		if len(r.todo) > 0 {
+			err = l.expand(pop(&r.todo), r)
+		} else if len(r.labelsTodo) > 0 {
+			err = l.expandLabel(pop(&r.labelsTodo), r)
+		} else if len(r.strategiesTodo) > 0 {
+			err = l.expandStrategy(pop(&r.strategiesTodo), r)
+		} else if i := slices.IndexFunc(r.pending, func(p pendingRule) bool { return l.lhsPossible(&p.lhs, r) }); i >= 0 {
+			// a labelled rule whose left-hand side has become possible
+			p := r.pending[i]
+			r.pending = slices.Delete(r.pending, i, i+1)
+			err = l.acceptRule(p.rule, &p.lhs, p.ctx, r)
+		} else {
+			break
+		}
+		if err != nil {
 			return nil, err
 		}
 	}
@@ -472,6 +529,9 @@ func (l *lowerer) expand(c int, r *reach) error {
 	for _, a := range k.args {
 		r.sorts[a] = true
 	}
+	if code := k.semantic; k.semantic != 0 && (133 <= code && code <= 136 || -136 <= code && code <= -133) {
+		return unsupported("S7d", "labels named by strings in a strategy term of META (%s)", l.candDecl(k))
+	}
 	switch k.infos {
 	case 0:
 	case 2:
@@ -480,7 +540,7 @@ func (l *lowerer) expand(c int, r *reach) error {
 		return unsupported("S7c", "commutative operator %s", l.candDecl(k))
 	}
 	if k.defstrat.Kind != ref.DSNone {
-		return unsupported("S7b", "operator with a default strategy %s", l.candDecl(k))
+		return unsupported(task2, "operator with a default strategy %s", l.candDecl(k))
 	}
 	if l.boolSort.ok && k.result == l.boolSort.s {
 		// true and false are values of every bool computation
@@ -503,7 +563,7 @@ func (l *lowerer) expand(c int, r *reach) error {
 			code = -code
 		}
 		if strategyTermCode(code) {
-			return unsupported("S7b", "strategy term operator %s (code %d)", l.candDecl(k), k.semantic)
+			return unsupported(task2, "strategy term operator %s (code %d)", l.candDecl(k), k.semantic)
 		}
 		if _, ok := BuiltinFromCode(code); !ok {
 			return unsupported("S7d", "builtin operation code %d (%s)", code, l.candDecl(k))
@@ -513,32 +573,194 @@ func (l *lowerer) expand(c int, r *reach) error {
 		}
 		return nil
 	}
+	ctx := "rule for " + l.candDecl(k)
 	for _, rl := range rules {
-		if err := l.checkRule(rl.rule); err != nil {
+		if err := l.acceptRule(rl.rule, &rl.lhs, ctx, r); err != nil {
 			return err
 		}
-		l.visit(&rl.lhs, r)
-		if containsEVar(&rl.lhs) {
-			continue
-		}
-		body := rl.rule.Body.(ref.Plain)
-		for _, w := range body.Wheres {
-			ts, err := l.whereTerms(w, k)
-			if err != nil {
-				return err
-			}
-			for i := range ts {
-				l.visit(&ts[i], r)
-			}
-		}
-		rhs, err := l.typeTop(body.Rhs, optSort{rl.rule.Sort, true}, "rule for "+l.candDecl(k))
+	}
+	return nil
+}
+
+// acceptRule reaches what a rule uses (its left-hand side lhs is typed and
+// can match).
+func (l *lowerer) acceptRule(rule *ref.Rule, lhs *tt, ctx string, r *reach) error {
+	if err := l.checkRule(rule); err != nil {
+		return err
+	}
+	l.visit(lhs, r)
+	if containsEVar(lhs) {
+		return nil
+	}
+	body := rule.Body.(ref.Plain)
+	for _, w := range body.Wheres {
+		ts, err := l.whereTerms(w, ctx, r)
 		if err != nil {
 			return err
 		}
-		if containsEVar(&rhs) {
-			return invalid("extension variable in a right-hand side (%s)", l.candDecl(k))
+		for i := range ts {
+			l.visit(&ts[i], r)
 		}
-		l.visit(&rhs, r)
+	}
+	rhs, err := l.typeTop(body.Rhs, optSort{rule.Sort, true}, ctx)
+	if err != nil {
+		return err
+	}
+	if containsEVar(&rhs) {
+		return invalid("extension variable in a right-hand side (%s)", ctx)
+	}
+	l.visit(&rhs, r)
+	return nil
+}
+
+// alwaysPossible tells whether operator c can be at the top of a term
+// without being built by an expression of the program: an injection of a
+// builtin sort (the values of the builtin operations), true and false (the
+// results of the comparisons). Conservative: keeping a rule is always
+// correct.
+func (l *lowerer) alwaysPossible(c int) bool {
+	k := &l.cands[c]
+	builtin := func(s ref.SortIndex) bool { _, ok := builtinKind(l.sortName(s)); return ok }
+	return len(k.args) == 1 && builtin(k.args[0]) && !builtin(k.result) ||
+		len(k.args) == 0 && (k.symbol == 0 || k.symbol == 1) && l.boolSort.ok && k.result == l.boolSort.s
+}
+
+// lhsPossible tells whether the left-hand side of a labelled rule can
+// match a term of the program: each of its operators must be reached by
+// an expression or by the left-hand side of an unlabelled rule (or be
+// [lowerer.alwaysPossible]). The terms of a compiled program are built by
+// its start term and by the right-hand sides and conditions of the
+// reachable rules (the query is not read, S7d). A labelled rule whose
+// left-hand side has an operator that no term contains never applies; it
+// is not compiled and what it uses is not reached (e.g. the [TONE] rule of
+// strat[X] when no strategy term tone(...) is built). Unlabelled rules are
+// all reached with their operator, as in S7a: conservative.
+func (l *lowerer) lhsPossible(lhs *tt, r *reach) bool {
+	if lhs.kind != ttOp {
+		return true
+	}
+	if !r.seen[lhs.cand] && !l.alwaysPossible(lhs.cand) {
+		return false
+	}
+	for i := range lhs.args {
+		if !l.lhsPossible(&lhs.args[i], r) {
+			return false
+		}
+	}
+	return true
+}
+
+// labelName is the name of a label (r1:nat/m!GL).
+func (l *lowerer) labelName(i ref.RuleNameIndex) string {
+	if s, ok := l.p.RuleName(i); ok {
+		return s
+	}
+	return fmt.Sprintf("label%d", i)
+}
+
+// strategyName is the name of a strategy (go:nat/m).
+func (l *lowerer) strategyName(i ref.StrategyNameIndex) string {
+	if s, ok := l.p.StrategyName(i); ok {
+		return s
+	}
+	return fmt.Sprintf("strategy%d", i)
+}
+
+// labelFits tells whether label i can apply to terms of sort s: a rule
+// name of a strategy may resolve to the rules of another sort (they never
+// match); a label without rules applies to no term.
+func (l *lowerer) labelFits(i ref.RuleNameIndex, s ref.SortIndex) bool {
+	rules := l.rulesByLabel[i]
+	for _, r := range rules {
+		if r.Sort != s {
+			return false
+		}
+	}
+	return len(rules) > 0
+}
+
+// expandLabel reaches the rules of a newly reached label (now, or when
+// their left-hand side can match).
+func (l *lowerer) expandLabel(i ref.RuleNameIndex, r *reach) error {
+	ctx := "rule " + l.labelName(i)
+	for _, rule := range l.rulesByLabel[i] {
+		r.sorts[rule.Sort] = true
+		lhs, err := l.typeTop(rule.Lhs, optSort{rule.Sort, true}, ctx)
+		if err != nil {
+			return err
+		}
+		if l.lhsPossible(&lhs, r) {
+			if err := l.acceptRule(rule, &lhs, ctx, r); err != nil {
+				return err
+			}
+		} else {
+			r.pending = append(r.pending, pendingRule{rule, lhs, ctx})
+		}
+	}
+	return nil
+}
+
+// expandStrategy reaches what the definition of a newly reached strategy
+// uses.
+func (l *lowerer) expandStrategy(s ref.StrategyNameIndex, r *reach) error {
+	name := l.strategyName(s)
+	d := l.p.Strategy(s)
+	if d == nil {
+		return invalid("strategy %s is not defined", name)
+	}
+	r.sorts[d.Sort] = true
+	return l.visitSeq(d.Body, d.Sort, name, r)
+}
+
+func (l *lowerer) visitSeq(seq ref.StrategySeq, sort ref.SortIndex, name string, r *reach) error {
+	for _, e := range seq {
+		switch e.Op {
+		case ref.SId, ref.SFail:
+		case ref.SOneRules, ref.SDcRules, ref.SDkRules:
+			for _, lb := range e.Rules {
+				if l.labelFits(lb, sort) {
+					r.reachLabel(lb)
+				}
+			}
+		case ref.SOneStrats, ref.SDcStrats, ref.SDkStrats:
+			for _, a := range e.Alts {
+				if err := l.visitSeq(a, sort, name, r); err != nil {
+					return err
+				}
+			}
+		case ref.SRepeat, ref.SIterate:
+			if err := l.visitSeq(e.Body, sort, name, r); err != nil {
+				return err
+			}
+		case ref.SCall:
+			if d := l.p.Strategy(e.Call); d != nil && d.Sort != sort {
+				return invalid("%s calls %s of another sort", name, l.strategyName(e.Call))
+			}
+			r.reachStrategy(e.Call)
+		case ref.SMeta:
+			return unsupported(task2, "the META strategy (in %s)", name)
+		case ref.SNormIn, ref.SNormOut, ref.STAll, ref.STOne, ref.STSome, ref.SRewrite:
+			return unsupported("S7d", "strategy %s (in %s)", e.Op, name)
+		case ref.SDcCall, ref.SDkCall:
+			return unsupported("S7d", "strategy %s (external process, in %s)", e.Op, name)
+		default:
+			return invalid("unknown strategy %v (in %s)", e.Op, name)
+		}
+	}
+	return nil
+}
+
+// checkWhereStrategy checks a strategy applied by a where to terms of sort
+// s.
+func (l *lowerer) checkWhereStrategy(st ref.StrategyNameIndex, s ref.SortIndex, ctx string) error {
+	name := l.strategyName(st)
+	d := l.p.Strategy(st)
+	switch {
+	case d == nil:
+		return invalid("strategy %s is not defined (%s)", name, ctx)
+	case d.Sort != s:
+		return invalid("strategy %s of sort %s applied to a term of sort %s (%s)",
+			name, l.sortName(d.Sort), l.sortName(s), ctx)
 	}
 	return nil
 }
@@ -560,28 +782,36 @@ func varSort(t ref.Term) optSort {
 	return optSort{}
 }
 
-// whereTerms are the typed terms of a condition (patterns included).
-func (l *lowerer) whereTerms(w ref.Where, k *cand) ([]tt, error) {
-	ctx := "condition of a rule for " + l.candDecl(k)
+// whereTerms are the typed terms of a condition (patterns included); the
+// strategies of the wheres are reached.
+func (l *lowerer) whereTerms(w ref.Where, ruleCtx string, reach *reach) ([]tt, error) {
+	ctx := "condition of a " + ruleCtx
 	switch w := w.(type) {
 	case ref.If:
 		t, err := l.typeTop(w.Cond, l.boolSort, ctx)
 		return []tt{t}, err
 	case ref.Assign:
-		if w.Strategy.Valid {
-			n, _ := l.p.StrategyName(w.Strategy.Index)
-			return nil, unsupported("S7b", "where with a strategy (%s) in %s", n, ctx)
-		}
 		r, err := l.typeTop(w.Rhs, varSort(w.Lhs), ctx)
 		if err != nil {
 			return nil, err
 		}
 		lt, err := l.typeTop(w.Lhs, optSort{l.sortOf(&r), true}, ctx)
-		return []tt{lt, r}, err
+		if err != nil {
+			return nil, err
+		}
+		if w.Strategy.Valid {
+			if err := l.checkWhereStrategy(w.Strategy.Index, l.sortOf(&r), ctx); err != nil {
+				return nil, err
+			}
+			reach.reachStrategy(w.Strategy.Index)
+		}
+		return []tt{lt, r}, nil
 	case ref.Match:
 		if w.Strategy.Valid {
-			n, _ := l.p.StrategyName(w.Strategy.Index)
-			return nil, unsupported("S7b", "where with a strategy (%s) in %s", n, ctx)
+			if err := l.checkWhereStrategy(w.Strategy.Index, w.Sort, ctx); err != nil {
+				return nil, err
+			}
+			reach.reachStrategy(w.Strategy.Index)
 		}
 		pt, err := l.typeTop(w.Pattern, optSort{w.Sort, true}, ctx)
 		if err != nil {
@@ -636,16 +866,29 @@ type preKind struct {
 }
 
 type builder struct {
-	l      *lowerer
-	reach  *reach
-	opOf   map[int]OpID
-	sortOf map[ref.SortIndex]SortID
+	l       *lowerer
+	reach   *reach
+	opOf    map[int]OpID
+	sortOf  map[ref.SortIndex]SortID
+	labelOf map[ref.RuleNameIndex]LabelID     // labels in table order
+	stratOf map[ref.StrategyNameIndex]StratID // strategies in table order
 }
+
+// neverBuilt is the reason a labelled rule is not compiled.
+const neverBuilt = "(never applies: no term of the program has an operator of its left-hand side)"
 
 func (b *builder) build(name string, start *tt, q *ref.Query, sortIndices []ref.SortIndex) (*IR, error) {
 	l := b.l
 	b.opOf = map[int]OpID{}
 	b.sortOf = map[ref.SortIndex]SortID{}
+	b.labelOf = map[ref.RuleNameIndex]LabelID{}
+	for i, x := range slices.Sorted(slices.Values(b.reach.labels)) {
+		b.labelOf[x] = i
+	}
+	b.stratOf = map[ref.StrategyNameIndex]StratID{}
+	for i, x := range slices.Sorted(slices.Values(b.reach.strategies)) {
+		b.stratOf[x] = i
+	}
 	ir := &IR{Program: name}
 	for _, s := range sortIndices {
 		b.sortOf[s] = len(ir.Sorts)
@@ -775,7 +1018,7 @@ func (b *builder) build(name string, start *tt, q *ref.Query, sortIndices []ref.
 		}
 		for _, tr := range trs {
 			rl := &ruleLowerer{b: b, rule: tr.rule, varOf: map[uint32]VarID{}}
-			r, ok, err := rl.lower(&tr.lhs)
+			r, ok, err := rl.lower(&tr.lhs, false)
 			if err != nil {
 				return nil, err
 			}
@@ -851,14 +1094,150 @@ func (b *builder) build(name string, start *tt, q *ref.Query, sortIndices []ref.
 			}
 		}
 	}
+	if err := b.strategies(ir, sig, usedFuns); err != nil {
+		return nil, err
+	}
 	markRecursive(ir)
 
 	startExpr, err := b.expr(start, func(uint32) (VarID, bool) { return 0, false })
 	if err != nil {
 		return nil, err
 	}
-	ir.Start = Start{QuerySort: l.sortName(q.Sort), Sort: b.sortOf[l.sortOf(start)], Term: startExpr}
+	ir.Start = Start{QuerySort: l.sortName(q.Sort), Sort: b.sortOf[l.sortOf(start)], Term: startExpr, Strategy: -1}
+	if q.Strategy.Valid {
+		id := b.stratOf[q.Strategy.Index]
+		if st := &ir.Strategies[id]; st.Sort != ir.Start.Sort {
+			return nil, invalid("start with (%s): the strategy is of sort %s, the term of sort %s",
+				st.Name, ir.Sorts[st.Sort].Name, ir.Sorts[ir.Start.Sort].Name)
+		}
+		ir.Start.Strategy = id
+	}
 	return ir, nil
+}
+
+// strategies builds the labels and the strategies reached, in table order,
+// and their determinism (greatest fixpoint).
+func (b *builder) strategies(ir *IR, sig *signatures, usedFuns map[string]bool) error {
+	l := b.l
+	for _, li := range slices.Sorted(slices.Values(b.reach.labels)) {
+		name := l.labelName(li)
+		base := BaseName(name)
+		rules := l.rulesByLabel[li]
+		lb := Label{
+			Name:     name,
+			Fun:      unique(usedFuns, fmt.Sprintf("rl_%s_%d", OpBaseName([]string{base}), li)),
+			Sort:     b.sortOf[rules[0].Sort],
+			RulesDet: true,
+		}
+		ctx := "rule " + name
+		for _, r := range rules {
+			lhs, err := l.typeTop(r.Lhs, optSort{r.Sort, true}, ctx)
+			if err != nil {
+				return err
+			}
+			rl := &ruleLowerer{b: b, rule: r, varOf: map[uint32]VarID{}}
+			if !l.lhsPossible(&lhs, b.reach) {
+				lb.Skipped = append(lb.Skipped, "["+base+"] "+rl.render(&lhs)+" "+neverBuilt)
+				continue
+			}
+			x, ok, err := rl.lower(&lhs, true)
+			if err != nil {
+				return err
+			}
+			if !ok {
+				lb.Skipped = append(lb.Skipped, "["+base+"] "+rl.render(&lhs)+
+					" (extension variable in the left-hand side: not compiled, as REM)")
+				continue
+			}
+			x.Text = "[" + base + "] " + strings.TrimPrefix(x.Text, "[] ")
+			lb.Rules = append(lb.Rules, x)
+		}
+		tree, never := decisionTree(lb.Rules, []SortID{lb.Sort}, sig)
+		for _, r := range never {
+			lb.Skipped = append(lb.Skipped, lb.Rules[r].Text+
+				" (never applies: an operator of its left-hand side is always reduced)")
+		}
+		lb.Tree = tree
+		ir.Labels = append(ir.Labels, lb)
+	}
+	for _, si := range slices.Sorted(slices.Values(b.reach.strategies)) {
+		name := l.strategyName(si)
+		d := l.p.Strategy(si)
+		ir.Strategies = append(ir.Strategies, Strategy{
+			Name: name,
+			Fun:  unique(usedFuns, fmt.Sprintf("st_%s_%d", OpBaseName([]string{BaseName(name)}), si)),
+			Sort: b.sortOf[d.Sort],
+			Body: b.strategySeq(d.Body, d.Sort),
+			Det:  true,
+		})
+	}
+	// determinism: greatest fixpoint
+	for changed := true; changed; {
+		changed = false
+		for i := range ir.Labels {
+			lb := &ir.Labels[i]
+			det := true
+			for _, r := range lb.Rules {
+				for _, c := range r.Conds {
+					if c.Kind == CondApply && !ir.Strategies[c.Strategy].Det {
+						det = false
+					}
+				}
+			}
+			if det != lb.RulesDet {
+				lb.RulesDet, changed = det, true
+			}
+		}
+		for i := range ir.Strategies {
+			if det := ir.SeqDet(ir.Strategies[i].Body); det != ir.Strategies[i].Det {
+				ir.Strategies[i].Det, changed = det, true
+			}
+		}
+	}
+	return nil
+}
+
+// strategySeq is a strategy body of the .ref model (checked during
+// reachability); the labels that do not fit the sort are left out.
+func (b *builder) strategySeq(seq ref.StrategySeq, sort ref.SortIndex) []Strat {
+	labels := func(ls []ref.RuleNameIndex) []LabelID {
+		var v []LabelID
+		for _, x := range ls {
+			if b.l.labelFits(x, sort) {
+				v = append(v, b.labelOf[x])
+			}
+		}
+		return v
+	}
+	var out []Strat
+	for _, e := range seq {
+		var s Strat
+		switch e.Op {
+		case ref.SId:
+			s = Strat{Kind: StId}
+		case ref.SFail:
+			s = Strat{Kind: StFail}
+		case ref.SDkRules, ref.SDcRules, ref.SOneRules:
+			c := map[ref.StrategyOp]Choice{ref.SDkRules: Dk, ref.SDcRules: Dc, ref.SOneRules: One}[e.Op]
+			s = Strat{Kind: StRules, Choice: c, Labels: labels(e.Rules)}
+		case ref.SDkStrats, ref.SDcStrats, ref.SOneStrats:
+			c := map[ref.StrategyOp]Choice{ref.SDkStrats: Dk, ref.SDcStrats: Dc, ref.SOneStrats: One}[e.Op]
+			s = Strat{Kind: StStrats, Choice: c}
+			for _, a := range e.Alts {
+				s.Alts = append(s.Alts, b.strategySeq(a, sort))
+			}
+		case ref.SRepeat:
+			s = Strat{Kind: StRepeat, Body: b.strategySeq(e.Body, sort)}
+		case ref.SIterate:
+			s = Strat{Kind: StIterate, Body: b.strategySeq(e.Body, sort)}
+		case ref.SCall:
+			s = Strat{Kind: StCall, Call: b.stratOf[e.Call]}
+		default:
+			panic("refused during reachability")
+		}
+		out = append(out, s)
+	}
+	return out
 }
 
 func (b *builder) lexemTexts(ls []ref.Lexem) []string {
@@ -998,39 +1377,75 @@ func (s *signatures) valuesOnly(st SortID) bool {
 // markRecursive sets Op.Recursive for the operators on a cycle of the call
 // graph (Tarjan's strongly connected components). A function calls the
 // functions of the operators built by its rules (conditions and right-hand
-// sides); injections and booleans are inlined.
+// sides; injections and booleans are inlined) and the strategies of its
+// `where x := (S) t`; a strategy calls the labels and strategies of its
+// body; a label calls what its rules call. Labels and strategies always
+// guard their depth; an operator on a cycle through them guards it too.
 func markRecursive(ir *IR) {
-	calls := make([][]OpID, len(ir.Ops))
-	var collect func(o OpID, e *Expr)
-	collect = func(o OpID, e *Expr) {
+	nOps, nLabels := len(ir.Ops), len(ir.Labels)
+	label := func(l LabelID) int { return nOps + l }
+	strat := func(s StratID) int { return nOps + nLabels + s }
+	n := nOps + nLabels + len(ir.Strategies)
+	calls := make([][]int, n)
+	var collect func(from int, e *Expr)
+	collect = func(from int, e *Expr) {
 		if e.Kind != ExprOp {
 			return
 		}
 		if k := ir.Ops[e.Op].Kind; k != Injection && k != BoolConst {
-			calls[o] = append(calls[o], e.Op)
+			calls[from] = append(calls[from], e.Op)
 		}
 		for i := range e.Args {
-			collect(o, &e.Args[i])
+			collect(from, &e.Args[i])
+		}
+	}
+	rules := func(from int, rs []Rule) {
+		for ri := range rs {
+			r := &rs[ri]
+			for ci := range r.Conds {
+				c := &r.Conds[ci]
+				if c.Kind != CondSame {
+					collect(from, &c.Expr)
+				}
+				if c.Kind == CondApply {
+					calls[from] = append(calls[from], strat(c.Strategy))
+				}
+			}
+			collect(from, &r.Rhs)
 		}
 	}
 	for o := range ir.Ops {
-		for ri := range ir.Ops[o].Rules {
-			r := &ir.Ops[o].Rules[ri]
-			for ci := range r.Conds {
-				if c := &r.Conds[ci]; c.Kind != CondSame {
-					collect(o, &c.Expr)
-				}
+		rules(o, ir.Ops[o].Rules)
+	}
+	for l := range ir.Labels {
+		rules(label(l), ir.Labels[l].Rules)
+	}
+	var seq func(from int, v []Strat)
+	seq = func(from int, v []Strat) {
+		for i := range v {
+			s := &v[i]
+			for _, l := range s.Labels {
+				calls[from] = append(calls[from], label(l))
 			}
-			collect(o, &r.Rhs)
+			for _, a := range s.Alts {
+				seq(from, a)
+			}
+			seq(from, s.Body)
+			if s.Kind == StCall {
+				calls[from] = append(calls[from], strat(s.Call))
+			}
 		}
 	}
-	index := make([]int, len(ir.Ops))
-	low := make([]int, len(ir.Ops))
-	onStack := make([]bool, len(ir.Ops))
-	var stack []OpID
+	for i := range ir.Strategies {
+		seq(strat(i), ir.Strategies[i].Body)
+	}
+	index := make([]int, n)
+	low := make([]int, n)
+	onStack := make([]bool, n)
+	var stack []int
 	next := 1
-	var visit func(v OpID)
-	visit = func(v OpID) {
+	var visit func(v int)
+	visit = func(v int) {
 		index[v], low[v] = next, next
 		next++
 		stack = append(stack, v)
@@ -1044,7 +1459,7 @@ func markRecursive(ir *IR) {
 			}
 		}
 		if low[v] == index[v] {
-			var comp []OpID
+			var comp []int
 			for {
 				w := stack[len(stack)-1]
 				stack = stack[:len(stack)-1]
@@ -1056,13 +1471,15 @@ func markRecursive(ir *IR) {
 			}
 			rec := len(comp) > 1 || slices.Contains(calls[v], v)
 			for _, w := range comp {
-				ir.Ops[w].Recursive = rec
+				if w < nOps {
+					ir.Ops[w].Recursive = rec
+				}
 			}
 		}
 	}
-	for o := range ir.Ops {
-		if index[o] == 0 {
-			visit(o)
+	for v := range n {
+		if index[v] == 0 {
+			visit(v)
 		}
 	}
 }
@@ -1130,15 +1547,21 @@ func (rl *ruleLowerer) expr(t *tt) (Expr, error) {
 }
 
 // lower is the rule; false when it is not compiled (extension variables).
-func (rl *ruleLowerer) lower(lhs *tt) (Rule, bool, error) {
+// The patterns are those of the arguments of the left-hand side (a rule of
+// an operator), or with whole the left-hand side itself (a labelled rule).
+func (rl *ruleLowerer) lower(lhs *tt, whole bool) (Rule, bool, error) {
 	if containsEVar(lhs) {
 		return Rule{}, false, nil
 	}
 	l := rl.b.l
 	var same []Cond
 	var pats []Pattern
-	for i := range lhs.args {
-		pats = append(pats, rl.pattern(&lhs.args[i], &same))
+	if whole {
+		pats = append(pats, rl.pattern(lhs, &same))
+	} else {
+		for i := range lhs.args {
+			pats = append(pats, rl.pattern(&lhs.args[i], &same))
+		}
 	}
 	rl.conds = append(rl.conds, same...)
 	body := rl.rule.Body.(ref.Plain)
@@ -1169,8 +1592,13 @@ func (rl *ruleLowerer) lower(lhs *tt) (Rule, bool, error) {
 			if err != nil {
 				return Rule{}, false, err
 			}
-			texts = append(texts, "where "+rl.render(&lt)+" := () "+rl.render(&r))
-			if _, bound := rl.varOf[lt.index]; lt.kind == ttVar && !bound {
+			texts = append(texts, "where "+rl.render(&lt)+" := ("+rl.strategyText(w.Strategy)+") "+rl.render(&r))
+			if w.Strategy.Valid {
+				var same []Cond
+				p := rl.pattern(&lt, &same)
+				rl.conds = append(rl.conds, Cond{Kind: CondApply, Pat: p, Strategy: rl.b.stratOf[w.Strategy.Index], Expr: e})
+				rl.conds = append(rl.conds, same...)
+			} else if _, bound := rl.varOf[lt.index]; lt.kind == ttVar && !bound {
 				v := rl.newVar(lt.index, lt.sort)
 				rl.varOf[lt.index] = v
 				rl.conds = append(rl.conds, Cond{Kind: CondLet, A: v, Expr: e})
@@ -1193,10 +1621,14 @@ func (rl *ruleLowerer) lower(lhs *tt) (Rule, bool, error) {
 			if err != nil {
 				return Rule{}, false, err
 			}
-			texts = append(texts, "where "+rl.render(&pt)+" := () "+rl.render(&r))
+			texts = append(texts, "where "+rl.render(&pt)+" := ("+rl.strategyText(w.Strategy)+") "+rl.render(&r))
 			var same []Cond
 			p := rl.pattern(&pt, &same)
-			rl.conds = append(rl.conds, Cond{Kind: CondMatch, Pat: p, Expr: e})
+			if w.Strategy.Valid {
+				rl.conds = append(rl.conds, Cond{Kind: CondApply, Pat: p, Strategy: rl.b.stratOf[w.Strategy.Index], Expr: e})
+			} else {
+				rl.conds = append(rl.conds, Cond{Kind: CondMatch, Pat: p, Expr: e})
+			}
 			rl.conds = append(rl.conds, same...)
 		default:
 			panic("refused during reachability")
@@ -1215,6 +1647,14 @@ func (rl *ruleLowerer) lower(lhs *tt) (Rule, bool, error) {
 		text += " " + c
 	}
 	return Rule{Text: text, Vars: rl.vars, Lhs: pats, Conds: rl.conds, Rhs: rhs}, true, nil
+}
+
+// strategyText is the name of the strategy of a where (empty for ()).
+func (rl *ruleLowerer) strategyText(s ref.OptIndex) string {
+	if !s.Valid {
+		return ""
+	}
+	return BaseName(rl.b.l.strategyName(s.Index))
 }
 
 // render is the ELAN text of a typed term (variables x<model index>).
@@ -1256,7 +1696,15 @@ func (b *builder) render(t *tt, out *strings.Builder) {
 				out.WriteString(s)
 			case ref.LexChar:
 				c := byte(x.N)
-				if strings.IndexByte("+-*/=<>&|%", c) >= 0 {
+				const ops = "+-*/=<>&|%!"
+				if prev := out.String(); strings.IndexByte(ops, c) >= 0 && len(prev) >= 2 &&
+					prev[len(prev)-1] == ' ' && strings.IndexByte(ops, prev[len(prev)-2]) >= 0 {
+					// the next character of an operator (!=, ==, <=)
+					out.Reset()
+					out.WriteString(prev[:len(prev)-1])
+					out.WriteByte(c)
+					out.WriteByte(' ')
+				} else if strings.IndexByte(ops, c) >= 0 {
 					out.WriteByte(' ')
 					out.WriteByte(c)
 					out.WriteByte(' ')

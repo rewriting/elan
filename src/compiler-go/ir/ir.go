@@ -39,12 +39,35 @@
 // unconditional rules cover every normal form of its arguments (a greatest
 // fixpoint over the sorts, [Lower]); a total operator has no stuck term.
 //
+// # Strategies (S7b, as elanc-rs's S6b)
+//
+//   - The labels ([Label]): the labelled rules of one localised rule name
+//     (`label:sort/module!GL`), in source order, with the decision tree of
+//     their whole left-hand sides (one column: the term itself). A label is
+//     compiled to a function in continuation-passing style over the Go
+//     type of its sort, `func(t T, k rt.K[T], first bool) bool`: each
+//     result of each rule that applies, in order, is passed to k (true from
+//     k means stop); with first, only the results of the first rule that
+//     has one (dc). Labelled rules never take part in normalisation; the
+//     right-hand side is built by the normalisation functions, so every
+//     result is in normal form (the interpreter reduces each result).
+//   - The named strategies ([Strategy]): the STRATEGY definitions reachable
+//     from the query and from the wheres, a body made of [Strat] elements,
+//     each compiled to `func(t T, k rt.K[T]) bool`.
+//   - [CondApply]: `where p := (S) t`, each result of S in turn (the
+//     conditions after it backtrack into S); in normalisation, the first
+//     result for which the rest of the conditions hold.
+//   - The analyses: which strategies give at most one result ([Det],
+//     greatest fixpoint), which always give one when they terminate
+//     ([IR.TotalStrategies], least fixpoint), and the calls of a strategy
+//     to itself in tail position ([IR.TailCalls]): deterministic repeat*,
+//     iterate* and tail-recursive strategies are loops.
+//
+// Strategy terms built at run time (strat[X], defined strategies with
+// parameters, call "name":X, META) are refused as "S7b task 2".
+//
 // # Extension points
 //
-//   - S7b (strategies): labelled rules become continuation-passing
-//     functions next to the normalisation functions; [Cond] gets a strategy
-//     case (`where x := (s) t`), [Expr] a strategy call. [Decision] is
-//     reusable for labelled rules.
 //   - S7c (AC): [Pattern] gets an AC case, [Decision] an AC matching node.
 //   - S7d (query): [Start] gets the query variable and the parser tables.
 package ir
@@ -71,6 +94,12 @@ type RuleID = int
 // VarID is an index in [Rule.Vars].
 type VarID = int
 
+// LabelID is an index in [IR.Labels].
+type LabelID = int
+
+// StratID is an index in [IR.Strategies].
+type StratID = int
+
 // IR is a whole program, restricted to what the start term needs.
 type IR struct {
 	// Program is the name of the program (the .lgi file without extension).
@@ -78,7 +107,101 @@ type IR struct {
 	Sorts    []Sort
 	Families []Family
 	Ops      []Op
-	Start    Start
+	// Labels are the reachable labels, in the order of the rule names of
+	// the .ref file.
+	Labels []Label
+	// Strategies are the reachable named strategies, in the order of the
+	// strategy names of the .ref file.
+	Strategies []Strategy
+	Start      Start
+}
+
+// Label is the labelled rules of one label (a localised rule name of the
+// .ref file), in source order.
+type Label struct {
+	// Name is the localised name (r1:nat/m!GL).
+	Name string
+	// Fun is the name of the function.
+	Fun string
+	// Sort is the sort of the rules.
+	Sort SortID
+	// Rules are the rules; each has one left-hand side pattern, the whole
+	// term.
+	Rules []Rule
+	// Skipped are the rules of the source not compiled, with the reason
+	// (comments).
+	Skipped []string
+	// Tree is the matching automaton (one column: the term).
+	Tree *Decision
+	// RulesDet: every rule gives at most one result (its wheres use
+	// deterministic strategies only).
+	RulesDet bool
+}
+
+// Strategy is a named strategy (a STRATEGY definition).
+type Strategy struct {
+	// Name is the name in the .ref file (go:nat/m).
+	Name string
+	// Fun is the name of the function.
+	Fun string
+	// Sort is the sort of the terms it applies to (and of its results).
+	Sort SortID
+	// Body is the sequence s1 ; s2 ; ...
+	Body []Strat
+	// Det: it gives at most one result ([IR.SeqDet]).
+	Det bool
+}
+
+// Choice is how a choice keeps the results of its alternatives.
+type Choice int
+
+const (
+	// Dk (dk, DK): all results of all alternatives, in order.
+	Dk Choice = iota
+	// Dc (dc, DC, first): all results of the first alternative that has
+	// one (for rules: the first rule that has one).
+	Dc
+	// One (one, ONE, first one, dc one): the first result.
+	One
+)
+
+func (c Choice) String() string { return [...]string{"dk", "dc", "one"}[c] }
+
+// StratKind is the kind of a [Strat].
+type StratKind int
+
+const (
+	// StId is id.
+	StId StratKind = iota
+	// StFail is fail.
+	StFail
+	// StRules is dk/dc/one(l1, ..., ln) over labels.
+	StRules
+	// StStrats is DK/DC/ONE(s1, ..., sn) over sequences.
+	StStrats
+	// StRepeat is repeat*(s): the terms reached by s on which s fails,
+	// depth first.
+	StRepeat
+	// StIterate is iterate*(s): the term, then iterate*(s) of each result
+	// of s.
+	StIterate
+	// StCall is a call of a named strategy.
+	StCall
+)
+
+// Strat is an elementary strategy (one element of a sequence).
+type Strat struct {
+	Kind StratKind
+	// Choice of StRules and StStrats.
+	Choice Choice
+	// Labels of StRules.
+	Labels []LabelID
+	// Alts of StStrats.
+	Alts [][]Strat
+	// Body of StRepeat and StIterate.
+	Body []Strat
+	// Call is the strategy of StCall.
+	Call StratID
 }
 
 // Sort is a reachable sort.
@@ -361,6 +484,10 @@ const (
 	CondLet
 	// CondMatch is `where p := () t`: the normal form of t matches p.
 	CondMatch
+	// CondApply is `where p := (S) t` (p a variable for `where x := (S)
+	// t`): each result of strategy S applied to the normal form of t that
+	// matches p, in order (backtracking).
+	CondApply
 )
 
 // Cond is a condition or local assignment of a rule.
@@ -368,10 +495,12 @@ type Cond struct {
 	Kind CondKind
 	// A, B are the variables of CondSame; A is the variable of CondLet.
 	A, B VarID
-	// Expr is the term of CondIf, CondLet, CondMatch.
+	// Expr is the term of CondIf, CondLet, CondMatch, CondApply.
 	Expr Expr
-	// Pat is the pattern of CondMatch.
+	// Pat is the pattern of CondMatch and CondApply.
 	Pat Pattern
+	// Strategy is the strategy of CondApply.
+	Strategy StratID
 }
 
 // ExprKind is the kind of an [Expr].
@@ -473,6 +602,9 @@ type Start struct {
 	QuerySort string
 	Sort      SortID
 	Term      Expr
+	// Strategy is the strategy of `start with (S) t`, applied to the
+	// normal form of the term, each result printed; -1 for `()`.
+	Strategy StratID
 }
 
 // FamilyOf is the family of sort s, nil for a sort of terms.

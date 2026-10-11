@@ -18,8 +18,28 @@
 //     term (or a panic when the operator is total). The functions on a call
 //     cycle guard their depth (rt.Guard, exit status 3 before Go's fatal
 //     stack overflow).
+//   - per label (S7b): a function in continuation-passing style,
+//     `func rl_inc_7(a0 T, k rt.K[T], first bool) bool`: the decision tree
+//     of the labelled rules over the whole term, a rule leaf passing its
+//     result to k (`return true` when k asks to stop) and going on with
+//     the next rules (all of them, in source order; with first, only those
+//     of the first rule that has a result: dc);
+//   - per named strategy: `func st_go_4(t T, k rt.K[T]) bool`, its body an
+//     expression (strat.go): dk as || of the alternatives, a sequence as
+//     a continuation (a closure k<n> for the rest), dc/DC and one/ONE with
+//     the runtime's DcChoice and OneChoice, repeat* and iterate* through
+//     the runtime (rt.RepeatStarDet/IterateStarDet loops for a
+//     deterministic step); a deterministic strategy calling itself in tail
+//     position is a loop ([ir.IR.TailCalls]);
+//   - the functions that can recurse (strategies, labels, the
+//     normalisation of the operators of a cycle) start with rt.Guard();
+//   - conditions `where p := (S) t`: the rest of the rule in the
+//     continuation of S (a closure), so that a failing condition asks S
+//     for its next result (`return false`); in a normalisation function
+//     the first result for which the rule applies is kept;
 //   - main: the start term, normalised and printed by the runtime driver
-//     (rt.Main: options, output, exit statuses).
+//     (rt.Main: options, output, exit statuses), or each result of the
+//     start strategy applied to it.
 package gen
 
 import (
@@ -65,6 +85,13 @@ type emitter struct {
 	b2i    bool // the helper b2i is needed
 	// injTests are the injections whose test is needed (injTest)
 	injTests []ir.OpID
+	// labelMode: the rules are those of a label (each result to k)
+	labelMode bool
+	// res, ok are the variables of the result kept by a normalisation
+	// function after a `where p := (S) t`; resType is their type
+	res, ok, resType string
+	// tail are the tail calls of the strategy emitted as a loop
+	tail map[*ir.Strat]bool
 }
 
 func (e *emitter) line(format string, a ...any) {
@@ -326,6 +353,10 @@ func (e *emitter) file() {
 	e.line("")
 	e.line("// Normalisation (innermost) of the start term of %s with its unlabelled", comment(p.Program))
 	e.line("// rules: one function per operator, its arguments in normal form.")
+	if p.Start.Strategy >= 0 {
+		e.line("// Then the strategy %s: each label and each strategy is a function", comment(p.Strategies[p.Start.Strategy].Name))
+		e.line("// passing its results to a continuation k.")
+	}
 	e.line("package main")
 	e.line("")
 	e.line(`import rt "elan/elanrt"`)
@@ -337,6 +368,8 @@ func (e *emitter) file() {
 	for o := range p.Ops {
 		e.opFunc(o)
 	}
+	e.labels()
+	e.strategies()
 	for _, o := range e.injTests {
 		e.injTest(o)
 	}
@@ -505,6 +538,7 @@ func (e *emitter) opFunc(o ir.OpID) {
 			e.line("rt.Guard()")
 			e.line("defer rt.Unguard()")
 		}
+		e.resType = e.goType(op.Result)
 		e.decision(op.Tree, op.Rules)
 		switch {
 		case terminates(op.Tree, op.Rules):
@@ -682,8 +716,9 @@ func usedVars(r *ir.Rule) map[ir.VarID]bool {
 	return used
 }
 
-// usedOccs are the positions read by the code of d.
-func usedOccs(d *ir.Decision, rules []ir.Rule, into map[string]bool) {
+// usedOccs are the positions read by the code of d; all: every rule is
+// tried, whether it applies or not (a label).
+func usedOccs(d *ir.Decision, rules []ir.Rule, into map[string]bool, all bool) {
 	switch d.Kind {
 	case ir.Try:
 		used := usedVars(&rules[d.Rule])
@@ -692,16 +727,16 @@ func usedOccs(d *ir.Decision, rules []ir.Rule, into map[string]bool) {
 				into[occName(b.Occ)] = true
 			}
 		}
-		if !rules[d.Rule].Unconditional() {
-			usedOccs(d.Next, rules, into)
+		if all || !rules[d.Rule].Unconditional() {
+			usedOccs(d.Next, rules, into, all)
 		}
 	case ir.Switch:
 		into[occName(d.Occ)] = true
 		for _, c := range d.Cases {
-			usedOccs(c.Then, rules, into)
+			usedOccs(c.Then, rules, into, all)
 		}
 		if d.Default != nil {
-			usedOccs(d.Default, rules, into)
+			usedOccs(d.Default, rules, into, all)
 		}
 	}
 }
@@ -710,7 +745,7 @@ func (e *emitter) decision(d *ir.Decision, rules []ir.Rule) {
 	switch d.Kind {
 	case ir.Try:
 		e.tryRule(d, rules)
-		if !rules[d.Rule].Unconditional() {
+		if e.labelMode || !rules[d.Rule].Unconditional() {
 			e.decision(d.Next, rules)
 		}
 	case ir.Switch:
@@ -726,7 +761,7 @@ func (e *emitter) decision(d *ir.Decision, rules []ir.Rule) {
 // that the code of then reads.
 func (e *emitter) children(occ ir.Occ, o ir.OpID, then *ir.Decision, rules []ir.Rule) {
 	used := map[string]bool{}
-	usedOccs(then, rules, used)
+	usedOccs(then, rules, used, e.labelMode)
 	name := occName(occ)
 	for i, s := range e.ir.Ops[o].Args {
 		c := occName(append(slices.Clone(occ), i))
@@ -781,7 +816,7 @@ func (e *emitter) familySwitch(d *ir.Decision, rules []ir.Rule) {
 			if op.Kind == ir.Injection {
 				child := occName(append(slices.Clone(d.Occ), 0))
 				used := map[string]bool{}
-				usedOccs(c.Then, rules, used)
+				usedOccs(c.Then, rules, used, e.labelMode)
 				if used[child] {
 					e.line("%s := %s", child, name)
 				}
@@ -816,23 +851,47 @@ func (e *emitter) familySwitch(d *ir.Decision, rules []ir.Rule) {
 
 // tryRule applies a rule whose left-hand side matches, if its conditions
 // hold: a block of nested ifs ending with the return of its right-hand
-// side.
+// side (normalisation) or its result passed to k (a label, which then
+// goes on with the next rules; with first, it stops after the first rule
+// that has a result).
 func (e *emitter) tryRule(d *ir.Decision, rules []ir.Rule) {
 	r := &rules[d.Rule]
 	used := usedVars(r)
 	e.line("// %s", comment(r.Text))
-	opens := 0
-	if !r.Unconditional() {
+	block := e.labelMode || !r.Unconditional()
+	if block {
 		// a block: the variables of the rule are local to it
 		e.open("{")
-		opens++
 	}
 	for _, b := range d.Bindings {
 		if used[b.Var] {
 			e.line("%s := %s", r.Vars[b.Var].Name, occName(b.Occ))
 		}
 	}
-	for _, c := range r.Conds {
+	e.conds(r, 0, used, 0)
+	if block {
+		e.close("}")
+	}
+	if e.labelMode {
+		e.open("if first && found {")
+		e.line("return false // dc: the results of the first rule that has one")
+		e.close("}")
+	}
+}
+
+// conds writes the conditions of rule r from the i-th on, then its
+// application; depth is the number of enclosing continuations (closures
+// of `where p := (S) t`), where a failing condition returns false (S then
+// gives its next result).
+func (e *emitter) conds(r *ir.Rule, from int, used map[ir.VarID]bool, depth int) {
+	opens := 0
+	defer func() {
+		for range opens {
+			e.close("}")
+		}
+	}()
+	for j := from; j < len(r.Conds); j++ {
+		c := r.Conds[j]
 		switch c.Kind {
 		case ir.CondSame:
 			e.open("if %s == %s {", r.Vars[c.A].Name, r.Vars[c.B].Name)
@@ -867,11 +926,67 @@ func (e *emitter) tryRule(d *ir.Decision, rules []ir.Rule) {
 			if !read {
 				e.line("_ = %s // the pattern reads nothing of it", m)
 			}
+		case ir.CondApply:
+			e.apply(r, j, used, depth)
+			return
 		}
 	}
 	e.line("rt.Step()")
-	e.line("return %s", e.expr(&r.Rhs, r.Vars))
+	rhs := e.expr(&r.Rhs, r.Vars)
+	switch {
+	case e.labelMode && depth == 0:
+		e.line("found = true")
+		e.open("if k(%s) {", rhs)
+		e.line("return true")
+		e.close("}")
+	case e.labelMode:
+		e.line("found = true")
+		e.line("return k(%s)", rhs)
+	case depth == 0:
+		e.line("return %s", rhs)
+	default:
+		e.line("%s, %s = %s, true", e.res, e.ok, rhs)
+		e.line("return true")
+	}
+}
+
+// apply writes the condition j of r, `where p := (S) t`, and the rest of
+// the rule in the continuation of S: each result of S matched against p,
+// the conditions after it checked (a failure returns false: S gives its
+// next result). A normalisation function keeps the first result for which
+// the rule applies (res, ok); a label passes every one to k.
+func (e *emitter) apply(r *ir.Rule, j int, used map[ir.VarID]bool, depth int) {
+	c := &r.Conds[j]
+	st := &e.ir.Strategies[c.Strategy]
+	ty := e.goType(st.Sort)
+	n := e.next()
+	m, y := fmt.Sprintf("m%d", n), fmt.Sprintf("y%d", n)
+	e.line("%s := %s", m, e.typedExpr(&c.Expr, r.Vars))
+	e.line("// each result of %s (the conditions after it backtrack)", comment(st.Name))
+	keepFirst := !e.labelMode && depth == 0
+	if keepFirst {
+		e.res, e.ok = fmt.Sprintf("res%d", n), fmt.Sprintf("ok%d", n)
+		e.line("var %s %s", e.res, e.resType)
+		e.line("%s := false", e.ok)
+		e.open("%s(%s, func(%s %s) bool {", st.Fun, m, y, ty)
+	} else {
+		e.open("if %s(%s, func(%s %s) bool {", st.Fun, m, y, ty)
+	}
+	opens, _ := e.patternCheck(&c.Pat, y, st.Sort, r, used)
+	e.conds(r, j+1, used, depth+1)
 	for range opens {
+		e.close("}")
+	}
+	e.line("return false")
+	if keepFirst {
+		e.close("})")
+		e.open("if %s {", e.ok)
+		e.line("return %s", e.res)
+		e.close("}")
+	} else {
+		e.indent--
+		e.open("}) {")
+		e.line("return true")
 		e.close("}")
 	}
 }
@@ -941,15 +1056,29 @@ func (e *emitter) mainFunc() {
 	p := e.ir
 	e.line("// ==== main ====")
 	e.line("")
-	e.line("// main runs the start term of the query (-noInput), normalised and printed.")
+	if p.Start.Strategy < 0 {
+		e.line("// main runs the start term of the query (-noInput), normalised and printed.")
+	} else {
+		e.line("// main runs the start term of the query (-noInput), normalised, then each")
+		e.line("// result of the start strategy printed.")
+	}
 	e.open("func main() {")
 	e.open("rt.Main(%s, func(s *rt.Session) {", goString(p.Start.QuerySort))
-	x := e.expr(&p.Start.Term, nil)
 	result := "Result"
 	if k, ok := p.Native(p.Start.Sort); ok {
 		result = map[ir.BuiltinKind]string{ir.KindInt: "ResultInt", ir.KindBool: "ResultBool", ir.KindStr: "ResultStr"}[k]
 	}
-	e.line("s.%s(%s)", result, x)
+	if p.Start.Strategy < 0 {
+		e.line("s.%s(%s)", result, e.expr(&p.Start.Term, nil))
+	} else {
+		st := &p.Strategies[p.Start.Strategy]
+		e.line("t := %s", e.typedExpr(&p.Start.Term, nil))
+		e.line("// each result of %s", comment(st.Name))
+		e.open("%s(t, func(r %s) bool {", st.Fun, e.goType(st.Sort))
+		e.line("s.%s(r)", result)
+		e.line("return false")
+		e.close("})")
+	}
 	e.close("})")
 	e.close("}")
 }
