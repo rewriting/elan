@@ -6,7 +6,17 @@ produce the .ref. The difficulty is that the interpreter has a preprocessor
 used at parse time that itself uses the interpreter, for example to build
 the grammar. Could we define a parser in Go that uses the compiler for the
 program pieces used during parsing?" The answer proposed and approved:
-"write the S8 spec with the IR interpreter".
+"write the S8 spec with the IR interpreter". The open questions of the
+first draft were answered by the user on 2026-10-11 (§10, folded into §3,
+§6 and §8).
+
+**Names.** The user decided (S7e) that `elanc` becomes the Go compiler:
+`bin/elanc` is a symlink to `elanc-go` (CMake `ELAN_ELANC=go`, the default
+when Go >= 1.24 is found; `-DELAN_ELANC=rem` undoes it), REM's driver is
+installed as `elanc-rem`, and `elanc-go` keeps its name. In this spec
+`elanc-go` names the Go compiler under either name; "REM" is the 2004
+compiler (`elanc-rem`); no test calls the bare `elanc` (S7e,
+`check_rem_name.py`).
 
 ## 1. Context and decision
 
@@ -200,13 +210,14 @@ lower, emit 8 272 lines of Go): 50 ms user. A whole-program lowering per
    `tests/compiler-rs/programs` (334 `.lgi` together) and `examples/` (13),
    the 22 BenchThesis cases. A difference is allowed only
    when listed in `tests/front/differs.tsv` with its reason and the user's
-   approval (none is planned; the comparison of last resort is
-   `ref.CompareTokens`).
+   approval of that very case (S8-16: no class of differences is accepted
+   in bulk, not even a C++ quirk; none is planned; the comparison of last
+   resort is `ref.CompareTokens`).
 2. **Same errors.** On the error corpus (the golden error programs and a new
    one, §7), the same standard error, standard output (in `-b` mode) and
    exit status as `elan -b --cexport`.
-3. **No C++ needed.** `elanc-go prog[.lgi] [spec]` works with no `elan`
-   on the machine (a test runs it with a `PATH` and a prefix without
+3. **No C++ needed.** `elanc-go prog[.lgi] [spec]` (and `elanc`, the same
+   program after S7e) works with no `elan` on the machine (a test runs it with a `PATH` and a prefix without
    `elan`); `--front=elan` keeps the S7 path.
 4. **The IR interpreter equals compiled code.** `elan-go run prog.ref`
    (the command line of a compiled program: `-noInput`, `-quiet`, query on
@@ -215,11 +226,13 @@ lower, emit 8 272 lines of Go): 50 ms user. A whole-program lowering per
    `strategy_terms`, `test_depth`, `test_query` (150 queries), the bench
    G cases and BenchThesis G (the `rewrite_step` line compared too: the
    interpreter counts what the generated code counts).
-5. **Performance.** Loading (front end and preprocessor evaluation, `.ref`
-   written) under 0.5 s for every program of criterion 1 (the C++ takes
-   16-20 ms on the largest measured, §2.5); the interpreter's run times
-   reported next to the C++ interpreter's and `elanc-go`'s on `bench_perf.sh` (target: not slower than
-   the C++ interpreter; a miss is recorded, not a failure).
+5. **Performance** (targets confirmed by the user, S8-17). Loading (front
+   end and preprocessor evaluation, `.ref` written) under 0.5 s for every
+   program of criterion 1 (the C++ takes 16-20 ms on the largest measured,
+   §2.5) — a requirement; the IR interpreter's run times reported next to
+   the C++ interpreter's and `elanc-go`'s on `bench_perf.sh`, target: not
+   slower than the C++ interpreter — a miss is recorded with its figures,
+   not a failure.
 6. `make check` and the CI run the new tests when Go >= 1.24 is available;
    nothing in the existing chain changes; `legacy/` untouched.
 
@@ -261,7 +274,9 @@ Packages, in the module `elan` (`src/compiler-go`), standard library only:
 * `cmd/elan-go`: `elan-go [--cexport|--export F.ref] -b [options] prog.lgi
   [spec]` (the subset of `elan`'s options that matter for an export:
   `--elanlib`, `-l/--secondlib`, `--MAXLENNTERM`, `-b`) and
-  `elan-go run [options] prog.ref` (S8-7); `cmd/elanc-go` gains `--front`.
+  `elan-go run [options] prog.ref` (S8-7, S8-15: one command, `run` a
+  subcommand); `cmd/elanc-go` gains `--front` (so does `elanc`, a symlink
+  to it after S7e).
 
 ## 5. Evaluating the preprocessor
 
@@ -323,10 +338,13 @@ construct (never a silent difference).
 | S8-8 | `FOR EACH`/`IF`: snapshot export + `ir.LowerQuery` + `interp` enumeration + `writetobuf` port (§5); snapshots cached per state version, each condition list lowered on its own. | Reuses the export and the lowering instead of a second path from the loader's state to the IR. |
 | S8-9 | Generated modules (spec parts, `explimpl<n>`, `symbappl<n>`) are produced as text in memory and read by the same lexer and parser; no file is written in the current directory. | Same tables and numbering; no side effect (the C++ writes and deletes `explimpl*.eln` in the user's directory). |
 | S8-10 | Error messages: same text, stream and exit status for every error of the error corpus; `[error] :file=F\tline=L\tpos=P` positions computed as the C++ lexer does; the first fatal error stops the load (`failexit`). Warnings (`[warning] using the 'code' option...`, Earley ambiguity warnings) on stderr as the C++. | Users and tests read them; the goldens pin some. |
-| S8-11 | Oracles: `elan --cexport` and `elan -b`; C++ test harnesses linked with `elan_core` (as `tests/unit`), never changing `elan`: `elan-lextrace` (the macro-expanded lexem stream of a file, with given parameter macros, `FOR EACH` reported but not expanded) and, if the `.ref` diff is not enough to find a numbering divergence, a table-insertion trace behind a macro defined only for the harness target (open question 2). The module loading tree that `elan` prints without `-b` ("handling module m ... end of m") is the oracle of import order. | Small, precise oracles for the early stages; `elan` unchanged (the goldens prove it). |
-| S8-12 | Scope: what `elan -b --export/--cexport` needs. Not in S8: interactive commands, `-d`/`-s`/`-S` dumps, `--import` of a `.ref`, the `quote` library, `-coq`/`-proofterm`, the C code generation options of `elan`. A Go `elan -b` (queries on stdin, results as the C++) is an optional last stage, only on the user's decision. | Keeps S8 to the compiler's needs. |
-| S8-13 | The C++ interpreter stays built, installed and tested; after S8d, `elanc-go` uses the Go front end by default, `--front=elan` restores the C++ export (reversible, as the S7e switch). | No regression path; the C++ remains the oracle. |
+| S8-11 | Oracles: `elan --cexport` and `elan -b`; C++ test harnesses linked with `elan_core` (as `tests/unit`), never changing `elan`: `elan-lextrace` (the macro-expanded lexem stream of a file, with given parameter macros, `FOR EACH` reported but not expanded) and, if the `.ref` diff is not enough to find a numbering divergence, a table-insertion trace: `#ifdef` hooks in the C++ string table (`base/stringtab.cc`, and the other tables if needed) compiled only into a test harness target, never into `elan` (allowed by the user, §10 D2). The module loading tree that `elan` prints without `-b` ("handling module m ... end of m") is the oracle of import order. | Small, precise oracles for the early stages; `elan` unchanged (the goldens prove it). |
+| S8-12 | Scope: what `elan -b --export/--cexport` needs. Not in S8: interactive commands, `-d`/`-s`/`-S` dumps, `--import` of a `.ref`, the `quote` library, `-coq`/`-proofterm`, the C code generation options of `elan`. The Go interactive interpreter `elan` (queries on stdin, results as the C++) comes later, after S8: it is not in S8's scope (§10 D4). | Keeps S8 to the compiler's needs. |
+| S8-13 | The C++ interpreter stays built, installed and tested, and stays in `make check` by default after S8e, as the oracle (§10 D5; unlike the Rust compiler, G7, it does not become optional); after S8d, `elanc-go` (hence `elanc`) uses the Go front end by default, `--front=elan` restores the C++ export (reversible, as the S7e switch). | No regression path; the C++ remains the oracle. |
 | S8-14 | Library lookup as `ichstream`: the name as given (current directory), then `$SECONDELANLIB` (default `..`), then `$ELANLIB/share/elanlib/{common,noquote,strategy,ref}/` (exact case); `--elanlib DIR`, `-l DIR`. | Same programs load the same files. |
+| S8-15 | One command `elan-go`: `elan-go [--cexport\|--export F.ref] -b ... prog.lgi [spec]` for the front end, `elan-go run [options] prog.ref` for the IR interpreter (§10 D1). | One binary to build and install; the subcommand leaves room for the later interpreter. |
+| S8-16 | Every `.ref` difference from `elan` is listed in `tests/front/differs.tsv` and approved by the user case by case; no blanket acceptance, not even for a C++ quirk (§10 D3). | Byte equality stays a total oracle. |
+| S8-17 | Targets: loading under 0.5 s per program (required); IR interpreter no slower than the C++ interpreter (a miss is only recorded, with its figures) (§10 D6). | Confirmed by the user. |
 
 ## 7. Tests
 
@@ -383,10 +401,12 @@ construct (never a silent difference).
   BenchThesis, examples).
 * **S8e — integration.** `elanc-go --front=go` by default, `elan` not
   needed (criterion 3); `test_ref_roundtrip.sh` and the G kinds run with the
-  Go front end; docs (`docs/ref-format.md` "writers", README, followups).
-  Optional, on the user's decision: `elan-go -b prog.lgi [spec]` running
-  queries from stdin with `interp`, compared with `elan -b` on the I kind
-  of the bench and the examples.
+  Go front end; the C++ interpreter stays in `make check` as the oracle
+  (S8-13); docs (`docs/ref-format.md` "writers", README, followups).
+* **After S8 (not in its scope, §10 D4).** A Go interactive interpreter
+  `elan` (`elan-go -b prog.lgi [spec]` running queries from stdin with
+  `interp`, compared with `elan -b` on the I kind of the bench and the
+  examples): a new spec and decision.
 
 ## 9. Risks
 
@@ -427,16 +447,20 @@ construct (never a silent difference).
   dumps). Mitigation: S8-12; anything beyond the export and `elan-go run`
   needs a new decision.
 
-## 10. Open questions for the user
+## 10. Decisions of the user (2026-10-11)
 
-1. Command names: one `elan-go` with `run` as a subcommand (proposed), or
-   separate `elan-front`/`elan-run` commands?
-2. May the table-insertion trace (S8-11) add `#ifdef` hooks to
-   `base/stringtab.cc` compiled only into a test harness (no change to the
-   `elan` binary), if the `.ref` diff is not enough?
-3. Byte-for-byte is the target; should any difference be accepted without a
-   case-by-case decision (e.g. a C++ quirk reading uninitialised memory)?
-   Proposed: no, each one listed and approved.
-4. S8e's Go `elan -b` interpreter: in S8, later, or not at all?
-5. After S8e, should the C++ interpreter stay in `make check` by default
-   (as the oracle) or become optional like the Rust compiler (G7)?
+The first draft ended with open questions; the user accepted the six
+recommendations. Recorded here, folded into §3, §6 and §8:
+
+| # | Question | Decision | Where |
+|---|---|---|---|
+| D1 | Command names | One command `elan-go`, with a `run` subcommand for the IR interpreter (not separate `elan-front`/`elan-run`). | S8-15, §4 |
+| D2 | Table-insertion trace | `#ifdef` trace hooks in the C++ string table are allowed, compiled only into a test harness; the `elan` binary does not change. | S8-11 |
+| D3 | Differences of `.ref` | Every difference listed and approved by the user case by case; no blanket acceptance. | S8-16, criterion 1 |
+| D4 | Go interactive `elan` | Later, after S8; out of S8's scope. | S8-12, §8 |
+| D5 | C++ interpreter after S8e | Stays in `make check` by default, as the oracle. | S8-13, §8 S8e |
+| D6 | Targets | Loading under 0.5 s per program; IR interpreter no slower than the C++ interpreter (a miss is only recorded). | S8-17, criterion 5 |
+
+Also decided (S7e, the same day): `elanc` is the Go compiler, REM is kept
+as `elanc-rem` (see "Names" at the top); the S8 text names `elanc-go`,
+which `elanc` designates.
