@@ -14,6 +14,7 @@ elan/sources/Compiler.2.1/BenchThesis/FastCompletion::G::ans:p2:-:jp2	ERROR
 elan/sources/Compiler.2.1/BenchThesis/FastCompletion::G::ans:p8:-:jp8	ERROR
 elan/sources/Compiler.2.1/BenchThesis/FastCompletion::G::ans:sample:-:jsample	ERROR
 elan/sources/Compiler.2.1/BenchThesis/FastCompletion::G::ans:taussky:-:jtaussky	ERROR
+elan/sources/Compiler.2.1/Test::G::bimatch:no:-:bimatch	PASS≈
 elan/sources/Compiler.2.1/Test::G::bool3:no:-:bool3	PASS
 elan/sources/Compiler.2.1/Test::G::choice1:no:-:choice1	PASS
 elan/sources/Compiler.2.1/Test::G::condac1:no:-:condac1	FAIL
@@ -36,6 +37,7 @@ elan/sources/Compiler.2.1/Test::G::match3:no:-:match3	PASS≈
 elan/sources/Compiler.2.1/Test::G::match4:no:-:match4	PASS
 elan/sources/Compiler.2.1/Test::G::propc1:no:-:propc1	PASS
 elan/sources/Compiler.2.1/Test::G::propc2:no:-:propc2	PASS
+elan/sources/Compiler.2.1/Test::G::rep:no:-:rep	PASS≈
 elan/sources/Compiler.2.1/Test::G::testACNumbering:no:-:testACNumbering	PASS
 elan/sources/Compiler.2.1/Test::G::testSubstitution:no:-:testSubstitution	FAIL
 elan/sources/Compiler.2.1/Test::G::wpattern:no:-:wpattern	PASS≈
@@ -45,6 +47,7 @@ elan/sources/Compiler.2.1/Test::G::wpatternAC3:no:-:wpatternAC3	FAIL
 elan/sources/Compiler.2.1/Test::G::wpatternAC4:no:-:wpatternAC4	PASS≈
 elan/sources/Compiler.2.1/Test::G::wpatternAC5:no:-:wpatternAC5	PASS≈
 elan/sources/Compiler.2.1/Test::G::wpatternAC6:no:-:wpatternAC6	PASS≈
+elan/sources/Compiler.3.0/Test::G::bimatch:no:-:bimatch	PASS≈
 elan/sources/Compiler.3.0/Test::G::bool3:no:-:bool3	PASS
 elan/sources/Compiler.3.0/Test::G::choice1:no:-:choice1	PASS
 elan/sources/Compiler.3.0/Test::G::condac1:no:-:condac1	FAIL
@@ -67,6 +70,7 @@ elan/sources/Compiler.3.0/Test::G::match3:no:-:match3	PASS≈
 elan/sources/Compiler.3.0/Test::G::match4:no:-:match4	PASS
 elan/sources/Compiler.3.0/Test::G::propc1:no:-:propc1	PASS
 elan/sources/Compiler.3.0/Test::G::propc2:no:-:propc2	PASS
+elan/sources/Compiler.3.0/Test::G::rep:no:-:rep	PASS≈
 elan/sources/Compiler.3.0/Test::G::testACNumbering:no:-:testACNumbering	PASS
 elan/sources/Compiler.3.0/Test::G::testSubstitution:no:-:testSubstitution	FAIL
 elan/sources/Compiler.3.0/Test::G::wpattern:no:-:wpattern	PASS≈
@@ -76,6 +80,7 @@ elan/sources/Compiler.3.0/Test::G::wpatternAC3:no:-:wpatternAC3	PASS≈
 elan/sources/Compiler.3.0/Test::G::wpatternAC4:no:-:wpatternAC4	PASS≈
 elan/sources/Compiler.3.0/Test::G::wpatternAC5:no:-:wpatternAC5	PASS≈
 elan/sources/Compiler.3.0/Test::G::wpatternAC6:no:-:wpatternAC6	PASS≈
+elan/sources/Compiler.3.2/Test::G::bimatch:no:-:bimatch	PASS≈
 elan/sources/Compiler.3.2/Test::G::choice1:no:-:choice1	PASS
 elan/sources/Compiler.3.2/Test::G::condac1:no:-:condac1	PASS≈
 elan/sources/Compiler.3.2/Test::G::condac2:no:-:condac2	FAIL
@@ -97,6 +102,7 @@ elan/sources/Compiler.3.2/Test::G::match3:no:-:match3	PASS≈
 elan/sources/Compiler.3.2/Test::G::match4:no:-:match4	PASS
 elan/sources/Compiler.3.2/Test::G::propc1:no:-:propc1	PASS
 elan/sources/Compiler.3.2/Test::G::propc2:no:-:propc2	PASS
+elan/sources/Compiler.3.2/Test::G::rep:no:-:rep	PASS≈
 elan/sources/Compiler.3.2/Test::G::testACNumbering:no:-:testACNumbering	PASS
 elan/sources/Compiler.3.2/Test::G::testSubstitution:no:-:testSubstitution	PASS≈
 elan/sources/Compiler.3.2/Test::G::wpattern:no:-:wpattern	PASS≈
@@ -127,6 +133,7 @@ elan/sources/Compiler.4.0/Test::G::match3:no:-:match3	PASS≈
 elan/sources/Compiler.4.0/Test::G::match4:no:-:match4	PASS
 elan/sources/Compiler.4.0/Test::G::propc1:no:-:propc1	PASS
 elan/sources/Compiler.4.0/Test::G::propc2:no:-:propc2	PASS
+elan/sources/Compiler.4.0/Test::G::rep:no:-:rep	PASS≈
 elan/sources/Compiler.4.0/Test::G::testACNumbering:no:-:testACNumbering	PASS
 elan/sources/Compiler.4.0/Test::G::testSubstitution:no:-:testSubstitution	PASS≈
 elan/sources/Compiler.4.0/Test::G::wpattern:no:-:wpattern	PASS≈

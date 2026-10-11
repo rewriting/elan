@@ -52,6 +52,32 @@ sub-project (S1–S5b). Each item says where it comes from.
   (exporter, `src/interpreter/ref/ref.cc`), so elanc-go and elanc-rs exit
   with status 1 instead of refusing the program (status 2, "not supported
   yet"); the interpreter runs it. To do with the calls by name, S7d (S6d).
+- **Interpreter: `builtinSyntacticMatching` fails on every function
+  symbol** (found by S7d, bench `bimatch`): `term::equalMatch`
+  (`src/interpreter/term/term.cc`) ends the `TNORMFS` case with `break`
+  after matching the arguments, so it returns 0: only a variable or a
+  constant pattern matches (`f(var(1))` against `f(a)` gives `fail`, even
+  `g(a,b)` against `g(a,b)`). REM (`builtinMatching.c`) and the 2000 output
+  (`.(a,nil)`) agree on `a.nil`; elanc-go follows them
+  (`tests/compiler-rs/programs/normalise/bimatch`, `synmatch`,
+  `.no-interpreter`). Not fixed (the interpreter does not change in S7d).
+- **REM: term builtins** (found by S7d): `term_equalMatch` compares two
+  strings with `return strcmp(...)` (true when they differ) and refuses a
+  variable whose value would be an int, an identifier or an AC term (the
+  tag tests come before the variable lookup); `builtinSyntacticUnification`
+  (175) is not implemented (`fun_175: TODO`: the C does not compile);
+  `btoi`/`itob` (25, 26) return their argument (a boolean constant read as
+  an int: the program crashes), and the interpreter stops on them ("not yet
+  implemented in the interpreted version"); a value builtin declared on a
+  sort of terms (`@ pl @ : (t t) t code 3`) adds addresses. elanc-go:
+  matching as REM with these fixed, unification as the interpreter, btoi
+  1/0 and itob `n != 0`, the value builtin a constructor (S7d plan, Task 1
+  rulings).
+- **replace/occurs on AC terms differ between the oracles** (S7d): the
+  interpreter finds an AC sub-multiset (`a U b` occurs in `a U b U c`,
+  `stermreplace`/`occursin`), REM the elements only (`term_rec_replace`,
+  `term_occur`); elanc-go follows the interpreter
+  (`programs/normalise/replace_ac.rem`).
 - **REM: Meta_strat terms** (`call`, sequences... built as `Strategy[X]`
   terms) give C that does not compile (`fun_143`), found by S6b
   (`tests/compiler-rs/programs/strategy_terms/ms_*`, `.no-rem`).

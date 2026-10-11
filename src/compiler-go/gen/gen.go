@@ -96,6 +96,8 @@ type emitter struct {
 	indent int
 	fresh  int  // counter of temporaries in the current function
 	b2i    bool // the helper b2i is needed
+	// normTerm: the normalisation dispatcher normTerm is needed (rt.Replace)
+	normTerm bool
 	// injTests are the injections whose test is needed (injTest)
 	injTests []ir.OpID
 	// labelMode: the rules are those of a label (each result to k)
@@ -460,8 +462,47 @@ func (e *emitter) file() {
 		e.close("}")
 		e.line("")
 	}
+	if e.normTerm {
+		e.normTermFunc()
+	}
 	e.ekerDecls()
 	e.mainFunc()
+}
+
+// normTermFunc writes normTerm, the normalisation dispatcher of rt.Replace:
+// the normal form of sym(args...), its arguments in normal form (an AC
+// symbol: its elements), by the function of the operator for the symbols
+// of the operators that can be stuck (defined or builtin), else the term
+// (a constructor).
+func (e *emitter) normTermFunc() {
+	p := e.ir
+	e.line("// normTerm is the normal form of sym(a...), a in normal form (the elements")
+	e.line("// of an AC term): the function of its operator, or the term of a")
+	e.line("// constructor (rt.Replace renormalises the path it copies).")
+	e.open("func normTerm(sym int32, a []rt.Term) rt.Term {")
+	e.line("switch sym {")
+	for o := range p.Ops {
+		op := &p.Ops[o]
+		if !op.Variant || op.Kind == ir.Constructor {
+			continue
+		}
+		e.line("case %s:", symName(op))
+		e.indent++
+		if op.AC {
+			e.line("return %s(a)", acFun(op))
+		} else {
+			var args []string
+			for i, s := range op.Args {
+				args = append(args, e.unbox(s, fmt.Sprintf("a[%d]", i)))
+			}
+			e.line("return %s", e.asTerm(op.Result, op.Fun+"("+strings.Join(args, ", ")+")"))
+		}
+		e.indent--
+	}
+	e.line("}")
+	e.line("return rt.MkAny(sym, a)")
+	e.close("}")
+	e.line("")
 }
 
 // sorts writes a comment per sort: its representation.
@@ -702,6 +743,26 @@ func (e *emitter) builtinBody(o ir.OpID) {
 	op := &e.ir.Ops[o]
 	b := op.Builtin
 	res := op.Result
+	if b.OnTerms() {
+		// on terms of any sorts: the arguments as terms
+		var args []string
+		for i, s := range op.Args {
+			args = append(args, e.asTerm(s, fmt.Sprintf("a%d", i)))
+		}
+		switch b {
+		case ir.TermReplace:
+			// replace a0 by a1 in a2, the copied path renormalised
+			e.normTerm = true
+			e.line("return %s", e.unbox(res, "rt.Replace("+args[2]+", "+args[0]+", "+args[1]+", normTerm)"))
+		case ir.TermOccurs:
+			e.line("return %s", e.fromValue(res, "rt.Occurs("+args[0]+", "+args[1]+")"))
+		case ir.TermMatch:
+			e.line("return %s", e.unbox(res, "rt.SyntacticMatch("+strings.Join(args, ", ")+")"))
+		case ir.TermUnify:
+			e.line("return %s", e.unbox(res, "rt.SyntacticUnify("+strings.Join(args, ", ")+")"))
+		}
+		return
+	}
 	if !b.NeedsValues() {
 		isTrue := func(i int) string {
 			if _, ok := e.ir.Native(op.Args[i]); ok {
@@ -788,6 +849,11 @@ func (e *emitter) builtinBody(o ir.OpID) {
 		value = "rt.StrCmp(" + v[0] + ", " + v[1] + ")"
 	case ir.StrOfChar:
 		value = "rt.StrOfChar(" + v[0] + ")"
+	case ir.BoolToInt:
+		value = "b2i(" + v[0] + ")"
+		e.b2i = true
+	case ir.IntToBool:
+		value = v[0] + " != 0"
 	case ir.StrIndex:
 		value = "rt.StrIndex(" + v[0] + ", " + v[1] + ")"
 	case ir.StrModif:

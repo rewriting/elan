@@ -1,0 +1,7 @@
+The bench program Compiler.4.0/Test/bimatch (builtinSyntacticMatching,
+code 191). The interpreter prints fail: its term::equalMatch
+(src/interpreter/term/term.cc) ends the case of a function symbol with
+`break` after matching the arguments, so it returns 0 (no match) for
+every pattern that is not a variable or a constant; REM and the 2000
+output (SAMPLES/bimatch.out: .(a,nil)) give a.nil, which elanc-go
+follows. Recorded in docs/followups.md (interpreter bug, not fixed).

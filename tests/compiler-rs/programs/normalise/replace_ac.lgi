@@ -1,0 +1,17 @@
+LPL replace_ac description
+  query of sort bool
+  result of sort u
+  import replace_ac
+  start with () res(
+    r(replace(a, c, f(a U b U a)) == f(b U d),
+      replace(a, c, a U c) == d,
+      replace(b, c U c, g(a U b, b)) == g(a U d, d),
+      replace(a U b, d, a U b U c) == c U d,
+      replace(a U b, c, a U a U b U b) == d,
+      occurs(a U b, a U b U c),
+      occurs(a U b, f(b U c U a)),
+      occurs(a U d, a U b U c),
+      replace(a U b, d, g(a U b, a U b U a)) == g(d, a U d)),
+    replace(a, c, f(a U c)),
+    replace(b, a U c, b U b))
+end

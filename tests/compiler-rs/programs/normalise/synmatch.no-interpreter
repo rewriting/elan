@@ -1,0 +1,7 @@
+More cases of builtinSyntacticMatching (code 191), as bimatch: the
+interpreter prints fail for all of them, even g(a,b) against g(a,b): its
+term::equalMatch (src/interpreter/term/term.cc) ends the case of a
+function symbol with `break` after matching the arguments, so it returns
+0 for every pattern that is not a variable or a constant. REM's results
+are the expected ones; elanc-go follows REM. Recorded in
+docs/followups.md (interpreter bug, not fixed).

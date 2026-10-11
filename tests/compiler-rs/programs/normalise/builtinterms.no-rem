@@ -1,0 +1,3 @@
+REM compiles the builtin addition (code 3) declared on a sort of terms
+as the addition of its arguments' representations: r(26382544) (an
+address), not a result to compare. The interpreter leaves a pl a.

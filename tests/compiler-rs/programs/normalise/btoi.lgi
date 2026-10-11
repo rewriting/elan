@@ -1,0 +1,6 @@
+LPL btoi description
+  query of sort bool
+  result of sort out
+  import btoi
+  start with () r(btoi(true), btoi(false), btoi(1 < 2) + 10, itob(0), itob(1), itob(-7), itob(3 - 3) or true)
+end

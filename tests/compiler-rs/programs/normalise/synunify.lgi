@@ -1,0 +1,12 @@
+LPL synunify description
+  query of sort bool
+  result of sort out
+  import synunify
+  start with () r(builtinSyntacticUnification(g(v1,b),g(a,v2),v1.v2.nil,fail),
+                  builtinSyntacticUnification(g(v1,v1),g(a,b),v1.nil,fail),
+                  builtinSyntacticUnification(g(v1,v2),g(v2,f(a)),v1.v2.nil,fail),
+                  builtinSyntacticUnification(g(v1,a),g(f(v2),v2),v1.v2.nil,fail),
+                  builtinSyntacticUnification(v1,v2,v1.v2.nil,fail),
+                  builtinSyntacticUnification(f(v1),f(v1),v1.nil,fail),
+                  builtinSyntacticUnification(g(v2,v1),g(f(v1),a),v1.v2.nil,fail))
+end

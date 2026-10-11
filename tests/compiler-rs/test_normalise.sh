@@ -25,7 +25,9 @@
 # compared with the interpreter only); <name>.no-interpreter says why the
 # interpreter is not run, <name>.no-rem why REM is not run,
 # <name>.no-<compiler> (e.g. .no-elanc-rs) why the program is not run
-# with that compiler (normalised or refused programs).
+# with that compiler (normalised or refused programs); <name>.expected
+# holds the expected result line of a program that neither oracle runs
+# (its .no-rem and .no-interpreter say why).
 # Outputs are compared as bytes (LC_ALL=C): strings are bytes, and the
 # sources of latin1*.eln are Latin-1.
 # Programs programs/refused/<name>.lgi use constructs of later stages:
@@ -115,6 +117,16 @@ for lgi in "$HERE"/programs/normalise/*.lgi; do
   rs=$(printf '%s\n' "$rs" | grep '^result = ')
   if [ "$status" != 0 ] || [ -z "$rs" ]; then
     fail "$name: the compiled program failed (status $status, see $d/$W/run.err)"; continue
+  fi
+
+  # the expected result, when no oracle runs the program
+  if [ -f "$HERE/programs/normalise/$name.expected" ]; then
+    expected=$(grep -v '^#' "$HERE/programs/normalise/$name.expected")
+    if [ "$rs" = "$expected" ]; then
+      ok "$name: $rs ($name.expected)"
+    else
+      fail "$name: $ELANC [$rs], expected [$expected] ($name.expected)"
+    fi
   fi
 
   # REM

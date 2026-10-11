@@ -480,33 +480,39 @@ type BuiltinOp int
 
 // The builtin operations supported.
 const (
-	IntAdd    BuiltinOp = iota // + on builtinInt (code 3)
-	IntSub                     // - (4)
-	IntMul                     // * (5)
-	IntDiv                     // / (6)
-	IntRem                     // % (27)
-	IntAnd                     // & (28)
-	IntOr                      // | (29)
-	IntNeg                     // unary - (20)
-	CmpEq                      // == on builtinInt or bool values (8)
-	CmpNe                      // != (9)
-	CmpLt                      // < (10)
-	CmpLe                      // <= (11)
-	CmpGt                      // > (12)
-	CmpGe                      // >= (13)
-	BoolAnd                    // and (21): a stuck argument counts as false
-	BoolOr                     // or (22)
-	BoolNot                    // not (24)
-	TermEq                     // == on any sort (18): syntactic equality of normal forms
-	TermNeq                    // != on any sort (19)
-	StrLen                     // string_strlen (150)
-	StrCat                     // string_strcat (151)
-	StrIndex                   // s[i] (152)
-	StrModif                   // s[i <- c] (153)
-	StrSubstr                  // string_substr (154)
-	StrSpn                     // string_strspn (156)
-	StrCmp                     // string_strcmp (157)
-	StrOfChar                  // string_string (158)
+	IntAdd      BuiltinOp = iota // + on builtinInt (code 3)
+	IntSub                       // - (4)
+	IntMul                       // * (5)
+	IntDiv                       // / (6)
+	IntRem                       // % (27)
+	IntAnd                       // & (28)
+	IntOr                        // | (29)
+	IntNeg                       // unary - (20)
+	CmpEq                        // == on builtinInt or bool values (8)
+	CmpNe                        // != (9)
+	CmpLt                        // < (10)
+	CmpLe                        // <= (11)
+	CmpGt                        // > (12)
+	CmpGe                        // >= (13)
+	BoolAnd                      // and (21): a stuck argument counts as false
+	BoolOr                       // or (22)
+	BoolNot                      // not (24)
+	TermEq                       // == on any sort (18): syntactic equality of normal forms
+	TermNeq                      // != on any sort (19)
+	StrLen                       // string_strlen (150)
+	StrCat                       // string_strcat (151)
+	StrIndex                     // s[i] (152)
+	StrModif                     // s[i <- c] (153)
+	StrSubstr                    // string_substr (154)
+	StrSpn                       // string_strspn (156)
+	StrCmp                       // string_strcmp (157)
+	StrOfChar                    // string_string (158)
+	BoolToInt                    // btoi (25): 1 or 0 (no oracle: the S7d plan, Task 1)
+	IntToBool                    // itob (26): n != 0
+	TermReplace                  // replace t1 by t2 in t3 on any sorts (16): rt.Replace
+	TermOccurs                   // occurs t1 in t2 on any sorts (17): rt.Occurs
+	TermMatch                    // builtinSyntacticMatching (191): rt.SyntacticMatch
+	TermUnify                    // builtinSyntacticUnification (175): rt.SyntacticUnify
 )
 
 var builtinNames = [...]string{
@@ -514,6 +520,7 @@ var builtinNames = [...]string{
 	"CmpEq", "CmpNe", "CmpLt", "CmpLe", "CmpGt", "CmpGe",
 	"BoolAnd", "BoolOr", "BoolNot", "TermEq", "TermNeq",
 	"StrLen", "StrCat", "StrIndex", "StrModif", "StrSubstr", "StrSpn", "StrCmp", "StrOfChar",
+	"BoolToInt", "IntToBool", "TermReplace", "TermOccurs", "TermMatch", "TermUnify",
 }
 
 func (b BuiltinOp) String() string { return builtinNames[b] }
@@ -524,6 +531,7 @@ var builtinCodes = map[int32]BuiltinOp{
 	21: BoolAnd, 22: BoolOr, 24: BoolNot, 18: TermEq, 19: TermNeq,
 	150: StrLen, 151: StrCat, 152: StrIndex, 153: StrModif, 154: StrSubstr,
 	156: StrSpn, 157: StrCmp, 158: StrOfChar,
+	25: BoolToInt, 26: IntToBool, 16: TermReplace, 17: TermOccurs, 191: TermMatch, 175: TermUnify,
 }
 
 // BuiltinFromCode is the operation of a semantic code; false when it is not
@@ -534,13 +542,26 @@ func BuiltinFromCode(code int32) (BuiltinOp, bool) {
 }
 
 // NeedsValues tells whether the operation needs values (not stuck terms) as
-// arguments; and, or, not and the term equalities accept any normal form.
+// arguments; and, or, not, the term equalities and the operations on
+// terms ([BuiltinOp.OnTerms]) accept any normal form.
 func (b BuiltinOp) NeedsValues() bool {
 	switch b {
 	case BoolAnd, BoolOr, BoolNot, TermEq, TermNeq:
 		return false
 	}
-	return true
+	return !b.OnTerms()
+}
+
+// OnTerms tells whether the operation works on terms of any sorts, its
+// result too (replace, occurs, syntactic matching and unification):
+// declared on sorts of terms, it is compiled (a value operation on sorts
+// of terms is a constructor).
+func (b BuiltinOp) OnTerms() bool {
+	switch b {
+	case TermReplace, TermOccurs, TermMatch, TermUnify:
+		return true
+	}
+	return false
 }
 
 // Partial tells whether the operation is undefined on some values (the

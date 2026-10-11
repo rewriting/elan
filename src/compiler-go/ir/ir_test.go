@@ -408,26 +408,57 @@ func TestUnsupportedConstructsAreRefusedWhenReachable(t *testing.T) {
 
 // A builtin operation needs values of builtin sorts: declared on a sort
 // of terms (`@ pl @ : (t t) t code 3;`, the interpreter leaves the term),
-// it is refused (elanc-go crashed on it).
-func TestBuiltinOnASortOfTermsIsRefused(t *testing.T) {
+// it is a constructor (S7d; elanc-go crashed on it, then refused it).
+func TestBuiltinOnASortOfTermsIsAConstructor(t *testing.T) {
 	p := peano()
 	p.op(sNat, 3, "pl", []uint32{sNat, sNat}, 3, 0) // + on nat
 	p.start(f(3, f(318), f(318)), sNat)
-	if st, what := unsupportedStage(t, p); st != "S7d" || !strings.Contains(what, "pl") {
-		t.Fatalf("%s %s", st, what)
+	if x := opNamed(t, p.lower(t), "pl"); x.Kind != Constructor || !x.Variant {
+		t.Fatalf("pl: %+v", x)
 	}
 	// a result of a sort of terms
 	p = peano()
 	p.op(sNat, 150, "len", []uint32{sStr}, 150, 0)
 	p.start(f(150, ref.Str{Codes: []int32{'a'}}), sNat)
-	if st, what := unsupportedStage(t, p); st != "S7d" || !strings.Contains(what, "len") {
-		t.Fatalf("%s %s", st, what)
+	if x := opNamed(t, p.lower(t), "len"); x.Kind != Constructor || !x.Variant {
+		t.Fatalf("len: %+v", x)
 	}
 	// and, or, not, ==, != take any term: fine on a sort of terms
 	p = peano()
 	p.op(sBool, 18, "eq", []uint32{sNat, sNat}, 18, 0)
 	p.start(f(18, f(318), f(318)), sBool)
 	p.lower(t)
+	// but give a bool
+	p = peano()
+	p.op(sNat, 21, "and", []uint32{sNat, sNat}, 21, 0)
+	p.start(f(21, f(318), f(318)), sNat)
+	if st, what := unsupportedStage(t, p); st != "S7d" || !strings.Contains(what, "and") {
+		t.Fatalf("%s %s", st, what)
+	}
+	// the operations on terms take and give any sorts (replace, occurs,
+	// matching, unification)
+	for _, c := range []struct {
+		code   int32
+		args   []uint32
+		result uint32
+		op     BuiltinOp
+	}{
+		{16, []uint32{sNat, sNat, sNat}, sNat, TermReplace},
+		{17, []uint32{sNat, sNat}, sBool, TermOccurs},
+		{191, []uint32{sNat, sNat, sNat, sNat}, sNat, TermMatch},
+		{175, []uint32{sNat, sNat, sNat, sNat}, sNat, TermUnify},
+	} {
+		p = peano()
+		p.op(c.result, 156, "x", c.args, c.code, 0)
+		args := make([]ref.Term, len(c.args))
+		for i := range args {
+			args[i] = f(318)
+		}
+		p.start(f(156, args...), c.result)
+		if x := opNamed(t, p.lower(t), "x"); x.Kind != Builtin || x.Builtin != c.op || !x.Total || x.Variant {
+			t.Fatalf("code %d: %+v", c.code, x)
+		}
+	}
 }
 
 func TestPrintingFormIsTheLastGrammarRule(t *testing.T) {

@@ -1144,36 +1144,35 @@ func (b *builder) build(name string, start *tt, q *ref.Query, sortIndices []ref.
 	}
 
 	// families: builtin sorts, and the sorts whose only constructor is a
-	// transparent injection of a builtin sort
-	familyOf := map[SortID]FamilyID{}
-	for s := range ir.Sorts {
-		if bk, ok := builtinOf(s); ok {
-			familyOf[s] = len(ir.Families)
-			ir.Families = append(ir.Families, Family{Kind: bk, Base: s, Members: []SortID{s}})
-		}
-	}
-	for s := range ir.Sorts {
-		if _, ok := familyOf[s]; ok {
-			continue
-		}
-		var ctors []OpID
-		for o := range ir.Ops {
-			if ir.Ops[o].Result == s && pre[o].kind == Constructor {
-				ctors = append(ctors, o)
+	// transparent injection of a builtin sort. A builtin operation
+	// computes a value of a builtin sort from values: declared on sorts of
+	// terms (`@ pl @ : (t t) t code 3`), it is a constructor (the
+	// interpreter leaves the term as it is; REM adds the addresses); then
+	// the families are computed again (one more constructor: a sort may no
+	// longer be one), until none changes. The operations on terms
+	// (replace, occurs, matching) take and give any sorts.
+	var familyOf map[SortID]FamilyID
+	for {
+		familyOf = b.families(pre)
+		demoted := false
+		for i := range cs {
+			if pre[i].kind != Builtin || !pre[i].builtin.NeedsValues() {
+				continue
+			}
+			op := &ir.Ops[i]
+			_, ok := familyOf[op.Result]
+			for _, a := range op.Args {
+				if _, isF := familyOf[a]; !isF {
+					ok = false
+				}
+			}
+			if !ok {
+				pre[i] = preKind{kind: Constructor}
+				demoted = true
 			}
 		}
-		if len(ctors) != 1 {
-			continue
-		}
-		op := &ir.Ops[ctors[0]]
-		if len(op.Args) != 1 {
-			continue
-		}
-		if _, ok := builtinOf(op.Args[0]); ok && len(op.Print) == 1 && op.Print[0] == (PrintItem{Kind: PArg, Arg: 0}) {
-			f := familyOf[op.Args[0]]
-			ir.Families[f].Members = append(ir.Families[f].Members, s)
-			familyOf[s] = f
-			pre[ctors[0]] = preKind{kind: Injection}
+		if !demoted {
+			break
 		}
 	}
 	for s, f := range familyOf {
@@ -1185,22 +1184,12 @@ func (b *builder) build(name string, start *tt, q *ref.Query, sortIndices []ref.
 		}
 	}
 
-	// a builtin operation computes a value of a builtin sort, from values
-	// when it needs them: declared on sorts of terms (`@ pl @ : (t t) t
-	// code 3`, the interpreter leaves the term as it is), it is not
-	// compiled
+	// and, or, not and the term equalities give a bool
 	for i, c := range cs {
-		if pre[i].kind != Builtin {
+		if pre[i].kind != Builtin || pre[i].builtin.NeedsValues() || pre[i].builtin.OnTerms() {
 			continue
 		}
-		op := &ir.Ops[i]
-		_, ok := familyOf[op.Result]
-		for _, a := range op.Args {
-			if _, isF := familyOf[a]; !isF && pre[i].builtin.NeedsValues() {
-				ok = false
-			}
-		}
-		if !ok {
+		if _, ok := familyOf[ir.Ops[i].Result]; !ok {
 			return nil, unsupported("S7d", "builtin operation %s on sorts that are not builtin (%s)",
 				pre[i].builtin, l.candDecl(&l.cands[c]))
 		}
@@ -1334,6 +1323,53 @@ func (b *builder) build(name string, start *tt, q *ref.Query, sortIndices []ref.
 		ir.Start.Strategy = id
 	}
 	return ir, nil
+}
+
+// families computes the builtin families (ir.Families) and the family of
+// each of their sorts: the builtin sorts, and the sorts whose only
+// constructor (pre) is a transparent injection of a builtin sort, marked
+// Injection in pre (the marks of a previous computation undone first).
+func (b *builder) families(pre []preKind) map[SortID]FamilyID {
+	ir := b.ir
+	builtinOf := func(s SortID) (BuiltinKind, bool) { return builtinKind(ir.Sorts[s].Name) }
+	for o := range pre {
+		if pre[o].kind == Injection {
+			pre[o] = preKind{kind: Constructor}
+		}
+	}
+	ir.Families = nil
+	familyOf := map[SortID]FamilyID{}
+	for s := range ir.Sorts {
+		if bk, ok := builtinOf(s); ok {
+			familyOf[s] = len(ir.Families)
+			ir.Families = append(ir.Families, Family{Kind: bk, Base: s, Members: []SortID{s}})
+		}
+	}
+	for s := range ir.Sorts {
+		if _, ok := familyOf[s]; ok {
+			continue
+		}
+		var ctors []OpID
+		for o := range ir.Ops {
+			if ir.Ops[o].Result == s && pre[o].kind == Constructor {
+				ctors = append(ctors, o)
+			}
+		}
+		if len(ctors) != 1 {
+			continue
+		}
+		op := &ir.Ops[ctors[0]]
+		if len(op.Args) != 1 {
+			continue
+		}
+		if _, ok := builtinOf(op.Args[0]); ok && len(op.Print) == 1 && op.Print[0] == (PrintItem{Kind: PArg, Arg: 0}) {
+			f := familyOf[op.Args[0]]
+			ir.Families[f].Members = append(ir.Families[f].Members, s)
+			familyOf[s] = f
+			pre[ctors[0]] = preKind{kind: Injection}
+		}
+	}
+	return familyOf
 }
 
 // strategies builds the labels and the strategies reached, in table order,
@@ -1720,6 +1756,15 @@ func markRecursive(ir *IR) {
 	}
 	for o := range ir.Ops {
 		rules(o, ir.Ops[o].Rules)
+		if op := &ir.Ops[o]; op.Kind == Builtin && op.Builtin == TermReplace {
+			// the copied path is renormalised by the functions of the
+			// operators that can be stuck (normTerm)
+			for x := range ir.Ops {
+				if ir.Ops[x].Variant && ir.Ops[x].Kind != Constructor {
+					calls[o] = append(calls[o], x)
+				}
+			}
+		}
 	}
 	for l := range ir.Labels {
 		rules(label(l), ir.Labels[l].Rules)

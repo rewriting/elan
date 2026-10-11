@@ -1,0 +1,21 @@
+module synmatch
+// builtinSyntacticMatching (code 191) as REM's term_syntacticMatching
+// (src/compiler/runtime/builtinMatching.c): the variables are the terms
+// of the list (any term), bound once (non-linear: equal), the result is
+// the list of their values, nil without variable, the failure term when
+// the pattern does not match. Strings and ints under a variable: the S7d
+// plan, Task 1 rulings.
+import global bool int builtinSyntacticMatching[term,vars]; end
+sort term vars out; end
+operators global
+  a : term; b : term; c : term;
+  v1 : term; v2 : term;
+  var(@) : (int) term;
+  f(@) : (term) term;
+  g(@,@) : (term term) term;
+  @.@ : (term vars) vars;
+  nil : vars;
+  fail : vars;
+  r(@,@,@,@,@,@,@,@) : (vars vars vars vars vars vars vars vars) out;
+end
+end
