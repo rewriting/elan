@@ -1,0 +1,3 @@
+As trav_ac_nd.no-rem: REM accumulates the elements of the previous result
+in the AC term it rebuilds (b u b u b then b u b u b u b u c u c); elanc-go
+gives b u b u b, b u c u c.

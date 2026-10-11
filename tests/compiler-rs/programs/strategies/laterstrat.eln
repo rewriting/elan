@@ -1,7 +1,7 @@
 module laterstrat
 // A strategy term built at run time with a traversal (tone, evaluated by
-// the eval_TONE strategy of strat[X], S6d), which elanc-rs must refuse
-// (tests/compiler-rs/test_normalise.sh).
+// the eval_TONE strategy of strat[X]), which elanc-rs refuses (S6d) and
+// elanc-go compiles since S7d (runtimetraversal.lgi).
 import global int strat[int]; end
 rules for int
   n : int;

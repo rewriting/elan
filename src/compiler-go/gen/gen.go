@@ -124,6 +124,12 @@ type emitter struct {
 	// ekerPats are the patterns of Eker's matcher (ac.go), declared at the
 	// end
 	ekerPats []string
+	// the functions of the traversals (traverse.go): their names, the
+	// numbers of the traversal nodes, the names taken, the work list
+	travNames map[travKey]string
+	travNodes map[*ir.Strat]int
+	travUsed  map[string]bool
+	travQueue []travKey
 }
 
 func (e *emitter) line(format string, a ...any) {
@@ -470,6 +476,7 @@ func (e *emitter) file() {
 	e.labels()
 	e.strategies()
 	e.metas()
+	e.travFuncs()
 	for _, o := range e.injTests {
 		e.injTest(o)
 	}

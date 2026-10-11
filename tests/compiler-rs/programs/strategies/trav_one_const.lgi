@@ -1,0 +1,6 @@
+LPL trav_one_const description
+  query of sort bool
+  result of sort nat
+  import trav
+  start with (one1) o
+end

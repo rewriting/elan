@@ -1,0 +1,6 @@
+LPL trav_all_norm description
+  query of sort bool
+  result of sort nat
+  import trav
+  start with (all) p(f(o))
+end

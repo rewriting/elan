@@ -927,9 +927,19 @@ func (l *lowerer) visitSeq(seq ref.StrategySeq, sort ref.SortIndex, name string,
 					return err
 				}
 			}
-		case ref.SRepeat, ref.SIterate:
+		case ref.SRepeat, ref.SIterate, ref.STAll, ref.STOne, ref.STSome, ref.SRewrite:
+			// (a traversal applies its body to the arguments of the term,
+			// of any sort: the rules of its labels apply to the terms of
+			// their sort, the strategies it calls are compiled for each
+			// sort they meet when the code is emitted)
 			if err := l.visitSeq(e.Body, sort, name, r); err != nil {
 				return err
+			}
+		case ref.SNormIn, ref.SNormOut:
+			for _, lb := range e.Rules {
+				if l.labelFits(lb, sort) {
+					r.reachLabel(lb)
+				}
 			}
 		case ref.SCall:
 			if d := l.p.Strategy(e.Call); d != nil && d.Sort != sort {
@@ -939,8 +949,6 @@ func (l *lowerer) visitSeq(seq ref.StrategySeq, sort ref.SortIndex, name string,
 		case ref.SMeta:
 			// the meta_apply terms are reached by the rules that build
 			// them; the strategies of their calls by reachCall
-		case ref.SNormIn, ref.SNormOut, ref.STAll, ref.STOne, ref.STSome, ref.SRewrite:
-			return unsupported("S7d", "strategy %s (in %s)", e.Op, name)
 		case ref.SDcCall, ref.SDkCall:
 			return unsupported("S7d", "strategy %s (external process, in %s)", e.Op, name)
 		default:
@@ -1706,6 +1714,13 @@ func (b *builder) strategySeq(seq ref.StrategySeq, sort ref.SortIndex) []Strat {
 			s = Strat{Kind: StRepeat, Body: b.strategySeq(e.Body, sort)}
 		case ref.SIterate:
 			s = Strat{Kind: StIterate, Body: b.strategySeq(e.Body, sort)}
+		case ref.STAll, ref.STOne, ref.STSome, ref.SRewrite:
+			k := map[ref.StrategyOp]StratKind{ref.STAll: StTAll, ref.STOne: StTOne, ref.STSome: StTSome, ref.SRewrite: StRewrite}[e.Op]
+			s = Strat{Kind: k, Body: b.strategySeq(e.Body, sort)}
+		case ref.SNormIn:
+			s = Strat{Kind: StNormIn, Labels: labels(e.Rules)}
+		case ref.SNormOut:
+			s = Strat{Kind: StNormOut, Labels: labels(e.Rules)}
 		case ref.SCall:
 			s = Strat{Kind: StCall, Call: b.stratOf[e.Call]}
 		case ref.SMeta:
@@ -2000,6 +2015,15 @@ func markRecursive(ir *IR) {
 				seq(from, a)
 			}
 			seq(from, s.Body)
+			if s.Kind.IsTraversal() {
+				// the terms it rebuilds are renormalised by the
+				// functions of the operators that can be stuck (normTerm)
+				for x := range ir.Ops {
+					if ir.Ops[x].Variant && ir.Ops[x].Kind != Constructor {
+						calls[from] = append(calls[from], x)
+					}
+				}
+			}
 			switch s.Kind {
 			case StCall:
 				calls[from] = append(calls[from], strat(s.Call))

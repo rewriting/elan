@@ -1,0 +1,3 @@
+# REM accumulates the elements (the printer puts a space after a previous result, as REM's; trav_ac_nd.no-rem)
+result = b u b
+result =  c u c

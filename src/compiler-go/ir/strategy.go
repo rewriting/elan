@@ -22,7 +22,9 @@ import "strings"
 //   - repeat*(s): s deterministic; iterate*(s): s contains fail (iterate*
 //     gives the term itself and every result after it);
 //   - a call: the called strategy;
-//   - META: no (meta_apply(s, t) gives every result of s).
+//   - META: no (meta_apply(s, t) gives every result of s);
+//   - tall(s): s deterministic; normin, normout: yes; tone, tsome,
+//     rewrite: no (several arguments).
 func StrategyDet(s *Strat, rulesDet func(LabelID) bool, nRules func(LabelID) int, stratDet func(StratID) bool) bool {
 	seq := func(v []Strat) bool {
 		for i := range v {
@@ -79,6 +81,12 @@ func StrategyDet(s *Strat, rulesDet func(LabelID) bool, nRules func(LabelID) int
 		return false
 	case StCall:
 		return stratDet(s.Call)
+	case StTAll:
+		// the body on each argument: at most one result each (on an
+		// argument of another sort, the body gives fewer results)
+		return seq(s.Body)
+	case StNormIn, StNormOut:
+		return true
 	}
 	return false
 }
@@ -232,6 +240,16 @@ func (ir *IR) SeqText(seq []Strat) string {
 			parts = append(parts, BaseName(ir.Strategies[s.Call].Name))
 		case StMeta:
 			parts = append(parts, "META")
+		case StTAll, StTOne, StTSome, StRewrite:
+			what := map[StratKind]string{StTAll: "tall", StTOne: "tone", StTSome: "tsome", StRewrite: "rewrite"}[s.Kind]
+			parts = append(parts, what+"("+ir.SeqText(s.Body)+")")
+		case StNormIn, StNormOut:
+			var ls []string
+			for _, l := range s.Labels {
+				ls = append(ls, BaseName(ir.Labels[l].Name))
+			}
+			what := map[StratKind]string{StNormIn: "normin", StNormOut: "normout"}[s.Kind]
+			parts = append(parts, what+"("+strings.Join(ls, ", ")+")")
 		}
 	}
 	return strings.Join(parts, " ; ")

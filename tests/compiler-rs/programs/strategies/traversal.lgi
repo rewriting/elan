@@ -1,6 +1,6 @@
 LPL traversal description
   query of sort bool
   result of sort nat
-  import later
-  start with (walk) f(o)
+  import trav
+  start with (all) f(o)
 end

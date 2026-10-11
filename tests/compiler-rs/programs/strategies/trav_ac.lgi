@@ -1,0 +1,6 @@
+LPL trav_ac description
+  query of sort bool
+  result of sort elt
+  import trav
+  start with (allac) a u b u b
+end

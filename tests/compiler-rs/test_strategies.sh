@@ -34,7 +34,9 @@
 # it has a <name>.none saying why no result is expected (it then fails if
 # the compiler gives one).
 # Exceptions, each documented in its file: <name>.no-rem says why REM is
-# not run, <name>.no-interpreter why the interpreter is not run,
+# not run, <name>.no-interpreter why the interpreter is not run (when
+# neither runs the program right, <name>.expected holds its expected
+# `result = ` lines, `#` lines being comments),
 # <name>.no-<compiler> (e.g. .no-elanc-go) why the program is not run with
 # that compiler; no-<compiler> in DIR why no program of DIR is (e.g.
 # programs/ac/no-elanc-rs: elanc-rs refuses AC by design).
@@ -165,6 +167,16 @@ for lgi in "$PROGS"/*.lgi; do
     fi
   elif [ "$count" = 0 ]; then
     fail "$name: no result (vacuous comparison; add $name.none if intended)"; continue
+  fi
+
+  # the expected results, when no oracle runs the program right
+  if [ -f "$PROGS/$name.expected" ]; then
+    expected=$(grep -v '^#' "$PROGS/$name.expected")
+    if [ "$rs" = "$expected" ]; then
+      ok "$name: [$(printf '%s\n' "$rs" | oneline)] ($name.expected)"
+    else
+      fail "$name: $ELANC [$(printf '%s\n' "$rs" | oneline)], expected [$(printf '%s\n' "$expected" | oneline)] ($name.expected)"
+    fi
   fi
 
   # interpreter

@@ -196,6 +196,15 @@ func TestStrategyDet(t *testing.T) {
 		{Strat{Kind: StRepeat, Body: []Strat{{Kind: StCall, Call: 0}}}, true},
 		{Strat{Kind: StIterate, Body: []Strat{{Kind: StCall, Call: 0}}}, false},
 		{Strat{Kind: StIterate, Body: []Strat{{Kind: StCall, Call: 0}, fail}}, true},
+		// traversals: tall as its body; tone, tsome, rewrite several
+		// results; normin, normout one
+		{Strat{Kind: StTAll, Body: []Strat{{Kind: StCall, Call: 0}}}, true},
+		{Strat{Kind: StTAll, Body: []Strat{{Kind: StCall, Call: 1}}}, false},
+		{Strat{Kind: StTOne, Body: []Strat{{Kind: StCall, Call: 0}}}, false},
+		{Strat{Kind: StTSome, Body: []Strat{{Kind: StCall, Call: 0}}}, false},
+		{Strat{Kind: StRewrite, Body: []Strat{{Kind: StCall, Call: 0}}}, false},
+		{Strat{Kind: StNormIn, Labels: []LabelID{2}}, true},
+		{Strat{Kind: StNormOut, Labels: []LabelID{2}}, true},
 	} {
 		if got := StrategyDet(&c.s, rulesDet, nRules, stratDet); got != c.want {
 			t.Errorf("%+v: %v", c.s, got)
@@ -219,6 +228,8 @@ func TestLabelledRulesNeedTheirOperators(t *testing.T) {
 	p.strategy(3, rules(ref.SDkRules, 7))
 	p.strategy(4, ref.StrategyExpr{Op: ref.STAll, Body: ref.StrategySeq{id}})
 	p.p.Query.Strategy = ref.Some(3)
+	// (a query of sort set: it cannot build b)
+	p.p.Query.Sort = sSet
 	p.start(f(321), sNat)
 	ir := p.lower(t)
 	if len(ir.Labels[0].Rules) != 1 || !strings.Contains(ir.Labels[0].Skipped[0], "never applies") {
@@ -234,13 +245,57 @@ func TestLabelledRulesNeedTheirOperators(t *testing.T) {
 	}
 	// b built by the start term: the rule and the traversal are reached
 	p.start(f(322, f(321)), sNat)
-	if st, what := unsupportedStage(t, p); st != "S7d" || !strings.Contains(what, "tall") {
-		t.Fatalf("%s %s", st, what)
-	}
-	p.p.Strategies[1].Body = ref.StrategySeq{id}
 	ir = p.lower(t)
 	if len(ir.Labels[0].Rules) != 2 || opNamed(t, ir, "b").Kind != Constructor {
 		t.Fatalf("%+v", ir.Labels[0])
+	}
+	if len(ir.Strategies) != 2 || ir.Strategies[1].Body[0].Kind != StTAll {
+		t.Fatal(strategyNames(ir))
+	}
+}
+
+// Traversals (S7d task 6): their bodies and labels are lowered and
+// reached; normin/normout give one result, tall as many as its body,
+// tone, tsome and rewrite several.
+func TestTraversalsAreLowered(t *testing.T) {
+	p := peano()
+	p.op(sNat, 322, "b", []uint32{sNat, sNat}, 0, 0)
+	// [r7] s(x) => x    [r8] o => s(o)
+	p.labelled(7, 1, f(319, v(0, sNat)), v(0, sNat))
+	p.labelled(8, 0, f(318), f(319, f(318)))
+	// st3 = DK(tall(dk(r7)), tone(st4), tsome(dk(r8)), rewrite(st4),
+	//          normin(r7, r8), normout(r8))
+	// st4 = one(r7)
+	p.strategy(3, strats(ref.SDkStrats,
+		ref.StrategySeq{{Op: ref.STAll, Body: ref.StrategySeq{rules(ref.SDkRules, 7)}}},
+		ref.StrategySeq{{Op: ref.STOne, Body: ref.StrategySeq{call(4)}}},
+		ref.StrategySeq{{Op: ref.STSome, Body: ref.StrategySeq{rules(ref.SDkRules, 8)}}},
+		ref.StrategySeq{{Op: ref.SRewrite, Body: ref.StrategySeq{call(4)}}},
+		ref.StrategySeq{rules(ref.SNormIn, 7, 8)},
+		ref.StrategySeq{rules(ref.SNormOut, 8)}))
+	p.strategy(4, rules(ref.SOneRules, 7))
+	p.p.Query.Strategy = ref.Some(3)
+	p.start(f(322, f(318), f(318)), sNat)
+	ir := p.lower(t)
+	if got := strategyNames(ir); !reflect.DeepEqual(got, []string{"st3:nat/m", "st4:nat/m"}) {
+		t.Fatal(got)
+	}
+	if len(ir.Labels) != 2 {
+		t.Fatalf("%d labels", len(ir.Labels))
+	}
+	want := "DK(tall(dk(r7)), tone(st4), tsome(dk(r8)), rewrite(st4), normin(r7, r8), normout(r8))"
+	if got := ir.SeqText(ir.Strategies[0].Body); got != want {
+		t.Fatalf("%s, want %s", got, want)
+	}
+	alts := ir.Strategies[0].Body[0].Alts
+	kinds := []StratKind{StTAll, StTOne, StTSome, StRewrite, StNormIn, StNormOut}
+	for i, k := range kinds {
+		if alts[i][0].Kind != k || !k.IsTraversal() {
+			t.Fatalf("alternative %d: %v", i, alts[i][0].Kind)
+		}
+	}
+	if len(alts[4][0].Labels) != 2 || len(alts[0][0].Body) != 1 {
+		t.Fatalf("%+v", alts)
 	}
 }
 

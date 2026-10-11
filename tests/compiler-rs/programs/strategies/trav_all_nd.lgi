@@ -1,0 +1,6 @@
+LPL trav_all_nd description
+  query of sort bool
+  result of sort nat
+  import trav
+  start with (allnd) g(o, o)
+end

@@ -322,18 +322,42 @@ const (
 	// StMeta is META (the strategy of `where x := (META) t`): t is a
 	// meta_apply term ([MetaOp]); its results.
 	StMeta
+	// StTAll is tall(s): s on every argument, each combination of the
+	// results, the term rebuilt (elanrt.TAll; S7d task 6, as REM: the
+	// interpreter does not interpret traversals).
+	StTAll
+	// StTOne is tone(s): each result of s on one argument (elanrt.TOne).
+	StTOne
+	// StTSome is tsome(s): s on some arguments, one at least
+	// (elanrt.TSome).
+	StTSome
+	// StRewrite is rewrite(s): each result of s at the top, then of
+	// rewrite(s) on each argument (REM's term_rewriteStep: DK(s,
+	// tone(rewrite(s)))).
+	StRewrite
+	// StNormIn is normin(l1, ..., ln): the normal form for the rules of
+	// the labels, innermost (elanrt.NormIn); one result.
+	StNormIn
+	// StNormOut is normout(l1, ..., ln): the same, leftmost-outermost
+	// (elanrt.OuterStep); one result.
+	StNormOut
 )
+
+// IsTraversal tells whether k applies a strategy to the arguments of the
+// term (each with the strategy of the argument's sort): tall, tone, tsome,
+// rewrite, normin, normout.
+func (k StratKind) IsTraversal() bool { return k >= StTAll && k <= StNormOut }
 
 // Strat is an elementary strategy (one element of a sequence).
 type Strat struct {
 	Kind StratKind
 	// Choice of StRules and StStrats.
 	Choice Choice
-	// Labels of StRules.
+	// Labels of StRules, StNormIn and StNormOut.
 	Labels []LabelID
 	// Alts of StStrats.
 	Alts [][]Strat
-	// Body of StRepeat and StIterate.
+	// Body of StRepeat, StIterate, StTAll, StTOne, StTSome and StRewrite.
 	Body []Strat
 	// Call is the strategy of StCall.
 	Call StratID

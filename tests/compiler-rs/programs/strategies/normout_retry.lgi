@@ -1,0 +1,6 @@
+LPL normout_retry description
+  query of sort bool
+  result of sort nat
+  import trav
+  start with (noutw) f(e)
+end

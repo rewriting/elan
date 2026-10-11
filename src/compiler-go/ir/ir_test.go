@@ -364,12 +364,10 @@ func TestUnsupportedConstructsAreRefusedWhenReachable(t *testing.T) {
 	if ir := p.lower(t); len(ir.Strategies) != 1 || len(ir.Labels) != 0 || ir.Start.Strategy != 0 {
 		t.Fatalf("%+v %+v", ir.Strategies, ir.Labels)
 	}
-	// traversals (META: meta_test.go)
-	for op, stage := range map[ref.StrategyOp]string{ref.STAll: "S7d", ref.SNormIn: "S7d"} {
+	// traversals: compiled (S7d task 6; strategy_test.go)
+	for _, op := range []ref.StrategyOp{ref.STAll, ref.SNormIn} {
 		p.p.Strategies[0].Body = ref.StrategySeq{{Op: ref.SId}, {Op: op}}
-		if st, _ := unsupportedStage(t, p); st != stage {
-			t.Fatalf("%v: %s", op, st)
-		}
+		p.lower(t)
 	}
 	// a call "name":X of a name that no strategy has (the export writes -1)
 	p = peano()

@@ -1,0 +1,6 @@
+LPL normin_call description
+  query of sort bool
+  result of sort nat
+  import trav
+  start with (nincall) f(f(o))
+end

@@ -1,0 +1,1 @@
+[tone(inc)]3 is evaluated by eval_TONE => tone(TONE1) of strat[int]: TONE1 ([S]a => ...) applies to neither argument of [inc]3 (inc, 3): no result (REM: no result).

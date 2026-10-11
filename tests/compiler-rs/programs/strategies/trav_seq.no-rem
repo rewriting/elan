@@ -1,0 +1,3 @@
+REM applies the strategy after a traversal to the result of its last
+argument (StrategyTraversalAll.java leaves v0 there): s(s(o)) instead of
+g(s(o),s(s(o))) (see trav_bu.no-rem).

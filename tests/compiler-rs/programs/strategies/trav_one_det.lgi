@@ -1,0 +1,6 @@
+LPL trav_one_det description
+  query of sort bool
+  result of sort nat
+  import trav
+  start with (one1) g(f(o), f(o))
+end

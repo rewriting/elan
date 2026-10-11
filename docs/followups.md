@@ -106,6 +106,23 @@ sub-project (S1–S5b). Each item says where it comes from.
   error lists `'\0'`, read from uninitialised memory). elanc-go prints
   `STRING` and the string quoted, and reports the error at the end of the
   input (`test_query.sh` maps the first to REM's `(null)`).
+- **REM: traversals and normin/normout** (found by S7d task 6;
+  `tests/compiler-rs/programs/strategies/trav_*`, `rewrite_*`, `normin_*`,
+  each `.no-rem` says which): (1) the strategy after a traversal in a
+  sequence gets the last argument's result, not the rebuilt term
+  (`StrategyTraversalAll.java` and its siblings leave `v0` there):
+  `tall(s) ; id` or a bottom-up `bu => tall(bu) ; first(dk(r), id)` give
+  wrong terms, and crash when that argument is an int; (2) tall/tsome on an
+  AC term with a non-deterministic strategy keep the elements of the
+  previous result (`genericSetSubterm` adds to one term allocated before
+  the loop); (3) `rewrite` does not renormalise the term it rebuilds
+  (`term_rewriteStep`, no `specialApply`); (4) `normin`/`normout` run the
+  step function of the start strategy (`strTab[... + strCall]`, trace.c):
+  right only as the start strategy itself, elsewhere one step at the top
+  at most; `normout` does not go into AC terms; (5) REM is untyped: a rule
+  `x => s(x)` applies to an int argument (`h(s(o),s(3))`). elanc-go follows
+  REM elsewhere (the S7d plan, Task 6 rulings). The interpreter does not
+  interpret traversals at all ("Traversal is not intepreted").
 - **REM: Meta_strat terms** (`call`, sequences... built as `Strategy[X]`
   terms) give C that does not compile (`fun_143`), found by S6b
   (`tests/compiler-rs/programs/strategy_terms/ms_*`, `.no-rem`).

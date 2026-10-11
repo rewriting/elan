@@ -1,0 +1,2 @@
+# REM prints o (trav_bu.no-rem): bottom-up, each f(x) rewritten to s(x)
+result = g(s(o),s(s(o)))

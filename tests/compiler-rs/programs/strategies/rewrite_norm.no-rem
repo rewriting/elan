@@ -1,0 +1,4 @@
+REM does not renormalise the term rebuilt by rewrite (term_rewriteStep,
+termCommon.c, no specialApply, unlike tall/tone/tsome): it prints p(s(o)),
+which the unlabelled rule p(s(x)) => x rewrites. elanc-go renormalises the
+rebuilt path, as for the other traversals (S7d plan, Task 6 rulings): o.

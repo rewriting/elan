@@ -1,0 +1,6 @@
+LPL normin_id description
+  query of sort bool
+  result of sort nat
+  import trav
+  start with (ninff) o
+end

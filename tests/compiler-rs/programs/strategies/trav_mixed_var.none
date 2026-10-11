@@ -1,0 +1,1 @@
+tall fails: the rule v (x => s(x), x of sort nat) applies to terms of sort nat only, not to the argument 3 of sort int.

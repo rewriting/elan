@@ -1,0 +1,5 @@
+REM computes normin/normout with norm_in/norm_out (trace.c), which apply
+the step function of the start strategy (strTab[... + strCall], strCall =
+the query strategy): normin is right only when it is the start strategy
+itself. Here (a call of ninff) REM applies one step at the top (o);
+elanc-go normalises: s(s(o)) (S7d plan, Task 6 rulings).

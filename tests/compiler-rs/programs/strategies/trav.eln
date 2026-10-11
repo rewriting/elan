@@ -1,0 +1,109 @@
+module trav
+// Traversals tall, tone, tsome, rewrite and normin/normout (S7d task 6).
+// The interpreter does not interpret them ("Traversal is not intepreted",
+// rewrite/stateofexecution.cc): REM's compiled programs are the oracle,
+// except where REM is wrong (each such program has a .no-rem saying why).
+import global int bool; end
+sort nat elt; end
+operators global
+  o : nat;
+  e : nat;
+  s(@) : (nat) nat;
+  f(@) : (nat) nat;
+  g(@,@) : (nat nat) nat;
+  h(@,@) : (nat int) nat;
+  p(@) : (nat) nat;
+  a : elt;
+  b : elt;
+  c : elt;
+  @ u @ : (elt elt) elt (AC);
+end
+stratop global
+  all : <nat -> nat> bs;
+  allnd : <nat -> nat> bs;
+  allid : <nat -> nat> bs;
+  allv : <nat -> nat> bs;
+  onend : <nat -> nat> bs;
+  one1 : <nat -> nat> bs;
+  somend : <nat -> nat> bs;
+  some1 : <nat -> nat> bs;
+  bu : <nat -> nat> bs;
+  tseq : <nat -> nat> bs;
+  rstep : <nat -> nat> bs;
+  rw : <nat -> nat> bs;
+  nin : <nat -> nat> bs;
+  nout : <nat -> nat> bs;
+  ninff : <nat -> nat> bs;
+  noutff : <nat -> nat> bs;
+  noutw : <nat -> nat> bs;
+  ninm : <nat -> nat> bs;
+  ninlab : <nat -> nat> bs;
+  nincall : <nat -> nat> bs;
+  ninseq : <nat -> nat> bs;
+  allac : <elt -> elt> bs;
+  allacnd : <elt -> elt> bs;
+  oneac : <elt -> elt> bs;
+  someac : <elt -> elt> bs;
+  someacnd : <elt -> elt> bs;
+  abstep : <elt -> elt> bs;
+  rwac : <elt -> elt> bs;
+end
+rules for nat
+  x, y : nat;
+global
+  [r] f(x) => s(x) end
+  [n] o => s(o) end
+  [n] o => f(o) end
+  [] p(s(x)) => x end
+  [q] g(x, y) => g(y, x) end
+  [v] x => s(x) end
+  [ff] f(f(x)) => o end
+  [ff] f(x) => s(x) end
+  [m] f(x) => s(x) end
+  [m] f(x) => p(f(x)) end
+  [la] f(x) => s(x) end
+  [lb] f(x) => p(o) end
+  [w] e => s(o) end
+  [w] f(s(x)) => o end
+end
+rules for elt
+global
+  [ab] a => b end
+  [ab] a => c end
+  [bc] b => c end
+end
+strategies for nat
+implicit
+  [] all => tall(dk(r)) end
+  [] allnd => tall(dk(n)) end
+  [] allid => tall(id) end
+  [] allv => tall(dk(v)) end
+  [] onend => tone(dk(n)) end
+  [] one1 => tone(dk(r)) end
+  [] somend => tsome(dk(n)) end
+  [] some1 => tsome(dk(r)) end
+  [] bu => tall(bu) ; first(dk(r), id) end
+  [] tseq => tall(dk(r)) ; id end
+  [] rstep => dk(r, q) end
+  [] rw => rewrite(rstep) end
+  [] nin => normin(r) end
+  [] nout => normout(r) end
+  [] ninff => normin(ff) end
+  [] noutff => normout(ff) end
+  [] noutw => normout(w) end
+  [] ninm => normin(m) end
+  [] ninlab => normin(lb, la) end
+  [] nincall => ninff end
+  [] ninseq => dk(q) ; normin(ff) end
+end
+strategies for elt
+implicit
+  [] allac => tall(first(dk(bc), id)) end
+  [] allacnd => tall(dk(ab)) end
+  [] oneac => tone(dk(ab, bc)) end
+  [] someac => tsome(dk(bc)) end
+  [] someacnd => tsome(dk(ab)) end
+  [] abstep => dk(ab) end
+  [] rwac => rewrite(abstep) end
+end
+end

@@ -1,0 +1,6 @@
+LPL trav_mixed description
+  query of sort bool
+  result of sort nat
+  import trav
+  start with (all) h(f(o), 3)
+end

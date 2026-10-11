@@ -1,0 +1,6 @@
+LPL rewrite_none description
+  query of sort bool
+  result of sort nat
+  import trav
+  start with (rw) o
+end

@@ -235,16 +235,30 @@ func (e *emitter) stratExpr(hoist *[]string, s *ir.Strat, sort ir.SortID, t, k s
 		if e.tail[s] {
 			return e.use("again") + "(" + t + ")"
 		}
+		if p.Strategies[s.Call].Sort != sort {
+			// in a traversal, on an argument of another sort
+			return e.trav(travKey{kind: travCall, call: s.Call, sort: sort}) + "(" + t + ", " + e.use(k) + ")"
+		}
 		return p.Strategies[s.Call].Fun + "(" + t + ", " + e.use(k) + ")"
 	case ir.StMeta:
+		if p.MetaApplies[s.Meta].Sort != sort {
+			// in a traversal, on an argument of another sort: its terms
+			// are not meta_apply terms of the strategy's sort
+			return "false"
+		}
 		return p.MetaApplies[s.Meta].Fun + "(" + t + ", " + e.use(k) + ")"
+	case ir.StTAll, ir.StTOne, ir.StTSome, ir.StRewrite, ir.StNormIn, ir.StNormOut:
+		return e.trav(travKey{kind: travFun, node: s, sort: sort}) + "(" + t + ", " + e.use(k) + ")"
 	case ir.StRules:
-		if len(s.Labels) == 0 {
+		// (in a traversal, the labels of another sort do not apply to
+		// its arguments of this sort)
+		labels := e.labelsAt(s.Labels, sort)
+		if len(labels) == 0 {
 			return "false"
 		}
 		calls := func(k string, first bool) []string {
 			var v []string
-			for _, l := range s.Labels {
+			for _, l := range labels {
 				v = append(v, fmt.Sprintf("%s(%s, %s, %v)", p.Labels[l].Fun, t, k, first))
 			}
 			return v
@@ -253,7 +267,7 @@ func (e *emitter) stratExpr(hoist *[]string, s *ir.Strat, sort ir.SortID, t, k s
 		case ir.Dk:
 			return strings.Join(calls(e.use(k), false), " || ")
 		case ir.Dc:
-			if len(s.Labels) == 1 {
+			if len(labels) == 1 {
 				return calls(e.use(k), true)[0]
 			}
 			d := e.dc(hoist, k, s)
@@ -279,8 +293,17 @@ func (e *emitter) stratExpr(hoist *[]string, s *ir.Strat, sort ir.SortID, t, k s
 			if len(s.Alts) == 1 {
 				return e.seqExpr(hoist, s.Alts[0], sort, t, k)
 			}
+			at, wasUsed := len(*hoist), e.used[k]
 			d := e.dc(hoist, k, s)
-			return strings.Join(alts(d+".K"), " || !"+d+".Found && ")
+			// (an alternative without result, false, finds nothing: left
+			// out; none left: no dc)
+			xs := slices.DeleteFunc(alts(d+".K"), func(x string) bool { return x == "false" })
+			if len(xs) == 0 {
+				*hoist = slices.Delete(*hoist, at, at+1)
+				e.used[k] = wasUsed
+				return "false"
+			}
+			return strings.Join(xs, " || !"+d+".Found && ")
 		}
 		o := e.one(hoist, k, s)
 		return o + ".Pass(" + or(alts(o+".K")) + ")"
