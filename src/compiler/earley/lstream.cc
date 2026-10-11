@@ -281,6 +281,11 @@ const char *lexem::alfsy()
  else if (lex == NOLEXEM) return("ENDOFLSTREAM");
  else if (lex == IDENT) return("IDENTIFIER");
  else if (lex == JUSTNUMBER) return("NUMBER");
+ // a string lexem (STRING, or a string read: BOFSTRING-i) is no
+ // identifier: tabofident.ide(BOFIDENT-lex) read past the end of the table
+ // (undefined behaviour: "(null)" printed on macOS, a segmentation fault
+ // on Linux/glibc).  "(null)" is kept, the name every run printed.
+ else if (isstring()) return("(null)");
  else if (lex >= 0) {snprintf(alfs2,sizeof(alfs2),"%d",lex);return(alfs2);}
  else if (lex <= BOFIDENT) return(tabofident.ide(BOFIDENT-lex));
  else {
