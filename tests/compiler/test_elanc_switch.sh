@@ -50,6 +50,13 @@ if [ -L "$ELANC" ] && [ "$(readlink "$ELANC")" = "$target" ]; then
 else
   fail "elanc_is_a_link_to_$target (got: $(ls -l "$ELANC" 2>&1))"
 fi
+# ... listed in the install manifest (an uninstall removes it), when PREFIX
+# is the build's (make install: BUILD/install, BUILD/install_manifest.txt)
+MANIFEST=$(dirname "$PREFIX")/install_manifest.txt
+if [ -f "$MANIFEST" ]; then
+  if grep -qx "$PREFIX/bin/elanc" "$MANIFEST"; then ok "elanc_in_install_manifest"  # bare-elanc-ok: the installed path
+  else fail "elanc_in_install_manifest ($MANIFEST)"; fi
+fi
 if [ -x "$PREFIX/bin/elanc-rem" ] || [ ! -d "$PREFIX/classes" ]; then ok "elanc_rem_installed"
 else fail "elanc_rem_installed"; fi
 
