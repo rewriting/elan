@@ -757,6 +757,18 @@ func (e *emitter) symbols() {
 			items = append(items, printItem(it))
 		}
 		e.line("declare(%s, %q, %d, %v, %d, %s)", symName(op), op.Fun, len(op.Args), op.AC, op.Symbol, strings.Join(items, ", "))
+		// the injections over builtin values of its arguments (REM's
+		// nodes, hashed by rt.HashTerm)
+		inj := make([]string, len(op.Args))
+		some := false
+		for i, s := range op.Args {
+			c := p.InjectionCode(s)
+			inj[i] = strconv.Itoa(int(c))
+			some = some || c != 0
+		}
+		if some {
+			e.line("rt.Syms[%s].ArgInj = []int32{%s}", symName(op), strings.Join(inj, ", "))
+		}
 	}
 	e.close("}")
 	e.line("")
@@ -969,7 +981,12 @@ func (e *emitter) builtinBody(o ir.OpID) {
 		case ir.ArrayLength:
 			e.line("return %s", e.fromValue(res, "rt.ArrayLength("+args[0]+")"))
 		case ir.TermHash:
-			e.line("return %s", e.fromValue(res, "rt.HashTerm("+args[0]+")"))
+			h := "rt.HashTerm(" + args[0] + ")"
+			if c := e.ir.InjectionCode(op.Args[0]); c != 0 {
+				// REM hashes the injection's node over a value
+				h = fmt.Sprintf("rt.HashTermInj(%s, %d)", args[0], c)
+			}
+			e.line("return %s", e.fromValue(res, h))
 		}
 		return
 	}

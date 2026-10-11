@@ -1,0 +1,28 @@
+module hashinj
+// builtinHashTerm on the values of a sort whose only constructor is an
+// injection of builtinInt (S7e task 13): REM hashes the injection's node
+// (its code, then the int), at the top and inside terms; E is native in
+// elanc-go, B boxed (d can be stuck), F a sort of terms over E.
+import global bool builtinInt builtinHashTerm[E] builtinHashTerm[B] builtinHashTerm[F] builtinHashTerm[T]; end
+sort E B F T out; end
+operators global
+  @ : (builtinInt) E;
+  @ : (builtinInt) B;
+  d(@) : (builtinInt) B;
+  @ : (E) F;
+  f(@) : (E) T;
+  fb(@) : (B) T;
+  g(@,@) : (F T) T;
+  r(@,@,@,@,@,@,@,@,@) : (builtinInt builtinInt builtinInt builtinInt builtinInt builtinInt builtinInt builtinInt builtinInt) out;
+  go : out;
+end
+rules for B
+global
+  [] d(0) => 3 end
+end
+rules for out
+  x, z : E; y : F; b, c : B;
+global
+  [] go => r(builtinHashTerm(x), builtinHashTerm(z), builtinHashTerm(y), builtinHashTerm(f(x)), builtinHashTerm(g(y, f(z))), builtinHashTerm(b), builtinHashTerm(c), builtinHashTerm(fb(b)), builtinHashTerm(fb(c))) where x := () -5 where z := () 7 where y := () x where b := () d(0) where c := () d(1) end
+end
+end

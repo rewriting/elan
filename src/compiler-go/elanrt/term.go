@@ -81,7 +81,13 @@ type Symbol struct {
 	// runtime code plus 1000 (tests); the generated programs give the
 	// .ref code (never 0: false, a builtin).
 	Code int32
-	seed uint64 // hash of name and arity
+	// ArgInj are, per argument (one for both arguments of an AC symbol),
+	// the .ref code of the injection of a builtin sort that is the only
+	// constructor of the argument's sort, 0 for none: REM's terms hold
+	// the injection's node over a value, elanc-go the value alone
+	// ([HashTermInj]). nil: none.
+	ArgInj []int32
+	seed   uint64 // hash of name and arity
 }
 
 // Syms is the symbol table, indexed by symbol code; the builtin symbols

@@ -15,6 +15,28 @@ package elanrt
 // hashMask16 is REM's HASHMASK.
 const hashMask16 = 0xFFFF
 
+// HashTermInj is REM's hashTerm(t) for t of a sort whose only
+// constructor is the injection of code inj (0: none) of a builtin sort:
+// REM builds the injection's node over a builtin value (elanc-go keeps
+// the value alone, native or boxed: S7e task 13); a stuck term is
+// itself.
+func HashTermInj(t Term, inj int32) int32 {
+	if inj == 0 || !isValue(t) {
+		return HashTerm(t)
+	}
+	return doobs(inj, []int32{HashTerm(t)})
+}
+
+// isValue tells whether t is a builtin value (an int, a string, a bool,
+// an identifier).
+func isValue(t Term) bool {
+	switch t.Sym {
+	case SymInt, SymString, SymTrue, SymFalse, SymIdent:
+		return true
+	}
+	return false
+}
+
 // HashTerm is REM's hashTerm(t).
 func HashTerm(t Term) int32 {
 	switch t.Sym {
@@ -38,9 +60,17 @@ func HashTerm(t Term) int32 {
 		}
 		args = e
 	}
+	inj := Syms[t.Sym].ArgInj
 	h := make([]int32, len(args))
 	for i, x := range args {
-		h[i] = HashTerm(x)
+		switch {
+		case inj == nil:
+			h[i] = HashTerm(x)
+		case Syms[t.Sym].AC:
+			h[i] = HashTermInj(x, inj[0])
+		default:
+			h[i] = HashTermInj(x, inj[i])
+		}
 	}
 	return doobs(Syms[t.Sym].Code, h)
 }

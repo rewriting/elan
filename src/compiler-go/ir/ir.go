@@ -1044,6 +1044,22 @@ func (ir *IR) HoldsArray() []bool {
 	return holds
 }
 
+// InjectionCode is the .ref code of the injection of a builtin sort that
+// is the only constructor of sort s (a family member other than its
+// base), 0 for another sort: REM's terms of s are the injection's nodes
+// over builtin values (rt.HashTermInj).
+func (ir *IR) InjectionCode(s SortID) int32 {
+	if f := ir.FamilyOf(s); f == nil || f.Base == s {
+		return 0
+	}
+	for o := range ir.Ops {
+		if op := &ir.Ops[o]; op.Kind == Injection && op.Result == s {
+			return op.Symbol
+		}
+	}
+	return 0
+}
+
 // Native returns the native kind of the terms of sort s, and false when
 // they are elanrt.Terms (a sort of terms or a boxed family).
 func (ir *IR) Native(s SortID) (BuiltinKind, bool) {
