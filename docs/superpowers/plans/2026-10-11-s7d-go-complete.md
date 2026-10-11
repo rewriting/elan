@@ -88,6 +88,8 @@ The parser is driven by `int gram[]`, which REM writes while reading the `.ref` 
 
 **Results (Tasks 1-3).** Bench G (`bench_parity.py --kind G`): before `PASS=74 PASS~=1 PASS≈=46 FAIL=9 UNSUPPORTED=15`; after Task 1 `PASS≈=53 UNSUPPORTED=8` (rep, bimatch PASS≈); after Task 2 `PASS=78 UNSUPPORTED=4` (choice2 PASS); after Task 3 `PASS=78 PASS~=1 PASS≈=53 FAIL=13 UNSUPPORTED=0` (ident1 FAIL as J; 2.1/3.0/4.0 print `toto`, listed in `bench_g_differs.tsv`; 3.2 prints J's `-noInput` message), no case worse than J. New programs: `normalise/` termops, replace_ac, bimatch, synmatch, synunify, btoi, builtinterms (moved from `refused/`), idents, idents_ac, ident2string, noinput_query, neqnative; `strategies/` choose_* (11); unit tests `elanrt/termops_test.go`, `ident_test.go`, the `-noInput` cases of `driver_test.go`.
 
+**Results (Task 4).** `BENCHTHESIS_KINDS=G tests/compiler/test_benchthesis.sh build/install`: the 15 FastCompletion cases ok at once (output equal to J's, `rewrite_step` equal to J's in all 15: elanc-go tries the same redexes in the same order), no refusal, nothing to fix; the 7 MinelaComp cases `FAIL (a.out status 2)` (query input), skipped in `check-go` by `BENCHTHESIS_G_SKIP` (Makefile) until Task 5. `test_benchthesis.sh` gets `BENCHTHESIS_KINDS` (default `J JO I`), `BENCHTHESIS_SKIP` (printed case names) and the kind G (`elanc-go -v -b`, go cache `tests/compiler/work/gocache`; oracle `expected/J-<out>.out` without its `rewrite_step` line; the result line gives the time, the `go build` time and the steps of G and J). Compile times of `ans` (Apple M4 Max; `main.go` 229 KB, 339 rules): a new program 1.5 s (`go build` 1.48 s with the runtime cached; 1.55 s with an empty cache, the runtime compiling in parallel), an unchanged one 0.15 s — under the 2 s target; each specification gives another Go module. Run times (`-noInput -quiet`): p8 0.88 s (REM 5.39 s), furtin 0.04 s (0.38), taussky 0.03 s (0.21), the others at most 0.02 s (REM up to 0.11 s); table in `tests/compiler/benchthesis/README.md`.
+
 ## File structure
 
 | file | responsibility |
@@ -188,12 +190,12 @@ Bench: ident1 (4) leaves UNSUPPORTED (4 → 0).
 **Interfaces:**
 - Produces: `BENCHTHESIS_KINDS` (default `J JO I`; `G` alone in `check-go`); kind G runs `elanc-go -b LGI SPC` (shared `--gocache`, as `test_strategies.sh`), then the same command as J; its oracle is `expected/J-<out>.out` with the `rewrite_step = N` line removed on both sides (the count depends on the compilation scheme, as in the bench); the G steps are written to the result line for information.
 
-- [ ] **Step 1: Add kind G** with the 15 FastCompletion cases (`G FastCompletion ans <spc> - j<spc>`) and the 7 MinelaComp cases, which fail until Task 5 (`G MinelaComp rewritingC ...`).
-- [ ] **Step 2: Run.** `BENCHTHESIS_KINDS=G tests/compiler/test_benchthesis.sh build/install` — Expected: 15 `ok` (FastCompletion), 7 `FAIL ... (a.out status 2)` (MinelaComp: query input). If a FastCompletion case is refused or differs, fix it in this task (new refusal: implement or explain; difference: compare with the interpreter's `I-i<spc>.out` and REM's).
-- [ ] **Step 3: Measure** each case: `elanc-go` compile time (cold and warm cache; spec target under 2 s warm) and run time against REM's (README "Timings": p8 6 s); write the table in the README.
-- [ ] **Step 4: Wire `check-go`** to run `BENCHTHESIS_KINDS=G tests/compiler/test_benchthesis.sh` with a `BENCHTHESIS_SKIP` list for the 7 MinelaComp G cases (removed in Task 5).
-- [ ] **Step 5: Run** `make check-go` — Expected: green.
-- [ ] **Step 6: Commit** (`tests: BenchThesis compiled by elanc-go, kind G (S7d task 4)`).
+- [x] **Step 1: Add kind G** with the 15 FastCompletion cases (`G FastCompletion ans <spc> - j<spc>`) and the 7 MinelaComp cases, which fail until Task 5 (`G MinelaComp rewritingC ...`).
+- [x] **Step 2: Run.** `BENCHTHESIS_KINDS=G tests/compiler/test_benchthesis.sh build/install` — Expected: 15 `ok` (FastCompletion), 7 `FAIL ... (a.out status 2)` (MinelaComp: query input). If a FastCompletion case is refused or differs, fix it in this task (new refusal: implement or explain; difference: compare with the interpreter's `I-i<spc>.out` and REM's).
+- [x] **Step 3: Measure** each case: `elanc-go` compile time (cold and warm cache; spec target under 2 s warm) and run time against REM's (README "Timings": p8 6 s); write the table in the README.
+- [x] **Step 4: Wire `check-go`** to run `BENCHTHESIS_KINDS=G tests/compiler/test_benchthesis.sh` with a `BENCHTHESIS_SKIP` list for the 7 MinelaComp G cases (removed in Task 5).
+- [x] **Step 5: Run** `make check-go` — Expected: green.
+- [x] **Step 6: Commit** (`tests: BenchThesis compiled by elanc-go, kind G (S7d task 4)`).
 
 ### Task 5: Query input — Earley parser port
 
