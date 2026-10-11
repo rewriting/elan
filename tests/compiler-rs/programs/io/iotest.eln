@@ -17,6 +17,7 @@ operators global
   getfile         : out;
   readfile        : out;
   nofile          : out;
+  readbad         : out;
   bt              : <int -> int> bs;
 end
 rules for out
@@ -54,6 +55,11 @@ global
        where c3 := () getc(w)
        where c4 := () getc(w)
        where c5 := () getc(w)
+       end
+  // a term that does not parse: REM's messages, status 1
+  [] readbad => re(e, 0)
+       where w := () open("bad.txt", "r")
+       where e := () read(w)
        end
   // a file that cannot be opened: -1 (REM's message on stderr)
   [] nofile => rb(iserr(w), errno(w))
