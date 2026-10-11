@@ -1,0 +1,6 @@
+LPL g_wapp description
+  query of sort bool
+  result of sort T
+  import acwnl
+  start with (s_wapp) g(F(a, F(a, F(b, c))))
+end

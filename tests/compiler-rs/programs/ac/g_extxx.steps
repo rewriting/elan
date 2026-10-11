@@ -1,0 +1,9 @@
+The same result as REM's, with fewer rewrite steps: REM matches
+K(x, K(x, y)) at the top of its unlabelled rule as K(E, Y) where
+K(x, x, y) :=() Y (RewriteRule.java transformation3_2, case 5): the
+extension E takes REM's counter (never empty: REM never applies the rule
+to the whole term) and Y, the rest, is normalised (steps) before Eker's
+matcher. elanc-go follows the interpreter (the rule on the whole term
+first, then its extension rule; the elements as they are), the semantics
+where REM differs (g_ext2, g_ext3: other results): the counts cannot be
+the same without REM's semantics.

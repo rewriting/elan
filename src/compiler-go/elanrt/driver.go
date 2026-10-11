@@ -5,9 +5,12 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"runtime"
 	"runtime/debug"
+	"runtime/pprof"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -83,14 +86,27 @@ func FlushOutput() { Out.Flush() }
 // Exit flushes the output and ends the program with the status code.
 func Exit(code int) {
 	FlushOutput()
+	endProfiles()
 	os.Exit(code)
 }
+
+// profiles ends the profiles of the run (ELAN_CPUPROFILE, ELAN_MEMPROFILE),
+// set by [Main]: every end of the program writes them complete (a normal
+// end, [Exit], [Fatal], [Unsupported], [TooDeep]).
+var (
+	profiles     = func() {}
+	profilesOnce sync.Once
+)
+
+// endProfiles writes the profiles of the run, once.
+func endProfiles() { profilesOnce.Do(profiles) }
 
 // Fatal is a run-time error of the program (the interpreter's interr()):
 // the output so far, then the message on the standard error, status 1.
 func Fatal(msg string) {
 	FlushOutput()
 	fmt.Fprintln(os.Stderr, msg)
+	endProfiles()
 	os.Exit(1)
 }
 
@@ -100,6 +116,7 @@ func Fatal(msg string) {
 func Unsupported(msg string) {
 	FlushOutput()
 	fmt.Fprintln(os.Stderr, "elanrt: not supported yet: "+msg)
+	endProfiles()
 	os.Exit(2)
 }
 
@@ -163,8 +180,19 @@ const MaxStack = 2_000_000_000
 // GCPercent is the GC setting of [Main] when GOGC is not set: the live
 // heap of a program with weak unique tables is small, the default (100)
 // runs hundreds of collections (spike G2: propc 3, 0.68 s at 100, 0.43 s
-// at 400).
+// at 400); larger while the live heap is below [MinHeap] (gc.go).
 const GCPercent = 400
+
+// Go samples the allocations for its memory profile (one per 512 KiB by
+// default), each sample unwinding the stack: with the deep recursions of
+// the programs and their allocation rates, a few per cent of the time
+// (propc 3: 0.77 -> 0.75 s). Off unless a profile is asked for
+// (ELAN_MEMPROFILE).
+func init() {
+	if os.Getenv("ELAN_MEMPROFILE") == "" {
+		runtime.MemProfileRate = 0
+	}
+}
 
 // Main is the main function of a generated program: it parses the options,
 // sets the GC and the stack limit, and runs program on a new goroutine with
@@ -180,6 +208,7 @@ func Main(querySort string, program func(s *Session)) {
 	}
 	if os.Getenv("GOGC") == "" {
 		debug.SetGCPercent(GCPercent)
+		startGCTuner()
 	}
 	SetMaxStack(MaxStack)
 	done := make(chan int)
@@ -200,7 +229,22 @@ func Main(querySort string, program func(s *Session)) {
 			done <- 2
 			return
 		}
+		stop := func() {}
+		if f := os.Getenv("ELAN_CPUPROFILE"); f != "" {
+			stop = startProfile(f)
+		}
+		profiles = func() {
+			stop()
+			if f := os.Getenv("ELAN_MEMPROFILE"); f != "" {
+				writeMemProfile(f)
+			}
+		}
 		program(s)
+		if depth != 0 {
+			// every Guard has its Unguard (generated code: a bug otherwise)
+			panic(fmt.Sprintf("guarded depth %d at the end of the program", depth))
+		}
+		endProfiles()
 		s.Finish()
 		if os.Getenv("ELAN_STATS") == "1" {
 			FlushOutput()
@@ -209,6 +253,36 @@ func Main(querySort string, program func(s *Session)) {
 		done <- 0
 	}()
 	Exit(<-done)
+}
+
+// startProfile starts a CPU profile written to file (ELAN_CPUPROFILE: `go
+// tool pprof a.out file`); the function returned stops it.
+func startProfile(file string) func() {
+	f, err := os.Create(file)
+	if err == nil {
+		err = pprof.StartCPUProfile(f)
+	}
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "elanrt: ELAN_CPUPROFILE:", err)
+		return func() {}
+	}
+	return func() {
+		pprof.StopCPUProfile()
+		f.Close()
+	}
+}
+
+// writeMemProfile writes the allocations of the run to file
+// (ELAN_MEMPROFILE: `go tool pprof -sample_index=alloc_space a.out file`).
+func writeMemProfile(file string) {
+	f, err := os.Create(file)
+	if err == nil {
+		err = pprof.Lookup("allocs").WriteTo(f, 0)
+		f.Close()
+	}
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "elanrt: ELAN_MEMPROFILE:", err)
+	}
 }
 
 // Stats is a report of the runtime's counters (ELAN_STATS=1 in a program,
@@ -220,5 +294,7 @@ func Stats() string {
 		", live " + strconv.Itoa(LiveTerms()) +
 		", table " + strconv.Itoa(TableSize()) +
 		", rebuilds " + strconv.FormatInt(Rebuilds, 10) +
-		", forced GCs " + strconv.FormatInt(ForcedGCs, 10)
+		", forced GCs " + strconv.FormatInt(ForcedGCs, 10) +
+		", GC cycles " + strconv.FormatUint(gcCycles(), 10) +
+		", GC tunings " + strconv.FormatInt(GCTunings.Load(), 10)
 }

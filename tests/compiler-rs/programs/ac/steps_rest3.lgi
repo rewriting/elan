@@ -1,0 +1,6 @@
+LPL steps_rest3 description
+  query of sort bool
+  result of sort T
+  import acsteps
+  start with () K(n(5), K(n(6), K(n(1), n(2))))
+end

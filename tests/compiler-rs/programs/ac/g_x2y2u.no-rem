@@ -1,0 +1,4 @@
+REM gives the values of x U x U y U y undivided (h(F(a,a),F(b,F(c,c))) for
+x = a, y = F(b,c)): its Diophantine code fills the variables with the
+multiplicities of the subject. elanc-go enumerates the solutions in REM's
+order (the same sequence, each value divided).

@@ -1,0 +1,3 @@
+The rewrite steps of each program are compared with REM's (elanc-go tries
+the same redexes in the same order as REM, conditions included), except
+for the programs with a <name>.steps file saying why the count differs.

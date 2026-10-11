@@ -1,0 +1,6 @@
+LPL efib_30 description
+  query of sort bool
+  result of sort eInt
+  import efib
+  start with () go(30)
+end

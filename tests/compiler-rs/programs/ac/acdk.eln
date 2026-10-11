@@ -1,0 +1,55 @@
+module acdk
+// Labelled rules whose left-hand side is an AC pattern (no extension),
+// under dk: every solution of the matching is a result, each once.
+import global acsyms; end
+stratop global
+  s_rest : <T -> T> bs;
+  s_two : <T -> T> bs;
+  s_cond : <T -> T> bs;
+  s_nl : <T -> T> bs;
+  s_xx : <T -> T> bs;
+  s_xy : <T -> T> bs;
+  s_inner : <T -> T> bs;
+  s_under : <T -> T> bs;
+  s_mk : <T -> T> bs;
+end
+rules for T
+  x, y, z : T;
+  i, j : int;
+global
+  // one element pattern and a rest
+  [rest] F(g(x), y) => h(x, y) end
+  // two element patterns and a rest
+  [two] F(g(x), F(g(y), z)) => h(h(x, y), z) end
+  // conditions pruned as soon as their variables are bound
+  [cond] F(n(i), F(n(j), z)) => F(n(i * j), z) if j > i if i > 1 end
+  // non-linear between two element patterns
+  [nl] F(h(x, y), F(h(y, x), z)) => g(z) end
+  // a repeated variable: x U x takes the whole term
+  [xx] F(x, x) => x end
+  // two variables of the AC level
+  [xy] F(x, y) => h(x, y) end
+  // an element pattern of another AC operator
+  [inner] F(a U y, z) => h(y, z) end
+  // an AC pattern under a free symbol
+  [under] g(F(b, y)) => y end
+  // AC terms built in different ways: one canonical form each
+  [mk] x => F(c, F(b, a)) end
+  [mk] x => F(F(a, b), c) end
+  [mk] x => c U b U a U b end
+  [mk] x => F(F(a, a), F(b, a U b)) end
+  [mk] x => F(g(b U a), F(g(a U b), x)) end
+end
+strategies for T
+implicit
+  [] s_rest => dk(rest) end
+  [] s_two => dk(two) end
+  [] s_cond => dk(cond) end
+  [] s_nl => dk(nl) end
+  [] s_xx => dk(xx) end
+  [] s_xy => dk(xy) end
+  [] s_inner => dk(inner) end
+  [] s_under => dk(under) end
+  [] s_mk => dk(mk) end
+end
+end

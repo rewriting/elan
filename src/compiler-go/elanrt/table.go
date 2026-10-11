@@ -64,7 +64,7 @@ func lookup(h uint64, sym, iv int32, args []Term) *Node {
 
 // insert adds a new node (not in the table).
 func insert(n *Node) {
-	put(slots, n.Hash, weak.Make(n))
+	put(slots, n.hash(), weak.Make(n))
 	usedSlots++
 	if 2*usedSlots > len(slots) {
 		rebuild()

@@ -1,0 +1,3 @@
+elanc-go compiles AC operators since S7c (this term is printed as REM
+prints it, tests/compiler-rs/programs/ac); the AC shapes it still refuses
+are acallrep, acnested (S7c) and acbuiltin (S7d).

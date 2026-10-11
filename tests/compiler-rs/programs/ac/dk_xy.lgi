@@ -1,0 +1,6 @@
+LPL dk_xy description
+  query of sort bool
+  result of sort T
+  import acdk
+  start with (s_xy) F(c, F(a, b))
+end

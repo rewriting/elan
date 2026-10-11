@@ -1,0 +1,6 @@
+LPL g_wnl description
+  query of sort bool
+  result of sort T
+  import acwnl
+  start with (s_wnl) h(b, F(a, F(b, F(c, b))))
+end

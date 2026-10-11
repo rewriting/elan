@@ -1,0 +1,6 @@
+LPL steps_under description
+  query of sort bool
+  result of sort T
+  import acsteps
+  start with () h(G(n(5000), G(n(9096), G(n(4999 + 1), n(1)))), F(n(7), F(n(1), F(n(4), n(2)))))
+end

@@ -1,0 +1,6 @@
+LPL g_extxxy description
+  query of sort bool
+  result of sort T
+  import acext
+  start with () N(c, N(a, N(b, N(d, N(a, b)))))
+end

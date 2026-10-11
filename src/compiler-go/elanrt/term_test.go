@@ -2,8 +2,10 @@ package elanrt
 
 import (
 	"runtime"
+	"slices"
 	"testing"
 	"time"
+	"unsafe"
 )
 
 func TestSameStructureIsTheSamePointer(t *testing.T) {
@@ -136,4 +138,63 @@ func itoa(i int) string {
 	var w Writer
 	w.Int(int32(i))
 	return string(w.Bytes())
+}
+
+// Int nodes are not shared beyond the cache: Eq compares them by value,
+// and the nodes holding them are shared all the same.
+func TestIntsAreComparedByValue(t *testing.T) {
+	big := int32(1 << 20)
+	a := MkInt(big)
+	intCache[uint32(big)&(intCacheSize-1)] = nil // as if evicted
+	b := MkInt(big)
+	if a == b || !Eq(a, b) || Eq(a, MkInt(big+1)) || Eq(a, Mk0(symO)) || Compare(a, b) != 0 {
+		t.Fatal("two int nodes of the same value: Eq, Compare")
+	}
+	if MkInt(big) != b || MkInt(5) != MkInt(5) {
+		t.Fatal("the cache of ints, the small ints")
+	}
+	if Mk2(symCons, a, Mk0(symNil)) != Mk2(symCons, b, Mk0(symNil)) {
+		t.Fatal("cons(a) and cons(b), a and b of the same value: one node")
+	}
+	e := []Term{a, b, MkInt(big + 1)}
+	if Mult(e, 0) != 2 || FirstOcc(e, 1, nil) || !FirstOcc(e, 1, []int{0}) {
+		t.Fatal("multiplicities of equal ints")
+	}
+	if x := MkAC(symU, Flatten(symU, a, b, MkInt(big+1))); MkAC(symU, Flatten(symU, b, MkInt(big+1), a)) != x {
+		t.Fatal("AC terms of equal ints: one node")
+	}
+}
+
+// TestNodeSizes: the flags of a node (transient, normal form) take no
+// room of their own: the nodes stay in the 40/48/56/64-byte layouts (the
+// size classes 48 and 64 of the allocator for the inline arities).
+func TestNodeSizes(t *testing.T) {
+	if unsafe.Sizeof(uintptr(0)) != 8 {
+		t.Skip("64-bit layout")
+	}
+	sizes := []uintptr{unsafe.Sizeof(Node{}), unsafe.Sizeof(node1{}), unsafe.Sizeof(node2{}), unsafe.Sizeof(node3{})}
+	if want := []uintptr{40, 48, 56, 64}; !slices.Equal(sizes, want) {
+		t.Fatalf("Node, node1, node2, node3: %v bytes, want %v", sizes, want)
+	}
+}
+
+// TestFlagsKeepHash: marking a term transient or in normal form changes
+// neither its hash nor the hashes of the terms built on it.
+func TestFlagsKeepHash(t *testing.T) {
+	e := []Term{Mk1(symP, MkInt(1)), Mk1(symP, MkInt(2)), Mk1(symP, MkInt(77001))}
+	x := ACTerm(symAnd, slices.Clone(e))
+	if !x.isTmp() {
+		t.Fatal("ACTerm of a new multiset: not transient")
+	}
+	h := x.hash()
+	x = NormalForm(x, Steps)
+	if x.isTmp() || !Normal(x) || x.hash() != h {
+		t.Fatalf("NormalForm: tmp %v nf %v hash %x, was %x", x.isTmp(), Normal(x), x.hash(), h)
+	}
+	if y := MkAC(symAnd, slices.Clone(e)); y != x {
+		t.Fatal("the shared node of a normal form is not found again")
+	}
+	if g := Mk1(symNot, x); g.hash() != nodeHash(symNot, 0, []Term{x}) || g != Mk1(symNot, MkAC(symAnd, slices.Clone(e))) {
+		t.Fatal("the hash of a term over a marked one changed")
+	}
 }

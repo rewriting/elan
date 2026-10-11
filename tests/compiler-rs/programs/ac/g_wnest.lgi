@@ -1,0 +1,6 @@
+LPL g_wnest description
+  query of sort bool
+  result of sort T
+  import acgen
+  start with (s_wnest) g(F(h(a, b U d), F(h(c, d U a U d), F(h(a, d), b))))
+end

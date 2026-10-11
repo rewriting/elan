@@ -1,0 +1,6 @@
+LPL g_three_mult description
+  query of sort bool
+  result of sort T
+  import acgen
+  start with (s_three) F(a, F(b, F(a, b)))
+end

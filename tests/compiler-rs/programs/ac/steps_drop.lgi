@@ -1,0 +1,6 @@
+LPL steps_drop description
+  query of sort bool
+  result of sort T
+  import acsteps
+  start with () M(n(1), M(n(5), n(2)))
+end

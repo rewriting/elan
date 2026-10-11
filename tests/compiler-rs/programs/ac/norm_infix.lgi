@@ -1,0 +1,6 @@
+LPL norm_infix description
+  query of sort bool
+  result of sort T
+  import acnorm
+  start with () a U d U b U d U c
+end

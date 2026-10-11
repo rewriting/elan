@@ -1,0 +1,4 @@
+REM gives wrong solutions for x U x U y U y U y (x^2 U y^3: its
+Diophantine code abstracts x^2 into a where whose matching is wrong):
+h(F(b,F(a,a)),F(b,c)) twice x plus three times y is not the subject. The
+interpreter and elanc-go give the only solution.

@@ -1,0 +1,6 @@
+LPL dk_cond description
+  query of sort bool
+  result of sort T
+  import acdk
+  start with (s_cond) F(n(3), F(n(1), F(n(2), n(5))))
+end

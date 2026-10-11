@@ -341,12 +341,12 @@ func unsupportedStage(t *testing.T, p *prog) (string, string) {
 
 func TestUnsupportedConstructsAreRefusedWhenReachable(t *testing.T) {
 	p := peano()
-	p.op(sSet, 340, "u", []uint32{sSet, sSet}, 0, 2) // AC
+	p.op(sSet, 340, "u", []uint32{sSet, sSet}, 0, 1) // commutative (never exported)
 	p.op(sSet, 341, "single", []uint32{sNat}, 0, 0)
 	// not reachable: fine
 	p.lower(t)
 	p.start(f(340, f(341, f(318)), f(341, f(318))), sSet)
-	if st, what := unsupportedStage(t, p); st != "S7c" || !strings.Contains(what, "AC") {
+	if st, what := unsupportedStage(t, p); st != "S7c" || !strings.Contains(what, "commutative") {
 		t.Fatalf("%s %s", st, what)
 	}
 	// a start term with the query

@@ -1,0 +1,6 @@
+LPL dk_inner description
+  query of sort bool
+  result of sort T
+  import acdk
+  start with (s_inner) F(a U b U c, F(d, a U d))
+end

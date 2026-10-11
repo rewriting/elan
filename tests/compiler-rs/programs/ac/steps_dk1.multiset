@@ -1,0 +1,4 @@
+The interpreter matches the whole left-hand side F(n(i), x, y) with its AC
+matcher; REM (and elanc-go) match n(i) first, then x and y with Eker's
+matcher in a where on the elements left (RewriteRule.java
+transformation3_1): the same 14 solutions, in another order.

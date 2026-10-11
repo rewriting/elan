@@ -101,7 +101,28 @@
 //
 // # Extension points
 //
-//   - S7c (AC): [Pattern] gets an AC case, [Decision] an AC matching node.
+//   - S7d: AC operators on builtin sorts.
+//
+// # AC operators (S7c tasks 1 and 2)
+//
+// An AC operator ([Op.AC]) builds canonical terms: its function flattens
+// and sorts its arguments (rt.MkAC2: REM's order, see the S7c plan) and
+// applies its unlabelled rules to the result, which is the only column of
+// its decision tree. An AC pattern ([PatAC]) in a left-hand side or in a
+// where is replaced, for the decision tree, by a fresh variable; a
+// [CondAC] condition then matches the term bound to it (each solution in
+// turn, the conditions after it backtracking into the matching): the
+// element patterns one element each, in source order, each over the
+// subject's elements in canonical order (each distinct choice once), then
+// the variables of the AC level ([ACVar]). An unlabelled rule with its AC
+// operator at the top is applied modulo an extension ([Pattern.Ext]), as
+// the interpreter does with the extension rules it exports.
+//
+// Task 2: the patterns REM matches with Eker's AC matcher (the patterns
+// of wheres that contain an AC operator, and the variables of an AC level
+// of three items or more with several variables, [ACAbs]) are matched by
+// rt.Eker ([CondEker], [EkerPat]) in the oracles' order; x^n U y and
+// x^n U y^m as REM's Diophantine code ([ACVar]).
 //   - S7d (query): [Start] gets the query variable and the parser tables.
 package ir
 
@@ -386,6 +407,9 @@ type Op struct {
 	Name string
 	// Fun is the name of the normalisation function (Name_Symbol, unique).
 	Fun string
+	// ACFun is, for an AC operator, the name of its normalisation
+	// function over a multiset (Fun_ac, unique).
+	ACFun string
 	// Variant tells whether a term with this operator at the top can be a
 	// normal form (a constructor, or an operator that can be stuck): the
 	// operator then has a runtime symbol.
@@ -414,6 +438,9 @@ type Op struct {
 	Tree *Decision
 	// Meta is the evaluation of a meta_apply operator by META.
 	Meta MetaOp
+	// AC: the operator is associative-commutative (infos 2): its terms are
+	// flattened and canonically sorted multisets of two or more elements.
+	AC bool
 	// Recursive: the function is on a cycle of the call graph (it calls
 	// itself, directly or not), so it can recurse as deep as the data: the
 	// generated function guards its depth.
@@ -567,7 +594,38 @@ const (
 	PatInt
 	// PatStr is a builtinString literal.
 	PatStr
+	// PatAC is an AC pattern (only in [CondAC]): the AC operator Op, the
+	// element patterns Args (nested patterns of the same operator
+	// flattened; each matches one element), the variables of the AC level
+	// Vars, and Ext.
+	PatAC
 )
+
+// ACVar is a variable of the AC level of an AC pattern: it takes a
+// non-empty sub-multiset, Mult times (x U x: Mult 2). With two variables
+// (the shapes REM matches with its Diophantine code, Term.java
+// genDioMatching), the first is REM's "list_x": both of multiplicity 1, it
+// takes a counter over the elements ([rt.Split]); x^n U y (n > 1), x takes
+// the elements from the largest multiset down ([rt.Down] with n), y the
+// rest (non-empty); x^n U y^m (n, m > 1: REM abstracts the variable that
+// comes first in its order, here the second, `x^n :=() X`), the first
+// takes them from the largest down (Down with m), the rest X (non-empty)
+// is n copies of the second.
+type ACVar struct {
+	Var  VarID
+	Mult int
+}
+
+// ACAbs is the part of an AC pattern that REM matches with Eker's matcher
+// (RewriteRule.java transformation3_1: several variables at an AC level
+// of three items or more): a fresh variable Var takes the elements left to
+// it (the last variable of the AC level), then a [CondEker] condition
+// matches it against the abstracted items (EkerVars: the variables it
+// binds, to be bound before the conditions that read them).
+type ACAbs struct {
+	Var      VarID
+	EkerVars []VarID
+}
 
 // Pattern is a pattern of a left-hand side or of a where.
 type Pattern struct {
@@ -577,6 +635,15 @@ type Pattern struct {
 	Args []Pattern
 	Int  int32
 	Str  string
+	// Vars are the variables of the AC level of a PatAC (at most two;
+	// with Abs, at most one, before Abs.Var).
+	Vars []ACVar
+	// Abs is the abstracted part of a PatAC (nil if none).
+	Abs *ACAbs
+	// Ext: the pattern is the left-hand side of an unlabelled rule of its
+	// AC operator, applied modulo an extension E (the elements left over,
+	// possibly none): the result is then op(rhs, E) normalised.
+	Ext bool
 }
 
 // CondKind is the kind of a [Cond].
@@ -596,19 +663,49 @@ const (
 	// t`): each result of strategy S applied to the normal form of t that
 	// matches p, in order (backtracking).
 	CondApply
+	// CondAC: the term of variable A matches the AC pattern Pat; each
+	// solution in turn (the conditions after it backtrack into the
+	// matching).
+	CondAC
+	// CondEker: the term of variable A matches the pattern Eker with
+	// Eker's AC matcher (rt.Eker), each solution in turn, in the order of
+	// the oracles; EkerVars[i] is the variable of the pattern's variable
+	// number i.
+	CondEker
 )
 
 // Cond is a condition or local assignment of a rule.
 type Cond struct {
 	Kind CondKind
-	// A, B are the variables of CondSame; A is the variable of CondLet.
+	// A, B are the variables of CondSame; A is the variable of CondLet
+	// and the subject of CondAC.
 	A, B VarID
 	// Expr is the term of CondIf, CondLet, CondMatch, CondApply.
 	Expr Expr
-	// Pat is the pattern of CondMatch and CondApply.
+	// Pat is the pattern of CondMatch, CondApply and CondAC.
 	Pat Pattern
 	// Strategy is the strategy of CondApply.
 	Strategy StratID
+	// Eker, EkerVars: the pattern of CondEker and its variables.
+	Eker     *EkerPat
+	EkerVars []VarID
+}
+
+// EkerPat is a pattern for Eker's matcher ([CondEker]), in REM's form:
+// the elements of an AC pattern are its distinct items in REM's order
+// (Term.java orderedNormalForm: ints, then variables by number, then
+// symbols by code, then their arguments), with their multiplicities; the
+// variables are numbered depth first in that order
+// (rgenTermForACMatcher), from 0.
+type EkerPat struct {
+	Kind PatternKind // PatVar (Var: its number), PatOp, PatAC, PatInt, PatStr
+	Var  int
+	Op   OpID
+	Args []EkerPat
+	// Mults are the multiplicities of the elements (Args) of a PatAC.
+	Mults []int
+	Int   int32
+	Str   string
 }
 
 // ExprKind is the kind of an [Expr].

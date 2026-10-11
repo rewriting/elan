@@ -1,0 +1,6 @@
+LPL g_wxx description
+  query of sort bool
+  result of sort T
+  import acgen
+  start with (s_wxx) g(F(a, F(a, F(b, F(b, F(c, F(c, d)))))))
+end

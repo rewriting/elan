@@ -1,0 +1,6 @@
+LPL print_dk description
+  query of sort bool
+  result of sort T
+  import acdk
+  start with (s_mk) d
+end

@@ -1,0 +1,4 @@
+REM's compiler stops on a where pattern with an AC operator whose variable
+is bound by the left-hand side (java.lang.InternalError: pattern not
+numbered, Term.java genAssignment2Substitution); the interpreter checks the
+equality, as elanc-go.

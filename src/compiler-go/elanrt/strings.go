@@ -52,7 +52,7 @@ func strHash(s string) uint64 {
 	for i := 0; i < len(s); i++ {
 		h = (h ^ uint64(s[i])) * 1099511628211
 	}
-	return mix(h^Syms[SymString].seed) | 1
+	return mix(h^Syms[SymString].seed)&hashMask | 1 // (the top bits: flags of Node.Hash)
 }
 
 func lookupStr(h uint64, s string) *Node {

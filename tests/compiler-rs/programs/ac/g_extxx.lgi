@@ -1,0 +1,6 @@
+LPL g_extxx description
+  query of sort bool
+  result of sort T
+  import acgen
+  start with () K(a, K(c, K(b, K(a, K(c, K(a, b))))))
+end

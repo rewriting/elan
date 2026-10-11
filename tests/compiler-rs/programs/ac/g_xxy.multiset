@@ -1,0 +1,4 @@
+The interpreter enumerates x U x U y with Eker's matcher; REM (and elanc-go)
+with its Diophantine code (Term.java genDioMatching: next_maximal_extract,
+x from the largest multiset down): the same solutions, in reverse order
+(S7c plan, Task 2 findings).

@@ -1,0 +1,6 @@
+LPL norm_under description
+  query of sort bool
+  result of sort T
+  import acnorm
+  start with () h(occ(F(g(c), F(a, g(b))), b), occ(F(g(c), a), b))
+end

@@ -1,0 +1,6 @@
+LPL g_ext3 description
+  query of sort bool
+  result of sort T
+  import acgen
+  start with () G(a, G(b, G(c, G(d, b))))
+end

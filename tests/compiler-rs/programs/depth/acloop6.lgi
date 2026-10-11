@@ -1,0 +1,6 @@
+LPL acloop6 description
+  query of sort bool
+  result of sort Bag
+  import acloop
+  start with (acloop) c(3000000) U a U b
+end

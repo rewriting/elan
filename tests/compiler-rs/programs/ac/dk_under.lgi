@@ -1,0 +1,6 @@
+LPL dk_under description
+  query of sort bool
+  result of sort T
+  import acdk
+  start with (s_under) g(F(a, F(b, F(c, b))))
+end

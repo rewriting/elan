@@ -1,0 +1,24 @@
+module acwnl
+// Patterns of wheres with an AC operator whose variables are already
+// bound (by the left-hand side, or twice in the pattern): the interpreter
+// checks the equality; REM's compiler stops (Term.java
+// genAssignment2Substitution: "pattern not numbered").
+import global acgen; end
+stratop global
+  s_wnl : <T -> T> bs;
+  s_wapp : <T -> T> bs;
+end
+rules for T
+  x, y, z, w : T;
+global
+  // non-linear with the left-hand side
+  [wnl] h(x, z) => y where (T) F(x, y) :=() z end
+  // a strategy in the where, then the pattern (x twice) by Eker's matcher
+  [wapp] g(z) => k(x, y, w) where (T) k(F(x, y), w, x) :=(s_three) z end
+end
+strategies for T
+implicit
+  [] s_wnl => dk(wnl) end
+  [] s_wapp => dk(wapp) end
+end
+end

@@ -1,0 +1,3 @@
+REM stops (segmentation fault) on x U x U y U y at the top of a labelled
+rule: its Diophantine code can leave the abstracted variable empty there
+(Term.java genDioMatching tests the emptiness only under a symbol).

@@ -1,0 +1,4 @@
+The interpreter enumerates the solutions of AC matching with Eker's
+matcher, REM and elanc-go in REM's order (element patterns over the
+elements in canonical order, two variables by a counter): the same
+solutions, in another order (S7c plan, investigation).

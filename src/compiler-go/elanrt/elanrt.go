@@ -6,7 +6,8 @@
 //
 //   - term.go, table.go, strings.go: terms. One node type ([Node]) for
 //     every sort, maximally shared through a weak unique table: two equal
-//     terms alive at the same time are the same pointer.
+//     terms alive at the same time are the same pointer, except ints
+//     (not in the table: [Eq] compares terms).
 //   - ac.go: AC multisets, ordered by a history-independent structural
 //     order ([Compare]), and the helpers of AC matching.
 //   - strat.go: strategies in continuation-passing style ([K], [Strat]).

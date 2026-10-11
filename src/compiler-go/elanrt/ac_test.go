@@ -27,20 +27,78 @@ func TestCanonicalFormIsIndependentOfGroupingAndOrder(t *testing.T) {
 	}
 }
 
-// The order is a fixed function of the structure: the same in every run
-// and every build (the hash uses the symbols' names, not their codes).
-func TestCanonicalOrderIsFixed(t *testing.T) {
+// A transient AC term (ACTerm) is outside the unique table until Intern;
+// an AC term that exists is found, not rebuilt; Intern gives way to an
+// equal node built meanwhile.
+func TestTransientACTerms(t *testing.T) {
+	a, b, c := atom(41), atom(42), atom(43)
+	x := ACTerm(symAnd, MergeAC(symAnd, a, b))
+	if !x.isTmp() || Format(x) != "and(p(41),p(42))" {
+		t.Fatalf("transient %s (tmp %v)", Format(x), x.isTmp())
+	}
+	created := Created
+	if y := Intern(x); y != x || y.isTmp() || and(a, b) != x || Created != created+1 {
+		t.Fatal("Intern of a new term: the node itself, shared")
+	}
+	if ACTerm(symAnd, MergeAC(symAnd, b, a)) != x {
+		t.Fatal("ACTerm of an existing term: its node")
+	}
+	z := ACTerm(symAnd, MergeAC(symAnd, x, c))
+	shared := and(c, and(b, a)) // built meanwhile
+	if z == shared || Intern(z) != shared {
+		t.Fatal("Intern after an equal term was built: that term")
+	}
+	if Intern(a) != a {
+		t.Fatal("Intern of a shared term")
+	}
+	// NormalForm marks the term only when no step was counted
+	steps := Steps
+	Step()
+	if n := NormalForm(ACTerm(symAnd, MergeAC(symAnd, a, c)), steps); Normal(n) {
+		t.Fatal("marked normal after a step")
+	}
+	if n := NormalForm(ACTerm(symAnd, MergeAC(symAnd, a, c)), Steps); !Normal(n) || n != and(c, a) || !Normal(and(a, c)) {
+		t.Fatal("not marked normal without a step")
+	}
+	// MergeAC as Merge of Elems; Insert as Merge
+	for _, p := range [][2]Term{{a, b}, {b, a}, {x, c}, {c, x}, {x, x}, {a, a}} {
+		want := Merge(Elems(symAnd, p[0]), Elems(symAnd, p[1]))
+		if got := MergeAC(symAnd, p[0], p[1]); !slices.Equal(got, want) {
+			t.Errorf("MergeAC(%s, %s)", Format(p[0]), Format(p[1]))
+		}
+	}
+	if got := Insert([]Term{a, b, b, c}, b); !slices.Equal(got, []Term{a, b, b, b, c}) {
+		t.Error("Insert of a repeated element")
+	}
+	// a constructor: ApplyAC and ExtendAC build the term
+	if ApplyAC(symU, nil, a, MkAC2(symU, c, b)) != MkAC2(symU, MkAC2(symU, a, b), c) ||
+		ExtendAC(symU, nil, []Term{c}, a, b) != MkAC2(symU, MkAC2(symU, a, b), c) {
+		t.Error("ApplyAC, ExtendAC of a constructor")
+	}
+}
+
+// The order is REM's (Gterm_cmp): ints by value, strings, then by symbol
+// code (declaration order here), then the arguments; an AC term as a
+// multiset (distinct elements, then multiplicities).
+func TestCanonicalOrderIsREMs(t *testing.T) {
 	var e []Term
 	for i := range 8 {
-		e = append(e, atom(i))
+		e = append(e, atom(7-i))
 	}
-	e = append(e, nat(2), MkStr("x"), MkInt(1<<20), True)
+	e = append(e, nat(2), MkStr("x"), MkInt(1<<20), True, Mk0(symO), Mk0(symNil))
 	x := MkAC(symU, Flatten(symU, e...))
-	// (a change of the hash function changes this order: outputs of AC
-	// programs change with it)
-	const want = "p(3)U true U1048576 U p(1)U p(7)U p(0)U p(4)U s(s(o))U p(2)U p(6)U p(5)Ux"
+	const want = "1048576Ux U true U o U s(s(o))U nil U p(0)U p(1)U p(2)U p(3)U p(4)U p(5)U p(6)U p(7)"
 	if got := Format(x); got != want {
 		t.Fatalf("got  %s\nwant %s", got, want)
+	}
+	// multisets: a prefix first, then by the first different distinct
+	// element, then by its multiplicity
+	a, b := atom(1), atom(2)
+	ab, aab, abb, abc := and(a, b), and(and(a, a), b), and(and(a, b), b), and(and(a, b), atom(3))
+	for _, c := range [][2]Term{{ab, abc}, {abb, aab}, {abc, aab}, {ab, and(a, a)}} {
+		if Compare(c[0], c[1]) >= 0 || Compare(c[1], c[0]) <= 0 {
+			t.Errorf("%s < %s expected", Format(c[0]), Format(c[1]))
+		}
 	}
 }
 
@@ -89,20 +147,20 @@ func TestDuplicatesAndHelpers(t *testing.T) {
 	}
 }
 
-// Compare is a total order consistent with equality, also on terms whose
-// hashes are equal (compared by structure).
-func TestCompareOnEqualHashes(t *testing.T) {
-	a, b := atom(1), atom(2)
-	// as if the two terms had the same hash: compareStructure
-	if c := compareStructure(a, b); c == 0 || c != -compareStructure(b, a) {
-		t.Fatal("p(1), p(2) by structure")
+// Compare is a total order consistent with equality.
+func TestCompareIsTotal(t *testing.T) {
+	ts := []Term{atom(1), atom(2), MkStr("a"), MkStr("b"), Mk0(symO), Mk0(symNil), MkInt(1), MkInt(2),
+		nat(3), and(atom(1), atom(2)), and(atom(1), atom(1)), True, False}
+	for _, a := range ts {
+		for _, b := range ts {
+			if c := Compare(a, b); (c == 0) != (a == b) || c != -Compare(b, a) {
+				t.Fatalf("Compare(%s, %s) = %d", Format(a), Format(b), c)
+			}
+		}
 	}
-	if compareStructure(MkStr("a"), MkStr("b")) >= 0 || compareStructure(Mk0(symO), Mk0(symNil)) <= 0 ||
-		compareStructure(MkInt(1), MkInt(2)) >= 0 || compareStructure(Mk0(symNil), atom(1)) >= 0 {
-		t.Fatal("strings by bytes, ints by value, symbols by name")
-	}
-	if Compare(a, a) != 0 || Compare(a, b) == 0 || Compare(a, b) != -Compare(b, a) {
-		t.Fatal("Compare")
+	if Compare(MkStr("a"), MkStr("b")) >= 0 || Compare(Mk0(symO), Mk0(symNil)) >= 0 ||
+		Compare(MkInt(1), MkInt(2)) >= 0 || Compare(MkInt(9), MkStr("a")) >= 0 || Compare(False, True) >= 0 {
+		t.Fatal("strings by bytes, ints by value, symbols by code")
 	}
 }
 
@@ -164,5 +222,83 @@ func TestACOrderIsHistoryIndependent(t *testing.T) {
 		if o != wantAll {
 			t.Fatalf("run %d: AC order differs between processes or GC settings", i)
 		}
+	}
+}
+
+func fmtMS(e []Term) string {
+	if len(e) == 0 {
+		return "-"
+	}
+	return Format(MkAC(symU, slices.Clone(e)))
+}
+
+// The variables of an AC pattern: x U y in REM's order (observed: on
+// a U b U c, x = c, b, b U c, a, a U c, a U b; on a U a U b: b, a, a U b,
+// a U a), each solution once.
+func TestSplitOrder(t *testing.T) {
+	a, b, c := Mk0(symO), Mk0(symNil), nat(1) // codes: o < s < nil
+	var got []string
+	for s := NewSplit(Flatten(symU, c, b, a)); s.Next(); {
+		got = append(got, fmtMS(s.X())+"|"+fmtMS(s.Y()))
+	}
+	want := "nil|o U s(o),s(o)|o U nil,s(o)U nil|o,o|s(o)U nil,o U nil|s(o),o U s(o)|nil"
+	if g := strings.Join(got, ","); g != want {
+		t.Errorf("got  %s\nwant %s", g, want)
+	}
+	got = nil
+	for s := NewSplit(Flatten(symU, a, b, a)); s.Next(); {
+		got = append(got, fmtMS(s.X()))
+	}
+	if g := strings.Join(got, ","); g != "nil,o,o U nil,o U o" {
+		t.Errorf("multiplicities: %s", g)
+	}
+	if s := NewSplit([]Term{a}); s.Next() {
+		t.Error("one element: no solution")
+	}
+}
+
+func TestDownAndDiv(t *testing.T) {
+	a, b := Mk0(symO), Mk0(symNil)
+	if s := NewDown(Flatten(symU, a, b), 2); s.Next() {
+		t.Error("x U x U E on a U b: no solution")
+	}
+	var got []string
+	for s := NewDown(Flatten(symU, a, a, b), 1); s.Next(); {
+		got = append(got, fmtMS(s.X())+"|"+fmtMS(s.Rest()))
+	}
+	if g := strings.Join(got, ","); g != "o U o U nil|-,o U o|nil,o U nil|o,o|o U nil,nil|o U o" {
+		t.Errorf("m=1: %s", g)
+	}
+	got = nil
+	for s := NewDown(Flatten(symU, a, a, a, b, b), 2); s.Next(); {
+		got = append(got, fmtMS(s.X())+"|"+fmtMS(s.Rest()))
+	}
+	if g := strings.Join(got, ","); g != "o U nil|o,o|o U nil U nil,nil|o U o U o" {
+		t.Errorf("m=2: %s", g)
+	}
+	if x, ok := DivAC(Flatten(symU, a, a, b, b), 2); !ok || fmtMS(x) != "o U nil" {
+		t.Error("DivAC")
+	}
+	if _, ok := DivAC(Flatten(symU, a, a, b), 2); ok {
+		t.Error("DivAC of an odd multiplicity")
+	}
+}
+
+// TestACSubject: a part of an AC term given to a matcher is the element
+// itself, the shared node when the term exists, else a transient node
+// (outside the unique table: AC terms enter it only as normal forms).
+func TestACSubject(t *testing.T) {
+	a, b, c := atom(51), atom(52), atom(53)
+	if ACSubject(symAnd, []Term{a}) != a {
+		t.Fatal("one element: the element itself")
+	}
+	created := Created
+	x := ACSubject(symAnd, MergeAC(symAnd, a, b))
+	if !x.isTmp() || Created != created || Format(x) != "and(p(51),p(52))" {
+		t.Fatalf("a new multiset: %s, transient %v, %d nodes created", Format(x), x.isTmp(), Created-created)
+	}
+	y := and(b, c)
+	if z := ACSubject(symAnd, MergeAC(symAnd, c, b)); z != y || z.isTmp() {
+		t.Fatal("an existing term: not its shared node")
 	}
 }

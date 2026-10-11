@@ -1,0 +1,54 @@
+module acsteps
+// Conditional rules of AC operators applied modulo an extension, with
+// conditions that take rewrite steps (big): REM evaluates the conditions
+// once per solution of the whole match, the variable of the AC level
+// taking the rest (no enumeration of the extension); the rewrite steps
+// are compared with REM's (steps_*).
+import global int bool eq[T]; end
+sort T; end
+operators global
+  a : T;
+  b : T;
+  c : T;
+  n(@) : (int) T;
+  F(@,@) : (T T) T (AC);
+  G(@,@) : (T T) T (AC);
+  K(@,@) : (T T) T (AC);
+  M(@,@) : (T T) T (AC);
+  h(@,@) : (T T) T;
+  big(@) : (int) bool;
+  ok(@) : (T) bool;
+end
+stratop global
+  s_l1 : <T -> T> bs;
+  s_l3 : <T -> T> bs;
+end
+rules for bool
+  i : int;
+  x : T;
+global
+  [] big(i) => true if i > 3 end
+  [] big(i) => false end
+  [] ok(a) => true end
+  [] ok(x) => false end
+end
+rules for T
+  x, y : T;
+  i, j : int;
+global
+  [] F(n(i), F(n(j), x)) => F(n(i + j), x) if big(i) if big(j) end
+  [] G(n(i), G(n(j), x)) => G(n(i + j), x) if big(i) and big(j) end
+  // the rest as the right-hand side (reducible), the rest dropped
+  [] K(n(i), x) => x if big(i) end
+  [] M(n(i), x) => n(i) if big(i) end
+  // labelled, the variables abstracted into a where (Eker's matcher):
+  // the conditions after each of its solutions
+  [l1] F(n(i), F(x, y)) => h(x, y) if big(i) end
+  [l3] F(n(i), F(x, y)) => h(x, y) if ok(x) if big(i) end
+end
+strategies for T
+implicit
+  [] s_l1 => dk(l1) end
+  [] s_l3 => dk(l3) end
+end
+end

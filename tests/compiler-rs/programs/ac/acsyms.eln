@@ -1,0 +1,18 @@
+module acsyms
+// AC symbols for the AC tests of the compilers (S7c): a prefix one (F), an
+// infix one (U), constants declared in an order that is not the
+// alphabetical one, unary and binary free symbols, an injection of ints.
+import global int bool eq[T]; end
+sort T; end
+operators global
+  d : T;
+  b : T;
+  c : T;
+  a : T;
+  g(@) : (T) T;
+  h(@,@) : (T T) T;
+  n(@) : (int) T;
+  F(@,@) : (T T) T (AC);
+  @ U @ : (T T) T (AC);
+end
+end

@@ -1,0 +1,6 @@
+LPL acbuiltin description
+  query of sort bool
+  result of sort int
+  import acnext
+  start with () pl(pl(1, 2), 3)
+end

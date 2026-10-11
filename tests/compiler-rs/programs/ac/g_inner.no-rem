@@ -1,0 +1,3 @@
+REM stops at run time ("Warning [toEkerForm]: empty term !": its
+transformations of an AC level with an AC pattern nested in an element and
+two variables give Eker's matcher an empty term).

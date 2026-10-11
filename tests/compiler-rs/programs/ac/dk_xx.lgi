@@ -1,0 +1,6 @@
+LPL dk_xx description
+  query of sort bool
+  result of sort T
+  import acdk
+  start with (s_xx) F(a, F(b, F(a, b)))
+end

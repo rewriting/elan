@@ -585,8 +585,11 @@ func (l *lowerer) expand(c int, r *reach) error {
 	switch k.infos {
 	case 0:
 	case 2:
-		return unsupported("S7c", "AC operator %s", l.candDecl(k))
+		if err := l.checkAC(k); err != nil {
+			return err
+		}
 	default:
+		// (the language has no commutative-only operators: never exported)
 		return unsupported("S7c", "commutative operator %s", l.candDecl(k))
 	}
 	if l.boolSort.ok && k.result == l.boolSort.s {
@@ -806,10 +809,38 @@ func (l *lowerer) checkWhereStrategy(st ref.StrategyNameIndex, s ref.SortIndex, 
 	return nil
 }
 
-func (l *lowerer) checkRule(r *ref.Rule) error {
-	if r.WhichMatch == 0 {
-		return unsupported("S7c", "rule with AC matching")
+// checkAC checks an AC operator: two arguments of its result sort, a sort
+// of terms (not a builtin family: refused as S7d, see builtinAC), a
+// printing form with its two arguments in order.
+// builtinAC is the refusal of an AC operator on a builtin sort or a sort
+// with an injection of one (S7d): no program of the bench needs it; the
+// oracles order ints as REM's tagged words in Eker's matcher, and strings
+// under an AC symbol are a fatal error of the interpreter and crash REM's
+// compiler (the S7c plan).
+const builtinAC = "AC operator %s on a builtin sort (no program of the bench has one; strings under an AC symbol make both oracles fail)"
+
+func (l *lowerer) checkAC(k *cand) error {
+	if len(k.args) != 2 || k.args[0] != k.result || k.args[1] != k.result {
+		return unsupported("S7c", "AC operator %s whose arguments are not of its result sort (its terms are flattened: (s s) s; no program of the bench declares one)", l.candDecl(k))
 	}
+	if _, ok := builtinKind(l.sortName(k.result)); ok || isBuiltin(k.semantic) {
+		return unsupported("S7d", builtinAC, l.candDecl(k))
+	}
+	// (an injection of a builtin sort into the sort makes it a family:
+	// checked when the IR is built)
+	var args []int64
+	for _, x := range l.printForm[profileOf(k.symbol, k.args, k.result)] {
+		if x.Kind == ref.LexType {
+			args = append(args, x.N)
+		}
+	}
+	if len(args) != 2 {
+		return unsupported("S7c", "AC operator %s printed without its two arguments (REM prints an AC term as a right comb of its form; no program of the bench has one)", l.candDecl(k))
+	}
+	return nil
+}
+
+func (l *lowerer) checkRule(r *ref.Rule) error {
 	if _, ok := r.Body.(ref.Plain); !ok {
 		return unsupported("S7d", "rule with a switch/case right-hand side")
 	}
@@ -1077,6 +1108,10 @@ func (b *builder) build(name string, start *tt, q *ref.Query, sortIndices []ref.
 			Decl:   l.candDecl(k),
 			Kind:   Constructor,
 			Meta:   metaOp(k.semantic),
+			AC:     k.infos == 2,
+		}
+		if op.AC {
+			op.ACFun = unique(usedFuns, op.Fun+"_ac")
 		}
 		for _, a := range k.args {
 			op.Args = append(op.Args, b.sortOf[a])
@@ -1144,6 +1179,11 @@ func (b *builder) build(name string, start *tt, q *ref.Query, sortIndices []ref.
 	for s, f := range familyOf {
 		ir.Sorts[s].Family = f
 	}
+	for o := range ir.Ops {
+		if op := &ir.Ops[o]; op.AC && ir.Sorts[op.Result].Family >= 0 {
+			return nil, unsupported("S7d", builtinAC, op.Decl)
+		}
+	}
 
 	// a builtin operation computes a value of a builtin sort, from values
 	// when it needs them: declared on sorts of terms (`@ pl @ : (t t) t
@@ -1177,17 +1217,25 @@ func (b *builder) build(name string, start *tt, q *ref.Query, sortIndices []ref.
 		if err != nil {
 			return nil, err
 		}
-		for _, tr := range trs {
+		ac := ir.Ops[i].AC
+		for ti, tr := range trs {
 			rl := &ruleLowerer{b: b, rule: tr.rule, varOf: map[uint32]VarID{}}
-			r, ok, err := rl.lower(&tr.lhs, false)
+			// an AC operator: one column, the whole (canonical) term; the
+			// rule is applied modulo an extension when the interpreter
+			// exports one for it (the next rule, F(EVAR, lhs))
+			rl.extTop = ac && ti+1 < len(trs) && containsEVar(&trs[ti+1].lhs)
+			r, ok, err := rl.lower(&tr.lhs, ac)
 			if err != nil {
 				return nil, err
 			}
 			if ok {
 				rules[i] = append(rules[i], r)
 			} else {
-				skipped[i] = append(skipped[i], rl.render(&tr.lhs)+
-					" (extension variable in the left-hand side: not compiled, as REM)")
+				why := " (extension variable in the left-hand side: not compiled, as REM)"
+				if ac {
+					why = " (the extension of the rule before it: that rule is applied modulo an extension)"
+				}
+				skipped[i] = append(skipped[i], rl.render(&tr.lhs)+why)
 			}
 		}
 	}
@@ -1204,6 +1252,11 @@ func (b *builder) build(name string, start *tt, q *ref.Query, sortIndices []ref.
 		for o := range ir.Ops {
 			switch pre[o].kind {
 			case Defined:
+				if ir.Ops[o].AC {
+					// its rules all match modulo AC (conditions)
+					next[o] = false
+					continue
+				}
 				var rows [][]Pattern
 				for _, r := range rules[o] {
 					if r.Unconditional() {
@@ -1247,7 +1300,11 @@ func (b *builder) build(name string, start *tt, q *ref.Query, sortIndices []ref.
 			}
 		}
 		if op.Kind == Defined {
-			tree, never := decisionTree(rules[o], op.Args, sig)
+			cols := op.Args
+			if op.AC {
+				cols = []SortID{op.Result}
+			}
+			tree, never := decisionTree(rules[o], cols, sig)
 			op.Rules, op.Tree, op.Skipped = rules[o], tree, skipped[o]
 			for _, r := range never {
 				op.Skipped = append(op.Skipped, rules[o][r].Text+
@@ -1344,6 +1401,10 @@ func (b *builder) strategies(ir *IR, sig *signatures, usedFuns map[string]bool) 
 			for _, r := range lb.Rules {
 				for _, c := range r.Conds {
 					if c.Kind == CondApply && !ir.Strategies[c.Strategy].Det {
+						det = false
+					}
+					// an AC matching can give several solutions
+					if c.Kind == CondAC || c.Kind == CondEker {
 						det = false
 					}
 				}
@@ -1633,11 +1694,25 @@ func markRecursive(ir *IR) {
 			r := &rs[ri]
 			for ci := range r.Conds {
 				c := &r.Conds[ci]
-				if c.Kind != CondSame {
+				if c.Kind != CondSame && c.Kind != CondAC && c.Kind != CondEker {
 					collect(from, &c.Expr)
+				}
+				if c.Kind == CondEker {
+					// the values of its variables are normalised by the
+					// functions of the AC operators of its pattern
+					for _, o := range c.Eker.ACOps() {
+						if ir.Ops[o].Kind == Defined {
+							calls[from] = append(calls[from], o)
+						}
+					}
 				}
 				if c.Kind == CondApply {
 					calls[from] = append(calls[from], strat(c.Strategy))
+				}
+				if c.Kind == CondAC && ir.Ops[c.Pat.Op].Kind == Defined {
+					// the values of its variables and the extension are
+					// normalised by the operator's function
+					calls[from] = append(calls[from], c.Pat.Op)
 				}
 			}
 			collect(from, &r.Rhs)
@@ -1735,6 +1810,172 @@ type ruleLowerer struct {
 	// varOf maps a model variable to its IR variable (first occurrence).
 	varOf map[uint32]VarID
 	conds []Cond
+	// extTop: the left-hand side is that of an unlabelled rule of its AC
+	// operator, applied modulo an extension (the top AC pattern gets Ext)
+	extTop bool
+	// acConds are the CondAC conditions of the AC patterns met by pattern
+	// and not yet added to conds (outer patterns first)
+	acConds []Cond
+	// ekerConds are the CondEker conditions of the abstracted parts of
+	// those patterns (acAbstract), added after them
+	ekerConds []Cond
+	// err is the first refusal met by pattern
+	err error
+}
+
+// freshVar is a new variable of the rule (the subject of an AC pattern).
+func (rl *ruleLowerer) freshVar(prefix string, s SortID) VarID {
+	name := prefix
+	for n := 2; slices.ContainsFunc(rl.vars, func(v Var) bool { return v.Name == name }); n++ {
+		name = fmt.Sprintf("%s_%d", prefix, n)
+	}
+	rl.vars = append(rl.vars, Var{Name: name, Sort: s})
+	return len(rl.vars) - 1
+}
+
+// takeAC moves the pending CondAC conditions, then the CondEker ones, to
+// the conditions.
+func (rl *ruleLowerer) takeAC() {
+	rl.conds = append(rl.conds, rl.acConds...)
+	rl.conds = append(rl.conds, rl.ekerConds...)
+	rl.acConds, rl.ekerConds = nil, nil
+}
+
+// addEker adds the CondEker of a where pattern (if any).
+func (rl *ruleLowerer) addEker(ek *Cond) {
+	if ek != nil {
+		rl.conds = append(rl.conds, *ek)
+	}
+}
+
+// acPattern is the AC pattern of t (an AC operator applied): its arguments
+// flattened (the arguments with the same operator on top spliced), the
+// variables among them grouped by name (x U x: one variable of
+// multiplicity 2), the others element patterns; at a level of three items
+// or more (equal items counted once) with two variables or more, or an
+// element pattern repeated, the variables and repeated items are matched
+// by Eker's matcher, as REM does (acAbstract).
+func (rl *ruleLowerer) acPattern(t *tt, same *[]Cond, ext bool) Pattern {
+	n := rl.remOf(t)
+	p := Pattern{Kind: PatAC, Op: rl.b.opOf[t.cand], Ext: ext}
+	nVars, repeated := 0, false
+	for i, a := range n.args {
+		if a.rank == 1 {
+			nVars++
+		} else if n.mults[i] > 1 {
+			repeated = true
+		}
+	}
+	if len(n.args) > 2 && (nVars >= 2 || repeated) {
+		return rl.acAbstract(t, n, p, same)
+	}
+	var items []*tt
+	var flatten func(x *tt)
+	flatten = func(x *tt) {
+		if x.kind == ttOp && x.cand == t.cand {
+			for i := range x.args {
+				flatten(&x.args[i])
+			}
+			return
+		}
+		items = append(items, x)
+	}
+	flatten(t)
+	type mv struct {
+		x    *tt
+		mult int
+	}
+	var vars []mv
+	for _, x := range items {
+		if x.kind != ttVar {
+			p.Args = append(p.Args, rl.pattern(x, same))
+			continue
+		}
+		if i := slices.IndexFunc(vars, func(v mv) bool { return v.x.index == x.index }); i >= 0 {
+			vars[i].mult++
+		} else {
+			vars = append(vars, mv{x, 1})
+		}
+	}
+	// REM's list_x first (Term.java genDioMatching): the higher
+	// multiplicity, else the smaller variable code; x^n U y^m with n, m > 1:
+	// REM abstracts the smaller variable (transformation3_1), the other
+	// one is list_x
+	slices.SortStableFunc(vars, func(a, b mv) int {
+		if a.mult > 1 && b.mult > 1 {
+			return cmp.Compare(b.x.index, a.x.index)
+		}
+		return cmp.Or(cmp.Compare(b.mult, a.mult), cmp.Compare(a.x.index, b.x.index))
+	})
+	for _, v := range vars {
+		pv := rl.pattern(v.x, same)
+		p.Vars = append(p.Vars, ACVar{Var: pv.Var, Mult: v.mult})
+	}
+	return p
+}
+
+// acAbstract is the AC pattern of t (its level n in REM's form) whose
+// variables and repeated items REM matches with Eker's matcher
+// (RewriteRule.java transformation3_1, case 2): F(x1^a1, ..., t1, ...,
+// s^b, ...) is matched as F(t1, ..., X) where F(x1^a1, ..., s^b, ...) :=()
+// X, X a fresh variable; when every item would go, the first one in REM's
+// order stays at the level (F(x, y, z): F(x, X) where F(y, z) :=() X).
+func (rl *ruleLowerer) acAbstract(t *tt, n *remNode, p Pattern, same *[]Cond) Pattern {
+	decl := rl.b.l.candDecl(&rl.b.l.cands[t.cand])
+	var list []int
+	for i, a := range n.args {
+		if a.rank == 1 || n.mults[i] > 1 {
+			list = append(list, i)
+		}
+	}
+	keep := -1
+	if len(list) == len(n.args) {
+		keep, list = list[0], list[1:]
+		if n.args[keep].rank != 1 {
+			rl.refuse("an AC pattern whose items are all repeated, the first one an element pattern (%s: REM keeps it at the level for its bipartite matcher, not reproduced)", decl)
+		}
+	}
+	abs := &remNode{t: t, rank: 2, code: n.code, ac: true}
+	for _, i := range list {
+		if rl.containsAC(n.args[i].t) {
+			rl.refuse("an AC pattern nested in a repeated element of an AC pattern with several variables (%s: REM first abstracts the nested one into a where, RewriteRule.java transformation2, not reproduced)", decl)
+		}
+		abs.args = append(abs.args, n.args[i])
+		abs.mults = append(abs.mults, n.mults[i])
+	}
+	// the element patterns left at the level (multiplicity 1), in source
+	// order
+	var flatten func(x *tt)
+	flatten = func(x *tt) {
+		if x.kind == ttOp && x.cand == t.cand {
+			for i := range x.args {
+				flatten(&x.args[i])
+			}
+			return
+		}
+		if x.kind != ttVar {
+			r := rl.remOf(x)
+			if i := slices.IndexFunc(n.args, func(a *remNode) bool { return remCmp(a, r) == 0 }); n.mults[i] == 1 {
+				p.Args = append(p.Args, rl.pattern(x, same))
+			}
+		}
+	}
+	flatten(t)
+	if keep >= 0 {
+		pv := rl.pattern(n.args[keep].t, same)
+		p.Vars = append(p.Vars, ACVar{Var: pv.Var, Mult: n.mults[keep]})
+	}
+	x := rl.freshVar("ab", rl.b.ir.Ops[p.Op].Result)
+	c := rl.ekerCond(x, abs, same)
+	p.Abs = &ACAbs{Var: x, EkerVars: c.EkerVars}
+	rl.ekerConds = append(rl.ekerConds, c)
+	return p
+}
+
+func (rl *ruleLowerer) refuse(format string, a ...any) {
+	if rl.err == nil {
+		rl.err = unsupported("S7c", format, a...)
+	}
 }
 
 // newVar is a new variable for model variable i (named x<i> as in the rule
@@ -1762,6 +2003,20 @@ func (rl *ruleLowerer) pattern(t *tt, same *[]Cond) Pattern {
 		}
 		return Pattern{Kind: PatVar, Var: v}
 	case ttOp:
+		if rl.b.l.cands[t.cand].infos == 2 {
+			// an AC pattern: a fresh variable here, matched by a CondAC
+			// (the outer patterns' conditions first)
+			ext := rl.extTop
+			rl.extTop = false
+			op := rl.b.opOf[t.cand]
+			v := rl.freshVar("ac", rl.b.ir.Ops[op].Result)
+			slot := len(rl.acConds)
+			rl.acConds = append(rl.acConds, Cond{Kind: CondAC, A: v})
+			p := rl.acPattern(t, same, ext)
+			rl.acConds[slot].Pat = p
+			return Pattern{Kind: PatVar, Var: v}
+		}
+		rl.extTop = false
 		p := Pattern{Kind: PatOp, Op: rl.b.opOf[t.cand]}
 		for i := range t.args {
 			p.Args = append(p.Args, rl.pattern(&t.args[i], same))
@@ -1803,6 +2058,7 @@ func (rl *ruleLowerer) lower(lhs *tt, whole bool) (Rule, bool, error) {
 			pats = append(pats, rl.pattern(&lhs.args[i], &same))
 		}
 	}
+	rl.takeAC()
 	rl.conds = append(rl.conds, same...)
 	body := rl.rule.Body.(ref.Plain)
 	var texts []string
@@ -1835,8 +2091,9 @@ func (rl *ruleLowerer) lower(lhs *tt, whole bool) (Rule, bool, error) {
 			texts = append(texts, "where "+rl.render(&lt)+" := ("+rl.strategyText(w.Strategy)+") "+rl.render(&r))
 			if w.Strategy.Valid {
 				var same []Cond
-				p := rl.pattern(&lt, &same)
+				p, ek := rl.wherePattern(&lt, &same)
 				rl.conds = append(rl.conds, Cond{Kind: CondApply, Pat: p, Strategy: rl.b.stratOf[w.Strategy.Index], Expr: e})
+				rl.addEker(ek)
 				rl.conds = append(rl.conds, same...)
 			} else if _, bound := rl.varOf[lt.index]; lt.kind == ttVar && !bound {
 				v := rl.newVar(lt.index, lt.sort)
@@ -1844,8 +2101,9 @@ func (rl *ruleLowerer) lower(lhs *tt, whole bool) (Rule, bool, error) {
 				rl.conds = append(rl.conds, Cond{Kind: CondLet, A: v, Expr: e})
 			} else {
 				var same []Cond
-				p := rl.pattern(&lt, &same)
+				p, ek := rl.wherePattern(&lt, &same)
 				rl.conds = append(rl.conds, Cond{Kind: CondMatch, Pat: p, Expr: e})
+				rl.addEker(ek)
 				rl.conds = append(rl.conds, same...)
 			}
 		case ref.Match:
@@ -1863,12 +2121,13 @@ func (rl *ruleLowerer) lower(lhs *tt, whole bool) (Rule, bool, error) {
 			}
 			texts = append(texts, "where "+rl.render(&pt)+" := ("+rl.strategyText(w.Strategy)+") "+rl.render(&r))
 			var same []Cond
-			p := rl.pattern(&pt, &same)
+			p, ek := rl.wherePattern(&pt, &same)
 			if w.Strategy.Valid {
 				rl.conds = append(rl.conds, Cond{Kind: CondApply, Pat: p, Strategy: rl.b.stratOf[w.Strategy.Index], Expr: e})
 			} else {
 				rl.conds = append(rl.conds, Cond{Kind: CondMatch, Pat: p, Expr: e})
 			}
+			rl.addEker(ek)
 			rl.conds = append(rl.conds, same...)
 		default:
 			panic("refused during reachability")
@@ -1881,6 +2140,9 @@ func (rl *ruleLowerer) lower(lhs *tt, whole bool) (Rule, bool, error) {
 	rhs, err := rl.expr(&rt)
 	if err != nil {
 		return Rule{}, false, err
+	}
+	if rl.err != nil {
+		return Rule{}, false, rl.err
 	}
 	text := "[] " + rl.render(lhs) + " => " + rl.render(&rt)
 	for _, c := range texts {

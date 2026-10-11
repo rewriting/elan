@@ -1,0 +1,30 @@
+module acnext
+// AC shapes that elanc-go refuses after S7c task 2 (the others are
+// compiled, tests/compiler-rs/programs/ac); elanc-rs refuses every AC
+// operator (S6c).
+import global int bool; end
+sort elt; end
+operators global
+  e1 : elt;
+  e2 : elt;
+  g(@) : (elt) elt;
+  @ + @ : (elt elt) elt (AC);
+  pl(@,@) : (int int) int (AC);
+  allrep(@) : (elt) elt;
+  nested(@) : (elt) elt;
+end
+rules for elt
+  x, y, z : elt;
+global
+  // every item repeated, the first one in REM's order an element pattern
+  [] allrep(e1 + e1 + g(x) + g(x) + e2 + e2) => x end
+  // an AC pattern in a repeated element of a level with several variables
+  [] nested(g(x + y) + g(x + y) + z + e1) => z end
+end
+rules for int
+  i : int;
+global
+  // an AC operation on ints (int is then a sort of native values, S7d)
+  [] pl(i, i) => i end
+end
+end

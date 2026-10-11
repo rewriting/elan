@@ -1,0 +1,6 @@
+REM never applies an unlabelled rule of an AC operator with several
+variables to the whole term (RewriteRule.java transformation3_2 case 5:
+its extension variable takes a counter that starts at one element) and
+here stops ("Warning [toEkerForm]: empty term !"); the interpreter and
+elanc-go apply the rule itself first, then its extension (S7c plan, Task 2
+findings).

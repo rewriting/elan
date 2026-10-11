@@ -25,15 +25,26 @@
 #    be equal, in order (the leading spaces of the compiled programs'
 #    token spacing are not compared, nor the quotes of strings);
 #  - REM: `elanc -b -nosplit -quiet` + make + `./a.out -noInput -quiet`:
-#    the `result = ` lines must be byte-identical (the `rewrite_step` line
-#    is not compared: it depends on the compilation scheme).
+#    the `result = ` lines must be byte-identical; the `rewrite_step` line
+#    is compared only when DIR has a file rem-steps (programs/ac: elanc-go
+#    tries the same redexes in the same order as REM), except for a
+#    program with a <name>.steps saying why its count differs (elsewhere
+#    it depends on the compilation scheme).
 # A program without result fails (both sides empty prove nothing), unless
 # it has a <name>.none saying why no result is expected (it then fails if
 # the compiler gives one).
 # Exceptions, each documented in its file: <name>.no-rem says why REM is
 # not run, <name>.no-interpreter why the interpreter is not run,
 # <name>.no-<compiler> (e.g. .no-elanc-go) why the program is not run with
-# that compiler. A program that the compiler refuses (status 2, "not
+# that compiler; no-<compiler> in DIR why no program of DIR is (e.g.
+# programs/ac/no-elanc-rs: elanc-rs refuses AC by design).
+# AC terms (programs/ac, S7c): the interpreter prints an AC term as it was
+# built, REM and the compilers flattened and sorted; when DIR has a file
+# ac-symbols (the AC symbols), the results compared with the
+# interpreter's are first put in a canonical form modulo AC
+# (ac_canon.py); with <name>.multiset (saying why: the oracles enumerate
+# AC solutions in different orders), as multisets (sorted). The results
+# are compared with REM's byte for byte, in order. A program that the compiler refuses (status 2, "not
 # supported yet (<stage>)", the stage being one of its later ones: S6c-S6e
 # for elanc-rs, S7c-S7e for elanc-go) fails, the refusal quoted.
 # Outputs are compared as bytes (LC_ALL=C).
@@ -68,6 +79,19 @@ if [ "$1" = -d ]; then DIR=${2:?-d DIR}; shift 2; fi
 PROGS=$HERE/programs/$DIR
 QUERY='true end'
 [ -f "$PROGS/query" ] && QUERY=$(cat "$PROGS/query")
+if [ -f "$PROGS/no-$ELANC" ]; then
+  echo "skip $DIR ($DIR/no-$ELANC: $(head -1 "$PROGS/no-$ELANC"))"; exit 0
+fi
+# canon: the canonical form modulo AC of the result lines (identity when
+# DIR has no ac-symbols)
+canon() {
+  if [ -f "$PROGS/ac-symbols" ]; then
+    # shellcheck disable=SC2046
+    python3 "$HERE/ac_canon.py" $(cat "$PROGS/ac-symbols")
+  else
+    cat
+  fi
+}
 
 mkdir -p "$HERE/work" "$TARGET" || exit 2
 RUN=$(mktemp -d "$HERE/work/$DIR$SUFFIX.XXXXXX") || exit 2
@@ -150,12 +174,14 @@ for lgi in "$PROGS"/*.lgi; do
     iout=$( cd "$d/int" && printf '%s\n' "$QUERY" | elan -b "$name.lgi" 2>&1; echo "status $?" )
     istatus=$(printf '%s\n' "$iout" | sed -n 's/^status //p')
     int=$(printf '%s\n' "$iout" | sed -n 's/^ \(.*\) end$/\1/p' | grep -v '^end$')
-    a=$(printf '%s\n' "$rs" | sed 's/^result = *//' | tr -d '"' | oneline)
-    b=$(printf '%s\n' "$int" | tr -d '"' | oneline)
+    order=cat how=
+    if [ -f "$PROGS/$name.multiset" ]; then order=sort how=" (as multisets, $name.multiset)"; fi
+    a=$(printf '%s\n' "$rs" | sed 's/^result = *//' | tr -d '"' | canon | $order | oneline)
+    b=$(printf '%s\n' "$int" | tr -d '"' | canon | $order | oneline)
     if [ "$istatus" != 0 ] || printf '%s\n' "$iout" | grep -q '^\[error\]'; then
       fail "$name: the interpreter failed (status $istatus)"
     elif [ "$a" = "$b" ]; then
-      ok "$name vs interpreter: $count results [$a] (build $build)"
+      ok "$name vs interpreter$how: $count results [$a] (build $build)"
     else
       fail "$name vs interpreter: $ELANC [$a], interpreter [$b]"
     fi
@@ -173,10 +199,18 @@ for lgi in "$PROGS"/*.lgi; do
     rem=$(printf '%s\n' "$rout" | grep '^result = ')
     if [ "$rstatus" != 0 ]; then
       fail "$name: the REM program failed (status $rstatus)"
-    elif [ "$rs" = "$rem" ]; then
-      ok "$name vs REM: $count results"
-    else
+    elif [ "$rs" != "$rem" ]; then
       fail "$name vs REM: $ELANC [$(printf '%s\n' "$rs" | oneline)], REM [$(printf '%s\n' "$rem" | oneline)]"
+    elif [ -f "$PROGS/rem-steps" ] && [ ! -f "$PROGS/$name.steps" ]; then
+      csteps=$(printf '%s\n' "$out" | sed -n 's/^rewrite_step = //p')
+      rsteps=$(printf '%s\n' "$rout" | sed -n 's/^rewrite_step = //p')
+      if [ "$csteps" = "$rsteps" ]; then
+        ok "$name vs REM: $count results, $csteps rewrite steps"
+      else
+        fail "$name vs REM: rewrite steps $ELANC $csteps, REM $rsteps"
+      fi
+    else
+      ok "$name vs REM: $count results"
     fi
   else
     fail "$name: elanc or make failed (see $d/rem/*.log)"
