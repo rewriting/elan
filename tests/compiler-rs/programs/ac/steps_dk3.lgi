@@ -1,0 +1,6 @@
+LPL steps_dk3 description
+  query of sort bool
+  result of sort T
+  import acsteps
+  start with (s_l3) F(n(1), F(n(5), F(a, F(b, a))))
+end
