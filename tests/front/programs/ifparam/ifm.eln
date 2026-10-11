@@ -1,0 +1,14 @@
+// IF on a numeric module parameter (S8a fixture). Only one condition: the
+// C++ refuses `IF c ANDIF c2` (mlstream.cc macroexp: iffirst is never reset,
+// so the second condition is parsed from ANDIF on); ANDIF is in ../foreach.
+module ifm[verbose]
+import global int bool; end
+operators global
+  h_verbose : int;
+  IF verbose == 1 : { loud_verbose : int; }
+end
+rules for int
+global
+  [] h_verbose => verbose end
+end
+end

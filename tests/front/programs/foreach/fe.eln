@@ -1,0 +1,11 @@
+// nested FOR EACH over list[int] elements, with ANDIF (S8a fixture)
+module fe
+import global int bool list[int]; end
+operators global
+  FOR EACH A:int SUCH THAT A:=(listExtract) elem(1.2.nil) ANDIF A > 1 : {
+    FOR EACH B:int SUCH THAT B:=(listExtract) elem(3.4.nil) : {
+      p_A_B : int;
+    }
+  }
+end
+end

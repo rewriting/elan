@@ -1,0 +1,6 @@
+LPL stratlgi description
+  query of sort int
+  result of sort int
+  import sm
+  start with [id] 1
+end

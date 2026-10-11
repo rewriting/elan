@@ -1,0 +1,6 @@
+LPL foreach description
+  query of sort int
+  result of sort int
+  import fe
+  start with () p_2_4
+end

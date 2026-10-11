@@ -1,0 +1,4 @@
+// two modules importing each other: the cycle warning (S8a fixture)
+module ca
+import global int cb; end
+end

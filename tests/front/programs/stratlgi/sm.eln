@@ -1,0 +1,4 @@
+// start with [S] in the .lgi loads strat[int] (S8a fixture)
+module sm
+import global int; end
+end

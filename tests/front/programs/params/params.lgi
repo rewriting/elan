@@ -1,0 +1,6 @@
+LPL params description
+  query of sort int
+  result of sort int
+  import pm[3] tuple[3,int,bool,int]
+  start with () k(1,2,3)
+end

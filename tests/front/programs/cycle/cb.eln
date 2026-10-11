@@ -1,0 +1,3 @@
+module cb
+import global int ca; end
+end

@@ -1,0 +1,15 @@
+// module parameters, X_1,...,X_N, {...}_I=1...N and ~ (S8a fixture)
+module pm[N]
+import global int bool; end
+operators global
+  {c_I : int;}_I=1...N
+  k(@{,@}_I=2...N) : ({int}~N) int;
+  twice(@) : (int) int;
+end
+rules for int
+  x_1,...,x_N : int;
+global
+  [] k(x_1 {,x_I}_I=2...N) => x_1 end
+  [] twice(x_1) => x_1 {+ x_1}~(2-1) end
+end
+end

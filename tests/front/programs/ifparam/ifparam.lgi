@@ -1,0 +1,6 @@
+LPL ifparam description
+  query of sort int
+  result of sort int
+  import ifm[1] ifm[0]
+  start with () h_1
+end

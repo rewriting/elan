@@ -1,0 +1,6 @@
+LPL cycle description
+  query of sort int
+  result of sort int
+  import ca
+  start with () 1
+end

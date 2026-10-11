@@ -1,0 +1,4 @@
+# Differences between the Go front end and the C++ oracle kept on purpose
+# (spec S8-16, decision D3): one per line, FILE-OR-PROGRAM<TAB>WHAT<TAB>REASON
+# <TAB>APPROVED-BY-THE-USER-ON. Each one approved by the user case by case;
+# none is planned. Empty.
