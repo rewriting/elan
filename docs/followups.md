@@ -119,10 +119,26 @@ sub-project (S1–S5b). Each item says where it comes from.
   (`term_rewriteStep`, no `specialApply`); (4) `normin`/`normout` run the
   step function of the start strategy (`strTab[... + strCall]`, trace.c):
   right only as the start strategy itself, elsewhere one step at the top
-  at most; `normout` does not go into AC terms; (5) REM is untyped: a rule
+  at most; `normout` does not go into AC terms (`normout_ac`, `.no-rem`;
+  elanc-go goes into them, `normin_ac` equal to REM); (5) REM is untyped: a rule
   `x => s(x)` applies to an int argument (`h(s(o),s(3))`). elanc-go follows
   REM elsewhere (the S7d plan, Task 6 rulings). The interpreter does not
   interpret traversals at all ("Traversal is not intepreted").
+- **REM's compiler crashes on `rewrite(dk(...))`** (found by the S7d
+  review): `rewrite` whose body is not a named strategy, e.g.
+  `repeat*(rewrite(dk(cyc)))` or `rewrite(dk(cyc)) ; rr`, stops elanc with
+  `java.lang.ClassCastException: StrategyDkRule cannot be cast to
+  StrategyCall` (`StrategyRewriteStep.compile`, StrategyRewriteStep.java:53):
+  REM compiles `rewrite(s)` only for a named s. elanc-go compiles any body
+  (`rewrite_*` name their strategy, so REM is the oracle there).
+- **normin/normout on cyclic rules do not terminate** (found by the S7d
+  review): `normin(cyc)` / `normout(cyc)` with `[cyc] a => b`, `[cyc] b =>
+  a` on `g(a,b)` loop forever in elanc-go — a genuine non-termination like
+  `repeat*` on such rules: each step succeeds, no depth is consumed (the
+  rules rewrite in place), so no stack-depth exit (status 4) stops it.
+  REM's normout loops too; REM's normin stops at `g(b,a)` (one rewrite per
+  argument: its normin is not a normal form for these rules). Kept as is
+  (the rules have no normal form); a step bound would need an option.
 - **REM: Meta_strat terms** (`call`, sequences... built as `Strategy[X]`
   terms) give C that does not compile (`fun_143`), found by S6b
   (`tests/compiler-rs/programs/strategy_terms/ms_*`, `.no-rem`).
