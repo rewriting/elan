@@ -1,0 +1,3 @@
+REM gives x = the whole term for the labelled rule [xx] F(x, x) => x on
+F(a, F(b, F(a, b))) (it prints F(b,F(b,F(a,a)))): a bug of REM, the
+interpreter and elanc-go give x = F(a, b) (twice x makes the term).

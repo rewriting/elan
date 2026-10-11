@@ -1,0 +1,2 @@
+elanc-rs refuses every AC operator by design (S6c was not done, the Rust
+compiler is frozen: docs/s6-rust-status.md); these programs test elanc-go.

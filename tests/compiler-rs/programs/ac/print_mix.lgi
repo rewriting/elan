@@ -1,0 +1,6 @@
+LPL print_mix description
+  query of sort bool
+  result of sort T
+  import acsyms
+  start with () F(h(b,a), F(g(c), F(n(3), F(d, F(F(a, n(1)), F(g(a), F(b, F(c U a U d, g(b U d U b)))))))))
+end

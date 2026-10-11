@@ -1,0 +1,6 @@
+LPL norm_cond description
+  query of sort bool
+  result of sort T
+  import acnorm
+  start with () F(n(1), F(n(5), F(n(2), d)))
+end

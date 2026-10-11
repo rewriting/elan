@@ -1,0 +1,6 @@
+LPL norm_idem description
+  query of sort bool
+  result of sort T
+  import acnorm
+  start with () F(F(h(a,b),c), F(c, F(h(a,b), F(b, F(c, c)))))
+end

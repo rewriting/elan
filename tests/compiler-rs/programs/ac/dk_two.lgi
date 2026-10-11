@@ -1,0 +1,6 @@
+LPL dk_two description
+  query of sort bool
+  result of sort T
+  import acdk
+  start with (s_two) F(g(a), F(g(b), F(g(c), d)))
+end

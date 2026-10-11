@@ -1,0 +1,23 @@
+module acnorm
+// Unlabelled rules over AC operators: of the AC operator itself (applied
+// modulo an extension) and an AC pattern under a free symbol.
+import global acsyms; end
+operators global
+  occ(@,@) : (T T) T;
+end
+rules for T
+  x, y : T;
+  i, j : int;
+global
+  // a repeated variable of the AC level (x U x), modulo an extension
+  [] F(x, x) => x end
+  // conditions pruned as soon as i and j are bound, a rest x
+  [] F(n(i), F(n(j), x)) => F(n(i + j), x) if j == i + 1 end
+  // infix, a constant and a rest
+  [] x U d => x end
+  // under a free symbol, non-linear between the AC pattern and the
+  // other argument (as efib's occursFib)
+  [] occ(F(g(x), y), x) => a end
+  [] occ(x, y) => b end
+end
+end
