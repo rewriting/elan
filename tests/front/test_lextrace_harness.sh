@@ -4,7 +4,10 @@
 #     F.expected (stdout, then "@@stderr", stderr, then "@@status N"), run in
 #     the fixtures directory; any difference fails. With --save, the fixtures
 #     without an .expected get one (to be read before committing it).
-#  2. Loader mode on examples/unification: status 0, @begin/@end balanced,
+#  2. `lex` refuses an IF (its condition needs booltype, set by the loader):
+#     status 3, the message `[elan-lextrace] IF needs the loader`, no crash
+#     (it was a bus error).
+#  3. Loader mode on examples/unification: status 0, @begin/@end balanced,
 #     25 module streams (= the "handling module" lines of elan without -b;
 #     the plan said 32, a miscount: its 8 717 lines are found), 10 FOR EACH regions, each @foreach-begin closed by
 #     an @foreach-end (regions may nest) before the @end of its module.
@@ -40,6 +43,15 @@ for f in $(cd "$FIX" && ls | grep -v '\.expected$'); do
   fi
 done
 echo "lex: $n fixtures, $fail failed"
+
+# lex refuses IF (standalone, booltype is unset: a bus error before)
+for src in 'module m IF 1 THEN { a } end' 'module m { b }~(1) IF x : { a } end'; do
+  printf '%s\n' "$src" > "$W/if.eln"
+  ( cd "$W" && "$H" lex if.eln > "$W/if.out" 2> "$W/if.err" < /dev/null ); st=$?
+  if [ $st -ne 3 ] || ! grep -q '^\[elan-lextrace\] IF needs the loader' "$W/if.err"; then
+    echo "FAIL lex refuses IF ($src): status $st"; head -3 "$W/if.err"; fail=$((fail + 1))
+  fi
+done
 
 # loader mode
 cp -R "$ROOT/examples/unification" "$W/unif"

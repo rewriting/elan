@@ -24,7 +24,10 @@ an `#ifdef ELAN_LEXTRACE` block).
 identifiers, then joined by `collident`), any other file (`.lgi`, `.spc`)
 through a plain `lstream`; stderr and exit status are the C++'s (a fatal
 error exits with 1). `FOR EACH`/`IF` need the loader (`actgram()`, `typet`,
-Earley): files that use them are read only in `load` mode.
+Earley): files that use them are read only in `load` mode. An `IF` in `lex`
+mode is refused before its condition is parsed (`[elan-lextrace] IF needs the
+loader ...`, status 3): `booltype` is unset there, and the C++ read garbage (a
+bus error was seen).
 
 ## Trace format
 

@@ -8,7 +8,8 @@
 //       a plain lstream (.lgi, .spc: '_' is part of identifiers); one line
 //       per lexem on stdout, `eos` last, "@inline <chars>" after a lexem
 //       during whose reading an inline /# ... #/ was read; stderr and exit
-//       status those of the C++ (a fatal error exits with status 1).
+//       status those of the C++ (a fatal error exits with status 1); an IF
+//       (it needs the loader) is refused: message, status 3.
 //   elan-lextrace load TRACE [elan options] prog.lgi [spec]
 //       elan_main on the remaining arguments (argv[0] kept), the lexems of
 //       every module written to TRACE.
@@ -20,6 +21,7 @@
 
 #include "commondefs.h"
 #include "elan_main.h"
+#include "fatal.h"
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -30,6 +32,7 @@
 extern FILE *lextrace_out;
 void lextrace_lexem(FILE *f, lexem l);
 void lextrace_chars(FILE *f, const char *s, size_t n);
+extern void (*lextrace_refuse_if)(lstream *f);
 
 static void flush_trace() { if (lextrace_out) fflush(lextrace_out); }
 
@@ -62,6 +65,17 @@ static void init_paths()
   perslib = addsuffix(perslib, "/");
 }
 
+// An IF condition read standalone: booltype and the grammar are the
+// loader's (unset, earleycall would read garbage: a bus error was seen), so
+// `lex` refuses it with status 3; such files are read in `load` mode.
+static void refuse_if(lstream *f)
+{
+  f->oerr();
+  sterr << "[elan-lextrace] IF needs the loader (booltype, the module's grammar): use load mode\n";
+  fatal_cleanup();
+  exit(3);
+}
+
 static int lex_mode(const char *name)
 {
   size_t n = strlen(name);
@@ -69,6 +83,7 @@ static int lex_mode(const char *name)
   lexem l;
   init_paths();
   lextrace_out = stdout;
+  lextrace_refuse_if = refuse_if;
   if (eln) {
     mlstream *f = new mlstream((char *)name);
     do { f->ilex(l); write_inline(f); } while (!l.isendofstream());   // the hook writes l

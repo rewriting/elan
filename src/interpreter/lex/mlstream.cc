@@ -62,6 +62,9 @@ static std::vector<std::string> lextrace_pending;
 static long lextrace_returned = 0;              // mlstream::ilex calls completed
 static std::vector<std::pair<long, std::string> > lextrace_deferred; // (due at, marker)
 static std::set<const void *> lextrace_delivered;  // FOR EACH actions that gave a lexem
+// Set by `elan-lextrace lex`: an IF condition needs booltype and the module's
+// grammar, set by the loader only; the harness refuses it (status 3).
+void (*lextrace_refuse_if)(lstream *f) = NULL;
 
 void lextrace_chars(FILE *f, const char *s, size_t n)
 {
@@ -764,6 +767,9 @@ int mlstream::macroexp()
               }
 	      expect(')'); collpilex(fl);
             }
+#ifdef ELAN_LEXTRACE
+            if (snm->leftvarn == IFVARN && lextrace_refuse_if) lextrace_refuse_if(this);
+#endif
             if (! actgram()->earleycall(this,startsym,pppendofin)) failexit();
             snm->whereterm.popt();
 
