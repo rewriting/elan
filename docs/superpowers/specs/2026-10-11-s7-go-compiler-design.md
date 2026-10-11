@@ -106,6 +106,14 @@ runtime sources (`$PREFIX/share/elan-go/runtime`), built with a shared
   all J/JO cases, BenchThesis.
 * **S7e — performance and switch**: benchmarks, compile times, the decision
   to make `elanc` the Go compiler.
+  Outcome (decision gate of 2026-10-11, plan
+  `docs/superpowers/plans/2026-10-11-s7e-go-switch.md` Task 10): on the
+  evidence — the 145 bench programs built by both compilers give the same
+  results and steps, elanc-go is 4-14x faster on every case above 20 ms,
+  compile time median 0.11 s vs 0.19 s (elanc + make); costs: peak memory
+  median 5.4 vs 2.9 MB, binaries of 3.3 MB, the REM-only options lost — the
+  user decided "Switch to Go": `elanc` is the Go compiler, REM stays
+  installed as `elanc-rem`, reversible with `-DELAN_ELANC=rem`.
 
 ## 6. Risks
 
