@@ -3,6 +3,7 @@ package elanrt
 import (
 	"errors"
 	"os"
+	"slices"
 
 	"elan/elanrt/earley"
 )
@@ -31,6 +32,10 @@ type QueryParser struct {
 	Op   func(r int, a []Term) Term
 	AC   func(r int, e []Term) Term
 	IsAC func(r int) bool
+	// Uncompiled tells, when the start term does not use the query,
+	// whether the operator of grammar rule r is not compiled (nil: all
+	// are): a query containing one is parsed, not built
+	Uncompiled func(r int) bool
 }
 
 var queryParser *QueryParser
@@ -51,18 +56,18 @@ func (queryBuilder) Str(s string) Term         { return MkStr(s) }
 // readQuery reads the query from the standard input, as REM's
 // EarleyParser: the term built and normalised, then a newline; an error
 // stops the program. When the start term does not use the query (used
-// false), its derivation is read (the same errors) but no term is built:
-// nil (S7e task 13: the program has no query operator then).
+// false) and the query contains an operator that is not compiled
+// (q.Uncompiled), its derivation is read (the same errors) but no term is
+// built: nil (S7e task 13; REM builds and normalises it, its steps and
+// effects then missing here).
 func readQuery(q *QueryParser, used bool) Term {
 	tree, err := earley.Parse(stdin, queryTables(q), q.Sort, os.Stderr)
 	if err != nil {
 		parseFatal(err)
 	}
 	var query Term
-	if used {
+	if used || !needsUncompiled(tree, q) {
 		query = buildQuery(tree, q)
-	} else {
-		deriveQuery(tree)
 	}
 	Out.WriteString("\n")
 	return query
@@ -95,10 +100,15 @@ func buildQuery(tree *earley.Tree, q *QueryParser) Term {
 	return earley.Build[Term](tree, queryBuilder{q})
 }
 
-// deriveQuery reads the derivation tree as buildQuery, building nothing.
-func deriveQuery(tree *earley.Tree) {
+// needsUncompiled tells whether the derivation tree contains an operator
+// that q.Uncompiled says is not compiled (read as buildQuery reads it,
+// building nothing).
+func needsUncompiled(tree *earley.Tree, q *QueryParser) bool {
+	if q.Uncompiled == nil {
+		return false
+	}
 	defer stopOnFatal()
-	earley.Build[struct{}](tree, noBuilder{})
+	return earley.Build[bool](tree, uncompiledFinder{q.Uncompiled})
 }
 
 // stopOnFatal, deferred, stops the program on an *earley.Fatal.
@@ -112,12 +122,15 @@ func stopOnFatal() {
 	}
 }
 
-// noBuilder builds nothing (earley.Builder): the query is not used.
-type noBuilder struct{}
+// uncompiledFinder finds an uncompiled operator in a derivation
+// (earley.Builder): a term is true when it contains one.
+type uncompiledFinder struct{ uncompiled func(r int) bool }
 
-func (noBuilder) Op(int, []struct{}) struct{} { return struct{}{} }
-func (noBuilder) AC(int, []struct{}) struct{} { return struct{}{} }
-func (noBuilder) IsAC(int) bool               { return false }
-func (noBuilder) Int(int32) struct{}          { return struct{}{} }
-func (noBuilder) Ident(int32) struct{}        { return struct{}{} }
-func (noBuilder) Str(string) struct{}         { return struct{}{} }
+func (f uncompiledFinder) Op(r int, a []bool) bool {
+	return r >= 0 && f.uncompiled(r) || slices.Contains(a, true)
+}
+func (f uncompiledFinder) AC(r int, e []bool) bool { return f.Op(r, e) }
+func (uncompiledFinder) IsAC(int) bool             { return false }
+func (uncompiledFinder) Int(int32) bool            { return false }
+func (uncompiledFinder) Ident(int32) bool          { return false }
+func (uncompiledFinder) Str(string) bool           { return false }

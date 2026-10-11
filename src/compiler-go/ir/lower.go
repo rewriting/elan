@@ -584,19 +584,20 @@ func (l *lowerer) run(name string) (*IR, error) {
 		return (&builder{l: l, reach: r, query: qs, grammar: grammar}).build(name, &start, q, sorts)
 	}
 	// When the start term does not use the query (S7e task 13, replacing
-	// task 2's partial compilation), the query's value is not used: the
-	// program parses it (syntax errors, ambiguity warnings) but does not
-	// build its term (rt.Main), so no query operator is compiled (the
-	// rules: none) and the program's native families stay native. When
-	// the start term uses the query, its value flows into the program:
-	// every query operator is compiled (correctness first).
+	// task 2's refusal), its value is not used: the query operators that
+	// the program reaches are compiled (a query of them is built and
+	// normalised as in REM: its steps, its effects), the others are not
+	// (QueryUncompiled: the program's native families stay native), and
+	// a query containing one is parsed but not built (rt.Main). When the
+	// start term uses the query, its value flows into the program: every
+	// query operator is compiled (correctness first).
 	// (a term read by the program flows into it as a query used by the
 	// start term: every operator of its sorts is compiled)
 	if !containsVar(&start) && len(readSorts) == 0 {
 		qs := slices.Clone(qrules)
 		for i := range qs {
-			if qs[i].Kind == QueryOp || qs[i].Kind == QueryUmin {
-				qs[i] = queryRule{}
+			if qs[i].Kind == QueryOp && !base.seen[qs[i].cand] {
+				qs[i] = queryRule{QueryRule: QueryRule{Kind: QueryUncompiled}}
 			}
 		}
 		return build(base, qs)

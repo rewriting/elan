@@ -39,14 +39,18 @@ func init() {
 		SetQuery(natQuery())
 		Main("Nat", false, func(s *Session, _ Term) { s.Result(nat(0)) })
 	}
-	// the query's operators refused (a program whose start term ignores
-	// the query compiles none)
+	// s not compiled (only the query reaches it, the start term ignores
+	// the query): a query containing it is parsed, not built
 	helpers["queryignorednoop"] = func() {
 		q := natQuery()
 		q.Op = func(r int, a []Term) Term {
+			if r == 0 {
+				return Mk0(symO)
+			}
 			Unsupported("a query with the operator of grammar rule " + strconv.Itoa(r))
 			return nil
 		}
+		q.Uncompiled = func(r int) bool { return r == 1 }
 		SetQuery(q)
 		Main("Nat", false, func(s *Session, _ Term) { s.Result(nat(0)) })
 	}
@@ -63,18 +67,24 @@ func TestMainQuery(t *testing.T) {
 	if st != 0 || errs != "" || out != prompt+"\n\nresult = s(s(s(o)))\n\nrewrite_step = 2\n" {
 		t.Fatalf("status %d, out %q, err %q", st, out, errs)
 	}
-	// the query is parsed even when the start term does not use it, but
-	// its term is not built (S7e task 13): no operator of the query is
-	// called (no step, no refusal); its syntax errors are reported
-	for _, h := range []string{"queryignored", "queryignorednoop"} {
-		out, errs, st = runHelperIn(t, h, nil, "s(s(o)) end", "-quiet")
-		if st != 0 || errs != "" || out != prompt+"\n\nresult = o\n\nrewrite_step = 0\n" {
-			t.Fatalf("%s: status %d, out %q, err %q", h, st, out, errs)
+	// the query is built and normalised even when the start term does not
+	// use it (its steps counted, as REM), unless it contains an operator
+	// that is not compiled (S7e task 13): then parsed only (no step, no
+	// refusal); its syntax errors are reported either way
+	for _, c := range []struct{ helper, steps string }{{"queryignored", "2"}, {"queryignorednoop", "0"}} {
+		out, errs, st = runHelperIn(t, c.helper, nil, "s(s(o)) end", "-quiet")
+		if st != 0 || errs != "" || out != prompt+"\n\nresult = o\n\nrewrite_step = "+c.steps+"\n" {
+			t.Fatalf("%s: status %d, out %q, err %q", c.helper, st, out, errs)
 		}
-		out, errs, st = runHelperIn(t, h, nil, "s(o end\n", "-quiet")
+		out, errs, st = runHelperIn(t, c.helper, nil, "s(o end\n", "-quiet")
 		if st != 1 || out != prompt || !strings.Contains(errs, "syntax error on symbol 'end'") {
-			t.Fatalf("%s: status %d, out %q, err %q", h, st, out, errs)
+			t.Fatalf("%s: status %d, out %q, err %q", c.helper, st, out, errs)
 		}
+	}
+	// a query of compiled operators only is built
+	out, errs, st = runHelperIn(t, "queryignorednoop", nil, "o end", "-quiet")
+	if st != 0 || errs != "" || out != prompt+"\n\nresult = o\n\nrewrite_step = 0\n" {
+		t.Fatalf("status %d, out %q, err %q", st, out, errs)
 	}
 	out, errs, st = runHelperIn(t, "query", nil, "s(o end\n", "-quiet")
 	want := "\n[error] :file=standard input\tline=1\tpos=1\n[earley] syntax error on symbol 'end'\n" +

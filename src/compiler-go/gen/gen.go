@@ -636,6 +636,30 @@ func (e *emitter) query() {
 	e.line("rt.Unsupported(\"a query with the operator of grammar rule \" + strconv.Itoa(r) + why)")
 	e.close("}")
 	e.line("")
+	if p.Start.UsesQuery {
+		return
+	}
+	// the start term ignores the query: a query is built unless it
+	// contains an operator that is not compiled
+	var skipped []int
+	for r, x := range q.Rules {
+		if x.Kind == ir.QueryUncompiled || x.Kind == ir.QueryUnsupported {
+			skipped = append(skipped, r)
+		}
+	}
+	e.line("// queryUncompiled tells whether the operator of grammar rule r is not")
+	e.line("// compiled: a query containing it is parsed, not built (the start term")
+	e.line("// does not use the query).")
+	e.open("func queryUncompiled(r int) bool {")
+	if len(skipped) > 0 {
+		e.line("switch r {")
+		e.line("%s", cases(skipped))
+		e.line("\treturn true")
+		e.line("}")
+	}
+	e.line("return false")
+	e.close("}")
+	e.line("")
 }
 
 // normTermFunc writes normTerm, the normalisation dispatcher of rt.Replace:
@@ -1734,8 +1758,12 @@ func (e *emitter) mainFunc() {
 	}
 	if q := p.Start.Query; q != nil {
 		e.line("rt.SetQuery(&rt.QueryParser{Rules: grammar, Sort: %d, SortNames: sortNames,", q.Sort)
-		e.line("\tInternIdent: %d, InternInt: %d, InternString: %d, Op: queryOp, AC: queryAC, IsAC: queryIsAC})",
-			q.InternIdent, q.InternInt, q.InternString)
+		uncompiled := ""
+		if !p.Start.UsesQuery {
+			uncompiled = ", Uncompiled: queryUncompiled"
+		}
+		e.line("\tInternIdent: %d, InternInt: %d, InternString: %d, Op: queryOp, AC: queryAC, IsAC: queryIsAC%s})",
+			q.InternIdent, q.InternInt, q.InternString, uncompiled)
 	}
 	e.open("rt.Main(%s, %v, func(s *rt.Session, %s rt.Term) {", goString(p.Start.QuerySort), p.Start.UsesQuery, q)
 	if p.Start.UsesQuery {

@@ -29,7 +29,8 @@
 # rewrite_step excluded, one block per query separated by `==` lines);
 # <name>.status: the expected exit status of each query, one per line
 # (2: a query refused, the interpreter not run; without it a status 0 or
-# 1 is expected).
+# 1 is expected); <name>.steps (saying why): the `rewrite_step` line is
+# compared with REM's too (the whole stdout).
 #
 # Usage: [ELANC=elanc-go] test_query.sh PREFIX [name...]  (an installed
 # ELAN with the compiler and elanc-rem; names select programs: start_term/x,
@@ -87,13 +88,14 @@ program() {
   mkdir -p "$d/go" "$d/rem" "$d/int" || exit 2
   for w in go rem int; do cp -R "$src"/. "$d/$w/" || exit 2; done
   spcfile=; [ -n "$spc" ] && spcfile=$spc.spc
-  noint=; norem=; expected=; statuses=
+  noint=; norem=; expected=; statuses=; steps=
   base=$(basename "$label")
   if [ "${label%%/*}" = query ]; then
     [ -f "$QDIR/$base.no-rem" ] && norem=$QDIR/$base.no-rem
     [ -f "$QDIR/$base.no-interpreter" ] && noint=$QDIR/$base.no-interpreter
     [ -f "$QDIR/$base.expected" ] && expected=$QDIR/$base.expected
     [ -f "$QDIR/$base.status" ] && statuses=$QDIR/$base.status
+    [ -f "$QDIR/$base.steps" ] && steps=$QDIR/$base.steps
   fi
   if ! ( cd "$d/go" && $ELANC -v -b -nosplit -quiet --gocache "$TARGET" "$lgi" $spc >elanc-go.log 2>&1 ); then
     fail "$label: $ELANC failed (see $d/go/elanc-go.log)"; return
@@ -109,7 +111,8 @@ program() {
     if [ "$q" = "<EOF>" ]; then printf '' > "$d/q$i"; else printf '%s\n' "$q" > "$d/q$i"; fi
     what="$label [$q]"
     ( cd "$d/go" && ./a.out -quiet < "$d/q$i" > "$d/go/out$i" 2> "$d/go/err$i" ); gs=$?
-    grep -v '^rewrite_step = ' "$d/go/out$i" > "$d/go/cmp$i"
+    if [ -n "$steps" ]; then cp "$d/go/out$i" "$d/go/cmp$i"
+    else grep -v '^rewrite_step = ' "$d/go/out$i" > "$d/go/cmp$i"; fi
     good=1
     if [ -n "$statuses" ]; then
       want=$(sed -n "${i}p" "$statuses")
@@ -129,7 +132,8 @@ program() {
       ( cd "$d/rem" && ./a.out -quiet < "$d/q$i" > "$d/rem/raw$i" 2> "$d/rem/err$i" ); rs=$?
       # REM's identifiers by name: the names of the .ref, then those of the query
       python3 "$HERE/rem_idents.py" "$d/rem/$lgi.ref" --query "$d/q$i" < "$d/rem/raw$i" > "$d/rem/out$i"
-      grep -v '^rewrite_step = ' "$d/rem/out$i" > "$d/rem/cmp$i"
+      if [ -n "$steps" ]; then cp "$d/rem/out$i" "$d/rem/cmp$i"
+      else grep -v '^rewrite_step = ' "$d/rem/out$i" > "$d/rem/cmp$i"; fi
       if [ "$rs" != "$gs" ]; then
         fail "$what vs REM: status $gs, REM $rs"; good=
       elif ! cmp -s "$d/go/cmp$i" "$d/rem/cmp$i"; then

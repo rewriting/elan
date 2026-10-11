@@ -374,18 +374,22 @@ func TestQueryParserCode(t *testing.T) {
 	}
 }
 
-// TestQueryIgnoredNoOperator: when the start term does not use the query
-// (S7e task 13), the program parses it (the grammar, rt.SetQuery) but
-// builds no term: queryOp calls no operator.
-func TestQueryIgnoredNoOperator(t *testing.T) {
-	src := peano().gen(t)
-	for _, want := range []string{"var grammar = []earley.Rule{", "rt.SetQuery(&rt.QueryParser{Rules: grammar, Sort: 323,", "rt.Main(\"nat\", false,"} {
+// TestQueryIgnoredUncompiled: when the start term does not use the query
+// (S7e task 13), the operators of the program are compiled for the
+// query (queryOp calls plus), the others not (queryUncompiled: a query
+// containing one is parsed, not built).
+func TestQueryIgnoredUncompiled(t *testing.T) {
+	p := peano()
+	p.op(sNat, 321, "double", []uint32{sNat}, 0) // only the query reaches it
+	src := p.gen(t)
+	for _, want := range []string{"var grammar = []earley.Rule{", "return plus_320(a[0], a[1])",
+		"func queryUncompiled(r int) bool {", "IsAC: queryIsAC, Uncompiled: queryUncompiled})", "rt.Main(\"nat\", false,"} {
 		if !strings.Contains(src, want) {
 			t.Errorf("missing %q in\n%s", want, src)
 		}
 	}
-	if i := strings.Index(src, "func queryOp("); i < 0 || strings.Contains(src[i:i+strings.Index(src[i:], "\n}\n")], "plus_320(") {
-		t.Errorf("queryOp calls an operator:\n%s", src)
+	if strings.Contains(src, "double_321") {
+		t.Errorf("double is compiled:\n%s", src)
 	}
 }
 

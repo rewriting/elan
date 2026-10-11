@@ -254,16 +254,20 @@ sub-project (S1–S5b). Each item says where it comes from.
   - (removed, S7e task 13: the run-time refusal of task 2 — a query
     containing an operator that only the query reaches and that would
     box a family native in the program, when the start term does not
-    use the query. Such a query is now parsed but not built: no query
-    operator is compiled, nothing is refused, the native families stay
-    native, and the start term's result is printed as REM does
-    (`programs/query/queryonly`, compared with REM). What differs from
-    REM: REM builds and normalises the unused query, so its
-    `rewrite_step` line counts the query's steps (not compared by
-    `test_query.sh`), and a query whose normalisation does not end or
-    stops the program (an array error, a write) does so in REM only.
-    The run-time refusals left are worded `elanrt: not supported (not
-    planned): ...`.)
+    use the query.) When the start term does not use the query, the
+    query operators that the program reaches are compiled and a query of
+    them is built and normalised as in REM (its steps in `rewrite_step`,
+    its effects: `programs/query/queryignored`, `.steps`); the others are
+    not compiled (the native families stay native) and a query
+    containing one is parsed (the same syntax errors and warnings) but
+    neither built nor normalised: nothing is refused and the start
+    term's result is printed as REM does (`programs/query/queryonly`).
+    What differs from REM for such a query only: REM builds and
+    normalises it, so its `rewrite_step` counts the query's steps (not
+    compared by `test_query.sh` for `queryonly`), and a query whose
+    normalisation does not end or stops the program (an array error, a
+    write) does so in REM only. The run-time refusals left are worded
+    `elanrt: not supported (not planned): ...`.
 
 ## Performance
 

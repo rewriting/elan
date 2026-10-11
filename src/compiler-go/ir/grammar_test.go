@@ -173,10 +173,11 @@ func queryRuleOf(t *testing.T, ir *IR, sym int32) QueryRule {
 }
 
 // TestQueryOnlyOperatorsKeepIntNative: when the start term does not use
-// the query, the query is parsed but not built (S7e task 13): no query
-// operator is compiled (every rule QueryNone, none refused), so an
-// operator that only the query reaches does not box a family native in
-// the program.
+// the query, the query operators that the program reaches are compiled
+// (a query of them is built, as in REM) and the others are not
+// (QueryUncompiled, S7e task 13: a query containing one is parsed, not
+// built), so an operator that only the query reaches does not box a
+// family native in the program.
 func TestQueryOnlyOperatorsKeepIntNative(t *testing.T) {
 	ir := queryOnly().lower(t)
 	for _, n := range []string{"int", "builtinInt"} {
@@ -185,18 +186,18 @@ func TestQueryOnlyOperatorsKeepIntNative(t *testing.T) {
 			t.Errorf("%s is boxed", n)
 		}
 	}
-	if ir.Start.Query == nil {
-		t.Fatal("no query parser")
-	}
-	for i, r := range ir.Start.Query.Rules {
-		if r.Kind != QueryNone {
-			t.Errorf("rule %d (symbol %d): %+v", i, ir.Start.Query.Grammar[i].Symbol, r)
+	for _, sym := range []int32{303, 25, 304} {
+		if r := queryRuleOf(t, ir, sym); r.Kind != QueryUncompiled {
+			t.Errorf("symbol %d: %+v", sym, r)
 		}
 	}
 	for _, op := range ir.Ops {
 		if op.Symbol == 303 || op.Symbol == 304 || op.Symbol == 25 {
 			t.Errorf("%s is compiled", op.Decl)
 		}
+	}
+	if r := queryRuleOf(t, ir, 301); r.Kind != QueryOp {
+		t.Errorf("plus: %+v", r)
 	}
 }
 

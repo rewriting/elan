@@ -985,8 +985,7 @@ type QueryKind uint8
 const (
 	// QueryNone: the parser never builds it (a rule of a sort that a
 	// query cannot contain, or a number, identifier or string: built by
-	// the parser; every rule when the start term does not use the query:
-	// it is parsed, not built).
+	// the parser).
 	QueryNone QueryKind = iota
 	// QueryOp: the function of the operator Op.
 	QueryOp
@@ -995,6 +994,11 @@ const (
 	// QueryUnsupported: the operator is not compiled (Why); a query that
 	// contains it stops the program (status 2).
 	QueryUnsupported
+	// QueryUncompiled: the start term does not use the query and only the
+	// query reaches the operator: it is not compiled (the program's
+	// native families stay native); a query containing it is parsed but
+	// not built (S7e task 13).
+	QueryUncompiled
 )
 
 // QueryRule is how the term of a grammar rule is built.
