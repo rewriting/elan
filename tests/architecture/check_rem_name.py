@@ -7,11 +7,12 @@ the name `elanc` designates (it may become the Go compiler, S7e task 10).
 
 Scanned: the scripts (*.sh, *.py, Makefile, *.yml, Dockerfile*) under tests/,
 ci/, .github/, reference/ and the top-level Makefile. A line is a comment
-when its first non-blank character is `#`, and a `#` after a blank starts a
-comment to the end of the line; comments are not checked. Any
-other line naming `elanc` as a word (not `elanc-go`, `elanc.log`, `$ELANC`,
-`.elan.x`), a path such as `bin/elanc` included, is reported, unless it
-carries the marker `bare-elanc-ok` (with the reason next to it).
+when its first non-blank character is `#`, and a `#` after a blank, outside
+quotes, starts a comment to the end of the line; comments are not checked.
+Any other line naming `elanc` as a word (not `elanc-go`, `elanc.log`,
+`$ELANC`, `.elan.x`), a path such as `bin/elanc` or a parameter's default
+such as `${ELANC:-elanc}` included, is reported, unless it carries the
+marker `bare-elanc-ok` (with the reason next to it).
 
 Usage: check_rem_name.py [--root DIR]   Exit status: 0 if none, 1 otherwise.
 """
@@ -29,7 +30,31 @@ MARKER = "bare-elanc-ok"
 # `elanc` as a word: not preceded by a letter, digit, _, -, . or $ (but a
 # `/` may: bin/elanc), not followed by a letter, digit, _, - or .
 BARE = re.compile(r"(?<![\w.$-])elanc(?![\w.-])")
-COMMENT = re.compile(r"\s#.*$")
+# the opening of a parameter's default value (${ELANC:-elanc}, ${X-elanc},
+# ${X:=elanc}): its value is a word
+DEFAULT = re.compile(r"\$\{\w+:?[-=+?]")
+
+
+def strip_comment(line):
+    """line without its comment: from a `#` at its start or after a blank,
+    outside quotes (a `\\` escapes the next character outside single
+    quotes)."""
+    quote = None
+    i = 0
+    while i < len(line):
+        c = line[i]
+        if c == "\\" and quote != "'":
+            i += 2
+            continue
+        if quote:
+            if c == quote:
+                quote = None
+        elif c in "'\"":
+            quote = c
+        elif c == "#" and (i == 0 or line[i - 1].isspace()):
+            return line[:i]
+        i += 1
+    return line
 
 
 def is_script(p):
@@ -59,7 +84,7 @@ def bare_calls(text):
         s = line.strip()
         if s.startswith("#") or MARKER in line:
             continue
-        if BARE.search(COMMENT.sub("", line)):
+        if BARE.search(DEFAULT.sub("${ ", strip_comment(line))):
             found.append((i, s))
     return found
 

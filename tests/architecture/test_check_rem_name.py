@@ -18,6 +18,21 @@ class BareCallsTest(unittest.TestCase):
                 "HAVE_REM=; command -v elanc >/dev/null\n")
         self.assertEqual([n for n, _ in cr.bare_calls(text)], [1, 2, 3, 4])
 
+    def test_defaults_of_parameters_are_found(self):
+        text = ('ELANC=${ELANC:-elanc}\n'
+                'E=${ELANC-elanc}; F=${X:=elanc}\n'
+                ': "${ELANC:=elanc}"\n'
+                'ELANC=${ELANC:-elanc-go}\n')
+        self.assertEqual([n for n, _ in cr.bare_calls(text)], [1, 2, 3])
+
+    def test_a_hash_inside_quotes_is_not_a_comment(self):
+        text = ('echo "step #1"; elanc -b x\n'
+                "echo 'a #b' && elanc x\n"
+                'x = "#" ; run(["elanc"])\n'
+                'echo "a \\" #" ; elanc x\n'
+                'echo "#ok" # elanc in a comment\n')
+        self.assertEqual([n for n, _ in cr.bare_calls(text)], [1, 2, 3, 4])
+
     def test_other_names_comments_and_marker_are_not(self):
         text = ('elanc-rem -b x\n'
                 'elanc-go -b x; elanc-rs x\n'
