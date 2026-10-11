@@ -1,0 +1,24 @@
+module ambigm
+// ambiguous queries (S7d task 8): the parser warns on stderr (REM's
+// warning, byte-identical) and keeps the derivation of the first rule
+// (the binary ## twice, or the ternary ##; ;; with no associativity)
+import global int bool; end
+sort e; end
+operators global
+  a : e;
+  b : e;
+  @ ## @ : (e e) e;
+  @ ## @ ## @ : (e e e) e;
+  @ ;; @ : (e e) e pri 1;
+  s(@,@) : (e e) e;
+  t(@,@,@) : (e e e) e;
+  u(@,@) : (e e) e;
+end
+rules for e
+  x, y, z : e;
+global
+  [] x ## y => s(x,y) end
+  [] x ## y ## z => t(x,y,z) end
+  [] x ;; y => u(x,y) end
+end
+end

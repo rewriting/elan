@@ -1,0 +1,5 @@
+REM's normout (norm_4) does not go into the elements of an AC term: it
+gives k(a u b u b) => a u b u b, the b left (status 0, result
+a u b u b). elanc-go goes into AC terms under normout as into the
+arguments of a free operator (S7d plan, Task 6 ruling): a u c u c, as
+normin (normin_ac, equal to REM).

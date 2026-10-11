@@ -1,0 +1,29 @@
+module travac
+// normin/normout on AC terms (S7d task 8): elanc-go goes into the
+// elements of an AC term (as into the arguments of a free operator), REM's
+// normout (norm_4) does not (normout_ac.no-rem).
+import global int bool; end
+sort elt; end
+operators global
+  a : elt;
+  b : elt;
+  c : elt;
+  k(@) : (elt) elt;
+  @ u @ : (elt elt) elt (AC);
+end
+stratop global
+  noutac : <elt -> elt> bs;
+  ninac : <elt -> elt> bs;
+end
+rules for elt
+  x : elt;
+global
+  [bc] b => c end
+  [bc] k(x) => x end
+end
+strategies for elt
+implicit
+  [] noutac => normout(bc) end
+  [] ninac => normin(bc) end
+end
+end
