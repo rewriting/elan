@@ -26,7 +26,10 @@
 #    error (status 1), the interpreter reports an error too.
 # Exceptions, each with its reason: programs/query/<name>.no-rem,
 # <name>.no-interpreter (then <name>.expected holds the expected stdout,
-# rewrite_step excluded, one block per query separated by `==` lines).
+# rewrite_step excluded, one block per query separated by `==` lines);
+# <name>.status: the expected exit status of each query, one per line
+# (2: a query refused, the interpreter not run; without it a status 0 or
+# 1 is expected).
 #
 # Usage: [ELANC=elanc-go] test_query.sh PREFIX [name...]  (an installed
 # ELAN with the compiler and elanc; names select programs: start_term/x,
@@ -84,12 +87,13 @@ program() {
   mkdir -p "$d/go" "$d/rem" "$d/int" || exit 2
   for w in go rem int; do cp -R "$src"/. "$d/$w/" || exit 2; done
   spcfile=; [ -n "$spc" ] && spcfile=$spc.spc
-  noint=; norem=; expected=
+  noint=; norem=; expected=; statuses=
   base=$(basename "$label")
   if [ "${label%%/*}" = query ]; then
     [ -f "$QDIR/$base.no-rem" ] && norem=$QDIR/$base.no-rem
     [ -f "$QDIR/$base.no-interpreter" ] && noint=$QDIR/$base.no-interpreter
     [ -f "$QDIR/$base.expected" ] && expected=$QDIR/$base.expected
+    [ -f "$QDIR/$base.status" ] && statuses=$QDIR/$base.status
   fi
   if ! ( cd "$d/go" && $ELANC -v -b -nosplit -quiet --gocache "$TARGET" "$lgi" $spc >elanc-go.log 2>&1 ); then
     fail "$label: $ELANC failed (see $d/go/elanc-go.log)"; return
@@ -107,7 +111,12 @@ program() {
     ( cd "$d/go" && ./a.out -quiet < "$d/q$i" > "$d/go/out$i" 2> "$d/go/err$i" ); gs=$?
     grep -v '^rewrite_step = ' "$d/go/out$i" > "$d/go/cmp$i"
     good=1
-    case $gs in 0|1) ;; *) fail "$what: status $gs ($(head -c 300 "$d/go/err$i" | tr '\n' ' '))"; continue ;; esac
+    if [ -n "$statuses" ]; then
+      want=$(sed -n "${i}p" "$statuses")
+      [ "$gs" = "$want" ] || { fail "$what: status $gs, expected $want ($(head -c 300 "$d/go/err$i" | tr '\n' ' '))"; continue; }
+    else
+      case $gs in 0|1) ;; *) fail "$what: status $gs ($(head -c 300 "$d/go/err$i" | tr '\n' ' '))"; continue ;; esac
+    fi
     # REM
     if [ -n "$norem" ]; then
       if [ -n "$expected" ]; then
@@ -131,7 +140,7 @@ program() {
     fi
     # the interpreter
     # (an empty input is no query for the interpreter: it stops silently)
-    if [ -z "$noint" ] && [ "$q" != "<EOF>" ]; then
+    if [ -z "$noint" ] && [ "$q" != "<EOF>" ] && [ "$gs" != 2 ]; then
       iout=$( cd "$d/int" && elan -b "$lgi.lgi" $spcfile < "$d/q$i" 2>&1 )
       if [ "$gs" = 1 ]; then
         if ! printf '%s\n' "$iout" | grep -q '^\[error\]'; then
@@ -148,6 +157,7 @@ program() {
     if [ -n "$good" ]; then
       r=$(grep '^result = ' "$d/go/out$i" | sed 's/^result = *//' | oneline)
       [ "$gs" = 1 ] && r="syntax error: $(sed -n 's/^\[earley\] //p' "$d/go/err$i" | head -1)"
+      [ "$gs" = 2 ] && r="refused: $(head -1 "$d/go/err$i")"
       ok "$what: [$r]${norem:+ (no REM: $(basename "$norem"))}${noint:+ (no interpreter: $(basename "$noint"))}"
     fi
   done < "$queries"

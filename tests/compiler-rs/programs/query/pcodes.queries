@@ -1,0 +1,4 @@
+g(a) end
+foo(a) end
+bar(a) end
+g(bar(a)) end

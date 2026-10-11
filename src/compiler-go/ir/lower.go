@@ -641,13 +641,35 @@ type queryRule struct {
 	cand int
 }
 
-// Lexical rules of the query grammar (term/codes.h): built by the parser.
+// Codes of the query grammar (term/codes.h): the semantic actions of the
+// parser (the lexical rules, built by the parser) and INTCONSTUMIN.
 const (
 	numToTerm      = 67 // NUMTOTERM
 	identToTerm    = 68 // IDENTTOTERM
+	numRule        = 69 // NUMRULE
+	identRule      = 70 // IDENTRULE
 	intConstUminus = 79 // INTCONSTUMIN
 	stringToTerm   = 81 // STRINGTOTERM
+	stringRule     = 82 // STRINGRULE
 )
+
+// parserCode tells whether a rule's code is a semantic action of REM's
+// parser (esemact).
+func parserCode(symbol int32) bool {
+	switch symbol {
+	case numToTerm, identToTerm, numRule, identRule, stringToTerm, stringRule:
+		return true
+	}
+	return false
+}
+
+// lexicalRule tells whether g is a `1:` rule of the .ref, s ::= intern
+// int (67), intern ident (68) or intern string (81), built by the parser
+// (the only rules of the .ref to which the parser applies its action).
+func (l *lowerer) lexicalRule(g *GrammarRule) bool {
+	want := map[int32]string{numToTerm: "intern int", identToTerm: "intern ident", stringToTerm: "intern string"}[g.Symbol]
+	return want != "" && len(g.Rhs) == 1 && g.Rhs[0].Kind == GramSort && l.sortName(ref.SortIndex(g.Rhs[0].Code)) == want
+}
 
 // queryRules says, per grammar rule, how a query builds its term: the
 // rules of the sorts that a term of the query's sort can contain (its
@@ -670,7 +692,13 @@ func (l *lowerer) queryRules(grammar []GrammarRule) []queryRule {
 	}
 	rules := make([]queryRule, len(grammar))
 	for i, g := range grammar {
-		if !in[g.Sort] || g.Symbol == numToTerm || g.Symbol == identToTerm || g.Symbol == stringToTerm {
+		if !in[g.Sort] || l.lexicalRule(&g) {
+			continue
+		}
+		if parserCode(g.Symbol) {
+			// REM's parser applies its action to it (S7d task 8 ruling)
+			rules[i].Kind, rules[i].Why = QueryUnsupported,
+				fmt.Sprintf("code %d is a semantic action of REM's parser, which builds another term", g.Symbol)
 			continue
 		}
 		if g.Symbol == intConstUminus {

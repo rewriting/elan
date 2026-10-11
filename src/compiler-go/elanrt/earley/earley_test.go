@@ -187,3 +187,50 @@ func TestAC(t *testing.T) {
 		t.Errorf("%s %v %s", got, err, stderr)
 	}
 }
+
+// TestUserBuiltinCodes: a user rule whose code is one of the semantic
+// actions of the parser (67-70, 81, 82) is an operator like any other
+// (built by the builder, which refuses it), the actions applying only to
+// the standard rules and to the `1:` rules of the .ref (s ::= intern int,
+// intern ident, intern string).
+func TestUserBuiltinCodes(t *testing.T) {
+	id := newIdents("end", "(", ")")
+	a, foo, bar := id.add("a"), id.add("foo"), id.add("bar")
+	rules := []Rule{
+		{Sort: 7, Symbol: 500, Rhs: []RhsLexem{{RhsIdent, a}}},
+		{Sort: 7, Symbol: identRule, Rhs: []RhsLexem{{RhsIdent, foo}, {RhsChar, '('}, {RhsSort, 7}, {RhsChar, ')'}}},
+		{Sort: 7, Symbol: numToTerm, Rhs: []RhsLexem{{RhsIdent, bar}, {RhsChar, '('}, {RhsSort, 7}, {RhsChar, ')'}}},
+		{Sort: 7, Symbol: numToTerm, Rhs: []RhsLexem{{RhsSort, 19}}},
+	}
+	tab := id.tables(rules, map[int32]string{7: "s"})
+	for _, c := range []struct{ src, want string }{
+		{"foo(a) end", "70(500)"},
+		{"bar(a) end", "67(500)"},
+		{"bar(foo(3)) end", "67(70(#3))"},
+	} {
+		func() {
+			defer func() {
+				if x := recover(); x != nil {
+					t.Errorf("%q: panic %v", c.src, x)
+				}
+			}()
+			got, stderr, err := parse(t, tab, 7, c.src)
+			if err != nil || got != c.want {
+				t.Errorf("%q: %s %v %s, want %s", c.src, got, err, stderr, c.want)
+			}
+		}()
+	}
+}
+
+// TestComputeTermNoRule: an operator entry without its rule stops with a
+// Fatal (not a nil dereference).
+func TestComputeTermNoRule(t *testing.T) {
+	tr := &Tree{res: []int32{70}, kind: []int32{defaultRule}, str: []string{""}, rule: []*grule{nil}, pos: 1}
+	defer func() {
+		x := recover()
+		if f, ok := x.(*Fatal); !ok || f.Status != 1 {
+			t.Errorf("%v, want a Fatal", x)
+		}
+	}()
+	Build[string](tr, prefix{&Tables{}})
+}

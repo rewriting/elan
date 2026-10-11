@@ -55,8 +55,7 @@ func readQuery(q *QueryParser) Term {
 	t := &earley.Tables{Rules: q.Rules, IdentIndex: IdentIndex, IdentName: IdentName,
 		SortName:    func(s int32) string { return q.SortNames[s] },
 		InternIdent: q.InternIdent, InternInt: q.InternInt, InternString: q.InternString}
-	tree, err := earley.Parse(os.Stdin, t, q.Sort, os.Stderr)
-	if err != nil {
+	fatal := func(err error) {
 		FlushOutput()
 		var f *earley.Fatal
 		if errors.As(err, &f) {
@@ -65,7 +64,22 @@ func readQuery(q *QueryParser) Term {
 		}
 		Exit(1)
 	}
-	query := earley.Build[Term](tree, queryBuilder{q})
+	tree, err := earley.Parse(os.Stdin, t, q.Sort, os.Stderr)
+	if err != nil {
+		fatal(err)
+	}
+	query := func() Term {
+		defer func() {
+			if x := recover(); x != nil {
+				f, ok := x.(*earley.Fatal)
+				if !ok {
+					panic(x)
+				}
+				fatal(f)
+			}
+		}()
+		return earley.Build[Term](tree, queryBuilder{q})
+	}()
 	Out.WriteString("\n")
 	return query
 }

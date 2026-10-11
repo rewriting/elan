@@ -43,7 +43,11 @@ func (g *grammar) esemact(rule *grule, lex Lexem) {
 		panic(&Fatal{Msg: "[esemact] Not enough memory...\n", Status: 255})
 	}
 	tr.at()
-	switch rule.rulenumber {
+	num := rule.rulenumber
+	if !rule.action {
+		num = -1 // an operator
+	}
+	switch num {
 	case identRule:
 		tr.last.ident = lex.idval()
 		tr.kind[tr.pos] = identRule
@@ -107,6 +111,9 @@ func (tr *Tree) computeTerm(ppos *int) *raw {
 	t := &raw{rule: tr.rule[p], kind: tr.kind[p], res: tr.res[p], str: tr.str[p]}
 	switch t.kind {
 	case defaultRule:
+		if t.rule == nil {
+			panic(&Fatal{Msg: "computeTerm: an operator without its rule\n", Status: 1})
+		}
 		for i := 0; i < t.rule.arity; i++ {
 			t.args = append(t.args, tr.computeTerm(ppos))
 		}

@@ -1,0 +1,17 @@
+module pcodesm
+// operators with a code of a semantic action of REM's parser (67-70, 81,
+// 82): refused when a query uses them (S7d task 8)
+import global int bool; end
+sort e; end
+operators global
+  a : e;
+  foo(@) : (e) e code 70;
+  bar(@) : (e) e code 67;
+  g(@) : (e) e;
+end
+rules for e
+  x : e;
+global
+  [] g(x) => x end
+end
+end

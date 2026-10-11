@@ -104,3 +104,38 @@ func TestQueryRules(t *testing.T) {
 		}
 	}
 }
+
+// TestQueryRulesParserCodes: a user operator whose code is a semantic
+// action of the parser (67-70, 81, 82: REM's parser builds another term
+// for it) is refused when a query uses it; the `1:` rules of the .ref (s
+// ::= intern int code 67) stay built by the parser.
+func TestQueryRulesParserCodes(t *testing.T) {
+	const sIntern = 19
+	p := peano()
+	p.p.Sorts = append(p.p.Sorts, ref.Sort{Index: sIntern, Name: "intern int", Builtin: true})
+	for _, c := range []int32{67, 68, 69, 70, 81, 82} {
+		p.op(sNat, c, "c"+strconv.Itoa(int(c)), []uint32{sNat}, c, 0)
+	}
+	p.p.Grammars.TopOnly = append(p.p.Grammars.TopOnly, ref.SortGrammar{Sort: sNat, Operators: []ref.Operator{
+		{Flag: 1, Symbol: 67, Priority: 4000, Rhs: []ref.Lexem{{Kind: ref.LexType, N: sIntern}}}}})
+	ir := p.lower(t)
+	q := ir.Start.Query
+	n := 0
+	for i, g := range q.Grammar {
+		r := q.Rules[i]
+		switch {
+		case g.Symbol == 67 && len(g.Rhs) == 1:
+			if r.Kind != QueryNone {
+				t.Errorf("nat ::= intern int: %+v", r)
+			}
+		case g.Symbol >= 67 && g.Symbol <= 70 || g.Symbol == 81 || g.Symbol == 82:
+			n++
+			if r.Kind != QueryUnsupported || !strings.Contains(r.Why, "code "+strconv.Itoa(int(g.Symbol))) {
+				t.Errorf("c%d: %+v", g.Symbol, r)
+			}
+		}
+	}
+	if n != 6 {
+		t.Errorf("%d user rules", n)
+	}
+}

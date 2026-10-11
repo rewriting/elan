@@ -78,6 +78,11 @@ type grule struct {
 	rside      []Lexem // ended by NoLexem
 	index      int     // in Tables.Rules; -1 for a standard rule
 	arity      int
+	// action: rulenumber is a semantic action of the parser (esemact),
+	// only for the standard rules and the `1:` rules of the .ref (s ::=
+	// intern int code 67, intern ident 68, intern string 81); a user
+	// operator with such a code is an operator like any other
+	action bool
 }
 
 // sit is a situation [rule, pos, i] (struct sitlist).
@@ -119,9 +124,10 @@ type grammar struct {
 // newGrammar is addstandards then grammarInit.
 func newGrammar(t *Tables) *grammar {
 	g := &grammar{nontt: map[int32][]*grule{}, t: t}
-	g.addrul(TypeLex(t.InternIdent), []Lexem{IdentLexem}, standpri, identRule, -1)
-	g.addrul(TypeLex(t.InternInt), []Lexem{JustNumber}, standpri, numRule, -1)
-	g.addrul(TypeLex(t.InternString), []Lexem{StringLexem}, standpri, stringRule, -1)
+	g.addrul(TypeLex(t.InternIdent), []Lexem{IdentLexem}, standpri, identRule, -1).action = true
+	g.addrul(TypeLex(t.InternInt), []Lexem{JustNumber}, standpri, numRule, -1).action = true
+	g.addrul(TypeLex(t.InternString), []Lexem{StringLexem}, standpri, stringRule, -1).action = true
+	intern := map[int32]int32{numToTerm: t.InternInt, identToTerm: t.InternIdent, stringToTerm: t.InternString}
 	for i, r := range t.Rules {
 		var rs []Lexem
 		for _, x := range r.Rhs {
@@ -136,13 +142,16 @@ func newGrammar(t *Tables) *grammar {
 				rs = append(rs, NumLex(uint32(x.Code)))
 			}
 		}
-		g.addrul(TypeLex(r.Sort), rs, r.Info, r.Symbol, i)
+		gr := g.addrul(TypeLex(r.Sort), rs, r.Info, r.Symbol, i)
+		if s, ok := intern[r.Symbol]; ok && len(r.Rhs) == 1 && r.Rhs[0].Kind == RhsSort && r.Rhs[0].Code == s {
+			gr.action = true
+		}
 	}
 	return g
 }
 
 // addrul appends a rule to the rules of its left-hand side.
-func (g *grammar) addrul(leftside Lexem, body []Lexem, priority, num int32, index int) {
+func (g *grammar) addrul(leftside Lexem, body []Lexem, priority, num int32, index int) *grule {
 	r := &grule{priority: priority, rulenumber: num, leftside: leftside,
 		rside: append(body, NoLexem), index: index}
 	for _, l := range body {
@@ -152,6 +161,7 @@ func (g *grammar) addrul(leftside Lexem, body []Lexem, priority, num int32, inde
 	}
 	n := leftside.typeval()
 	g.nontt[n] = append(g.nontt[n], r)
+	return r
 }
 
 // found is FOUND: the situations of set s whose next symbol is sy, nil if
