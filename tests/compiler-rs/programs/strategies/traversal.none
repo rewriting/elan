@@ -1,1 +1,5 @@
 tall(dk(r)) on f(o): r does not apply to the argument o (REM: no result).
+(The META traversal path, a strategy term tone(S) evaluated by strat[X],
+has only negative programs (runtimetraversal) but one, runtimetraversal_app:
+strat[X] defines only tone, applied to the application term [S]a, so it
+gives a result only when a is itself an application term.)
