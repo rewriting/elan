@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"runtime/debug"
+	"runtime/pprof"
 	"strconv"
 	"strings"
 	"time"
@@ -200,7 +201,15 @@ func Main(querySort string, program func(s *Session)) {
 			done <- 2
 			return
 		}
+		stop := func() {}
+		if f := os.Getenv("ELAN_CPUPROFILE"); f != "" {
+			stop = startProfile(f)
+		}
 		program(s)
+		stop()
+		if f := os.Getenv("ELAN_MEMPROFILE"); f != "" {
+			writeMemProfile(f)
+		}
 		s.Finish()
 		if os.Getenv("ELAN_STATS") == "1" {
 			FlushOutput()
@@ -209,6 +218,36 @@ func Main(querySort string, program func(s *Session)) {
 		done <- 0
 	}()
 	Exit(<-done)
+}
+
+// startProfile starts a CPU profile written to file (ELAN_CPUPROFILE: `go
+// tool pprof a.out file`); the function returned stops it.
+func startProfile(file string) func() {
+	f, err := os.Create(file)
+	if err == nil {
+		err = pprof.StartCPUProfile(f)
+	}
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "elanrt: ELAN_CPUPROFILE:", err)
+		return func() {}
+	}
+	return func() {
+		pprof.StopCPUProfile()
+		f.Close()
+	}
+}
+
+// writeMemProfile writes the allocations of the run to file
+// (ELAN_MEMPROFILE: `go tool pprof -sample_index=alloc_space a.out file`).
+func writeMemProfile(file string) {
+	f, err := os.Create(file)
+	if err == nil {
+		err = pprof.Lookup("allocs").WriteTo(f, 0)
+		f.Close()
+	}
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "elanrt: ELAN_MEMPROFILE:", err)
+	}
 }
 
 // Stats is a report of the runtime's counters (ELAN_STATS=1 in a program,
