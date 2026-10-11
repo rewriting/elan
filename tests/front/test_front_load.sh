@@ -10,8 +10,10 @@
 # The trees are compared after removing the strconc[...] subtrees of the C++
 # side (counted), the traces by tracecmp.py --mode load (FOR EACH bodies and
 # strconc streams of the C++ side excluded, counted; positions dropped), the
-# statuses of elan and front-trace must be equal, and so must the cycle
-# warnings of stderr. Files of passing programs are written, as paths relative
+# statuses of elan and front-trace must be equal, the harness's status 0, and
+# so must stderr, byte for byte, except elan's warnings about module bodies
+# (S8b: Earley ambiguities, the 'semantic' option of an operator; matched by
+# their exact shape, removed on the C++ side only and counted). Files of passing programs are written, as paths relative
 # to the repository, to tests/front/work/loaded-files.txt (test_front_lex.sh
 # counts the `loaded` files found there as covered).
 # The run fails unless it compared at least MIN_OK programs, with at most
@@ -34,7 +36,7 @@ if [ "${1:-}" = --one ]; then   # worker: --one RUN H FT N KIND DIR LGI SPC
   if [ $es -ne 0 ]; then
     echo "NOLOAD $name (elan status $es)" > "$RUN/res/$n"; rm -rf "$app" "$o".*; exit 0
   fi
-  ( cd "$app" && "$H" load "$o.c" --export /dev/null -b "$@" ) > /dev/null 2> "$o.c.err" < /dev/null
+  ( cd "$app" && "$H" load "$o.c" --export /dev/null -b "$@" ) > /dev/null 2> "$o.c.err" < /dev/null; hs=$?
   ( cd "$app" && "$FT" load --tree --trace "$o.g" "$@" ) > "$o.go" 2> "$o.go.err" < /dev/null; gs=$?
   [ -f "$o.g" ] || : > "$o.g"
   # C++ tree without the strconc subtrees
@@ -44,14 +46,29 @@ if [ "${1:-}" = --one ]; then   # worker: --one RUN H FT N KIND DIR LGI SPC
     { print }
     END { print n + 0 > "/dev/stderr" }' > "$o.ctree" 2> "$o.nstrconc"
   grep -E "$TREE" "$o.go" > "$o.gtree"
+  # elan's stderr without the warnings of module bodies (S8b), counted: an
+  # Earley ambiguity (empty line, header, the string, `between operators :`,
+  # the operators, each line starting with a tab) or the 'semantic' option of
+  # an operator (empty line, position line, message)
+  python3 - "$o.elan.err" "$o.elan.err.cmp" "$o.nbodywarn" <<'EOF'
+import re, sys
+text = open(sys.argv[1], encoding="latin-1").read()
+text, n1 = re.subn(r"\n\[warning\]earley: ambiguity can't be solved in string:\n[^\n]*\n"
+                   r"between operators :\n(?:\t[^\n]*\n)*", "", text)
+text, n2 = re.subn(r"\n\[warning\] :file=[^\n]*\n"
+                   r"\[warning\] using the 'semantic' option in user's module\n", "", text)
+open(sys.argv[2], "w", encoding="latin-1").write(text)
+open(sys.argv[3], "w").write("%d\n" % (n1 + n2))
+EOF
   msg=
-  if [ $es -ne $gs ]; then msg="status: elan $es, front-trace $gs ($(head -c 200 "$o.go.err"))"
+  if [ $hs -ne 0 ]; then msg="harness status $hs ($(head -c 200 "$o.c.err"))"
+  elif [ $es -ne $gs ]; then msg="status: elan $es, front-trace $gs ($(head -c 200 "$o.go.err"))"
   elif ! cmp -s "$o.ctree" "$o.gtree"; then msg="module tree differs: $(diff "$o.ctree" "$o.gtree" | head -6 | tr '\n' ' ')"
   elif ! python3 "$HERE/tracecmp.py" --mode load "$o.c" "$o.g" > "$o.cmp" 2>&1; then
     msg="trace differs:
 $(head -30 "$o.cmp" | sed 's/^/    /')"
-  elif [ "$(grep 'probably a cycle' "$o.elan.err")" != "$(grep 'probably a cycle' "$o.go.err")" ]; then
-    msg="cycle warnings differ"
+  elif ! cmp -s "$o.elan.err.cmp" "$o.go.err"; then
+    msg="stderr differs: $(diff "$o.elan.err.cmp" "$o.go.err" | head -6 | tr '\n' ' ')"
   fi
   if [ -n "$msg" ]; then
     echo "FAIL $name: $msg" > "$RUN/res/$n"; rm -rf "$app"; exit 0
@@ -67,7 +84,7 @@ $(head -30 "$o.cmp" | sed 's/^/    /')"
       fi
     done
   done > "$RUN/files/$n"
-  echo "ok $name $(tail -1 "$o.cmp") strconc-tree=$(cat "$o.nstrconc")" > "$RUN/res/$n"
+  echo "ok $name $(tail -1 "$o.cmp") strconc-tree=$(cat "$o.nstrconc") body-warnings=$(cat "$o.nbodywarn")" > "$RUN/res/$n"
   rm -rf "$app" "$o".*
   exit 0
 fi
@@ -90,19 +107,20 @@ python3 "$HERE/list_programs.py" "$REPO" > "$RUN/programs.tsv" || exit 2
 
 awk -F'\t' '{ print NR, $1, $2, $3, $4 }' "$RUN/programs.tsv" \
   | sed "s|^|$0 --one $RUN $H $FT |" | xargs -P "$JOBS" -L 1 sh
-total=0 ok=0 failed=0 noload=0 foreach=0 strconc=0
+total=0 ok=0 failed=0 noload=0 foreach=0 strconc=0 bodywarn=0
 for r in "$RUN"/res/*; do
   total=$((total + 1))
   case $(head -1 "$r") in
     ok*) ok=$((ok + 1))
          foreach=$((foreach + $(sed -n 's/.* foreach=\([0-9]*\).*/\1/p' "$r")))
-         strconc=$((strconc + $(sed -n 's/.* strconc-tree=\([0-9]*\).*/\1/p' "$r"))) ;;
+         strconc=$((strconc + $(sed -n 's/.* strconc-tree=\([0-9]*\).*/\1/p' "$r")))
+         bodywarn=$((bodywarn + $(sed -n 's/.* body-warnings=\([0-9]*\).*/\1/p' "$r"))) ;;
     NOLOAD*) noload=$((noload + 1)); cat "$r" ;;
     *) failed=$((failed + 1)); cat "$r" ;;
   esac
 done
 cat "$RUN"/files/* 2>/dev/null | sort -u > "$HERE/work/loaded-files.txt"
-echo "$total programs: $ok ok, $failed failed, $noload NOLOAD; strconc subtrees removed: $strconc; FOR EACH regions excluded: $foreach"
+echo "$total programs: $ok ok, $failed failed, $noload NOLOAD; strconc subtrees removed: $strconc; FOR EACH regions excluded: $foreach; body warnings excluded from stderr: $bodywarn"
 # The run must have compared something: a broken ELANLIB or elan makes every
 # program NOLOAD, which compares nothing (minimums: the figures of 4785698).
 nprog=$(wc -l < "$RUN/programs.tsv")

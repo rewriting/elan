@@ -66,8 +66,8 @@ which it became pending.
 | `test_check_lextrace_hooks.sh [BUILD]` | the guard passes on `mlstream.cc` and fails on temp copies with an unguarded hook (declaration, comment, `#else` branch) or without hooks |
 | `test_lextrace_harness.sh [BUILD] [--save]` | the harness on `fixtures/*` (`<f>.expected`: stdout, `@@stderr`, stderr, `@@status N`) and on `examples/unification` in loader mode |
 | `python3 test_tracecmp.py` | unit tests of `tracecmp.py` |
-| `test_front_lex.sh PREFIX [--only lgi,spc]` | every file of `list_files.py`: harness and `front-trace lex` compared exactly |
-| `test_front_load.sh PREFIX` | every program of `list_programs.py`: module tree of `elan` (no `-b`) and harness trace against `front-trace load` |
+| `test_front_lex.sh PREFIX [--only lgi,spc]` | every file of `list_files.py`: harness and `front-trace lex` compared exactly; fails below the S8a figures |
+| `test_front_load.sh PREFIX` | every program of `list_programs.py`: module tree, status and stderr of `elan` (no `-b`; stderr without its warnings about module bodies, S8b) and harness trace (harness status 0) against `front-trace load`; fails below the S8a figures |
 | `test_front_errors.sh PREFIX [--save]` | the error corpus `errors/lex/*` (harness `lex`) and `errors/load/<case>/` (`elan ARGS`, `args` holds them) against `front-trace`: stdout, stderr, status; `--save` writes the expected outputs from the C++ |
 
 `make check-front` runs them all (and `go vet`/`go test ./front/...`), in
