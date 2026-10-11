@@ -104,7 +104,8 @@ generator REM (options such as `-optimiseChoicePoint`, `-debug`, `-quiet`,
 `-output name`; `elanc` alone lists them). The generated Makefile
 uses the C/C++ compilers and the Boehm GC of the build (`ELAN_CC`,
 `ELAN_CXX`, `GC_PREFIX`, which the environment can override; `ELAN_SANITIZE`
-holds the sanitizer options in a `make check-sanitize` build). `elanc` and
+holds the sanitizer options in a `make check-sanitize` build). The same
+driver is also installed as `elanc-rem`, the name the tests use. `elanc` and
 REM exit with a non-zero status on errors. The ATerm runtime of 2003
 (`-aterm`) is not supported. With `-strategy 1`, the strategy terms of
 `strat[X]` (`elanlib/strategy/strat.eln`) are evaluated at run time by the C

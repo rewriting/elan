@@ -1,6 +1,6 @@
 #!/bin/sh
-# Tests of the compiler driver elanc and of the Makefile REM generates.
-# Usage: test_elanc.sh PREFIX     (an installed ELAN with elanc)
+# Tests of the compiler driver elanc-rem and of the Makefile REM generates.
+# Usage: test_elanc.sh PREFIX     (an installed ELAN with elanc-rem)
 PREFIX=${1:?usage: test_elanc.sh PREFIX}
 HERE=$(cd "$(dirname "$0")" && pwd)
 REPO=$(cd "$HERE/../.." && pwd)
@@ -15,11 +15,26 @@ fresh() { # fresh <name>: a work copy of the enum example
   cp "$REPO"/legacy/elan/sources/Compiler.4.0/Test/enum.* "$WORK/$1/"
 }
 
-# 1. a front-end (elan --cexport) error makes elanc fail, even with a stale .ref
+# 0. REM's driver is installed as elanc-rem (S7e task 9: the tests call it by
+#    that name, whatever bin/elanc is): its usage text, the .make it writes
+if [ -x "$PREFIX/bin/elanc-rem" ] && "$PREFIX/bin/elanc-rem" 2>&1 | grep -q 'Reduce ELAN Machine'; then
+  ok "elanc_rem_is_rems_driver (usage)"
+else
+  fail "elanc_rem_is_rems_driver (usage)"
+fi
+fresh remname
+if ( cd "$WORK/remname" && elanc-rem -nosplit -quiet enum >/dev/null 2>&1 ) \
+   && [ -f "$WORK/remname/enum.make" ] && [ -f "$WORK/remname/.elan.enum/Makefile" ]; then
+  ok "elanc_rem_writes_the_make"
+else
+  fail "elanc_rem_writes_the_make"
+fi
+
+# 1. a front-end (elan --cexport) error makes elanc-rem fail, even with a stale .ref
 fresh frontend
-( cd "$WORK/frontend" && elanc -nosplit -quiet enum >/dev/null 2>&1 )
+( cd "$WORK/frontend" && elanc-rem -nosplit -quiet enum >/dev/null 2>&1 )
 echo "this is not ELAN" >> "$WORK/frontend/enum.eln"
-if ( cd "$WORK/frontend" && elanc -nosplit -quiet enum >/dev/null 2>&1 ); then
+if ( cd "$WORK/frontend" && elanc-rem -nosplit -quiet enum >/dev/null 2>&1 ); then
   fail "elanc_fails_when_the_export_fails"
 else
   ok "elanc_fails_when_the_export_fails"
@@ -27,7 +42,7 @@ fi
 
 # 2. the Linux branch of the generated Makefile uses GC_PREFIX like the Darwin one
 fresh gcprefix
-( cd "$WORK/gcprefix" && elanc -nosplit -quiet enum >/dev/null 2>&1 )
+( cd "$WORK/gcprefix" && elanc-rem -nosplit -quiet enum >/dev/null 2>&1 )
 mk="$WORK/gcprefix/.elan.enum/Makefile"
 if grep -q '^CC = $(ELAN_CC)' "$mk" && ! grep '^CC = $(ELAN_CC)' "$mk" | grep -vq -- '-I$(GC_PREFIX)/include' \
    && grep -q '^CXX = $(ELAN_CXX)' "$mk" && ! grep '^CXX = $(ELAN_CXX)' "$mk" | grep -vq -- '-L$(GC_PREFIX)/lib'; then
@@ -37,12 +52,12 @@ else
 fi
 
 # 3. the ATerm runtime is rejected
-if elanc -aterm enum >/dev/null 2>&1; then fail "elanc_rejects_aterm"; else ok "elanc_rejects_aterm"; fi
+if elanc-rem -aterm enum >/dev/null 2>&1; then fail "elanc_rejects_aterm"; else ok "elanc_rejects_aterm"; fi
 
 # 4. REM itself rejects the ATerm runtime options and no longer advertises them
-JAVA=$(sed -n 's/^JAVA="\(.*\)"$/\1/p' "$PREFIX/bin/elanc")
+JAVA=$(sed -n 's/^JAVA="\(.*\)"$/\1/p' "$PREFIX/bin/elanc-rem")
 fresh rem
-( cd "$WORK/rem" && elanc -nosplit -quiet enum >/dev/null 2>&1 )
+( cd "$WORK/rem" && elanc-rem -nosplit -quiet enum >/dev/null 2>&1 )
 if ( cd "$WORK/rem" && "$JAVA" -cp "$PREFIX/classes" rem.REM enum.ref -aterm >/dev/null 2>&1 ); then
   fail "rem_rejects_aterm"
 elif "$JAVA" -cp "$PREFIX/classes" rem.REM 2>&1 | grep -q aterm; then
@@ -53,7 +68,7 @@ fi
 
 # 5. REM exits with a non-zero status on errors: missing .ref, parse error
 fresh remstatus
-( cd "$WORK/remstatus" && elanc -nosplit -quiet enum >/dev/null 2>&1 )
+( cd "$WORK/remstatus" && elanc-rem -nosplit -quiet enum >/dev/null 2>&1 )
 if ( cd "$WORK/remstatus" && "$JAVA" -cp "$PREFIX/classes" rem.REM missing.ref -quiet >/dev/null 2>&1 ); then
   fail "rem_fails_on_a_missing_ref"
 else
@@ -71,9 +86,9 @@ else
   fail "rem_succeeds_on_a_valid_ref"
 fi
 
-# 6. elanc fails when REM fails (an option without its argument makes REM fail)
+# 6. elanc-rem fails when REM fails (an option without its argument makes REM fail)
 fresh elancrem
-if ( cd "$WORK/elancrem" && elanc -nosplit -quiet enum -strategy >/dev/null 2>&1 ); then
+if ( cd "$WORK/elancrem" && elanc-rem -nosplit -quiet enum -strategy >/dev/null 2>&1 ); then
   fail "elanc_fails_when_rem_fails"
 else
   ok "elanc_fails_when_rem_fails"
@@ -111,7 +126,7 @@ LPL sq description
   start with () sq(65536)
 end
 LGI
-out=$( cd "$WORK/int32" && elanc -nosplit -quiet sq >/dev/null 2>&1 && make -f sq.make >/dev/null 2>&1 && ./a.out -noInput -quiet )
+out=$( cd "$WORK/int32" && elanc-rem -nosplit -quiet sq >/dev/null 2>&1 && make -f sq.make >/dev/null 2>&1 && ./a.out -noInput -quiet )
 if echo "$out" | grep -q '^result = 0$'; then ok "compiled_int_prints_low_32_bits"
 else fail "compiled_int_prints_low_32_bits (got: $(echo "$out" | grep result))"; fi
 
@@ -120,7 +135,7 @@ rm -rf "$WORK"
 #    with -output, a plain name or an absolute path (copied to the main
 #    directory, as in 2004)
 fresh makestatus
-( cd "$WORK/makestatus" && elanc -nosplit -quiet enum >/dev/null 2>&1 )
+( cd "$WORK/makestatus" && elanc-rem -nosplit -quiet enum >/dev/null 2>&1 )
 echo "syntax error" >> "$WORK/makestatus/.elan.enum/enum.c"
 if ( cd "$WORK/makestatus" && make -f enum.make >/dev/null 2>&1 ); then
   fail "generated_makefile_fails_when_the_build_fails"
@@ -129,7 +144,7 @@ else
 fi
 for out in prog "$WORK/outputabs/abs/prog"; do
   fresh outputabs; mkdir -p "$WORK/outputabs/abs"
-  if ( cd "$WORK/outputabs" && elanc -nosplit -quiet -output "$out" enum >/dev/null 2>&1 \
+  if ( cd "$WORK/outputabs" && elanc-rem -nosplit -quiet -output "$out" enum >/dev/null 2>&1 \
        && make -f enum.make >/dev/null 2>&1 ) && [ -x "$WORK/outputabs/prog" ] \
      && ( cd "$WORK/outputabs" && [ -x "$out" ] ); then
     ok "generated_makefile_with_output $out"

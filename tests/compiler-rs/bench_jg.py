@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """elanc-go against REM on the bench (S7e task 1): per G case of
 tests/legacy-bench (run_tests.discover()), the program is built by REM
-(`elanc-rem` when installed, else `elanc`, then `make -f <prog>.make`) and by
+(`elanc-rem`, then `make -f <prog>.make`) and by
 elanc-go, and the table gives:
 
-  compile J: elanc (REM: export, Java, C generation) and make (C build), s;
+  compile J: elanc-rem (REM: export, Java, C generation) and make (C build), s;
   compile G: a new program (runtime in the warm cache) and the same program
              built again (unchanged), s;
   run J/G:   best wall time of `./a.out -noInput -quiet`, ms (3 untimed runs
@@ -56,7 +56,7 @@ def main(argv):
     env = R.env()
     env["LC_ALL"] = "C"
     env["ELANC_GO_CACHE"] = str(WORK / "gocache")
-    rem = "elanc-rem" if (prefix / "bin" / "elanc-rem").exists() else "elanc"
+    rem = "elanc-rem"   # REM by its own name, whatever bin/elanc is (S7e task 9)
     WORK.mkdir(parents=True, exist_ok=True)
 
     def sh(cmd, cwd, timeout=300):

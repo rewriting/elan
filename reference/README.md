@@ -9,11 +9,15 @@ It is the **behavioural reference** for the modern port: the test bench of
 implementation must reproduce them.
 
 ```sh
-./build.sh                 # prepare + aterm + cpl + interpreter + compiler + library
+./build.sh                 # prepare + aterm + cpl + interpreter + compiler + elanc_rem + library
 source env.sh              # PATH, ELANLIB, JAVA_HOME
 elan -b queens.lgi < queens.inp            # interpreter
 elanc -nosplit queens && make -f queens.make && ./a.out -noInput   # compiler
 ```
+
+`elanc-rem` is a link to `elanc` (component `elanc_rem`, `./build.sh
+elanc_rem` adds it to an existing install): the bench calls REM by that name,
+as in the modern build.
 
 Requirements: `brew install gcc openjdk bdw-gc bison flex libtool` (macOS), or
 `apt install build-essential cmake bison flex libfl-dev default-jdk-headless libgc-dev automake tcsh python3`

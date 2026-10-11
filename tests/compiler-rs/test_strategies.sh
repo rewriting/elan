@@ -25,7 +25,7 @@
 #    start term) prints ` t end` per result: the sequences of results must
 #    be equal, in order (the leading spaces of the compiled programs'
 #    token spacing are not compared, nor the quotes of strings);
-#  - REM: `elanc -b -nosplit -quiet` + make + `./a.out -noInput -quiet`:
+#  - REM: `elanc-rem -b -nosplit -quiet` + make + `./a.out -noInput -quiet`:
 #    the `result = ` lines must be byte-identical; the `rewrite_step` line
 #    is compared only when DIR has a file rem-steps (programs/ac: elanc-go
 #    tries the same redexes in the same order as REM), except for a
@@ -109,7 +109,7 @@ mkdir -p "$HERE/work" "$TARGET" || exit 2
 RUN=$(mktemp -d "$HERE/work/$DIR$SUFFIX.XXXXXX") || exit 2
 echo "work directory: $RUN ($ELANC)"
 
-HAVE_REM=; command -v elanc >/dev/null 2>&1 && HAVE_REM=1
+HAVE_REM=; command -v elanc-rem >/dev/null 2>&1 && HAVE_REM=1
 # the programs read an empty standard input (getc(stdin): -1)
 NULL=/dev/null
 fails=0 n=0
@@ -198,7 +198,7 @@ for lgi in "$PROGS"/*.lgi; do
     fi
     ok "$name: status $want ($name.status)"
     if [ -n "$HAVE_REM" ] && [ ! -f "$PROGS/$name.no-rem" ]; then
-      if ( cd "$d/rem" && elanc -b -nosplit -quiet "$name" >elanc.log 2>&1 \
+      if ( cd "$d/rem" && elanc-rem -b -nosplit -quiet "$name" >elanc.log 2>&1 \
            && make -f "$name.make" >make.log 2>&1 ); then
         ( cd "$d/rem" && ./a.out -noInput -quiet <"$NULL" >run.out 2>run.err )
         rstatus=$?
@@ -208,7 +208,7 @@ for lgi in "$PROGS"/*.lgi; do
           same_output "$name" "$d"
         fi
       else
-        fail "$name: elanc or make failed (see $d/rem/*.log)"
+        fail "$name: elanc-rem or make failed (see $d/rem/*.log)"
       fi
     fi
     continue
@@ -257,10 +257,10 @@ for lgi in "$PROGS"/*.lgi; do
 
   # REM
   if [ -z "$HAVE_REM" ]; then
-    echo "skip $name vs REM (elanc not installed)"
+    echo "skip $name vs REM (elanc-rem not installed)"
   elif [ -f "$PROGS/$name.no-rem" ]; then
     echo "skip $name vs REM ($name.no-rem)"
-  elif ( cd "$d/rem" && elanc -b -nosplit -quiet "$name" >elanc.log 2>&1 \
+  elif ( cd "$d/rem" && elanc-rem -b -nosplit -quiet "$name" >elanc.log 2>&1 \
        && make -f "$name.make" >make.log 2>&1 ); then
     rout=$( cd "$d/rem" && ./a.out -noInput -quiet <"$NULL" >run.out 2>run.err; s=$?; cat run.out run.err; echo; echo "status $s" )
     rstatus=$(printf '%s\n' "$rout" | sed -n 's/^status //p')
@@ -282,7 +282,7 @@ for lgi in "$PROGS"/*.lgi; do
     fi
     if [ "$rstatus" = 0 ]; then same_output "$name" "$d"; fi
   else
-    fail "$name: elanc or make failed (see $d/rem/*.log)"
+    fail "$name: elanc-rem or make failed (see $d/rem/*.log)"
   fi
 done
 

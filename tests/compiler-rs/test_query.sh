@@ -13,7 +13,7 @@
 #    `<EOF>` is an empty standard input (not given to the interpreter,
 #    which stops silently: no query).
 # For each program and query, `./a.out -quiet < query`:
-#  - the compiler ($ELANC, default elanc-go) and REM (`elanc -b -nosplit
+#  - the compiler ($ELANC, default elanc-go) and REM (`elanc-rem -b -nosplit
 #    -quiet`): the whole stdout byte-identical (REM's IDENT(n) printed by
 #    name, rem_idents.py; the `rewrite_step` line excluded: the count
 #    depends on the compilation scheme), the same stderr (syntax errors,
@@ -32,7 +32,7 @@
 # 1 is expected).
 #
 # Usage: [ELANC=elanc-go] test_query.sh PREFIX [name...]  (an installed
-# ELAN with the compiler and elanc; names select programs: start_term/x,
+# ELAN with the compiler and elanc-rem; names select programs: start_term/x,
 # runtime_strategies/x, examples/x, query/x). The go build cache is
 # $ELANC_GO_CACHE, default tests/compiler-rs/work/gocache. The work
 # directory tests/compiler-rs/work/query-go.XXXXXX is removed when all pass.
@@ -99,9 +99,9 @@ program() {
     fail "$label: $ELANC failed (see $d/go/elanc-go.log)"; return
   fi
   build=$(sed -n 's/^elanc-go: build time //p' "$d/go/elanc-go.log")
-  if [ -z "$norem" ] && ! ( cd "$d/rem" && elanc -b -nosplit -quiet "$lgi" $spc >elanc.log 2>&1 \
+  if [ -z "$norem" ] && ! ( cd "$d/rem" && elanc-rem -b -nosplit -quiet "$lgi" $spc >elanc.log 2>&1 \
        && make -f "$lgi.make" >make.log 2>&1 ); then
-    fail "$label: elanc or make failed (see $d/rem/*.log)"; return
+    fail "$label: elanc-rem or make failed (see $d/rem/*.log)"; return
   fi
   i=0
   while IFS= read -r q || [ -n "$q" ]; do

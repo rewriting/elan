@@ -10,7 +10,7 @@
 #                        exists): go vet/test, .ref reader, normalisation, strategies, AC,
 #                        depth, bench G, query input, BenchThesis G
 #   make check-golden    golden tests: .ref files, -d dump, statistics, errors
-#   make check-compiler  compiled tests (J, JO) only: elanc, REM, runtime libraries
+#   make check-compiler  compiled tests (J, JO) only: elanc-rem, REM, runtime libraries
 #   make reference       build the 2004 reference system (reference/install)
 #   make check-reference full bench (778 tests) against the reference
 BUILD   ?= build
@@ -62,12 +62,13 @@ configure: toolchain
 	fi
 
 # Files removed from the sources must not linger in PREFIX: the library, the
-# compiler's classes, its runtime headers and elanc are reinstalled from
-# scratch (the last three only when the compiler is built, -DELAN_COMPILER=ON,
-# the default).
+# compiler's classes, its runtime headers and elanc (also installed as
+# elanc-rem) are reinstalled from scratch (the last three only when the
+# compiler is built, -DELAN_COMPILER=ON, the default).
 install: all
-	rm -rf "$(PREFIX)/share/elanlib" "$(PREFIX)/classes" "$(PREFIX)/include/elan-compiler" "$(PREFIX)/bin/elanc" \
+	rm -rf "$(PREFIX)/share/elanlib" "$(PREFIX)/classes" "$(PREFIX)/include/elan-compiler" "$(PREFIX)/bin/elanc-rem" \
 	       "$(PREFIX)/bin/elanc-rs" "$(PREFIX)/share/elan-rs" "$(PREFIX)/bin/elanc-go" "$(PREFIX)/share/elan-go"
+	rm -f "$(PREFIX)/bin/elanc"  # bare-elanc-ok: the install removes what bin/elanc was
 	cmake --install $(BUILD)
 
 test-runner:
@@ -81,25 +82,27 @@ smoke: install
 	if grep -q 's(o)' $$d/out; then echo "smoke: elan finds its library without ELANLIB"; rm -rf $$d; \
 	else cat $$d/out; rm -rf $$d; exit 1; fi
 
-# Module dependency rules (tests/architecture, S3a spec D2), and the
-# compiler's copies of the interpreter's limits and codes (REF contract)
+# Module dependency rules (tests/architecture, S3a spec D2), the
+# compiler's copies of the interpreter's limits and codes (REF contract), and
+# no script calling the bare elanc (REM is elanc-rem, S7e task 9)
 check-arch:
-	cd tests/architecture && python3 test_check_deps.py && python3 test_check_limits.py
+	cd tests/architecture && python3 test_check_deps.py && python3 test_check_limits.py && python3 test_check_rem_name.py
 	python3 tests/architecture/check_deps.py
 	python3 tests/architecture/check_limits.py
+	python3 tests/architecture/check_rem_name.py
 
 # C++ unit tests of the interpreter modules (tests/unit, CTest)
 check-unit: all
 	cd $(BUILD) && ctest --output-on-failure --no-tests=error
 
-# Compiled tests of the bench (spec S5a, D4): elanc -> make -> a.out, against
+# Compiled tests of the bench (spec S5a, D4): elanc-rem -> make -> a.out, against
 # the installed compiler (the generated programs are built with the
 # compilers of this build, see src/compiler/CMakeLists.txt), after the tests
-# of elanc, of the strategies evaluated at run time and of the BenchThesis
+# of elanc-rem, of the strategies evaluated at run time and of the BenchThesis
 # programs ported to ELAN 3 (tests/compiler).
 # The compiled tests run only when the compiler is installed (not with
 # -DELAN_COMPILER=OFF).
-CHECK_COMPILER = if [ -x "$(PREFIX)/bin/elanc" ]; then \
+CHECK_COMPILER = if [ -x "$(PREFIX)/bin/elanc-rem" ]; then \
 	  tests/compiler/test_elanc.sh "$(PREFIX)" && tests/compiler/test_runtime_strategies.sh "$(PREFIX)" \
 	  && tests/compiler/test_start_term.sh "$(PREFIX)" \
 	  && tests/compiler/test_benchthesis.sh "$(PREFIX)" \

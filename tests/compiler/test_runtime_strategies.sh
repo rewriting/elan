@@ -3,12 +3,12 @@
 # src/compiler/runtime/streval.c): dc, one (dc one) and
 # `if S then S1 orelse S2 fi`, compared with the interpreter.
 #
-# `elanc -strategy 1` makes the generated `eval` strategy of strat[X] (the
+# `elanc-rem -strategy 1` makes the generated `eval` strategy of strat[X] (the
 # interpreter of strategy terms, elanlib/strategy/strat.eln) call the C
 # function str_eval instead of the compiled ELAN rules (REM Strategy.isEval,
 # BORO); str_eval passes the strategy terms built at run time to str_eval2.
 #
-# `elanc -strategy 2` compiles instead the strategy terms known at compile
+# `elanc-rem -strategy 2` compiles instead the strategy terms known at compile
 # time (REM StrategyEval: dc, dk, if-then-orelse, labels, defined strategies)
 # and leaves the others to str_eval2. Every program is run at both levels.
 #
@@ -16,7 +16,7 @@
 # query; for every query below, the sequence of results of the compiled
 # program (`result = t` lines) must equal the interpreter's (`elan -b`, one
 # ` t end` line per result).
-# Usage: test_runtime_strategies.sh PREFIX     (an installed ELAN with elanc)
+# Usage: test_runtime_strategies.sh PREFIX     (an installed ELAN with elanc-rem)
 PREFIX=${1:?usage: test_runtime_strategies.sh PREFIX}
 HERE=$(cd "$(dirname "$0")" && pwd)
 WORK=$HERE/work/runtime-strategies
@@ -35,9 +35,9 @@ for level in 1 2; do
   name=$(basename "$lgi" .lgi)
   label="-strategy $level $name"
   if ! ( cd "$wd" && rm -rf a.out ".elan.$name" \
-         && elanc -nosplit -quiet -strategy $level "$name" >"$name.elanc.log" 2>&1 \
+         && elanc-rem -nosplit -quiet -strategy $level "$name" >"$name.elanc.log" 2>&1 \
          && make -f "$name.make" >"$name.make.log" 2>&1 && [ -x a.out ] ); then
-    fail "$label (elanc or make failed, see $wd/$name.*.log)"; continue
+    fail "$label (elanc-rem or make failed, see $wd/$name.*.log)"; continue
   fi
   # level 1 must go through str_eval, not the compiled strat[int] rules;
   # level 2 must compile the strategy term (StrategyEval)

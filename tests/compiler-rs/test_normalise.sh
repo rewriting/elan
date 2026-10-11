@@ -13,7 +13,7 @@
 #    `./a.out -noInput -quiet` prints `result = t`;
 #    with elanc-go, `go vet` on the generated module (.elan-go.<name>)
 #    must report nothing;
-#  - REM: `elanc -b -nosplit -quiet` + make + `./a.out -noInput -quiet`:
+#  - REM: `elanc-rem -b -nosplit -quiet` + make + `./a.out -noInput -quiet`:
 #    the `result = ` lines must be byte-identical (the `rewrite_step` line
 #    is not compared: it depends on the compilation scheme);
 #  - the interpreter: `elan -b` with the query `true end` (ignored by the
@@ -74,7 +74,7 @@ mkdir -p "$HERE/work" "$TARGET" || exit 2
 RUN=$(mktemp -d "$HERE/work/normalise$SUFFIX.XXXXXX") || exit 2
 echo "work directory: $RUN ($ELANC)"
 
-HAVE_REM=; command -v elanc >/dev/null 2>&1 && HAVE_REM=1
+HAVE_REM=; command -v elanc-rem >/dev/null 2>&1 && HAVE_REM=1
 fails=0 n=0
 ok()   { echo "ok   $1"; }
 fail() { echo "FAIL $1"; fails=$((fails+1)); }
@@ -132,7 +132,7 @@ for lgi in "$HERE"/programs/normalise/*.lgi; do
       fail "$name: status $status, output $(od -c "$d/$W/run.out" | head -3 | tr '\n' ' ') (expected $name.stdout)"
     fi
     if [ -n "$HAVE_REM" ] && [ ! -f "$HERE/programs/normalise/$name.no-rem" ]; then
-      if ( cd "$d/rem" && elanc -b -nosplit -quiet "$name" >elanc.log 2>&1 \
+      if ( cd "$d/rem" && elanc-rem -b -nosplit -quiet "$name" >elanc.log 2>&1 \
            && make -f "$name.make" >make.log 2>&1 && ./a.out -noInput -quiet >run.out 2>&1 ) \
          && cmp -s "$d/rem/run.out" "$stdout"; then
         ok "$name vs REM: the output of $name.stdout"
@@ -161,10 +161,10 @@ for lgi in "$HERE"/programs/normalise/*.lgi; do
 
   # REM
   if [ -z "$HAVE_REM" ]; then
-    echo "skip $name vs REM (elanc not installed)"
+    echo "skip $name vs REM (elanc-rem not installed)"
   elif [ -f "$HERE/programs/normalise/$name.no-rem" ]; then
     echo "skip $name vs REM ($name.no-rem)"
-  elif ( cd "$d/rem" && elanc -b -nosplit -quiet "$name" >elanc.log 2>&1 \
+  elif ( cd "$d/rem" && elanc-rem -b -nosplit -quiet "$name" >elanc.log 2>&1 \
        && make -f "$name.make" >make.log 2>&1 ); then
     rem=$( cd "$d/rem" && ./a.out -noInput -quiet 2>&1 | python3 "$HERE/rem_idents.py" "$name.ref" \
            | grep '^result = ' )
@@ -182,7 +182,7 @@ for lgi in "$HERE"/programs/normalise/*.lgi; do
       fail "$name vs REM: $ELANC [$rs], REM [$rem]"
     fi
   else
-    fail "$name: elanc or make failed (see $d/rem/*.log)"
+    fail "$name: elanc-rem or make failed (see $d/rem/*.log)"
   fi
 
   # interpreter

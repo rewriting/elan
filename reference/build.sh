@@ -12,7 +12,7 @@
 # Requirements (Homebrew on macOS arm64): gcc (gcc-16/g++-16), openjdk,
 # bdw-gc, bison, flex, libtool.  Must run on a case-sensitive file system.
 #
-# Usage: ./build.sh [component...]   components: prepare aterm cpl interpreter compiler library
+# Usage: ./build.sh [component...]   components: prepare aterm cpl interpreter compiler elanc_rem library
 #        (no argument = all, in dependency order)
 set -euo pipefail
 
@@ -115,7 +115,7 @@ build_prepare() {
   # and the Java classes compiled in 2003 (REM must be rebuilt from the patched sources)
   find "$SRC" \( -name '*.o' -o -name '*.a' -o -name config.cache -o -name config.status \
                  -o -name '*.class' -o -name 'classjava.stamp' \) -delete
-  rm -f "$SRC/elan-compiler/scripts/elanc"   # generated in 2003 for another prefix
+  rm -f "$SRC/elan-compiler/scripts/elanc"   # generated in 2003 for another prefix (bare-elanc-ok)
 }
 
 configure_clean() { [ -f Makefile ] && make distclean >/dev/null 2>&1 || true; freeze_autotools; }
@@ -156,6 +156,15 @@ build_compiler() {
       CC_NS="$CC_FLAGS $inc" AR=$AR JAVAC="javac -nowarn -encoding ISO-8859-1"
 }
 
+# elanc-rem: the name the tests give REM's driver (S7e task 9: they never call
+# the bare elanc, which may become the Go compiler in the modern build); here
+# a symbolic link to the 2004 elanc.
+build_elanc_rem() {
+  log "elanc-rem -> elanc"   # bare-elanc-ok: the link to the 2004 driver
+  [ -x "$PREFIX/bin/elanc" ] || { echo "elanc missing: build the compiler first"; exit 1; }  # bare-elanc-ok
+  ln -sf elanc "$PREFIX/bin/elanc-rem"   # bare-elanc-ok
+}
+
 build_library() {
   log "ELAN standard library (elanlib)"
   cd "$SRC/elan-library"; configure_clean
@@ -164,7 +173,7 @@ build_library() {
 }
 
 components=("$@")
-[ ${#components[@]} -eq 0 ] && components=(prepare aterm cpl interpreter compiler library)
+[ ${#components[@]} -eq 0 ] && components=(prepare aterm cpl interpreter compiler elanc_rem library)
 mkdir -p "$LOGDIR" "$PREFIX"
 for c in "${components[@]}"; do "build_$c"; done
 

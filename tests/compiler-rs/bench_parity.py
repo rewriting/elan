@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""The bench compiled by a new compiler against elanc (kind J): elanc-rs
+"""The bench compiled by a new compiler against REM (elanc-rem, kind J): elanc-rs
 (kind R) or elanc-go (kind G).
 
 Runs tests/legacy-bench/run_tests.py --kinds R or G (which compares every
@@ -102,7 +102,7 @@ def main():
         if snap == "SNAP-DIFF":
             snapdiffs.add(tid)
             if tid not in differs:
-                problems.append(f"{tid}: output differs from the elanc (J) snapshot")
+                problems.append(f"{tid}: output differs from the J (elanc-rem) snapshot")
         j = base.get(tid.replace(f"::{kind}::", "::J::"))
         if st in RANK and j in RANK and RANK[st] > RANK[j]:
             problems.append(f"{tid}: {kind} {st}, J {j}")

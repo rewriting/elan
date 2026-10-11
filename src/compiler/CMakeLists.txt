@@ -163,3 +163,6 @@ file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/elanc "${ELANC}")
 set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
              ${CMAKE_CURRENT_SOURCE_DIR}/scripts/elanc.src)
 install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/elanc DESTINATION bin)
+# the same driver as elanc-rem (S7e task 9): the tests call REM by this name,
+# whatever bin/elanc is
+install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/elanc DESTINATION bin RENAME elanc-rem)
