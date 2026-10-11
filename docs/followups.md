@@ -213,12 +213,12 @@ sub-project (S1–S5b). Each item says where it comes from.
   (107 M guarded calls); a further gain needs fewer guarded calls (e.g.
   self tail calls of normalisation functions as loops).
 
-- **Tail-call loops of elanc-go allocate every turn** (review of S7b,
-  `gen/strat.go`, `strategies`): the closures `again` and those of the
-  body (the rest of the sequences, the steps of repeat*/iterate*) and the
-  DC/ONE states (`rt.NewOne`, `rt.NewDc`) are created inside the `for`,
-  once per iteration. Hoist them out of the loop and reset the states at
-  each turn (S7e, with the other optimisations).
+- **Tail-call loops of elanc-go allocated every turn** (review of S7b):
+  done in S7e task 4 (`gen/strat.go`: the closures and the dc/one states
+  of a loop are made once per call, the states reset at each turn; tail
+  10^7 0.24 → 0.03 s). Left: a ONE/dc inside a continuation closure of the
+  loop (`dc(dk(dec) ; dc one(taildc), id)`: `one3` in `k2`) is still made
+  at each call of the closure (taildc 10^7 0.13 s, one object per turn).
 
 ## Build, tests, tooling
 

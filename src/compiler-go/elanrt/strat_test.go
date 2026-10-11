@@ -161,6 +161,22 @@ func TestChoicesOfTheGeneratedCode(t *testing.T) {
 	if !o.Pass(true) || o.Pass(false) {
 		t.Fatal("Pass")
 	}
+	// a state reset (each turn of a tail-call loop, S7e task 4) is a new
+	// state: no result kept, nothing found
+	var got []int32
+	o = NewOne(func(r int32) bool { got = append(got, r); return false })
+	d := NewDc(func(r int32) bool { return false })
+	o.K(7)
+	d.K(7)
+	o.Reset()
+	d.Reset()
+	if o.Pass(false) || len(got) != 0 || d.Found {
+		t.Fatalf("reset: %v %v", got, d.Found)
+	}
+	o.K(8)
+	if o.Pass(false); !slices.Equal(got, []int32{8}) {
+		t.Fatalf("after a reset: %v", got)
+	}
 	// the step of a deterministic strategy: its first result, each time
 	step := DetStep(dkAB)
 	for _, c := range []struct{ in, out int32 }{{1, 10}, {10, 100}, {100, 0}} {

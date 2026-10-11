@@ -229,9 +229,9 @@ Target: nqueens 12 <= 0.67 s after Task 2 (measured upper bound without any guar
 
 **Files:** `src/compiler-go/gen/strat.go` (`strategies`, the loop emission), `gen/strat_test.go`; `elanrt/strat.go` (a `Reset` on the One/Dc states)
 
-- [ ] **Step 1: Measure.** `programs/depth/tail6`, `taildc6`, `tailone6`, `iterdet6` (and nqueens 12): run with `ELAN_MEMPROFILE` and `ELAN_STATS=1`; count the allocations per loop turn (`go tool pprof -sample_index=alloc_objects`). Keep the task only if a program spends >= 10 % of its time in these allocations; else record the numbers in this plan and in followups ("measured, not worth it") and skip to Task 5.
-- [ ] **Step 2: Failing test.** A gen test that runs a tail-recursive strategy loop 10^6 turns and checks `testing.AllocsPerRun` per turn <= 1 (today: the count of closures + states).
-- [ ] **Step 3: Implement** (closures and states hoisted out of the `for`, reset each turn), **Step 4:** tests (`go test ./gen`, `test_strategies.sh`, `test_depth.sh`) green, **Step 5:** measure, **Step 6:** commit (`elanc-go: tail-call loops allocate once (S7e task 4)`).
+- [x] **Step 1: Measure.** `programs/depth/tail6`, `taildc6`, `tailone6`, `iterdet6` (and nqueens 12): run with `ELAN_MEMPROFILE` and `ELAN_STATS=1`; count the allocations per loop turn (`go tool pprof -sample_index=alloc_objects`). Keep the task only if a program spends >= 10 % of its time in these allocations; else record the numbers in this plan and in followups ("measured, not worth it") and skip to Task 5.
+- [x] **Step 2: Failing test.** A gen test that runs a tail-recursive strategy loop 10^6 turns and checks `testing.AllocsPerRun` per turn <= 1 (today: the count of closures + states).
+- [x] **Step 3: Implement** (closures and states hoisted out of the `for`, reset each turn), **Step 4:** tests (`go test ./gen`, `test_strategies.sh`, `test_depth.sh`) green, **Step 5:** measure, **Step 6:** commit (`elanc-go: tail-call loops allocate once (S7e task 4)`).
 
 ### Task 5: Spike — the weak pointer per node (time-boxed, keep/drop)
 
@@ -389,3 +389,22 @@ Measured (nqueens 12, generated code of this branch, interleaved best of 7, Pyth
 `bench_perf.sh build/install 5 --check` with Task 3: nqueens 12 0.70 s, nqueens 11 0.12, deeplist3m 1.27, propc 3 0.28, efib 200 0.07 (exit 0: all within the criterion-4 limits). nqueens 12 makes 107.5 M guarded calls; any check at a function entry costs ~0.5 ns there (a load and a branch alone: 0.05 s; the inlining decisions are the same with and without the guard, `-gcflags=-m`). The target (<= 0.67 s) assumed the no-guard figure minus a little; it is out of reach for any per-call guard.
 
 - Ruling: Task 3 reverted on `s7e-go-switch` (the plan's rule: a change that does not reach its target is reverted), kept as commit 96f18ec on the local branch `s7e-task3-guard-tried` (`git cherry-pick 96f18ec` restores it, tests included) — why: 0.705 s > 0.67 s; the gain (-5 % on nqueens 12, nothing elsewhere) does not reach the target the plan set, and the depth guard is safety-critical code that should change only for a clear gain — cost if wrong: 0.036 s on nqueens 12 (5 %) and slightly smaller depth limits (8.4 M instead of 9.9 M list levels) left on the table; the user may decide to take it at the gate (Task 10) with a revised target.
+
+### Task 4 results
+
+Measured first (the programs of `programs/depth` at 10^7 instead of 10^6 so that the loop dominates the process start; `ELAN_MEMPROFILE`, `GOMAXPROCS=1` `ELAN_CPUPROFILE`): every turn of a tail-call loop allocated its `OneChoice` and `DcChoice` (the closures `again`, `k2` stayed on the stack, but `rt.NewOne`/`rt.NewDc` escape: their `K` closes over the state): tail7 37.6 M objects (NewDc 19.2 M, NewOne 18.4 M), taildc7 57.6 M; their share of the CPU profile: tail7 50 % (NewDc 36 %, NewOne 14 %), taildc7 31 %, tailone7 18 % — above the plan's 10 %: task kept. None of `bench_perf.sh`'s programs has a tail-call loop (no `NewOne`/`NewDc` in their generated code): their figures do not move (nqueens 12 0.74 s, deeplist3m 1.27 s, propc 3 0.28 s; `--check` exit 0).
+
+`gen/strat.go`: a loop declares `next`, `tail`, `again`, its `one` and the hoisted closures and states once, before the `for`; each turn sets `tail = false` and calls `Reset()` on `one` and on every top-level dc/one state (`elanrt` `OneChoice.Reset`, `DcChoice.Reset`). The closures read `t`, the loop's variable, so they see each turn's term as before.
+
+Tests RED → GREEN: `elanrt` `TestChoicesOfTheGeneratedCode` (Reset: RED, does not compile), `gen` `TestTailLoopsAllocateOnce` (a DC loop and a ONE loop of 10^6 turns run by `go test` in the generated module, `testing.AllocsPerRun`: RED 4.00 allocations per turn, GREEN < 0.01; the shape: states before the `for`, resets in it). `go test ./...`, `test_strategies.sh` (96 programs), `test_depth.sh` (20), `test_normalise.sh` (36): 0 failures.
+
+| program (best of 5, real s / max RSS MB) | before | after |
+|---|---|---|
+| tail 10^7 (`first(dk(dec) ; tail, id)`) | 0.24 / 40 | 0.03 / 5 |
+| taildc 10^7 (`dc(dk(dec) ; dc one(taildc), id)`) | 0.33 / 40 | 0.13 / 40 |
+| tailone 10^7 (`first one(dc(dec) ; tailone, id)`) | 0.23 / 40 | 0.03 / 5 |
+| iterdet 10^7 (not a tail call: `iterate*`) | 0.04 / 5 | 0.04 / 5 |
+
+taildc keeps one allocation per turn: its `ONE(taildc)` is the state of a continuation closure (`k2`), made at each call of the closure, not a state of the loop's body; not hoisted (a closure may run several times in a turn, each needing its own state) — recorded in followups.
+
+- Ruling: the states are reset by name, the top-level hoisted declarations matching `^(dc|one)N := rt.New(Dc|One)(` — why: the declarations removed while emitting (a dc whose alternatives all fail) never get a reset that would name an undeclared variable, and the states inside closures keep their per-call creation — cost if wrong: a state left unreset would keep a previous turn's result; `TestTailLoopsAllocateOnce` checks both kinds and `test_depth`/`test_strategies` the results.

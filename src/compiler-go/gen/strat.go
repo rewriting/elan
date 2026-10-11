@@ -2,6 +2,7 @@ package gen
 
 import (
 	"fmt"
+	"regexp"
 	"slices"
 	"strings"
 
@@ -109,8 +110,8 @@ func (e *emitter) strategies() {
 			e.line("return %s", x)
 		} else {
 			e.line("// tail-recursive: a call of %s in tail position (again)", comment(ir.BaseName(st.Name)))
-			e.line("// starts the loop again on its term")
-			e.open("for {")
+			e.line("// starts the loop again on its term; the closures and the states of")
+			e.line("// the choices are made once, the states reset at each turn")
 			e.line("var next %s", ty)
 			e.line("tail := false")
 			e.open("again := func(r %s) bool {", ty)
@@ -119,6 +120,14 @@ func (e *emitter) strategies() {
 			e.close("}")
 			e.line("one := rt.NewOne(k) // the result, at most one")
 			e.lines(hoist)
+			e.open("for {")
+			e.line("tail = false")
+			e.line("one.Reset()")
+			for _, h := range hoist {
+				if m := stateDecl.FindStringSubmatch(h); m != nil {
+					e.line("%s.Reset()", m[1])
+				}
+			}
 			e.line("_ = %s", x)
 			e.open("if !tail {")
 			e.line("return one.Pass(false)")
@@ -131,6 +140,10 @@ func (e *emitter) strategies() {
 		e.tail, e.used = nil, nil
 	}
 }
+
+// stateDecl is the declaration of the state of a dc or a one (see dc and
+// one): a loop resets it at each turn.
+var stateDecl = regexp.MustCompile(`^((?:dc|one)\d+) := rt\.New(?:Dc|One)\(`)
 
 // lines writes statements (possibly of several lines: go/format indents
 // them).
