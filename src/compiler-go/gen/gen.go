@@ -904,14 +904,18 @@ func usedVars(r *ir.Rule) map[ir.VarID]bool {
 			walk(&x.Args[i])
 		}
 	}
-	for _, c := range r.Conds {
-		if c.Kind == ir.CondSame {
-			used[c.A], used[c.B] = true, true
-		} else if c.Kind == ir.CondAC || c.Kind == ir.CondEker {
-			used[c.A] = true
-		} else {
-			walk(&c.Expr)
-		}
+	for i := range r.Conds {
+		r.Conds[i].Walk(func(c *ir.Cond) {
+			switch c.Kind {
+			case ir.CondSame:
+				used[c.A], used[c.B] = true, true
+			case ir.CondAC, ir.CondEker:
+				used[c.A] = true
+			case ir.CondChoose:
+			default:
+				walk(&c.Expr)
+			}
+		})
 	}
 	walk(&r.Rhs)
 	return used
@@ -1145,6 +1149,8 @@ func (e *emitter) conds(r *ir.Rule, from int, used map[ir.VarID]bool, depth int)
 			// (its code ends with a loop)
 			e.ekerMatch(r, j, used, depth)
 			return true
+		case ir.CondChoose:
+			return e.choose(r, j, used, depth)
 		}
 	}
 	rhs := ""
@@ -1183,6 +1189,27 @@ func (e *emitter) conds(r *ir.Rule, from int, used map[ir.VarID]bool, depth int)
 		e.line("return true")
 	}
 	return opens > 0
+}
+
+// choose writes the condition j of r, `choose try b1 ... end`
+// ([ir.CondChoose]): per branch, a block with the branch's conditions then
+// the rest of the rule (its code repeated in each branch); the code of a
+// branch falls into the next one when it fails. It tells whether the code
+// after it is reached: the branches after one that always returns are
+// not written (unreachable).
+func (e *emitter) choose(r *ir.Rule, j int, used map[ir.VarID]bool, depth int) bool {
+	c := &r.Conds[j]
+	for i, br := range c.Branches {
+		e.open("{ // choose: try branch %d of %d, then the rest of the rule", i+1, len(c.Branches))
+		sub := *r
+		sub.Conds = append(slices.Clone(br), r.Conds[j+1:]...)
+		falls := e.conds(&sub, 0, used, depth)
+		e.close("}")
+		if !falls {
+			return false
+		}
+	}
+	return true
 }
 
 // simpleCond writes a condition that gives at most one solution and binds

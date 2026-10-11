@@ -1,0 +1,6 @@
+LPL choose_one description
+  query of sort bool
+  result of sort int
+  import chooses
+  start with (sone) 1
+end

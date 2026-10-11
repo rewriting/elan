@@ -1,0 +1,59 @@
+module chooses
+// choose try ... try ... end conditions (S7d task 2). Both oracles (the
+// interpreter's TRYCHOICE, rewrite/stateofexecution.cc; REM's Choice.java)
+// make a branch an alternative of the rest of the rule: branch i, then
+// the conditions after end; when that fails (or, in a labelled rule, when
+// its results are exhausted), branch i+1. So a condition after end that
+// fails tries the next branch (cafter(3) = 30), and under dk every branch
+// gives its results. (The module is not named choose: a keyword.)
+import global int bool; end
+operators global
+  p(@,@) : (int int) int;
+  cfirst(@) : (int) int;
+  csecond(@) : (int) int;
+  cnone(@) : (int) int;
+  cafter(@) : (int) int;
+  cnested(@) : (int) int;
+  cgen(@) : (int) int;
+end
+stratop global
+  three : <int -> int> bs;
+  sdk : <int -> int> bs;
+  sdc : <int -> int> bs;
+  sone : <int -> int> bs;
+  sdk2 : <int -> int> bs;
+  sdc2 : <int -> int> bs;
+end
+rules for int
+  x, y, z : int;
+global
+  [inc] x => x + 1 end
+  [inc] x => x + 2 end
+  // the first branch succeeds, or the second
+  [] cfirst(x) => y choose try if x > 0 where y := () x + 100 try where y := () x + 200 end end
+  [] csecond(x) => y choose try if x < 0 where y := () 1 try where y := () 2 end end
+  // no branch succeeds: the next rule
+  [] cnone(x) => 1 choose try if x < 0 try if x > 100 end end
+  [] cnone(x) => 0 end
+  // a condition after end that fails: the next branch
+  [] cafter(x) => y choose try where y := () x try where y := () x * 10 end if y > 5 end
+  [] cafter(x) => 0 - 1 end
+  [] cnested(x) => y choose try choose try if x == 1 where y := () 11 try if x == 2 where y := () 22 end try where y := () 33 end end
+  // a where with several results in a branch, a condition after it
+  [] cgen(x) => y choose try where y := (three) x if y > x + 1 try where y := (three) x * 10 end end
+  // labelled rules: the results of every branch, in order
+  [lab] x => y choose try where y := (three) x try where y := (three) x + 10 end end
+  [lab] x => x + 1000 end
+  [lab2] x => y choose try if x > 5 where y := () x try where y := (three) x * 3 end if y > 6 end
+  [lab2] x => x + 1000 end
+end
+strategies for int
+implicit
+  [] three => dk(inc) end
+  [] sdk => dk(lab) end
+  [] sdc => dc(lab) end
+  [] sone => dc one(lab) end
+  [] sdk2 => dk(lab2) end
+  [] sdc2 => dc(lab2) end
+end
+end

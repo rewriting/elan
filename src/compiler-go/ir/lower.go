@@ -3,6 +3,7 @@ package ir
 import (
 	"cmp"
 	"fmt"
+	"maps"
 	"slices"
 	"strconv"
 	"strings"
@@ -892,7 +893,17 @@ func (l *lowerer) whereTerms(w ref.Where, ruleCtx string, reach *reach) ([]tt, e
 		r, err := l.typeTop(w.Rhs, optSort{w.Sort, true}, ctx)
 		return []tt{pt, r}, err
 	case ref.Try:
-		return nil, unsupported("S7d", "choose/try conditions in %s", ctx)
+		var ts []tt
+		for _, br := range w.Branches {
+			for _, x := range br {
+				t, err := l.whereTerms(x, ruleCtx, reach)
+				if err != nil {
+					return nil, err
+				}
+				ts = append(ts, t...)
+			}
+		}
+		return ts, nil
 	}
 	return nil, invalid("unknown condition %T", w)
 }
@@ -1435,14 +1446,17 @@ func (b *builder) strategies(ir *IR, sig *signatures, usedFuns map[string]bool) 
 			lb := &ir.Labels[i]
 			det := true
 			for _, r := range lb.Rules {
-				for _, c := range r.Conds {
-					if c.Kind == CondApply && !ir.Strategies[c.Strategy].Det {
-						det = false
-					}
-					// an AC matching can give several solutions
-					if c.Kind == CondAC || c.Kind == CondEker {
-						det = false
-					}
+				for i := range r.Conds {
+					r.Conds[i].Walk(func(c *Cond) {
+						if c.Kind == CondApply && !ir.Strategies[c.Strategy].Det {
+							det = false
+						}
+						// an AC matching can give several solutions, and
+						// so can the branches of a choose
+						if c.Kind == CondAC || c.Kind == CondEker || c.Kind == CondChoose && len(c.Branches) > 1 {
+							det = false
+						}
+					})
 				}
 			}
 			if det != lb.RulesDet {
@@ -1728,9 +1742,12 @@ func markRecursive(ir *IR) {
 	rules := func(from int, rs []Rule) {
 		for ri := range rs {
 			r := &rs[ri]
+			var all []*Cond
 			for ci := range r.Conds {
-				c := &r.Conds[ci]
-				if c.Kind != CondSame && c.Kind != CondAC && c.Kind != CondEker {
+				r.Conds[ci].Walk(func(c *Cond) { all = append(all, c) })
+			}
+			for _, c := range all {
+				if c.Kind != CondSame && c.Kind != CondAC && c.Kind != CondEker && c.Kind != CondChoose {
 					collect(from, &c.Expr)
 				}
 				if c.Kind == CondEker {
@@ -1866,6 +1883,20 @@ type ruleLowerer struct {
 	ekerConds []Cond
 	// err is the first refusal met by pattern
 	err error
+	// shared are the variables bound by the branches of the enclosing
+	// chooses already lowered: a branch binding the same model variable
+	// gets the same variable ([CondChoose])
+	shared map[uint32]VarID
+}
+
+// bindVar is the variable of the first binding of model variable i (in a
+// pattern or a where): the one of another branch of an enclosing choose
+// ([CondChoose]), else a new one.
+func (rl *ruleLowerer) bindVar(i uint32, s ref.SortIndex) VarID {
+	if v, ok := rl.shared[i]; ok {
+		return v
+	}
+	return rl.newVar(i, s)
 }
 
 // freshVar is a new variable of the rule (the subject of an AC pattern).
@@ -2040,10 +2071,12 @@ func (rl *ruleLowerer) pattern(t *tt, same *[]Cond) Pattern {
 	switch t.kind {
 	case ttVar:
 		first, bound := rl.varOf[t.index]
-		v := rl.newVar(t.index, t.sort)
+		var v VarID
 		if bound {
+			v = rl.newVar(t.index, t.sort)
 			*same = append(*same, Cond{Kind: CondSame, A: first, B: v})
 		} else {
+			v = rl.bindVar(t.index, t.sort)
 			rl.varOf[t.index] = v
 		}
 		return Pattern{Kind: PatVar, Var: v}
@@ -2107,76 +2140,8 @@ func (rl *ruleLowerer) lower(lhs *tt, whole bool) (Rule, bool, error) {
 	rl.conds = append(rl.conds, same...)
 	body := rl.rule.Body.(ref.Plain)
 	var texts []string
-	for _, w := range body.Wheres {
-		switch w := w.(type) {
-		case ref.If:
-			t, err := l.typeTop(w.Cond, l.boolSort, "condition")
-			if err != nil {
-				return Rule{}, false, err
-			}
-			texts = append(texts, "if "+rl.render(&t))
-			e, err := rl.expr(&t)
-			if err != nil {
-				return Rule{}, false, err
-			}
-			rl.conds = append(rl.conds, Cond{Kind: CondIf, Expr: e})
-		case ref.Assign:
-			r, err := l.typeTop(w.Rhs, varSort(w.Lhs), "where")
-			if err != nil {
-				return Rule{}, false, err
-			}
-			lt, err := l.typeTop(w.Lhs, optSort{l.sortOf(&r), true}, "where")
-			if err != nil {
-				return Rule{}, false, err
-			}
-			e, err := rl.expr(&r)
-			if err != nil {
-				return Rule{}, false, err
-			}
-			texts = append(texts, "where "+rl.render(&lt)+" := ("+rl.strategyText(w.Strategy)+") "+rl.render(&r))
-			if w.Strategy.Valid {
-				var same []Cond
-				p, ek := rl.wherePattern(&lt, &same)
-				rl.conds = append(rl.conds, Cond{Kind: CondApply, Pat: p, Strategy: rl.b.stratOf[w.Strategy.Index], Expr: e})
-				rl.addEker(ek)
-				rl.conds = append(rl.conds, same...)
-			} else if _, bound := rl.varOf[lt.index]; lt.kind == ttVar && !bound {
-				v := rl.newVar(lt.index, lt.sort)
-				rl.varOf[lt.index] = v
-				rl.conds = append(rl.conds, Cond{Kind: CondLet, A: v, Expr: e})
-			} else {
-				var same []Cond
-				p, ek := rl.wherePattern(&lt, &same)
-				rl.conds = append(rl.conds, Cond{Kind: CondMatch, Pat: p, Expr: e})
-				rl.addEker(ek)
-				rl.conds = append(rl.conds, same...)
-			}
-		case ref.Match:
-			r, err := l.typeTop(w.Rhs, optSort{w.Sort, true}, "where")
-			if err != nil {
-				return Rule{}, false, err
-			}
-			pt, err := l.typeTop(w.Pattern, optSort{w.Sort, true}, "where")
-			if err != nil {
-				return Rule{}, false, err
-			}
-			e, err := rl.expr(&r)
-			if err != nil {
-				return Rule{}, false, err
-			}
-			texts = append(texts, "where "+rl.render(&pt)+" := ("+rl.strategyText(w.Strategy)+") "+rl.render(&r))
-			var same []Cond
-			p, ek := rl.wherePattern(&pt, &same)
-			if w.Strategy.Valid {
-				rl.conds = append(rl.conds, Cond{Kind: CondApply, Pat: p, Strategy: rl.b.stratOf[w.Strategy.Index], Expr: e})
-			} else {
-				rl.conds = append(rl.conds, Cond{Kind: CondMatch, Pat: p, Expr: e})
-			}
-			rl.addEker(ek)
-			rl.conds = append(rl.conds, same...)
-		default:
-			panic("refused during reachability")
-		}
+	if err := rl.wheres(body.Wheres, &texts); err != nil {
+		return Rule{}, false, err
 	}
 	rt, err := l.typeTop(body.Rhs, optSort{rl.rule.Sort, true}, "right-hand side")
 	if err != nil {
@@ -2194,6 +2159,131 @@ func (rl *ruleLowerer) lower(lhs *tt, whole bool) (Rule, bool, error) {
 		text += " " + c
 	}
 	return Rule{Text: text, Vars: rl.vars, Lhs: pats, Conds: rl.conds, Rhs: rhs}, true, nil
+}
+
+// wheres lowers the conditions ws of the rule, in order, appending them
+// to rl.conds and their text (comments) to texts.
+func (rl *ruleLowerer) wheres(ws []ref.Where, texts *[]string) error {
+	l := rl.b.l
+	for _, w := range ws {
+		switch w := w.(type) {
+		case ref.If:
+			t, err := l.typeTop(w.Cond, l.boolSort, "condition")
+			if err != nil {
+				return err
+			}
+			*texts = append(*texts, "if "+rl.render(&t))
+			e, err := rl.expr(&t)
+			if err != nil {
+				return err
+			}
+			rl.conds = append(rl.conds, Cond{Kind: CondIf, Expr: e})
+		case ref.Assign:
+			r, err := l.typeTop(w.Rhs, varSort(w.Lhs), "where")
+			if err != nil {
+				return err
+			}
+			lt, err := l.typeTop(w.Lhs, optSort{l.sortOf(&r), true}, "where")
+			if err != nil {
+				return err
+			}
+			e, err := rl.expr(&r)
+			if err != nil {
+				return err
+			}
+			*texts = append(*texts, "where "+rl.render(&lt)+" := ("+rl.strategyText(w.Strategy)+") "+rl.render(&r))
+			if w.Strategy.Valid {
+				var same []Cond
+				p, ek := rl.wherePattern(&lt, &same)
+				rl.conds = append(rl.conds, Cond{Kind: CondApply, Pat: p, Strategy: rl.b.stratOf[w.Strategy.Index], Expr: e})
+				rl.addEker(ek)
+				rl.conds = append(rl.conds, same...)
+			} else if _, bound := rl.varOf[lt.index]; lt.kind == ttVar && !bound {
+				v := rl.bindVar(lt.index, lt.sort)
+				rl.varOf[lt.index] = v
+				rl.conds = append(rl.conds, Cond{Kind: CondLet, A: v, Expr: e})
+			} else {
+				var same []Cond
+				p, ek := rl.wherePattern(&lt, &same)
+				rl.conds = append(rl.conds, Cond{Kind: CondMatch, Pat: p, Expr: e})
+				rl.addEker(ek)
+				rl.conds = append(rl.conds, same...)
+			}
+		case ref.Match:
+			r, err := l.typeTop(w.Rhs, optSort{w.Sort, true}, "where")
+			if err != nil {
+				return err
+			}
+			pt, err := l.typeTop(w.Pattern, optSort{w.Sort, true}, "where")
+			if err != nil {
+				return err
+			}
+			e, err := rl.expr(&r)
+			if err != nil {
+				return err
+			}
+			*texts = append(*texts, "where "+rl.render(&pt)+" := ("+rl.strategyText(w.Strategy)+") "+rl.render(&r))
+			var same []Cond
+			p, ek := rl.wherePattern(&pt, &same)
+			if w.Strategy.Valid {
+				rl.conds = append(rl.conds, Cond{Kind: CondApply, Pat: p, Strategy: rl.b.stratOf[w.Strategy.Index], Expr: e})
+			} else {
+				rl.conds = append(rl.conds, Cond{Kind: CondMatch, Pat: p, Expr: e})
+			}
+			rl.addEker(ek)
+			rl.conds = append(rl.conds, same...)
+		case ref.Try:
+			if err := rl.choose(w, texts); err != nil {
+				return err
+			}
+		default:
+			panic("unknown condition")
+		}
+	}
+	return nil
+}
+
+// choose lowers `choose try b1 ... end` ([CondChoose]): each branch's
+// conditions from the variables bound before it, a model variable bound by
+// several branches being one variable; after end, the variables bound by
+// every branch are bound.
+func (rl *ruleLowerer) choose(w ref.Try, texts *[]string) error {
+	before := maps.Clone(rl.varOf)
+	outer := rl.shared
+	shared := maps.Clone(outer)
+	if shared == nil {
+		shared = map[uint32]VarID{}
+	}
+	conds := rl.conds
+	var branches [][]Cond
+	var everywhere map[uint32]VarID
+	var bt []string
+	for _, br := range w.Branches {
+		rl.varOf, rl.shared, rl.conds = maps.Clone(before), shared, nil
+		var t []string
+		if err := rl.wheres(br, &t); err != nil {
+			return err
+		}
+		bt = append(bt, "try "+strings.Join(t, " "))
+		branches = append(branches, rl.conds)
+		bound := map[uint32]VarID{}
+		for m, v := range rl.varOf {
+			if _, ok := before[m]; !ok {
+				shared[m] = v
+				bound[m] = v
+			}
+		}
+		if everywhere == nil {
+			everywhere = bound
+		} else {
+			maps.DeleteFunc(everywhere, func(m uint32, _ VarID) bool { _, ok := bound[m]; return !ok })
+		}
+	}
+	rl.varOf, rl.shared = before, outer
+	maps.Copy(rl.varOf, everywhere)
+	rl.conds = append(conds, Cond{Kind: CondChoose, Branches: branches})
+	*texts = append(*texts, "choose "+strings.Join(bt, " ")+" end")
+	return nil
 }
 
 // strategyText is the name of the strategy of a where (empty for ()).

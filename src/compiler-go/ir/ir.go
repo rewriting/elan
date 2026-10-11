@@ -693,6 +693,20 @@ const (
 	// the oracles; EkerVars[i] is the variable of the pattern's variable
 	// number i.
 	CondEker
+	// CondChoose is `choose try b1 try b2 ... end` (S7d task 2): the
+	// branches (Branches, lists of conditions) are alternatives of the
+	// rest of the rule, as both oracles run them (the interpreter's
+	// TRYCHOICE, rewrite/stateofexecution.cc; REM's Choice.java): branch 1
+	// then the conditions after end and the right-hand side, each of its
+	// solutions in turn; when they are exhausted (or fail), branch 2 and
+	// the rest, and so on. So a condition after end that fails tries the
+	// next branch, a labelled rule gives the results of every branch in
+	// order (dk), and a normalisation keeps the first. A variable bound
+	// by a branch is the same variable in every branch (one VarID); after
+	// end, only those bound by every branch are bound. Under dc, REM stops
+	// a labelled rule after the first branch that gave a result; the
+	// interpreter, followed here, does not (the S7d plan, Task 2).
+	CondChoose
 )
 
 // Cond is a condition or local assignment of a rule.
@@ -710,6 +724,19 @@ type Cond struct {
 	// Eker, EkerVars: the pattern of CondEker and its variables.
 	Eker     *EkerPat
 	EkerVars []VarID
+	// Branches are the branches of CondChoose.
+	Branches [][]Cond
+}
+
+// Walk calls f on c and on the conditions of its branches (CondChoose),
+// depth first.
+func (c *Cond) Walk(f func(*Cond)) {
+	f(c)
+	for _, b := range c.Branches {
+		for i := range b {
+			b[i].Walk(f)
+		}
+	}
 }
 
 // EkerPat is a pattern for Eker's matcher ([CondEker]), in REM's form:

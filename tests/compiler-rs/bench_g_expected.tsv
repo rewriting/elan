@@ -17,6 +17,7 @@ elan/sources/Compiler.2.1/BenchThesis/FastCompletion::G::ans:taussky:-:jtaussky	
 elan/sources/Compiler.2.1/Test::G::bimatch:no:-:bimatch	PASS≈
 elan/sources/Compiler.2.1/Test::G::bool3:no:-:bool3	PASS
 elan/sources/Compiler.2.1/Test::G::choice1:no:-:choice1	PASS
+elan/sources/Compiler.2.1/Test::G::choice2:no:-:choice2	PASS
 elan/sources/Compiler.2.1/Test::G::condac1:no:-:condac1	FAIL
 elan/sources/Compiler.2.1/Test::G::condac2:no:-:condac2	FAIL
 elan/sources/Compiler.2.1/Test::G::cons1:no:-:cons1	PASS
@@ -50,6 +51,7 @@ elan/sources/Compiler.2.1/Test::G::wpatternAC6:no:-:wpatternAC6	PASS≈
 elan/sources/Compiler.3.0/Test::G::bimatch:no:-:bimatch	PASS≈
 elan/sources/Compiler.3.0/Test::G::bool3:no:-:bool3	PASS
 elan/sources/Compiler.3.0/Test::G::choice1:no:-:choice1	PASS
+elan/sources/Compiler.3.0/Test::G::choice2:no:-:choice2	PASS
 elan/sources/Compiler.3.0/Test::G::condac1:no:-:condac1	FAIL
 elan/sources/Compiler.3.0/Test::G::condac2:no:-:condac2	FAIL
 elan/sources/Compiler.3.0/Test::G::cons1:no:-:cons1	PASS
@@ -82,6 +84,7 @@ elan/sources/Compiler.3.0/Test::G::wpatternAC5:no:-:wpatternAC5	PASS≈
 elan/sources/Compiler.3.0/Test::G::wpatternAC6:no:-:wpatternAC6	PASS≈
 elan/sources/Compiler.3.2/Test::G::bimatch:no:-:bimatch	PASS≈
 elan/sources/Compiler.3.2/Test::G::choice1:no:-:choice1	PASS
+elan/sources/Compiler.3.2/Test::G::choice2:no:-:choice2	PASS
 elan/sources/Compiler.3.2/Test::G::condac1:no:-:condac1	PASS≈
 elan/sources/Compiler.3.2/Test::G::condac2:no:-:condac2	FAIL
 elan/sources/Compiler.3.2/Test::G::cons1:no:-:cons1	PASS
@@ -113,6 +116,7 @@ elan/sources/Compiler.3.2/Test::G::wpatternAC4:no:-:wpatternAC4	PASS≈
 elan/sources/Compiler.3.2/Test::G::wpatternAC5:no:-:wpatternAC5	PASS≈
 elan/sources/Compiler.3.2/Test::G::wpatternAC6:no:-:wpatternAC6	PASS≈
 elan/sources/Compiler.4.0/Test::G::choice1:no:-:choice1	PASS
+elan/sources/Compiler.4.0/Test::G::choice2:no:-:choice2	PASS
 elan/sources/Compiler.4.0/Test::G::condac1:no:-:condac1	PASS≈
 elan/sources/Compiler.4.0/Test::G::condac2:no:-:condac2	FAIL
 elan/sources/Compiler.4.0/Test::G::cons1:no:-:cons1	PASS
