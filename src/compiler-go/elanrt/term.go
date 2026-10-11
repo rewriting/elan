@@ -3,9 +3,16 @@ package elanrt
 import "slices"
 
 // Term is a shared term: a pointer to a node of the unique table. Two terms
-// are equal if and only if they are the same pointer (maximal sharing), so
-// `a == b` compares terms.
+// are equal if and only if they are the same pointer (maximal sharing),
+// except int values: an int node is not in the table ([MkInt]: a weak
+// pointer would cost more than the node), two int nodes may have the same
+// value, and [Eq] compares terms. The nodes that hold ints are shared
+// (their table compares their int arguments by value).
 type Term = *Node
+
+// Eq tells whether a and b are the same term: the same node, or ints of
+// the same value.
+func Eq(a, b Term) bool { return a == b || a.Sym == SymInt && b.Sym == SymInt && a.Int == b.Int }
 
 // Node is an immutable term node. Build nodes with [Mk0]..[Mk3], [Mk],
 // [MkInt], [MkStr], [MkAC]; never with a composite literal (the node would
@@ -174,8 +181,8 @@ func (n *Node) same(sym, iv int32, args []Term) bool {
 	if n.Sym != sym || n.Int != iv || len(n.Args) != len(args) {
 		return false
 	}
-	for i := range args {
-		if n.Args[i] != args[i] {
+	for i, a := range args {
+		if b := n.Args[i]; a != b && !(a.Sym == SymInt && b.Sym == SymInt && a.Int == b.Int) {
 			return false
 		}
 	}
@@ -235,7 +242,11 @@ func Mk(sym int32, args ...Term) Term { return mk(sym, 0, args) }
 // ---------------------------------------------------------------------------
 // Builtin values as terms (boxing)
 
-// Small ints are preallocated: no table lookup for them.
+// Int nodes are not in the unique table: a weak pointer costs ~0.25 us,
+// 20 times the node (deep normalisation of a list of 3 x 10^6 ints: 2.0 s
+// -> 1.3 s). Small ints are preallocated, the others go through a small
+// cache of the last ones made (direct-mapped, by value): a repeated value
+// is often one node, and memory stays bounded.
 const smallMin, smallMax = -1024, 1024
 
 var smallInts = makeSmallInts()
@@ -243,17 +254,34 @@ var smallInts = makeSmallInts()
 func makeSmallInts() []Term {
 	ts := make([]Term, smallMax-smallMin)
 	for i := range ts {
-		ts[i] = mk(SymInt, int32(i+smallMin), nil)
+		ts[i] = newInt(int32(i + smallMin))
 	}
 	return ts
 }
 
-// MkInt returns the int term v.
+// intCacheSize is the number of entries of the cache of ints (a power of
+// two).
+const intCacheSize = 1 << 12
+
+var intCache [intCacheSize]Term
+
+func newInt(v int32) Term {
+	Created++
+	return &Node{Sym: SymInt, Int: v, Hash: nodeHash(SymInt, v, nil)}
+}
+
+// MkInt returns an int term v (compare ints with [Eq] or by value).
 func MkInt(v int32) Term {
 	if smallMin <= v && v < smallMax {
 		return smallInts[v-smallMin]
 	}
-	return mk(SymInt, v, nil)
+	c := &intCache[uint32(v)&(intCacheSize-1)]
+	if t := *c; t != nil && t.Int == v {
+		return t
+	}
+	t := newInt(v)
+	*c = t
+	return t
 }
 
 // MkBool returns True or False.

@@ -26,7 +26,7 @@ import (
 // of their symbol in the .ref file ([Symbol.Code]), then their arguments
 // from left to right, the elements of an AC term as a multiset (each
 // distinct element, then its multiplicity; a prefix first). Compare(a, b)
-// == 0 if and only if a == b.
+// == 0 if and only if Eq(a, b).
 func Compare(a, b Term) int {
 	if a == b {
 		return 0
@@ -273,7 +273,7 @@ func Find(e []Term, x Term) int {
 //	for i := 0; i < len(e); i += Mult(e, i) { ... e[i] ... }
 func Mult(e []Term, i int) int {
 	m := 1
-	for i+m < len(e) && e[i+m] == e[i] {
+	for i+m < len(e) && Eq(e[i+m], e[i]) {
 		m++
 	}
 	return m
@@ -294,7 +294,7 @@ func FirstOcc(e []Term, j int, removed []int) bool {
 	if slices.Contains(removed, j) {
 		return false
 	}
-	for p := j - 1; p >= 0 && e[p] == e[j]; p-- {
+	for p := j - 1; p >= 0 && Eq(e[p], e[j]); p-- {
 		if !slices.Contains(removed, p) {
 			return false
 		}
@@ -335,14 +335,14 @@ func RemoveOne(e []Term, x Term) ([]Term, bool) {
 func distinct(e []Term, extra int) (d []Term, ints []int) {
 	k := 0
 	for i := range e {
-		if i == 0 || e[i] != e[i-1] {
+		if i == 0 || !Eq(e[i], e[i-1]) {
 			k++
 		}
 	}
 	d = make([]Term, 0, k)
 	ints = make([]int, k*(1+extra))
 	for i := 0; i < len(e); i++ {
-		if i == 0 || e[i] != e[i-1] {
+		if i == 0 || !Eq(e[i], e[i-1]) {
 			d = append(d, e[i])
 		}
 		ints[len(d)-1]++
@@ -508,7 +508,7 @@ func (s *Down) counters(e []Term) {
 func hasMult(e []Term, m int) bool {
 	run := 0
 	for i := range e {
-		if i > 0 && e[i] == e[i-1] {
+		if i > 0 && Eq(e[i], e[i-1]) {
 			run++
 		} else {
 			run = 1

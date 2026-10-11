@@ -219,6 +219,15 @@ func (e *emitter) unbox(s ir.SortID, t string) string {
 
 func symName(op *ir.Op) string { return "sym_" + op.Fun }
 
+// eqExpr is the test that a and b, of sort s, are the same term: rt.Eq
+// on terms (int nodes are not shared), == on native values.
+func (e *emitter) eqExpr(s ir.SortID, a, b string) string {
+	if _, ok := e.ir.Native(s); ok {
+		return a + " == " + b
+	}
+	return "rt.Eq(" + a + ", " + b + ")"
+}
+
 // acFun is the normalisation function of the AC operator op over a
 // multiset; nil for a constructor (rt.ApplyAC and rt.ExtendAC then
 // build the term).
@@ -662,9 +671,9 @@ func (e *emitter) builtinBody(o ir.OpID) {
 		var v string
 		switch b {
 		case ir.TermEq:
-			v = "a0 == a1"
+			v = e.eqExpr(op.Args[0], "a0", "a1")
 		case ir.TermNeq:
-			v = "a0 != a1"
+			v = "!" + e.eqExpr(op.Args[0], "a0", "a1")
 		case ir.BoolAnd:
 			v = isTrue(0) + " && " + isTrue(1)
 		case ir.BoolOr:
@@ -1068,7 +1077,7 @@ func (e *emitter) conds(r *ir.Rule, from int, used map[ir.VarID]bool, depth int)
 func (e *emitter) simpleCond(c *ir.Cond, r *ir.Rule, used map[ir.VarID]bool) int {
 	switch c.Kind {
 	case ir.CondSame:
-		e.open("if %s == %s {", r.Vars[c.A].Name, r.Vars[c.B].Name)
+		e.open("if %s {", e.eqExpr(r.Vars[c.A].Sort, r.Vars[c.A].Name, r.Vars[c.B].Name))
 		return 1
 	case ir.CondIf:
 		x := e.expr(&c.Expr, r.Vars)

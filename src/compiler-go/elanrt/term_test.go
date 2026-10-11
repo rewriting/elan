@@ -137,3 +137,28 @@ func itoa(i int) string {
 	w.Int(int32(i))
 	return string(w.Bytes())
 }
+
+// Int nodes are not shared beyond the cache: Eq compares them by value,
+// and the nodes holding them are shared all the same.
+func TestIntsAreComparedByValue(t *testing.T) {
+	big := int32(1 << 20)
+	a := MkInt(big)
+	intCache[uint32(big)&(intCacheSize-1)] = nil // as if evicted
+	b := MkInt(big)
+	if a == b || !Eq(a, b) || Eq(a, MkInt(big+1)) || Eq(a, Mk0(symO)) || Compare(a, b) != 0 {
+		t.Fatal("two int nodes of the same value: Eq, Compare")
+	}
+	if MkInt(big) != b || MkInt(5) != MkInt(5) {
+		t.Fatal("the cache of ints, the small ints")
+	}
+	if Mk2(symCons, a, Mk0(symNil)) != Mk2(symCons, b, Mk0(symNil)) {
+		t.Fatal("cons(a) and cons(b), a and b of the same value: one node")
+	}
+	e := []Term{a, b, MkInt(big + 1)}
+	if Mult(e, 0) != 2 || FirstOcc(e, 1, nil) || !FirstOcc(e, 1, []int{0}) {
+		t.Fatal("multiplicities of equal ints")
+	}
+	if x := MkAC(symU, Flatten(symU, a, b, MkInt(big+1))); MkAC(symU, Flatten(symU, b, MkInt(big+1), a)) != x {
+		t.Fatal("AC terms of equal ints: one node")
+	}
+}
