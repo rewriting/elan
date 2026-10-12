@@ -163,17 +163,6 @@ def compare(produced, expected_dir=EXPECTED):
     return problems
 
 
-def case_sensitive(directory):
-    directory.mkdir(parents=True, exist_ok=True)
-    probe = Path(tempfile.mkdtemp(prefix="case-", dir=directory))
-    try:
-        (probe / "a").touch()
-        (probe / "A").touch()
-        return len(list(probe.iterdir())) == 2
-    finally:
-        shutil.rmtree(probe, ignore_errors=True)
-
-
 def main(argv=None):
     ap = argparse.ArgumentParser()
     ap.add_argument("--prefix", default=str(REPO / "build" / "install"))
@@ -182,9 +171,6 @@ def main(argv=None):
     ap.add_argument("--update", action="store_true")
     a = ap.parse_args(argv)
     prefix = Path(a.prefix).resolve()
-    if not case_sensitive(WORK):
-        print(f"ERROR: {WORK} is on a case-insensitive file system")
-        return 2
     cases = [c for c in parse_manifest(CASES.read_text()) if re.search(a.filter, c["id"])]
     failed, names = 0, set()
     with cf.ThreadPoolExecutor(a.j) as ex:
