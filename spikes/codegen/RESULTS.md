@@ -21,6 +21,10 @@ terms, flattened AC, success continuations, no stack copying).
 | propc 2 | 1.49 | 0.07 / 7 | 0.06 / 49 | 0.05 / 25 | 0.13 / 32 | 0.23 / 35 |
 | propc 3 | 9.7 | 0.52 / 16 | 0.33 / 227 | 0.29 / 90 | 0.64 (user 2.1) / 130 | 1.32 / 182 |
 
+> **Correction (2026-10-12).** The REM column and the "30 to 150 times" of the reading below were measured against REM without its
+> choice-point optimisation (`-optimiseChoicePoint` / `-O`, off by default).
+> Against `elanc-rem -O`: nqueens 11 1.34 s, nqueens 12 7.83 s, efib 100/200 8.64/204 s, propc 2/3 0.24/1.31 s; the gap with Go becomes 11-12x (nqueens), 3.4-4.7x (propc), ~900-2900x (efib) (`docs/measures/2026-10-12-rem-O/README.md`).
+
 Clean builds: C 0.6 s (6 binaries), Rust 0.26 s (3 binaries, release),
 Go 1.3 s with a cold cache (standard library included), 0.09 s warm.
 
