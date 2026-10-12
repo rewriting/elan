@@ -1,0 +1,27 @@
+# Files renamed so that no two paths differ only by case (the repository
+# works on case-insensitive file systems). One line per file:
+# stored path<TAB>original path. Contents unchanged. The legacy bench
+# restores the original names in its private copy of an application when
+# the test needs them (tests/legacy-bench/run_tests.py); tests/check_case.sh
+# keeps the tree free of new collisions; tests/restore_case.sh rebuilds the
+# original layout (on a case-sensitive file system).
+legacy/elan/sources/Compiler.3.2/x-case-test	legacy/elan/sources/Compiler.3.2/test
+legacy/elan3/applications/Robot/x-case-Nim.eln	legacy/elan3/applications/Robot/Nim.eln
+legacy/elan3/applications/Robot/x-case-Nim.lgi	legacy/elan3/applications/Robot/Nim.lgi
+legacy/elan3/applications/Robot/x-case-Robot.eln	legacy/elan3/applications/Robot/Robot.eln
+legacy/elan3/applications/Robot/x-case-Robot.lgi	legacy/elan3/applications/Robot/Robot.lgi
+legacy/elan3/applications/Robot/x-case-Space.eln	legacy/elan3/applications/Robot/Space.eln
+legacy/elan3/applications/Robot/x-case-State.eln	legacy/elan3/applications/Robot/State.eln
+legacy/elan3/applications/Robot/Sample/x-case-Nim.inp	legacy/elan3/applications/Robot/Sample/Nim.inp
+legacy/elan3/applications/Robot/Sample/x-case-Nim.out	legacy/elan3/applications/Robot/Sample/Nim.out
+legacy/elan3/applications/Robot/Sample/x-case-Robot.inp	legacy/elan3/applications/Robot/Sample/Robot.inp
+legacy/elan3/applications/Robot/Sample/x-case-Robot.out	legacy/elan3/applications/Robot/Sample/Robot.out
+legacy/elan3/applications/Robot/SAMPLES/x-case-Nim.inp	legacy/elan3/applications/Robot/SAMPLES/Nim.inp
+legacy/elan3/applications/Robot/SAMPLES/x-case-Nim.out	legacy/elan3/applications/Robot/SAMPLES/Nim.out
+legacy/elan3/applications/Robot/SAMPLES/x-case-Robot.inp	legacy/elan3/applications/Robot/SAMPLES/Robot.inp
+legacy/elan3/applications/Robot/SAMPLES/x-case-Robot.out	legacy/elan3/applications/Robot/SAMPLES/Robot.out
+legacy/elan/src/elan-library/elanlib/strategy/x-case-Any.eln	legacy/elan/src/elan-library/elanlib/strategy/Any.eln
+legacy/elan3/doc/ElanLibStrategy/x-case-Any.eln	legacy/elan3/doc/ElanLibStrategy/Any.eln
+legacy/elan3/src/elan-library/elan-library-1.0a/elanlib/strategy/x-case-Any.eln	legacy/elan3/src/elan-library/elan-library-1.0a/elanlib/strategy/Any.eln
+legacy/elan3/src/elan-library/elanlib/strategy/x-case-Any.eln	legacy/elan3/src/elan-library/elanlib/strategy/Any.eln
+docs/manual/ElanLibStrategy/x-case-Any.eln	docs/manual/ElanLibStrategy/Any.eln

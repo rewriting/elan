@@ -13,8 +13,7 @@ import check_deps as cd  # noqa: E402
 RULES = {"lex": ["base"], "base": [], "term": ["lex", "base"]}
 
 
-# Test trees live next to this file (the repository's case-sensitive volume;
-# the system temp dir may be case-insensitive) and are removed at exit.
+# Test trees live next to this file and are removed at exit.
 TMP = Path(__file__).resolve().parent / ".tmp"
 atexit.register(shutil.rmtree, TMP, True)
 
@@ -82,7 +81,15 @@ class CheckDepsTest(unittest.TestCase):
                          [("lex/l.cc", "term/t.h")])
 
 
+def case_sensitive_tmp():
+    t = tree({"a": "", "A": ""})
+    return len(list(t.iterdir())) == 2
+
+
 class CaseCollisionTest(unittest.TestCase):
+    # the colliding tree cannot exist on a case-insensitive file system (the
+    # macOS default); the test runs on Linux CI and case-sensitive volumes
+    @unittest.skipUnless(case_sensitive_tmp(), "case-insensitive file system")
     def test_names_differing_only_by_case_are_reported(self):
         root = tree({"lib/any.eln": "", "lib/x/y.eln": "", "lib/AnY.eln": ""})
         self.assertEqual(cd.case_collisions(root / "lib"), [["AnY.eln", "any.eln"]])

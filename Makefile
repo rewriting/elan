@@ -12,16 +12,19 @@
 #   make check-front     tests of the Go front end (src/compiler-go/front, spec S8,
 #                        when go >= 1.24 exists): go vet/test, the harness
 #                        elan-lextrace, lexem streams, module trees, error corpus
+#   make check-case      no two tracked paths differ only by case (CASE-RENAMES.tsv)
 #   make check-golden    golden tests: .ref files, -d dump, statistics, errors
 #   make check-compiler  compiled tests (J, JO) only: elanc-rem, REM, runtime libraries
 #   make check-elanc     what bin/elanc is (ELAN_ELANC: go by default, rem), CMake's fallback
 #   make check-elanc-rem the same test in a build with -DELAN_ELANC=rem (build-elanc-rem/,
 #                        removed afterwards)
-#   make reference       build the 2004 reference system (reference/install)
+#   make reference       build the 2004 reference system (REFERENCE_PREFIX, default
+#                        reference/install; on a case-sensitive volume, see reference/README.md)
 #   make check-reference full bench (778 tests) against the reference
 BUILD   ?= build
 PREFIX  ?= $(CURDIR)/$(BUILD)/install
 BENCH    = tests/legacy-bench/run_tests.py
+REFERENCE_PREFIX ?= $(CURDIR)/reference/install
 # parallel build jobs (a plain -j is unlimited with make and can exhaust memory)
 JOBS    ?= $(shell nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 2)
 
@@ -38,7 +41,7 @@ else
   ELAN_CXX ?= g++
 endif
 
-.PHONY: front-tables check-front manual manual-update all configure install check check-rust check-go check-compiler check-elanc check-elanc-rem elanc-kind check-golden check-sanitize check-arch check-unit test-runner smoke reference check-reference clean toolchain
+.PHONY: check-case front-tables check-front manual manual-update all configure install check check-rust check-go check-compiler check-elanc check-elanc-rem elanc-kind check-golden check-sanitize check-arch check-unit test-runner smoke reference check-reference clean toolchain
 
 all: configure
 	cmake --build $(BUILD) -j $(JOBS)
@@ -91,6 +94,10 @@ smoke: install
 # Module dependency rules (tests/architecture, S3a spec D2), the
 # compiler's copies of the interpreter's limits and codes (REF contract), and
 # no script calling the bare elanc (REM is elanc-rem, S7e task 9)
+# No two tracked paths may differ only by case (CASE-RENAMES.tsv).
+check-case:
+	tests/check_case.sh
+
 check-arch:
 	cd tests/architecture && python3 test_check_deps.py && python3 test_check_limits.py && python3 test_check_rem_name.py
 	python3 tests/architecture/check_deps.py
@@ -202,7 +209,7 @@ check-front: install
 	  && tests/front/test_front_errors.sh $(PREFIX); \
 	else echo "elanc-go not built (go >= 1.24 missing or -DELAN_GO=OFF): front tests skipped"; fi
 
-check: smoke test-runner check-arch check-unit check-golden check-rust check-go check-elanc check-front
+check: check-case smoke test-runner check-arch check-unit check-golden check-rust check-go check-elanc check-front
 	$(BENCH) --prefix $(PREFIX) --kinds I,A
 	@$(CHECK_COMPILER)
 
@@ -246,10 +253,10 @@ manual-update: manual
 	cp build-manual/manual.pdf docs/manual/manual.pdf
 
 reference:
-	reference/build.sh
+	PREFIX="$(REFERENCE_PREFIX)" reference/build.sh
 
 check-reference:
-	$(BENCH) --prefix reference/install
+	$(BENCH) --prefix "$(REFERENCE_PREFIX)"
 
 clean:
 	rm -rf $(BUILD)

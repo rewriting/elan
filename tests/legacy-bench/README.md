@@ -12,8 +12,10 @@ drove the csh scripts `itest`, `aitest` and `jtest` of
 ./run_tests.py --list
 ```
 
-It must run on a case-sensitive file system (it copies each application
-directory to `work/`).
+Each test runs in a private copy of its application directory (`work/`); the
+files stored renamed (`CASE-RENAMES.tsv`, e.g. `Robot/x-case-Nim.lgi`) get
+their original names back there when the test uses them, so the bench runs
+on case-insensitive file systems too.
 
 ## Test kinds
 

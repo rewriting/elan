@@ -10,7 +10,10 @@
 # bench in ../tests/legacy-bench is validated against it.
 #
 # Requirements (Homebrew on macOS arm64): gcc (gcc-16/g++-16), openjdk,
-# bdw-gc, bison, flex, libtool.  Must run on a case-sensitive file system.
+# bdw-gc, bison, flex, libtool.  The build tree (REFERENCE_BUILD, default
+# reference/build) and the install (PREFIX, default reference/install) must be
+# on a case-sensitive file system: the 2004 library installs both
+# strategy/Any.eln and strategy/any.eln. The repository itself need not be.
 #
 # Usage: ./build.sh [component...]   components: prepare aterm cpl interpreter compiler elanc_rem library
 #        (no argument = all, in dependency order)
@@ -19,7 +22,7 @@ set -euo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"
 REPO="$(cd "$HERE/.." && pwd)"
 LEGACY="$REPO/legacy"
-BUILD="$HERE/build"
+BUILD="${REFERENCE_BUILD:-$HERE/build}"
 SRC="$BUILD/elan3/src"
 PREFIX="${PREFIX:-$HERE/install}"
 LOGDIR="$BUILD/logs"
@@ -58,11 +61,13 @@ run() { # run <logname> <cmd...>: quiet, show the log tail on failure
   fi
 }
 
-case_sensitive_or_die() {
-  local t; t=$(mktemp -d "$HERE/.casetest.XXXX")
+case_sensitive_or_die() {   # DIR
+  local t; mkdir -p "$1"; t=$(mktemp -d "$1/.casetest.XXXX")
   touch "$t/a" "$t/A"
   if [ "$(ls "$t" | wc -l)" -ne 2 ]; then
-    rm -rf "$t"; echo "ERROR: $HERE is on a case-insensitive file system (see README.md)"; exit 1
+    rm -rf "$t"
+    echo "ERROR: $1 is on a case-insensitive file system: set REFERENCE_BUILD and PREFIX"
+    echo "to directories of a case-sensitive volume (see reference/README.md)"; exit 1
   fi
   rm -rf "$t"
 }
@@ -78,12 +83,20 @@ freeze_autotools() {
 
 build_prepare() {
   log "Preparing sources from legacy/ + patches/"
-  case_sensitive_or_die
+  case_sensitive_or_die "$(dirname "$BUILD")"
+  case_sensitive_or_die "$PREFIX"
   # (the library build extracts a read-only distribution tree: make it removable)
   [ -d "$BUILD" ] && chmod -R u+w "$BUILD"
   rm -rf "$BUILD"; mkdir -p "$SRC" "$LOGDIR"
   cp -R "$LEGACY/elan3/src/." "$SRC/"
   cp -R "$LEGACY/elan/src/aterm-1.6.5" "$SRC/"
+  # original names of the renamed files (CASE-RENAMES.tsv): the 2004 library
+  # has both strategy/Any.eln and strategy/any.eln
+  grep -v '^#' "$HERE/../CASE-RENAMES.tsv" | while IFS="$(printf '\t')" read -r stored orig; do
+    case "$stored" in
+      legacy/elan3/src/*) mv "$SRC/${stored#legacy/elan3/src/}" "$SRC/${orig#legacy/elan3/src/}" ;;
+    esac
+  done
   for p in "$HERE"/patches/*.patch; do
     echo "  applying $(basename "$p")"
     run prepare patch -p1 -d "$BUILD" -i "$p"
