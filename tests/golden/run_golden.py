@@ -19,7 +19,7 @@ The cases are listed in cases.tsv (tab-separated, `#` comments):
       elan ARGS < STDIN                           -> expected/<id>.txt
 
 `dir` is relative to the repository; each case runs in a private copy of it
-(under work/, which must be on a case-sensitive file system). When the copy
+(under work/). When the copy
 contains gen.py, `python3 -I gen.py` runs first in it (generated programs:
 table overflows, deep includes...). Text outputs are normalised: the work
 directory, the install prefix and the repository become <WORK>, <PREFIX> and

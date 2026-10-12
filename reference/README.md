@@ -21,9 +21,22 @@ as in the modern build.
 
 Requirements: `brew install gcc openjdk bdw-gc bison flex libtool` (macOS), or
 `apt install build-essential cmake bison flex libfl-dev default-jdk-headless libgc-dev automake tcsh python3`
-(Linux, Ubuntu 24.04), and a **case-sensitive** file system (see the top-level
-README). `build.sh` picks its defaults from `uname -s`; `ELAN_CC`, `ELAN_CXX`,
-`GC_PREFIX`, `JAVA_HOME` and `AUX` override them.
+(Linux, Ubuntu 24.04). The build tree and the install must be on a
+**case-sensitive** file system (the 2004 library installs both
+`strategy/Any.eln` and `strategy/any.eln`); the repository need not be. On
+macOS, put them on a case-sensitive APFS image:
+
+```sh
+hdiutil create -size 4g -type SPARSE -fs "Case-sensitive APFS" -volname elanref $HOME/elanref.sparseimage
+hdiutil attach $HOME/elanref.sparseimage -mountpoint $HOME/elanref -nobrowse
+make reference REFERENCE_BUILD=$HOME/elanref/build REFERENCE_PREFIX=$HOME/elanref/install
+make check-reference REFERENCE_PREFIX=$HOME/elanref/install
+```
+
+`build.sh` picks its defaults from `uname -s`; `ELAN_CC`, `ELAN_CXX`,
+`GC_PREFIX`, `JAVA_HOME` and `AUX` override them; `REFERENCE_BUILD` (default
+`reference/build`) and `PREFIX` (`make reference`: `REFERENCE_PREFIX`,
+default `reference/install`) place the build tree and the install.
 
 ## What the build does
 

@@ -39,12 +39,12 @@ run	dump-Unification-bool1	legacy/elan3/applications/Unification	SAMPLES/bool1.i
 run	dump-Features-ac2	legacy/elan3/applications/Features	SAMPLES/ac2.inp	-b -d ac2.lgi qqq.spc
 #
 # statistics: -s short, -S long (times and speeds are normalised)
-run	stats-s-Simplest-fib	legacy/elan3/applications/Simplest	SAMPLES/ifib.inp	-b -s fib.lgi
-run	stats-S-Simplest-fib	legacy/elan3/applications/Simplest	SAMPLES/ifib.inp	-b -S fib.lgi
-run	stats-S-Simplest-nhorse	legacy/elan3/applications/Simplest	Sample/nhorse.inp	-b -S nhorse.lgi
-run	stats-s-Prolog-queens	legacy/elan3/applications/Prolog	SAMPLES/iqueens.inp	-b -s prolog.lgi queens.spc
-run	stats-S-Features-m	legacy/elan3/applications/Features	SAMPLES/m.inp	-b -S m.lgi
-run	stats-S-Poly-poly1	legacy/elan3/applications/Poly	SAMPLES/poly1.inp	-b -S poly1.lgi someVariables.spc
+run	stats-short-Simplest-fib	legacy/elan3/applications/Simplest	SAMPLES/ifib.inp	-b -s fib.lgi
+run	stats-long-Simplest-fib	legacy/elan3/applications/Simplest	SAMPLES/ifib.inp	-b -S fib.lgi
+run	stats-long-Simplest-nhorse	legacy/elan3/applications/Simplest	Sample/nhorse.inp	-b -S nhorse.lgi
+run	stats-short-Prolog-queens	legacy/elan3/applications/Prolog	SAMPLES/iqueens.inp	-b -s prolog.lgi queens.spc
+run	stats-long-Features-m	legacy/elan3/applications/Features	SAMPLES/m.inp	-b -S m.lgi
+run	stats-long-Poly-poly1	legacy/elan3/applications/Poly	SAMPLES/poly1.inp	-b -S poly1.lgi someVariables.spc
 #
 # deliberate errors (without -b: the messages and warnings are shown)
 run	err-missing-lgi	tests/golden/programs/syntax-error	-	nofile.lgi

@@ -227,13 +227,36 @@ class RunTest(unittest.TestCase):
         self.assertIn("elan-no-such-program", err)
 
 
-class CaseSensitivityTest(unittest.TestCase):
-    def test_repository_volume_is_case_sensitive(self):
-        self.assertTrue(rt.case_sensitive(rt.HERE / "work"))
+class CaseRenamesTest(unittest.TestCase):
+    ROBOT = rt.ELAN3 / "applications" / "Robot"
 
-    @unittest.skipUnless(sys.platform == "darwin", "macOS default volume only")
-    def test_macos_temp_dir_is_not(self):
-        self.assertFalse(rt.case_sensitive(Path(tempfile.gettempdir()) / "elan-case-probe"))
+    def test_manifest_maps_robot_variant(self):
+        self.assertEqual(rt.src_path(self.ROBOT / "Nim.lgi"), self.ROBOT / "x-case-Nim.lgi")
+        self.assertEqual(rt.src_path(self.ROBOT / "nim.lgi"), self.ROBOT / "nim.lgi")
+        self.assertTrue(rt.src_path(self.ROBOT / "SAMPLES" / "Robot.out").exists())
+
+    def copy(self, tmp):
+        wd = Path(tmp) / "Robot"
+        rt.shutil.copytree(self.ROBOT, wd, ignore=rt.shutil.ignore_patterns("CVS"))
+        return wd
+
+    def test_restore_for_an_upper_case_test(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            wd = self.copy(tmp)
+            rt.restore_case(self.ROBOT, wd, "Nim")
+            names = {p.name for p in wd.iterdir()}
+            self.assertIn("Nim.lgi", names)
+            self.assertIn("State.eln", names)
+            self.assertFalse(any(n.startswith("x-case-") for n in names))
+            self.assertTrue((wd / "Nim.eln").read_text(encoding="latin-1").startswith("module Nim"))
+            self.assertTrue((wd / "SAMPLES" / "Nim.inp").exists())
+
+    def test_no_restore_for_a_lower_case_test(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            wd = self.copy(tmp)
+            rt.restore_case(self.ROBOT, wd, "nim")
+            self.assertTrue((wd / "x-case-Nim.lgi").exists())
+            self.assertTrue((wd / "nim.eln").read_text(encoding="latin-1").startswith("module nim"))
 
 
 if __name__ == "__main__":

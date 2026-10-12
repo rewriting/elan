@@ -13,8 +13,7 @@ import check_deps as cd  # noqa: E402
 RULES = {"lex": ["base"], "base": [], "term": ["lex", "base"]}
 
 
-# Test trees live next to this file (the repository's case-sensitive volume;
-# the system temp dir may be case-insensitive) and are removed at exit.
+# Test trees live next to this file and are removed at exit.
 TMP = Path(__file__).resolve().parent / ".tmp"
 atexit.register(shutil.rmtree, TMP, True)
 

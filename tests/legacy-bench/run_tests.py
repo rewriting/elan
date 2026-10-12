@@ -55,6 +55,46 @@ REGRESSION = REPO / "tests" / "regression"
 EXAMPLES = REPO / "examples"
 EXCEPTIONS = HERE / "platform-exceptions.tsv"
 
+# Files renamed so that no two paths differ only by case (CASE-RENAMES.tsv:
+# stored path, original path). A test sees the original names: its private
+# copy of the application gets them back when it uses one of them.
+def load_case_renames(path=REPO / "CASE-RENAMES.tsv"):
+    pairs = []
+    for line in path.read_text().splitlines():
+        if line and not line.startswith("#"):
+            stored, orig = line.split("\t")
+            pairs.append((REPO / stored, REPO / orig))
+    return pairs
+
+
+CASE_RENAMES = load_case_renames()
+STORED_OF = {orig: stored for stored, orig in CASE_RENAMES}
+
+
+def src_path(p):
+    """Where the original file p is stored (checked before p itself: on a
+    case-insensitive file system p would find its twin)."""
+    return STORED_OF.get(p, p)
+
+
+def restore_case(src, dst, lgi=None):
+    """In dst, a copy of src, give the renamed files of src their original
+    names: all of them when lgi is None, else only if src/lgi.lgi is one
+    (the files of a case variant go together: Robot/Nim.lgi imports Nim,
+    Space, State). On a case-insensitive file system a restored file
+    replaces its twin, which the test does not use (removed first, or the
+    twin's name would stay)."""
+    under = [(s, o) for s, o in CASE_RENAMES if src in o.parents]
+    if lgi is not None and src / f"{lgi}.lgi" not in STORED_OF:
+        return
+    for stored, orig in under:
+        target = dst / orig.relative_to(src)
+        for twin in os.listdir(target.parent):
+            if twin != target.name and twin.lower() == target.name.lower():
+                os.remove(target.parent / twin)
+        os.replace(dst / stored.relative_to(src), target)
+
+
 # Directories whose tst_all files are harvested
 SUITES = [ELAN3 / "applications", ELAN3 / "contributions", ROOT / "elan" / "sources"]
 
@@ -198,17 +238,6 @@ def load_exceptions(path=EXCEPTIONS, platform=None):
     return exc
 
 
-def case_sensitive(directory):
-    directory.mkdir(parents=True, exist_ok=True)
-    probe = Path(tempfile.mkdtemp(prefix="case-", dir=directory))
-    try:
-        (probe / "a").touch()
-        (probe / "A").touch()
-        return len(list(probe.iterdir())) == 2
-    finally:
-        shutil.rmtree(probe, ignore_errors=True)
-
-
 # ---------------------------------------------------------------- execution
 def run(cmd, cwd, stdin=None, timeout=60):
     with open(stdin, "rb") if stdin else open(os.devnull, "rb") as fin:
@@ -241,19 +270,20 @@ def sanitizer_report(err):
 def run_test(t, timeout):
     if modern_only(t, PREFIX, FIXED_CASES):
         return "MODERN-ONLY", "fixes a bug of the 2004 reference (fixes-2004)", ""
-    expected = samples(t["dir"]) / f"{t['out']}.out"
+    expected = src_path(samples(t["dir"]) / f"{t['out']}.out")
     if not expected.exists():
         return "NOREF", f"missing {expected}", ""
-    if not (t["dir"] / f"{t['lgi']}.lgi").exists():
+    if not src_path(t["dir"] / f"{t['lgi']}.lgi").exists():
         return "NOLGI", f"missing {t['lgi']}.lgi", ""
     spc = [] if t["spc"] == "no" else [f"{t['spc']}.spc"]
     flags = [f for f in t["flags"] if f]
     WORK.mkdir(exist_ok=True)
-    work = Path(tempfile.mkdtemp(prefix="elantest-", dir=WORK))  # case-sensitive volume
+    work = Path(tempfile.mkdtemp(prefix="elantest-", dir=WORK))
     try:
         wd = work / t["dir"].name
         shutil.copytree(t["dir"], wd, symlinks=True,
                         ignore=shutil.ignore_patterns("CVS", "*.o", "a.out", ".elan.*"))
+        restore_case(t["dir"], wd, t["lgi"])
         inp = samples(wd) / f"{t['inp']}.inp" if t["inp"] else None
         if inp is not None and not inp.exists():
             return "NOINP", f"missing {inp.name}", ""
@@ -437,7 +467,8 @@ def main():
     if a.oldlib:
         tmp = Path(tempfile.mkdtemp(prefix="elan-oldlib-"))
         (tmp / "share").mkdir()
-        (tmp / "share" / "elanlib").symlink_to(OLDLIB_SRC)
+        shutil.copytree(OLDLIB_SRC, tmp / "share" / "elanlib", symlinks=True)
+        restore_case(OLDLIB_SRC, tmp / "share" / "elanlib")   # strategy/Any.eln
         a.elanlib = str(tmp)
     if a.elanlib:
         os.environ["ELAN_TEST_LIB"] = str(Path(a.elanlib).resolve())
@@ -450,10 +481,6 @@ def main():
         print(len(tests), "tests")
         return 0
 
-    if not case_sensitive(WORK):
-        print(f"ERROR: {WORK} is on a case-insensitive file system "
-              "(ELAN sources contain files differing only by case; see README)")
-        return 2
     exceptions = load_exceptions()
     global FIXED_CASES
     FIXED_CASES = frozenset(load_fixes_2004())

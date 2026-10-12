@@ -9,7 +9,7 @@ backtracking. This repository preserves the original system and revives it.
 
 | Path | Purpose |
 |------|---------|
-| `legacy/` | verbatim archive of the historical sources (never edited) |
+| `legacy/` | verbatim archive of the historical sources (never edited; a few files renamed `x-case-*`, see `CASE-RENAMES.tsv`) |
 | `reference/` | rebuild of ELAN 3 (2004) from `legacy/` with minimal portability patches; the behavioural reference |
 | `tests/legacy-bench/` | the historical test bench (778 tests), its baseline and reference snapshots |
 | `src/interpreter/` | the modern interpreter, one directory per module (see below) |
@@ -44,24 +44,17 @@ brew install gcc libtool               # reference system
 Without Go (or with Go older than 1.24), the build still succeeds: `elanc`
 is then REM's driver (`elanc-rem`), with a CMake message.
 
-### Case-sensitive file system
+### File names and case
 
-Some files of `legacy/` (and of the manual's example copies in `docs/manual/`)
-differ only by the case of their name (`any.eln` / `Any.eln`, `Robot.lgi` /
-`robot.lgi`, ...), and the default macOS file system is case-insensitive.
-Work in a case-sensitive
-APFS volume:
-
-```sh
-hdiutil create -size 20g -type SPARSE -fs "Case-sensitive APFS" -volname elan ~/github/elan.sparseimage
-mkdir -p ~/github/elan
-hdiutil attach ~/github/elan.sparseimage -mountpoint ~/github/elan -nobrowse
-cd ~/github/elan && git clone https://github.com/rewriting/elan .
-```
-
-After a reboot, only the `hdiutil attach` line is needed. This is only needed
-for the repository (because of `legacy/`): the installed interpreter and its
-library work on any file system.
+The repository works on case-insensitive file systems (the macOS and Windows
+defaults). The few files of the imported archives (`legacy/`) and of the
+manual's examples whose names differed only by case from another file are
+stored with an `x-case-` prefix, contents unchanged, and listed in
+`CASE-RENAMES.tsv`; the legacy bench gives them back their names in its
+private copy of an application, `tests/restore_case.sh DEST` rebuilds the
+original layout, and `tests/check_case.sh` (run by `make check`) refuses new
+collisions. Only the 2004 reference system (`make reference`) needs a
+case-sensitive volume, for its build tree and install (`reference/README.md`).
 
 ## Getting started
 
