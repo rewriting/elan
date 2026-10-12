@@ -121,6 +121,36 @@ void CPL_init_realloc(void* (*f)(void *, size_t)) {
 
 
 
+/* --- Statistics (-DCPL_STATS): printed on stderr at exit ---------- */
+
+#ifdef CPL_STATS
+static unsigned long st_global, st_fail, st_bytes, st_max, st_same4k, st_chunks4k;
+static void cpl_stats_print(void) {
+  fprintf(stderr, "cpl: %lu global choice points, %lu global fails, "
+          "%lu bytes copied (mean %lu, max %lu), 4 KiB chunks equal to the "
+          "previous global snapshot: %lu of %lu\n",
+          st_global, st_fail, st_bytes, st_global ? st_bytes / st_global : 0,
+          st_max, st_same4k, st_chunks4k);
+}
+static void cpl_stats_cp(char *top, long size) {
+  int i;
+  if(st_global == 0) atexit(cpl_stats_print);
+  st_global++; st_bytes += size; if((unsigned long)size > st_max) st_max = size;
+  /* compare with the most recent live global snapshot, chunks aligned on bp_main */
+  for(i = stack_ptr - 1; i >= 0 && tab_pile[i].size == -1; i--) ;
+  if(i >= 0) {
+    long prev = tab_pile[i].size, k;
+    char *ps = (char*)backTrail + tab_pile[i].data_index;   /* copy of [bp_main-prev, bp_main) */
+    for(k = 4096; k <= size; k += 4096) {
+      st_chunks4k++;
+      if(k <= prev && !memcmp(top - k, ps + prev - k, 4096)) st_same4k++;
+    }
+  } else {
+    st_chunks4k += size / 4096;
+  }
+}
+#endif
+
 /* --- Le Choice_Point() -------------------------------------- */
 
 #define scale sizeof(long)
@@ -188,7 +218,7 @@ int _localSetChoicePoint() {
   stack_ptr++;
   tab_pile[stack_ptr].backCTraili = backCTraili;
   tab_pile[stack_ptr].size = -1;
-  return setjmp(jmpbuf_stack[stack_ptr]);
+  return CPL_SETJMP(jmpbuf_stack[stack_ptr]);
 }
 
 int setChoicePoint() {
@@ -216,7 +246,10 @@ int setChoicePoint() {
     //printf("dest      = %x\ts=%x\tsize=%d\n",d,s,size); 
   
   memcpy(d, s, global_size);
-  return setjmp(jmpbuf_stack[stack_ptr]);
+#ifdef CPL_STATS
+  cpl_stats_cp(bp_main, global_size);
+#endif
+  return CPL_SETJMP(jmpbuf_stack[stack_ptr]);
     /*
       if(setjmp(stack[stack_ptr])) {
         // mise a 0 du Trail pour le GC
@@ -235,12 +268,15 @@ static __attribute__((noinline)) void makeLongJump() {
   memcpy(d, s, global_size);
   backTraili -= global_size;
   backCTraili = tab_pile[stack_ptr].backCTraili;
-  longjmp(jmpbuf_stack[stack_ptr--], 1);
+  CPL_LONGJMP(jmpbuf_stack[stack_ptr--], 1);
   printf("[fail] Error\n");
 }
 
 __attribute__((noreturn)) void globalFail() {
   register volatile char *sp;
+#ifdef CPL_STATS
+  st_fail++;
+#endif
     /* suppression du point de choix */
   s = (char*)backTrail + tab_pile[stack_ptr].data_index;
   global_size = tab_pile[stack_ptr].size;

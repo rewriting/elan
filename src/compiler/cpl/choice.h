@@ -34,6 +34,17 @@
 #define DNON_SAVING_SETJMP 1
 #define DLONGJMP_RESTORE_FROM_STACK 1
 
+/* setjmp/longjmp without the signal mask: on macOS (BSD) setjmp saves and
+   longjmp restores it, a system call per choice point and per failure; the
+   generated code never changes the mask. glibc's setjmp already keeps it. */
+#if DNON_SAVING_SETJMP && defined(__APPLE__)
+#define CPL_SETJMP(b)    _setjmp(b)
+#define CPL_LONGJMP(b,v) _longjmp(b,v)
+#else
+#define CPL_SETJMP(b)    setjmp(b)
+#define CPL_LONGJMP(b,v) longjmp(b,v)
+#endif
+
 #define INITIAL_BACKTRAIL_SIZE    256
 #define INITIAL_BACKCTRAIL_SIZE   8
 #define INITIAL_JMPBUF_STACK_SIZE 4
@@ -92,11 +103,11 @@ extern void increment_stack_ptr();
   (stack_ptr++),\
   (tab_pile[stack_ptr].backCTraili = backCTraili),\
   (tab_pile[stack_ptr].size = -1),\
-  (setjmp(jmpbuf_stack[stack_ptr])))
+  (CPL_SETJMP(jmpbuf_stack[stack_ptr])))
 
 #define localFail() \
   backCTraili = tab_pile[stack_ptr].backCTraili; \
-  longjmp(jmpbuf_stack[stack_ptr--],1); 
+  CPL_LONGJMP(jmpbuf_stack[stack_ptr--],1); 
 
 #define fail() \
   if(stack_ptr<0) { printf("Error: no more choices.\n"); exit(0); }\
