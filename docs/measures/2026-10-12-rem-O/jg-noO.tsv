@@ -1,0 +1,176 @@
+case	J_status	J_elanc_s	J_make_s	J_run_ms	J_rss_MB	J_steps	G_status	G_new_s	G_again_s	G_run_ms	G_rss_MB	G_steps	check
+elan3/applications/BCompletion::ans:KNZ86:-:jKNZ86	ERROR-elanc-rem	0.03	-	-	0.0	-	ERROR-elanc-go-1	0.01	-	-	0.0	-	both fail
+elan3/applications/BCompletion::ans:Zeh89:-:jZeh89	ERROR-elanc-rem	0.03	-	-	0.0	-	ERROR-elanc-go-1	0.01	-	-	0.0	-	both fail
+elan3/applications/BCompletion::ans:curry:-:jcurry	ERROR-elanc-rem	0.03	-	-	0.0	-	ERROR-elanc-go-1	0.01	-	-	0.0	-	both fail
+elan3/applications/BCompletion::ans:exa79:-:jexa79	ERROR-elanc-rem	0.03	-	-	0.0	-	ERROR-elanc-go-1	0.01	-	-	0.0	-	both fail
+elan3/applications/BCompletion::ans:exa80:-:jexa80	ERROR-elanc-rem	0.03	-	-	0.0	-	ERROR-elanc-go-1	0.01	-	-	0.0	-	both fail
+elan3/applications/BCompletion::ans:exa85:-:jexa85	ERROR-elanc-rem	0.03	-	-	0.0	-	ERROR-elanc-go-1	0.01	-	-	0.0	-	both fail
+elan3/applications/BCompletion::ans:expf:-:jexpf	ERROR-elanc-rem	0.03	-	-	0.0	-	ERROR-elanc-go-1	0.01	-	-	0.0	-	both fail
+elan3/applications/BCompletion::ans:expoclos:-:jexpoclos	ERROR-elanc-rem	0.03	-	-	0.0	-	ERROR-elanc-go-1	0.01	-	-	0.0	-	both fail
+elan3/applications/BCompletion::ans:furtin:-:jfurtin	ERROR-elanc-rem	0.03	-	-	0.0	-	ERROR-elanc-go-1	0.01	-	-	0.0	-	both fail
+elan3/applications/BCompletion::ans:gdiv:-:jgdiv	ERROR-elanc-rem	0.03	-	-	0.0	-	ERROR-elanc-go-1	0.01	-	-	0.0	-	both fail
+elan3/applications/BCompletion::ans:group:-:jgroup	ERROR-elanc-rem	0.03	-	-	0.0	-	ERROR-elanc-go-1	0.01	-	-	0.0	-	both fail
+elan3/applications/BCompletion::ans:p2:-:jp2	ERROR-elanc-rem	0.03	-	-	0.0	-	ERROR-elanc-go-1	0.01	-	-	0.0	-	both fail
+elan3/applications/BCompletion::ans:p8:-:jp8	ERROR-elanc-rem	0.03	-	-	0.0	-	ERROR-elanc-go-1	0.01	-	-	0.0	-	both fail
+elan3/applications/BCompletion::ans:sample:-:jsample	ERROR-elanc-rem	0.03	-	-	0.0	-	ERROR-elanc-go-1	0.01	-	-	0.0	-	both fail
+elan3/applications/BCompletion::ans:taussky:-:jtaussky	ERROR-elanc-rem	0.03	-	-	0.0	-	ERROR-elanc-go-1	0.01	-	-	0.0	-	both fail
+elan3/applications/Simplest::prim_jc:no:-:prim_jc	0	0.09	0.17	3.83	2.9	1404	0	0.11	0.05	3.07	5.3	1404	ok
+elan3/applications/Simplest::primes_jc:no:-:primes_jc	0	0.10	0.16	3.54	2.8	534	0	0.12	0.06	2.89	5.3	534	ok
+elan3/applications/Simplest::main_jc:no:-:main_jc	0	0.07	0.17	3.28	2.8	30	0	0.11	0.05	2.86	5.4	30	ok
+elan3/applications/Simplest::hanoi_jc:no:-:hanoi_jc	0	0.09	0.17	3.59	2.8	347	0	0.11	0.05	2.95	5.4	347	ok
+elan3/applications/Simplest::nhorse_jc:no:-:nhorse_jc	0	0.09	0.20	25.80	7.3	45157	0	0.11	0.05	3.93	5.9	45157	ok
+elan3/applications/Simplest::fib_jc:no:-:fib_jc	0	0.09	0.16	18.54	7.3	65671	0	0.11	0.05	3.25	5.2	65671	ok
+elan3/applications/Simplest::nqueens_jc:no:-:nqueens_jc	0	0.09	0.18	158.70	7.4	648617	0	0.11	0.06	4.83	5.8	648617	ok
+elan3/applications/Simplest::queens_jc:no:-:queens_jc	0	0.09	0.18	107.88	7.4	253888	0	0.11	0.06	4.61	5.8	253888	ok
+elan/sources/Compiler.2.1/BenchThesis/FastCompletion::ans:KNZ86:-:jKNZ86	ERROR-make	0.04	0.01	-	0.0	-	ERROR-elanc-go-1	0.02	-	-	0.0	-	both fail
+elan/sources/Compiler.2.1/BenchThesis/FastCompletion::ans:Zeh89:-:jZeh89	ERROR-make	0.03	0.01	-	0.0	-	ERROR-elanc-go-1	0.02	-	-	0.0	-	both fail
+elan/sources/Compiler.2.1/BenchThesis/FastCompletion::ans:curry:-:jcurry	ERROR-make	0.03	0.01	-	0.0	-	ERROR-elanc-go-1	0.02	-	-	0.0	-	both fail
+elan/sources/Compiler.2.1/BenchThesis/FastCompletion::ans:exa79:-:jexa79	ERROR-make	0.04	0.01	-	0.0	-	ERROR-elanc-go-1	0.02	-	-	0.0	-	both fail
+elan/sources/Compiler.2.1/BenchThesis/FastCompletion::ans:exa80:-:jexa80	ERROR-make	0.03	0.01	-	0.0	-	ERROR-elanc-go-1	0.02	-	-	0.0	-	both fail
+elan/sources/Compiler.2.1/BenchThesis/FastCompletion::ans:exa85:-:jexa85	ERROR-make	0.03	0.01	-	0.0	-	ERROR-elanc-go-1	0.02	-	-	0.0	-	both fail
+elan/sources/Compiler.2.1/BenchThesis/FastCompletion::ans:expf:-:jexpf	ERROR-make	0.03	0.01	-	0.0	-	ERROR-elanc-go-1	0.02	-	-	0.0	-	both fail
+elan/sources/Compiler.2.1/BenchThesis/FastCompletion::ans:expoclos:-:jexpoclos	ERROR-make	0.03	0.01	-	0.0	-	ERROR-elanc-go-1	0.02	-	-	0.0	-	both fail
+elan/sources/Compiler.2.1/BenchThesis/FastCompletion::ans:furtin:-:jfurtin	ERROR-make	0.04	0.01	-	0.0	-	ERROR-elanc-go-1	0.02	-	-	0.0	-	both fail
+elan/sources/Compiler.2.1/BenchThesis/FastCompletion::ans:gdiv:-:jgdiv	ERROR-make	0.03	0.01	-	0.0	-	ERROR-elanc-go-1	0.02	-	-	0.0	-	both fail
+elan/sources/Compiler.2.1/BenchThesis/FastCompletion::ans:group:-:jgroup	ERROR-make	0.03	0.01	-	0.0	-	ERROR-elanc-go-1	0.02	-	-	0.0	-	both fail
+elan/sources/Compiler.2.1/BenchThesis/FastCompletion::ans:p2:-:jp2	ERROR-make	0.03	0.01	-	0.0	-	ERROR-elanc-go-1	0.02	-	-	0.0	-	both fail
+elan/sources/Compiler.2.1/BenchThesis/FastCompletion::ans:p8:-:jp8	ERROR-make	0.04	0.01	-	0.0	-	ERROR-elanc-go-1	0.02	-	-	0.0	-	both fail
+elan/sources/Compiler.2.1/BenchThesis/FastCompletion::ans:sample:-:jsample	ERROR-make	0.03	0.01	-	0.0	-	ERROR-elanc-go-1	0.02	-	-	0.0	-	both fail
+elan/sources/Compiler.2.1/BenchThesis/FastCompletion::ans:taussky:-:jtaussky	ERROR-make	0.03	0.01	-	0.0	-	ERROR-elanc-go-1	0.02	-	-	0.0	-	both fail
+elan/sources/Compiler.2.1/Test::bimatch:no:-:bimatch	0	0.09	0.24	3.20	2.8	1	0	0.38	0.13	3.06	5.2	1	ok
+elan/sources/Compiler.2.1/Test::bool3:no:-:bool3	0	0.07	0.18	470.03	21.3	57664	0	0.11	0.05	46.72	29.5	57664	ok
+elan/sources/Compiler.2.1/Test::choice1:no:-:choice1	0	0.09	0.17	3.61	2.8	10	0	0.11	0.06	3.14	5.4	10	ok
+elan/sources/Compiler.2.1/Test::choice2:no:-:choice2	0	0.08	0.16	3.14	2.8	2	0	0.11	0.06	2.87	5.2	2	ok
+elan/sources/Compiler.2.1/Test::condac1:no:-:condac1	0	0.08	0.17	3.37	2.8	3	0	0.11	0.05	3.10	5.5	3	ok
+elan/sources/Compiler.2.1/Test::condac2:no:-:condac2	0	0.08	0.17	3.34	2.8	2	0	0.11	0.05	3.01	5.4	2	ok
+elan/sources/Compiler.2.1/Test::cons1:no:-:cons1	0	0.07	0.17	3.31	2.8	4	0	0.10	0.05	3.04	5.3	4	ok
+elan/sources/Compiler.2.1/Test::dcfail1:no:-:dcfail1	0	0.08	0.17	3.24	2.7	2	0	0.13	0.05	3.05	5.3	2	ok
+elan/sources/Compiler.2.1/Test::dcfail2:no:-:dcfail2	0	0.07	0.14	3.17	2.7	2	0	0.12	0.06	2.85	5.2	2	ok
+elan/sources/Compiler.2.1/Test::dcfail3:no:-:dcfail3	0	0.08	0.16	3.37	2.7	0	0	0.10	0.05	3.08	5.4	0	ok
+elan/sources/Compiler.2.1/Test::enum:no:-:enum	0	0.07	0.16	4.85	3.3	556	0	0.11	0.05	3.17	6.0	556	ok
+elan/sources/Compiler.2.1/Test::enum2:no:-:enum2	0	0.09	0.14	2.97	2.8	49	0	0.10	0.05	2.54	5.2	49	ok
+elan/sources/Compiler.2.1/Test::ident1:no:-:ident1	0	0.07	0.12	3.09	2.8	1	0	0.10	0.05	2.70	5.4	1	ok
+elan/sources/Compiler.2.1/Test::manySortedSet1:no:-:manySortedSet1	0	0.08	0.16	14.22	8.7	1984	0	0.11	0.05	3.94	7.9	1984	ok
+elan/sources/Compiler.2.1/Test::manySortedSet2:no:-:manySortedSet2	0	0.08	0.16	53.42	10.1	6623	0	0.10	0.05	5.93	11.5	6623	ok
+elan/sources/Compiler.2.1/Test::manySortedSet3:no:-:manySortedSet3	0	0.08	0.16	88.76	12.9	9507	0	0.10	0.05	7.14	13.8	9507	ok
+elan/sources/Compiler.2.1/Test::match11:no:-:match11	0	0.08	0.13	3.59	2.7	1	0	0.10	0.05	3.12	5.3	1	ok
+elan/sources/Compiler.2.1/Test::match12:no:-:match12	0	0.09	0.17	3.30	2.7	1	0	0.11	0.06	2.94	5.3	1	ok
+elan/sources/Compiler.2.1/Test::match13:no:-:match13	0	0.08	0.17	3.43	2.7	1	0	0.10	0.06	3.17	5.3	1	ok
+elan/sources/Compiler.2.1/Test::match14:no:-:match14	0	0.08	0.17	3.36	2.7	1	0	0.11	0.05	2.95	5.4	1	ok
+elan/sources/Compiler.2.1/Test::match2:no:-:match2	0	0.08	0.17	3.43	2.7	1	0	0.11	0.05	3.24	5.2	1	ok
+elan/sources/Compiler.2.1/Test::match3:no:-:match3	0	0.06	0.16	3.51	2.7	2	0	0.10	0.05	3.18	5.2	2	ok
+elan/sources/Compiler.2.1/Test::match4:no:-:match4	0	0.06	0.16	3.39	2.7	2	0	0.10	0.05	3.06	5.2	2	ok
+elan/sources/Compiler.2.1/Test::propc1:no:-:propc1	0	0.09	0.20	54.91	8.6	12841	0	0.11	0.05	7.19	11.1	12841	ok
+elan/sources/Compiler.2.1/Test::propc2:no:-:propc2	0	0.09	0.20	1334.46	14.5	218978	0	0.11	0.05	80.85	40.5	218978	ok
+elan/sources/Compiler.2.1/Test::rep:no:-:rep	0	0.07	0.17	3.42	2.7	2	0	0.11	0.05	3.18	5.3	2	ok
+elan/sources/Compiler.2.1/Test::testACNumbering:no:-:testACNumbering	0	0.08	0.16	3.23	2.8	1	0	0.11	0.05	2.88	5.2	1	ok
+elan/sources/Compiler.2.1/Test::testSubstitution:no:-:testSubstitution	0	0.08	0.17	3.17	2.8	1	0	0.11	0.05	2.84	5.2	1	ok
+elan/sources/Compiler.2.1/Test::wpattern:no:-:wpattern	0	0.06	0.16	3.37	2.7	1	0	0.11	0.05	3.15	5.2	1	ok
+elan/sources/Compiler.2.1/Test::wpatternAC1:no:-:wpatternAC1	0	0.07	0.16	3.19	2.8	2	0	0.11	0.05	3.08	5.3	2	ok
+elan/sources/Compiler.2.1/Test::wpatternAC2:no:-:wpatternAC2	0	0.08	0.17	3.38	2.9	2	0	0.11	0.06	3.13	5.5	2	ok
+elan/sources/Compiler.2.1/Test::wpatternAC3:no:-:wpatternAC3	0	0.08	0.17	3.26	2.8	3	0	0.11	0.05	2.98	5.3	3	ok
+elan/sources/Compiler.2.1/Test::wpatternAC4:no:-:wpatternAC4	0	0.09	0.18	3.36	2.9	2	0	0.11	0.06	3.14	5.2	2	ok
+elan/sources/Compiler.2.1/Test::wpatternAC5:no:-:wpatternAC5	0	0.09	0.18	3.29	2.9	2	0	0.11	0.06	2.85	5.4	2	ok
+elan/sources/Compiler.2.1/Test::wpatternAC6:no:-:wpatternAC6	0	0.08	0.17	3.60	2.8	2	0	0.11	0.05	3.21	5.3	2	ok
+elan/sources/Compiler.3.0/Test::bimatch:no:-:bimatch	0	0.09	0.16	3.31	2.8	1	0	0.11	0.05	2.96	5.3	1	ok
+elan/sources/Compiler.3.0/Test::bool3:no:-:bool3	0	0.07	0.18	479.03	21.2	57664	0	0.11	0.05	47.42	29.5	57664	ok
+elan/sources/Compiler.3.0/Test::choice1:no:-:choice1	0	0.09	0.18	3.27	2.8	10	0	0.11	0.06	3.09	5.2	10	ok
+elan/sources/Compiler.3.0/Test::choice2:no:-:choice2	0	0.08	0.17	3.33	2.8	2	0	0.11	0.05	2.92	5.2	2	ok
+elan/sources/Compiler.3.0/Test::condac1:no:-:condac1	0	0.08	0.17	3.30	2.8	3	0	0.11	0.05	3.07	5.3	3	ok
+elan/sources/Compiler.3.0/Test::condac2:no:-:condac2	0	0.08	0.17	3.33	2.8	2	0	0.11	0.06	3.18	5.4	2	ok
+elan/sources/Compiler.3.0/Test::cons1:no:-:cons1	0	0.07	0.16	3.23	2.8	4	0	0.11	0.05	2.91	5.4	4	ok
+elan/sources/Compiler.3.0/Test::dcfail1:no:-:dcfail1	0	0.08	0.17	3.35	2.7	2	0	0.11	0.05	2.93	5.2	2	ok
+elan/sources/Compiler.3.0/Test::dcfail2:no:-:dcfail2	0	0.08	0.16	3.28	2.7	2	0	0.11	0.05	3.05	5.2	2	ok
+elan/sources/Compiler.3.0/Test::dcfail3:no:-:dcfail3	0	0.08	0.16	3.40	2.7	0	0	0.10	0.05	2.97	5.3	0	ok
+elan/sources/Compiler.3.0/Test::enum:no:-:enum	0	0.07	0.16	4.88	3.3	556	0	0.11	0.05	3.09	5.9	556	ok
+elan/sources/Compiler.3.0/Test::enum2:no:-:enum2	0	0.09	0.18	3.33	2.8	49	0	0.11	0.06	2.90	5.3	49	ok
+elan/sources/Compiler.3.0/Test::ident1:no:-:ident1	0	0.08	0.17	3.33	2.8	1	0	0.11	0.05	2.88	5.2	1	ok
+elan/sources/Compiler.3.0/Test::manySortedSet1:no:-:manySortedSet1	0	0.09	0.20	14.74	8.7	1984	0	0.11	0.06	4.29	7.7	1984	ok
+elan/sources/Compiler.3.0/Test::manySortedSet2:no:-:manySortedSet2	0	0.09	0.21	53.68	10.1	6623	0	0.11	0.05	6.43	11.6	6623	ok
+elan/sources/Compiler.3.0/Test::manySortedSet3:no:-:manySortedSet3	0	0.08	0.20	89.37	12.9	9507	0	0.11	0.06	7.98	13.7	9507	ok
+elan/sources/Compiler.3.0/Test::match11:no:-:match11	0	0.09	0.17	3.34	2.7	1	0	0.11	0.05	2.86	5.2	1	ok
+elan/sources/Compiler.3.0/Test::match12:no:-:match12	0	0.09	0.18	3.12	2.7	1	0	0.11	0.05	2.84	5.2	1	ok
+elan/sources/Compiler.3.0/Test::match13:no:-:match13	0	0.08	0.17	3.47	2.7	1	0	0.11	0.05	3.04	5.2	1	ok
+elan/sources/Compiler.3.0/Test::match14:no:-:match14	0	0.08	0.17	3.47	2.7	1	0	0.11	0.06	2.97	5.3	1	ok
+elan/sources/Compiler.3.0/Test::match2:no:-:match2	0	0.09	0.17	3.12	2.7	1	0	0.11	0.06	2.97	5.2	1	ok
+elan/sources/Compiler.3.0/Test::match3:no:-:match3	0	0.07	0.16	3.42	2.7	2	0	0.10	0.05	3.02	5.2	2	ok
+elan/sources/Compiler.3.0/Test::match4:no:-:match4	0	0.06	0.16	3.21	2.7	2	0	0.10	0.05	2.97	5.4	2	ok
+elan/sources/Compiler.3.0/Test::propc1:no:-:propc1	0	0.09	0.20	54.95	8.6	12841	0	0.11	0.05	7.39	11.2	12841	ok
+elan/sources/Compiler.3.0/Test::propc2:no:-:propc2	0	0.09	0.20	1324.08	14.3	218978	0	0.11	0.05	80.33	40.7	218978	ok
+elan/sources/Compiler.3.0/Test::rep:no:-:rep	0	0.07	0.16	3.47	2.7	2	0	0.11	0.05	3.22	5.3	2	ok
+elan/sources/Compiler.3.0/Test::testACNumbering:no:-:testACNumbering	0	0.08	0.17	3.35	2.8	1	0	0.11	0.05	3.09	5.3	1	ok
+elan/sources/Compiler.3.0/Test::testSubstitution:no:-:testSubstitution	0	0.08	0.17	3.32	2.8	1	0	0.11	0.05	3.02	5.2	1	ok
+elan/sources/Compiler.3.0/Test::wpattern:no:-:wpattern	0	0.08	0.16	3.12	2.7	1	0	0.11	0.05	2.96	5.2	1	ok
+elan/sources/Compiler.3.0/Test::wpatternAC1:no:-:wpatternAC1	0	0.08	0.17	3.30	2.8	2	0	0.11	0.05	3.05	5.4	2	ok
+elan/sources/Compiler.3.0/Test::wpatternAC2:no:-:wpatternAC2	0	0.08	0.16	3.28	2.9	2	0	0.11	0.05	2.93	5.4	2	ok
+elan/sources/Compiler.3.0/Test::wpatternAC3:no:-:wpatternAC3	0	0.07	0.16	3.35	2.8	3	0	0.11	0.05	3.00	5.4	3	ok
+elan/sources/Compiler.3.0/Test::wpatternAC4:no:-:wpatternAC4	0	0.09	0.18	3.40	2.9	2	0	0.11	0.06	3.02	5.2	2	ok
+elan/sources/Compiler.3.0/Test::wpatternAC5:no:-:wpatternAC5	0	0.09	0.17	3.36	2.9	2	0	0.11	0.06	3.05	5.3	2	ok
+elan/sources/Compiler.3.0/Test::wpatternAC6:no:-:wpatternAC6	0	0.08	0.17	3.14	2.8	2	0	0.11	0.05	2.95	5.3	2	ok
+elan/sources/Compiler.3.2/Test::bimatch:no:-:bimatch	0	0.09	0.17	3.41	2.8	1	0	0.11	0.05	2.97	5.3	1	ok
+elan/sources/Compiler.3.2/Test::choice1:no:-:choice1	0	0.09	0.18	3.34	2.8	10	0	0.11	0.05	2.91	5.2	10	ok
+elan/sources/Compiler.3.2/Test::choice2:no:-:choice2	0	0.08	0.17	3.42	2.8	2	0	0.10	0.05	2.86	5.3	2	ok
+elan/sources/Compiler.3.2/Test::condac1:no:-:condac1	0	0.08	0.17	3.41	2.8	3	0	0.11	0.05	3.09	5.3	3	ok
+elan/sources/Compiler.3.2/Test::condac2:no:-:condac2	0	0.08	0.16	2.97	2.8	2	0	0.11	0.05	3.09	5.4	2	ok
+elan/sources/Compiler.3.2/Test::cons1:no:-:cons1	0	0.08	0.17	3.43	2.8	4	0	0.10	0.05	3.10	5.4	4	ok
+elan/sources/Compiler.3.2/Test::dcfail1:no:-:dcfail1	0	0.08	0.16	3.24	2.7	2	0	0.11	0.05	3.08	5.3	2	ok
+elan/sources/Compiler.3.2/Test::dcfail2:no:-:dcfail2	0	0.07	0.16	3.05	2.7	2	0	0.11	0.05	2.86	5.2	2	ok
+elan/sources/Compiler.3.2/Test::dcfail3:no:-:dcfail3	0	0.08	0.16	3.37	2.7	0	0	0.11	0.05	3.02	5.3	0	ok
+elan/sources/Compiler.3.2/Test::enum:no:-:enum	0	0.07	0.17	4.94	3.3	556	0	0.11	0.05	3.15	6.1	556	ok
+elan/sources/Compiler.3.2/Test::enum2:no:-:enum2	0	0.09	0.18	3.45	2.8	49	0	0.11	0.06	3.08	5.2	49	ok
+elan/sources/Compiler.3.2/Test::ident1:no:-:ident1	0	0.08	0.16	3.34	2.7	-	0	0.11	0.05	2.86	5.1	-	ok
+elan/sources/Compiler.3.2/Test::manySortedSet1:no:-:manySortedSet1	0	0.09	0.21	14.69	8.7	1984	0	0.11	0.05	4.36	7.7	1984	ok
+elan/sources/Compiler.3.2/Test::manySortedSet2:no:-:manySortedSet2	0	0.09	0.20	53.69	10.2	6623	0	0.11	0.05	6.39	11.6	6623	ok
+elan/sources/Compiler.3.2/Test::manySortedSet3:no:-:manySortedSet3	0	0.09	0.20	88.94	12.9	9507	0	0.11	0.06	7.76	13.7	9507	ok
+elan/sources/Compiler.3.2/Test::match11:no:-:match11	0	0.09	0.17	3.44	2.7	1	0	0.11	0.05	3.07	5.2	1	ok
+elan/sources/Compiler.3.2/Test::match12:no:-:match12	0	0.09	0.17	3.28	2.7	1	0	0.11	0.06	2.97	5.2	1	ok
+elan/sources/Compiler.3.2/Test::match13:no:-:match13	0	0.09	0.17	3.52	2.7	1	0	0.11	0.05	3.20	5.4	1	ok
+elan/sources/Compiler.3.2/Test::match14:no:-:match14	0	0.09	0.17	3.43	2.7	1	0	0.11	0.06	3.04	5.2	1	ok
+elan/sources/Compiler.3.2/Test::match2:no:-:match2	0	0.09	0.17	3.30	2.7	1	0	0.11	0.06	3.06	5.3	1	ok
+elan/sources/Compiler.3.2/Test::match3:no:-:match3	0	0.08	0.17	3.33	2.7	2	0	0.11	0.05	3.08	5.4	2	ok
+elan/sources/Compiler.3.2/Test::match4:no:-:match4	0	0.06	0.16	3.10	2.7	2	0	0.11	0.05	3.05	5.3	2	ok
+elan/sources/Compiler.3.2/Test::propc1:no:-:propc1	0	0.09	0.20	55.06	8.6	12841	0	0.11	0.05	7.40	11.1	12841	ok
+elan/sources/Compiler.3.2/Test::propc2:no:-:propc2	0	0.09	0.20	1332.52	14.5	218978	0	0.11	0.05	80.48	40.5	218978	ok
+elan/sources/Compiler.3.2/Test::rep:no:-:rep	0	0.07	0.16	3.32	2.7	2	0	0.11	0.05	3.00	5.3	2	ok
+elan/sources/Compiler.3.2/Test::testACNumbering:no:-:testACNumbering	0	0.08	0.17	3.41	2.8	1	0	0.10	0.05	3.07	5.3	1	ok
+elan/sources/Compiler.3.2/Test::testSubstitution:no:-:testSubstitution	0	0.08	0.17	3.49	2.8	1	0	0.11	0.05	3.12	5.3	1	ok
+elan/sources/Compiler.3.2/Test::wpattern:no:-:wpattern	0	0.08	0.16	3.43	2.7	1	0	0.11	0.05	3.13	5.4	1	ok
+elan/sources/Compiler.3.2/Test::wpatternAC1:no:-:wpatternAC1	0	0.08	0.17	3.54	2.8	2	0	0.11	0.05	3.13	5.3	2	ok
+elan/sources/Compiler.3.2/Test::wpatternAC2:no:-:wpatternAC2	0	0.07	0.17	3.50	2.8	2	0	0.11	0.05	3.15	5.3	2	ok
+elan/sources/Compiler.3.2/Test::wpatternAC3:no:-:wpatternAC3	0	0.08	0.17	3.39	2.8	3	0	0.11	0.06	3.27	5.4	3	ok
+elan/sources/Compiler.3.2/Test::wpatternAC4:no:-:wpatternAC4	0	0.09	0.18	3.33	2.9	2	0	0.11	0.06	2.95	5.2	2	ok
+elan/sources/Compiler.3.2/Test::wpatternAC5:no:-:wpatternAC5	0	0.09	0.18	3.33	2.9	2	0	0.11	0.06	2.96	5.3	2	ok
+elan/sources/Compiler.3.2/Test::wpatternAC6:no:-:wpatternAC6	0	0.08	0.17	3.28	2.8	2	0	0.11	0.05	2.94	5.3	2	ok
+elan/sources/Compiler.4.0/Test::choice1:no:-:choice1	0	0.09	0.17	3.52	2.8	10	0	0.11	0.06	3.16	5.3	10	ok
+elan/sources/Compiler.4.0/Test::choice2:no:-:choice2	0	0.08	0.16	3.42	2.8	2	0	0.11	0.05	3.25	5.3	2	ok
+elan/sources/Compiler.4.0/Test::condac1:no:-:condac1	0	0.08	0.17	3.39	2.8	3	0	0.10	0.05	3.17	5.4	3	ok
+elan/sources/Compiler.4.0/Test::condac2:no:-:condac2	0	0.08	0.18	3.50	2.8	2	0	0.11	0.05	3.09	5.3	2	ok
+elan/sources/Compiler.4.0/Test::cons1:no:-:cons1	0	0.07	0.16	3.28	2.8	4	0	0.11	0.05	2.91	5.3	4	ok
+elan/sources/Compiler.4.0/Test::dcfail1:no:-:dcfail1	0	0.08	0.16	3.58	2.7	2	0	0.10	0.05	3.19	5.5	2	ok
+elan/sources/Compiler.4.0/Test::dcfail2:no:-:dcfail2	0	0.06	0.16	3.34	2.7	2	0	0.11	0.05	3.08	5.3	2	ok
+elan/sources/Compiler.4.0/Test::dcfail3:no:-:dcfail3	0	0.08	0.17	3.41	2.7	0	0	0.11	0.05	3.09	5.3	0	ok
+elan/sources/Compiler.4.0/Test::enum:no:-:enum	0	0.08	0.17	4.99	3.3	556	0	0.10	0.05	3.03	5.9	556	ok
+elan/sources/Compiler.4.0/Test::enum2:no:-:enum2	0	0.09	0.18	3.50	2.8	49	0	0.11	0.06	3.12	5.2	49	ok
+elan/sources/Compiler.4.0/Test::ident1:no:-:ident1	0	0.08	0.16	3.16	2.8	1	0	0.10	0.05	3.05	5.2	1	ok
+elan/sources/Compiler.4.0/Test::manySortedSet1:no:-:manySortedSet1	0	0.09	0.21	14.45	8.7	1984	0	0.11	0.06	4.14	7.8	1984	ok
+elan/sources/Compiler.4.0/Test::manySortedSet2:no:-:manySortedSet2	0	0.09	0.20	53.67	10.2	6623	0	0.11	0.06	6.44	11.5	6623	ok
+elan/sources/Compiler.4.0/Test::manySortedSet3:no:-:manySortedSet3	0	0.09	0.21	88.88	12.9	9507	0	0.11	0.06	7.54	13.8	9507	ok
+elan/sources/Compiler.4.0/Test::match11:no:-:match11	0	0.09	0.17	3.39	2.7	1	0	0.11	0.06	3.04	5.2	1	ok
+elan/sources/Compiler.4.0/Test::match12:no:-:match12	0	0.08	0.17	3.45	2.8	1	0	0.11	0.06	3.12	5.2	1	ok
+elan/sources/Compiler.4.0/Test::match13:no:-:match13	0	0.09	0.16	3.38	2.7	1	0	0.12	0.06	2.97	5.2	1	ok
+elan/sources/Compiler.4.0/Test::match14:no:-:match14	0	0.09	0.17	3.14	2.7	1	0	0.11	0.05	2.92	5.2	1	ok
+elan/sources/Compiler.4.0/Test::match2:no:-:match2	0	0.08	0.17	3.39	2.7	1	0	0.11	0.05	3.12	5.3	1	ok
+elan/sources/Compiler.4.0/Test::match3:no:-:match3	0	0.07	0.16	3.37	2.7	2	0	0.10	0.05	2.96	5.2	2	ok
+elan/sources/Compiler.4.0/Test::match4:no:-:match4	0	0.06	0.16	3.49	2.7	2	0	0.11	0.05	3.19	5.3	2	ok
+elan/sources/Compiler.4.0/Test::propc1:no:-:propc1	0	0.09	0.21	54.88	8.6	12841	0	0.11	0.06	7.40	11.2	12841	ok
+elan/sources/Compiler.4.0/Test::propc2:no:-:propc2	0	0.09	0.20	1329.27	14.5	218978	0	0.11	0.05	80.18	40.4	218978	ok
+elan/sources/Compiler.4.0/Test::rep:no:-:rep	0	0.07	0.16	3.40	2.8	2	0	0.11	0.05	3.02	5.3	2	ok
+elan/sources/Compiler.4.0/Test::testACNumbering:no:-:testACNumbering	0	0.08	0.16	3.21	2.8	1	0	0.11	0.05	3.05	5.3	1	ok
+elan/sources/Compiler.4.0/Test::testSubstitution:no:-:testSubstitution	0	0.08	0.17	3.01	2.8	1	0	0.11	0.05	3.08	5.3	1	ok
+elan/sources/Compiler.4.0/Test::wpattern:no:-:wpattern	0	0.08	0.17	3.25	2.7	1	0	0.10	0.05	2.95	5.2	1	ok
+elan/sources/Compiler.4.0/Test::wpatternAC1:no:-:wpatternAC1	0	0.07	0.16	3.42	2.8	2	0	0.11	0.05	3.06	5.3	2	ok
+elan/sources/Compiler.4.0/Test::wpatternAC2:no:-:wpatternAC2	0	0.08	0.16	3.39	2.8	2	0	0.11	0.06	3.07	5.3	2	ok
+elan/sources/Compiler.4.0/Test::wpatternAC3:no:-:wpatternAC3	0	0.08	0.17	3.25	2.8	3	0	0.11	0.06	2.98	5.4	3	ok
+elan/sources/Compiler.4.0/Test::wpatternAC4:no:-:wpatternAC4	0	0.09	0.17	3.53	2.9	2	0	0.11	0.05	3.24	5.2	2	ok
+elan/sources/Compiler.4.0/Test::wpatternAC5:no:-:wpatternAC5	0	0.09	0.17	3.28	2.9	2	0	0.11	0.06	3.04	5.4	2	ok
+elan/sources/Compiler.4.0/Test::wpatternAC6:no:-:wpatternAC6	0	0.08	0.16	3.29	2.8	2	0	0.11	0.05	3.11	5.3	2	ok

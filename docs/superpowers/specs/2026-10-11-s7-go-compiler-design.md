@@ -22,6 +22,10 @@ disappears), weak references and canonicalisation in the standard library
 compilation, one static binary per program, code that is simple to read and
 to generate.
 
+> **Correction (2026-10-12).** The "30-100x" were measured against REM without its
+> choice-point optimisation (`-optimiseChoicePoint` / `-O`, off by default).
+> Against `elanc-rem -O`: Go (spike and elanc-go) is 11-12x faster on nqueens, 3.4-4.7x on propc 2/3, ~900-2900x on efib (`docs/measures/2026-10-12-rem-O/README.md`).
+
 ## 2. Goal and success criteria
 
 `elanc-go` next to `elanc` and `elanc-rs` (REM stays until the switch) (in this section `elanc` is REM's driver;
@@ -121,6 +125,10 @@ runtime sources (`$PREFIX/share/elan-go/runtime`), built with a shared
   >= 1.24); REM's options that change the result are refused by `elanc`
   (status 2, naming `elanc-rem`); README, CONTRIBUTING, followups and
   examples describe `elanc` as the Go compiler.
+
+> **Correction (2026-10-12).** The "4-14x" were measured against REM without its
+> choice-point optimisation (`-optimiseChoicePoint` / `-O`, off by default).
+> Against `elanc-rem -O`: elanc-go is 1.6-7x faster on every bench case above 20 ms, 1.6x on BenchThesis p8 (`docs/measures/2026-10-12-rem-O/README.md`).
 
 ## 6. Risks
 

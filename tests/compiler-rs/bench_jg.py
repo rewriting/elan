@@ -23,6 +23,7 @@ bench_perf.sh --check, after a change of the runtime or of the generated
 code. The machine should be otherwise idle.
 
 Usage: bench_jg.py PREFIX [--filter REGEX] [--runs N] [--check] [--tsv FILE]
+                   [--rem-opts OPTS]   (e.g. --rem-opts=-O: REM's choice-point optimisation)
 The work directory tests/legacy-bench/work/jg (git-ignored) holds the shared
 go build cache (gocache, warmed by one build first) and one case at a time.
 """
@@ -43,6 +44,8 @@ def parse(argv):
     ap.add_argument("--runs", type=int, default=15)
     ap.add_argument("--check", action="store_true")
     ap.add_argument("--tsv")
+    ap.add_argument("--rem-opts", default="",
+                    help="extra elanc-rem options, e.g. '-O' (choice-point optimisation)")
     return ap.parse_args(argv)
 
 
@@ -97,7 +100,7 @@ def main(argv):
         return os.waitstatus_to_exitcode(st), dt, rss, b"".join(chunks).decode("latin-1")
 
     def build_j(t, wd, flags, spc):
-        rc, d1, o = sh([rem, "-b", "-nosplit", "-quiet", *flags, t["lgi"], *spc], wd)
+        rc, d1, o = sh([rem, "-b", "-nosplit", "-quiet", *a.rem_opts.split(), *flags, t["lgi"], *spc], wd)
         mk = wd / f"{t['lgi']}.make"
         if not mk.exists():
             return f"ERROR-{rem}", d1, None

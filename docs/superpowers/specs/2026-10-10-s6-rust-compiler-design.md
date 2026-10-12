@@ -20,6 +20,10 @@ runtime and the generated code**, with ELAN terms represented by Rust
 algebraic data types. The three hard problems, named by the user: the
 **strategies**, **AC matching** and **memory management**.
 
+> **Correction (2026-10-12).** The spike's "30-150x" were measured against REM without its
+> choice-point optimisation (`-optimiseChoicePoint` / `-O`, off by default).
+> Against `elanc-rem -O`: nqueens 11-12x, propc 2/3 3.4-4.7x, efib ~900-2900x (efib is not about choice points) (`docs/measures/2026-10-12-rem-O/README.md`).
+
 ## 2. Goal and success criteria
 
 A new compiler `elanc-rs` next to `elanc` (REM stays unchanged until the

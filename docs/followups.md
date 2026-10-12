@@ -294,6 +294,31 @@ sub-project (S1–S5b). Each item says where it comes from.
   loop (`dc(dk(dec) ; dc one(taildc), id)`: `one3` in `k2`) is still made
   at each call of the closure (taildc 10^7 0.13 s, one object per turn).
 
+- **Or-parallelism of `dk` in elanc-go** (idea of the user, 2026-10-12, not
+  started): run the branches of a `dk` (all results) on goroutines. Gain
+  expected only on programs enumerating every solution of a large search
+  tree (nqueens, `set_of` over large spaces: up to the number of
+  performance cores); none on normalisation (propc, efib, BenchThesis).
+  Obstacles in `elanrt` today: (1) order — `Dk` (`strat.go`) gives the
+  results to `k` in branch order and `k` may stop (`first`, `one`, `dc`);
+  the suites compare outputs and `rewrite_step` byte for byte with REM and
+  the interpreter, so each branch must buffer its results for an in-order
+  replay, and speculative branches cut by a stop add work and steps (`dc`
+  is don't-care in ELAN, so racing would be correct but not
+  deterministic); (2) shared state — `Step()` (`Steps++`, `driver.go`),
+  the unique table (`table.go`, not thread-safe, and term equality is
+  pointer identity, so one table per goroutine is not enough: a concurrent
+  sharded table, paid at every node creation, also by sequential
+  programs), the depth guard (`depth`/`nextCheck`, per goroutine), I/O
+  builtins and arrays (side effects: stay sequential); (3) granularity — a
+  `dk` branch is often tens of ns, a goroutine 0.3-1 µs: parallelise near
+  the root only (depth cutoff or work stealing); (4) the Go GC already
+  uses the other cores (propc 3: user 2.1 s for 0.64 s real). Next step if
+  pursued: a spike with an opt-in `-parallel` limited to all-results `dk`,
+  ordered replay, per-goroutine step counters summed at the end, a
+  sharded unique table; measure nqueens 12 and the overhead on sequential
+  programs (a few percent at most, or drop it).
+
 ## Build, tests, tooling
 
 - **CI**: the Linux job failed at the ASan+UBSan step on GitHub (x86_64) while

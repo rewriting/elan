@@ -132,11 +132,14 @@ On an error (1, 2, 3) the results printed before it are still written to
 the standard output.
 
 On the 145 programs of the bench that both compile, `elanc` gives REM's
-results and rewrite steps; programs running longer than 20 ms with REM run
-4-14x faster (propc2 1.19 s → 0.09 s, BenchThesis p8 5.4 s → 1.0 s), the
+results and rewrite steps; programs running longer than 20 ms run 1.6-7x
+faster than with REM's choice-point optimisation (`elanc-rem -O`: propc2
+0.24 s → 0.08 s, BenchThesis p8 1.33 s → 0.81 s; 7-38x faster than REM
+without it), the
 compile time is 0.11 s instead of 0.19 s (median, REM's `elanc` + `make`);
 the programs use more memory (median 5.4 MB instead of 2.9 MB) and are
 ~3.3 MB executables (REM's: 0.2 MB). Details:
+`docs/measures/2026-10-12-rem-O/README.md` (times) and
 `docs/superpowers/plans/2026-10-11-s7e-go-switch.md`.
 
 ### Differences from REM's driver (`elanc-rem`)

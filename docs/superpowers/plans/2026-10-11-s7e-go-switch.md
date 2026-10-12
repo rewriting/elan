@@ -70,6 +70,10 @@ Rewrite steps unchanged everywhere (nqueens 12: 653494329, REM's count).
 | elan3 Simplest nhorse_jc | 41 | 7.5 | 6 | 6.1 | 45157 | 7x |
 | Compiler.{3.2,4.0}/Test manySortedSet1 (2) | 22 | 8.9 | 5-6 | 7.8-7.9 | 1984 | 4x |
 
+> **Correction (2026-10-12).** This table and the "4-14x" of this plan were measured against REM without its
+> choice-point optimisation (`-optimiseChoicePoint` / `-O`, off by default).
+> Against `elanc-rem -O`: propc2 238-244 ms vs G 77-81 (3.1x), bool3 96-98 vs 45-47 (2.1x), nqueens_jc 14.4 vs 4.2 (3.4x), manySortedSet3 50 vs 7.5 (6.7x), propc1 11.3 vs 7.0 (1.6x): 1.6-7x on every case above 20 ms; BenchThesis p8 1.33 s vs 0.81 s (1.6x) (`docs/measures/2026-10-12-rem-O/README.md`).
+
 The other 122 cases run in the time of starting a process. In the bench harness (fresh binaries in the work directory) both take 4.6-6.1 ms and elanc-go was slower in 80 of them by 0.01-1.3 ms, faster in the others; an interleaved re-run of the 33 Compiler.4.0 cases: G slower in 9, by 0.02-0.8 ms, medians J 5.72 / G 5.71 ms. Measured outside the harness on the same binaries (match14, 60 runs): J 2.5-2.6 ms, G 2.2-2.3 ms; a Go "hello" 2.0-2.3 ms, a C "hello" 1.55 ms. So below ~10 ms the comparison is noise of the process start (both directions); Task 1's harness states the tolerance.
 
 **Memory:** elanc-go's peak RSS is larger in 137 of 145 cases (median 5.4 MB vs 2.9 MB: the Go runtime), up to 2.8x on propc2 (40 vs 14.5 MB: the GC tuner's heap goal of at least 32 MiB, G3). The criterion is about time; the gate reports memory too.
@@ -140,6 +144,10 @@ Each "not planned" is renamed in the IR (`unsupported(NotPlanned, ...)` with the
 - (Doubles, codes 34-78, and the ELAN system calls 160-174: REM has none — nothing lost.)
 
 **What they gain:** 4-14x faster programs on every bench program that runs longer than a process start (propc2 1.19 s → 0.09 s, bool3 0.43 → 0.08 s, BenchThesis p8 5.4 → 1.0 s; the spike's 30-100x on nqueens/efib/propc 3 against REM + cpl), compile 0.11 s instead of 0.19 s (median), the query parser byte-identical to REM's, outputs equal to REM's where REM is right and the REM bugs fixed (traversals, `IDENT(n)` printing, empty AC extensions, `x^n U y^m` values, Earley reads past its arrays, deep recursion: status 3 instead of a crash), Meta_strat terms (REM's C does not compile), a single static binary per program; costs: more memory (median 5.4 vs 2.9 MB, propc2 40 vs 14.5 MB, deep lists ~300 B/node), binaries of ~3.3 MB (REM 0.2 MB).
+
+> **Correction (2026-10-12).** The "4-14x" and the spike's "30-100x" were measured against REM without its
+> choice-point optimisation (`-optimiseChoicePoint` / `-O`, off by default).
+> Against `elanc-rem -O`: 1.6-7x on the bench (propc2 0.24 s → 0.08 s, bool3 0.10 → 0.05 s), BenchThesis p8 1.33 → 0.81 s, the spike's nqueens/propc 3-12x, efib ~900-2900x (`docs/measures/2026-10-12-rem-O/README.md`).
 
 **REM and elanc-rs after a switch:** REM stays in the tree, built and installed as `elanc-rem` when `ELAN_COMPILER=ON` (default), still the J/JO oracle of the bench and of `tests/compiler`; nothing removed. elanc-rs: G7 says its tests become optional once elanc-go reaches parity — reached (the 79 cases of `bench_r_expected.tsv` — 36 PASS, 1 PASS~, 27 PASS≈, 15 ERROR — all have the same or a better status in `bench_g_expected.tsv`, which has 160; the only `.no-elanc-go` program, `programs/refused/ac`, is one elanc-rs refuses; `test_normalise`/`test_strategies`/`test_depth` run the same programs for both) — so `ELAN_RUST` defaults to OFF (Task 8, before the gate: decided by G7, independent of the switch), the code stays, `-DELAN_RUST=ON` builds and tests it.
 
@@ -304,6 +312,10 @@ No user-visible change: `bin/elanc` is still REM's driver; `bin/elanc-rem` is th
 - (b), (d) costs: peak memory median 5.4 MB vs 2.9 MB (the Go runtime; propc2 40 vs 14.5 MB); binaries of ~3.3 MB (REM 0.2 MB); Go >= 1.24 needed for `elanc`; the REM-only options lost (`-coq`, `-proofterm`, `-lib`, `-debug`, `-onlyC`/`-noC`/`-nocode`, `-strategy 1|2`, the generated program's `-sort=`, `-strategy=`, `-REFInput`, `-commandLine`, `-filequery`), no `<prog>.make` and no C sources.
 - (e) reversible: `elanc-rem` stays installed; `-DELAN_ELANC=rem` makes `bin/elanc` REM's driver again.
 - (f) proposed: switch now; keep `elanc-go` as a name; REM-only options refused with a message naming `elanc-rem`; no `<prog>.make` stub.
+
+> **Correction (2026-10-12).** The "4-14x" were measured against REM without its
+> choice-point optimisation (`-optimiseChoicePoint` / `-O`, off by default).
+> Against `elanc-rem -O`: 1.6-7x on every case above 20 ms; the gate decided on the figures without `-O` above (`docs/measures/2026-10-12-rem-O/README.md`).
 
 **The user's answer (2026-10-11), verbatim:** "Switch to Go" — `elanc` becomes the Go compiler; REM stays installed as `elanc-rem`; reversible with `-DELAN_ELANC=rem`. Tasks 11-12 run.
 
