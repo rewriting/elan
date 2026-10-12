@@ -61,8 +61,9 @@ system as the oracle, or is listed with a checkable reason. Done when:
 2. **The modern interpreter reproduces the reference** on every new I/A
    test; the only exceptions are differences the user approved case by
    case, recorded in `baseline.tsv` with their reason.
-3. **elanc (Go)**: each new test is run in kind G; it passes (same output as
-   the reference, `rewrite_step` lines excepted) or is UNSUPPORTED (elanc
+3. **elanc (Go)**: each new program has a `gtest` line; it passes (same
+   output as the program compiled by the reference's REM, `rewrite_step`
+   lines excepted) or is UNSUPPORTED (elanc
    refuses the program, status 2); no ERROR, no FAIL. `bench_parity.py`'s
    expected statuses are updated.
 4. **`make check` stays green and fast**: the default bench run takes less
@@ -111,9 +112,15 @@ refuses to overwrite an existing `.out` without `--force`. A historical
 `.out` (category 1 below) stays the historical oracle; the reference's
 output then goes to the snapshot, as for the existing tests.
 
-**Kinds.** I and A for each `itest`/`aitest` line; G for each of them too
-(elanc compiles the program with the query as start term, as
-`bench_parity.py` does today); UNSUPPORTED when elanc refuses.
+**Kinds.** I and A for each `itest`/`aitest` line. G through a new line
+`gtest LGI SPC INP OUT` (kind G only): elanc compiles the program and the
+compiled program reads the query (`./a.out -quiet < INP`); its oracle `OUT`
+is the output of the program compiled by the reference's REM on the same
+input (`elanc-rem -b -nosplit -quiet LGI [SPC]; make; ./a.out -quiet <
+INP`), `rewrite_step` lines excepted — a compiled program does not print as
+the interpreter does, and this is the rule BenchThesis already uses for G.
+`make_expected.py` writes it like the interpreter's outputs. UNSUPPORTED
+when elanc refuses the program (status 2).
 
 ## 5. Triage of each program
 
