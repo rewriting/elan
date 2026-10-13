@@ -36,8 +36,12 @@ Other reasons:
 | APT/bubleLOG | the reference REM build crashes (Boehm GC out of memory) |
 | Robot/tictac | elanc-go writes a 4 MB `main.go` (121 615 lines); `go build` takes more than 6 min (TIMEOUT); REM gives the 5 moves |
 
-## elanc-go bug found by S9b
+## elanc-go bug found by S9b (fixed)
 
-Features/i2str, query `a`: elanc-go leaves `ident2string(a)` unevaluated
-(`string_ident2string(a)`), whereas the interpreter and the reference
-interpreter give `"a"`. To be fixed in elanc (no `gtest` until then).
+Features/i2str, query `a`: elanc-go left `ident2string(a)` unevaluated
+(`string_ident2string(a)`) because the query `a` is the constant `a : ident`
+of the program (not an identifier lexem) and the builtin only evaluated
+identifier values; the interpreter writes the argument term, so gives the
+name. Fixed in elanc-go (rt.IdentOrConst; regression programs/query/identstr).
+Still no `gtest` line: REM ignores the start term (see above) and leaves the
+term stuck, so the compiled outputs differ.

@@ -1,0 +1,12 @@
+module identstrm
+
+import global string;
+end
+sort Foo; end
+operators global
+  a	: ident;
+  b	: ident;
+  (@,@)	: (string string) Foo;
+end
+
+end

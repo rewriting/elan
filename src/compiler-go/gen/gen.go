@@ -1136,6 +1136,9 @@ func (e *emitter) builtinBody(o ir.OpID) {
 			continue
 		}
 		get := map[ir.BuiltinKind]string{ir.KindInt: "rt.IntOf", ir.KindBool: "rt.BoolOf", ir.KindStr: "rt.StrValue", ir.KindIdent: "rt.IdentOf"}[f.Kind]
+		if b == ir.IdentToString {
+			get = "rt.IdentOrConst"
+		}
 		e.line("v%d, ok%d := %s(%s)", i, i, get, a)
 		oks = append(oks, fmt.Sprintf("!ok%d", i))
 	}
