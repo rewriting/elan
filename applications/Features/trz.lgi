@@ -1,0 +1,13 @@
+LPL trz description
+
+   query of sort  	Foo
+   result of sort 	Foo
+   import 		trz
+   start with 		(ALLSOL)f(query)
+
+end
+
+
+
+
+

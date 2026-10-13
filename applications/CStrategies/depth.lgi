@@ -1,0 +1,9 @@
+LPL depth description
+  
+query		of sort  	integ
+		result of sort 	integ
+		import 	depth_int
+		start with 	[depth-first(prime(integ),hop)]query
+
+end
+

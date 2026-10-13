@@ -1,0 +1,36 @@
+/*G-Robot*/
+
+#locs 6
+#trans 6
+#clocks Y
+#sync middle gpick sempty gput
+
+loc: 0
+     prop: GInspect
+     invar: TRUE
+     trans: TRUE => middle; Y:=0; goto 1
+
+loc: 1
+     prop: GPick
+     invar: Y<=8
+     trans: Y>=3 and Y<=8 => gpick; Y:=0; goto 2
+
+loc: 2
+     prop: GTurnR
+     invar: Y<=10
+     trans: Y>=6 and Y<=10 => gturnr; Y:=0; goto 3
+
+loc: 3
+     prop: GWait
+     invar: TRUE
+     trans: TRUE => sempty; Y:=0; goto 4
+
+loc: 4
+     prop: GPut
+     invar: Y<=2
+     trans: Y>=1 and Y<=2 => gput; Y:=0; goto 5
+
+loc: 5
+     prop: GTurnL
+     invar: Y<=10
+     trans: Y>=8 and Y<=10 => gturnl; Y:=0; goto 0

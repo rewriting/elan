@@ -1,0 +1,19 @@
+module queens[S]
+ 
+import global int S strat[S];
+end
+rules for S
+	x		: S;
+	rr, cc, ii 	: int;
+global
+  [verify(cc,rr,ii)]	x => x
+				if x[ii] 	!= rr
+				if x[ii] 	!= rr+cc-ii
+				if x[ii]	!= rr+ii-cc
+  end
+  [drop(cc,rr)] 	x => x[cc<-rr]
+  end
+end
+
+end
+

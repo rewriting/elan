@@ -1,0 +1,2 @@
+g(v) = g(c) /\ z=g(g(a)) /\ w=g(z) 
+end

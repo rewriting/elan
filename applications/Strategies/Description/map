@@ -1,0 +1,7 @@
+#! /bin/csh
+setenv REP 	$APPLICATIONS/Strategies
+setenv LGI 	map
+setenv SPC 	
+setenv OPTION 	-b
+setenv INPUT 	$REP/Sample/map.inp
+setenv OUTPUT 	$REP/Sample/map.out

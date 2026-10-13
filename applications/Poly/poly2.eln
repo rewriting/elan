@@ -1,0 +1,33 @@
+module poly2[Vars]
+
+import global int Vars eq[variable] identifier list[identifier];
+end
+sort variable poly;
+end
+operators global
+  FOR EACH Id:identifier SUCH THAT Id:=(listExtract) elem(Vars) :
+ { Id : variable; } 
+
+  @		: ( variable ) poly;
+  @		: ( int ) poly;
+  @ + @ 	: ( poly poly ) poly  assocRight pri 1 (AC);
+  @ * @		: ( poly  poly) poly  assocRight pri 2 (AC);
+  deriv(@,@) 	: ( poly variable) poly;
+end
+
+rules for poly
+	p, p1, p2 : poly; 
+	$x, $y : variable;
+	n : int;
+global
+  []  0+p		=> p				end
+  []  0*p		=> 0				end
+  []  1*p		=> p				end
+  []  deriv(x,x) 	=> 1				end
+  []  deriv(y,x) 	=> 0    if $x != $y		end
+  []  deriv(n,x)   	=> 0				end
+  []  deriv(p1+p2,x)  	=> deriv(p1,x)+deriv(p2,x) 		end
+  []  deriv(p1*p2,x)  	=> deriv(p1,x)*p2 + p1*deriv(p2,x)	end
+end
+
+end

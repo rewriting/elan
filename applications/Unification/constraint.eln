@@ -1,0 +1,42 @@
+module constraint[Fss,Vss]
+import 	global	 replace[term,constraint]; // applySubstOn[constraint];
+	local	bool int termCommons[Fss,Vss];
+end
+
+sort constraint equation;
+end
+
+operators
+global
+  @ = @         : ( term term ) equation;
+  @             : ( bool ) constraint;
+  @             : ( equation ) constraint;
+  @ & @         : ( constraint constraint ) constraint        (AC);
+  (@ & @)       : ( constraint constraint ) constraint        alias @ & @:;
+  system_to_subst(@)	: ( constraint ) substitution;
+  /*--- applySubstOn ---*/
+   @(@)	: ( substitution constraint ) constraint;
+   apply(@,@)	: ( substitution constraint ) constraint		alias @(@):;
+end
+
+rules for substitution
+P,Q,R:constraint; t:term; x:variable;
+global
+  [] system_to_subst(true) 	=> identity			end
+  [] system_to_subst(x=t) 	=> x->t				end
+  [] system_to_subst(P & Q) 	=> system_to_subst(P) o system_to_subst(Q)
+  end
+end
+
+rules for constraint
+	$tt	: constraint;
+	$s1,$s2	: substitution;
+	$v 	: variable;
+	$t	: term;
+global
+  [] apply(identity,$tt) 	=> $tt				end
+  [] apply($s1 o $s2 ,$tt) 	=> apply($s2,apply($s1,$tt))	end
+  [] apply($v->$t,$tt) 		=> replace($v,$t,$tt)		end
+end
+
+end

@@ -1,0 +1,11 @@
+LPL g description
+
+   query of sort  	Foo
+   result of sort 	Foo
+   import 		g
+   start with 		(foo)query
+
+end
+
+
+

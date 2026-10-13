@@ -1,0 +1,3 @@
+# tests of Solving/Equational/Unification (from legacy/elan3 tst_all; format: tests/apps/README.md)
+itest unification simplesig ex1 ex1
+itest unification simplesig ex2 ex2

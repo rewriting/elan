@@ -1,0 +1,2 @@
+f(g(a),f(b,g(a)))  end
+f(g(a),f(a,g(a)))  end

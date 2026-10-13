@@ -1,0 +1,23 @@
+go(Far.Up.u0.nil/true,In.Down.u0.nil/true) end 
+lst_trans(nil,Far.Up.u0.nil/true,In.Down.u0.nil/true) end
+result = [Near|Up|u1--->Near|t1|u0--->Near|Down|u0--->In|Down|u0,REACHED]
+
+
+go(Far.Up.u0.nil/true,Far.Up.u0.nil/true) end 
+lst_trans(nil,Far.Up.u0.nil/true,Far.Up.u0.nil/true) end
+result = [Near|Up|u1--->Near|t1|u0--->Near|Down|u0--->In|Down|u0--->After|Down|u0--->Far|Down|u2--->Far|t2|u0--->Far|Up|u0,REACHED]
+
+go(Far.Up.u0.nil/true,In.Up.u0.nil/true) end
+lst_trans(nil,Far.Up.u0.nil/true,In.Up.u0.nil/true) end
+result = [Near|Up|u1--->Near|t1|u0--->Near|Down|u0--->In|Down|u0--->After|Down|u0--->Far|Down|u2--->Far|t2|u0--->Near|t2|u1--->Near|Up|u1,CYCLE]
+
+
+
+go(D_Wait.G_Inspect.S_Empty.B_Mov,nil/true,D_Wait.G_Inspect.S_Empty.B_Mov.nil/true) end
+lst_trans(nil,D_Wait.G_Inspect.S_Empty.B_Mov,nil/true,D_Wait.G_Inspect.S_Empty.B_Mov.nil/true) end
+result = [D_Wait|G_Inspect|S_Empty|B_Inspect--->D_Wait|G_Pick|S_Empty|B_Inspect--->D_Wait|G_Turn_R|S_Empty|B_On_G--->D_Wait|G_Wait|S_Empty|B_On_G--->D_Wait|G_Put|S_Empty|B_On_G--->D_Wait|G_Turn_L|S_Busy|B_On_S--->D_Wait|G_Inspect|S_Busy|B_On_S--->D_Wait|G_Inspect|S_Ready|B_On_S--->D_Pick|G_Inspect|S_Ready|B_On_S--->D_Turn_R|G_Inspect|S_Empty|B_On_D--->D_Put|G_Inspect|S_Empty|B_On_D--->D_Turn_L|G_Inspect|S_Empty|B_Mov--->D_Wait|G_Inspect|S_Empty|B_Mov,REACHED]
+
+
+go(D_Wait.G_Inspect.S_Empty.B_Mov.nil/true,D_Turn_R.G_Turn_L.S_Empty.B_On_S.nil/true) end
+lst_trans(nil,D_Wait.G_Inspect.S_Empty.B_Mov.nil/true,D_Turn_R.G_Turn_L.S_Empty.B_On_S.nil/true) end
+result = [D_Wait|G_Inspect|S_Empty|B_Inspect--->D_Wait|G_Pick|S_Empty|B_Inspect--->D_Wait|G_Turn_R|S_Empty|B_On_G--->D_Wait|G_Wait|S_Empty|B_On_G--->D_Wait|G_Put|S_Empty|B_On_G--->D_Wait|G_Turn_L|S_Busy|B_On_S--->D_Wait|G_Inspect|S_Busy|B_On_S--->D_Wait|G_Inspect|S_Ready|B_On_S--->D_Pick|G_Inspect|S_Ready|B_On_S--->D_Turn_R|G_Inspect|S_Empty|B_On_D--->D_Put|G_Inspect|S_Empty|B_On_D--->D_Turn_L|G_Inspect|S_Empty|B_Mov--->D_Wait|G_Inspect|S_Empty|B_Mov--->D_Wait|G_Inspect|S_Empty|B_Inspect,CYCLE]

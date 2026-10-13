@@ -1,0 +1,2 @@
+d(lam([z]app(lam([x]app(ln,plus(x,one))),app(lam([x]app(ln,x)),z))))
+end

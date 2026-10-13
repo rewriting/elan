@@ -1,0 +1,173 @@
+module tictac
+
+import global 
+	int strat[state];
+end
+sort 	Sign;
+end
+operators global
+  X	: Sign;
+  O	: Sign;
+  -	: Sign;
+  nxt(@): (Sign) Sign;
+  state(@,[@,@,@],
+          [@,@,@],
+	  [@,@,@])
+	: ( Sign Sign Sign Sign Sign Sign Sign Sign Sign Sign ) state;
+end
+
+stratop global
+  put(@,@) : (int int) <state>;
+  win	: <state>;
+  moves	: <state>;
+end
+
+rules for Sign
+global
+  []	nxt(X) => O	end
+  []	nxt(O) => X	end
+end
+
+strategies for state
+a, b, c, d, e, f, g, h, i, Y 	: Sign;
+explicit
+  // 1-st line
+  [.] [win] 
+	state(Y,[-,Y,Y],[d,e,f],[g,h,i]) =>
+	state(nxt(Y),[Y,Y,Y],[d,e,f],[g,h,i]) 		end
+  [.] [win] 
+	state(Y,[Y,-,Y],[d,e,f],[g,h,i]) =>
+	state(nxt(Y),[Y,Y,Y],[d,e,f],[g,h,i]) 		end
+  [.] [win] 
+	state(Y,[Y,Y,-],[d,e,f],[g,h,i]) =>
+	state(nxt(Y),[Y,Y,Y],[d,e,f],[g,h,i]) 		end
+  // 2-nd line
+  [.] [win] 
+	state(Y,[a,b,c],[-,Y,Y],[g,h,i]) =>
+	state(nxt(Y),[a,b,c],[Y,Y,Y],[g,h,i]) 		end
+  [.] [win] 
+	state(Y,[a,b,c],[Y,-,Y],[g,h,i]) =>
+	state(nxt(Y),[a,b,c],[Y,Y,Y],[g,h,i]) 		end
+  [.] [win] 
+	state(Y,[a,b,c],[Y,Y,-],[g,h,i]) =>
+	state(nxt(Y),[a,b,c],[Y,Y,Y],[g,h,i]) 		end
+  // 3-rd line
+  [.] [win] 
+	state(Y,[a,b,c],[d,e,f],[-,Y,Y]) =>
+	state(nxt(Y),[a,b,c],[d,e,f],[Y,Y,Y]) 		end
+  [.] [win] 
+	state(Y,[a,b,c],[d,e,f],[Y,-,Y]) =>
+	state(nxt(Y),[a,b,c],[d,e,f],[Y,Y,Y]) 		end
+  [.] [win] 
+	state(Y,[a,b,c],[d,e,f],[Y,Y,-]) =>
+	state(nxt(Y),[a,b,c],[d,e,f],[Y,Y,Y]) 		end
+  // 1-st row
+  [.] [win] 
+	state(Y,[-,b,c],[Y,e,f],[Y,h,i]) =>
+	state(nxt(Y),[Y,b,c],[Y,e,f],[Y,h,i]) 		end
+  [.] [win] 
+	state(Y,[Y,b,c],[-,e,f],[Y,h,i]) =>
+	state(nxt(Y),[Y,b,c],[Y,e,f],[Y,h,i]) 		end
+  [.] [win] 
+	state(Y,[Y,b,c],[Y,e,f],[-,h,i]) =>
+	state(nxt(Y),[Y,b,c],[Y,e,f],[Y,h,i]) 		end
+  // 2-nd row
+  [.] [win]
+	state(Y,[a,-,c],[d,Y,f],[g,Y,i]) =>
+	state(nxt(Y),[a,Y,c],[d,Y,f],[g,Y,i]) 		end
+  [.] [win]
+	state(Y,[a,Y,c],[d,-,f],[g,Y,i]) =>
+	state(nxt(Y),[a,Y,c],[d,Y,f],[g,Y,i]) 		end
+  [.] [win]
+	state(Y,[a,Y,c],[d,Y,f],[g,-,i]) =>
+	state(nxt(Y),[a,Y,c],[d,Y,f],[g,Y,i]) 		end
+  // 3-rd row
+  [.] [win]
+	state(Y,[a,b,-],[d,e,Y],[g,h,Y]) =>
+	state(nxt(Y),[a,b,Y],[d,e,Y],[g,h,Y]) 		end
+  [.] [win]
+	state(Y,[a,b,Y],[d,e,-],[g,h,Y]) =>
+	state(nxt(Y),[a,b,Y],[d,e,Y],[g,h,Y]) 		end
+  [.] [win]
+	state(Y,[a,b,Y],[d,e,Y],[g,h,-]) =>
+	state(nxt(Y),[a,b,Y],[d,e,Y],[g,h,Y]) 		end
+  // 1-st diag
+  [.] [win] 
+	state(Y,[-,b,c],[d,Y,f],[g,h,Y]) =>
+	state(nxt(Y),[Y,b,c],[d,Y,f],[g,h,Y]) 		end
+  [.] [win] 
+	state(Y,[Y,b,c],[d,-,f],[g,h,Y]) =>
+	state(nxt(Y),[Y,b,c],[d,Y,f],[g,h,Y]) 		end
+  [.] [win] 
+	state(Y,[Y,b,c],[d,Y,f],[g,h,-]) =>
+	state(nxt(Y),[Y,b,c],[d,Y,f],[g,h,Y]) 		end
+  // 2-nd diag
+  [.] [win]
+	state(Y,[a,b,-],[d,Y,f],[Y,h,i]) =>
+	state(nxt(Y),[a,b,Y],[d,Y,f],[Y,h,i]) 		end
+  [.] [win]
+	state(Y,[a,b,Y],[d,-,f],[Y,h,i]) =>
+	state(nxt(Y),[a,b,Y],[d,Y,f],[Y,h,i]) 		end
+  [.] [win]
+	state(Y,[a,b,Y],[d,Y,f],[-,h,i]) =>
+	state(nxt(Y),[a,b,Y],[d,Y,f],[Y,h,i]) 		end
+  //--------------------------------------------
+  [.] [moves]
+	state(Y,[-,b,c],[d,e,f],[g,h,i]) =>
+	state(nxt(Y),[Y,b,c],[d,e,f],[g,h,i]) 		end
+  [.] [moves]
+	state(Y,[a,-,c],[d,e,f],[g,h,i]) =>
+	state(nxt(Y),[a,Y,c],[d,e,f],[g,h,i]) 		end
+  [.] [moves]
+	state(Y,[a,b,-],[d,e,f],[g,h,i]) =>
+	state(nxt(Y),[a,b,Y],[d,e,f],[g,h,i]) 		end
+  [.] [moves]
+	state(Y,[a,b,c],[-,e,f],[g,h,i]) =>
+	state(nxt(Y),[a,b,c],[Y,e,f],[g,h,i]) 		end
+  [.] [moves]
+	state(Y,[a,b,c],[d,-,f],[g,h,i]) =>
+	state(nxt(Y),[a,b,c],[d,Y,f],[g,h,i]) 		end
+  [.] [moves]
+	state(Y,[a,b,c],[d,e,-],[g,h,i]) =>
+	state(nxt(Y),[a,b,c],[d,e,Y],[g,h,i]) 		end
+  [.] [moves]
+	state(Y,[a,b,c],[d,e,f],[-,h,i]) =>
+	state(nxt(Y),[a,b,c],[d,e,f],[Y,h,i]) 		end
+  [.] [moves]
+	state(Y,[a,b,c],[d,e,f],[g,-,i]) =>
+	state(nxt(Y),[a,b,c],[d,e,f],[g,Y,i]) 		end
+  [.] [moves]
+	state(Y,[a,b,c],[d,e,f],[g,h,-]) =>
+	state(nxt(Y),[a,b,c],[d,e,f],[g,h,Y]) 		end
+  //------------------------------
+  [.] [put(1,1)]
+	state(Y,[-,b,c],[d,e,f],[g,h,i]) =>
+	state(nxt(Y),[Y,b,c],[d,e,f],[g,h,i]) 		end
+  [.] [put(1,2)]
+	state(Y,[a,-,c],[d,e,f],[g,h,i]) =>
+	state(nxt(Y),[a,Y,c],[d,e,f],[g,h,i]) 		end
+  [.] [put(1,3)]
+	state(Y,[a,b,-],[d,e,f],[g,h,i]) =>
+	state(nxt(Y),[a,b,Y],[d,e,f],[g,h,i]) 		end
+  [.] [put(2,1)]
+	state(Y,[a,b,c],[-,e,f],[g,h,i]) =>
+	state(nxt(Y),[a,b,c],[Y,e,f],[g,h,i]) 		end
+  [.] [put(2,2)]
+	state(Y,[a,b,c],[d,-,f],[g,h,i]) =>
+	state(nxt(Y),[a,b,c],[d,Y,f],[g,h,i]) 		end
+  [.] [put(2,3)]
+	state(Y,[a,b,c],[d,e,-],[g,h,i]) =>
+	state(nxt(Y),[a,b,c],[d,e,Y],[g,h,i]) 		end
+  [.] [put(3,1)]
+	state(Y,[a,b,c],[d,e,f],[-,h,i]) =>
+	state(nxt(Y),[a,b,c],[d,e,f],[Y,h,i]) 		end
+  [.] [put(3,2)]
+	state(Y,[a,b,c],[d,e,f],[g,-,i]) =>
+	state(nxt(Y),[a,b,c],[d,e,f],[g,Y,i]) 		end
+  [.] [put(3,3)]
+	state(Y,[a,b,c],[d,e,f],[g,h,-]) =>
+	state(nxt(Y),[a,b,c],[d,e,f],[g,h,Y]) 		end
+end
+
+end
+

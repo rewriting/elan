@@ -1,0 +1,21 @@
+LPL tex description
+
+specification description 
+   part Btypes	of sort list[identifier]
+		modules sigSyntax
+   part Mvars	of sort list[vardef]
+		modules sigSyntax ivars[Btypes]
+   part Bvars	of sort list[vardef]
+		modules sigSyntax ivars[Btypes]
+end  
+query		of sort  texinput
+		result of sort texoutput
+		modules 
+			texterms[Mvars,Btypes,Bvars] texhounif[Mvars,Btypes,Bvars]
+			hounif[Mvars,Btypes,Bvars]
+		start with (Protheo)totex(query)
+end of LPL description
+
+
+
+

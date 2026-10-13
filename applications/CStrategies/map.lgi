@@ -1,0 +1,11 @@
+LPL map description
+	
+	query	of sort	list[integ] 
+	result of sort 	list[integ] 
+	import int 	map[integ] 
+	start with 	[map(dk(add1,ass(55)))]query
+
+end
+
+
+

@@ -1,0 +1,31 @@
+(x<=AC((a+b)+c)&y<=AC d) end
+
+(x<=AC d&y<=AC((a+b)+c)) end
+
+(y<=AC(c+d)&x<=AC(a+b)) end
+
+(y<=AC((a+b)+d)&x<=AC c) end
+
+(y<=AC((b+c)+d)&x<=AC a) end
+
+(y<=AC((a+c)+d)&x<=AC b) end
+
+(y<=AC(a+d)&x<=AC(b+c)) end
+
+(y<=AC(b+d)&x<=AC(a+c)) end
+
+(x<=AC(c+d)&y<=AC(a+b)) end
+
+(x<=AC((a+b)+d)&y<=AC c) end
+
+(x<=AC((b+c)+d)&y<=AC a) end
+
+(x<=AC((a+c)+d)&y<=AC b) end
+
+(x<=AC(a+d)&y<=AC(b+c)) end
+
+(x<=AC(b+d)&y<=AC(a+c)) end
+
+ end end
+end
+

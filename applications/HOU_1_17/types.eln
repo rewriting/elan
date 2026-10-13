@@ -1,0 +1,102 @@
+module types[btypes]
+import
+  global 	bool obj[btypes] btypes;
+sort type textype;
+op
+  global
+    //--------- types ----------------------------------//
+    notype	: type;					// special constant
+    @		: (obj_btypes) type pri 1000;		// basic type
+    @ -> @	: (type type) type pri 900;		// function type
+    (@ -> @)	: (type type) type pri 900 alias @ -> @:;// de -()
+    tvar(@)	: (int) type;				// type variable
+    //--------------------------------------------------//
+    functional_type(@)	: (type) bool;		// is A->B
+    atomic_type(@)	: (type) bool;		// basic type
+    domain_type(@)	: (type) type;			// A
+    codomain_type(@)	: (type) type;			// B
+    known(@)		: (type) bool;		// diff unknoewn
+    rem_par(@)		: (type) type;			// remove parentheses
+    //------------------- TEX --------------------------//
+    tex(@)		: (type) textype;
+    \notype		: textype;	
+    \basictype<@> 	: (obj_btypes) textype pri 1000;	
+    \fromto<@><@>	: (textype textype) textype pri 900;	
+    (@)			: (textype) textype;			
+    \tvar<@>		: (int) textype;		
+endop
+
+rules for textype
+declare
+	bt	: obj_btypes;
+	t1, t2	: type;
+	i	: int;
+bodies
+  []	tex(notype)	=> \notype		
+  end
+  []	tex(bt)	=> \basictype<bt>
+  end
+  []	tex(t1->t2) => \fromto<tex(t1)><tex(t2)>
+  end
+// une regle bizzarde
+//  []	tex(t1)	=> (tex(t1))
+//  end
+  []	tex(tvar(i)) => \tvar<i>
+  end
+end of rules
+
+rules for bool
+declare	t1, t2	: type;
+	bt	: obj_btypes;
+	i	: int;
+bodies
+  []	functional_type(t1 -> t2)	=> true		
+  end
+  []	functional_type(bt)		=> false	
+  end
+  []	functional_type(tvar(i))	=> false	
+  end
+
+  []	atomic_type(t1 -> t2)	=> false		
+  end
+  []	atomic_type(bt)		=> true			
+  end
+  []	atomic_type(tvar(i))	=> false		
+  end
+
+  []	known(notype)	=> false			
+  end
+  []	known(t1)	=> true				
+  end 							// dirty
+end of rules
+
+rules for type
+declare	t1, t2	: type;
+bodies
+  []	domain_type(t1 -> t2)	=> t1			
+  end
+  []	codomain_type(t1 -> t2)	=> t2			
+  end
+end of rules
+
+rules for type
+declare	t, t1, t2, bt	: type;
+bodies
+    []	rem_par(bt) => bt
+    end
+    []	rem_par(t1->t2)	=> rem_par(t1) -> rem_par(t2)
+    end
+end of rules
+
+end of module
+
+
+
+ 
+
+
+
+
+
+
+

@@ -1,0 +1,511 @@
+module cpbasic2[vars,fss,prec]
+
+import	
+	global  
+		extequation1[vars,fss,prec]
+		termCommons[fss,vars] /* defined the sort term so variable*/
+	;       
+        local 
+		vars
+		fss
+		prec
+		eq[eqSystem]
+		eq[list[int]]
+		syntacticUnification[fss,vars]
+		applySubstOn[fss,vars,term]
+		lpo[vars,fss,prec]
+		position[vars,fss,prec]
+	;
+end
+
+operators
+  global
+
+	/* BASIC CRITICAL PAIR */
+
+	/* General function that does a Basic Critical Pair inference. */
+	/* The first equation is the into equation and the second is */
+	/* the from equation. The number is a counter to know what */
+	/* is the number of the last deduced equation during the completion */
+	/* process */
+
+	deduce(@,@,@) 		: (extequation1 extequation1 counter:int) 
+				extequation1; 
+	
+	deduce(@,@,@,@,@,@,@,@,@,@,@): (term term term term int list[list[int]] 
+	list[list[int]] int list[list[int]] list[list[int]] int) extequation1; 
+
+	/* BASIC SIMPLIFICATION */
+
+	/* Basic blocking is included in basic simplification */
+
+	basic_simplify(@,@,@): (extequation1 extequation1 counter:int) 
+				extequation1; 
+
+	basic_simplify(@,@,@,@,@,@,@,@,@,@,@): (term term term term int 
+		list[list[int]] list[list[int]] int list[list[int]] list[list[int]] int) 
+		extequation1; 
+
+	/* INTERMEDIARY FUNCTIONS */
+
+	/* Function used for testing the reduced relative to condition */
+	/* include_terms(l,r,num1,l1,l2,g,d,num2,l11,l22) */
+	/* tests if the lists of marked terms of l=r is included in the */
+	/* list of marked terms of g=d */
+
+	include_terms(@,@,@,@,@,@,@,@,@,@): (term term int list[list[int]] 
+				list[list[int]] term term int list[list[int]] 
+				list[list[int]]) bool;
+
+	/* Function saying if the first equation is reduced relative */
+	/* to the second one */
+
+	is_reduced_relative_to(@,@,@,@,@,@,@,@,@,@):(term term int list[list[int]] 
+				list[list[int]] term term int list[list[int]] 
+				list[list[int]]) bool; 
+end
+
+
+stratop
+  global
+
+    dedstrat		 : <extequation1>		builtin;
+    ded			 : <extequation1>		builtin;
+
+    dedleft		 : <extequation1>		builtin;
+    dedleftright	 : <extequation1>		builtin;
+
+    bsimpstrat		 : <extequation1>		builtin;
+    bsimpleft		 : <extequation1>		builtin;
+    bsimplblockingleft	 : <extequation1>		builtin;
+    bsimpleftright	 : <extequation1>		builtin;
+    bsimpblockingleftright : <extequation1>		builtin;
+    bsimpleftblocking	 : <extequation1>		builtin;
+end
+
+
+/* BASIC CRITICAL PAIR */
+
+/* deduce */
+
+rules for extequation1
+	g, d, l, r				: term;
+	sigmag, sigmad, sigmal, sigmar		: term;
+	lp1, lp2, lp11, lp22, lp111, lp222	: list[list[int]];
+	eq					: equation;
+	num1, num2, counter			: int;
+	omega 					: list[int];
+ 	sigma	 	 			: substitution;
+	unif, matcha  				: eqSystem;
+	bmatch, bred				: bool;
+global
+
+	/* Critical pair at left */
+
+	[dedleft1] deduce(g,d,l,r, num1, lp1, lp2,num2,lp11,lp22,counter) => 
+			eq, counter ,lp111, lp2
+			/* position = nil and mgu */
+			where omega 	:= (chooseOccurence)nvocc(g)
+			if eq_list[int](omega,nil)
+			if not ismarkedpos(omega,g=d,num1,lp1,lp2) 
+			where matcha	:= (match)l = g at omega
+			where bmatch 	:= ()$matcha == false 
+			where bred	:= ()is_reduced_relative_to(l,r,num2,lp11,lp22,
+			g,d,num1,lp1,lp2)
+			if bmatch or not bred
+			where unif 	:= (unifys) true & g at omega = l
+			where sigma 	:= ()system_to_subst(unif)
+			where sigmar 	:= ()sigma(r)
+			where sigmag	:= ()sigma(g)
+			where sigmad 	:= ()sigma(d)
+			where sigmal 	:= ()sigma(l)
+			where eq 	:= ()sigmag[sigmar] at omega= sigmad
+			/* for the test of triviality */
+			if not eq_term(lhs(eq),rhs(eq))
+			/* ordering conditions */
+			if not lpo(sigmad,sigmag)
+			if not lpo(sigmar,sigmal)
+			if lpo(sigmad,sigmar) or not lpo(sigmar,sigmad)
+			/* list of marked positions */
+			where lp111 	:= ()ltransform(omega,lp1,lp22)
+	end
+
+	[dedleft2] deduce(g,d,l,r, num1, lp1, lp2,num2,lp11,lp22,counter) => 
+			eq, counter ,lp111, lp2
+			/* position not nil and mgu */
+			where omega 	:= (chooseOccurence)nvocc(g)
+			if not eq_list[int](omega,nil)
+			if not ismarkedpos(omega,g=d,num1,lp1,lp2) 
+			where matcha	:= (match)l = g at omega
+			where bmatch 	:= ()$matcha == false 
+			where bred	:= ()is_reduced_relative_to(l,r,num2,lp11,lp22,
+			g,d,num1,lp1,lp2)
+			if bmatch or not bred
+			where unif 	:= (unifys) true & g at omega = l
+			where sigma 	:= () system_to_subst(unif)
+			where sigmar 	:= ()sigma(r)
+			where sigmag	:= ()sigma(g)
+			where sigmad 	:= ()sigma(d)
+			where sigmal 	:= ()sigma(l)
+			where eq 	:= () sigmag[sigmar] at omega= sigmad
+			/* for the test of triviality */
+			if not eq_term(lhs(eq),rhs(eq))
+			/* ordering conditions */
+			if not lpo(sigmad,sigmag)
+			if not lpo(sigmar,sigmal)
+			/* list of marked positions */
+			where lp111 	:= ()ltransform(omega,lp1,lp22)
+	end
+end
+
+
+rules for extequation1
+	g, d, l, r			: term;
+	eq1, eq2			: equation;
+	lp1, lp2, lp11, lp22	 	: list[list[int]];
+	num1, num2, counter		: int;
+	ext 				: extequation1;
+global
+
+	/* Choice between eq1 and eq2 as into equation and from equation */
+	/* eq1 : g=d, eq2 : l=r */
+	/* Choice of the left and the right hand side of each equation */
+
+	/* g=d l=r */
+	[dedrule1] deduce(eq1, num1, lp1, lp2, eq2, num2, lp11, lp22, counter)=> 
+		ext
+		where g		:= ()lhs(eq1)
+		where d 	:= ()rhs(eq1)
+		where l 	:= ()lhs(eq2)
+		where r 	:= ()rhs(eq2)
+		where ext := (dedleft)deduce(g,d,l,r, num1, lp1, lp2, 
+			num2, lp11, lp22, counter)
+	end
+
+	/* g=d r=l */
+	[dedrule2] deduce(eq1, num1, lp1, lp2, eq2, num2, lp11, lp22, counter)=> 
+		ext
+		where g 	:= ()lhs(eq1)
+		where d 	:= ()rhs(eq1)
+		where l 	:= ()lhs(eq2)
+		where r 	:= ()rhs(eq2)
+		where ext := (dedleft)deduce(g,d,r,l, num1, lp1, lp2, 
+			num2, lp22, lp11, counter)
+
+	end
+
+	/* d=g l=r */
+	[dedrule3] deduce(eq1, num1, lp1, lp2, eq2, num2, lp11, lp22, counter)=> 
+		ext
+		where g 	:= ()lhs(eq1)
+		where d		:= ()rhs(eq1)
+		where l 	:= ()lhs(eq2)
+		where r 	:= ()rhs(eq2)
+		where ext := (dedleft)deduce(d,g,l,r, num1, lp2, lp1,
+			num2, lp11, lp22, counter)
+
+
+	end
+
+	/* d=g r=l */
+	[dedrule4] deduce(eq1, num1, lp1, lp2, eq2, num2, lp11, lp22, counter)=> 
+		ext
+		where g		:= ()lhs(eq1)
+		where d 	:= ()rhs(eq1)
+		where l 	:= ()lhs(eq2)
+		where r 	:= ()rhs(eq2)
+		where ext := (dedleft)deduce(d,g,r,l, num1, 
+			lp2, lp1,num2, lp22, lp11, counter)
+	end
+
+	/* l=r g=d */
+	[dedrule5] deduce(eq1, num1, lp1, lp2, eq2, num2, lp11, lp22, counter)=> 
+		ext
+		where g 	:= ()lhs(eq1)
+		where d 	:= ()rhs(eq1)
+		where l 	:= ()lhs(eq2)
+		where r 	:= ()rhs(eq2)
+		where ext := (dedleft)deduce(l,r,g,d, num2, 
+			lp11, lp22, num1, lp1, lp2, counter)
+	end
+
+	/* r=l g=d */
+	[dedrule6] deduce(eq1, num1, lp1, lp2, eq2, num2, lp11, lp22, counter)=> 
+		ext
+		where g 	:= ()lhs(eq1)
+		where d 	:= ()rhs(eq1)
+		where l 	:= ()lhs(eq2)
+		where r 	:= ()rhs(eq2)
+		where ext := (dedleft)deduce(r,l,g,d, num2, 
+			lp22, lp11, num1, lp1, lp2, counter)
+	end
+
+	/* l=r d=g */
+	[dedrule7] deduce(eq1, num1, lp1, lp2, eq2, num2, lp11, lp22, counter)=> 
+		ext
+		where g 	:= ()lhs(eq1)
+		where d 	:= ()rhs(eq1)
+		where l 	:= ()lhs(eq2)
+		where r 	:= ()rhs(eq2)
+		where ext := (dedleft)deduce(l,r,d,g, num2, lp11, lp22, 
+			num1, lp2, lp1, counter)
+	end
+
+	/* r=l d=g */
+	[dedrule8] deduce(eq1, num1, lp1, lp2, eq2, num2, lp11, lp22, counter)=> 
+		ext
+		where g 	:= ()lhs(eq1)
+		where d 	:= ()rhs(eq1)
+		where l 	:= ()lhs(eq2)
+		where r 	:= ()rhs(eq2)
+		where ext := (dedleft)deduce(r,l,d,g, num2, lp22, lp11, 
+			num1, lp2, lp1, counter)
+	end
+end
+
+/* BASIC SIMPLIFICATION */
+
+/* basic_simplify */
+
+rules for extequation1
+	num1, num2, counter			: int;
+	omega 					: list[int];
+	g, d, l, r, mul, mur			: term;	
+	eq					: equation;
+	lp1, lp2, lp11, lp22, lp111, lp222  	: list[list[int]];
+	matcha  				: eqSystem;
+ 	mu					: substitution;
+global
+
+	[bsimpleft1] basic_simplify(g,d,l,r, num1, lp1, lp2, num2, lp11, lp22, counter) =>
+			eq, counter ,lp111, lp2
+			/* position = nil */
+			where omega 	:= (chooseOccurence)nvocc(g)
+			if eq_list[int](omega,nil)
+			if not ismarkedpos(omega,g=d,num1,lp1,lp2) 
+			where matcha	:= (match)l = g at omega
+			if not $matcha == false
+			where mu	:= ()system_to_subst(matcha)
+			where mul 	:= ()mu(l)
+			where mur	:= ()mu(r)
+			if not is_renaming(mu) or lpo(d,mur) or	eq_term(d,mur) 
+			where eq 	:= () g[mur] at omega= d
+			/* the test of triviality (a=a) is done at a upper level */
+			/* ordering conditions */
+			if not lpo(mur,mul)
+			/* list of marked positions */
+			where lp111 	:= ()ltransform(omega,lp1,lp22)
+	end
+
+	[bsimpleft2] basic_simplify(g,d,l,r, num1, lp1, lp2, num2, lp11, lp22, counter) =>
+			eq, counter ,lp111, lp2
+			/* position not nil */
+			where omega 	:= (chooseOccurence)nvocc(g)
+			if not eq_list[int](omega,nil)
+			if not ismarkedpos(omega,g=d,num1,lp1,lp2) 
+			where matcha	:= (match)l = g at omega
+			if not $matcha == false
+			where mu 	:= ()system_to_subst(matcha)
+			where mul 	:= ()mu(l)
+			where mur 	:= ()mu(r)
+			where eq 	:= () g[mur] at omega= d
+			/* the test of triviality (a=a) is done at a upper level */
+			/* ordering conditions */
+			if not lpo(mur,mul)
+			/* list of marked positions */
+			where lp111 	:= ()ltransform(omega,lp1,lp22)
+	end
+
+	[bblockingleft1] basic_simplify(g,d,l,r, num1, lp1, lp2, num2, lp11, lp22, counter) =>
+			d=d, 0 ,nil, nil
+			/* we return a trivial equation because g=d can be */
+			/* simplified in the constraint */
+			/* the test of triviality (a=a) is done at a upper level */
+			/* marked position not variable = nil */
+			where omega 	:= (chooseOccurence)nvocc(g)
+			if eq_list[int](omega,nil)
+			if ismarkedpos(omega,g=d,num1,lp1,lp2)
+			where matcha	:= (match)l = g at omega
+			if not $matcha == false
+			where mu	:= ()system_to_subst(matcha)
+			where mul 	:= ()mu(l)
+			where mur	:= ()mu(r)
+			if not is_renaming(mu) or lpo(d,mur) or	eq_term(d,mur) 
+			/* ordering conditions */
+			if not lpo(mur,mul)
+	end
+
+	[bblockingleft2] basic_simplify(g,d,l,r, num1, lp1, lp2, num2, lp11, lp22, counter) =>
+			d=d, 0, nil, nil
+			/* we return a trivial equation because g=d can be */
+			/* simplified in the constraint */
+			/* the test of triviality (a=a) is done at a upper level */
+			/* marked position not variable not nil */			
+			where omega 	:= (chooseOccurence)nvocc(g)
+			if not eq_list[int](omega,nil)
+			if ismarkedpos(omega,g=d,num1,lp1,lp2) 
+			where matcha	:= (match)l = g at omega
+			if not $matcha == false
+			where mu 	:= ()system_to_subst(matcha)
+			where mul 	:= ()mu(l)
+			where mur 	:= ()mu(r)
+			/* ordering conditions */
+			if not lpo(mur,mul)
+	end
+
+	[bsimpright1] basic_simplify(g,d,l,r, num1, lp1, lp2, num2, lp11, lp22, counter) =>
+			eq, counter ,lp1, lp222
+			/* position not nil */
+			where omega 	:= (chooseOccurence)nvocc(d)
+			if not ismarkedposr(omega,g=d,num1,lp1,lp2) 
+			where matcha	:= (match)l = d at omega
+			if not $matcha == false
+			where mu 	:= ()system_to_subst(matcha)
+			where mul 	:= ()mu(l)
+			where mur 	:= ()mu(r)
+			where eq 	:= () g =d [mur] at omega
+			/* the test of triviality (a=a) is done at a upper level */
+			/* ordering conditions */
+			if not lpo(mur,mul)
+			/* list of marked positions */
+			where lp222 	:= ()ltransform(omega,lp2,lp22)
+	end
+
+	[bblockingright1] basic_simplify(g,d,l,r, num1, lp1, lp2, num2, lp11, lp22, counter) =>
+			d=d, 0 ,nil, nil
+			/* we return a trivial equation because g=d can be */
+			/* simplified in the constraint */
+			/* the test of triviality (a=a) is done at a upper level */
+			/* marked position not variable = nil */
+			where omega 	:= (chooseOccurence)nvocc(d)
+			if ismarkedposr(omega,g=d,num1,lp1,lp2)
+			where matcha	:= (match)l = d at omega
+			if not $matcha == false
+			where mu	:= ()system_to_subst(matcha)
+			where mul 	:= ()mu(l)
+			where mur	:= ()mu(r)
+			/* ordering conditions */
+			if not lpo(mur,mul)
+	end
+end
+
+/* basic_simplify */
+
+rules for extequation1
+	g, d, l, r			: term;
+	eq1, eq2			: equation;
+	lp1, lp2, lp11, lp22 		: list[list[int]];
+	num1, num2, counter		: int;
+	simp				: extequation1;
+global
+
+	/* Choice between eq1 and eq2 as into equation and from equation */
+	/* eq1 : g=d, eq2 : l=r */
+	/* Choice of the left and the right hand side of each equation */
+
+	/* g=d l=r */
+	[bsimprule1] basic_simplify(eq1, num1, lp1, lp2, eq2, num2, 
+					lp11, lp22, counter)=> 
+		simp
+		where g	:= ()lhs(eq1)
+		where d	:= ()rhs(eq1)
+		where l := ()lhs(eq2)
+		where r := ()rhs(eq2)
+		if is_reduced_relative_to(l,r,num2,lp11,lp22,g,d,num1,lp1,lp2)
+		where simp := (bsimpblockingleftright)basic_simplify(g,d,l,r, num1, lp1, lp2,
+				num2, lp11, lp22, counter)
+	end
+
+	/* g=d r=l */
+	[bsimprule2] basic_simplify(eq1, num1, lp1, lp2, eq2, num2, 
+					lp11, lp22, counter)=> 
+		simp
+		where g := ()lhs(eq1)
+		where d := ()rhs(eq1)
+		where l := ()lhs(eq2)
+		where r := ()rhs(eq2)
+		if is_reduced_relative_to(r,l,num2,lp22,lp11,g,d,num1,lp1,lp2)
+		where simp := (bsimpblockingleftright)basic_simplify(g,d,r,l, num1, lp1, lp2,
+				num2, lp22, lp11, counter)
+	end
+
+	[bsimprule3] basic_simplify(eq1, num1, lp1, lp2, eq2, num2, 
+					lp11, lp22, counter)=> 
+		eq1, num1, lp1, lp2
+	end
+
+end
+
+
+/* INTERMEDIARY FUNCTIONS */
+
+/* include_terms */
+
+rules for bool
+	l, r, g, d1		: term;
+	num1, num2		: int;
+	lp1, lp2, lp11, lp22	: list[list[int]]; 
+	l1, l2 			: list[term];
+global
+	[] include_terms(l, r, num1, lp1, lp2, g, d1, num2, lp11, lp22)	=>
+	include_subterms(l1,l2)
+	where l1 := ()marked_termssv(l, r, num1, lp1, lp2)
+	where l2 := ()marked_termssv(g, d1, num2, lp11, lp22)
+	end
+end
+
+
+/* is_reduced_relative_to */
+
+rules for bool
+	l, r, g, d1		: term;
+	num1, num2		: int;
+	lp1, lp2, lp11, lp22	: list[list[int]]; 
+global
+	[] is_reduced_relative_to(l, r, num1, nil, nil, g, d1, num2, lp11, lp22)
+	=> true
+	end
+
+	[] is_reduced_relative_to(l, r, num1, lp1, lp2, g, d1, num2, lp11, lp22)
+	=> 
+	include_terms(l,r,num1,lp1,lp2,g,d1, num2,lp11,lp22)
+	end
+end
+
+
+strategies for extequation1
+implicit
+
+  [.] dedstrat => dk(dedrule1 || dedrule2 || dedrule3 || dedrule4 || dedrule5 || 
+		dedrule6 || dedrule7 || dedrule8 )
+  end 
+
+  [.] ded	=> dk(dedrule1 || dedrule2 || dedrule3 || dedrule4)
+  end 
+
+  [.] dedleft 	=> dk(dedleft1 || dedleft2)
+  end 
+
+  [.] bsimpstrat=> one(bsimprule1 || bsimprule2 || bsimprule3)
+  end
+
+  [.] bsimpblockingleftright => one(bsimpleft1 || bsimpleft2 || bsimpright1 ||
+		bblockingleft1 || bblockingleft2 || bblockingright1)
+  end
+
+end
+
+
+end
+
+
+
+
+
+
+
+
+
+
+
+

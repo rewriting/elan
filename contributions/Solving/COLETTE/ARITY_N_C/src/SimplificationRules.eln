@@ -1,0 +1,91 @@
+module SimplificationRules[Variables,Type,Values]
+
+import
+global	CSPDefinition[Variables,Type,Values]
+	tuple[3,list[constraint],list[constraint],list[var]]
+	;
+end
+
+rules for csp
+
+	x				: var;
+	v				: Type;
+	D				: domain;
+	lv				: list[var];
+	c				: constraint;
+	P				: csp;
+	lmc, lec, EC, DC, store		: list[constraint];
+	lmc1, lmc2, EC1, newstore	: list[constraint];
+
+global 
+
+[ArcConsistency]
+
+	CSP[lmc,lec,c.EC,DC,store]
+	=>
+	P
+ 	where	(tuple[list[constraint],list[constraint],list[var]])
+		[lmc1,lmc2,lv] := ()ReviseDxWRTc(lmc,lec,c)
+	where	(tuple[list[constraint],list[constraint]])
+		[EC1,newstore] :=()GetConstraintsOnVar(lv,store,nil,nil)
+	choose
+	try
+		if ArityOfConstraint(c) == 1
+		where P := () CSP[append(lmc1,lmc2),lec,append(EC1,EC),DC,newstore]
+	try
+		where P := () CSP[append(lmc1,lmc2),lec,append(EC1,EC),DC,c.newstore]
+	end
+end
+
+[Falsity]
+
+	CSP[x in? empty.lmc,lec,EC,DC,store]
+	=>
+	Unsatisfiable
+end
+
+[ExtractConstraintsOnEqualityVar]
+
+	CSP[lmc,x = v.lec,EC,DC,store]
+	=>
+	CSP[lmc,x = v.lec,append(EC1,EC),DC,newstore]
+	where	(tuple[list[constraint],list[constraint]])
+		[EC1,newstore] := ()GetConstraintsOnVar(x.nil,store,nil,nil)
+	if	EC1 != nil
+end
+
+[ExtractConstraintsOnDomainVar]
+
+	CSP[x in? D.lmc,lec,EC,DC,store]
+	=>
+	CSP[x in? D.lmc,lec,append(EC1,EC),DC,newstore]
+	where	(tuple[list[constraint],list[constraint]])
+		[EC1,newstore] := ()GetConstraintsOnVar(x.nil,store,nil,nil)
+	if	EC1 != nil
+end
+
+/*
+[ExtractAllConstraints]
+
+	CSP[lmc,,x = v.lec,EC,DC,c.store]
+	=>
+	if	occurs x in store
+	CSP[lmc,lec,append(c.store,EC),DC,nil]
+end
+
+[ExtractAllConstraints]
+
+	CSP[x in? D.lmc,lec,EC,DC,c.store]
+	=>
+	if	occurs x in store
+	CSP[lmc,lec,append(c.store,EC),DC,nil]
+end
+*/
+
+end
+
+
+end
+
+
+

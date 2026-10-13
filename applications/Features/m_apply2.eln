@@ -1,0 +1,39 @@
+module m_apply2
+
+import global builtinInt string REF Meta_Apply refstring2string ref2string[Strategy] ref2string[Term] ref2string[Program] string2refterm;
+end
+
+operators global
+  goo(@)	: (int) Term;
+end
+
+stratop global
+  GOO   : <Term -> Term> builtin;
+end
+
+rules for Term
+x	: int;
+xx	: builtinInt;
+s	: string;
+t	: Term;
+P, P1	: Program;
+global
+  [LL]   goo(xx) => t
+	    where t:=(meta_apply_strategy)
+		meta_apply(
+		call(126),
+		FSYM( FSYM( INT(4).nil, 200).nil,223):"list",
+		spec2ref("nqueens",""),
+		xx)	
+	end
+
+end
+
+strategies for Term
+implicit
+  [.]  GOO => dk(LL)  end
+end
+
+end
+
+

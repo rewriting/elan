@@ -1,0 +1,40 @@
+module mytuple[T_1,T_2,T_3]
+
+import global int;
+        end
+        
+sort T_1 T_2 T_3 mytuple[T_1,T_2,T_3];
+end
+        
+operators global
+ [@,@,@]  :(T_1 T_2 T_3) mytuple[T_1,T_2,T_3];
+ first(@) :(mytuple[T_1,T_2,T_3]) T_1;
+ second(@):(mytuple[T_1,T_2,T_3]) T_2;
+ third(@) :(mytuple[T_1,T_2,T_3]) T_3;          
+end
+
+rules for T_1
+ x_1 : T_1;
+ x_2 : T_2;
+ x_3 : T_3;
+global
+ [] first([x_1,x_2,x_3]) => x_1     end
+end
+
+rules for T_2
+ x_1 : T_1;
+ x_2 : T_2;
+ x_3 : T_3;
+global
+ [] second([x_1,x_2,x_3]) => x_2     end
+end
+
+rules for T_3
+ x_1 : T_1;
+ x_2 : T_2;
+ x_3 : T_3;
+global
+ [] third([x_1,x_2,x_3]) => x_3     end
+end
+
+end

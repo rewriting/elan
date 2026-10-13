@@ -1,0 +1,391 @@
+module graph
+
+/* Definition of the sort graph which is a set of adjacency lists */
+/* constructed using UU */
+
+import	
+	global
+		int
+		bool
+		edge
+		path
+		adjlist
+		oneadjlist
+		eq[label]
+		list[int]
+	;
+end
+
+
+sort graph;
+end
+
+
+operators
+  global
+
+	/* Constructor of the sort graph */
+	/* ginit is defined by oneadjempty. Perhaps, this must be changed. */
+	/* ginit is an empty graph without vertices and without edges. */
+	ginit		: graph;
+	@		: (oneadjlist) graph;
+	@ UU @		: (graph graph) graph (AC) assocLeft;
+
+	/* Test the existence of a cycle in the graph due to the addition */
+	/* of an S edge. This function is only called when the label of the */
+	/* edge to add is S. */
+	/* It is simple to implement because the graph is saved in its */
+	/* transitive closure form. If there is a path from v1 to v2 */
+	/* containing a C edge and if we add an S edge from v2 to v1 */
+	/* then there is an E-cycle (conditions of labels must be true */
+	/* too) */
+	iscycle(@,@)	: (edge graph) bool;
+
+	/* The following functions deal with the addition of an edge */
+	/* to the dependency graph */
+	/* Add an edge to the graph implies a recalculation of the */
+	/* transitive closure of the graph. The graph is so saved such */
+	/* that we know all the the paths that exist in the graph. */
+	/* The processus is the following. First, the new edge is */
+	/* added to the graph, then the transitive closure is */
+	/* calculated. */
+
+	/* add_edge adds only the edge to the graph without calculation */
+	/* of the transitive closure of the graph */
+	add_edge(@,@)	: (edge graph)	graph;
+
+	/* closurel calculates the transitive closure of the graph at */
+	/* left i.e. such that [v0,v1,lab] + [v1,[v2 ....] U X] UU G */
+	/* gives the adjacency list of v0 changed such that it is */
+	/* equal to [v0,[v2,...]U X]] if the conditions */
+	/* concerning labels are true */
+	/* The function addl_oneadjlist is called */
+	closurel(@,@)	: (edge graph) graph;
+
+	/* res_closurer is an intermediary function called in */
+	/* closurer. res_closurer(v2,v1,c1,lab1,lab2,lab3) returns */
+	/* the adjacency list [v2,[v1,c1,lab2,lab3]] if suiv(lab3,lab1),*/
+	/* otherwise it is oneadjempty. */
+	res_closurer(@,@,@,@,@,@) : (int int bool label label label) 
+	oneadjlist;
+
+	/* closurer calculates the transitive closure of the graph at */
+	/* right i.e. such that [v0,v1,lab] + [v2,[v0 ....] U X] UU G */ 
+	/* returns the adjacency list [v2,[v1,..]] if the conditions */
+	/* concerning labels are true */
+	/* The function res_closurer is called */
+	closurer(@,@)	: (edge graph) graph;
+
+	/* add is the general function that adds the new edge and calculates*/
+	/* the transitive closure but only if the edge does not create a */
+	/* cycle, otherwise the starting graph is returned */
+	add(@,@)	: (edge graph) graph;
+
+	/* add_listcedges uses add to add a list of edges to the graph with */
+	/* calculation of the transitive closure of the graph. It will be  */
+	/* used only when the label of all the edges to add is C */
+	add_listcedges(@,@,@,@)	: (int list[int] label graph)	graph;
+
+end
+
+
+/* Rules for simplification */
+
+rules for graph
+	v0 	: int;
+	X, Y 	: adjlist;
+	G 	: graph;
+global
+
+	/* Is ginit = oneadjempty ? */
+	[] oneadjempty			=> ginit
+	end
+
+	[] oneadjempty UU G		=> G
+	end
+
+	[] ginit UU G			=> G
+	end
+
+	[] [v0,adjempty]		=> ginit
+	end
+
+	[] [v0,adjempty] UU G		=> G
+	end
+
+	[] [v0,X] UU [v0,X] 		=> [v0,X] 
+	end
+
+	[] [v0,X] UU [v0,X] UU G	=> [v0,X] UU G
+	end
+
+	[] [v0,X] UU [v0,Y]		=> [v0, X U Y] 
+	end
+
+	[] [v0,X] UU [v0,Y] UU G	=> [v0, X U Y] UU G
+	end
+
+end
+
+
+/* iscycle */
+
+rules for bool
+	v0, v1		: int;
+	cedge     	: bool;
+	e		: edge;
+	lab1, lab2, lab3: label;
+	X 		: adjlist;
+	G		: graph;
+global
+
+	[] iscycle(edgeempty, G)		=> false
+	end
+
+	[] iscycle(e, ginit)			=> false
+	end
+
+	[] iscycle([v0,v1,lab1], [v1, [v0,cedge,lab2,lab3]]) 	=> 
+			switch 
+			case cedge
+			then 
+			switch 
+				case suiv(lab1,lab2)
+				then suiv(lab3,lab1)
+				otherwise false
+				end
+			otherwise false
+			end
+	end
+
+	[] iscycle([v0,v1,lab1], [v1,[v0,cedge,lab2,lab3] U X])	=> 
+			switch
+			case cedge
+			then
+			switch 
+				case suiv(lab1,lab2)
+				then suiv(lab3,lab1)
+				otherwise false
+				end
+			otherwise false
+			end
+	end
+
+	[] iscycle([v0,v1,lab1], [v1,[v0,cedge,lab2,lab3]] UU G)=> 
+			switch 
+			case cedge
+			then 
+			switch
+				case suiv(lab1,lab2)
+				then suiv(lab3,lab1)
+				otherwise false
+				end
+			otherwise false
+			end
+	end
+
+	[] iscycle([v0,v1,lab1], [v1,[v0,cedge,lab2,lab3] U X] UU G) => 
+			switch
+			case cedge
+			then
+			switch 
+				case suiv(lab1,lab2)
+				then suiv(lab3,lab1)
+				otherwise false
+				end
+			otherwise false
+			end
+	end
+
+	[] iscycle(e,G)						=> 
+			false
+	end
+
+end
+
+
+/* add_edge */
+
+rules for graph
+	v0, v1 	: int;
+	lab	: label;
+	X 	: adjlist;
+	G 	: graph;
+global
+
+	[] add_edge(edgeempty, G)		=> G
+	end
+
+	[] add_edge([v0,v1,lab], ginit)		=> 
+		[v0,[v1,eqlabel(C,lab),lab,lab]] 	
+	end
+
+	[] add_edge([v0,v1,lab], [v0,X])	=> 
+		[v0,[v1,eqlabel(C,lab),lab,lab] U X]
+	end
+
+	[] add_edge([v0,v1,lab], [v0,X] UU G)	=> 
+		[v0,[v1,eqlabel(C,lab),lab,lab] U X] UU G 
+	end
+
+	[] add_edge([v0,v1,lab], G)		=> 
+		[v0,[v1,eqlabel(C,lab),lab,lab]] UU G
+	end
+end
+
+
+/* closurel */
+
+rules for graph
+	v0, v1 			: int;
+	lab 			: label;
+	e 			: edge;
+	Y 			: adjlist;
+	G, Gres, Gres1, Gres2	: graph;
+global
+	
+	[] closurel(edgeempty, G)	=> ginit
+	end
+
+	[] closurel(e, ginit)		=> ginit
+	end
+
+	[] closurel([v0,v1,lab], [v1, Y]) => addl_oneadjlist([v0,v1,lab],[v1,Y]) 
+	end
+
+	[] closurel([v0,v1,lab], [v1, Y] UU G) => Gres1 UU Gres2
+		where Gres1 := ()closurel([v0,v1,lab],G) 
+		where Gres2 := ()addl_oneadjlist([v0,v1,lab],[v1,Y]) 
+	end	
+
+	[] closurel([v0,v1,lab], G) => ginit
+	end
+end
+
+
+/* suiv */
+
+rules for oneadjlist
+	v1, v2 			: int;
+	cedge	 		: bool;
+	lab1, lab2, lab3 	: label;
+global
+
+	[] res_closurer(v2,v1,cedge,lab1,lab2,lab3)= > 
+		switch 
+		case suiv(lab3,lab1) then [v2,[v1,cedge,lab2,lab1]]
+		otherwise oneadjempty
+		end
+	end
+end
+
+
+/* closurer */
+
+rules for graph
+	v0, v1, v2 		: int;
+	lab, lab1, lab2, lab3 	: label;
+	c			: bool;
+	e 			: edge;
+	X, Y, ad		: adjlist;
+	ad1, ad2 		: oneadjlist;
+	G, Gres2	 	: graph;
+global
+	
+	[] closurer(edgeempty, G)	=> ginit
+	end
+
+	[] closurer(e, ginit)		=> ginit
+	end
+
+	[] closurer([v0,v1,lab1], [v2,[v0,c,lab2,lab3]])	=> 
+		res_closurer(v2,v1,eqlabel(C,lab1) or c,lab1,lab2,lab3)
+	end
+
+	[] closurer([v0,v1,lab1], [v2,[v0,c,lab2,lab3] U X])	=> 
+		[v2,ad] UU ad2
+		where ad    := ()addr_adjlist([v0,v1,lab1],X)
+		where ad2   := 
+		()res_closurer(v2,v1,eqlabel(C,lab1) or c,lab1,lab2,lab3)
+	end
+
+	[] closurer([v0,v1,lab1], [v2,[v0,c,lab2,lab3]] UU G)	=> 
+		res_closurer(v2,v1,eqlabel(C,lab1) or c,lab1,lab2,lab3)UU Gres2 
+		where Gres2 := ()closurer([v0,v1,lab1],G)
+	end
+
+	[] closurer([v0,v1,lab1], [v2,[v0,c,lab2,lab3] U X] UU G)=> 
+		[v2,ad] UU ad2 UU Gres2
+		where ad    := ()addr_adjlist([v0,v1,lab1],X)
+		where ad2   := 
+		()res_closurer(v2,v1,eqlabel(C,lab1) or c,lab1,lab2,lab3)
+		where Gres2 := ()closurer([v0,v1,lab1],G)
+	end
+
+	[] closurer([v0,v1,lab1], G) 				=> 
+		ginit
+	end
+end
+
+
+/* add */
+
+rules for graph
+	v0, v1 			: int;
+	lab 			: label;
+	G, gr1, gr2, gr3 	: graph;
+global
+
+	[] add(edgeempty,G)			=> G		
+	end
+
+	[] add([v0,v1,lab],ginit)		=> 
+		[v0,[v1,eqlabel(lab,C),lab,lab]]
+	end
+
+	[] add([v0,v1,lab], G)			=> 
+		gr1 UU gr2 UU gr3
+		if eqlabel(S,lab)
+		where gr1 := ()add_edge([v0,v1,lab],G)
+		where gr2 := ()closurel([v0,v1,lab],G)
+		where gr3 := ()closurer([v0,v1,lab],G)
+		if not iscycle([v0,v1,lab],G)
+	end
+
+	[] add([v0,v1,lab], G)			=> 
+		gr1 UU gr2 UU gr3	
+		if not eqlabel(S,lab)
+		where gr1 := ()add_edge([v0,v1,lab],G)
+		where gr2 := ()closurel([v0,v1,lab],G)
+		where gr3 := ()closurer([v0,v1,lab],G)
+	end
+
+	[] add([v0,v1,lab], G)			=> 
+		G
+	end
+end
+
+
+/* add_listcedges */
+
+rules for graph
+	num, v		: int;
+	lv		: list[int];
+	G		: graph;
+global
+
+	[] add_listcedges(num, nil, C, G)	=> G
+	end
+
+	[] add_listcedges(num, v.nil, C, G)	=> add([num,v,C],G)
+	end
+
+	[] add_listcedges(num, v.lv, C, G)	=> add_listcedges(num,lv,C,add([num,v,C],G))
+	end
+
+	[] add_listcedges(num, lv, C, G)	=> G
+	end
+end
+
+end
+

@@ -1,0 +1,39 @@
+module traversal[X]
+
+import global X strat[X] mi[v,X] mi[u,X]; end
+
+stratop global
+  pd_all(@)	: (<X>) <X>;
+  pd_one(@)	: (<X>) <X>;
+  bu(@)	 	: (<X>) <X>;
+  td(@)	 	: (<X>) <X>;
+  inner(@)	 : (<X>) <X>;
+  outer(@)	: (<X>) <X>;
+  (@ ; @) 	: (<X> <X>) <X>		alias @;@:;
+  rep(@)	: (<X>) <X>;
+end
+
+strategies for X
+S : <X>;
+x, y 	: Term;
+x1, y1 	: Term;
+explicit
+  [.]  [pd_one(S)]f(x,y) => f(x1,y) where x1:=[S]x	end
+  [.]  [pd_one(S)]f(x,y) => f(x,y1) where y1:=[S]y	end
+  [.]  [pd_one(S)]g(x) => g(x1) where x1:=[S]x		end			
+implicit
+  [.]  pd_all(S) => a				end
+  [.]  pd_all(S) => b				end
+  [.]  pd_all(S) => f(S,S)			end
+  [.]  pd_all(S) => g(S)			end
+
+  [.]  bu(S) => mi v. (pd_all(v);S)		end
+  [.]  td(S) => mi v. (S;pd_all(v))		end
+
+  [.]  inner(S) => mi u.bu(first(S;u, id))	end
+  [.]  outer(S) => rep(mi u.first(S,pd_one(u)))	end
+  [.]  rep(S) => first(S;rep(S), id)		end
+end
+
+
+end

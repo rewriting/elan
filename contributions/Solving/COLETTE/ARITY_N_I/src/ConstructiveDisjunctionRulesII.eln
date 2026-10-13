@@ -1,0 +1,306 @@
+module ConstructiveDisjunctionRulesII[Variables,Type,Values]
+
+import
+global
+	ConstructiveDisjunctionDefinitionII[Variables,Type,Values]
+	LocalConsistencyStrategies[Variables,Type,Values]
+	DisjointCSPRules[Variables,Type,Values]
+	Meta_apply[csp]
+	list[int]
+	list[constraint]
+	list[csp]
+	stdio
+	io[csp]
+	io[string]
+	occur[var,list[constraint]]
+	;
+end
+
+operators
+global
+	TransformLECintoLMC(@)	: (list[constraint])				list[constraint];
+local
+	GetAllLMC(@,@)		: (list[constraint] list[csp])			list[constraint];
+	UnionLMC(@,@)		: (list[constraint] list[constraint])		list[constraint];
+	ExtractAllMin(@,@)	: (domain list[int])				list[int];
+	ExtractAllMax(@,@)	: (domain list[int])				list[int];
+	MergeList(@,@)		: (list[int] list[int])				list[int];
+	DeleteHoles(@,@,@)	: (list[int] list[int] int)			list[int];
+	CreateDomain(@)		: (list[int])					domain;
+	GetAllSolutions(@,@)	: (Pid list[csp])				list[csp];
+end
+
+
+rules for cspCDII
+
+	P, Q, R					: csp;
+	pid, pid1				: Pid;
+	string1					: string;
+	lmc, lec, EC, DC, store			: list[constraint];
+	lmc1, alllmc				: list[constraint];
+	luCsp, luCsp1, newluCsp, lsCsp, lcsp	: list[csp];
+	laPid, liPid				: list[Pid];
+
+global
+
+[DecomposeCSPCDII]
+	CSPCDII[CSP[lmc,lec,EC,DC,store],luCsp,lsCsp,laPid,liPid]
+	=>
+	CSPCDII[CSP[nil,nil,EC,DC,store],newluCsp,lsCsp,laPid,liPid]
+	where	lmc1    := ()TransformLECintoLMC(lec)
+	where	luCsp1	:= ()CreateListOfCSP(append(lmc,lmc1))
+	where	newluCsp:= ()DecomposeCSP(luCsp1,DC)
+end
+
+[CreateSolverCSPCDII]
+	CSPCDII[P,luCsp,lsCsp,laPid,liPid]
+	=>
+	CSPCDII[P,luCsp,lsCsp,laPid,pid.liPid]
+	if	size(luCsp) > size(liPid)
+	where	pid := ()create("solverCSPDCII")
+	if 	not iserr(pid)
+end
+
+[SendToSolverCSPCDII]
+	CSPCDII[P,Q.luCsp,lsCsp,laPid,pid.liPid]
+	=>
+	CSPCDII[P,luCsp,lsCsp,pid.laPid,liPid]
+	where	R 	:= ()write(pid,Q)
+	where	string1	:= ()write(pid,"\nend\n")
+	if 	not iserror(R) and not iserror(string1)
+end
+
+[GetOutputOfSolverCSPCDII]
+	CSPCDII[P,luCsp,lsCsp,pid.laPid,liPid]
+	=>
+	CSPCDII[P,luCsp,R.lsCsp,pid.laPid,liPid]
+	where	lcsp   := ()GetAllSolutions(pid,nil)
+	where	alllmc := ()GetAllLMC(nil,lcsp)
+	where	lmc    := ()UnionLMC(nil,alllmc)
+	where	R      := ()CSP[lmc,nil,nil,nil,nil]
+end
+
+[ComposeCSPCDII]
+	CSPCDII[P,luCsp,Q.lsCsp,laPid,liPid]
+	=>
+	CSPCDII[R,luCsp,lsCsp,laPid,liPid]
+	where	R := ()ComposeCSP(P,Q)
+end
+
+[CloseSolverCSPCDII]
+	CSPCDII[P,luCsp,lsCsp,laPid,pid.liPid]
+	=>
+	CSPCDII[P,luCsp,lsCsp,laPid,liPid]
+	where	pid1 := ()close(pid)
+end
+
+end
+
+
+rules for list[constraint]
+
+	x, x1, x2					: var;
+	D1, D2, newD1					: domain;
+	v						: Type;
+	lmc, lmc1, lmc2, l1, lec, lec1, lmc3, lf	: list[constraint];
+	P						: csp;
+	lcsp						: list[csp];
+	lmin1, lmin2, lmax1, lmax2, lmin, lmax, lv	: list[int];
+
+global
+
+[]	TransformLECintoLMC(x = v.lec)
+	=>
+	x in? [v,..,v].TransformLECintoLMC(lec)
+end
+
+[]	TransformLECintoLMC(nil)
+	=>
+	nil
+end
+
+[]	GetAllLMC(lmc,P.lcsp)
+	=>
+	GetAllLMC(l1,lcsp)
+	choose
+	try
+		if not P == Unsatisfiable
+		where	lmc1 := ()GetLMC(P)
+		where	lec1 := ()GetLEC(P)
+		where	lmc2 := ()TransformLECintoLMC(lec1)
+		where	lmc3 := ()append(lmc1,lmc2)
+		where	l1   := ()append(lmc3,lmc)
+	try
+		if P == Unsatisfiable
+		where	l1 := ()lmc
+	end
+end
+[]	GetAllLMC(lmc,nil)
+	=>
+	lmc
+end
+
+[]	UnionLMC(lmc1,x2 in? D2.lmc2)
+	=>
+	lf
+	choose
+	try
+		if occurs x2 in lmc1
+		where	(list[constraint]) x1 in? D1.l1	:= ()GetVarInHead(x2,lmc1,nil)
+		where	lmin1	:= ()ExtractAllMin(D1,nil)
+		where	lmin2	:= ()ExtractAllMin(D2,nil)
+		where	lmax1	:= ()ExtractAllMax(D1,nil)
+		where	lmax2	:= ()ExtractAllMax(D2,nil)
+		where	lmin	:= ()MergeList(lmin1,lmin2)
+		where	lmax	:= ()MergeList(lmax1,lmax2)
+		where	lv	:= ()DeleteHoles(lmin,lmax,0)
+		where	newD1	:= ()CreateDomain(lv)
+		where	lf	:= () UnionLMC(x1 in? newD1.l1,lmc2)
+	try
+		where	lf	:= () UnionLMC(x2 in? D2.lmc1,lmc2)
+	end
+end
+[]	UnionLMC(lmc,nil)
+	=>
+	lmc
+end
+
+end
+
+
+rules for list[int]
+
+	D1, D2			: domain;
+	min, max, v1, v2, n	: int;
+	l, l1, l2, lf		: list[int];
+
+global
+
+[]	ExtractAllMin(D1 U D2,l)
+	=>
+	l1
+	where	l2 := ()ExtractAllMin(D2,l)
+	where	l1 := ()ExtractAllMin(D1,l2)
+end
+[]	ExtractAllMin([min,..,max],l)
+	=>
+	min.l
+end
+
+[]	ExtractAllMax(D1 U D2,l)
+	=>
+	l1
+	where	l2 := ()ExtractAllMax(D2,l)
+	where	l1 := ()ExtractAllMax(D1,l2)
+end
+[]	ExtractAllMax([min,..,max],l)
+	=>
+	max.l
+end
+
+[]	MergeList(v1.l1,v2.l2)
+	=>
+	lf
+	choose
+	try
+		if v1 <= v2
+		where lf := () v1.MergeList(l1,v2.l2)
+	try
+		where lf := () v2.MergeList(v1.l1,l2)
+	end
+end
+[]	MergeList(nil,l2)
+	=>
+	l2
+end
+[]	MergeList(l1,nil)
+	=>
+	l1
+end
+
+[]	DeleteHoles(min.l1,max.l2,n)
+	=>
+	lf
+	choose
+	try
+		if min <= max
+		choose
+		try
+			if n == 0
+			where lf := () min.DeleteHoles(l1,max.l2,1)
+		try
+			where lf := () DeleteHoles(l1,max.l2,n+1)
+		end
+	try
+		choose
+		try
+			if n == 1
+			where lf := () max.DeleteHoles(min.l1,l2,0)
+		try
+			where lf := () DeleteHoles(min.l1,l2,n-1)
+		end
+	end
+end
+[]	DeleteHoles(nil,max.l2,n)
+	=>
+	lf
+	choose
+	try
+		if n > 1
+		where lf := () DeleteHoles(nil,l2,n-1)
+	try
+		where lf := () max.nil
+	end
+end
+
+end
+
+
+rules for list[csp]
+
+	pid	: Pid;
+	Q	: csp;
+	lcsp, lf: list[csp];
+
+global 
+
+[]	GetAllSolutions(pid,lcsp)
+	=>
+	lf
+	where	Q := ()read(pid)
+	choose
+	try
+		if not iserror(Q)
+		where lf := () GetAllSolutions(pid,Q.lcsp)
+	try
+		where lf := () lcsp
+	end
+end
+
+end
+
+
+rules for domain
+
+	min, max	: int;
+	l		: list[int];
+
+global
+
+[]	CreateDomain(min.max.nil)
+	=>
+	[min,..,max]
+end
+[]	CreateDomain(min.max.l)
+	=>
+	[min,..,max] U CreateDomain(l)
+end
+
+end
+
+
+end
+
+
+
+

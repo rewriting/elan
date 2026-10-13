@@ -1,0 +1,13 @@
+LPL s description
+
+   query of sort  	string 
+   result of sort 	string //int
+   modules 		s
+//   start with 		(ss)length(query)
+//   start with 		(ss)query[1]
+  start with		(ss)query
+
+end
+
+
+

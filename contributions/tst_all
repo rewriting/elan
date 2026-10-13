@@ -1,0 +1,34 @@
+#!/bin/sh
+# Run the tests of this tree (applications/ or contributions/) with the legacy bench.
+# Usage: <tree>/tst_all [KINDS] [run_tests.py options]
+#   KINDS: I,A (default), J,JO, G...; the system tested is $ELAN_PREFIX,
+#   else build/install (make install), else reference/install.
+#   A --filter RE of the options is combined with the tree: only the tests of
+#   this tree whose id matches RE run.
+here=$(cd "$(dirname "$0")" && pwd)
+repo=$(dirname "$here")
+tree=$(basename "$here")
+case ${1-} in -*|"") kinds=I,A ;; *) kinds=$1; shift ;; esac
+prefix=${ELAN_PREFIX:-$repo/build/install}
+[ -x "$prefix/bin/elan" ] || prefix=$repo/reference/install
+# a user --filter RE becomes ^tree/.*(RE); without one, ^tree/
+filter="^$tree/"
+args=
+for a in "$@"; do
+    if [ "${prev-}" = --filter ]; then
+        filter="^$tree/.*($a)"
+    elif case $a in --filter=*) true ;; *) false ;; esac; then
+        filter="^$tree/.*(${a#--filter=})"
+    elif [ "$a" != --filter ]; then
+        args="$args
+$a"
+    fi
+    prev=$a
+done
+unset prev
+# shellcheck disable=SC2086
+IFS='
+'
+set -f
+exec python3 "$repo/tests/legacy-bench/run_tests.py" --prefix "$prefix" --kinds "$kinds" \
+    --filter "$filter" $args

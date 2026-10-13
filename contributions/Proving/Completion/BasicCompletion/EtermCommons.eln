@@ -1,0 +1,199 @@
+module EtermCommons[fss,vars]
+// Extension du module : termCommons
+
+import global	termCommons[fss,vars]
+		substitution
+		list[term]
+		list[int]
+		Elist[variable]
+		Elist[term]
+		;
+       local	int
+		bool
+		vars
+		fss
+		identifier
+		pair[identifier,int] list[pair[identifier,int]]
+		;
+end
+
+//sort variable term;
+operators
+  global
+// transforme une variable en un terme
+    vtot(@)		: (variable) term	pri 1000;
+    term_to_variable(@)	: ( term ) variable;
+
+// donne les sous termes de F(t_1,...,t_N)
+    list_subterm(@)	: ( term ) list[term];
+
+// donne les variables d'un terme
+    list_variable(@)	: ( term ) list[variable] pri 100;
+    listTerm_variable(@)        : ( term ) list[term] pri 100;
+
+// renomme les variables var(1)...var(n) en var(i)...var(i+n)
+    rename_subst(@,@)     : ( int int ) substitution;
+
+// donne le plus grand numero de variable d'un terme
+    maxvar(@,@)		: ( term int) int;
+/*
+	normalize renomme un terme avec une substitution
+	replace permet de remplacer une variable par une autre
+	partout dans un terme. Applique de maniere successive,
+	cela donnerai :
+	renommage( f(x,y) , x->y o y->x ) ==> f(x,x) ou f(y,y) pas tres pratique !
+	alors que normalize( f(x,y) , x->y o y->x ) donne bien f(y,x)
+*/
+    normalize(@,@)	: (term substitution) term;
+
+// taille en nombre de symboles de fonction
+    taille(@)		: (term) int;
+end
+
+
+stratop
+  global
+   nvocc	: <list[int]>	builtin;
+end
+
+
+//-----------------------------------------------------------------------------
+rules for term
+	t,s : term;
+	i   : int;
+        l   : list[int];
+	x   : variable;
+global
+  [] vtot($x) => $x
+  end
+end
+
+rules for substitution
+ i,n : int;
+        vn: variable;
+        vl: list[variable];
+global
+  [] rename_subst(0,i)     => var(0)->var(i)
+  end
+  [] rename_subst(n,i) => var(n)->var(n+i) o rename_subst(n-1 ,i) 
+  end
+end
+
+rules for list[variable]
+ X 	: variable;
+global
+  [] list_variable(X)	=> X.nil end
+end
+
+rules for list[term]
+ X : variable;
+global
+  [] list_subterm(X)	=> nil end
+  [] listTerm_variable(X)       => X.nil end
+end
+
+rules for variable
+ X : variable;
+global
+  [] term_to_variable(X)	=> X end
+end
+
+rules for term
+	 X,Y,Z : variable;
+	sigma : substitution;
+global
+  [] normalize(X,identity)	=> X end
+  [] normalize(X,Z->Y o sigma)	=> Y if eq_variable(X,Z) end
+  [] normalize(X,Z->Y)	=> Y if eq_variable(X,Z) end
+  [] normalize(X,Y->Z o sigma)	=> normalize(X,sigma) if neq_variable(X,Y) end
+end
+
+rules for int
+
+	X : variable;
+	n,m : int;
+global
+  [] taille(X) => 0
+  end
+  [] maxvar(var(n),m) => n if n>=m
+  end
+  [] maxvar(var(n),m) => m if m>=n
+  end
+  [] maxvar(evar(n),m) => n if n>=m
+  end
+  [] maxvar(evar(n),m) => m if m>=n
+  end
+  [] maxvar(X,m) => m
+  end
+end
+
+/*---Eterm_f --*/
+  FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+  SUCH THAT SS:=(listExtract) elem(fss) AND F:=()first(SS) 
+        AND N:=()second(SS) :{
+  rules for list[int]
+   t_1,...,t_N : term;
+          oocc        : list[int];
+  global
+    [nvoccrule]  nvocc(F(t_1,...,t_N))          => nil
+    end
+    {
+      [nvoccrule] nvocc(F(t_1,...,t_N))        => J.oocc
+                                           where oocc:=(nvocc) nvocc(t_J)
+      end
+    }_J=1...N
+  end
+
+  rules for list[term]
+   t_1,...,t_N : term;
+  global
+    [] list_subterm(F(t_1,...,t_N)) => {t_I.}_I=1...N nil end
+    [] listTerm_variable(F(t_1,...,t_N)) =>     { listTerm_variable(t_I) @@ }_I=1...N nil
+    end
+  end
+
+  rules for list[variable]
+  
+	t_1,...,t_N 	: term;
+	lv		: list[variable];
+  global
+    [] list_variable(F(t_1,...,t_N)) =>	{ list_variable(t_I) @@ }_I=1...N nil
+    end
+  end
+
+  rules for term
+   t_1,...,t_N : term;
+  sigma : substitution;
+  global
+    [] normalize(F(t_1,...,t_N),sigma) => F({normalize(t_I,sigma),}_I=1...N)  end
+  end
+
+  rules for int
+  
+	t_1,...,t_N : term;
+	m : int;
+  global
+    [] taille(F(t_1,...,t_N)) => {taille(t_I)+}_I=1...N 1
+    end
+    [] maxvar(F(t_1,...,t_N),m) => { maxvar(t_I, }_I=1...N
+				m
+				{ ) }_I=1...N
+    end
+  end
+}
+
+/*
+ * Pour accelerer
+ */
+
+strategies for list[int]
+implicit
+  [.] nvocc => dk(nvoccrule)
+  end
+end
+
+end
+
+
+
+

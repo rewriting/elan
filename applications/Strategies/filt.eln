@@ -1,0 +1,44 @@
+module filt
+
+import global strat[integ] strat[list[integ]]
+	      strassign[list[integ]] strassign[integ]
+	      integ list[integ];
+end
+stratop global
+  filter(@,@) : (integ list[integ]) <list[integ]>;
+end
+
+rules for integ
+ n,m,p:integ;
+local
+  [add(p)]	n => n+p				end
+  [large]	n => n+1 if n > 0			end
+end
+
+strategies for list[integ]
+	h,l 		: integ; 
+	hs, t, uu 	: list[integ];
+	m, n, p 	: integ;
+implicit
+  [.] filter(m,t) => dc(
+			nil,
+			(let n:=[id]m , p:=[large]n in add(p)).
+			[h.l.hs	=> l.h.t
+					[large]h, 
+					if m > 0, 
+					[[p=>h*p]]l,
+					[[uu=>nil]]hs, 
+					[[uu => 1999.uu]]t
+			])
+  end
+/*
+  [filter(m,t)]dc(	
+			nil,
+	(let n:=[id]m , p:=[large]n in add(p)).
+         [h.l.hs => h:large,if m > 0 => l.h.t]
+			)
+  end
+*/
+end
+
+end

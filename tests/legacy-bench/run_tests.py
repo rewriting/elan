@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 """ELAN regression test bench.
 
-Replays the historical test bench of the ELAN project (the `tst_all` files that
-drive the csh scripts `itest`, `aitest` and `jtest` from elan/sources/Scripts)
-against an installed ELAN system: by default the reference build
-(reference/install, see reference/build.sh); use --prefix to test another one
-(e.g. the modern port).
+Replays the test bench of the ELAN project against an installed ELAN system:
+the `TESTS` files of applications/ and contributions/ (the living copy of the
+ELAN 3 applications, spec S9 §8; format: tests/apps/README.md) and the
+historical `tst_all` files of legacy/elan/sources (they drive the csh scripts
+`itest`, `aitest` and `jtest` from elan/sources/Scripts). The system is by
+default the reference build (reference/install, see reference/build.sh); use
+--prefix to test another one (e.g. the modern port).
 
 Test kinds (same semantics as the original scripts):
   I  itest  : elan -b LGI.lgi [SPC.spc] < SAMPLES/INP.inp       == SAMPLES/OUT.out
@@ -13,13 +15,18 @@ Test kinds (same semantics as the original scripts):
               elan -b --import LGI.ref < SAMPLES/INP.inp         == SAMPLES/OUT.out
   J  jtest  : elanc-rem -b -nosplit -quiet LGI [SPC]; make; a.out -noInput -quiet == SAMPLES/OUT.out
               (-noInput = evaluate the compiled `start with` query; it was the default
-              when the reference outputs were produced)
+              when the reference outputs were produced). A compiled program (J, JO, R, G)
+              reads SAMPLES/INP.inp when its line has an INP.
   JO jtest  : same with -optimiseChoicePoint (second half of the original jtest)
   R  jtest  : elanc-rs (Rust compiler, spec S6) LGI [SPC]; a.out -noInput -quiet,
               rewrite_step lines ignored; UNSUPPORTED when elanc-rs refuses (exit 2).
               Not in the default kinds.
   G  jtest  : the same with elanc-go (Go compiler, spec S7; a go build cache in the
-              bench work directory). Not in the default kinds.
+              bench work directory). Not in the default kinds. `gtest` lines of a TESTS
+              file are G tests with an INP.
+
+A test of the living copy not in baseline.tsv must PASS; G and R tests may also be
+UNSUPPORTED (the compiler refuses the program).
 
 ctest/actest/cctest (old C compiler) and pitest/pevaltest (partial evaluator)
 have no script anymore and are not replayed.
@@ -95,10 +102,15 @@ def restore_case(src, dst, lgi=None):
         os.replace(dst / stored.relative_to(src), target)
 
 
-# Directories whose tst_all files are harvested
-SUITES = [ELAN3 / "applications", ELAN3 / "contributions", ROOT / "elan" / "sources"]
+# Historical tst_all files still read in legacy/ (compiler test directories,
+# BenchThesis: not copied), and the living copy of the ELAN 3 applications
+# (spec S9 §8), whose tests are in TESTS files (tests/apps/README.md).
+SUITES = [ROOT / "elan" / "sources"]
+APPS = [REPO / "applications", REPO / "contributions"]
 
-KIND_OF_CMD = {"itest": ["I"], "aitest": ["A"], "jtest": ["J", "JO", "R", "G"]}
+# gtest LGI SPC INP OUT (spec S9): elanc-go, the compiled program reading INP
+KIND_OF_CMD = {"itest": ["I"], "aitest": ["A"], "jtest": ["J", "JO", "R", "G"],
+               "gtest": ["G"]}
 # kinds compiled by the new compilers (not in the default kinds): spec S6
 # (elanc-rs, Rust) and S7 (elanc-go, Go)
 COMPILER_KINDS = {"R": "elanc-rs", "G": "elanc-go"}
@@ -143,30 +155,57 @@ def parse_tst_all(path):
             yield words[0], words[1:], any(stack)
 
 
-def discover():
+def parse_tests(path):
+    """Yield (cmd, args, long) for each line of a TESTS file
+    (tests/apps/README.md); an unknown command is an error (a typo must not
+    drop a test)."""
+    for n, raw in enumerate(path.read_text(errors="replace").splitlines(), 1):
+        words = raw.split("#", 1)[0].split()
+        if not words:
+            continue
+        long_ = words[0] == "long"
+        if long_:
+            words = words[1:]
+        if not words or words[0] not in KIND_OF_CMD:
+            raise SystemExit(f"{path}:{n}: unknown test command: {raw.strip()}")
+        yield words[0], words[1:], long_
+
+
+def discover(suites=None, apps=None):
+    """Tests of the historical tst_all files of the suites (ids relative to
+    legacy/) and of the TESTS files of the living copy (spec S9 §8; ids
+    relative to the repository, t["copy"] True)."""
+    suites = SUITES if suites is None else suites
+    apps = APPS if apps is None else apps
     tests, seen = [], set()
-    for suite in SUITES:
+
+    def add(d, lines, rel, copy):
+        for cmd, a, long_ in lines:
+            if cmd == "jtest":
+                if len(a) < 3:
+                    continue
+                lgi, spc, inp, out, flags = a[0], a[1], None, a[2], a[3:]
+            else:
+                if len(a) < 4:
+                    continue
+                lgi, spc, inp, out, flags = a[0], a[1], a[2], a[3], a[4:]
+            for kind in KIND_OF_CMD[cmd]:
+                tid = f"{rel}::{kind}::{lgi}:{spc}:{inp or '-'}:{out}"
+                if tid in seen:
+                    continue
+                seen.add(tid)
+                tests.append(dict(id=tid, dir=d, kind=kind, lgi=lgi, spc=spc,
+                                  inp=inp, out=out, flags=flags, long=long_, copy=copy))
+
+    for suite in suites:
         for tst in sorted(suite.rglob("tst_all")):
-            d = tst.parent
-            if d == suite:          # top-level driver (tst_one ...)
-                continue
-            for cmd, a, long_ in parse_tst_all(tst):
-                if cmd == "jtest":
-                    if len(a) < 3:
-                        continue
-                    lgi, spc, inp, out, flags = a[0], a[1], None, a[2], a[3:]
-                else:
-                    if len(a) < 4:
-                        continue
-                    lgi, spc, inp, out, flags = a[0], a[1], a[2], a[3], a[4:]
-                for kind in KIND_OF_CMD[cmd]:
-                    rel = d.relative_to(ROOT)
-                    tid = f"{rel}::{kind}::{lgi}:{spc}:{inp or '-'}:{out}"
-                    if tid in seen:
-                        continue
-                    seen.add(tid)
-                    tests.append(dict(id=tid, dir=d, kind=kind, lgi=lgi, spc=spc,
-                                      inp=inp, out=out, flags=flags, long=long_))
+            if tst.parent != suite:          # top-level driver (tst_one ...)
+                add(tst.parent, parse_tst_all(tst), tst.parent.relative_to(ROOT), False)
+    for top in apps:
+        # exact name from the listing: rglob("TESTS") would also return a data
+        # file `tests` on a case-insensitive volume
+        for tf in sorted(Path(d) / "TESTS" for d, _, fs in os.walk(top) if "TESTS" in fs):
+            add(tf.parent, parse_tests(tf), tf.parent.relative_to(REPO).as_posix(), True)
     return tests
 
 
@@ -267,26 +306,54 @@ def sanitizer_report(err):
     return None
 
 
-def run_test(t, timeout):
-    if modern_only(t, PREFIX, FIXED_CASES):
-        return "MODERN-ONLY", "fixes a bug of the 2004 reference (fixes-2004)", ""
-    expected = src_path(samples(t["dir"]) / f"{t['out']}.out")
-    if not expected.exists():
-        return "NOREF", f"missing {expected}", ""
-    if not src_path(t["dir"] / f"{t['lgi']}.lgi").exists():
-        return "NOLGI", f"missing {t['lgi']}.lgi", ""
+class Unrunnable(Exception):
+    """A test that produced no output to compare: status, detail, output so far."""
+    def __init__(self, status, detail, out=""):
+        super().__init__(status)
+        self.status, self.detail, self.out = status, detail, out
+
+
+def locate(t, name):
+    """(file, path relative to the test's directory) of its SAMPLES file
+    `name` (stored names of legacy/: CASE-RENAMES.tsv), or (None, None)."""
+    p = samples(t["dir"]) / name
+    if src_path(p).exists():
+        return src_path(p), p.relative_to(t["dir"])
+    return None, None
+
+
+def has_lgi(t):
+    return src_path(t["dir"] / f"{t['lgi']}.lgi").exists()
+
+
+def private_copy(t, wd):
+    """wd: a copy of the test's directory (legacy/: case names restored)."""
+    shutil.copytree(t["dir"], wd, symlinks=True,
+                    ignore=shutil.ignore_patterns("CVS", "*.o", "a.out", ".elan.*"))
+    restore_case(t["dir"], wd, t["lgi"])
+
+
+def produce(t, timeout):
+    """(stdout, stderr, rc) of test t run in a private copy with PREFIX's tools.
+    Raises Unrunnable when there is nothing to compare; lets
+    subprocess.TimeoutExpired through. A compiled program reads the test's
+    input when it has one, else evaluates its start term (-noInput)."""
+    if not has_lgi(t):
+        raise Unrunnable("NOLGI", f"missing {t['lgi']}.lgi")
     spc = [] if t["spc"] == "no" else [f"{t['spc']}.spc"]
     flags = [f for f in t["flags"] if f]
     WORK.mkdir(exist_ok=True)
     work = Path(tempfile.mkdtemp(prefix="elantest-", dir=WORK))
     try:
         wd = work / t["dir"].name
-        shutil.copytree(t["dir"], wd, symlinks=True,
-                        ignore=shutil.ignore_patterns("CVS", "*.o", "a.out", ".elan.*"))
-        restore_case(t["dir"], wd, t["lgi"])
-        inp = samples(wd) / f"{t['inp']}.inp" if t["inp"] else None
-        if inp is not None and not inp.exists():
-            return "NOINP", f"missing {inp.name}", ""
+        private_copy(t, wd)
+        inp = None
+        if t["inp"]:
+            _, rel = locate(t, f"{t['inp']}.inp")
+            if rel is None:
+                raise Unrunnable("NOINP", f"missing {t['inp']}.inp")
+            inp = wd / rel
+        compiled = ["./a.out", "-quiet"] if inp is not None else ["./a.out", "-noInput", "-quiet"]
         k = t["kind"]
         if k == "I":
             rc, out, err = run(["elan", "-b", *flags, f"{t['lgi']}.lgi", *spc], wd, inp, timeout)
@@ -294,47 +361,65 @@ def run_test(t, timeout):
             rc, o1, e1 = run(["elan", "-b", *flags, "--export", f"{t['lgi']}.ref",
                               f"{t['lgi']}.lgi", *spc], wd, None, timeout)
             if sanitizer_report(e1):
-                return "SANITIZER", f"export: {sanitizer_report(e1)}\n{e1[-4000:]}", o1
+                raise Unrunnable("SANITIZER", f"export: {sanitizer_report(e1)}\n{e1[-4000:]}", o1)
             if rc != 0:
-                return "ERROR", f"export rc={rc}\n{e1[-2000:]}", o1
+                raise Unrunnable("ERROR", f"export rc={rc}\n{e1[-2000:]}", o1)
             rc, out, err = run(["elan", "-b", "--import", f"{t['lgi']}.ref"], wd, inp, timeout)
         elif k in COMPILER_KINDS:   # elanc-rs (S6) or elanc-go (S7); only with --kinds R/G
             compiler = COMPILER_KINDS[k]
             rc, o1, e1 = run([compiler, "-b", *flags, t["lgi"], *spc], wd, None, timeout * 3)
             if rc == 2:
-                return "UNSUPPORTED", (o1 + e1)[-1500:], ""
+                raise Unrunnable("UNSUPPORTED", (o1 + e1)[-1500:])
             if rc != 0 or not (wd / "a.out").exists():
-                return "ERROR", f"{compiler} rc={rc}\n{o1[-1500:]}\n{e1[-1500:]}", ""
-            rc, out, err = run(["./a.out", "-noInput", "-quiet"], wd, None, timeout)
+                raise Unrunnable("ERROR", f"{compiler} rc={rc}\n{o1[-1500:]}\n{e1[-1500:]}")
+            rc, out, err = run(compiled, wd, inp, timeout)
         else:  # J, JO
             opts = ["-b", "-nosplit", "-quiet"] + (["-optimiseChoicePoint"] if k == "JO" else [])
             rc, o1, e1 = run(["elanc-rem", *opts, *flags, t["lgi"], *spc], wd, None, timeout)
             mk = wd / f"{t['lgi']}.make"
             if not mk.exists():
-                return "ERROR", f"elanc-rem rc={rc}\n{o1[-1500:]}\n{e1[-1500:]}", ""
+                raise Unrunnable("ERROR", f"elanc-rem rc={rc}\n{o1[-1500:]}\n{e1[-1500:]}")
             rc, o2, e2 = run(["make", "-f", mk.name], wd, None, timeout * 3)
             if rc != 0 or not (wd / "a.out").exists():
-                return "ERROR", f"make rc={rc}\n{(o2 + e2)[-3000:]}", ""
-            rc, out, err = run(["./a.out", "-noInput", "-quiet"], wd, None, timeout)
+                raise Unrunnable("ERROR", f"make rc={rc}\n{(o2 + e2)[-3000:]}")
+            rc, out, err = run(compiled, wd, inp, timeout)
         if sanitizer_report(err):
-            return "SANITIZER", f"{sanitizer_report(err)}\n{err[-4000:]}", out
-        exp = expected.read_text(encoding="latin-1", errors="replace")
-        if k in COMPILER_KINDS:   # rewrite_step counts depend on the compilation scheme
-            out, exp = REWRITE_STEP.sub("", out), REWRITE_STEP.sub("", exp)
-        if out == exp:
-            return "PASS", "", out
-        if norm(out) == norm(exp):
-            return "PASS~", "differs only in white space", out
-        if atoms(out) == atoms(exp):
-            return "PASS≈", "same symbols/values in same order (printing differs)", out
-        diff = "".join(difflib.unified_diff(exp.splitlines(True), out.splitlines(True),
-                                            "expected", "got", n=2))
-        tail = f"\n--- rc={rc} stderr:\n{err[-1500:]}" if (rc or err.strip()) else ""
-        return "FAIL", diff[:20000] + tail, out
-    except subprocess.TimeoutExpired:
-        return "TIMEOUT", f"> {timeout}s", ""
+            raise Unrunnable("SANITIZER", f"{sanitizer_report(err)}\n{err[-4000:]}", out)
+        return out, err, rc
     finally:
         shutil.rmtree(work, ignore_errors=True)
+
+
+def run_test(t, timeout):
+    if modern_only(t, PREFIX, FIXED_CASES):
+        return "MODERN-ONLY", "fixes a bug of the 2004 reference (fixes-2004)", ""
+    expected, _ = locate(t, f"{t['out']}.out")
+    if expected is None:
+        return "NOREF", f"missing {t['out']}.out", ""
+    try:
+        out, err, rc = produce(t, timeout)
+    except Unrunnable as u:
+        return u.status, u.detail, u.out
+    except subprocess.TimeoutExpired:
+        return "TIMEOUT", f"> {timeout}s", ""
+    k = t["kind"]
+    exp = expected.read_text(encoding="latin-1", errors="replace")
+    if k in COMPILER_KINDS:   # rewrite_step counts depend on the compilation scheme
+        out, exp = REWRITE_STEP.sub("", out), REWRITE_STEP.sub("", exp)
+    if out == exp:
+        return "PASS", "", out
+    if norm(out) == norm(exp):
+        return "PASS~", "differs only in white space", out
+    if atoms(out) == atoms(exp):
+        return "PASS≈", "same symbols/values in same order (printing differs)", out
+    diff = "".join(difflib.unified_diff(exp.splitlines(True), out.splitlines(True),
+                                        "expected", "got", n=2))
+    rcs = f"rc={rc}" if rc != 0 else ""
+    if err.strip():
+        tail = f"\n--- {rcs + ', ' if rcs else ''}stderr:\n{err[-1500:]}"
+    else:
+        tail = f"\n--- {rcs}" if rcs else ""
+    return "FAIL", diff[:20000] + tail, out
 
 
 def snapshot_id(t):
@@ -406,11 +491,12 @@ def load_baseline():
 RANK = {"PASS": 0, "PASS~": 1, "PASS≈": 2}
 
 
-def judge(statuses, base, exceptions):
+def judge(statuses, base, exceptions, new_ids=frozenset()):
     """Compare test statuses with the baseline: return (regressions, improvements),
     lists of (id, old, new). Cases of tests/regression must PASS exactly (their
     expected.out is the oracle, whatever the baseline says); tests listed in the
-    platform exceptions are exempt."""
+    platform exceptions are exempt. Tests of the living copy (spec S9 §8) not in
+    the baseline must PASS (kinds G and R: or UNSUPPORTED): the reference is their oracle."""
     regress, improve = [], []
     for tid, new in sorted(statuses.items()):
         if new == "SANITIZER":          # a sanitizer report is always a failure
@@ -422,6 +508,11 @@ def judge(statuses, base, exceptions):
             if new not in ("PASS", "MODERN-ONLY"):
                 regress.append((tid, "PASS", new))
             continue
+        if tid in new_ids and tid not in base:
+            ok = ("PASS", "UNSUPPORTED") if "::G::" in tid or "::R::" in tid else ("PASS",)
+            if new not in ok:
+                regress.append((tid, "PASS", new))
+            continue
         if tid in base:
             old = base[tid]
             if RANK.get(new, 9) > RANK.get(old, 9):
@@ -429,6 +520,14 @@ def judge(statuses, base, exceptions):
             elif RANK.get(new, 9) < RANK.get(old, 9):
                 improve.append((tid, old, new))
     return regress, improve
+
+
+def new_tests(tests, base):
+    """Ids of the tests of the living copy added since the baseline: neither
+    the test nor its J case (kinds R, G: the baseline has the J case of a
+    historical jtest line) is in it."""
+    return {t["id"] for t in tests
+            if t.get("copy") and t["id"] not in base and snapshot_id(t) not in base}
 
 
 def run_repeated(t, timeout, repeat):
@@ -529,8 +628,10 @@ def main():
     print(f"details: {outdir}")
 
     base = load_baseline()
-    regress, improve = judge({tid: results[tid][0] for tid in ids}, base, exceptions)
-    if base or regress:
+    new_ids = new_tests(tests, base)
+    regress, improve = judge({tid: results[tid][0] for tid in ids}, base, exceptions,
+                             new_ids)
+    if base or regress or new_ids:
         print(f"vs baseline: {len(regress)} regressions, {len(improve)} improvements")
         for tid, old, new in regress:
             print(f"  REGRESSION {tid}: {old} -> {new}")

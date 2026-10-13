@@ -1,0 +1,23 @@
+/*PROCESSING STATION*/
+
+#locs 3
+#trans 5
+#clocks Z
+#sync sempty gput sready dpick
+
+loc: 0
+     prop: SEmpty
+     invar: TRUE
+     trans: TRUE => gput; Z:=0; goto 1
+            TRUE => sempty; ; goto 0
+
+loc: 1
+     prop: SBusy
+     invar: Z<=10
+     trans: Z>=8 and Z<=10 => sbusy; Z:=0; goto 2
+
+loc: 2
+     prop: SReady
+     invar: TRUE
+     trans: TRUE => dpick; Z:=0; goto 0
+            TRUE => sready; ; goto 2

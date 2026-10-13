@@ -1,0 +1,68 @@
+module Lin
+
+import term eqSystem list[variable] ;
+end
+
+
+operators 
+
+  global
+
+  Lin(@) : (list[variable]) list[variable] ;
+
+  x : variable ;
+  y : variable ;
+  z : variable ;
+  u : variable ;
+  v : variable ;
+  w : variable ;
+
+
+  local
+
+  insert(@,@) : (variable list[variable]) list[variable] ;
+
+end
+
+rules for list[variable]
+// declare	
+        x,v 	: variable ;
+	l,m,n	: list[variable];
+global
+
+  [Ins1] insert(x,l)	=> x.l 
+                           end
+
+  [Ins2] insert(x,v.l)	=> v.m
+                           where m:= (chooseIns) insert(x,l)
+                           end
+  
+  [Lin1] Lin(x.l)       => n 
+                        where m:= (chooseLin) Lin(l) 
+                        where n:= (chooseIns) insert(x,m)
+                        end 
+
+  [Lin2] Lin(nil) => nil end
+
+end
+
+
+strategies for list[variable]
+
+ global
+    [chooseLin]
+    dont know choose(Lin1 || Lin2) 
+    end
+end
+
+
+strategies for list[variable]
+
+ global 
+    [chooseIns]
+    dont know choose(Ins1 || Ins2)
+    end
+end
+
+
+end

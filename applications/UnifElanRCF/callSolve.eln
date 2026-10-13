@@ -1,0 +1,64 @@
+module callSolve[Vars,Fss1,Fss2]
+import 	global 	termAlien[Vars,Fss1,Fss2] ;
+ 	local  	Vars Fss1 Fss2 int anyIdentifier bool pair[identifier,int]
+		list[int] list[identifier] list[pair[identifier,int]] 
+                eq[variable] eq[term]
+		eqSystem anyInteger eqMulti 
+                occur[variable,term] occur[variable,eqSystem] ;
+end 
+
+operators
+
+  local
+
+  ////// Attention, piege, il faut redefinir la grammaire
+  ///// C'est un Gros Hack....
+
+
+    FOR EACH SS:identifier SUCH THAT SS:=(listExtract) elem(Vars) :{
+      SS     : variable                 alias SS: ;
+      SS . @ : (int) variable           alias SS.@:;
+    }
+
+
+	// This creates from the user specification the actual 
+	// rank for operators declared of arity zero (the constants)
+  FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+  SUCH THAT SS:=(listExtract) elem(Fss1 @ Fss2) AND F:=()first(SS) 
+	AND N:=()second(SS) ANDIF N==0 :{
+      F     	: term                          alias F: ;
+    }
+
+	// From the user specification, this creates the actual
+	// rank for non constant operators
+FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+SUCH THAT SS:=(listExtract) elem(Fss1 @ Fss2) AND F:=()first(SS) 
+	AND N:=()second(SS) ANDIF N > 0 :{
+
+     F(@ {,@}~(N-1))	:({term}~N) term        alias F(@ {,@}~(N-1)): ;
+
+}
+
+        vabst[@]        : ( term) variable alias vabst[@]: ;
+        xnew.@          : (int) variable alias xnew.@: ;
+
+	@               : (variable) term alias @: ;
+	@ 		: ( equation ) eqSystem alias @:; 
+	@ @             :(eqSystem eqSystem ) eqSystem assocLeft alias @&@:; 
+        @ |--> @	: (term term ) equation alias @ = @:;
+        IDENTITY	: bool   		 alias true:;
+        x ':' @           : (int) variable alias var(@): ; 
+end
+
+
+
+strategies for eqSystem
+  global
+
+    [callunif]
+    dkcall(unifelan,1,eqSystem)
+    end
+end
+
+
+end

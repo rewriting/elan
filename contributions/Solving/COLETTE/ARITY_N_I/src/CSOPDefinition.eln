@@ -1,0 +1,124 @@
+module CSOPDefinition[Variables,Type,Values]
+
+import
+global
+	CSPDefinition[Variables,Type,Values]
+	tuple[4,constraint,var,Type,Type]
+	tuple[4,csp,var,Type,Type]
+
+/* Cannot be complied
+
+        stdio
+        io[csop]
+        io[string]
+
+*/
+
+	;
+end
+
+sort
+
+	csop;
+
+end
+
+operators
+global	
+
+// CSOP definition
+
+	CSOP@		: (set:tuple[csp,var,Type,Type])	csop;
+
+// Constructor
+
+	CreateCSOP(@)	: (set:tuple[constraint,var,Type,Type])	csop;
+
+// Destructor
+
+	GetCSP(@)	 : (csop)				csp;
+	GetLowerBound(@) : (csop)				Type;
+	GetUpperBound(@) : (csop)				Type;
+
+end
+
+
+rules for csop
+
+        x       : var;
+        lb, ub	: Type;
+        c       : constraint;
+        P, Q    : csp;
+	P1, P2	: csop;
+	s1	: string;
+
+global 
+
+[]      CreateCSOP([c,x,lb,ub])
+        =>
+        CSOP[P,x,lb,ub]
+        where   P  := ()CreateCSP(c)
+end
+
+[GetSolutionCSOP]
+
+        CSOP[P,x,lb,ub]
+        =>
+        CSOP[Q,x,lb,ub]
+        where   Q := (first(GetSolutionCSP))P
+end
+
+/* Cannot be compiled
+
+[WriteCSOPInASCII]
+
+	P1
+	=>
+	P1
+	where	P2 := ()write(stdout,P1)
+        where   s1 := ()write(stdout,"\n\n\n")
+end
+
+*/
+
+end
+
+
+rules for csp
+
+        x       : var;
+        lb, ub	: Type;
+        P	: csp;
+
+global 
+
+[]	GetCSP(CSOP[P,x,lb,ub])
+	=>
+	P
+end
+
+end
+
+
+rules for Type
+
+        x       : var;
+        lb, ub	: Type;
+        P	: csp;
+
+global
+
+[]	GetLowerBound(CSOP[P,x,lb,ub])
+	=>
+	lb
+end
+
+[]	GetUpperBound(CSOP[P,x,lb,ub])
+	=>
+	ub
+end
+
+end
+
+
+end

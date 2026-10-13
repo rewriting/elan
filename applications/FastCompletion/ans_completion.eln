@@ -1,0 +1,526 @@
+module ans_completion[vars,fss,prec,syst]
+import	global 	equation[vars,fss,prec]
+		rewriteStep[vars,fss,prec]
+		compute_state[vars,fss,prec,equation]
+	;
+
+	local 	syst int bool
+		syntacticUnification[fss,vars]
+		EtermCommons[fss,vars]
+		occur[equation,list[equation]]
+		applySubstOn[fss,vars,equation]
+		eq[list[equation]]
+		eq[list[int]]
+		Elist[equation]
+		substitution
+		;
+end
+
+operators
+  global
+    sat			: list[equation];
+    cp			: list[equation];
+    append_taille(@,@)	: ( list[equation] list[equation] ) list[equation];
+    append_taille(@,@)	: ( list[equation] equation ) list[equation];
+
+    completion(@)	: (list[equation]) list[equation];
+    cp(@)		: (list[equation]) list[equation];
+
+    AC_to_N(@)		: (compute_state) compute_state;
+    S_to_T(@)		: (compute_state) compute_state;
+    normalize(@)	: (list[equation]) list[equation];
+    eqlist		: list[equation];
+    delete(@)		: (list[equation]) list[equation];
+    compose(@,@)	: (equation equation) equation;
+    collapse(@,@)	: (equation equation) equation;
+    simplify(@,@)	: (equation equation) equation;
+    deduce(@,@)		: (equation equation) equation;
+    internal_deduce(@,@): (equation equation) equation;
+
+    choix_orient(@,@)	: (list[equation] list[equation]) list[equation];
+    supemb(@,@,@,@)	: (equation equation list[int] substitution) bool;
+end
+
+stratop
+  global
+   completion_kb	: <compute_state>	builtin;
+   completion_cp	: <compute_state>	builtin;
+   s_simplify_ANCT	: <compute_state>	builtin;
+   s_compose_ics	: <internal_compute_state>	builtin;
+   s_compose_ics_T	: <internal_compute_state>	builtin;
+   s_collapse_ics	: <internal_compute_state>	builtin;
+   s_simplify_ics	: <internal_compute_state>	builtin;
+   s_simplify_list	: <internal_compute_state>	builtin;
+   s_deduce_list	: <internal_compute_state>	builtin;
+   s_completion		: <list[equation]>		builtin;
+   s_cp			: <list[equation]>		builtin;
+   s_choix_orient	: <list[equation]>		builtin;
+   s_commande		: <list[equation]>		builtin;
+end
+
+//------------------------------------------------------------
+
+rules for compute_state
+	
+	A,N,C,T,S,E			: list[equation];
+	A1,N1,C1,T1,S1,E1		: list[equation];
+	a,n,c,t,s,e,e1			: equation;
+	la,ln,lc,lt,ls,le,le1		: list[equation];
+	cs1,cs2,cs3,cs4			: compute_state;
+	ics1,ics2,ics3,ics4		: internal_compute_state;
+global
+
+// Regles de base
+
+  [Regle1] A * N * C * T * s.ls * E 		=> S_to_T(cs1)
+	where cs1:=(s_simplify_ANCT) A * N * C * T * s.ls * E
+  end
+
+  [Regle2] A * N * C * T * nil * e.le		=> cs3
+	where cs1:=(first one(simplify_E)) A * N * C * T * nil *  e.le
+	where cs2:=(first one(delete_E)) cs1
+	where cs3:=(first one(orient_E, orient_fail)) cs2
+  end
+
+  [Regle3] A * n.ln * c.nil * T * nil * nil	=> cs1
+	where cs1:=(first one(deduce_NC)) A * n.ln * c.nil * T * nil * nil
+  end
+
+  [Regle4] A * nil * c.nil * T * nil * nil	=> cs2
+	where cs1:=(first one(internal_deduce)) A * nil * c.nil * T * nil * nil
+	where cs2:=() AC_to_N(cs1)
+  end
+
+  [Regle5] A * N * nil * t.lt * nil * nil	=> cs1
+	where cs1:=(first one(choix_C)) A * N * nil * t.lt * nil * nil
+  end
+
+//------------------------------------------------------------
+// Pour calculer un ensemble de paires critiques
+
+  [Regle1bis] A * N * C * T * s.ls * E 		=> S_to_T(cs1)
+	where cs1:=() A * N * C * T * s.ls * E
+  end
+
+  [Regle2bis] A * N * C * T * nil * e.le		=> cs2
+	where cs1:=(first one(delete_E)) A * N * C * T * nil *  e.le
+	where cs2:=(first one(orient_E, orient_fail)) cs1
+  end
+
+  [Regle3bis] A * n.ln * c.nil * T * nil * nil	=> cs2
+	where cs1:=(first one(deduce_NC)) A * n.ln * c.nil * T * nil * nil
+	where cs2:=() CS_to_A(cs1) @@ CS_to_E(cs1) *
+		      CS_to_N(cs1) * CS_to_C(cs1) * CS_to_T(cs1) * CS_to_S(cs1) * nil
+  end
+
+  [Regle4bis] A * nil * c.nil * T * nil * nil	=> cs2
+	where cs1:=(first one(internal_deduce)) A * nil * c.nil * T * nil * nil
+	where cs2:=() CS_to_A(cs1) @@ CS_to_E(cs1) *
+		      CS_to_C(cs1) * nil * CS_to_T(cs1) * CS_to_S(cs1) * nil
+
+  end
+
+  [Regle5bis] A * N * nil * t.lt * nil * nil	=> cs1
+	where cs1:=() A * N * t.nil * lt * nil * nil
+  end
+
+//------------------------------------------------------------
+
+// Regles de transformation d'etat
+
+
+// il faudrait prendre n minimum
+  [deduce_NC] A * n.ln * c.nil * T * S * nil	=> append_taille(A,n) * ln * c.nil * T * S * E1
+	where ics1:=(s_deduce_list) nil | nil | n.nil | c.nil
+	where ics2:=(s_deduce_list) ICS_to_1(ics1) | nil | c.nil | n.nil
+	where E1:=() ICS_to_1(ics2)
+  end
+
+  [internal_deduce] A * N * c.nil * T * S * nil	=> A * N * c.nil * T * S * E1
+	where ics1:=(s_deduce_list) nil | nil | nil | c.nil
+	where E1:=() ICS_to_1(ics1)
+  end
+
+  [simplify_E] A * N * C * T * S * E 		=> A * N * C * T * S * E1
+	where ics1:=(s_simplify_ics) nil | nil | append(A,append(N,append(C,T))) | E
+	where E1:=() ICS_to_1(ics1)
+  end
+
+// il faudrait prendre t de taille minimum
+  [choix_C] A * N * C * t.lt * S * E 		=> nil * append_taille(A,N) * t.nil * lt * nil * nil
+  end
+
+// E a ete entierement simplife
+  [orient_E] A * N * C * T * nil * nil		=> A * N * C * T * nil * nil
+  end
+// On prend une equation orientable de E (ici S est vide)
+  [orient_E] A * N * C * T * nil * e.le		=> A * N * C * T * normalize(tete(le1)).nil * queue(le1)
+	where le1:=(s_choix_orient) choix_orient(nil,e.le)
+	if le1 != nil
+  end
+// Aucune equation de E ne peut etre orientee, ECHEC
+  [orient_fail] A * N * C * T * nil * e.le	=> nil * nil * nil * nil * nil * nil
+  end
+
+  [] AC_to_N(A * nil * c.nil * T * S * E)	=> nil * append_taille(A,c) * nil * T * S * E
+  end
+
+  [] S_to_T(A * N * C * T * s.ls * E)		=> A * N * C * append_taille(T,s) * ls * E
+  end
+
+  [delete_E] A * N * C * T * S * E		=> A * N * C * T * S * E1
+	where E1:=(first one(delete)) delete(E)
+  end
+
+  [collapse_A] A * N * C * T * s.ls * E		=> A1 * N * C * T * s.ls * E1 
+	where ics1:=(s_collapse_ics) nil | A | s.ls | E
+	where E1:=() ICS_to_4(ics1)
+	where A1:=() ICS_to_1(ics1)
+  end
+  [collapse_N] A * N * C * T * s.ls * E		=> A * N1 * C * T * s.ls * E1 
+	where ics1:=(s_collapse_ics) nil | N | s.ls | E
+	where E1:=() ICS_to_4(ics1)
+	where N1:=() ICS_to_1(ics1)
+  end
+  [collapse_C] A * N * C * T * s.ls * E		=> A * N * C1 * T * s.ls * E1 
+	where ics1:=(s_collapse_ics) nil | C | s.ls | E
+	where E1:=() ICS_to_4(ics1)
+	where C1:=() ICS_to_1(ics1)
+  end
+  [collapse_T] A * N * C * T * s.ls * E 	=> A * N * C * T1 * s.ls * E1
+	where ics1:=(s_collapse_ics) nil | T | s.ls | E
+	where E1:=() ICS_to_4(ics1)
+	where T1:=() ICS_to_1(ics1)
+  end
+
+  [compose_A] A * N * C * T * s.ls * E		=> A1 * N * C * T1 * s.ls * E
+	where ics1:=(s_compose_ics) nil | A | s.ls | T
+	where T1:=() ICS_to_4(ics1)
+	where A1:=() ICS_to_1(ics1)
+  end
+  [compose_N] A * N * C * T * s.ls * E		=> A * N1 * C * T1 * s.ls * E
+	where ics1:=(s_compose_ics) nil | N | s.ls | T
+	where T1:=() ICS_to_4(ics1)
+	where N1:=() ICS_to_1(ics1)
+  end
+  [compose_C] A * N * C * T * s.ls * E		=> A * N * C1 * T1 * s.ls * E
+	where ics1:=(s_compose_ics) nil | C | s.ls | T
+	where T1:=() ICS_to_4(ics1)
+	where C1:=() ICS_to_1(ics1)
+  end
+  [compose_T] A * N * C * T * s.ls * E		=> A * N * C * T1 * s.ls * E
+	where ics1:=(s_compose_ics_T) nil | T | s.ls | nil
+	where T1:=() ICS_to_1(ics1)
+  end
+end
+
+
+rules for internal_compute_state
+	
+	R1,R2,E,T			: list[equation];
+	r,s,e,rrwr			: equation;
+	lr,ls,le,les			: list[equation];
+	ics1: internal_compute_state;
+	t,tt: term;
+global
+// regles non modifiees | regles a simplifier | regle de simplification | eq + regles simplifiees
+
+  [collapse_ics_ok] R1 | r.lr | s.nil | E	=> R1 | lr | s.nil | E @@ e.nil
+	where e:=(first one(collapse)) collapse(r,s)
+  end
+  [collapse_ics_echec] R1 | r.lr | s.nil | E	=> R1 @ r.nil | lr | s.nil | E
+  end
+  [collapse_ics_stop] R1 | nil | s.nil | E	=> R1 | nil | nil | E
+  end
+
+  [compose_ics_ok] R1 | r.lr | s.nil | T	=> R1 | lr | s.nil | append_taille(T,e)
+	where e:=(first one(compose)) compose(r,s)
+  end
+  [compose_ics_echec] R1 | r.lr | s.nil | T	=> R1 @ r.nil | lr | s.nil | T
+  end
+  [compose_ics_stop] R1 | nil | s.nil | T	=> R1 | nil | nil | T
+  end
+  [compose_ics_ok_T] R1 | r.lr | s.nil | nil	=> R1 | e.lr | s.nil | nil
+	where e:=(first one(compose)) compose(r,s)
+  end
+
+// resultat | nil | regles de simplification | ens. a simplifier
+  [simplify_ics] R1 | nil | ls | e.le	=> R1 @@ lr | nil | ls | le
+	where ics1:=(s_simplify_list) nil | nil | ls | e.nil
+	where lr:=() ICS_to_1(ics1)
+  end
+
+// resultat | regles deja essayees | regles de simplification | eq a simplifer
+  [simplify_list_ok] nil | lr | s.ls | t=tt.nil	=> nil | nil | nil | nil
+	if t==tt
+  end
+
+  [simplify_list_ok] nil | lr | s.ls | e.nil	=> nil | nil | append(s.ls,lr) | r.nil
+	where r:=(dk(simplify)) simplify(e,s)
+  end
+  [simplify_list_echec] nil | lr | s.ls | e.nil	=> nil | s.lr | ls | e.nil
+  end
+  [simplify_list_stop] nil | lr | nil | e.nil	=> e.nil | nil | nil | nil
+  end
+
+
+  [deduce_list] R1 | nil| e.nil | s.nil	=> r.R1 | nil | e.nil | s.nil
+	where rrwr:=() translate(s,maxvar(e,0))	
+	where r:=(dk(deduce)) deduce(e,rrwr)
+	if not occurs(r,R1)
+   end
+  [deduce_list] R1 | nil| nil | s.nil	=> r.R1 | nil | nil | s.nil
+	where rrwr:=() translate(s,maxvar(s,0))	
+	where r:=(dk(deduce)) internal_deduce(s,rrwr)
+	if not occurs(r,R1)
+   end
+end
+
+rules for equation
+
+	s,t,l,r,v,g,d	: term;
+	e,r		: equation;
+	e1,e2		: equation;
+	lr		: list[equation];
+        eq_renommee	: equation;
+        rlr,rrwr	: equation;
+	unif,filtre	: eqSystem;
+	omega		: list[int];
+	sigma		: substitution;
+	b		: bool;
+global
+  [compose] compose(s->t,l->r)		=> s->v
+	where rrwr:=() translate(l->r,maxvar(s,0))
+	where v:=(dk(rewriteStep)) rewriteStep(t,rrwr)
+  end
+
+  [simplify] simplify(s=t,l->r)		=> s=v
+	where rrwr:=() translate(l->r,maxvar(s,maxvar(t,0)))
+	where v:=(dk(rewriteStep)) rewriteStep(t,rrwr)
+  end
+  [simplify] simplify(s=t,l->r)		=> v=t
+	where rrwr:=() translate(l->r,maxvar(s,maxvar(t,0)))
+	where v:=(dk(rewriteStep)) rewriteStep(s,rrwr)
+  end
+
+  [collapse] collapse(s->t,l->r)	=> v=t
+	where rrwr:=() translate(l->r,maxvar(s,0))
+        where omega := (chooseOccurence) nvocc(s)
+        where filtre := (matchs) true & left(rrwr) = s at omega
+        where sigma := () system_to_subst(filtre)
+	where v:=() s[sigma(right(rrwr))] at omega
+	if supemb(s->t,l->r,omega,sigma)
+  end
+
+  [deduce] deduce(g->d,l->r)		=> eq_renommee
+	where omega:=(chooseOccurence) nvocc(g)	
+	where unif:=(unifys) true & g at omega = l
+	where sigma:=() system_to_subst(unif)
+	where eq_renommee:=() sigma(g)[sigma(r)] at omega = sigma(d)
+  end
+  [deduce] internal_deduce(g->d,l->r)		=> eq_renommee
+	where omega:=(chooseOccurence) nvocc(g)	
+	if omega != nil
+	where unif:=(unifys) true & g at omega = l
+	where sigma:=() system_to_subst(unif)
+	where eq_renommee:=() sigma(g)[sigma(r)] at omega = sigma(d)
+  end
+
+end
+
+
+rules for list[equation]
+
+	le,ln,lr,l1,l2	: list[equation];
+	e,e1,n		: equation;
+	s,t		: term;
+	x,y		: variable;
+global
+
+  [delete] delete(nil)			=> nil
+  end
+  [delete] delete(s=t.le)		=> lr 
+	if s == t
+	where lr:=(first one(delete)) delete(le)
+  end
+  [delete] delete(s=t.le)		=> s=t.lr
+	if s!=t
+	where lr:=(first one(delete)) delete(le)
+  end
+
+  [choix_orient1] choix_orient(lr,e.le)	=> normalize(e1).append(lr,le)
+	where e1:=(s_orient_eq) orient(e)
+  end
+  [choix_orient2] choix_orient(lr,e.le)	=> l1
+	where l1:=(s_choix_orient) choix_orient(e.lr,le)
+  end
+  [choix_orient3] choix_orient(lr,nil)	=> nil
+  end
+  
+//--------------------
+  [] append_taille(nil,n)	=> n.nil
+  end
+  [] append_taille(e.le,n)	=>n.e.le
+	if taille(n) < taille(e)
+  end
+  [] append_taille(e.le,n)	=>e.append_taille(le,n)
+	if taille(n) >= taille(e)
+  end
+
+  [] append_taille(nil,n.ln)	=> append_taille(n.nil,ln)
+  end
+  [] append_taille(ln,nil)	=> ln
+  end
+  [] append_taille(le,n.ln)	=> append_taille(append_taille(le,n),ln)
+	if not occurs n in le
+  end
+  [] append_taille(le,n.ln)	=>append_taille(le,ln)
+	if occurs n in le
+  end
+end
+
+rules for bool
+
+	eq1,eq2 : equation;
+	b : bool;
+	omega	: list[int];
+	rho	: substitution;
+global
+  [] supemb(eq1,eq2,omega,rho)	=> true if omega!=nil
+  end
+  [] supemb(eq1,eq2,omega,rho)	=> true if left(eq1)!=left(eq2)
+  end
+  [] supemb(eq1,eq2,omega,rho)	=> right(eq1) >lpo rho(right(eq2))
+  end
+end
+
+rules for list[equation]
+
+	complete	: list[equation];
+	X 	: equation;
+global
+  [commande] sat	=> complete
+	where complete:=(s_completion) completion(eqlist)
+  end
+
+  [commande] cp	=> complete
+	where complete:=(s_cp) cp(eqlist)
+  end
+
+
+  [] eqlist => FOR EACH X:equation SUCH THAT X:=(listExtract)elem(syst): { X.} nil
+  end
+end
+
+rules for list[equation]
+
+	list_renomme	: list[equation];
+	list_sature 	: list[equation];
+	final_state	: compute_state;
+	E		: list[equation];
+global
+  [completion] completion(E) => list_sature
+	where list_renomme:=() normalize(E)
+	where final_state:=(completion_kb) nil * nil * nil * nil *nil * list_renomme
+	where list_sature:=() CS_to_A(final_state) @@ CS_to_N(final_state)
+  end
+
+  [cp] cp(E) => list_sature
+	where list_renomme:=() normalize(E)
+	where final_state:=(completion_cp) nil * nil * nil * nil *nil * list_renomme
+	where list_sature:=() CS_to_A(final_state) @@ CS_to_N(final_state)
+  end
+
+end
+
+rules for list[equation]
+
+	le	: list[equation];
+	e	: equation;
+global
+  [] normalize(e.le) => normalize(e).normalize(le)
+  end
+  [] normalize(nil) => nil
+  end
+end
+
+//------------------------------------------------------------
+
+strategies for compute_state
+implicit
+  [.] completion_kb =>
+    repeat*(first one(Regle1, Regle2, Regle3, Regle4, Regle5))
+  end
+
+  [.] completion_cp =>
+    repeat*(first one(Regle1bis, Regle2bis, Regle3bis, Regle4bis, Regle5bis))
+  end
+
+  [.] s_simplify_ANCT =>
+    first one(compose_A) ;
+    first one(collapse_A) ;
+    first one(compose_N) ;
+    first one(collapse_N) ;
+    first one(compose_C) ;
+    first one(collapse_C) ;
+    first one(compose_T) ;
+    first one(collapse_T) 
+  end
+end
+
+strategies for internal_compute_state
+implicit
+  [.] s_compose_ics =>
+    repeat*(first one(compose_ics_ok, compose_ics_echec, compose_ics_stop))
+  end
+
+  [.] s_compose_ics_T =>
+    repeat*(first one(compose_ics_ok_T, compose_ics_echec, compose_ics_stop))
+  end
+
+  [.] s_collapse_ics =>
+  repeat*(first one(collapse_ics_ok, collapse_ics_echec, collapse_ics_stop))
+  end
+
+  [.] s_simplify_list =>
+    repeat*(first one(simplify_list_ok, simplify_list_echec, simplify_list_stop))
+  end
+/*
+  [.] s_compose_ics =>
+    repeat*(dc(compose_ics_ok, compose_ics_echec, compose_ics_stop))
+  end
+
+  [.] s_compose_ics_T =>
+    repeat*(dc(compose_ics_ok_T, compose_ics_echec, compose_ics_stop))
+  end
+
+  [.] s_collapse_ics =>
+  repeat*(dc(collapse_ics_ok, collapse_ics_echec, collapse_ics_stop))
+  end
+
+  [.] s_simplify_list =>
+    repeat*(dc(simplify_list_ok, simplify_list_echec, simplify_list_stop))
+  end
+*/
+  [.] s_simplify_ics =>
+    repeat*(first one(simplify_ics))
+  end
+
+  [.] s_deduce_list =>
+    repeat*(first one(deduce_list))
+  end
+end
+
+strategies for list[equation]
+implicit
+  [.] s_completion => first one(completion)
+  end
+  [.] s_cp => first one(cp)
+  end
+  [.] s_choix_orient => first one(choix_orient1, choix_orient2, choix_orient3)  
+  end
+  [.] s_commande =>  first one(commande)
+  end
+end
+
+end

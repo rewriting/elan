@@ -1,0 +1,8 @@
+LPL n description
+
+query		of sort  	lterm
+		result of sort 	lterm
+		import 		n
+		start with 	(ss)query
+
+end

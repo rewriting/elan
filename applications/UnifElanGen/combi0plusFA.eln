@@ -1,0 +1,147 @@
+module combi0plusFA[Vars,Fss]
+
+import 
+
+    global
+
+       RestrictUnif0[Vars,Fss] ctes RestrictUnifFA[Vars,Fss]  ;
+
+       
+
+
+
+    local 
+
+       bool int term eqSystem list[variable] eq[list[variable]]
+       pair[list[variable],list[variable]]  
+       occur[variable,list[variable]] replace[term,eqSystem] 
+       Id Part Lin ;
+    end
+
+sort gencombiSystem ; end
+
+
+operators
+
+  global
+
+
+  (@,@,@ | @,@,@) : (eqSystem eqSystem eqSystem 
+                     list[variable] 
+                     pair[list[variable],list[variable]] 
+                     list[variable]) gencombiSystem ;
+  
+
+  local
+
+  toSolver(@,@,@,@,@,@) : (eqSystem eqSystem 
+                         list[variable] list[variable] list[variable]
+                         int) eqSystem ;
+
+  addelim(@,@,@)      : (term list[variable] eqSystem) eqSystem ;
+
+  VarLt(@,@,@)        : (variable list[variable] list[variable]) 
+                        list[variable] ; 
+
+  backtoSolver(@,@,@) : (eqSystem list[variable] int) eqSystem ;
+
+end
+
+rules for list[variable]
+// declare	
+        c,x 	: variable ;
+	Ord,V	: list[variable];
+
+global
+
+  [] VarLt(c,c.Ord,V) => nil end
+  [] VarLt(c,x.Ord,V) => x.VarLt(c,Ord,V) if occurs(x,V) end
+  [] VarLt(c,x.Ord,V) => VarLt(c,Ord,V) if not occurs(x,V) end 
+
+
+end
+
+rules for eqSystem 
+// declare	
+        cx,x 	: variable ;
+	Ord,V,C	: list[variable];
+        P,Rest  : eqSystem ;
+        n       : int ;
+        cst     : term ;
+
+global
+
+  [] toSolver(P,Rest,Ord,V,cx.C,n) => 
+       toSolver(apply(cx -> cte.n,P),addelim(cte.n,VarLt(cx,Ord,V),Rest),
+                Ord,V,C,n+1) end
+
+                       
+  [] toSolver(P,Rest,Ord,V,nil,n) => (P | Rest) end
+
+
+  [] addelim(cst,x.V,P) => addelim(cst,V,P) & elim(cst,x) end
+  [] addelim(cst,nil,P) => P end
+
+  [] backtoSolver(P,cx.C,n) => 
+         backtoSolver(replace cte.n by cx in P,C,n+1) end
+
+  [] backtoSolver(P,nil,n) => P end
+
+end
+
+
+
+rules for gencombiSystem 
+// declare	
+	
+        Ord     : list[variable] ;
+        ThInd   : pair[list[variable],list[variable]] ;
+        V       : list[variable] ;
+        P1,Q1,P2,Q2,PV: eqSystem ;
+
+global
+
+  [identification] (P1,P2,true | V,[nil,nil],nil) => 
+        (applyId(PV,P1),applyId(PV,P2),PV | applyId(PV,V),[nil,nil],nil) 
+        where PV := (chooseIdeqSys) IdeqSys(V)
+        end
+
+  [theoryIndice]   (P1,P2,PV | V,[nil,nil],nil) => (P1,P2,PV | V,ThInd,nil) 
+                   where ThInd:= (choosePart) Part(V) 
+                   end
+
+  [linearOrdering] (P1,P2,PV | V,ThInd,nil) => (P1,P2,PV | V,ThInd,Ord) 
+                   where Ord:= (chooseLin) Lin(V) 
+                   end
+
+  [solve1] (P1,P2,PV | V,ThInd,Ord) =>
+    (backtoSolver(Q1,second(ThInd),0),P2,PV | V,ThInd,Ord)
+    where Q1:= (restrictUnif0) toSolver(P1,true,Ord,first(ThInd),
+                                                second(ThInd),0) 
+    end 
+
+
+  [solve2] (P1,P2,PV | V,ThInd,Ord) =>
+    (P1,backtoSolver(Q2,first(ThInd),0),PV | V,ThInd,Ord)
+    where Q2:= (restrictUnifFA) toSolver(P2,true,Ord,second(ThInd),
+                                                first(ThInd),0)
+    end 
+    
+end
+
+
+strategies for gencombiSystem
+
+global 
+
+[gencombiStrat]
+dont know choose(identification) ;
+dont know choose(theoryIndice) ;
+dont know choose(linearOrdering) ; 
+dont know choose(solve1) ;
+dont know choose(solve2) 
+end
+
+end
+
+end

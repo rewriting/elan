@@ -1,0 +1,591 @@
+module hounif[mvars,btypes,bvars]
+import
+  global	terms[mvars,btypes,bvars]
+		typech[mvars,btypes,bvars]
+		//----
+		btypes types[btypes] contexts[btypes]
+		ivars[btypes] vars[mvars,btypes] list[objbvars]
+			      vars[bvars,btypes] list[obj_Mvars]
+		//---
+		//occur[obj_Mvars,uconj] 
+		//occur[obj_Mvars,wtterm] 
+		occur[obj_Mvars,wtsubst] 
+		occur[obj_Mvars,list[wtterm]] 
+		occur[obj_Mvars,tterm]
+		occur[obj_Mvars,state]
+		occur[tterm,uconj]
+		replace[tterm,wtterm] 
+		replace[tterm,wtsubst]
+		replace[tterm,list[wtterm]]
+		replace[tterm,uconj]
+		pair[list[obj_Bvars],list[obj_Bvars]]
+		list[wtterm] list[uconj] 
+		eq[type] eq[usystem] eq[ueq] 
+		eq[wtterm] eq[list[uconj]] eq[list[wtterm]] eq[tsubst]
+		ifte[list[uconj]]
+		ifte[uconj]
+		ifte[usystem]
+		int bool;
+end
+sort 	uterm ueq uconj usystem input;
+end
+operators
+  global
+	
+	@	: (lterm) uterm;
+	@	: (dBterm) uterm;
+	@	: (term) uterm;
+	@	: (wtterm) uterm;
+	@	: (state) uterm;	
+
+	@ = @ 	: (uterm uterm) ueq	(AC);	// well typed unify equation
+	@	: (bool) uconj;
+	@	: (ueq) uconj;
+	@ -AND- @	: (uconj uconj) uconj  pri 500 assocLeft (AC);
+
+	(@,@,@,@,@,@): (disj:list[uconj] solved:list[uconj] mvrs:list[wtterm]
+			fvars:int int int) usystem;
+	//----------------------------------------------//
+	@=@,@ 		: (lterm lterm int)	input;
+	@=@		: (lterm lterm)	input;
+	hou (@) 	: (input) list[uconj];
+	//----------------------------------------------//
+	add_disj(@,@,@,@) : (int int wtterm usystem) usystem;
+	complete(@,@,@) : (state state usystem) usystem;
+	add_unsolved @ @ @ : (int list[wtterm] usystem) usystem;
+	exp_vars(@,@,@) : (int list[wtterm] usystem) usystem;
+	add_args(@,@,@) : (list[wtterm] list[wtterm] uconj) uconj;
+    	collect_mvrs(@,@,@)	: (context lterm list[wtterm]) list[wtterm];
+	solved_var(@,@) : (state uconj) int;
+	is_var(@)	: (tterm) bool;
+        distrib(@,@)	: (uconj list[uconj]) list[uconj];
+	sufix(@,@)	: (type type) bool;
+	back(@,@,@)	: (list[uconj] list[obj_Bvars] int) list[uconj];
+	back(@,@,@)	: (uconj list[obj_Bvars] int) uconj;
+   	back(@,@,@)	: (uterm list[obj_Bvars] int) uterm;
+	replace_norm(@,@,@) : (obj_Mvars tterm uconj) uconj;
+        replace_norm(@,@,@) : (obj_Mvars tterm wtterm) wtterm;
+	replace_all(@,@,@) : (obj_Mvars tterm uconj) uconj;
+	replace123(@,@,@) : (obj_Mvars tterm state) state;
+	replace_norm(@,@,@) : (obj_Mvars tterm wtsubst) wtsubst;
+	//--------------------- should be in Elan lib ----------------//
+	bit @ in @	: (int int) bool;
+	limit(@)	: (int) int;
+	odd(@)		: (int) bool;
+	modd(@,@)	: (int int) int;
+	//---------------------- funny flags -------------------------//
+	wtt		: int; // has no external semantic
+	slt		: int;
+	dbt		: int;
+	lt		: int;
+	bfs		: int;
+        noback		: int;
+end
+
+stratop local
+  hounify	: <usystem>	builtin;
+end
+
+rules for uconj
+	P, P1, P2, ee		: uconj;
+	a1, b1			: wtterm;
+	n			: int;
+	cc			: context;
+	tt, $tt1, tt2, tt3	: type;
+	Sa, Sb			: list[wtterm];
+	st1, st2		: state;
+	aa			: tterm;
+	ww			: obj_Mvars;
+	bo			: bool;
+global
+  [] 	replace_norm(ww,aa,bo)	=> bo
+  end
+  []	replace_norm(ww,aa,P1 -AND- P2) =>
+		replace_norm(ww,aa,P1) -AND- replace_norm(ww,aa,P2)
+  end
+  []	replace_norm(ww,aa,a1 = b1) => replace_norm(ww,aa,a1) = replace_norm(ww,aa,b1)
+  end
+  []	replace_all(ww,aa,P1 -AND- P2) =>
+		replace_all(ww,aa,P1) -AND- replace_all(ww,aa,P2)
+  end
+  []	replace_all(ww,aa,st1 = st2) =>
+		replace123(ww,aa,st1) = replace123(ww,aa,st2)
+  end
+  []	replace_all(ww,aa,bo) => bo
+  end
+
+  [qqq]	P -AND- true => P			end // trivial
+  []	P -AND- a1 = a1 => P			end // trivial
+  []	P -AND- st1 = st1 => P			end // trivial
+  []	P -AND- ee -AND- ee => P -AND- ee		end // -AND- idemp
+  []	P -AND- false	=> false		end // false propag
+  []	add_args(a1.Sa,b1.Sb,P) => add_args(Sa, Sb, 
+		P -AND- 
+		lnf red tostate(a1) = 
+		lnf red tostate(b1))
+  end
+  // else DIRTY
+  []	add_args(nil,nil,P) => P 			// dirty	
+  end
+end
+
+rules for usystem
+	P, P1			: uconj;
+	$D, slds			: list[uconj];
+	aa, bb, aa1, bb1	: tterm;
+	aaa, bbb		: wtterm;
+	tt, t1, t2, t3, tn	: type;
+	ww, ww1 		: obj_Mvars;
+	ss			: subst;
+	$ss1, ss2, ttt1, ttt2	: tsubst;
+	mvs, mvrs		: list[wtterm];
+	cc, c1, c2, cn		: context;
+	$mm,$nn, m, n, fvar, p , r, j	: int;
+	flags			: int;
+	isize			: int;
+	sss, ttt, sss1, sss2	: wtsubst;
+	us, uu			: usystem;
+	$Sa, Sb			: list[wtterm];
+	AAA, BBB		: state;
+global
+  [solved]	(P.$D, slds, mvs, fvar, flags,isize) => //ifdef CASE
+			(ifte(1+size(slds) == limit(flags), nil, $D), 
+			 P1.slds, mvs, fvar,flags,isize)
+			where P1:=(repeat* (/*dc*/first one(qqq)))back(P,nil,wtt)
+  end
+  [decla]	(P -AND-
+  		[(la t1.aa:t1.cc|-t2):cc|-t1->t2,$ss1:c1|>cc,nil,c1,t1->t2] = 
+		[(la t1.bb:t1.cc|-t2):cc|-t1->t2,ss2:c1|>cc,nil,c1,t1->t2].$D,
+		  slds, mvs, fvar, flags, isize) =>
+		(P -AND-
+		lnf red [aa:t1.cc|-t2,
+			#1:t1.c1|-t1 . ttt1 :t1.c1|>cc : t1.c1|>t1.cc,
+	       		nil, t1.c1,t2] =
+ 		lnf red [bb:t1.cc|-t2,
+             		#1:t1.c1|-t1 . ttt2 :t1.c1|>cc : t1.c1|>t1.cc,
+	       		nil, t1.c1,t2].$D,
+	 	slds, mvs, fvar, flags, isize)
+ 		where ttt2:=()ss2:c1|>cc o ^:t1.c1|>c1
+ 		where ttt1:=()$ss1:c1|>cc o ^:t1.c1|>c1
+  end
+  [decapp1]	(P -AND-  [#n:cc|-tt,id:cc|>cc,$Sa,cn,tn] = 
+			  [#n:cc|-tt,id:cc|>cc,Sb,cn,tn].$D, 
+			slds, mvs, fvar, flags, isize) => 
+		  (P1.$D, slds, mvs, fvar, flags, isize)
+		where P1:=()add_args($Sa,Sb,P)
+  end
+  [decapp2]	(P -AND-  [#$nn:cc|-tt,id:cc|>cc,$Sa,cn,tn] = 
+			  [#$mm:c1|-t1,id:c1|>c1,Sb,cn,tn].$D, 
+			slds, mvs, fvar, flags, isize) => 
+			(false.$D, slds, mvs, fvar, flags, isize)
+		if $nn != $mm
+  end
+  [expla]	(P.$D, slds, mvs, fvar,flags,isize) => uu
+		  where uu:=()add_unsolved flags mvs 
+				(P.$D, slds, mvs, fvar, flags, isize)
+		  if uu != (P.$D, slds, mvs, fvar,flags,isize)
+  end
+  [expapp]	(P -AND-  [ww:cc|-tt,sss,nil,cn,tn] = 
+			  [#m:c1|-t1,id:c1|>c1,Sb,cn,tn].$D, 
+			slds, mvs, fvar, flags, isize) =>
+		  (append(distrib(P -AND- 
+				[ww:cc|-tt,sss,nil,cn,tn] = 
+				[#m:c1|-t1,id:c1|>c1,Sb,cn,tn],
+			   	uu.disj),$D),
+		   slds, uu.mvrs, uu.fvars, flags, isize)
+		if atomic_type(tt)
+		if solved_var([ww:cc|-tt,id:cc|>cc,nil,cc,tt],
+			[ww:cc|-tt,sss,nil,cn,tn] = 
+			[#m:c1|-t1,id:c1|>c1,Sb,cn,tn] -AND- P) != 1
+		where p:=()size(sss)
+		where us:=()add_disj(1,p,ww:cc|-tt,
+			(nil,nil,mvs,fvar,flags,isize))
+		where n:=()exp(sss)
+		where uu:=()ifte(m >= n+1,
+			add_disj(m+p-n,m+p-n,ww:cc|-tt,us),us)
+		if uu.disj != nil		// anti looping
+  end
+  [occurch]     (P -AND-  [ww:cc|-tt,id:cc|>cc, nil,cc,tt] =    
+                          [aa:c1|-t1,$ss1:c2|>c1,$Sa,cc,tt].$D,
+                          slds, mvs, fvar, flags, isize) =>
+		(false.$D, slds, mvs, fvar, flags, isize)                      
+                if occurs ww in fromstate([aa:c1|-t1,$ss1:c2|>c1,$Sa,cc,tt])
+  end
+  [replace]	(P -AND-  [ww:cc|-tt,id:cc|>cc, nil,cc,tt] = 
+			[aa:c1|-t1,$ss1:c2|>c1,$Sa,cc,tt].$D,
+			slds, mvs, fvar, flags, isize) =>
+	  		(
+			replace_all(ww,
+			removect(fromstate([aa:c1|-t1,$ss1:c2|>c1,$Sa,cc,tt])),
+				P)
+			-AND- 
+			ifte(meta(ww),true,
+			[ww:cc|-tt,id:cc|>cc,nil,cc,tt]=[aa:c1|-t1,$ss1:c2|>c1,$Sa,cc,tt]).$D,
+			slds, mvs, fvar, flags,isize)
+                if not (is_var(aa) and $ss1 == id and $Sa == nil) or occurs aa in P
+		if occurs ww in P
+		if not occurs ww in [aa:c1|-t1,$ss1:c2|>c1,$Sa,cc,tt]
+  end	
+  [antiexpla]	($D, P.slds, mvs, fvar, flags,isize) => uu
+		  if not bit noback in flags
+		  where uu:=()exp_vars(isize,mvs,
+				($D, P.slds, mvs, fvar, flags,isize))
+  end
+  [antiexplaa]   ($D, P.slds, mvs, fvar, flags,isize) => ($D, P.slds, mvs, fvar, flags,isize)
+		 if bit noback in flags
+  end
+  [replacee]    ($D,P -AND- aa:cc|-tt = ww:cc|-tt.slds,mvs, fvar, flags, isize) =>
+                        ($D,replace_norm(ww,aa,P) -AND-
+                        ifte(meta(ww),true,
+                        aa:cc|-tt = ww:cc|-tt).slds, mvs, fvar, flags,isize)
+                if not is_var(aa) or occurs aa in P
+                if occurs ww in P
+                if not occurs ww in aa
+                if not bit noback in flags
+  end
+  [antidecla]	($D, P -AND- aa:t1.cc|-tt=bb:t1.cc|-tt.slds, mvs, 
+			fvar, flags, isize) =>
+			($D, P -AND-  (la t1.aa:t1.cc|-tt):cc|-t1->tt = 
+			  (la t1.bb:t1.cc|-tt):cc|-t1->tt.slds, 
+			   mvs, fvar, flags, isize)
+			if size(cc) >= isize
+			if not bit noback in flags
+  end
+  [rotatea]	(P.$D, slds, mvs, fvar, flags, isize) =>
+		  (P.$D, slds, mvs, fvar, flags, isize)
+		if $D == nil or not bit bfs in flags
+  end
+  [rotateb]	(P.$D, slds, mvs, fvar, flags, isize) =>
+		  (append($D,P.nil), slds, mvs, fvar, flags, isize)
+		if $D != nil and bit bfs in flags
+  end
+  []	add_unsolved flags nil uu => uu
+  end
+  []	add_unsolved flags  ww:cc|-t1->t3.mvrs 
+		(P.$D, slds, mvs, fvar, flags, isize) =>
+	  add_unsolved flags mvrs (P -AND- 
+	        [ww:cc|-t1->t3,id:cc|>cc,nil,cc,t1->t3] = 
+	        lnf red [(la t1.V_Mvars(fvar):t1.cc|-t3):cc|-t1->t3,id:cc|>cc,
+			nil,cc,t1->t3].$D, 
+		slds,V_Mvars(fvar):t1.cc|-t3.mvs, fvar+1, flags, isize)
+	  if solved_var([ww:cc|-t1->t3,id:cc|>cc,nil,cc,t1->t3],P) != 1
+	  if occurs ww in P
+  end // !!! else !!!
+  []	add_unsolved flags  ww:cc|-tt.mvs uu	=> add_unsolved flags mvs uu
+  end // dirty 
+  []	exp_vars(isize,nil,uu) => uu
+  end
+  []	exp_vars(isize,ww:t1.cc|-tt.mvrs,($D, P.slds, mvs, fvar,flags,isize))=>
+          exp_vars(isize,V_Mvars(fvar):cc|-t1->tt.mvrs, 
+		($D,P -AND- 
+                 ww:t1.cc|-tt =
+                 (V_Mvars(fvar):cc|-t1->tt[^:t1.cc|>cc]:t1.cc|-t1->tt 
+				#1:t1.cc|-t1):t1.cc|-tt
+			.slds, 
+			V_Mvars(fvar):cc|-t1->tt.mvs, fvar+1,flags,isize))
+		if occurs ww in P
+		if size(cc) >= isize
+  end //else
+  []	exp_vars(isize,ww:cc|-tt.mvs,uu) => exp_vars(isize,mvs,uu) // dirty
+  end
+
+  []	complete([aaa, sss, $Sa, cn, tn],
+		 [bbb, ttt, Sb, cn, tn],
+		($D,slds,mvrs,fvar,flags,isize)) =>
+		([aaa, sss, $Sa, cn, tn] = [bbb, sss, Sb, cn, tn].$D,
+			slds,mvrs,fvar,flags,isize)
+  end // else
+  []	complete([aa:cc|-t3,id:cc|>cc,$Sa,cn,t1->t2],BBB,
+		($D,slds,mvrs,fvar,flags,isize)) =>
+	  complete([aa:cc|-t3,id:cc|>cc,
+		append(V_Mvars(fvar):cn|-t1.nil,$Sa),cn,t2], BBB,
+		($D,slds,V_Mvars(fvar):cn|-t1.mvrs,fvar+1,flags,isize))
+  end
+  []	add_disj(r,j,ww:cc|-tt,uu) =>
+	  complete([#r:cc|-t1,id:cc|>cc,nil,cc,t1],
+		   [ww:cc|-tt,id:cc|>cc,nil,cc,tt], 
+                   add_disj(r+1,j,ww:cc|-tt,uu))
+		if r <= j
+		where t1:=()r-th elem(cc)
+		if sufix(t1,tt)
+  end
+  []	add_disj(r,j,ww:cc|-tt,($D,slds,mvrs,fvar,flags,isize)) => 
+		($D,slds,mvrs,fvar,flags,isize)
+		if r > j
+  end
+end
+
+rules for uconj
+	aaa, bbb	: wtterm;
+	AAA, BBB	: state;
+       	P, P1, P2	: uconj;
+	bo		: bool;
+	bvrs		: list[obj_Bvars];
+	flags		: int;
+global
+  []	back(P1 -AND- P2, bvrs,flags) => 
+		back(P1,bvrs,flags) -AND- back(P2,bvrs,flags)	
+  end
+  []	back(bo, bvrs,flags) => bo				
+  end
+  []    back(AAA = BBB,bvrs,flags) =>
+                back(AAA,bvrs,flags) = back(BBB,bvrs,flags)
+  end
+  []	back(aaa = bbb,bvrs,flags) =>
+		back(aaa,bvrs,flags) = back(bbb,bvrs,flags)		
+  end
+end
+
+
+rules for bool
+
+	$tt1, tt2, tt3	: type;
+	SS		: state;
+	ww		: obj_Mvars;
+	cc		: context;
+	tt		: type;
+	QQ		: tterm;
+global
+  []	sufix($tt1,$tt1)	=> true					end
+  []	sufix($tt1->tt2,tt3) => sufix(tt2,tt3)			end // else
+  []	sufix($tt1,tt2)	=> false				end // dirty
+  []    is_var(ww) => true
+  end  // else
+  []	is_var(QQ) => false
+  end
+end
+
+rules for list[uconj]
+	P, P1, PP : uconj;
+	D1, D2	: list[uconj];
+global
+  []	distrib(P, PP.D2)	=> P -AND- PP.distrib(P,D2)
+  end // dirty
+  []	distrib(P, nil) =>  nil
+  end
+end
+
+rules for int
+	P, P1, P2: uconj;
+	ww	: obj_Mvars;
+	cc, cn, c1, c2	: context;
+	tt, tn, t1, t2	: type;
+	sss	: wtsubst;
+	S	: list[wtterm];
+	AAA 	: state;
+global
+  []	solved_var([ww:cc|-tt,id:cc|>cc,nil,cc,tt],P1 -AND- P2) =>
+	  solved_var([ww:cc|-tt,id:cc|>cc,nil,cc,tt],P1) + 
+	  solved_var([ww:cc|-tt,id:cc|>cc,nil,cc,tt],P2)
+	if is_var(ww)
+  end
+  []	solved_var([ww:cc|-tt,id:cc|>cc,nil,cc,tt],[ww:cc|-tt,id:cc|>cc,nil,cc,tt] = AAA) => 1
+	if is_var(ww)
+  end // else
+  []	solved_var([ww:cc|-tt,id:cc|>cc,nil,cc,tt],
+		   [ww:c1|-t1,sss,S,c2,t2] = AAA) => 99
+  end // else
+  []	solved_var(AAA,P)	=> 0		// dirty
+  end
+end
+
+rules for list[uconj]
+
+	aa, bb		: lterm;
+	dba, dbb	: dBterm;
+	a, b, a1, b1	: wtterm;
+	fvars		: list[obj_Bvars];
+	flags		: int;
+	isize		: int;
+	cc		: context;
+	nfv		: int;
+	$tt1, tt2	: type;
+	mvs		: list[wtterm];
+	tmp		: list[uconj];
+	yy, uu		: usystem;
+global
+  []	hou(aa = bb) => hou(aa = bb,lt)
+  end
+  [] 	hou(aa = bb,flags)=> back(
+		ifte(yy.disj == nil, yy.solved, nil), fvars, flags)
+  	where fvars:=()second(
+		collect_fbvars(aa,collect_fbvars(bb,[nil,nil])))
+  	where cc:=()make_context(fvars)  
+	where mvs:=()collect_mvrs(cc,aa,collect_mvrs(cc,bb,nil)) 
+	where dbb:=()tr(bb,fvars)
+	where dba:=()tr(aa,fvars)
+	where a:=()fill(FF(dba,0))
+   	where b:=()fill(FF(dbb,0))
+	where b1:=()typech(b,cc)
+	where tt2:=()typeof(b1)
+	where a1:=()typech(a,cc)
+	where tt1:=()typeof(a1)
+	where tmp:=()
+	ifte(typeof(a1) == typeof(b1) 
+		and known($tt1) and known(tt2), true -AND- 
+		lnf red [a1,id:cc|>cc,nil,cc,$tt1] = 
+		lnf red [b1,id:cc|>cc,nil,cc,tt2].nil,nil)
+	where yy:=(hounify)(tmp, nil, mvs, 0, flags, size(cc))
+  end
+end
+
+rules for list[wtterm]
+	mvrs		: list[wtterm];
+	aa, bb		: lterm;
+	ww		: obj_Bvars;
+	mm		: obj_Mvars;
+	cc		: context;
+global
+  [] 	collect_mvrs(cc, (aa bb), mvrs) =>
+	  collect_mvrs(cc, aa, collect_mvrs(cc, bb,mvrs))
+  end
+  []  	collect_mvrs(cc,(la ww.aa), mvrs) =>
+	  collect_mvrs(cc, aa, mvrs)
+  end
+  []	collect_mvrs(cc, ww, mvrs) => mvrs 
+  end
+  []	collect_mvrs(cc, mm, mvrs) =>  mm : cc|-typeof(mm).mvrs 
+		if not occurs mm in mvrs
+  end
+  []	collect_mvrs(cc,mm,mvrs) => mvrs if occurs mm in mvrs
+  end
+end
+
+rules for wtterm
+
+        ww      : obj_Mvars;
+        aa      : tterm;
+	bbb	: wtterm;
+global
+  []	replace_norm(ww,aa,bbb) => normalize(replace(ww,aa,bbb))
+	if occurs ww in bbb
+  end // else
+  []	replace_norm(ww,aa,bbb) => bbb
+  end
+end
+
+rules for wtsubst
+	
+	ww	: obj_Mvars;
+	aa	: tterm;
+	sss	: wtsubst;
+global
+  []	replace_norm(ww,aa,sss) =>
+		normalize(replace(ww,aa,sss))
+		if occurs ww in sss
+  end  // else
+  []	replace_norm(ww,aa,sss) => sss		// dirty
+  end
+end
+
+rules for state
+	AAA, BBB: state;
+	P	: uconj;
+	cc, cn	: context;
+	tt, tn	: type;
+	ww	: obj_Mvars;
+	aa	: tterm;
+	sss	: wtsubst;
+	Sa	: list[wtterm];
+	aaa	: wtterm;
+global
+  []	replace123(ww,aa,[ww:cc|-tt,sss,Sa,cn,tn])   =>
+		lnf red [aa:cc|-tt,
+		 replace_norm(ww,aa,sss),
+		 replace(ww,aa,Sa),cn,tn]
+  end  //else
+  []	replace123(ww,aa,[aaa,sss,Sa,cn,tn])   =>   //dirty
+		[aaa,
+		 replace_norm(ww,aa,sss),
+		 replace(ww,aa,Sa),cn,tn]
+	if not occurs ww in aaa
+  end //else
+  []	replace123(ww,aa,[aaa,sss,Sa,cn,tn])   =>   //dirty
+		lnf red [replace(ww,aa,aaa),
+		 replace_norm(ww,aa,sss),
+		 replace(ww,aa,Sa),cn,tn]
+  end
+end
+
+rules for int
+	n, m	: int;
+global
+  []	wtt	=> 8192 		end
+  []	slt	=> 1024			end
+  []	dbt	=> 2048			end
+  []	lt	=> 4096			end
+  []	bfs	=> 512			end
+  []    noback    => 16384                end
+  []	modd(n,m) => n-(m*(n/m)) 
+  end
+  []	limit(n) => modd(n,256)
+  end
+end
+
+rules for bool
+	n, m	: int;
+global
+  []	odd(n) => modd(n,2) == 1
+  end
+  []	bit n in m => odd(m/n)
+  end
+end
+
+rules for list[uconj]
+	P		: uconj;
+	D		: list[uconj];
+	bvrs		: list[obj_Bvars];
+	flags		: int;
+global
+  []	back(nil,bvrs,flags) => nil					end
+  []	back(P.D,bvrs,flags) => back(P,bvrs,flags).back(D,bvrs,flags)	end
+end
+
+rules for uterm
+	aaa	: state;
+	bbb	: wtterm;
+	bvrs	: list[obj_Bvars];
+	flags	: int;
+global
+  []	back(aaa,bvrs,flags) =>	fromstaten(aaa) if bit wtt in flags
+  end
+  []	back(bbb,bvrs,flags) =>	remove(bbb) if bit slt in flags
+  end
+  []	back(bbb,bvrs,flags) => Q(remove(bbb)) if bit dbt in flags
+  end
+  []	back(bbb,bvrs,flags) => rt(Q(remove(bbb)),bvrs,0) 
+		if bit lt in flags
+  end
+  []	back(bbb,bvrs,flags) =>	bbb	// else dirty
+  end
+end
+
+
+//--------------------------------------------------------------------------//
+strategies for usystem
+implicit
+  [.] hounify =>
+  repeat* (
+    repeat* (
+      /*dc*/first one(
+      	/*dc*/first one(
+	decla ,
+	decapp1 ,
+	decapp2 ,
+        occurch ,
+	replace ) ,
+	/*dc*/first one(expla); /*dc*/first one(rotatea , rotateb) ,
+	/*dc*/first one(expapp); /*dc*/first one(rotatea , rotateb) )
+    );
+    /*dc*/first one(solved);
+    /*dc*/first one(antiexpla , antiexplaa);
+     repeat* (
+      /*dc*/first one(replacee , antidecla )
+    )
+  )
+  end
+end
+
+end
+
+

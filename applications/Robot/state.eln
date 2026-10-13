@@ -1,0 +1,23 @@
+module state
+
+import global 	int 
+		loop
+		strat[state];
+end
+operators global
+  state(@,@)	: (int int) state;
+end
+
+rules for state
+ x, y, p	: int;
+ state1		: state; 
+global
+  [win]		state(x,y) => state(0,0)  if x <= y			end
+  [move(p)]	state(x,y) => state(x-p,p+p) 	if p <= y if p <= x	end
+  [moves]	state(x,y) => state1
+			where p:=[loop]x				
+			where state1:=[move(p)]state(x,y)		end
+end
+
+end
+

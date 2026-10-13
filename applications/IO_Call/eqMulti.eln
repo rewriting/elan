@@ -1,0 +1,36 @@
+module eqMulti
+import 	
+	local	bool int term eqSystem ;
+end
+
+operators
+
+global
+
+  @ == @        : (term variable) term ;
+
+local
+
+  elimvar (@) : (eqSystem) eqSystem ;
+
+end
+
+
+///// transformation des multi-equations en forme resolue
+
+rules for eqSystem 
+// declare 
+P,Q: eqSystem; v: variable ; s,t: term ;
+
+global
+  [] elimvar(P s == v = t) => elimvar(P & s = t) & v = t  end 
+  [] elimvar(s == v = t) => elimvar(s = t) & v = t  end 
+  [] elimvar(P v=t) => elimvar(P) & v=t end 
+  [] elimvar(v=t) => v=t end 
+  [] elimvar(true) => true end 
+  [nettoie] P => Q where Q:= () elimvar(P) end  
+end
+
+
+end
+

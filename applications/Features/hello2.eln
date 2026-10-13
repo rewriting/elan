@@ -1,0 +1,54 @@
+module hello2
+
+import global int string io[string];
+end
+operators global
+  loop(@)	: (int) string;
+  indent(@)	: (int) string;
+  hello		: string;
+end
+
+rules for string
+s	: string;
+n	: int;
+global
+  [] loop(0) => "elan"						end
+  [] loop(n) => indent(n)+hello+loop(n-1)			end
+  [] indent(0)	=> ""						end
+  [] indent(n)  => " "+indent(n-1)				end
+  [] hello => "Hello world\n" 					end
+end
+
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

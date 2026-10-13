@@ -1,0 +1,768 @@
+
+//--------------------------------------------------------------------------------------
+rules for bool
+global
+
+  	FOR EACH SS:pair[ident,pair[list[ident],ident]]; 
+		F:ident
+  	SUCH THAT SS:=(listExtract) elem(Fss)
+		AND F:=()first(SS) :{
+
+		[] constructor(F) => false			end
+   	}
+	
+  	FOR EACH SS:pair[ident,pair[list[ident],ident]]; 
+		F:ident
+  	SUCH THAT SS:=(listExtract) elem(Css)
+		AND F:=()first(SS) :{
+
+		[] constructor(F) => true			end
+	}
+
+end
+//--------------------------------------------------------------------------------------
+
+rules for equationS
+	u:equationS;
+global
+	[]	EmptyT:EmptyT	=> 	EmptyT		end
+end
+
+rules for clause
+	u:clause;
+global
+	[]	EmptyC	*EmptyC	=> 	EmptyC		end
+
+	[] [EmptyT,EmptyT]	=> 	EmptyC		end
+end
+
+//--------------------------------------------------------------------------------------
+
+rules for clause 
+	D, H, L, R : clause;
+	Ip : indpos;
+	Ts : testset;
+global	
+	[] getClauses(D#H#L#R#Ip#Ts)	=> 	D
+	end 
+end
+
+//--------------------------------------------------------------------------------------
+
+FOR EACH SS:pair[ident,pair[int,int]]; 
+	F:ident;  A:pair[int,int]; 
+	AL:int; AR:int
+SUCH THAT SS:=(listExtract) elem(Ars) 
+	AND F:=()first(SS) 
+	AND A:=()second(SS) 
+	AND AL:=()first(A) 
+	AND AR:=()second(A) 
+	ANDIF AL==0 
+	ANDIF AR==0 :{
+
+rules for term
+global
+	[] replaceVars(F) => F
+	end
+end
+}
+//--------------------------------------------------------------------------------------
+
+FOR EACH SS:pair[ident,pair[int,int]]; 
+	F:ident;  A:pair[int,int]; N:int; NEXT:int;
+	AL:int; AR:int
+SUCH THAT SS:=(listExtract) elem(Ars) 
+	AND F:=()first(SS) 
+	AND A:=()second(SS) 
+	AND AL:=()first(A) 
+	AND AR:=()second(A) 
+	AND NEXT:=()AL+1
+	AND N:=()AL+AR
+	ANDIF AL>0 :{
+
+rules for term
+   t_1,...,t_N : term;
+global
+	[] replaceVars({t_I }_I=1...AL F {t_I }_I=NEXT...N) => 
+		{replaceVars(t_I) }_I=1...AL F {replaceVars(t_I) }_I=NEXT...N	
+
+	end
+end
+
+rules for clause
+   t_1,...,t_N,s_1,...,s_N : term;
+   Np, Pp : equationS;
+global
+
+	[] decomposePos([Np,{t_I }_I=1...AL F {t_I }_I=NEXT...N
+		=    {s_I }_I=1...AL F {s_I }_I=NEXT...N:Pp]) => 
+	{
+	[Np,J-th subterm({t_I }_I=1...AL F {t_I }_I=NEXT...N) 
+	= 
+	J-th subterm({s_I }_I=1...AL F {s_I }_I=NEXT...N):Pp]*
+	}_J=1...N  EmptyC
+
+	end
+end
+
+rules for equationS
+   t_1,...,t_N,s_1,...,s_N : term;
+global
+
+	[] decomposeNeg({t_I }_I=1...AL F {t_I }_I=NEXT...N
+		=    {s_I }_I=1...AL F {s_I }_I=NEXT...N) => 
+	{
+	J-th subterm({t_I }_I=1...AL F {t_I }_I=NEXT...N) 
+	= 
+	J-th subterm({s_I }_I=1...AL F {s_I }_I=NEXT...N):
+	}_J=1...N  EmptyT
+
+	end
+end
+
+rules for list[pair[ident,variable]]
+	{t_I,}_I=1...N s, t : term;
+	v : variable;
+	f, d : ident;
+	u : list[int];
+	l : list[list[int]];
+	Lpi, LpiN : list[indp];	
+global
+  	[] indVars({t_I }_I=1...AL F {t_I }_I=NEXT...N, $f:nil . Lpi, LpiN)	=> 
+			nil
+			{ @ indVariables(t_I, LpiN)}_I=1...N
+		if eq_ident(F,$f)
+	end
+
+  	[] indVars({t_I }_I=1...AL F {t_I }_I=NEXT...N, $f:u.l . Lpi, LpiN)	=> 
+		  [$d,v] . indVars({t_I }_I=1...AL F {t_I }_I=NEXT...N, $f:l . Lpi, LpiN)
+		if eq_ident(F,$f)
+		where s:=()({t_I }_I=1...AL F {t_I }_I=NEXT...N) at u
+		if isvar(s)
+		where v:=()term_to_variable(s)
+		where t:=()({t_I }_I=1...AL F {t_I }_I=NEXT...N) at firstList(u)
+		where d:=() dom-lastElem(u)(head(t))
+	end
+
+  	[] indVars({t_I }_I=1...AL F {t_I }_I=NEXT...N, $f:u.l . Lpi, LpiN)	=> 
+		   indVars({t_I }_I=1...AL F {t_I }_I=NEXT...N, $f:l . Lpi, LpiN)
+		if eq_ident(F,$f)
+		where s:=()({t_I }_I=1...AL F {t_I }_I=NEXT...N) at u
+		if not isvar(s)
+	end
+
+  	[] indVars({t_I }_I=1...AL F {t_I }_I=NEXT...N, $f:l . Lpi, LpiN)	=> 
+			indVars({t_I }_I=1...AL F {t_I }_I=NEXT...N, Lpi, LpiN)
+		if not eq_ident(F,$f)
+	end
+  end	
+
+rules for int
+   t_1,...,t_N : term;
+global
+	[] depthT({t_I }_I=1...AL F {t_I }_I=NEXT...N) => 1 +
+					{ max( depthT(t_I), }_I=1...N  
+					0
+					{ ) }_I=1...N 
+	end
+	[] sdepthT({t_I }_I=1...AL F {t_I }_I=NEXT...N) => 1 +
+					{ max( sdepthT(t_I), }_I=1...N  
+					0
+					{ ) }_I=1...N 
+	end
+end
+
+}
+
+FOR EACH SS:pair[ident,pair[int,int]]; 
+	F:ident;  A:pair[int,int];
+	AL:int; AR:int; N:int
+SUCH THAT SS:=(listExtract) elem(Ars)
+	AND F:=()first(SS) 
+	AND A:=()second(SS) 
+	AND AL:=()first(A) 
+	AND AR:=()second(A) 
+	AND N:=()AL+AR
+	ANDIF AL==0 
+	ANDIF N>0 :{
+
+rules for term
+   t_1,...,t_N : term;
+global
+	[] replaceVars(F(t_1,...,t_N)) => 
+		F(replaceVars(t_1){,replaceVars(t_I)}_I=2...N)
+	end
+end
+
+rules for clause
+   t_1,...,t_N,s_1,...,s_N : term;
+   Np, Pp : equationS;
+global
+
+	[] decomposePos([Np,F(t_1,...,t_N)=F(s_1,...,s_N):Pp]) => 
+	{
+	[Np,J-th subterm(F(t_1,...,t_N)) = J-th subterm(F(s_1,...,s_N)):Pp]*
+	}_J=1...N  EmptyC
+
+	end
+end
+
+rules for equationS
+   t_1,...,t_N,s_1,...,s_N : term;
+global
+
+	[] decomposeNeg(F(t_1,...,t_N)=F(s_1,...,s_N)) => 
+	{
+	J-th subterm(F(t_1,...,t_N)) = J-th subterm(F(s_1,...,s_N)):
+	}_J=1...N  EmptyT
+
+	end
+end
+
+
+
+
+
+
+//--------------------------------------------------------------------------------------
+
+  rules for list[term]
+  global
+//------------------------------------- for each symbol ------- Sf -------------
+FOR EACH SS:pair[ident,pair[int,int]]; F:ident
+SUCH THAT SS:=(listExtract) elem(Ars) 
+  AND F:=()first(SS) :{
+	[] funSf(F)	=>
+    //--------------------------------- for each rule -----------
+    FOR EACH SSS:pair[list[pair[term,term]],list[pair[term,term]]]; 
+	LC:list[pair[term,term]];  R:list[pair[term,term]]; 
+	r:pair[term,term];
+	g:term
+    SUCH THAT SSS:=(listExtract) elem(Axs)
+	AND LC:=()first(SSS) // /\ ui=vi
+	AND R:=()second(SSS) // g -> d,.
+	ANDIF neq_list[pair[term,term]](R,nil) // g -> d, ... ,.
+	AND r:=()1-th elem(R) // g -> d
+	AND g:=()first(r)
+	:{
+				getTerms(F,g) @ getTermsPair(F,LC) @
+	}
+				nil
+	end
+  }
+  end
+
+//----------------------------------------------------------------------------------
+
+  rules for ipf
+  global
+//------------------------------------- for each symbol ------- pos_zero -------------
+FOR EACH SS:pair[ident,pair[int,int]]; F:ident
+SUCH THAT SS:=(listExtract) elem(Ars) 
+  AND F:=()first(SS) :{
+	[] pos_zero(F)	=> unicate(
+    //--------------------------------- for each Sf -----------
+    FOR EACH S:term; LV:list[variable]
+    SUCH THAT S:=(listExtract) elem(funSf(F))
+	AND LV:=()var_lin(S):{
+    	//--------------------------------- for each Strict Position -----------
+    	FOR EACH SPos:list[int]
+    	SUCH THAT SPos:=(chooseOccurence) nvocc(S)
+		ANDIF neq_list[int](SPos,nil):{
+			SPos.
+		}
+    	//--------------------------------- for each Non-linear Position -----------
+    	FOR EACH NLVPos:list[int]
+    	SUCH THAT NLVPos:=(NLVchooseOccurence) nlvocc(S,LV)
+		ANDIF neq_list[int](NLVPos,nil):{
+			NLVPos.
+	}
+    }
+			nil)
+	end
+}
+
+  end
+
+//----------------------------------------------------------------------------------
+
+  rules for indpos
+  global
+	[] IndPos	=>	
+//------------------------------------- for each symbol ------- pos_zero -------------
+FOR EACH SS:pair[ident,pair[int,int]]; F:ident
+SUCH THAT SS:=(listExtract) elem(Ars) 
+  AND F:=()first(SS) :{
+				F:pos_zero(F).
+}
+				nil
+
+	end
+  end
+
+//----------------------------------------------------------------------------------
+
+  rules for testset 
+  global
+	[] TestSET	=>	
+		getClasses( freshListTerm(1, TestSet(ListCons, DepthR, DepthR)), nil )
+			//getClasses( TestSet(ListCons, DepthR, DepthR), nil )	
+			//TestSet(ListCons, DepthR, DepthR)
+	end
+	[] TestSETbrief	=>
+			getClasses( TestSet(ListCons, DepthR, DepthR), nil )	
+			//TestSet(ListCons, DepthR, DepthR)
+	end
+  end
+
+//----------------------------------------------------------------------------------
+
+  rules for clause
+  global
+	[] LHsides	=>
+  //the left-hand sides of the rules
+  FOR EACH SSS:pair[list[pair[term,term]],list[pair[term,term]]];
+		PP:list[pair[term,term]]
+  SUCH THAT SSS:=(listExtract) elem(Axs)
+	AND PP:=()second(SSS)
+	:{
+
+	[
+	EmptyT,
+  	FOR EACH SS:pair[term,term]; 
+		Lt:term; Rt:term
+  	SUCH THAT SS:=(listExtract) elem(PP)
+		AND Lt:=()first(SS) 
+		AND Rt:=()second(SS):{
+			Lt = Rt : 
+   	}
+	EmptyT]*
+	}
+	EmptyC
+
+	end
+  end
+
+//----------------------------------------------------------------------------------
+
+  rules for clause
+  global
+	[] RulesW	=>
+  //the rewrite rules that will be used (non-empty RHS)
+  FOR EACH SSS:pair[list[pair[term,term]],list[pair[term,term]]]; 
+		NP:list[pair[term,term]];  PP:list[pair[term,term]]; F:ident
+  SUCH THAT SSS:=(listExtract) elem(Axs)
+	AND NP:=()first(SSS) 
+	AND PP:=()second(SSS)
+	ANDIF neq_list[pair[term,term]](PP,nil)
+	AND F:=()head(first(1-th elem(PP)))
+	:{
+	F : ( replaceVars(
+	[
+  	FOR EACH SS:pair[term,term]; 
+		Lt:term; Rt:term
+  	SUCH THAT SS:=(listExtract) elem(NP)
+		AND Lt:=()first(SS) 
+		AND Rt:=()second(SS):{
+			Lt = Rt : 
+   	}
+	EmptyT,
+  	FOR EACH SS:pair[term,term]; 
+		Lt:term; Rt:term
+  	SUCH THAT SS:=(listExtract) elem(PP)
+		AND Lt:=()first(SS) 
+		AND Rt:=()second(SS):{
+			Lt = Rt : 
+   	}
+	EmptyT]))*
+	}
+  //the rewrite rules that will be used (empty RHS)
+  FOR EACH SSS:pair[list[pair[term,term]],list[pair[term,term]]]; 
+		NP:list[pair[term,term]];  PP:list[pair[term,term]]
+  SUCH THAT SSS:=(listExtract) elem(Axs)
+	AND NP:=()first(SSS) 
+	AND PP:=()second(SSS)
+	ANDIF eq_list[pair[term,term]](PP,nil)
+	:{
+	NRWR : ( replaceVars(
+	[
+  	FOR EACH SS:pair[term,term]; 
+		Lt:term; Rt:term
+  	SUCH THAT SS:=(listExtract) elem(NP)
+		AND Lt:=()first(SS) 
+		AND Rt:=()second(SS):{
+			Lt = Rt : 
+   	}
+	EmptyT,
+	EmptyT]))*
+	}
+	EmptyC
+	//end rewrite rules part
+
+	end
+  end
+
+  rules for clause
+	f : ident;
+	C1, C2 : clause;
+  global
+	[] $f:(C1) * $f:(C2)	=>	$f:(C1 * C2)
+	end
+  end
+
+//----------------------------------------------------------------------------------
+
+  rules for clause
+  global
+	[] EClause	=>
+//the clauses to be proved
+  FOR EACH SSS:pair[list[pair[term,term]],list[pair[term,term]]]; 
+		NP:list[pair[term,term]];  PP:list[pair[term,term]]
+  SUCH THAT SSS:=(listExtract) elem(Es)
+	AND NP:=()first(SSS) 
+	AND PP:=()second(SSS)
+	:{
+
+	[
+  	FOR EACH SS:pair[term,term]; 
+		Lt:term; Rt:term
+  	SUCH THAT SS:=(listExtract) elem(NP)
+		AND Lt:=()first(SS) 
+		AND Rt:=()second(SS):{
+			Lt = Rt : 
+   	}
+	EmptyT,
+  	FOR EACH SS:pair[term,term]; 
+		Lt:term; Rt:term
+  	SUCH THAT SS:=(listExtract) elem(PP)
+		AND Lt:=()first(SS) 
+		AND Rt:=()second(SS):{
+			Lt = Rt : 
+   	}
+	EmptyT]*
+
+	}
+	EmptyC
+
+	end
+  end
+
+//----------------------------------------------------------------------------------
+
+  rules for clause
+  global
+	[] Lemma	=>
+  FOR EACH SSS:pair[list[pair[term,term]],list[pair[term,term]]]; 
+		NP:list[pair[term,term]];  PP:list[pair[term,term]]
+  SUCH THAT SSS:=(listExtract) elem(Lm)
+	AND NP:=()first(SSS) 
+	AND PP:=()second(SSS)
+	:{
+
+	[
+  	FOR EACH SS:pair[term,term]; 
+		Lt:term; Rt:term
+  	SUCH THAT SS:=(listExtract) elem(NP)
+		AND Lt:=()first(SS) 
+		AND Rt:=()second(SS):{
+			Lt = Rt : 
+   	}
+	EmptyT,
+  	FOR EACH SS:pair[term,term]; 
+		Lt:term; Rt:term
+  	SUCH THAT SS:=(listExtract) elem(PP)
+		AND Lt:=()first(SS) 
+		AND Rt:=()second(SS):{
+			Lt = Rt : 
+   	}
+	EmptyT]*
+
+	}
+	EmptyC
+
+	end
+  end
+
+//----------------------------------------------------------------------------------
+/***********************************************************************************
+  rules for bool
+  global
+	[] IsLeftLin	=>
+  //the left-hand sides of the rules
+  FOR EACH SSS:pair[list[pair[term,term]],list[pair[term,term]]];
+		PP:list[pair[term,term]]
+  SUCH THAT SSS:=(listExtract) elem(Axs)
+	AND PP:=()second(SSS) :{
+
+  	FOR EACH SS:pair[term,term]; 
+		Lt:term
+  	SUCH THAT SS:=(listExtract) elem(PP)
+		AND Lt:=()first(SS) :{
+			is_lin(variables_of(Lt)) and
+   	}
+  }			true
+
+	end
+  end
+
+***********************************************************************************/
+//----------------------------------------------------------------------------------
+
+  rules for list[ident]
+  global
+	[] ListCons	=> 
+FOR EACH SS:pair[ident,pair[list[ident],ident]]; F:ident
+SUCH THAT SS:=(listExtract) elem(Css)
+	AND F:=()first(SS) :{
+			F.	
+}
+			nil
+	end
+  end
+
+//----------------------------------------------------------------------------------
+/***********************************************************************************
+
+  rules for int
+  global
+	[] depthR	=>
+    //--------------------------------- for each rule -----------
+    FOR EACH SSS:pair[list[pair[term,term]],list[pair[term,term]]]; 
+	LC:list[pair[term,term]];  R:list[pair[term,term]]; 
+	r:pair[term,term];
+	g:term
+    SUCH THAT SSS:=(listExtract) elem(Axs)
+	AND LC:=()first(SSS) // /\ ui=vi
+	AND R:=()second(SSS) // g -> d,.
+	ANDIF neq_list[pair[term,term]](R,nil) // g -> d, ... ,.
+	AND r:=()1-th elem(R) // g -> d
+	AND g:=()first(r) :{
+		 max( depthT(g), 
+	}
+		0
+    FOR EACH SSS:pair[list[pair[term,term]],list[pair[term,term]]]; 
+	LC:list[pair[term,term]];  R:list[pair[term,term]]
+    SUCH THAT SSS:=(listExtract) elem(Axs)
+	AND LC:=()first(SSS) // /\ ui=vi
+	AND R:=()second(SSS) // g -> d,.
+	ANDIF neq_list[pair[term,term]](R,nil):{
+		 )
+	}
+	end
+  end
+
+***********************************************************************************/
+//----------------------------------------------------------------------------------
+
+  rules for int
+  global
+	[] sdepthR	=>
+    //--------------------------------- for each rule -----------
+    FOR EACH SSS:pair[list[pair[term,term]],list[pair[term,term]]]; 
+	LC:list[pair[term,term]];  R:list[pair[term,term]]; 
+	r:pair[term,term];
+	g:term
+    SUCH THAT SSS:=(listExtract) elem(Axs)
+	AND LC:=()first(SSS) // /\ ui=vi
+	AND R:=()second(SSS) // g -> d,.
+	ANDIF neq_list[pair[term,term]](R,nil) // g -> d, ... ,.
+	AND r:=()1-th elem(R) // g -> d
+	AND g:=()first(r) :{
+		 max( sdepthT(g), 
+	}
+		0
+    FOR EACH SSS:pair[list[pair[term,term]],list[pair[term,term]]]; 
+	LC:list[pair[term,term]];  R:list[pair[term,term]]
+    SUCH THAT SSS:=(listExtract) elem(Axs)
+	AND LC:=()first(SSS) // /\ ui=vi
+	AND R:=()second(SSS) // g -> d,.
+	ANDIF neq_list[pair[term,term]](R,nil):{
+		 )
+	}
+	end
+  end
+
+//----------------------------------------------------------------------------------
+
+
+
+
+//--------------------------------------------------------------------------------------
+
+FOR EACH SS:pair[ident,pair[int,int]]; 
+	F:ident;  A:pair[int,int];
+	AL:int; AR:int
+SUCH THAT SS:=(listExtract) elem(Ars) 
+	AND F:=()first(SS) 
+	AND A:=()second(SS) 
+	AND AL:=()first(A) 
+	AND AR:=()second(A) 
+	ANDIF AL==0  
+	ANDIF AR==0 :{
+
+  rules for list[pair[ident,variable]]
+	Lpi : list[indp];	
+  global
+  	[] indVariables(F, Lpi) =>  nil
+  	end
+  end
+
+  rules for int	
+  global
+  	[] depthT(F) =>  1
+  	end
+  	[] sdepthT(F) =>  1
+  	end
+  end
+}
+
+//--------------------------------------------------------------------------------------
+ 
+rules for list[pair[ident,variable]]
+	s,t : term;
+	Lpi : list[indp];
+	n,p : equationS;
+global
+  	[] indVariables(s, Lpi)	=> unicate(indVars(s, Lpi, Lpi)	)
+	end
+
+  	[] indVariables(EmptyT, Lpi) =>  nil
+	end
+  	[] indVariables(s=t, Lpi) =>  unicate(indVariables(s,Lpi) @ indVariables(t,Lpi))
+	end
+
+  	[] indVariables(n:p, Lpi) =>  unicate(indVariables(n,Lpi) @ indVariables(p,Lpi))
+	end
+  	[] indVariables([n,p],Lpi) =>  unicate(indVariables(n,Lpi) @ indVariables(p,Lpi))
+	end
+end
+
+//--------------------------------------------------------------------------------------
+
+  rules for int	
+	a, b : int;
+  global
+  	[] max(a, b) => 
+		switch
+		case a >= b then a
+		otherwise b
+	 	end
+	end 
+  end
+//--------------------------------------------------------------------------------------
+
+//--------- GET domain and codomain ------------------------------------
+FOR EACH SS:pair[ident,pair[list[ident],ident]]; 
+	F:ident;  DC:pair[list[ident],ident]; 
+	D:list[ident]; C:ident; N:int
+SUCH THAT SS:=(listExtract) elem(Css)
+	AND F:=()first(SS) 
+	AND DC:=()second(SS) 
+	AND D:=()first(DC)
+	AND N:=()size(D)
+	AND C:=()second(DC):{
+
+rules for ident
+global
+	{ [] dom-I(F) => I-th elem(D)
+	end
+	}_I=1...N
+
+	[] codom(F) => C
+	end
+end
+
+rules for list[ident]
+global
+	[] domall(F) => D
+	end
+end
+
+}
+
+//--------- GET domain and codomain ------------------------------------
+FOR EACH SS:pair[ident,pair[list[ident],ident]]; 
+	F:ident;  DC:pair[list[ident],ident]; 
+	D:list[ident]; C:ident; N:int
+SUCH THAT SS:=(listExtract) elem(Fss)
+	AND F:=()first(SS) 
+	AND DC:=()second(SS) 
+	AND D:=()first(DC)
+	AND N:=()size(D)
+	AND C:=()second(DC):{
+
+rules for ident
+global
+	{ [] dom-I(F) => I-th elem(D)
+	end
+	}_I=1...N
+
+	[] codom(F) => C
+	end
+end
+
+rules for list[ident]
+global
+	[] domall(F) => D
+	end
+end
+
+}
+
+// for the variables v-$
+rules for ident
+	f:ident;
+global
+	[] codom($f) => $f
+	end
+end
+
+//--------------------------------------------------------------------------------------
+
+
+
+//--------------------------------------------------------------------------------------
+FOR EACH SS:pair[ident,pair[int,int]]; 
+	F:ident;  A:pair[int,int];
+	AL:int; AR:int; N:int
+SUCH THAT SS:=(listExtract) elem(Ars)
+	AND F:=()first(SS) 
+	AND A:=()second(SS) 
+	AND AL:=()first(A) 
+	AND AR:=()second(A) 
+	AND N:=()AL+AR
+	ANDIF N==0:{
+
+  rules for list[term]
+	lt_1,...,lt_N : list[term];
+	TS : list[term];
+  global
+	[] consTerm(F, TS) =>	F.nil
+  	end
+  end
+
+}
+
+FOR EACH SS:pair[ident,pair[int,int]]; 
+	F:ident;  A:pair[int,int];
+	AL:int; AR:int; N:int
+SUCH THAT SS:=(listExtract) elem(Ars)
+	AND F:=()first(SS) 
+	AND A:=()second(SS) 
+	AND AL:=()first(A) 
+	AND AR:=()second(A) 
+	AND N:=()AL+AR
+	ANDIF N>0:{
+
+  rules for list[term]
+	lt_1,...,lt_N : list[term];
+	TS : list[term];
+  global
+	[] consTerm(F, TS) =>	makeTerm(F {,lt_I}_I=1...N)
+			{where lt_I := ()getArgs(dom-I(F), TS) }_I=1...N
+  	end
+  end
+
+}
+
+//--------------------------------------------------------------------------------------

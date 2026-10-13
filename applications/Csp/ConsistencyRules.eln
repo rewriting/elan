@@ -1,0 +1,117 @@
+module ConsistencyRules[Variables,Type,Values]
+
+import
+global	FormuleManipulation[Variables,Type,Values]
+	;
+local	tuple[2,list[formule],list[formule]]
+	occur[var,list[formule]]
+	; 
+end
+
+operators
+global	Verify_AC(@)	: (csp)		csp;
+	Verify_NC(@)	: (csp)		csp;
+
+end
+
+
+rules for csp
+
+	x,x1,x2,y	: var;
+	lv		: list[var];
+	v,v1,v2		: Type;
+	n		: int;
+	F		: bool;
+	D,D1,D2,RD	: domain;
+	c,c1,c2,c3,c4		: formule;
+	lmc,lec,store,C,L,
+	l,l1,l2,l3,l4	: list[formule];
+	Q		: csp;
+	twolists	: tuple[list[formule],list[formule]];
+
+global 
+
+[]	Verify_NC(CSP[lmc,lec,c.C,store])
+	=>
+	where	(list[var])	y.lv:= ()GetVarOfAtomicFormule(c)
+	switch
+	case	occurs y in lec then
+		where	(list[formule])	x = v.l1 := ()GetVarInHead(y,lec,nil)
+		switch
+		case	EvaluateGroundFormule(replace(x,v,c))	then
+			CSP[lmc,x=v.l1,C,store]
+		otherwise
+			CSP[x in? empty.lmc,l1,C,store]
+		end	
+	otherwise
+		where	(list[formule])	x in? D.l1 := ()GetVarInHead(y,lmc,nil)
+		where 	RD := ()ReviseDxWRTc(x in? D,c)
+		switch
+		case	RD != D	then
+			CSP[x in? RD.l1,lec,append(1-th(twolists),C),2-th(twolists)]
+			where (tuple[list[formule],list[formule]])
+			       twolists := ()GetConstraintsOnVar(x,store,nil,nil)
+		otherwise
+			CSP[x in? D.l1,lec,C,store]
+		end
+	end	
+end
+
+[]	Verify_AC(CSP[lmc,lec,c.C,store])
+	=>
+	where	(list[var]) x.y.lv := ()GetVarOfAtomicFormule(c)
+	switch
+	case	occurs x in lmc	then
+		where	(list[formule])	x1 in? D1.l1 := ()GetVarInHead(x,lmc,nil)
+		switch
+		case	occurs y in lmc	then
+			where	(list[formule])	x2 in? D2.l2 := ()GetVarInHead(y,l1,nil)
+			where	RD := ()ReviseDx1WRTDx2(x1 in? D1,x2 in? D2,c)
+			switch
+			case	RD == D1	then
+				CSP[x1 in? D1.x2 in? D2.l2,lec,C,c.store]
+			otherwise
+				CSP[x1 in? RD.x2 in? D2.l2,lec,append(1-th(twolists),C),c.2-th(twolists)]
+				where	twolists := ()GetConstraintsOnVar(x1,store,nil,nil)
+			end
+		otherwise
+			where	(list[formule])	x2 = v2.l2 := ()GetVarInHead(y,lec,nil)
+			where	D2 := ()CreateDomainFromValue(v2)
+			where	RD := ()ReviseDx1WRTDx2(x1 in? D1,x2 in? D2,c)
+			switch
+			case	RD == D1	then
+				CSP[x1 in? D1.l1,x2 = v2.l2,C,c.store]
+			otherwise
+				CSP[x1 in? RD.l1,x2 = v2.l2,append(1-th(twolists),C),c.2-th(twolists)]
+				where	twolists := ()GetConstraintsOnVar(x1,store,nil,nil)
+			end
+		end
+/*	otherwise
+		where	(list[formule])	x1 = v1.l1 := ()GetVarInHead(x,lec,nil)
+		switch
+		case	occurs y in lmc	then
+			where	(list[formule])	x2 in? D2.l2 := ()GetVarInHead(y,lmc,nil)
+			switch
+			case	ValueOfx1HasSupportInDx2(x1,v1,x2,D2,c)	then
+				CSP[x2 in? D2.l2,x1 = v1.l1,C,c.store]
+			otherwise
+				CSP[x1 in? empty.x2 in? D2.l2,l1,C,c.store]
+			end
+		otherwise
+			where	(list[formule])	x2 = v2.l2 := ()GetVarInHead(y,l1,nil)
+			switch
+			case	EvaluateGroundFormule(replace(x2,v2,replace(x1,v1,c)))	then
+				CSP[lmc,x1 = v1.x2 = v2.l2,C,c.store]
+			otherwise
+				CSP[x1 in? empty.lmc,x2 = v2.l2,C,c.store]
+			end
+		end
+*/
+	end
+end
+
+end
+
+
+end
+

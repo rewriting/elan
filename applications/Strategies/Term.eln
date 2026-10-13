@@ -1,0 +1,22 @@
+module Term
+
+import global strat[Term]; end
+
+sort Term; end
+operators global
+	a      : Term;
+	b      : Term;
+        f(@,@) : (Term Term) Term;
+        g(@)   : (Term) Term;
+end
+
+stratop global
+  swap  : <Term>;
+end
+
+strategies for Term
+explicit
+  [.] [swap]a => b   end
+end
+
+end

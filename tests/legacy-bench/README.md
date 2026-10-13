@@ -1,8 +1,12 @@
 # Legacy test bench
 
-`run_tests.py` replays the historical ELAN test bench — the `tst_all` files that
-drove the csh scripts `itest`, `aitest` and `jtest` of
-`legacy/elan/sources/Scripts` — against an installed ELAN system.
+`run_tests.py` replays the historical ELAN test bench against an installed ELAN
+system. It reads the `TESTS` files of the living copy (`applications/`,
+`contributions/`; ids `applications/X::KIND::lgi:spc:inp:out`; each tree has a
+`tst_all` entry point) and the historical `tst_all` files of
+`legacy/elan/sources` (compiler tests, BenchThesis), which drove the csh
+scripts `itest`, `aitest` and `jtest` of `legacy/elan/sources/Scripts`. The
+tools to add and check tests of the copy are in `tests/apps/`.
 
 ```sh
 ./run_tests.py                         # test reference/install (default)
@@ -12,19 +16,26 @@ drove the csh scripts `itest`, `aitest` and `jtest` of
 ./run_tests.py --list
 ```
 
-Each test runs in a private copy of its application directory (`work/`); the
-files stored renamed (`CASE-RENAMES.tsv`, e.g. `Robot/x-case-Nim.lgi`) get
-their original names back there when the test uses them, so the bench runs
-on case-insensitive file systems too.
+Each test runs in a private copy of its application directory (`work/`). The
+living copy has no `x-case-` file; the few files stored renamed in the
+historical trees (`CASE-RENAMES.tsv`) get their original names back there when
+the test uses them, so the bench runs on case-insensitive file systems too.
 
 ## Test kinds
 
 | Kind | Original script | What is run | Count |
 |------|-----------------|-------------|-------|
-| `I`  | `itest`  | `elan -b X.lgi [Y.spc] < SAMPLES/in.inp` | 232 |
-| `A`  | `aitest` | `elan --export X.ref ...` then `elan --import X.ref < in.inp` | 136 |
+| `I`  | `itest`  | `elan -b X.lgi [Y.spc] < SAMPLES/in.inp` | 253 |
+| `A`  | `aitest` | `elan --export X.ref ...` then `elan --import X.ref < in.inp` | 137 |
 | `J`  | `jtest`  | `elanc-rem -nosplit X` (REM's driver by its own name, whatever `elanc` is), `make`, `a.out -noInput -quiet` | 205 |
 | `JO` | `jtest` (2nd half) | same with `-optimiseChoicePoint` | 205 |
+| `R`  | `jtest` | `elanc-rs` (Rust compiler), same run; `UNSUPPORTED` when it refuses the program; not a default kind | 205 |
+| `G`  | `jtest`, `gtest` | `elanc-go` (Go compiler), same run; `gtest` lines (G with an INP) are in `TESTS` files; `UNSUPPORTED` when it refuses the program; not a default kind | 206 |
+
+A compiled program (`J`, `JO`, `R`, `G`) reads `SAMPLES/INP.inp` when the line
+has an INP. The default kinds (`I,A,J,JO`) make 800 tests. Strict rule for the
+new tests of the copy (not in `baseline.tsv`): they must `PASS`; `G` and `R`
+may be `UNSUPPORTED`.
 
 `ctest`/`actest` (C compiler of ELAN 2), `pitest` (partial evaluator) and the
 Java compiler of `Compiler.*/Test` have no driver anymore and are not replayed.
@@ -56,5 +67,5 @@ commit message.
 
 ## State of the reference build (reference/install)
 
-778 tests: PASS 276, PASS~ 2, PASS≈ 174, FAIL 126, ERROR 60, missing files 140;
+778 historical tests (before the living copy; the bench now lists 800 with the default kinds): PASS 276, PASS~ 2, PASS≈ 174, FAIL 126, ERROR 60, missing files 140;
 stable over repeated runs (0 FLAKY with `--repeat 3`).

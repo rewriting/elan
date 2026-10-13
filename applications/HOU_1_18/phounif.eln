@@ -1,0 +1,165 @@
+module phounif[mvars,btypes,bvars]
+import
+  global	bool int list[int] 
+		terms[mvars,btypes,bvars]
+		pterms[mvars,btypes,bvars]
+		typech[mvars,btypes,bvars]
+		btypes types[btypes] contexts[btypes]
+		ivars[btypes] vars[mvars,btypes] list[objbvars]
+			      vars[bvars,btypes] list[obj_Mvars]
+		hounif[mvars,btypes,bvars];
+end
+operators global
+    phou (@)    : (input) list[uconj];   // |list| == 1
+end
+
+stratop global
+  phounify	: <usystem>		builtin;
+end
+
+//--- almost the same code is in the module hounif.eln, unify them eventually
+rules for list[uconj]
+
+	aa, bb		: lterm;
+	dba, dbb	: dBterm;
+	a, b, a1, b1	: wtterm;
+	fvars		: list[obj_Bvars];
+	flags		: int;
+	isize		: int;
+	cc		: context;
+	nfv		: int;
+	tt1, tt2	: type;
+	mvs		: list[wtterm];
+	tmp		: list[uconj];
+	yy, uu		: usystem;
+global
+  []	phou(aa = bb) => phou(aa = bb,lt)
+  end
+  [] 	phou(aa = bb,flags)=> back(
+		ifte(yy.disj == nil, yy.solved, nil), fvars, flags)
+  	where fvars:=()second(
+		collect_fbvars(aa,collect_fbvars(bb,[nil,nil])))
+  	where cc:=()make_context(fvars)  
+	where mvs:=()collect_mvrs(cc,aa,collect_mvrs(cc,bb,nil)) 
+	where dbb:=()tr(bb,fvars)
+	where dba:=()tr(aa,fvars)
+	where a:=()fill(FF(dba,0))
+   	where b:=()fill(FF(dbb,0))
+	where b1:=()typech(b,cc)
+	where a1:=()typech(a,cc)
+	where tt2:=()typeof(b1)
+	where tt1:=()typeof(a1)
+	where tmp:=()
+	ifte(tt1 == tt2 and known(tt1) and known(tt2), true -AND- 
+		lnf red [a1,id:cc|>cc,nil,cc,tt1] = 
+		lnf red [b1,id:cc|>cc,nil,cc,tt2].nil,nil)
+	where yy:=(phounify)(tmp, nil, mvs, 0, flags, size(cc))
+  end
+end
+
+rules for usystem
+ P, P1                   : uconj;
+        D, slds                 : list[uconj];
+        aa, bb, aa1, bb1        : tterm;
+        aaa, bbb                : wtterm;
+        tt, tt1, tt2, tt3, tn   : type;
+        ww, zz                  : obj_Mvars;
+        ss                      : subst;
+        ss1, ss2, ttt1, ttt2    : tsubst;
+        mvs, mvrs               : list[wtterm];
+        cc, cc1, cc2, cn        : context;
+        i, m, n, fvar, p , r, j, ex: int;
+        flags                   : int;
+        isize                   : int;
+        sss, ttt, sss1	    	: wtsubst;
+        Sa, Sb                  : list[wtterm];
+        AAA, BBB                : state;
+	fl			: pair;
+	compl			: triple;
+global
+  [pruning1]	(P -AND- [ww:cc|-tt,sss,nil,cn,tn] = BBB.D,
+			slds, mvs, fvar, flags, isize) =>
+		(false.D,slds, mvs, fvar, flags, isize)
+		where bbb:=()fromstaten(BBB)
+		if atomic_pattern(bbb)
+		if pattern_subst(sss)
+		where ex := ()exp(sss)
+                if no_occ_and_rigid(1,ex,sss,bbb)
+  end     
+  [pruning2]	(P -AND- [ww:cc|-tt,sss,nil,cn,tn] = BBB.D,
+                        slds, mvs, fvar, flags, isize) =>
+		(P -AND- [ww:cc|-tt,sss,nil,cn,tn] = BBB -AND-
+			 [aaa,id:cc1|>cc1,nil,cc1,tt1] = 
+			 [V_Mvars(fvar):cc2|-tt1,ttt,nil,cc1,tt1].D,
+                         slds, V_Mvars(fvar):cc2|-tt1.mvs, fvar+1, flags, isize)
+		where bbb:=()fromstaten(BBB)
+                if atomic_pattern(bbb)
+		if pattern_subst(sss)
+		where ex := ()exp(sss)
+		where fl := ()no_occ_and_flexi(1,ex,sss,bbb)
+		if is_flexi(fl)
+		where aaa := ()fl.fst
+		where tt1 := ()type(aaa)
+		where cc1 := ()context(aaa)
+		where ttt := ()upnshift(fl.second,cc1)
+		where cc2 :=()context2(ttt)
+   end
+  [invert]	(P -AND- [ww:cc|-tt,sss,nil,cn,tn] = BBB.D,
+                        slds, mvs, fvar, flags, isize) =>
+		(P -AND- [ww:cc|-tt,id:cc|>cc,nil,cc,tt] = 
+			lnf red tostate(norm(bbb[compl.fst]:cc|-tt)).D,
+                          slds, compl.second, compl.third, flags, isize) 
+              where bbb:=()fromstaten(BBB)
+              if atomic_pattern(bbb)
+              if pattern_subst(sss)
+	      if not occurs ww in bbb
+	      where ex := ()exp(sss)
+	      where p := ()size(sss)
+  	      if p+ex > 0 /////////////////////////////////////////////////////////////////////////// HACK
+	      where sss1 :=  ()typech(fill(nshift(p)),cc)
+	      where compl := ()complete(1,ex,sss,cn,mvs,fvar,sss1)
+  end
+  [samevars]	(P -AND- [ww:cc|-tt,id:cc|>cc,nil,cc,tt] = [ww:cc|-tt,sss,nil,cc,tt].D,
+                        slds, mvs, fvar, flags, isize) =>
+		(P -AND- [ww:cc|-tt,id:cc|>cc,nil,cc,tt] = [V_Mvars(fvar):cc1|-tt,sss1,nil,cc,tt].D,
+                        slds, V_Mvars(fvar):cc1|-tt.mvs, fvar+1, flags, isize)
+		where sss1 := ()samevars(1,sss)
+		where cc1 := ()context2(sss1)
+  end
+end
+
+strategies for usystem
+implicit
+ [.] phounify =>
+  repeat* (
+    repeat* (
+      //dc
+	first one(
+        decla ,
+        decapp1 ,
+        decapp2 ,
+        occurch ,
+        replace ,
+	expla ,
+	pruning1 ,
+	pruning2 ,
+	invert ,
+	samevars
+	) 
+    );
+    /*dc*/first one(solved);
+    /*dc*/first one(antiexpla , antiexplaa);
+     repeat* (
+      /*dc*/first one(
+        replacee ,
+        antidecla )
+    )
+  )
+  end
+end
+
+end
+
+
+
+

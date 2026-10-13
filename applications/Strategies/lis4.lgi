@@ -1,0 +1,10 @@
+LPL lis4 description
+
+query		of sort  	Any
+		result of sort 	Any
+		import 	lis4_int
+		start with 	(eval)query
+//		start with 	[lis(swap)]query
+
+end
+

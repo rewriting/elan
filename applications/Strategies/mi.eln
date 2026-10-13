@@ -1,0 +1,17 @@
+module mi[v,X]
+
+import int strat[X] replace[<X->X>,<X->X>]; end
+
+stratop global
+  mi v.@  : (<X>) <X>;
+  v       : <X>;
+end
+
+strategies for X
+S : <X>;
+implicit
+  [.]  mi v.S => replace(v,mi v.S,S) end
+end
+
+end
+

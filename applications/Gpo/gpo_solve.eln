@@ -1,0 +1,219 @@
+module gpo_solve[Vars,Ops,rwrules]
+import	global	rwrules
+		mixed_constraint[Vars, Ops]
+		gpo_constraint[Vars, Ops]
+		theta_constraint[Vars, Ops]
+		interp_constraint[Ops]
+	;
+
+	local	Vars Ops
+		termCommons[Ops,Vars] 
+		int bool identifier
+		pair[identifier,int]
+		list[pair[identifier,int]]
+		pair[term,term]
+		list[pair[term,term]]
+		list[identifier]
+		list[variable]
+		occur[variable,list[variable]]
+		occur[term,term]
+		occur[prec_term,interp_constraint]
+		eq[int]
+		eq[identifier]
+	;
+end
+
+stratop global
+  gpo_strat : <mixed_constraint> builtin;
+end
+
+rules for mixed_constraint
+          P: mixed_constraint;
+	E: gpo_constraint;
+	C: theta_constraint;
+	Cinterp: interp_constraint;
+	a_variable: variable;
+	u,v: term;
+	symbol_f, symbol_g, symbol_h: identifier;
+global
+[init]
+initial_mixed_constraint => 
+	(
+	FOR EACH RWR:pair[term,term]; L,R:term
+	SUCH THAT RWR:=(listExtract) elem(rwrules)
+		AND L:=()first(RWR)
+		AND R:=()second(RWR):{
+		L > R ^ } Tgpo || Ttheta || Tinterp) v Fmix
+end
+
+ 
+FOR EACH SF,SG:pair[identifier,int]; F,G:identifier;  NF,NG:int
+SUCH THAT SF:=(listExtract) elem(Ops) AND F:=()first(SF) AND NF:=()second(SF)
+      AND SG:=(listExtract) elem(Ops) AND G:=()first(SG) AND NG:=()second(SG):{
+rules for mixed_constraint
+          s_1, ... , s_NF: term;
+	t_1, ..., t_NG: term;
+global
+  [decompose_ineq]
+	(F(s_1, ..., s_NF) > G(t_1, ..., t_NG) ^ E || C || Cinterp) v P
+
+	=>
+
+	{(s_I >  G(t_1, ..., t_NG) ^ E || C || Cinterp) v }_I=1...NF
+	{(s_I = G(t_1, ..., t_NG) ^ E || C || Cinterp) v }_I=1...NF
+	({F(s_1, ..., s_NF) > t_I ^ }_I=1...NG E || 
+		T(F(s_1, ..., s_NF)) > T(G(t_1, ..., t_NG)) ^ C || Cinterp) v P
+
+  end
+
+
+
+ [decompose_eq]
+
+	(F(s_1, ..., s_NF) = G(t_1, ..., t_NG) ^ E || C || Cinterp) v P
+
+	=>
+
+	({F(s_1, ..., s_NF) > t_I ^ }_I=1...NG 
+	 {G(t_1, ..., t_NG) > s_I ^ }_I=1...NF E || 
+		T(F(s_1, ..., s_NF)) = T(G(t_1, ..., t_NG)) ^ C || Cinterp) v P
+
+  end
+end
+}
+
+[anti_subterm] (a_variable > u ^ E || C || Cinterp) v P => P 		end
+
+[subterm] (u > v ^ E || C || Cinterp) v P => P
+
+		if occurs(u, v)						end
+
+[subterm] (u > v ^ E || C || Cinterp) v P => (E || C || Cinterp) v P
+
+		if occurs(v, u)						end
+
+[subterm] (u > a_variable ^ E || C || Cinterp) v P => P
+
+		if not(occurs(a_variable, u))				end
+
+[equality] (u = u ^ E || C || Cinterp) v P => (E || C || Cinterp) v P	end
+
+
+[subterm] (u = v ^ E || C || Cinterp) v P => P
+
+		if occurs(v, u)	or occurs(u, v)				end
+
+[anti_equality] (a_variable = u ^ E || C || Cinterp) v P => P		end
+[anti_equality] (u = a_variable ^ E || C || Cinterp) v P => P		end
+
+
+/* ---------- Instanciation ----------------------------------- */
+
+
+FOR EACH SF,SG:pair[identifier,int]; F,G:identifier;  NF,NG:int
+SUCH THAT SF:=(listExtract) elem(Ops) AND F:=()first(SF) AND NF:=()second(SF)
+      AND SG:=(listExtract) elem(Ops) AND G:=()first(SG) AND NG:=()second(SG) 
+ANDIF NF > NG:{
+rules for mixed_constraint
+          s_1, ... , s_NF: term;
+	t_1, ..., t_NG: term;
+global
+  [lpo_instantiation]
+	(Tgpo|| T(F(s_1, ..., s_NF)) > T(G(t_1, ..., t_NG)) ^ C || Cinterp) v P
+
+	=>
+
+	(Tgpo|| C || prec(F > G) ^ Cinterp) v 
+	{( {s_I = t_I ^}_I=1...(J-1) s_J > t_J ^ Tgpo || C || 
+				prec(F = G) ^ Cinterp ) v }_J=1...NG 
+	( {s_I = t_I ^}_I=1...NG Tgpo || C || prec(F = G) ^ Cinterp) v P
+  end
+end
+}
+
+
+FOR EACH SF,SG:pair[identifier,int]; F,G:identifier;  NF,NG:int
+SUCH THAT SF:=(listExtract) elem(Ops) AND F:=()first(SF) AND NF:=()second(SF)
+      AND SG:=(listExtract) elem(Ops) AND G:=()first(SG) AND NG:=()second(SG) 
+ANDIF NG >= NF:{
+rules for mixed_constraint
+          s_1, ... , s_NF: term;
+	t_1, ..., t_NG: term;
+global
+  [lpo_instantiation]
+	(Tgpo|| T(F(s_1, ..., s_NF)) > T(G(t_1, ..., t_NG)) ^ C || Cinterp) v P
+
+	=>
+
+	(Tgpo|| C || prec(F > G) ^ Cinterp) v 
+	{( {s_I = t_I ^}_I=1...(J-1) s_J > t_J ^ Tgpo || C || 
+				prec(F = G) ^ Cinterp) v }_J=1...NF
+	P
+  end
+end
+}
+
+FOR EACH SF,SG:pair[identifier,int]; F,G:identifier;  NF,NG:int
+SUCH THAT SF:=(listExtract) elem(Ops) AND F:=()first(SF) AND NF:=()second(SF)
+      AND SG:=(listExtract) elem(Ops) AND G:=()first(SG) AND NG:=()second(SG) 
+	ANDIF neq_identifier(NF,NG):{
+rules for mixed_constraint
+          s_1, ... , s_NF: term;
+	t_1, ..., t_NG: term;
+global
+  [lpo_instantiation]
+
+	(Tgpo|| T(F(s_1, ..., s_NF)) = T(G(t_1, ..., t_NG)) ^ C || Cinterp) v P
+
+	=>
+
+	P
+  end
+end
+}
+
+
+FOR EACH SF,SG:pair[identifier,int]; F,G:identifier;  NF,NG:int
+SUCH THAT SF:=(listExtract) elem(Ops) AND F:=()first(SF) AND NF:=()second(SF)
+      AND SG:=(listExtract) elem(Ops) AND G:=()first(SG) AND NG:=()second(SG) 
+ANDIF eq_identifier(NF, NG):{
+rules for mixed_constraint
+          s_1, ... , s_NF: term;
+	t_1, ..., t_NG: term;
+global
+  [lpo_instantiation]
+	(Tgpo|| T(F(s_1, ..., s_NF)) = T(G(t_1, ..., t_NG)) ^ C || Cinterp) v P
+
+	=>
+
+	( {s_I = t_I ^}_I=1...NG Tgpo || C || prec(F = G) ^ Cinterp) v P
+  end
+end
+}
+
+
+/* --------------- precedence verification --------------------- */
+
+
+[final1] (Tgpo || Ttheta || Cinterp) v P => precedence = simplify(Cinterp)	
+	if sat(Cinterp)							end
+[final2] (Tgpo || Ttheta || Cinterp) v P => P				end
+[final3] Fmix => no_precedence						end
+end
+
+
+strategies for mixed_constraint
+implicit
+  [.] gpo_strat =>
+	dc one(init);
+	repeat*(
+		dc one(
+			dc one(final1 , final2 , final3) ,
+			repeat+(dc one(anti_subterm , subterm , equality ,
+					anti_equality ,
+					decompose_ineq , decompose_eq ,
+					lpo_instantiation))))
+  end
+end	
+end
+

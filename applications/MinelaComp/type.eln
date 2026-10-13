@@ -1,0 +1,60 @@
+module type[Types]
+import
+global	list[type]
+	pair[identifier,type]
+
+	;
+local	identifier Types list[identifier]
+//	pair[identifier,identifier]
+	;
+end
+
+sort type sig;
+end
+
+operators
+global
+
+  type[@] : (identifier) type;
+//  @ : (identifier) type;
+
+  FOR EACH X:identifier SUCH THAT X:=(listExtract) elem(Types)
+  :{
+	X : type;
+   }
+
+//  @ : (pair[identifier,identifier]) pair[identifier,type];
+//  @ : (pair[list[identifier],identifier]) sig;
+//  @ : (pair[identifier,pair[list[identifier],identifier]]) pair[identifier,sig];
+
+
+  [@,@] : (list[type] type) sig;
+  @ --> @ : (list[type] type) sig	alias [@,@]:;	
+  dom(@) : (sig) list[type];
+  cod(@) : (sig) type;
+end
+
+rules for list[type]
+	t : type;
+	lt : list[type];
+global
+  [] dom([lt,t]) => lt
+  end
+end
+
+rules for type
+	t : type;
+	lt : list[type];
+global
+  [] cod([lt,t]) => t
+  end
+end
+
+rules for type
+global
+  FOR EACH X:identifier SUCH THAT X:=(listExtract) elem(Types)
+  :{ [] X => type[X] end }
+end
+
+end
+

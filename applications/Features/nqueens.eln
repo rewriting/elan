@@ -1,0 +1,102 @@
+module nqueens
+import 
+  global int bool;
+end
+sort 
+  list qint;
+end
+operators
+global
+
+  @			: ( int ) qint;
+  nil			: list;
+  @.@			: ( int list ) list;
+  generate_list(@)	: ( int ) list;
+
+  queens(@,@)		: ( int int ) list;
+  queens(@)		: ( int ) list;
+  noattack(@,@,@)	: ( int int list ) bool;
+
+  q2i(@)		: ( qint ) int;
+
+end
+
+stratop global
+	range		: <qint>	builtin;
+	queens_strat	: <list>	builtin;
+	det_queens_strat	: <list>	builtin;
+end
+
+rules for int
+n : int;
+global
+  [] q2i(n)	=> n						end
+end
+
+rules for list
+n:int;
+global
+  [] generate_list(0)	=> nil					end
+  [] generate_list(n)	=> n . generate_list(n-1)		end
+end
+
+
+rules for qint
+x : int;
+global
+  [range_rule]  x	=> x-1		if x > 1		end
+end
+
+rules for list
+n,size,x : int;
+	xx : qint;
+	ql : list;
+global
+  [] queens(n)	=> queens(n,n)					end
+
+  [queens_0] queens(0,size)	=> nil
+  end
+  [queens_n] queens(n,size)	=> x . ql
+			   if n>0
+			   where ql:=(queens_strat) queens(n-1,size)
+			   where xx:=(range) size
+			   where x:=()q2i(xx)
+			   if noattack(1,x,ql)
+  end
+end
+
+rules for bool
+p,d,diff : int;
+	l : list;
+global
+  [] noattack(diff,d,nil)	=> true								end
+  [] noattack(diff,d,p.l)	=> d!=p and d-p!=diff 
+					and p-d!=diff
+					 and noattack(diff+1,d,l)
+  end
+end
+
+strategies for qint
+implicit
+  [] range =>	iterate*(dc(range_rule))        end
+end
+
+strategies for list
+implicit
+  [] queens_strat => dk(queens_0, queens_n)	end
+  [] det_queens_strat => first one(queens_0, queens_n)	end
+end
+
+//strategies for qint
+//local
+//  [range] 	iterate*(dc(range_rule))        end
+//end
+//strategies for list
+//global
+//  [queens_strat] dk(queens_0 , queens_n)	end
+//end
+
+end
+
+
+

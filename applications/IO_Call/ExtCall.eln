@@ -1,0 +1,119 @@
+/* reimplantation du dc/dkcall avec le module io
+
+   - utilisation necessaire du filtre sed ``call2io''
+   - le solveur doit se terminer apres avoir ecrit les solutions sur stdout
+
+
+   me contacter en cas de pb
+
+   Christophe Ringeissen
+*/
+
+module ExtCall[X]
+import 	global io[X] strat[X] list[X] eq[X] ;
+
+        local X ;
+
+end
+
+
+operators
+
+global
+
+        DKSolver(@,@)  : (string X) list[X] ;
+        getSolutions(@) : (Pid) list[X] ;
+
+        DCSolver(@,@)  : (string X) list[X] ;
+        getOneSolution(@) : (Pid) list[X] ;
+        
+        EOS             : X ; 
+
+end
+
+
+stratop global 
+
+DKcall(@) : (string) <X> ;
+DCcall(@) : (string) <X> ;
+
+end
+
+
+
+
+rules for list[X]
+
+s: string ;
+P,P1,Q : X ;
+PID,closePID : Pid ;
+
+global 
+
+
+
+[] DKSolver(s,P) => getSolutions(PID) 
+     where PID := () create(s)
+     if not iserr(PID)
+
+     where P1 := () write(PID,P)
+     if not iserror(P1) 
+     end 
+
+
+[] getSolutions(PID) => 
+    
+      where Q := () read(PID)
+      switch 
+       case iserror(Q) or eq_X(Q,EOS) then
+           nil
+           where closePID	:= ()close(PID)
+       otherwise 
+           Q.getSolutions(PID)
+    end 
+   end
+
+
+[] DCSolver(s,P) => getOneSolution(PID) 
+     where PID := () create(s)
+     if not iserr(PID)
+     where P1 := () write(PID,P)
+     if not iserror(P1)
+     end 
+
+
+[] getOneSolution(PID) => 
+    
+      where Q := () read(PID)
+      switch 
+       case iserror(Q) or eq_X(Q,EOS) then
+           nil 
+           where closePID	:= ()close(PID)
+       otherwise 
+           Q.nil
+           where closePID	:= ()close(PID)
+      end 
+   end
+
+end
+
+
+strategies for X
+
+
+P,Q: X ;
+s: string ;
+
+  explicit
+
+    [.] [DKcall(s)] P => Q 
+                    where Q: = (listExtract) elem(DKSolver(s,P)) end
+
+    [.] [DCcall(s)] P => Q 
+                    where Q: = (listExtract) elem(DCSolver(s,P)) end
+
+
+end
+
+
+end

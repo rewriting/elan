@@ -1,0 +1,245 @@
+module approximation[Fss, Vars]
+import global int state position rwrule[Fss, Vars] list[affectation] list[state_approximation]
+	Cterm[Fss] state_set eq[position] list[rule_affectation] pair[list[affectation], int]
+	pair[Cterm, position] list[pair[Cterm, position]] eq[rwrule]
+	pair[identifier, int] list[pair[identifier, int]];
+	local Fss Vars;
+	
+end
+
+sort affectation dec_step rule_affectation state_approximation approximation;
+end
+
+operators global
+	[@, @]		: (position state) affectation;
+	rule(@, @)	: (rwrule list[affectation]) rule_affectation;
+	state(@, @)	: (state list[rule_affectation]) state_approximation;
+	state(@, @)	: (state state) state_approximation;
+	nil		: approximation;
+	@.@		: (state_approximation approximation) approximation;
+
+	new_decomposition(@,@)	: (Cterm int) pair[list[affectation],int]; 
+	states(@)		: (list[affectation]) state_set;
+	grep(@, @, @)		: (state approximation approximation) list[rule_affectation];
+	grep(@, @, @)		: (rwrule state approximation) list[affectation];
+	grep(@, @) 		: (rwrule list[rule_affectation]) list[affectation];
+	add(@, @, @)		: (state_set list[rule_affectation] approximation) approximation;
+	add(@, @, @)		: (state_set state approximation) approximation;
+	add(@, @, @)		: (state list[rule_affectation] approximation) approximation;
+	grep_state(@, @)	: (position list[affectation]) state;
+
+	dec_step(@, @, @)		: (list[pair[Cterm, position]] int list[affectation]) dec_step;
+	affectations(@)		: (dec_step) list[affectation];
+	last(@)			: (dec_step) int;
+	remove(@,@)		: (position list[affectation]) list[affectation];
+	initial(@, @)		: (state approximation) state;
+end
+
+
+stratop global
+  dec_step_strat: <dec_step> builtin;
+end
+
+
+/* One approximation */
+
+/* search for a record for a given position in an affectation list */
+
+rules for state
+	p, p2: position;
+	q, q2, q3: state;
+	l: list[affectation];
+	a: approximation;
+	lr: list[rule_affectation];
+global
+  [] grep_state(p, [p,q].l) => q
+  end
+  [] grep_state(p, [p2,q].l) => grep_state(p, l)
+	if neq_position(p,p2)
+  end
+  
+  [] initial(q, nil) => q
+  end
+  [] initial(q, state(q2, lr) . a) => initial(q, a)
+  end
+  [] initial(q, state(q, q2) . a) => q2
+  end
+  [] initial(q, state(q2, q3) . a) => initial(q, a)
+	if neq_state(q, q2)
+  end
+end
+
+
+/* Add an affectation list for a set of states "set" in an approximation a
+and add an affectation list for a state q in a */
+
+rules for approximation
+	q, q2, q3: state;
+	set: state_set;
+	l, l2: list[rule_affectation];
+	a: approximation;
+global
+  [] add(nil, l, a) => a
+  end
+  [] add(nil, q, a) => a
+  end
+  [] add(q.set, l, a) => add(q, l, add(set, l,a))
+  end
+  [] add(q.set, q2, a) => state(q, q2) . add(set, q2, a)
+  end
+  [] add(q, l, nil) => state(q, l) . nil
+  end
+  [] add(q, l, state(q, l2).a) => state(q, append(l,l2)) . a
+  end
+  [] add(q, l, state(q2, q3).a) => state(q2, q3).add(q,l,a)
+  end
+  [] add(q, l, state(q2, l2).a) => state(q2,l2).add(q,l,a)
+	if neq_state(q,q2)
+  end 
+end
+
+
+/* Search for a record for a given state in an affectation list */
+
+
+rules for list[rule_affectation]
+	q,q2, q3: state;
+	l: list[rule_affectation];
+	a, a2: approximation;
+global
+  [] grep(q, nil, a) => nil
+  end
+  [] grep(q, state(q, l).a, a2) => l
+  end
+  [] grep(q, state(q2,l).a, a2) => grep(q, a, a2)
+	if neq_state(q, q2)
+  end
+  [] grep(q, state(q, q2).a, a2) => grep(q2, a2, a2)
+  end
+  [] grep(q, state(q3, q2).a, a2) => grep(q, a, a2)
+	if neq_state(q, q3)
+  end
+end
+
+
+rules for state_set
+	p: position;
+	q: state;
+	l2: list[affectation];	
+global
+  [] states(nil) => nil
+  end
+  [] states([p,q].l2) => q.states(l2)
+  end
+end
+
+
+/* projection */
+
+rules for int
+	l: list[pair[Cterm, position]];
+	l2: list[affectation]; 	
+	i: int;
+global
+  [] last(dec_step(l, i, l2)) => i
+  end
+end
+
+
+/* Create a new decomposition of a non-normalised transition, call to the 
+named rules with the decomposition strategy */
+
+rules for pair[list[affectation], int]
+	s: Cterm;
+	i: int;
+	res: dec_step;
+global
+  [] new_decomposition(s, i) => [affectations(res), last(res)]
+	where res:= (dec_step_strat) dec_step([s, epsilon].nil, i, nil)
+  end
+end
+
+
+/* Search for a record for a given rule name in an approximation */
+
+rules for list[affectation]
+s: Cterm;
+	i: int;
+	l: list[pair[Cterm, position]];
+	l2: list[affectation];
+	r, r2: rwrule;
+	p, p2: position;
+	q: state;
+	a: approximation;
+	lraf: list[rule_affectation];
+global
+  [] affectations(dec_step(l, i, l2)) => l2
+  end
+
+  [] grep(r, q, a) => grep(r, grep(q, a, a))
+  end
+
+  [] grep(r, nil) => nil
+  end
+
+  [] grep(r , rule(r, l2).lraf) => l2
+  end
+
+  [] grep(r, rule(r2, l2).lraf) => grep(r,lraf) 
+  	if neq_rwrule(r, r2)
+  end
+
+  [] remove(p, nil) => nil
+  end
+
+  [] remove(p, [p, q].l2) => l2
+  end
+
+  [] remove(p, [p2, q].l2) => [p2, q].remove(p, l2)
+  	if neq_position(p,p2)
+  end
+end
+
+
+/* Rules for decomposing non-normalised transitions */
+
+rules for dec_step
+	q: state;
+	i: int;
+	p: position;
+	l: list[pair[Cterm, position]];
+	l2: list[affectation];
+
+/* A state is not decomposable and its position is not interesting,  
+it is removed */
+
+global
+  [dec_step_r1] dec_step([q, p].l, i, l2) => dec_step(l, i, remove(p,l2))
+  end
+
+FOR EACH SS:pair[identifier,int]; F:identifier; N:int
+SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS)
+     AND N:=()second(SS):{
+rules for dec_step
+	t_1,...,t_N: Cterm;
+	q_1,...,q_N: state;
+
+
+/* general case of decomposition */
+
+global
+  [dec_step_r2] dec_step([F(t_1, ..., t_N), p].l, i, l2) =>
+	dec_step({[t_I, p.I].}_I=1...N l, i+N, {[p.I, q|(i+I)]. }_I=1...N  l2)
+  end
+end
+}
+end
+
+
+strategies for dec_step
+implicit
+  [.] dec_step_strat =>
+	repeat*(dc one(dec_step_r1 , dec_step_r2))
+  end
+end
+end

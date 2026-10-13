@@ -1,0 +1,178 @@
+module fopc_bas
+
+import global 
+	occur[Var,list[Var]] bool eq[bool] eq[Term] list[Var] list[Term] int;
+end
+sort Var Term
+     Label
+     SentList Sent Goals
+     Sort
+     Seq;
+end
+operators global
+  @		: (Var) Term;
+  // part Signature -----------
+  p(@)			: (Term) Sent;
+  r(@,@)		: (Term Term) Sent;
+  member(@,@)		: (Term Term) Sent;
+  append(@,@)		: (Term Term) Term;
+  zero			: Term;
+  succ(@)		: (Term) Term;
+  f(@)			: (Term) Term;
+  g(@,@)		: (Term Term) Term;
+  @ ++ @		: (Term Term) Term;
+  nill			: Term;
+  (@ ':' ':' @)		: (Term Term) Term;
+ 
+  *		: SentList;
+//  @		: (Sent) SentList		pri 60;
+  (@ ':' @)	: (int Sent) SentList		pri 60;
+  @ ; @		: (SentList SentList) SentList	pri 60	(AC);
+  unique(@)	: (SentList) int;
+
+  $		: Seq				pri 50;
+  @ |- @	: (SentList Sent) Seq		pri 50;
+
+  @		: (Seq) Goals			pri 40;
+  @ . @		: (Goals Goals) Goals		pri 40	(AC);
+
+  (E @ @)	: (Var Sent) Sent			pri  70;
+  (A @ @)	: (Var Sent) Sent			pri  70;
+  @ and @	: (Sent Sent) Sent	assocLeft	pri  80;
+
+  @ or @	: (Sent Sent) Sent	assocLeft	pri  78;
+  @ impl @	: (Sent Sent) Sent	assocRight	pri  75;
+  @ equiv @	: (Sent Sent) Sent	assocRight	pri  75;
+  not @		: (Sent) Sent				pri  82;
+  @ = @		: (Term Term) Sent	(AC)		pri  85;
+  False		: Sent;
+  True		: Sent;
+
+  freevars(@)	: (Term) list[Var];
+  freevars(@)	: (Sent) list[Var];
+  freevarsList(@): (SentList) list[Var];
+  freevarsSeq(@): (Seq) list[Var];
+
+  new(@)	: (list[Var]) Var;
+  imax(@)	: (list[Var]) int;
+  imaxs(@,@)	: (int list[Var]) int;
+
+  getlemma(@)	: (Label) Seq;
+  getaxiom(@)	: (Label) Seq;
+  concl(@)	: (Seq) Sent;
+  //--------------------------------------- HACK --- should be in .spc
+  //----------------------- part Vars ----------------
+  x.@	: (int) Var;
+  INT	: Sort;	LIST	: Sort;
+  // part Labels --------------
+  app	: Label;
+  memb	: Label;
+ local
+  max(@,@)		: (int int) int;
+end
+
+rules for list[Var]
+ X, Y	: Sent;
+	H, Xs, Ys	: SentList;
+	v		: Var;
+	T1, T2		: Term;
+	N		: int;
+global
+  [] freevars(v)	=> v.nil					end
+  [] freevars(T1 = T2)    => freevars(T1) @ freevars(T2)		end
+  [] freevars(False)    => nil						end
+  [] freevars(True)     => nil						end
+  [] freevars(not X)  	=> freevars(X)					end
+  [] freevars(X and Y)  => freevars(X) @ freevars(Y)			end
+  [] freevars(X or Y)   => freevars(X) @ freevars(Y)			end
+  [] freevars(X impl Y) => freevars(X) @ freevars(Y)			end
+  [] freevars(X equiv Y)=> freevars(X) @ freevars(Y)			end
+  [] freevars((E v X)) 	=> freevars(X)					end
+  [] freevars((A v X)) 	=> freevars(X)					end
+  //....
+  [] freevarsList(*)    => nil						end
+  [] freevarsList((N:X)) => freevars(X)					end
+  [] freevarsList(Xs ; Ys) => freevarsList(Xs) @ freevarsList(Ys)	end
+  [] freevarsSeq(H |- X) => freevarsList(H) @ freevars(X)		end
+
+  // parametrised by .SPC
+  [] freevars(append(T1,T2)) => freevars(T1) @ freevars(T2)		end
+  [] freevars(member(T1,T2)) => freevars(T1) @ freevars(T2)		end
+  [] freevars((T1 :: T2)) => freevars(T1) @ freevars(T2)		end
+  [] freevars(T1 ++ T2) => freevars(T1) @ freevars(T2)			end
+end
+
+rules for int
+ X	: Sent;
+	Xs, Ys	: SentList;
+	N, M	: int;
+global
+  [] unique(*)    => 0							end
+  [] unique((N:X)) => N+1						end
+  [] unique(Xs ; Ys) => max(unique(Xs),unique(Ys))			end
+  [] max(N,M)	=> N if N > M						end
+  [] max(N,M)	=> M							end
+end
+
+rules for Var
+ ls	: list[Var]; 	i : int;
+global
+  [] new(ls)	=> x.imax(ls)						end
+end
+
+rules for int
+ ls	: list[Var]; 	i : int;
+global
+  [] imax(ls)	=> imaxs(99,ls)						end // I'm lazy
+  [] imaxs(0,ls) =>1							end
+  [] imaxs(i,ls) =>i+1 	if occurs x.i in ls == true			end
+  [] imaxs(i,ls) =>imaxs(i-1,ls)					end 
+end
+//rules for SentList
+// H	: SentList;
+//global
+//  [] * ; H => H								end
+//end
+
+rules for Sent
+ H 	: SentList;
+	X	: Sent;
+global
+  [] concl(H |- X) => X 							end
+end
+
+rules for Seq
+global
+  [] getaxiom(app) => 
+	* |- (A x.1 append(nill,x.1) = x.1) or
+	     (A x.1 (A x.2 (A x.3 append((x.1::x.2),x.2) = (x.1::append(x.2,x.3)))))	end
+  [] getaxiom(memb) =>
+	* |- (A x.1 (A x.2 member(x.1, (x.1::x.2)))) or
+	     (A x.1 (A x.2 (A x.3 not x.1=x.2 impl 
+		member(x.1,x.3) impl member(x.1, (x.2::x.3)))))			end
+//  [] getaxiom(memb3) =>
+//	* |- (A x.1 (A x.2 (A x.3 member(x.1, x.3) impl member(x.1,(x.2::x.3)))))end
+//  [] getaxiom(memb4) =>
+//     	* |- (A x.1 not member(x.1,nill))					end
+end
+
+/*
+rules for Term
+ T1, T2, T3	: Term;
+global
+  []	zero ++ T2	=> T2							end
+  []	succ(T1) ++ T2	=> succ(T1 ++ T2)					end
+end
+
+rules for Sent
+ T1, T2, T3	: Term;
+bodies
+  []	member(T1, (T1 :: T2)) => True						end
+  []	member(T1, (T2 :: T3)) => member(T1,T3)	if T1 != T2			end
+end
+*/
+
+end
+
+
+

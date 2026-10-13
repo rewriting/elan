@@ -1,0 +1,133 @@
+module solvers
+
+import global int bool string io[string] io[int] io[Pid]
+	list[Process] eq[list[Process]]
+	io[SolverResult]
+	eq[SolverResult]
+	; end
+
+sort State SolverResult Process Statistique; end
+
+operators global
+  solver_name	: string;
+  create_solvers(@) : (int) list[Process];
+  solver_state(@,@) : (loaded:list[Process] free:list[Process]) State;
+  load_solvers(@,@) : (int State) State;
+  pool_solvers(@,@) : (int State) State;
+  init_state(@)	    : (list[Process]) State;
+
+  wait(@)	    : (int) int;			    // loop !!!
+  is_finished(@)    : (Pid) bool;    			    // process has finished
+
+  delay		    : int;				    // for pooling
+  rnd(@)	    : (int) int;			    // foo random function
+
+  @		    : (int) SolverResult;
+  no_more	    : SolverResult;   			    // no more solutions
+
+  @':'@		    : (pid:Pid stat:Statistique) Process;   // one process description
+  [@,@]	    	    : (charge:int times:int) Statistique;   // whatever you want
+end
+
+rules for string
+global
+  []	solver_name => "fromto"		
+  end
+end
+
+rules for int
+global
+  []	delay	=> 10 		end
+end
+
+
+rules for bool
+pid	: Pid;
+res, res1 : SolverResult;
+void1	: string;
+R : bool;
+global
+  []	is_finished(pid) => R
+			where res:=()read(pid)
+			choose
+			  try if res == no_more where R:=() true
+			  try if iserror(res) == false
+			        where R:=() is_finished(pid)
+				where res1:=()write(stdout,res)
+				where void1:=()write(stdout,
+					" is the result\n")
+  			  try where R:=() false
+			end
+  end
+end
+
+rules for State
+pids, loaded, free	: list[Process];
+state			: State;
+pid, pid1		: Pid;
+qqq2,qqq1,qqq,n, mm		: int;
+statist			: Statistique;
+charge, times		: int;
+void1, void2, void3, void4, void5, void6		: string;
+global
+  [] 	init_state(pids) => solver_state(nil,pids) 
+  end
+  []	load_solvers(n,state) => pool_solvers(n,state)
+			if state.free == nil	
+  end
+  []	load_solvers(n,solver_state(loaded,pid:[charge,times].free)) =>
+			load_solvers(n-1,
+				solver_state(pid:[charge,times+1].loaded,free))
+		where void1:=()write(pid,"sum(1,")
+		where qqq:=()write(pid,rnd(n))
+		where void3:=()write(pid,") end \n\n")
+		where pid1:=()write(stdout,pid)
+		where void2:=()write(stdout," solver charged with its ")
+		where qqq2:=()write(stdout,times+1)
+		where void6:=()write(stdout,"-th problem sum(1,")
+		where qqq1:=()write(stdout,qqq)
+		where void5:=()write(stdout,") end\n")
+  end
+  []	pool_solvers(n,solver_state(pid:statist.loaded,free)) =>
+			load_solvers(n,
+				solver_state(loaded,pid:statist.free))
+			where mm:=()wait(delay)
+			if is_finished(pid)
+			where pid1:=()write(stdout,pid)
+			where void2:=()write(stdout," solver finished\n")
+  end
+  []	pool_solvers(n,solver_state(pid:statist.loaded,free)) =>
+			pool_solvers(n,solver_state(
+				append(loaded,pid:statist.nil),free))
+/*
+			where pid1:=()write(stdout,pid)
+			where void2:=()write(stdout," solver pooled\n")
+*/
+			where mm:=()wait(delay)		
+  end
+end
+
+rules for int
+n	: int;
+global
+  []  wait(0) => 0 			end
+  []  wait(n) => wait(n-1) 		end
+  []  rnd(n) => (17*n*n+193*n+53)%391 	end
+end
+
+rules for list[Process]
+pid, pid1	: Pid;
+void1		: string;
+n		: int;
+global
+  [] 	create_solvers(0) => nil		end
+  []	create_solvers(n) => pid:[0,0].create_solvers(n-1)
+		where pid:=()create_noblock(solver_name)  // version nonbloquant
+//		where pid:=()create(solver_name)          //         bloquant
+		if iserr(pid) == false
+		where pid1:=()write(stdout,pid)
+		where void1:=()write(stdout," solver created\n")
+	end
+end
+
+end

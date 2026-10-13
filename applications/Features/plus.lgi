@@ -1,0 +1,8 @@
+LPL plus description 
+
+  query 	of sort int
+         	result of sort int
+	 	modules	int plus
+        	start with (do)query
+
+end

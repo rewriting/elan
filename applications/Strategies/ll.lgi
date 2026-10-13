@@ -1,0 +1,91 @@
+LPL ll description
+
+query		of sort  	lterm
+		result of sort 	lterm
+		import 		ll
+//		start with 	[repeat 1000]query
+//		start with 	()query
+		start with 	[repeat lis(dc(beta, eta))]query
+//		start with 	[los(dc(beta, eta))]query
+
+// (la 1.(1 1) la 1.(1 1))
+// (la (1 1) la (1 1))
+
+/*
+zero = la la 1
+add  = la la la (2 ((3 2) 1))
+one  = (  la la la (2 ((3 2) 1))  la la 1   ) = la la (2 1)
+two  = (  la la la (2 ((3 2) 1))  la la (2 1)  ) = la la (2 (2 1))
+three= (  la la la (2 ((3 2) 1))  la la (2 (2 1)) ) = la la (2 (2 (2 1)))
+
+
+two = (  la la la (2 ((3 2) 1))		// add
+	   ( la la la (2 ((3 2) 1))		// add
+	     la la 1  				// zero
+	   )
+	)
+
+LIS:
+ (la la la(2((3 2)1))la la(2((la la 1 2)1)))
+ (la la la(2((3 2)1))la la(2(la 1 1)))
+ (la la la(2((3 2)1))la la(2 1))
+ la la(2((la la(2 1)2)1))
+ la la(2(la(2 1)1))
+ la la(2(2 1))
+
+LOS:
+la la(2(((la la la(2((3 2)1))la la 1)2)1))
+la la(2((la la(2((la la 1 2)1))2)1))
+la la(2(la(2((la la 1 2)1))1))
+la la(2(2((la la 1 2)1)))
+la la(2(2(la 1 1)))
+la la(2(2 	1))
+
+------------------------------------------
+(la la la (2 ((3 2) 1)) la la 1)
+LIS:
+la la(2((la la 1 2)1)) 
+la la(2(la 1 1)) 
+la la(2 1)
+
+LOS:
+la la(2((la la 1 2)1)) 
+la la(2(la 1 1))
+la la(2 1)
+-----------------------------------------------------------
+four = (  la la la (2 ((3 2) 1))		// add
+	 ( la la la (2 ((3 2) 1))		// add
+	   ( la la la (2 ((3 2) 1))		// add
+	     la la 1  				// zero
+	   )
+	 )
+	)
+LOS:
+ la la(2(((la la la(2((3 2)1))(la la la(2((3 2)1))la la 1))2)1))
+ la la(2((la la(2(((la la la(2((3 2)1))la la 1)2)1))2)1))
+ la la(2(la(2(((la la la(2((3 2)1))la la 1)2)1))1))
+ la la(2(2(((la la la(2((3 2)1))la la 1)2)1)))
+ la la(2(2((la la(2((la la 1 2)1))2)1)))
+ la la(2(2(la(2((la la 1 2)1))1)))
+ la la(2(2(2((la la 1 2)1))))
+ la la(2(2(2(la 1 1))))
+ la la(2(2(2 1)))
+
+LIS:
+ (la la la(2((3 2)1))(la la la(2((3 2)1))la la(2((la la 1 2)1))))
+ (la la la(2((3 2)1))(la la la(2((3 2)1))la la(2(la 1 1))))
+ (la la la(2((3 2)1))(la la la(2((3 2)1))la la(2 1)))
+ (la la la(2((3 2)1))la la(2((la la(2 1)2)1)))
+ (la la la(2((3 2)1))la la(2(la(2 1)1)))
+ (la la la(2((3 2)1))la la(2(2 1)))
+ la la(2((la la(2(2 1))2)1))
+ la la(2(la(2(2 1))1))
+ la la(2(2(2 1)))
+ la la(2(2(2 1)))
+
+
+
+
+*/
+
+end

@@ -1,0 +1,256 @@
+/*
+ *   Transcription générique d'un automate
+ */
+
+module Automate[K,Q,S,Inv,Trans]
+
+
+//----  MODULES IMPORTÉS  ----//
+
+import
+ global
+  K Q S Inv Trans
+  int
+  bool
+  identifier
+  eq[state]
+  Terms[K,Q,S] 
+  DBM[K]
+  list[statezone] ;
+end
+
+
+
+
+//----  CONSTRUCTEURS  ----//
+
+operators
+ global
+
+  @ / @  :  ( state clockzone ) statezone ;
+  cmp_zones(@,@) : (statezone statezone) bool ;
+
+ // @ -- @  :  ( int statezone ) statezone ;
+
+  inv( @ )  :  ( state ) clockzone ;
+  trans . @ ( @ )  :  ( label statezone ) statezone ;
+
+  trans( @ )  :  ( statezone ) statezone ;
+  ltrans( @ ) :  ( statezone ) statezone ;
+  time( @ )   :  ( statezone ) statezone ;
+
+  reachability of @ from @  :  ( statezone statezone ) bool ;
+
+  lst_trans(@,@)  :  ( list[statezone] statezone ) list[statezone] ;
+
+ local
+  //  un petit hack pour tirer au sort une étiquette
+  '-''-''-'  :  label ;
+
+  st(@)  :  ( statezone ) state ;
+  zn(@)  :  ( statezone ) clockzone ;
+
+  tr_before( @ )  :  ( transition ) state ;
+  tr_label( @ )   :  ( transition ) label ;
+  tr_cond( @ )    :  ( transition ) clockzone ;
+  tr_zero( @ )    :  ( transition ) list[clock] ;
+  tr_after( @ )   :  ( transition ) state ;
+
+  inv_state( @ )  :  ( invariant ) state ;
+  inv_zone( @ )   :  ( invariant ) clockzone ;
+  
+  @ in @          :  ( statezone list[statezone] ) bool ;
+  @ reaches @     :  ( list[statezone] statezone ) bool ;
+
+end
+
+
+stratop
+ global
+  trytrans : < label -> label >  bs ;
+  allPaths : < statezone -> statezone >  bs ;
+  tranz    : < statezone -> statezone >  bs ;
+  lst_tranz: < statezone -> statezone >  bs ;
+  dt       : < statezone -> statezone >  bs ;
+end
+
+
+
+
+//----  RÈGLES  ----//
+
+////  GÉNÉRIQUES
+
+rules for statezone
+  lbl       : label ;
+  s         : state ;
+  z, z1, z2 : clockzone ;
+  sz, r     : statezone ;
+  n         : int ;
+ global
+
+//  []  trans.lbl(n -- sz)  =>  n-1 -- trans.lbl(sz)  if n > 0  end
+
+  [trans]  sz   =>  r
+        where lbl := (trytrans) ---
+        where r := (dt) trans.lbl(sz)  end
+  [time]   s / z  =>  s / z1
+        where z1 := () inter(inv(s), time(z))  end
+
+//  [time]   n -- s / z  =>  n -- s / z2
+//        where z1 := () time(z)
+//        where z2 := () inter(inv(s), z1)  end
+
+  []  trans(sz)   =>  r  where r := (tranz) sz  end
+  []  ltrans(sz)  =>  r  where r := (lst_tranz) sz  end
+end
+
+rules for clockzone
+  s, t : state ;
+  z    : clockzone ;
+  n    : int ;
+  lbl  : label ;
+  lc   : list[clock] ;
+ global
+  []  tr_cond(s,lbl:z,lc,t)  =>  z  end
+  []  inv_zone(s:z)          =>  z  end
+
+  []  zn(     s / z)  =>  z  end
+//  []  zn(n -- s / z)  =>  z  end
+end
+
+rules for state
+  s, t : state ;
+  z    : clockzone ;
+  n    : int ;
+  lbl  : label ;
+  lc   : list[clock] ;
+ global
+  []  tr_before(s,lbl:z,lc,t)  =>  s  end
+  []  tr_after (s,lbl:z,lc,t)  =>  t  end
+  []  inv_state(s:z)           =>  s  end
+
+  []  st(     s / z)  =>  s  end
+//  []  st(n -- s / z)  =>  s  end
+end
+
+rules for list[statezone]
+  sz, sz1 : statezone ;
+  lsz     : list[statezone] ;
+ global
+  [] lst_trans(lsz,sz) => lst_trans(sz1.lsz, sz1) 
+                         where sz1:=()ltrans(sz) 
+                         if not sz1 in lsz end
+  [] lst_trans(lsz,sz) => lsz end
+end
+
+rules for label
+  s, t : state ;
+  z    : clockzone ;
+  n    : int ;
+  lbl  : label ;
+  lc   : list[clock] ;
+ global
+  []  tr_label(s,lbl:z,lc,t)  =>  lbl  end
+
+  FOR EACH label : identifier SUCH THAT label:=(listExtract)elem(S) :
+  {
+    [trylabel] lbl  =>  label  end
+  }
+end
+
+rules for list[clock]
+  s, t : state ;
+  z    : clockzone ;
+  n    : int ;
+  lbl  : label ;
+  lc   : list[clock] ;
+ global
+  []  tr_zero(s,lbl:z,lc,t)  =>  lc  end
+end
+
+
+////  SPÉCIFIQUES À L'AUTOMATE
+
+rules for statezone
+  z : clockzone ;
+ global
+  FOR EACH tr       : transition ;
+           bef, aft : state ;
+           label    : label ;
+           cond     : clockzone ;
+           zero     : list[clock]
+  SUCH THAT tr := (listExtract) elem(Trans)
+        AND bef  :=()tr_before(tr)
+        AND label:=()tr_label (tr)
+        AND cond :=()tr_cond  (tr)
+        AND zero :=()tr_zero  (tr)
+        AND aft  :=()tr_after (tr) :
+  {
+    [DT]  trans.label(bef/z)  =>  aft / lproj(inter(cond,z),zero)  end
+  }
+end
+
+rules for clockzone
+ global
+  FOR EACH invar : invariant; st : state; cz : clockzone
+  SUCH THAT invar:=(listExtract)elem(Inv)
+        AND st:=()inv_state(invar)  AND cz:=()inv_zone(invar) :
+  {
+    []  inv(st)  =>  cz  end
+  }
+end
+
+rules for bool
+  sA, sB, s, s1, s2 : state ;
+  zA, zB, z, cz1, cz2 : clockzone ;
+  sz, sz1, sz2  : statezone ;
+  lsz : list[statezone] ;
+  res : bool ;
+ global
+
+  []  reachability of sz1 from sz2  => res
+                                         where lsz:=()lst_trans(nil,sz2)
+                                         choose try if lsz reaches sz1
+                                                    where res:=()true
+                                                try
+                                                    where res:=()false
+                                         end   end
+
+  [] nil reaches sz                   => false end
+  [] s1/cz1.lsz reaches s2/cz2        => res
+                                         choose try if s1==s2 and not empty(inter(cz1,cz2))
+                                                    where res:=()true
+                                                try
+                                                    where res:=()lsz reaches s2/cz2
+                                         end  end
+
+  [] cmp_zones(s1/cz1,s2/cz2) => eq_state(s1,s2) and cmp_DBMs([cz1,cz2]) end
+  [] sz in nil      => false  end
+  [] sz in sz1.lsz  => res
+                       choose try if cmp_zones(sz,sz1) 
+                                  where res:=()true
+                              try 
+                                  where res:=()sz in lsz
+                       end  end
+end
+
+
+
+
+//---  STRATÉGIES  ---//
+
+strategies for label
+ implicit
+  []  trytrans  =>  dk(trylabel)  end
+end
+
+strategies for statezone
+ implicit
+  []  allPaths  =>  time ; iterate*(dk(tranz))  end
+  []  tranz  =>  trans ; time  end
+  []  lst_tranz => time ; trans  end
+  []  dt  => dk(DT)  end
+end
+
+end

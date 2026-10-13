@@ -1,0 +1,9 @@
+# tests of IO_Call (from legacy/elan3 tst_all; format: tests/apps/README.md)
+itest Unif2 simplesig isimple1 isimple1
+itest Unif2 simplesig isimple4 isimple4
+long itest Unif2 simplesig isimple2 isimple2
+long itest Unif2 simplesig isimple3 isimple3
+itest Unif2 simplesig isimple1 isimple1
+itest Unif2 simplesig isimple4 isimple4
+long itest Unif2 simplesig isimple2 isimple2
+long itest Unif2 simplesig isimple3 isimple3

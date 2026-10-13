@@ -1,0 +1,80 @@
+module nhorse
+import global int bool pair[int,int];
+end
+
+sort list;
+end
+
+operators
+global
+  nil			: list;
+  @.@			: ( pair[int,int] list ) list;
+  1st(@)		: ( list ) pair[int,int];
+  horse(@)		: ( int ) list;
+  noattack(@,@)		: ( pair[int,int] list ) bool;
+end
+
+stratop
+  global
+    horse_strat		: <list>		builtin;
+  local
+    range 		: <pair[int,int]>	builtin;
+end
+
+rules for pair[int,int]
+        x,y : int;
+	z :  pair[int,int];
+	l : list;
+global
+  [] 1st(z.l) => z end
+  [range_rule]  [x,y]	=> [x+2,y-1] if x+2<9 and y-1>0 end
+  [range_rule]  [x,y]	=> [x+2,y+1] if x+2<9 and y+1<9 end
+  [range_rule]  [x,y]	=> [x-2,y-1] if x-2>0 and y-1>0 end
+  [range_rule]  [x,y]	=> [x-2,y+1] if x-2>0 and y+1<9 end
+  [range_rule]  [x,y]	=> [x-1,y-2] if x-1>0 and y-2>0 end
+  [range_rule]  [x,y]	=> [x+1,y+2] if x+1<9 and y+2<9 end
+  [range_rule]  [x,y]	=> [x-1,y+2] if x-1>0 and y+2<9 end
+  [range_rule]  [x,y]	=> [x+1,y-2] if x+1<9 and y-2>0 end
+end
+
+rules for list
+        n : int;
+	x :  pair[int,int];
+	ql : list;
+local
+  [horse_0] horse(0)	=> [1,1].nil
+  end
+
+  [horse_n] horse(n)	=> x . ql
+			   if n>0
+			   where ql:=(horse_strat) horse(n-1)
+			   where x:=(range)1st(ql) 
+			   if noattack(x,ql)
+  end
+end
+
+rules for bool
+        x,y,u,v	 :  int;
+	d :  pair[int,int];
+	l : list;
+global
+  [] noattack(d,nil)	=> true						end
+//  [] noattack([x,y],[u,v].l)	=> (x!=u or y!=v) and noattack([x,y],l)	end
+  [] noattack([x,y],[u,v].l)	=> true if (x!=u or y!=v) if noattack([x,y],l)	end
+  [] noattack(d,l)	=> false end
+end
+
+strategies for pair[int,int]
+implicit
+ []	range => dk(range_rule) end
+end
+
+strategies for list
+implicit
+  [] horse_strat => dk(horse_0, horse_n) end
+end
+
+end
+
+
+

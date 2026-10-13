@@ -1,0 +1,8 @@
+LPL prim_jc description 
+
+      query 		of sort list
+      result 		of sort list
+      import   		prim 
+      start with 	(qqq) primes(100)
+
+end

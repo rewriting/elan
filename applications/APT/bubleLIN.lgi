@@ -1,0 +1,32 @@
+LPL bubleLIN description
+
+query		of sort  	arrayLIN[int]
+		result of sort 	arrayLIN[int]
+		import	 	int buble[arrayLIN[int]]
+				strat[arrayLIN[int]]
+				loops[i,arrayLIN[int]]
+				loops[j,arrayLIN[int]]
+				rndLIN[int]
+		start with 	[for i=1 to 99 do
+				   for j=99 downto i do
+//				     dc(swap(j-1,j),id)
+				     dc(swap(j),id)
+				   od
+				 od
+				]rnd(100)
+/*
+[[
+([4 6 3 1 2 3 4 5 6 7])
+([4 6 3 1 2 3 4 5 6 7])
+([4 6 3 1 2 3 4 5 6 7])
+([4 6 3 1 2 3 4 5 6 7])
+([4 6 3 1 2 3 4 5 6 7])
+([4 6 3 1 2 3 4 5 6 7])
+([4 6 3 1 2 3 4 5 6 7])
+([4 6 3 1 2 3 4 5 6 7])
+([4 6 3 1 2 3 4 5 6 7])
+([4 6 3 1 2 3 4 5 6 7])
+]]
+*/
+end
+

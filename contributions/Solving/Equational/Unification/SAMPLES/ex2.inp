@@ -1,0 +1,2 @@
+f(x,y)=f(a,w) & f(w,z) = f(g(c),x) & v = g(w) 
+end

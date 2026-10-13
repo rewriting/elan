@@ -1,0 +1,126 @@
+module texterms[mvars,btypes,bvars]
+import
+  global 	int bool
+		types[btypes] contexts[btypes]
+		//---
+                ivars[btypes] vars[mvars,btypes] list[obj_Bvars]
+                              vars[bvars,btypes] list[obj_Mvars]
+		//---
+		terms[mvars,btypes,bvars]
+  	 	replace[lterm,lterm] 
+		list[wtterm]
+		eq[term] eq[subst] eq[tsubst] eq[wtsubst] eq[tterm] eq[wtterm]
+		occur[obj_Mvars,list[obj_Mvars]] 
+		occur[obj_Bvars,list[obj_Bvars]]
+		occur[tterm,wtterm];
+
+sort texttype texstype textterm textsubst texwtterm texwtsubst;
+op
+  global    
+    @			: (ttype) texinput;
+    @			: (texttype) texoutput;
+
+    @			: (stype) texinput;
+    @			: (texstype) texoutput;
+ 
+    @			: (tterm) texinput;
+    @			: (textterm) texoutput;
+
+    @			: (tsubst) texinput;
+    @			: (textsubst) texoutput;
+
+    @			: (wtterm) texinput;
+    @			: (texwtterm) texoutput;
+
+    @			: (wtsubst) texinput;
+    @			: (texwtsubst) texoutput;
+
+    tex(@)		: (ttype) texttype;
+    tex(@)		: (stype) texstype;
+    \oft<@><@>		: (texcontext textype) texttype;
+    \ofs<@><@>		: (texcontext texcontext) texstype;
+    tex(@)		: (tterm) textterm;
+    \apply<@><@> 	: (texwtterm texwtterm) textterm pri 800;	
+    \lam<@><@>		: (textype texwtterm) textterm pri 900;
+    \sapply<@><@>	: (texwtterm texwtsubst) textterm pri 850;
+    \integer<@> 	: (int) textterm pri 1000;		
+    \metavar<@> 	: (obj_Mvars) textterm pri 1000;		
+    tex(@)		: (wtterm) texwtterm;
+    \termof<@><@>	: (textterm texttype) texwtterm;			
+    tex(@)		: (tsubst) textsubst;
+    \id 		:  textsubst;				
+    \up 		:  textsubst;			
+    \compos<@><@>	: (texwtsubst texwtsubst) textsubst assocLeft pri 800;
+    \point<@><@>	: (texwtterm texwtsubst) textsubst pri 900;	
+    tex(@)		: (wtsubst) texwtsubst;
+    \substof<@><@>	: (textsubst texstype) texwtsubst;	
+endop
+
+rules for texttype
+declare	tt	: type;
+	cc, c1	: context;
+bodies
+  []	tex(cc|-tt)	=> \oft<tex(cc)><tex(tt)>
+  end
+end of rules
+
+rules for texstype
+declare	tt	: type;
+	cc, c1	: context;
+bodies
+  []	tex(cc|>c1)	=> \ofs<tex(cc)><tex(c1)>
+  end	
+end of rules
+
+rules for textterm
+declare
+	aaa, bbb	: wtterm;
+	tt		: type;
+	sss		: wtsubst;
+	k		: int;
+	mm		: obj_Mvars;
+bodies
+  []	tex((aaa bbb))	=> \apply<tex(aaa)><tex(bbb)>
+  end
+  []	tex((la tt.aaa)) =>	\lam<tex(tt)><tex(aaa)>
+  end
+  []	tex(aaa[sss]) => \sapply<tex(aaa)><tex(sss)>
+  end
+  []	tex(#k)	=> \integer<k>
+  end
+  []	tex(mm)	=> \metavar<mm>
+  end
+end of rules
+
+rules for texwtterm
+declare	aa	: tterm;
+	tt	: ttype;
+bodies
+  []	tex(aa:tt)	=> \termof<tex(aa)><tex(tt)>
+  end
+end of rules
+
+rules for textsubst
+declare	sss,ttt	: wtsubst;
+	aaa	: wtterm;
+bodies
+  []	tex(id)	=>	\id
+  end
+  []	tex(^)	=>	\up
+  end
+  []	tex(sss o ttt)	=> \compos<tex(sss)><tex(ttt)>
+  end
+  [] 	tex(aaa.sss) 	=> \point<tex(aaa)><tex(sss)>
+  end
+end of rules
+
+rules for texwtsubst
+declare	ss	: tsubst;
+	tt	: stype;
+bodies
+  []	tex(ss:tt)	=> \substof<tex(ss)><tex(tt)>
+  end
+end of rules
+
+
+end of module

@@ -1,0 +1,32 @@
+module Fail
+
+import global int;
+end
+
+sort Foo; 
+end
+
+operators global
+     aa		: Foo;
+     bb 	: Foo;
+     foo(@)	: (Foo) Foo;
+     f(@)	: (Foo) Foo;
+     g(@)	: (Foo) Foo;
+     h(@,@)	: (Foo Foo) Foo;
+     d(@,@)	: (Foo Foo) Foo;
+end
+
+stratop
+  global
+    fo		: <Foo> 	builtin;
+end
+
+strategies for Foo
+implicit
+  [.] fo =>	dk( dk(id , fail , id , fail) , 
+	    dk(fail , fail , fail) , 
+	    id
+ 	  ) end
+end
+
+end

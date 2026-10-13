@@ -1,0 +1,35 @@
+module arbee
+
+import global int; end
+sort Tree; end
+
+operators global
+  @		: (int) Tree;
+  Leaf(@)	: (int) Tree;
+  Node(@,@,@)	: (Tree int Tree) Tree;
+end
+
+stratop global
+ all1	: <Tree->Tree> builtin;
+ all2	: <Tree->Tree> builtin;
+ all3	: <Tree->Tree> builtin;
+ all4	: <Tree->Tree> builtin;
+ all5	: <Tree->Tree> builtin;
+ all6	: <Tree->Tree> builtin;
+ all7	: <Tree->Tree> builtin;
+ all8	: <Tree->Tree> builtin;
+ all9	: <Tree->Tree> builtin;
+ all	: <Tree->Tree> builtin;
+ allL	: <Tree->Tree> builtin;
+ allR	: <Tree->Tree> builtin;
+end
+
+strategies for Tree
+implicit
+  [.]  all2 => repeat*(fail) ; dk(id,fail,id);id end
+//  [.]  all2 => dk(id,id) end
+//  [.]  all => all2 end
+  [.]  all => all2;all2 end
+end
+
+end

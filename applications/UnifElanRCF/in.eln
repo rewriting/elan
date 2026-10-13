@@ -1,0 +1,33 @@
+module in
+import  global term ;
+	local bool eq[variable] eqSystem ;
+end
+
+operators
+
+global
+
+in(@,@)        : (variable term) bool ;
+in(@,@)        : (variable eqSystem) bool ;
+
+end
+
+
+      rules for bool
+      // declare 
+      x,y:variable ; s,t:term ; P:eqSystem ;
+       
+      global
+   
+      [] in(x,y) => false if x != y end
+      [] in(x,x) => true end
+      [] in(x, s = t) => in(x,s) or in(x,t) end
+      [] in(x, P & s = t) => in(x,P) or in(x,s=t) end
+      [] in(x, true) => false end
+      [] in(x, false) => false end
+      [] in(x, P & true) => in(x, P) end
+
+      end
+
+end
+

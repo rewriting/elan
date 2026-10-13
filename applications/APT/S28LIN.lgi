@@ -1,0 +1,21 @@
+LPL S28LIN description
+
+query		of sort  	arrayLIN[int]
+		result of sort 	arrayLIN[int]
+		import	 	int S28[arrayLIN[int]]
+				strat[arrayLIN[int]]
+				loops[i,arrayLIN[int]]
+				loops[j,arrayLIN[int]]
+		start with 	[for i=1 to 9 do
+				   some j=1 to 25-2*i do
+				     add(j-1,i)
+				   od
+				 od]
+				 new(0)
+
+//[191218246279458634753968357]
+//[181915267285296475384639743]
+//[191618257269258476354938743]
+// ....
+end
+

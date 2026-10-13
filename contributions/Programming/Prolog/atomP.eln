@@ -1,0 +1,82 @@
+module atomP[Preds]	
+import 	
+global 	term atom ;
+
+local 	Preds int identifier
+	pair[identifier,int]
+	list[pair[identifier,int]]
+	;
+end
+
+operators
+  global
+
+
+  FOR EACH SS:pair[identifier,int]; P:identifier;  N:int
+  SUCH THAT SS:=(listExtract) elem(Preds) AND P:=()first(SS) 
+	AND N:=()second(SS) ANDIF N==0 :{
+
+      P : Psymbol ;
+
+      P         	: atom;
+      P()		: atom		alias P:;
+  }
+
+  FOR EACH SS:pair[identifier,int]; P:identifier;  N:int
+  SUCH THAT SS:=(listExtract) elem(Preds) AND P:=()first(SS) 
+	AND N:=()second(SS) ANDIF N > 0 :{
+ 
+      P : Psymbol ;
+
+      P(@ {,@}~(N-1))    :({term}~N) atom;
+      P({,@}~N) : ({term}~N)atom 		alias P(@{,@}~(N-1)):;
+      P({@,}~N) : ({term}~N)atom 		alias P(@{,@}~(N-1)):;
+      P(,{@,}~N): ({term}~N)atom 		alias P(@{,@}~(N-1)):;
+  }
+end
+
+FOR EACH SS:pair[identifier,int]; P:identifier;  N:int
+SUCH THAT SS:=(listExtract) elem(Preds) AND P:=()first(SS) 
+	AND N:=()second(SS) ANDIF N > 0 :{
+
+  rules for term
+   t_1,...,t_N : term;
+	  global
+
+   {
+     [] I-th subterm(P(t_1,...,t_N))	=> t_I
+     end
+    }_I=1...N
+
+  end
+
+
+  rules for Psymbol
+   t_1,...,t_N : term;
+    global 
+    [] head(P(t_1,...,t_N)) => P end
+  end
+
+  rules for int
+   global 
+   [] arity(P) => N end
+  end
+
+}
+
+FOR EACH SS:pair[identifier,int]; P:identifier;  N:int
+SUCH THAT SS:=(listExtract) elem(Preds) AND P:=()first(SS) 
+	AND N:=()second(SS) ANDIF N == 0 :{
+
+  rules for Psymbol
+    global 
+    [] head(P) => P end
+  end
+
+  rules for int
+   global 
+   [] arity(P) => N end
+  end
+}
+
+end

@@ -1,0 +1,4 @@
+node(empty,5,leaf(5))
+node(empty,5,leaf(9))
+node(empty,10,leaf(5))
+node(empty,10,leaf(9))

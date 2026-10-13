@@ -1,0 +1,11 @@
+# tests of Robot (from legacy/elan3 tst_all; format: tests/apps/README.md)
+itest nim non nim nim
+itest robot non robot robot
+itest tictactoe non tictactoe tictactoe
+long itest robot2 non robot2 robot2
+long itest nim2 non nim2 nim2
+aitest nim non nim nim
+aitest robot non robot robot
+aitest tictactoe non tictactoe tictactoe
+long aitest robot2 non robot2 robot2
+long aitest nim2 non nim2 nim2

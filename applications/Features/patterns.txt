@@ -1,0 +1,12 @@
+Patterns
+- variable
+- constr(pat, ..., pat)
+
+la semantique:
+
+where constr(pat1, ..., patn) := (ss)expr
+
+where pat1:=()uu.1         or   if pat1 == uu.1
+ . . . . .                       . . . . . . .
+where patn:=()uu.n         or   if patn == uu.n
+where uu:=(ss)expr

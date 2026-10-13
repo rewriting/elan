@@ -1,0 +1,29 @@
+module m_apply1
+
+import global builtinInt string REF Meta_Apply refstring2string ref2string[Strategy] ref2string[Term] ref2string[Program] string2refterm;
+end
+
+operators global
+  foo(@)	: (int) string;
+end
+
+rules for string
+x	: int;
+xx	: builtinInt;
+s	: string;
+t	: Term;
+P, P1	: Program;
+global
+  []   foo(xx) => s
+	where s:=(META)
+		meta_apply(
+		"call(126)",
+		"FSYM( FSYM( INT(4).nil, 200).nil,223)",
+		spec2ref("nqueens",""),
+		xx)	
+	end
+end
+
+end
+
+

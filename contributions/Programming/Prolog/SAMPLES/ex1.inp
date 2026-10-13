@@ -1,0 +1,2 @@
+clpExecute( E Vars(0): (  fib(s(s(s(s(zero)))),X).nil | true , true) )
+end

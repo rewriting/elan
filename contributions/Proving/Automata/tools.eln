@@ -1,0 +1,646 @@
+module tools[Fss]
+import local	
+	Fss 
+	Cterm[Fss]
+	automaton[Fss] 
+	aut_name eq[aut_name]
+	symbol[Fss] eq[symbol]
+	state eq[state]
+	state_set 
+	occur[Cterm, Cunion]	
+	configuration[Fss] eq[configuration]	
+	transition[Fss] occur[transition, list[transition]]
+	list[Catom]  occur[Catom, list[Catom]] eq[Catom] replace[Catom, disj_Cformula]; 
+end
+
+
+/*
+	Intersection, union and inclusion operations.
+	--------------------------------------------
+
+* Global functions
+
+"union": construct the union of two tree automata. (use simplify or at least
+renum to get a more readable version i.e. without cartesian products)
+
+"intersection": construct the intersection of two tree automata. (use 
+simplify or at least renum to get a more readable version i.e. without 
+cartesian product)
+
+"@ <= @": inclusion operator. BE CAREFUL this is a fast but INCOMPLETE 
+algorithm used for minimizing the sets of transition to be added to an 
+automaton in the approximation construction. If "A <= B" answers "true" 
+then the langage recognized by A is included in the langage recognized by B. 
+If the answer is "false" ... we don't know!
+
+"solve(@ <= @) with(@)": specific version used by approximation computation
+for showing if the langage recognized by a specific Cterm (or configuration) 
+is included in the langage recognized by another one, w.r.t. the same set of 
+transitions! ALSO FAST BUT INCOMPLETE.
+
+* Local functions
+
+"common": the common part of the intersection and union algorithm, i.e.
+construction of the cartesian product of two sets of transitions.
+
+*/
+
+sort Catom Cunion conj_Cformula Hconj_Cformula disj_Cformula inclusion_step;
+end
+
+operators global
+
+	@ union @		: (automaton automaton) automaton;
+	(@ union @)		: (automaton automaton) automaton alias @ union @:;
+	@ inter @		: (automaton automaton) automaton;
+	(@ inter @)		: (automaton automaton) automaton alias @ inter @:;
+	@ <= @			: (automaton automaton) bool;
+	(@, @) <= (@, @)	: (state_set list[transition] state_set list[transition]) bool; 
+	solve(@ <= @) with(@)	: (Cterm Cterm list[transition]) bool;
+
+	!@			: (automaton) automaton;
+
+	(@) trans(@, @)	true(@) false(@)	: 
+				(disj_Cformula list[transition] list[transition] list[Catom] list[Catom]) inclusion_step; 
+
+	(@, @, @)		: (bool list[Catom] list[Catom]) inclusion_step;
+	
+	bool(@)			: (inclusion_step) bool;
+	true_facts(@)		: (inclusion_step) list[Catom];
+	false_facts(@)		: (inclusion_step) list[Catom];
+
+	sts_to_Cunion(@)	: (state_set) Cunion;
+
+	nil			: Cunion pri 10;
+	
+	@ . @			: (Cterm Cunion) Cunion pri 10;
+	@ . @			: (tuple Cunion) Cunion pri 10;
+	
+	@			: (Cterm) Cset;
+	@			: (tuple) Cset;
+	@			: (Cunion) Cset;
+
+	@ <= @			: (Cset Cset) Catom;
+
+	true			: Catom;
+	false			: Catom;
+	disj(@)			: (Catom) Catom;
+	last_disj(@)		: (Catom) Catom;
+	true			: conj_Cformula;
+	@ ^ @			: (Catom conj_Cformula) conj_Cformula;
+	(@ ^ @)			: (Catom conj_Cformula) conj_Cformula alias @ ^ @:;
+	@ || @			: (Catom conj_Cformula) conj_Cformula;
+	(@ || @)		: (Catom conj_Cformula) conj_Cformula alias @ || @:;
+
+	and_cat(@, @)		: (conj_Cformula conj_Cformula) conj_Cformula;
+
+	false			: conj_Cformula;
+	false			: disj_Cformula;
+	@ v @			: (conj_Cformula disj_Cformula) disj_Cformula;
+	(@ v @)			: (conj_Cformula disj_Cformula) disj_Cformula
+					alias @ v @ :;
+	or_cat(@, @)		: (disj_Cformula disj_Cformula) disj_Cformula;
+
+
+local
+
+	get_name(@)		: (automaton) aut_name;
+	value(@, @)		: (aut_name list[automaton]) automaton;
+	common(@, @, @, @)	: (list[transition] list[transition] list[transition] list[transition]) list[transition]; 
+
+	@ is inductive in @	: (Catom conj_Cformula) bool;
+	@ induct(@)		: (Catom conj_Cformula) bool;
+	
+	bag_of_config(@, @)	: (state list[transition]) Cunion;
+	bag_of_tuple(@, @, @)	: (symbol Cunion list[transition]) Cunion;
+
+	first_component(@, @, @, @)	: (tuple Cunion conj_Cformula Cunion) conj_Cformula;
+	second_component(@, @, @, @)	: (tuple Cunion Cunion conj_Cformula) conj_Cformula;
+	third_component(@, @, @, @)	: (tuple Cunion Catom conj_Cformula) disj_Cformula;
+
+	append(@, @)			: (Cunion Cunion) Cunion;
+	sort(@)				: (Cunion) Cunion;
+	sort(@, @, @)			: (Cunion Cunion bool) Cunion;
+	simplify_tuple(@)		: (Cunion) Cunion;
+
+	add(@, @)			: (Catom list[Catom]) list[Catom];
+end
+
+
+stratop global
+  sort_strat : <Cunion> builtin;
+  bag_strat : <Cunion> builtin;
+  bag_strat2 : <Cunion> builtin;
+  simplify_tuple_strat : <Cunion> builtin;
+  common_strat : <list[transition]> builtin;
+  subseteq_strat : <inclusion_step> builtin;
+  subseteq_strat_simple : <inclusion_step> builtin;
+  prod_cart1 : <conj_Cformula> builtin;
+  prod_cart2 : <conj_Cformula> builtin;
+  prod_cart3 : <disj_Cformula> builtin;
+  induct_strat : <bool> builtin;
+end
+
+
+rules for Cunion
+          C,D: Cunion;
+	i, j: int;
+	s: state;
+	ta: Cterm;
+	b: bool;
+global	
+[] sort(nil)	=> nil									end
+[] sort(C) => D		where D := (sort_strat) sort(C, nil, false)			end
+[] append(s . C, D) => s . append(C, D)  if not(occurs(s, D))				end
+[] append(s . C, D) => append(C, D)  if occurs(s, D)					end
+[] append(nil, C) => C									end
+
+
+[sort_r1] sort(q|i.q|j.C, D, b) => sort(q|j.C, append(D, q|i.nil), b) if i<=j		end
+[sort_r2] sort(q|i.q|j.C, D, b) => sort(q|i.C, append(D, q|j.nil), true) if j<i		end
+[sort_r3] sort(q|i.nil, D, true) => sort(append(D, q|i.nil), nil, false)		end
+[sort_r4] sort(q|i.nil, D, false) => append(D, q|i.nil)					end
+
+
+[simplify_tuple_r1] simplify_tuple(tuple(ta, empty_tuple).C) => ta . D
+			where D:= (simplify_tuple_strat) simplify_tuple(C)		end
+[simplify_tuple_r2] simplify_tuple(nil) => nil						end
+
+end
+
+rules for aut_name
+          name: aut_name;
+	Q, Qf: state_set;
+	R: list[transition];
+global
+  [] get_name((name, Q, Qf, R)) => name
+  end
+end
+
+
+rules for automaton
+          name_a, name_b: aut_name;
+	Qa, Qb, Qfa, Qfb: state_set;
+	configa, configb: configuration;
+	Ra, Rb, Rresult: list[transition];
+
+global
+[]	(name_a, Qa, Qfa, Ra) inter (name_b, Qb, Qfb, Rb)
+		 => 
+	 (inc(name_a), Qa x Qb, Qfa x Qfb, Rresult)
+
+		where Rresult := (common_strat) common(Ra, Rb, Rb, nil)		end
+
+[]	(name_a, Qa, Qfa, Ra) union (name_b, Qb, Qfb, Rb)
+		 => 
+	 (inc(name_a), Qa x Qb, (Qfa x Qb) U (Qa x Qfb), Rresult)
+
+		where Rresult := (common_strat) common(Ra, Rb, Rb, nil)		end
+end
+
+
+rules for bool
+          name_a, name_b: aut_name;
+	qb: state;
+	inclusion_test: inclusion_step;
+	Qa, Qb, Qfa, Qfb: state_set;
+	Ra, Rb: list[transition];
+	ta, tb: Cterm;
+	res: inclusion_step;
+	b: bool;
+	facts, unfacts: list[Catom];
+global
+[]	(name_a, Qa, Qfa, Ra) <= (name_b, Qb, Qfb, Rb) => bool(res)
+
+	   where res := (subseteq_strat) 
+		((sts_to_Cunion(Qfa) <= sts_to_Cunion(Qfb) ^ true) v false) trans(Ra, Rb) true(nil) false(nil)	end
+
+[]	(Qfa, Ra) <= (Qfb, Rb) => bool(res)
+
+	   where res := (subseteq_strat) 
+		((sts_to_Cunion(Qfa) <= sts_to_Cunion(Qfb) ^ true) v false) trans(Ra, Rb) true(nil) false(nil)	end
+
+[]	solve(ta <= tb) with(Ra) => bool(res)
+
+	   where res := (subseteq_strat_simple) 
+		(( ta <= tb ^ true) v false) trans(Ra, Ra) true(nil) false(nil)	end
+
+[]	bool((b, facts, unfacts)) => b						end
+end
+
+rules for list[Catom]
+          b: bool;
+	l, facts, unfacts: list[Catom];
+	a: Catom;
+global
+[]	true_facts((b, facts, unfacts)) => facts				end
+[]	false_facts((b, facts, unfacts)) => unfacts				end
+
+[]	add(a, l) => a . l	if not(occurs(a, l))				end
+[]	add(a, l) => l		if occurs(a, l)					end
+end
+
+
+rules for Cunion
+          q: state;
+	set: state_set;
+global
+[]	sts_to_Cunion(nil) => nil					end
+[]	sts_to_Cunion(q . set) => q . sts_to_Cunion(set)		end
+end
+
+
+rules for list[transition]
+          configa, configb: configuration;
+	qa, qb : state;
+	ta1, tb1 : transition;
+	Ra, Rb, reste_Rb, Rc: list[transition];
+
+global
+[common_r1] common((configa -> qa) . Ra, Rb, (configb -> qb) . reste_Rb, Rc)
+
+		=>
+
+	common((configa -> qa) . Ra, Rb, reste_Rb, Rc)
+	
+	if symbol_of(configa) != symbol_of(configb)	end
+
+
+[common_r2] common((configa -> qa) . Ra, Rb, (configb -> qb) . reste_Rb, Rc)
+
+		=>
+
+	 common((configa -> qa) . Ra, Rb, reste_Rb, cons((mix_config(configa, configb) -> [qa, qb]), Rc))
+	
+	if symbol_of(configa) == symbol_of(configb)	end
+
+
+[common_r3] common(nil, Rb, reste_Rb, Rc) => Rc end
+
+[common_r4] common(ta1 . Ra, Rb, nil, Rc) => common(Ra, Rb, Rb, Rc) end
+
+end
+
+
+rules for bool
+          A, B, C: Catom;
+	phi1: conj_Cformula;
+	a: bool;
+global
+[] A is inductive in phi1 => a where a:= (induct_strat) A induct(phi1)			end
+
+
+[induct_r1] A induct(B ^ phi1) => A induct(phi1) 					end
+[induct_r2] A induct(B || A^phi1) => true						end
+[induct_r3] A induct(B || C^phi1) => A induct(phi1) if A != C				end
+[induct_r4] A induct(true) => false							end
+
+end
+
+
+
+rules for inclusion_step
+          qa, qb : state;
+	ta, tb: Cterm;
+	a: inclusion_step;
+	A, B, C: Catom;
+	tuple_a, tuple_b: tuple;
+	seta, setb: Cset;
+	Cuniona, Cunionb: Cunion;
+	lt,lf: list[Catom];
+	phi1, phi3, phi4: conj_Cformula;
+	phi2, phi5: disj_Cformula;
+	Ra, Rb : list[transition];
+	config_ta: configuration;
+
+global
+/* Vraie que si on calcule l'inclusion dans UN seul automate!! */
+
+[subseteq_simplify] ((ta <= ta  ^ phi1) v phi2) trans(Ra, Rb) true(lt) false(lf)
+		=>
+		(true^phi1 v phi2) trans(Ra, Rb) true(lt) false(lf)				end 
+
+[subseteq_simplify] ((ta <= ta . Cunionb  ^ phi1) v phi2) trans(Ra, Rb) true(lt) false(lf)
+		=>
+		(true^phi1 v phi2) trans(Ra, Rb) true(lt) false(lf)				end 
+
+
+[subseteq_simplify] ((ta <= qb ^ phi1) v phi2) trans(Ra, Rb) true(lt) false(lf)
+		=>
+		((true ^ phi1) v phi2) trans(Ra, Rb) true(lt) false(lf)
+
+		where config_ta:= (Cterm_to_config_strat) Cterm_to_config(ta)
+		if config_ta != void
+		if occurs(config_ta -> qb, Ra)
+		end
+
+
+[subseteq_r1] ((true || A ^ phi1) v phi2) trans(Ra, Rb) true(lt) false(lf)
+		=>
+	 	(true^phi1 v phi2)	trans(Ra, Rb) true(add(A, lt)) false(lf)			end
+
+[subseteq_r1] ((true ^ disj(A) || A ^ phi1) v phi2) trans(Ra, Rb) true(lt) false(lf)
+		=>
+		(true^phi1 v replace(last_disj(A), disj(A), phi2)) trans(Ra, Rb) true(add(A, lt)) false(lf) end
+
+
+[subseteq_r1] ((true ^ last_disj(A) || A ^ phi1) v phi2) trans(Ra, Rb) true(lt) false(lf)
+		=>
+		(true^phi1 v phi2) trans(Ra, Rb) true(add(A,lt)) false(lf) 			end
+
+[subseteq_r2] ((true ^ phi1) v phi2) trans(Ra, Rb) true(lt) false(lf)
+		=>
+		(phi1 v phi2) trans(Ra, Rb) true(lt) false(lf)					end
+
+[subseteq_r2] (true  v phi2) trans(Ra, Rb) true(lt) false(lf)
+		=>
+		(true, lt, lf)							end
+
+[subseteq_r3] (false) trans(Ra, Rb) true(lt) false(lf)
+		=>
+		(false, lt, lf)								end
+
+[subseteq_r4] (false v phi2) trans(Ra, Rb) true(lt) false(lf)
+		=>	
+		(phi2) trans (Ra, Rb) 	true(lt) false(lf)				end
+
+[subseteq_r4] ((false ^ true || A ^ phi1) v phi2) trans(Ra, Rb) true(lt) false(lf)
+		=>
+
+		((false ^ phi1) v phi2) trans(Ra, Rb) true(lt) false(add(A, lf))		end
+
+[subseteq_r4] ((false ^ disj(A) || A ^ phi1) v phi2) trans(Ra, Rb) true(lt) false(lf)
+		=>
+
+		(phi2) trans(Ra, Rb) true(lt) false(lf)					end
+
+[subseteq_r4] ((false ^ last_disj(A) || A ^ phi1) v phi2) trans(Ra, Rb) true(lt) false(lf)
+		=>
+
+		((false ^ phi1) v phi2) trans(Ra, Rb) true(lt) false(add(A, lf))		end
+
+[subseteq_r4] ((false ^ A ^ phi1) v phi2) trans(Ra, Rb) true(lt) false(lf)
+		=>
+
+		((false ^ phi1) v phi2) trans(Ra, Rb) true(lt) false(lf)		end
+
+[subseteq_r4] ((false ^ true) v phi2) trans(Ra, Rb) true(lt) false(lf)
+		=>
+
+		(phi2) trans(Ra, Rb) true(lt) false(lf)					end
+
+
+[subseteq_r5] ((seta <= setb  ^ phi1) v phi2) trans(Ra, Rb) true(lt) false(lf)
+		=>
+		(true^phi1 v phi2) trans(Ra, Rb) true(lt) false(lf)
+
+		if (seta <= setb is inductive in phi1 or occurs(seta <= setb, lt))		end
+
+[subseteq_r5] ((ta <= tb  ^ phi1) v phi2) trans(Ra, Rb) true(lt) false(lf)
+		=>
+		((false ^ phi1) v phi2) trans(Ra, Rb) true(lt) false(lf)
+
+		if occurs(ta <= tb, lf)							end
+
+[subseteq_r5] ((ta <= tb . Cunionb  ^ phi1) v phi2) trans(Ra, Rb) true(lt) false(lf)
+		=>
+		((false ^ phi1) v phi2) trans(Ra, Rb) true(lt) false(lf)
+
+		if occurs(ta <= tb . Cunionb, lf)					end
+
+[subseteq_r6] ((ta . Cuniona <= setb  ^ phi1) v phi2) trans(Ra, Rb) true(lt) false(lf) 
+		=>
+		((Cuniona <= setb ^ ta <= setb ^ phi1) v phi2) trans(Ra, Rb) true(lt) false(lf) end
+
+[subseteq_r7] ((nil  <= setb  ^ phi1) v phi2) trans(Ra, Rb) true(lt) false(lf)
+		=>
+		(true^phi1 v phi2) trans(Ra, Rb)true(lt) false(lf) 				end
+
+
+[subseteq_r8] ((seta <= nil ^ phi1) v phi2) trans(Ra, Rb) true(lt) false(lf)
+		=>
+		((false ^ phi1) v phi2) trans(Ra, Rb) true(lt) false(lf)		end
+
+
+[subseteq_r9] ((ta <= tb. nil  ^ phi1) v phi2) trans(Ra, Rb) true(lt) false(lf)
+		=>
+		((ta <= tb ^ phi1) v phi2) trans(Ra, Rb) true(lt) false(lf)			end
+
+[subseteq_r10] ((tuple(ta, empty_tuple) <= Cuniona  ^ phi1) v phi2) trans(Ra, Rb) true(lt) false(lf)
+		=>
+		((ta <= Cunionb ^ phi1) v phi2) trans(Ra, Rb) true(lt) false(lf)	
+
+			where Cunionb := (simplify_tuple_strat) simplify_tuple(Cuniona)		end
+
+[subseteq_r10] ((tuple_a <= tuple_b. nil  ^ phi1) v phi2) trans(Ra, Rb) true(lt) false(lf)
+		=>
+		((tuple_a <= tuple_b ^ phi1) v phi2) trans(Ra, Rb)	 true(lt) false(lf)		end
+
+[subseteq_r11] ((qa <= qb ^ phi1) v phi2) trans(Ra, Rb) true(lt) false(lf)
+		=>
+		((Cuniona <= qb ^ true || qa <= qb ^ phi1) v phi2) trans(Ra, Rb) true(lt) false(lf)
+
+			where Cuniona := (bag_strat) bag_of_config(qa, Ra)		end
+
+[subseteq_r11] ((qa <= qb . Cunionb  ^ phi1) v phi2) trans(Ra, Rb) true(lt) false(lf)
+		=>
+	((Cuniona <= qb . Cunionb ^ true || qa <= qb . Cunionb ^ phi1) v phi2) trans(Ra, Rb) true(lt) false(lf) 
+
+			where Cuniona := (bag_strat) bag_of_config(qa, Ra)		end
+
+
+[subseteq_r12] ((ta <= qb ^ phi1) v phi2) trans(Ra, Rb) true(lt) false(lf)
+		=>
+	((fun_to_tuple(ta) <= Cunionb ^ true || ta <= qb ^ phi1) v phi2) trans(Ra, Rb) true(lt) false(lf)
+
+		where Cunionb := (bag_strat2) bag_of_tuple(head_of(ta),qb.nil, Rb)	end
+	
+
+[subseteq_r12] ((ta <= qb . Cunionb ^ phi1) v phi2) trans(Ra, Rb) true(lt) false(lf)
+		=>
+	((fun_to_tuple(ta) <= Cuniona ^ true || ta <= qb . Cunionb ^phi1) v phi2) trans(Ra, Rb) true(lt) false(lf)
+
+		where Cuniona := (bag_strat2) bag_of_tuple(head_of(ta),qb . Cunionb, Rb)	end
+
+
+[subseteq_r13] ((tuple(ta, tuple_a) <= tuple(tb, tuple_b) ^phi1) v phi2) trans(Ra, Rb) true(lt) false(lf) =>
+
+		((ta <= tb ^ (tuple_a <= tuple_b ^ phi1)) v phi2) trans(Ra, Rb) true(lt) false(lf)  end
+
+
+[subseteq_r14] ((empty_tuple <= seta ^ phi1) v phi2) trans(Ra, Rb) true(lt) false(lf) =>
+		(true^phi1 v phi2) trans(Ra, Rb) true(lt) false(lf)			end
+
+[subseteq_r15] ((tuple_a <= Cunionb ^ phi1) v phi2) trans(Ra, Rb) true(lt) false(lf) =>
+
+(and_cat(phi3, disj(tuple_a <= Cunionb) || tuple_a <= Cunionb ^ phi1) v and_cat(phi4, disj(tuple_a <= Cunionb) || tuple_a <= Cunionb ^ phi1) v or_cat(phi5, phi2)) trans(Ra, Rb) true(lt) false(lf)
+
+	where	phi5 := (prod_cart3) third_component(tuple_a, Cunionb, tuple_a <= Cunionb, phi1)
+	where	phi4 := (prod_cart2) second_component(tuple_a, Cunionb, nil, true)
+	where	phi3 := (prod_cart1) first_component(tuple_a, Cunionb, true, nil)
+end
+
+
+[subseteq_sort] ((ta <= qa . Cuniona ^ phi1) v phi2) trans(Ra, Rb) true(lt) false(lf)=> 
+	((ta <= sort(qa. Cuniona) ^ phi1) v phi2) trans(Ra, Rb) true(lt) false(lf)	end
+[subseteq_sort] a => a							end
+end
+
+
+
+rules for conj_Cformula
+          ta, tb: Cterm;
+	Ca: Catom;
+	tuple_a, tuple_b: tuple;	
+	phi1, phi2: conj_Cformula;
+	setb, set_reste: Cunion;
+global
+
+[] and_cat(true, phi1) => phi1						end
+
+[] and_cat(Ca ^ phi1, phi2) => and_cat(phi1, Ca ^ phi2)			end
+
+
+[first_compo_r1] first_component(tuple(ta, tuple_a), nil, phi1, set_reste) =>
+		 and_cat(phi1, tuple_a <= set_reste ^ true)						end
+
+[first_compo_r2] first_component(tuple(ta, tuple_a), tuple(tb, tuple_b) . setb, phi1, set_reste) =>
+		first_component(tuple(ta, tuple_a), setb, ta <= tb ^ phi1, tuple_b . set_reste)	end
+
+
+[second_compo_r1] second_component(tuple(ta, tuple_a), nil, set_reste, phi1) =>
+
+		 and_cat(phi1, ta <= set_reste ^ true)			end
+
+[second_compo_r2] second_component(tuple(ta, tuple_a), tuple(tb, tuple_b) . setb, set_reste, phi1) =>
+		second_component(tuple(ta, tuple_a), setb, tb . set_reste, tuple_a <= tuple_b ^ phi1)	
+
+									end
+end
+
+	
+
+rules for disj_Cformula
+         	tuple_a, tuple_b: tuple;	
+	phi1: conj_Cformula;
+	phi2: conj_Cformula;
+	phi3, phi4: disj_Cformula;
+	A: Catom;
+	setb: Cunion;
+	res: disj_Cformula;
+global	
+
+
+[] or_cat(false, phi3) => phi3								end
+
+[] or_cat(phi2 v phi3, phi4) => or_cat(phi3, phi2 v phi4)				end
+
+
+[third_compo_r1] third_component(tuple_a, nil, A, phi1) => false			end
+[third_compo_r1] third_component(tuple_a, tuple_b.nil, A, phi1) 
+			=> 
+		(tuple_a <= tuple_b ^ last_disj(A)||A ^ phi1) v false			end
+[third_compo_r2] third_component(tuple_a , tuple_b . setb, A, phi1) 
+			=> 
+		(tuple_a <= tuple_b ^ disj(A) || A ^ phi1) v res
+
+		where res := (prod_cart3) third_component(tuple_a, setb, A, phi1)	end
+
+end
+	
+
+
+
+
+rules for Cunion
+          q1, q2: state;
+	Q1: Cunion;
+	c: configuration;
+	l: list[transition];
+	var_symbole: symbol;
+	res: Cunion;
+global
+[bag_r1]	bag_of_config(q1, (c -> q1) . l) => config_to_Cterm(c) . res	
+			where res := (bag_strat) bag_of_config(q1, l) 	end
+[bag_r2]	bag_of_config(q1, (c -> q2) . l) => bag_of_config(q1, l) end
+[bag_r3]	bag_of_config(q1, nil) => nil				end
+
+
+[bag_tuple_r1]	bag_of_tuple(var_symbole, Q1, (c -> q1).l) => fun_to_tuple(config_to_Cterm(c)) . res 
+			if symbol_of(c) == var_symbole and occurs(q1, Q1)
+			where res := (bag_strat2) bag_of_tuple(var_symbole, Q1, l)
+end
+
+[bag_tuple_r2]	bag_of_tuple(var_symbole, Q1, (c -> q1).l) => bag_of_tuple(var_symbole, Q1, l)
+			if symbol_of(c) != var_symbole or not(occurs(q1, Q1))		end
+[bag_tuple_r3]	bag_of_tuple(var_symbole, Q1, nil) => nil 						end
+
+end
+
+
+strategies for Cunion
+implicit
+  [.] sort_strat =>
+	 repeat*(dc one(sort_r1 , sort_r2 , sort_r3 , sort_r4))
+  end
+
+  [.] bag_strat => repeat*(dc one(bag_r1 , bag_r2 , bag_r3))
+  end
+
+  [.] bag_strat2 =>  repeat*(dc one(bag_tuple_r1 , bag_tuple_r2 , bag_tuple_r3))
+  end
+
+  [.] simplify_tuple_strat =>  repeat*(dc one(simplify_tuple_r1 , simplify_tuple_r2))
+  end
+end
+
+strategies for list[transition]
+implicit
+  [.] common_strat => repeat*(dc one(common_r1 , common_r2 , common_r3 , common_r4))
+  end
+end
+
+strategies for inclusion_step
+implicit
+  [.] subseteq_strat => 
+	repeat*(
+	  dc one(subseteq_sort);
+	  dc one(subseteq_r1 , subseteq_r2 , subseteq_r3 , subseteq_r4 ,
+		subseteq_r5 , subseteq_r6 , subseteq_r7 , subseteq_r8 ,
+		subseteq_r9 , subseteq_r10 , subseteq_r11 , subseteq_r12 ,
+		subseteq_r13 , subseteq_r14 , subseteq_r15))
+  end
+
+  [.] subseteq_strat_simple =>
+	repeat*(
+	  dc one(subseteq_sort);
+	  dc one(subseteq_simplify , subseteq_r1 , subseteq_r2 , subseteq_r3 ,
+		subseteq_r4 , subseteq_r5 , subseteq_r6 , subseteq_r7 , 
+		subseteq_r8 , subseteq_r9 , subseteq_r10 , subseteq_r11 , 
+		subseteq_r12 , subseteq_r13 , subseteq_r14 , subseteq_r15))
+  end
+end
+
+strategies for conj_Cformula
+implicit
+  [.] prod_cart1 => repeat*(dc one(first_compo_r1 , first_compo_r2))
+  end
+
+  [.] prod_cart2 => repeat*(dc one(second_compo_r1 , second_compo_r2))
+  end
+end
+
+strategies for disj_Cformula
+implicit
+  [.] prod_cart3 => repeat*(dc one(third_compo_r1 , third_compo_r2))
+  end
+end
+
+
+
+strategies for bool
+implicit
+  [.] induct_strat => repeat*(dc one(induct_r1 , induct_r2 , induct_r3 , induct_r4))
+  end
+end
+end

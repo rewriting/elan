@@ -1,0 +1,134 @@
+module RestrictUnifFA[Vars,Fss]
+import 	global 	term varabst varUnif[Vars] termUnif[Fss] termUnifFA 
+                UnifFA[Vars,Fss] ElimFA[Vars,Fss] ;
+ 	local  	int identifier bool pair[identifier,int]
+		list[int] list[identifier] list[pair[identifier,int]] 
+                //// eq[variable] eq[term] 
+		eqSystem renvar[Vars,Fss]
+                occur[variable,term] occur[variable,eqSystem] ;
+end
+
+operators
+
+
+local 
+
+     conj(@,@)            :(eqSystem eqSystem) eqSystem ;
+     propagate(@,@)       :(eqSystem eqSystem) eqSystem ;
+
+end
+
+
+/// for renaming
+
+   rules for int
+   // declare 
+              t1,t2:term ; i,n:int ;
+   global
+       [] maxv(t1 + t2,xnew.n)	=>  
+	      maxv(t1,xnew.n) ?max maxv(t2,xnew.n) end
+       [] maxv(t1 + t2,var(n))	=>  
+	      maxv(t1,var(n)) ?max  maxv(t2,var(n)) end
+
+       [] maxv(t1 * t2,xnew.n)	=>  
+	      maxv(t1,xnew.n) ?max maxv(t2,xnew.n) end
+       [] maxv(t1 * t2,var(n))	=>  
+	      maxv(t1,var(n)) ?max  maxv(t2,var(n)) end
+
+       [] maxv(C.i(t1),xnew.n)	=>  maxv(t1,xnew.n) end
+       [] maxv(C.i(t1),var(n))	=>  maxv(t1,var(n)) end
+
+       [] maxv((t1),xnew.n) => maxv(t1,xnew.n) end
+       [] maxv((t1),var(n)) => maxv(t1,var(n)) end
+ 
+       [] maxv(i,xnew.n) =>  n end
+       [] maxv(i,var(n)) =>  n end
+
+       [] maxv(cte.i,xnew.n) =>  n end
+       [] maxv(cte.i,var(n)) =>  n end
+                
+   end
+
+
+rules for eqSystem
+// declare 
+	P,Q,R,S: eqSystem;
+        x: variable ;
+        s,t: term ;
+        mv,mn: int ;
+ 
+local
+ 
+  [solveEq] (true | R) => (true | R) end
+
+  [solveEq] (P | R) => (renamevar(S,mv,mn) | R) 
+                where S:= (unify) P 
+                where mn := () maxvar(P,xnew.0)
+                where mv := () maxvar(S,var(0))
+            end
+
+  [solveEnd] (true | true) => true end
+  [solveEnd] (P | true) => S where S:= (unify) P end
+
+  [] propagate(P & x = t,Q) => propagate(P, apply(x -> t,Q)) end
+  [] propagate(x=t,Q) => propagate(true, apply(x -> t,Q)) end
+  [] propagate(true,Q) => Q end
+
+
+  [propRestrict] (P | R) => (P | propagate(P,R)) end
+
+  [solveRestrict] ( P | elim(s,t)) => (conj(P,Q) | true)
+                   where S:= (eliminate) elim(s,t) 
+                   where mn := () maxvar(P,xnew.0)
+                   where mv := () maxvar(S,var(0))
+                   where Q:= () renamevar(S,mv,mn)
+                   end 
+
+  [solveRestrict] ( P | R & elim(s,t)) => (conj(P,Q) | propagate(Q,R))
+                    where S:= (eliminate) elim(s,t)                    
+                    where mn := () maxvar(P,xnew.0)
+                    where mv := () maxvar(S,var(0))
+                    where Q:= () renamevar(S,mv,mn)
+                    end 
+
+  []     conj(P, Q & x = t) => conj(P & x=t,Q) end
+  []     conj(P, x = t)     => conj(P & x = t, true) end 
+  []     conj(P, true)      => P end
+
+  [newdelete]  P & xnew.mn = t => P end
+  [Pass] P & x = t => x = t & P end 
+  [unfold] P & (Q & R) => (P & Q) & R end
+  [trueadd] P => true & P end
+  [elimtrue] P & true => P end
+
+end
+
+strategies for eqSystem
+
+global 
+
+[restrictUnifFA]
+
+dont care choose (solveEq) ;
+
+dont care choose(propRestrict) ;
+
+repeat*(
+   dont care choose(solveRestrict)
+   ) ;
+
+dont care choose(solveEnd) ;
+
+dont care choose (trueadd) ;
+
+repeat*(
+dont care choose(newdelete || Pass || unfold)
+) ;
+
+dont care choose (elimtrue)
+
+end
+
+end
+
+end

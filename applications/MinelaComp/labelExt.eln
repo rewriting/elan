@@ -1,0 +1,15 @@
+module labelExt[Labels]
+import
+local	Labels anyIdentifier label[Labels]
+	list[identifier]
+	;
+
+op global
+
+  FOR EACH X:identifier SUCH THAT X:=(listExtract) elem(Labels)
+  :{
+	X : label 	alias "X":;
+   }
+end
+
+end

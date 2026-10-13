@@ -1,0 +1,30 @@
+module lis4_int
+
+import global 	strat[int] any[int] int
+                strat[tree[int]] any[tree[int]]
+                tree[int]
+                lis4[int];
+end
+
+stratop global
+  swap	: <int>;
+end
+
+strategies for int
+ y	: int;
+explicit
+  [.] [swap] y => y+1 if y < 10				end
+end
+
+end
+
+
+
+
+
+
+
+
+
+
+

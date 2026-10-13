@@ -1,0 +1,45 @@
+LPL tictactoe description
+
+  query of sort		state
+  result of sort	state
+//  query of sort		list[list[state]]
+//  result of sort	list[list[state]]
+  import 		tictactoe
+//  start with 		[call(win);narrow]query
+//  start with 		[movetowin;narrow]query
+
+start with (eval)query
+//start with [guess]query
+
+//  start with 		[call(moves); findawinner;cut ]query
+//  start with 		[call(moves)]query
+//  start with 		[findawinner]query
+
+end
+
+// run [movetowin;narrow]state(X,[-,-,-],[-,-,-],[-,-,-]).nil.nil;
+
+
+// state(X,[-,X,-],[X,-,-],[-,-,-]).nil.nil end 
+
+// state(X,[X,X,-],[X,-,-],[-,-,-]).nil.nil end 
+// state(X,[-,X,X],[-,X,X],[-,X,X]).nil.nil end 
+// state(X,[-,X,X],[-,X,X],[-,-,-]).nil.nil end 
+// state(X,[X,-,-],[-,X,X],[-,-,-]).nil.nil end 
+// state(X,[X,X,-],[-,X,-],[-,-,-]).nil.nil end 
+
+// state(X,[X,-,X],[-,O,X],[O,X,O]).nil.nil end
+// state(X,[X,-,-],[-,O,X],[O,X,O]).nil.nil end
+// state(X,[X,-,-],[-,O,-],[O,-,X]).nil.nil end
+// state(X,[X,-,X],[-,O,O],[O,-,X]).nil.nil end
+
+// state(X,[-,-,-],[-,-,-],[-,-,-]).nil.nil end
+// state(X,[X,-,-],[-,O,-],[-,-,-]).nil.nil end
+// state(X,[X,X,O],[-,O,-],[-,-,-]).nil.nil end
+// state(X,[X,X,O],[O,O,-],[X,-,-]).nil.nil end
+// state(X,[X,X,O],[O,O,X],[X,O,-]).nil.nil end
+
+
+//       state(O,[X,X,-],[-,O,X],[O,X,O]).nil.nil end  movetowin true
+//       state(O,[X,-,X],[-,O,X],[O,X,O]).nil.nil end  movetowin false
+//       state(O,[X,-,-],[X,O,X],[O,X,O]).nil.nil end  movetowin true

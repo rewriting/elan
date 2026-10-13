@@ -1,0 +1,18 @@
+start with 	[for col=0 to 5 do
+		  some row=0 to 5 do
+		    for i=0 to col-1 do
+		      verify(col,row,i)
+	            od;
+                    drop(col,row)
+		  od
+		od]new(0)
+
+  [verify(cc,rr,ii)]	x => x
+				if x[ii] 	!= rr
+				if x[ii] 	!= rr+cc-ii
+				if x[ii]	!= rr+ii-cc
+  end
+  [drop(cc,rr)] 	x => x[cc<-rr]
+  end
+run new(0);
+

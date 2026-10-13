@@ -1,0 +1,15 @@
+(x<=AC(a+b)&y<=AC c) end
+
+(x<=AC c&y<=AC(a+b)) end
+
+(y<=AC(b+c)&x<=AC a) end
+
+(y<=AC(a+c)&x<=AC b) end
+
+(x<=AC(b+c)&y<=AC a) end
+
+(x<=AC(a+c)&y<=AC b) end
+
+ end end
+end
+

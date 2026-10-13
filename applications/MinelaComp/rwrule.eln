@@ -1,0 +1,98 @@
+module rwrule[Vars,Ops,Types,Labels]
+import	global  msTermCommons[Vars,Ops,Types]
+		pair[term,term]
+		substitution
+		list[rwrule]
+		builtIn[Vars,Ops,Types]
+		label[Labels]
+	;
+	local	bool int 
+	;
+end
+
+sort rwrule rulebodies;
+end
+
+operators
+  global
+// Nouvelle version
+    @ => @	: (term term) rulebodies;
+    @ if @	: (rulebodies term) rulebodies;
+    @ where @':'=@	: (rulebodies variable term) rulebodies;
+    [] @ 	: (rulebodies) rwrule;
+    [@] @ 	: (label rulebodies) rwrule;
+
+    ;		: list[rwrule]		alias nil:;
+    @ @		: (rwrule list[rwrule]) list[rwrule]	alias cons(@,@):;
+	
+    left(@)	: (rwrule) term;
+    right(@)	: (rwrule) term;
+    label(@)	: (rwrule) label;
+//  local
+    rw2rb(@)	: (rwrule) rulebodies;
+    rb2r(@)	: (rulebodies) rulebodies;
+    left(@)	: (rulebodies) term;
+    right(@)	: (rulebodies) term;
+end
+
+rules for rulebodies
+	x,y,c,st	: term;
+	v		: variable;
+	r		: rulebodies;
+	l		: label;
+global
+// recuperation du rulebodies
+  [] rw2rb([] r ) => r
+  end
+  [] rw2rb([l] r ) => r
+  end
+// elimination des if et where
+  [] rb2r(r if c) => rb2r(r)
+  end
+  [] rb2r(r where v:=st) => rb2r(r)
+  end
+  [] rb2r(x=>y) => x=>y
+  end
+  [] rb2r(x=>y) => x=>y
+  end
+end
+
+rules for label
+	r		: rulebodies;
+	l		: label;
+global
+//  [] label([] r ) => ""
+//  end
+  [] label([l] r ) => l
+  end
+end
+
+
+rules for term
+ x,y,c,st 	: term;
+	v		: variable;
+	rw		: rwrule;
+	rb		: rulebodies;
+global
+// Nouvelle version
+// rwrule
+  [] left(rw) => left(rb2r(rw2rb(rw)))
+  end
+  [] right(rw) => right(rb2r(rw2rb(rw)))
+  end
+// rulebodies
+  [] left(x=>y) => x
+  end
+  [] right(x=>y) => y
+  end
+  [] left(rb) => left(rb2r(rb))
+  end
+  [] right(rb) => right(rb2r(rb))
+  end
+end
+
+end
+
+
+
+

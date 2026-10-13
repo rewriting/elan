@@ -1,0 +1,5 @@
+# tests of Solving/Equational/MatchingAC (from legacy/elan3 tst_all; format: tests/apps/README.md)
+itest matchingAC ctesig ex1 ex1
+itest matchingAC ctesig ex2 ex2
+itest matchingAC ctesig ex3 ex3
+itest matchingAC ctesig ex4 ex4

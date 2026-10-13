@@ -1,0 +1,9 @@
+module colette[Variables,Type,Values]
+
+import
+global
+	ForwardChecking[Variables,Type,Values]
+	;
+end
+
+end

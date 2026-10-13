@@ -1,0 +1,21 @@
+module aut_name
+import int;
+end
+
+sort aut_name;
+end
+
+operators global
+	nil	: aut_name pri 10;
+	A(@)	: (int) aut_name pri 10;
+	inc(@)	: (aut_name) aut_name;
+end
+
+rules for aut_name
+	i: int;
+global
+[] 	inc(A(i)) => A(i+1)  end
+[]      inc(nil) => A(1)     end
+end
+end
+

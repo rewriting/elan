@@ -1,0 +1,301 @@
+module MaxSatToUnForwardCheckingMaximumDegreeInEC[Variables,Type,Values]
+
+import
+global
+	OptimizationRules[Variables,Type,Values]
+	ForwardCheckingMaximumDegreeInEC[Variables,Type,Values]
+	ForwardCheckingChoicePointMaximumDegreeInEC[Variables,Type,Values]
+	ForwardCheckingChoicePointIIMaximumDegreeInEC[Variables,Type,Values]
+	;
+end
+
+stratop
+global
+	MaxSatToUnFCMaximumDegreeInECFirstToLast			: < csop -> csop >	bs;
+	MaxSatToUnFCMaximumDegreeInECLastToFirst			: < csop -> csop >	bs;
+	MaxSatToUnFCMaximumDegreeInECSplitFirstToLast			: < csop -> csop >	bs;
+	MaxSatToUnFCMaximumDegreeInECSplitLastToFirst			: < csop -> csop >	bs;
+	MaxSatToUnFCChoicePointMaximumDegreeInECFirstToLast		: < csop -> csop >	bs;
+	MaxSatToUnFCChoicePointMaximumDegreeInECLastToFirst		: < csop -> csop >	bs;
+	MaxSatToUnFCChoicePointMaximumDegreeInECSplitFirstToLast	: < csop -> csop >	bs;
+	MaxSatToUnFCChoicePointMaximumDegreeInECSplitLastToFirst	: < csop -> csop >	bs;
+	MaxSatToUnFCChoicePointIIMaximumDegreeInECFirstToLast		: < csop -> csop >	bs;
+	MaxSatToUnFCChoicePointIIMaximumDegreeInECLastToFirst		: < csop -> csop >	bs;
+	MaxSatToUnFCChoicePointIIMaximumDegreeInECSplitFirstToLast	: < csop -> csop >	bs;
+	MaxSatToUnFCChoicePointIIMaximumDegreeInECSplitLastToFirst	: < csop -> csop >	bs;
+end
+
+
+strategies for csop
+implicit
+
+/* Optimization Strategy: */
+/* Search Strategy	: */
+/* Variable selection	: */
+/* Value selection	: */
+
+[] MaxSatToUnFCMaximumDegreeInECFirstToLast =>
+first one (PostGTELowerBound);
+LocalConsistencyForEC;
+first one (GetLBFCMaximumDegreeInECFirstToLastOne);
+repeat* (
+	first one( first one (PostGTLowerBound);
+		   LocalConsistencyForEC;
+		   first one (GetLBFCMaximumDegreeInECFirstToLastOne)
+		   ,
+		   first one (SetUpperBoundToLowerBound)
+		 )
+	);
+first one (FCMaximumDegreeInECFirstToLastOne);
+first one (GetSolutionCSOP)
+end
+
+
+/* Optimization Strategy: */
+/* Search Strategy	: */
+/* Variable selection	: */
+/* Value selection	: */
+
+[] MaxSatToUnFCMaximumDegreeInECLastToFirst =>
+first one (PostGTELowerBound);
+LocalConsistencyForEC;
+first one (GetLBFCMaximumDegreeInECLastToFirstOne);
+repeat* (
+	first one( first one (PostGTLowerBound);
+		   LocalConsistencyForEC;
+		   first one (GetLBFCMaximumDegreeInECLastToFirstOne)
+		   ,
+		   first one (SetUpperBoundToLowerBound)
+		 )
+	);
+first one (FCMaximumDegreeInECLastToFirstOne);
+first one (GetSolutionCSOP)
+end
+
+
+/* Optimization Strategy: */
+/* Search Strategy	: */
+/* Variable selection	: */
+/* Value selection	: */
+
+[] MaxSatToUnFCMaximumDegreeInECSplitFirstToLast =>
+first one (PostGTELowerBound);
+LocalConsistencyForEC;
+first one (GetLBFCMaximumDegreeInECSplitFirstToLastOne);
+repeat* (
+	first one( first one (PostGTLowerBound);
+		   LocalConsistencyForEC;
+		   first one (GetLBFCMaximumDegreeInECSplitFirstToLastOne)
+		   ,
+		   first one (SetUpperBoundToLowerBound)
+		 )
+	);
+first one (FCMaximumDegreeInECSplitFirstToLastOne);
+first one (GetSolutionCSOP)
+end
+
+
+/* Optimization Strategy: */
+/* Search Strategy	: */
+/* Variable selection	: */
+/* Value selection	: */
+
+[] MaxSatToUnFCMaximumDegreeInECSplitLastToFirst =>
+first one (PostGTELowerBound);
+LocalConsistencyForEC;
+first one (GetLBFCMaximumDegreeInECSplitLastToFirstOne);
+repeat* (
+	first one( first one (PostGTLowerBound);
+		   LocalConsistencyForEC;
+		   first one (GetLBFCMaximumDegreeInECSplitLastToFirstOne)
+		   ,
+		   first one (SetUpperBoundToLowerBound)
+		 )
+	);
+first one (FCMaximumDegreeInECSplitLastToFirstOne);
+first one (GetSolutionCSOP)
+end
+
+
+/* Optimization Strategy: */
+/* Search Strategy	: */
+/* Variable selection	: */
+/* Value selection	: */
+
+[] MaxSatToUnFCChoicePointMaximumDegreeInECFirstToLast =>
+first one (PostGTELowerBound);
+LocalConsistencyForEC;
+first one (GetLBFCChoicePointMaximumDegreeInECFirstToLastOne);
+repeat* (
+	first one( first one (PostGTLowerBound);
+		   LocalConsistencyForEC;
+		   first one (GetLBFCChoicePointMaximumDegreeInECFirstToLastOne)
+		   ,
+		   first one (SetUpperBoundToLowerBound)
+		 )
+	);
+first one (FCChoicePointMaximumDegreeInECFirstToLastOne);
+first one (GetSolutionCSOP)
+end
+
+
+/* Optimization Strategy: */
+/* Search Strategy	: */
+/* Variable selection	: */
+/* Value selection	: */
+
+[] MaxSatToUnFCChoicePointMaximumDegreeInECLastToFirst =>
+first one (PostGTELowerBound);
+LocalConsistencyForEC;
+first one (GetLBFCChoicePointMaximumDegreeInECLastToFirstOne);
+repeat* (
+	first one( first one (PostGTLowerBound);
+		   LocalConsistencyForEC;
+		   first one (GetLBFCChoicePointMaximumDegreeInECLastToFirstOne)
+		   ,
+		   first one (SetUpperBoundToLowerBound)
+		 )
+	);
+first one (FCChoicePointMaximumDegreeInECLastToFirstOne);
+first one (GetSolutionCSOP)
+end
+
+
+/* Optimization Strategy: */
+/* Search Strategy	: */
+/* Variable selection	: */
+/* Value selection	: */
+
+[] MaxSatToUnFCChoicePointMaximumDegreeInECSplitFirstToLast =>
+first one (PostGTELowerBound);
+LocalConsistencyForEC;
+first one (GetLBFCChoicePointMaximumDegreeInECSplitFirstToLastOne);
+repeat* (
+	first one( first one (PostGTLowerBound);
+		   LocalConsistencyForEC;
+		   first one (GetLBFCChoicePointMaximumDegreeInECSplitFirstToLastOne)
+		   ,
+		   first one (SetUpperBoundToLowerBound)
+		 )
+	);
+first one (FCChoicePointMaximumDegreeInECSplitFirstToLastOne);
+first one (GetSolutionCSOP)
+end
+
+
+/* Optimization Strategy: */
+/* Search Strategy	: */
+/* Variable selection	: */
+/* Value selection	: */
+
+[] MaxSatToUnFCChoicePointMaximumDegreeInECSplitLastToFirst =>
+first one (PostGTELowerBound);
+LocalConsistencyForEC;
+first one (GetLBFCChoicePointMaximumDegreeInECSplitLastToFirstOne);
+repeat* (
+	first one( first one (PostGTLowerBound);
+		   LocalConsistencyForEC;
+		   first one (GetLBFCChoicePointMaximumDegreeInECSplitLastToFirstOne)
+		   ,
+		   first one (SetUpperBoundToLowerBound)
+		 )
+	);
+first one (FCChoicePointMaximumDegreeInECSplitLastToFirstOne);
+first one (GetSolutionCSOP)
+end
+
+
+/* Optimization Strategy: */
+/* Search Strategy	: */
+/* Variable selection	: */
+/* Value selection	: */
+
+[] MaxSatToUnFCChoicePointIIMaximumDegreeInECFirstToLast =>
+first one (PostGTELowerBound);
+LocalConsistencyForEC;
+first one (GetLBFCChoicePointIIMaximumDegreeInECFirstToLastOne);
+repeat* (
+	first one( first one (PostGTLowerBound);
+		   LocalConsistencyForEC;
+		   first one (GetLBFCChoicePointIIMaximumDegreeInECFirstToLastOne)
+		   ,
+		   first one (SetUpperBoundToLowerBound)
+		 )
+	);
+first one (FCChoicePointIIMaximumDegreeInECFirstToLastOne);
+first one (GetSolutionCSOP)
+end
+
+
+/* Optimization Strategy: */
+/* Search Strategy	: */
+/* Variable selection	: */
+/* Value selection	: */
+
+[] MaxSatToUnFCChoicePointIIMaximumDegreeInECLastToFirst =>
+first one (PostGTELowerBound);
+LocalConsistencyForEC;
+first one (GetLBFCChoicePointIIMaximumDegreeInECLastToFirstOne);
+repeat* (
+	first one( first one (PostGTLowerBound);
+		   LocalConsistencyForEC;
+		   first one (GetLBFCChoicePointIIMaximumDegreeInECLastToFirstOne)
+		   ,
+		   first one (SetUpperBoundToLowerBound)
+		 )
+	);
+first one (FCChoicePointIIMaximumDegreeInECLastToFirstOne);
+first one (GetSolutionCSOP)
+end
+
+
+/* Optimization Strategy: */
+/* Search Strategy	: */
+/* Variable selection	: */
+/* Value selection	: */
+
+[] MaxSatToUnFCChoicePointIIMaximumDegreeInECSplitFirstToLast =>
+first one (PostGTELowerBound);
+LocalConsistencyForEC;
+first one (GetLBFCChoicePointIIMaximumDegreeInECSplitFirstToLastOne);
+repeat* (
+	first one( first one (PostGTLowerBound);
+		   LocalConsistencyForEC;
+		   first one (GetLBFCChoicePointIIMaximumDegreeInECSplitFirstToLastOne)
+		   ,
+		   first one (SetUpperBoundToLowerBound)
+		 )
+	);
+first one (FCChoicePointIIMaximumDegreeInECSplitFirstToLastOne);
+first one (GetSolutionCSOP)
+end
+
+
+/* Optimization Strategy: */
+/* Search Strategy	: */
+/* Variable selection	: */
+/* Value selection	: */
+
+[] MaxSatToUnFCChoicePointIIMaximumDegreeInECSplitLastToFirst =>
+first one (PostGTELowerBound);
+LocalConsistencyForEC;
+first one (GetLBFCChoicePointIIMaximumDegreeInECSplitLastToFirstOne);
+repeat* (
+	first one( first one (PostGTLowerBound);
+		   LocalConsistencyForEC;
+		   first one (GetLBFCChoicePointIIMaximumDegreeInECSplitLastToFirstOne)
+		   ,
+		   first one (SetUpperBoundToLowerBound)
+		 )
+	);
+first one (FCChoicePointIIMaximumDegreeInECSplitLastToFirstOne);
+first one (GetSolutionCSOP)
+end
+
+end
+
+
+end
+
+
+

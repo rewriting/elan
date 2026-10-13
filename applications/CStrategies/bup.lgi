@@ -1,0 +1,9 @@
+LPL bup description
+  
+query		of sort   	tree[integ]
+		result of sort  tree[integ]
+		import  	bup[integ]
+		start with 	[bup(dk(ass1(5),ass2(5)),TRY swap(1998))]query
+
+end
+

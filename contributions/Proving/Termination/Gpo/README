@@ -1,0 +1,17 @@
+This directory contains the files implementing a completion procedure.
+
+***********   The Interpreter
+
+To run the interpreter : elan gpo file.spc
+
+Example:
+
+elan gpo append.spc < SAMPLES/gpo.inp
+ 
+**********    The Compiler
+
+To run the compiler : elanc gpo file.spc
+
+Example:
+
+elanc gpo append.spc ; gmake --file gpo.make ; a.out < SAMPLES/gpo.inp

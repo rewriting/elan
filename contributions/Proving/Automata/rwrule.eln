@@ -1,0 +1,13 @@
+module rwrule[Fss, Vars]
+import local ECterm[Vars] Cterm[Fss];
+end
+
+sort rwrule;
+end
+
+operators
+global
+	@ -> @		: (Cterm Cterm) rwrule;
+end
+
+end

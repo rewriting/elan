@@ -1,0 +1,46 @@
+module ElimFA[Vars,Fss]
+import 	global 	term varabst varUnif[Vars] termUnif[Fss] termUnifFA elimPred ;
+ 	local  	int identifier bool pair[identifier,int]
+		list[int] list[identifier] list[pair[identifier,int]] 
+                //// eq[variable] eq[term] 
+		eqSystem callElimFA[Vars,Fss]
+                occur[variable,term] occur[variable,eqSystem] ;
+end
+
+operators
+
+local
+
+	@ '\10'     	: ( eqSystem ) eqSystem;
+        @ newline       : ( eqSystem ) eqSystem alias @ '\10': ;
+        @ '\10' @ '\10' :(term term) equation ;
+        @ newline @ newline: (term term) equation alias @ '\10' @ '\10' : ;
+  	@ @		  :(eqSystem eqSystem ) eqSystem assocLeft ;
+        convert(@)      : (eqSystem) eqSystem ;
+end
+
+
+rules for eqSystem
+// declare 
+	t1,t2 : term;
+	P,Q : eqSystem;
+global
+  []             convert(elim(t1,t2)) => t1 newline t2 newline newline end
+  [elimrule]     P => Q where Q := (callelim) convert(P) end
+end
+
+
+
+strategies for eqSystem
+
+global
+
+    [eliminate] 
+    dont know choose(elimrule)
+    end
+end
+
+
+
+
+end

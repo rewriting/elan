@@ -1,0 +1,11 @@
+LPL core1 description
+
+   query of sort  	Foo
+   result of sort 	Foo
+   import 		core1
+   start with 		()doit(query)
+
+end
+
+
+

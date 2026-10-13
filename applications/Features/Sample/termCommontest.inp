@@ -1,0 +1,3 @@
+llnvocc(a) end
+llnvocc(g(a)) end
+llnvocc(f(g(a),g(g(a)))) end

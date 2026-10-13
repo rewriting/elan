@@ -1,0 +1,23 @@
+LPL rewriting description
+
+  specification description
+
+    part Vars	of sort list[identifier]
+	 	import sigSyntax
+    part Ops	of sort list[pair[identifier,int]]
+	 	import sigSyntax
+
+    part Rules	of sort list[pair[term,term]]
+		import	termCommons[Ops,Vars]
+			rwRules[Ops,Vars]
+			list[pair[term,term]]
+  end
+
+  query 	of sort term
+         	result of sort term
+	 	import termCommons[Ops,Vars]
+			rewriting[Ops,Vars,Rules]
+         	start with (s_rewrite) query 
+//         	start with (s_rewrite) append(cons(a,nil),cons(b,cons(c,nil)))
+end
+

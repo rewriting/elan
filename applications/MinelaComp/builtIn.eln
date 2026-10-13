@@ -1,0 +1,43 @@
+module builtIn[Vars,Ops,Types]
+import
+global	msTermCommons[Vars,Ops,Types]
+;
+local	int bool
+	type[Types]
+	sigFunctions[Types]
+//	typeCheck[Vars,Ops,Types]
+
+//	myEqSystemAC[Vars,Ops,Types]
+	myEqSystem[Vars,Ops,Types]
+
+;
+end
+
+operators
+  global
+    boolean : type;
+    [toto,nil --> boolean] : term;
+    [toto,nil --> boolean]() : term	alias [toto,nil --> boolean]:;
+    toto : term	alias [toto,nil --> boolean]:;
+    [true,nil --> boolean] : term;
+    [true,nil --> boolean]() : term	alias [true,nil --> boolean]:;
+    true : term	alias [true,nil --> boolean]:;
+
+end
+
+rules for eqSystem
+	P :eqSystem;
+global
+  [decompose]  P & [true,nil --> boolean]=[true,nil --> boolean] => P end
+end
+
+/*
+rules for bool
+local
+ [] typecheck(toto)	=> true
+  end    
+ [] typecheck(true)	=> true
+  end    
+end
+*/
+end

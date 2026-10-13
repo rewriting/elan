@@ -1,0 +1,36 @@
+# tests of FastCompletion (from legacy/elan3 tst_all; format: tests/apps/README.md)
+itest ans_completion KNZ86 sat iKNZ86
+itest ans_completion Zeh89 sat iZeh89
+long itest ans_completion curry sat icurry
+long itest ans_completion exa79 sat iexa79
+long itest ans_completion exa80 sat iexa80
+long itest ans_completion furtin sat ifurtin
+long itest ans_completion gdiv sat igdiv
+long itest ans_completion group sat igroup
+long itest ans_completion sample sat isample
+long itest ans_completion taussky sat itaussky
+jtest ans KNZ86 jKNZ86
+jtest ans Zeh89 jZeh89
+jtest ans curry jcurry
+jtest ans exa79 jexa79
+jtest ans exa80 jexa80
+jtest ans exa85 jexa85
+jtest ans expf jexpf
+jtest ans expoclos jexpoclos
+jtest ans furtin jfurtin
+jtest ans gdiv jgdiv
+jtest ans group jgroup
+jtest ans p2 jp2
+jtest ans p8 jp8
+jtest ans sample jsample
+jtest ans taussky jtaussky
+aitest ans_completion KNZ86 sat iKNZ86
+aitest ans_completion Zeh89 sat iZeh89
+long aitest ans_completion curry sat icurry
+long aitest ans_completion exa79 sat iexa79
+long aitest ans_completion exa80 sat iexa80
+long aitest ans_completion furtin sat ifurtin
+long aitest ans_completion gdiv sat igdiv
+long aitest ans_completion group sat igroup
+long aitest ans_completion sample sat isample
+long aitest ans_completion taussky sat itaussky

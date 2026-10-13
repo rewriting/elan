@@ -1,0 +1,342 @@
+module BasicOperators[Variables,Type,Values]
+
+import
+
+global
+
+GenericSignature[Variables,Type] Values;
+
+
+rules for csp_ext_1
+
+
+
+	l	: list[formule];
+
+bodies
+
+[]	CreateCSP_ext_1(l)	=>
+	CreateCSP(l),false
+end
+
+end
+
+
+rules for csp
+
+
+
+	l,lmc,lec,C,lrc	: list[formule];
+
+bodies
+
+[]	CreateCSP(l)		=>
+	CSP(lmc,lec,C,lrc)
+	where	lrc := ()nil
+	where	C   := ()CreateSetOfUnaryAndBinaryConstraints(l)
+	where	lec := ()nil
+	where	lmc := ()CreateSetOfMembershipConstraints
+end
+
+
+end
+
+
+rules for var
+
+
+
+	x	: var;
+	v	: Type;
+	D	: domain;
+
+bodies
+
+[]	GetVarOfEqualityConstraint(x = v)	=>
+	x
+end
+
+[]	GetVarOfMembershipConstraint(x in? D)	=>
+	x
+end
+
+end
+
+
+rules for list[var]
+
+ 
+
+	x	: var;
+	lv	: list[var];
+	v	: Type;
+	t1,t2,t3,t4	: term;
+	lt	: list[term];
+//	c1,c2	: formula;
+	f	: function_symbol;
+	p,p1,p2	: predicate_symbol;
+
+bodies
+
+[]	GetVarOfFormula(t1 p1 t2 V t3 p2 t4)	=>
+	append(lv,append(lv,lv))
+	where	lv := ()GetVarOfFormula(t1 p1 t2)
+end
+[]	GetVarOfFormula(t1 p1 t2 -> t3 p2 t4)	=>
+	append(lv,append(lv,lv))
+	where	lv := ()GetVarOfFormula(t1 p1 t2)
+end
+[]	GetVarOfFormula(t1 p t2)	=>
+	append(GetVarOfTerm(t1.nil),GetVarOfTerm(t2.nil))
+end
+[]	GetVarOfTerm((t1).lt)		=>
+	GetVarOfTerm(t1.lt)
+end
+[]	GetVarOfTerm(t1 f t2.lt)	=>
+	append(GetVarOfTerm(t1.nil),GetVarOfTerm(t2.lt))
+end
+[]	GetVarOfTerm(x.nil)		=>
+	x.nil
+end
+[]	GetVarOfTerm(v.nil)		=>
+	nil
+end
+[]	GetVarOfTerm(nil)		=>
+	nil
+end
+
+end
+
+
+rules for int
+
+
+
+	x	: var;
+	c	: formule;
+	C	: list[formule];
+
+bodies
+
+[]	GetDegreeOfConstraint(x,c.C)		=>
+	GetDegreeOfConstraint(x,C)
+	if	not(occurs x in c )
+end
+[]	GetDegreeOfConstraint(x,c.C)		=>
+	1+GetDegreeOfConstraint(x,C)
+end
+[]	GetDegreeOfConstraint(x,nil)		=>
+	0
+end
+
+end
+
+
+rules for Type
+
+
+
+	x	: var;
+	v	: Type;
+
+bodies
+
+[]	GetValueOfEqualityConstraint(x = v)	=>
+	v
+end
+
+end
+
+
+rules for list[formule]
+
+
+
+	x,x1,x2		: var;
+	v		: Type;
+	D,D1,D2		: domain;
+	n,m		: int;
+	c,c1,c2,c3,c4	: formule;
+	l,l1,l2,l3,l4,C	: list[formule];
+
+bodies
+
+[]	CreateSetOfUnaryAndBinaryConstraints(l)	=>
+	append(l1,append(l2,append(l3,l4)))
+	where	l4 := ()GetSetOfImplicationConstraints(l)
+	where	l3 := ()GetSetOfDisyuntiveConstraints(l)
+	where	l2 := ()GetSetOfBinaryConstraints(l)
+	where	l1 := ()GetSetOfUnaryConstraints(l)
+end
+
+[]	GetSetOfUnaryConstraints(c.l)		=>
+	c1.GetSetOfUnaryConstraints(l)
+	where	c1 :=()NormalFormOfUnaryConstraint(c)
+	if	size(GetVarOfFormula(c)) == 1
+end
+[]	GetSetOfUnaryConstraints(c.l)		=>
+	GetSetOfUnaryConstraints(l)
+end
+
+[]	GetSetOfUnaryConstraints(nil)		=>
+	nil
+end
+
+[]	GetSetOfBinaryConstraints(c.l)		=>
+	c1.c2.GetSetOfBinaryConstraints(l)
+	where	c2 :=()NormalFormOfBinaryConstraint(GetInverse(c))
+	where	c1 :=()NormalFormOfBinaryConstraint(c)
+	if	size(GetVarOfFormula(c)) == 2
+end
+[]	GetSetOfBinaryConstraints(c.l)		=>
+	GetSetOfBinaryConstraints(l)
+end
+
+[]	GetSetOfBinaryConstraints(nil)		=>
+	nil
+end
+
+[]	GetSetOfDisyuntiveConstraints(c1 V c2.l)	=>
+	c1 V c2.GetSetOfDisyuntiveConstraints(l)
+end
+[]	GetSetOfDisyuntiveConstraints(c.l)		=>
+	GetSetOfDisyuntiveConstraints(l)
+end
+[]	GetSetOfDisyuntiveConstraints(nil)		=>
+	nil
+end
+
+[]	GetSetOfImplicationConstraints(c1 -> c2.l)	=>
+	c1 -> c2.GetSetOfImplicationConstraints(l)
+end
+[]	GetSetOfImplicationConstraints(c.l)		=>
+	GetSetOfImplicationConstraints(l)
+end
+[]	GetSetOfImplicationConstraints(nil)		=>
+	nil
+end
+
+[]	CreateSetOfMembershipConstraints	=>
+	FOR EACH x:identifier SUCH THAT x:=(listExtract)elem(Variables):
+
+	{x in? Values} nil
+end
+
+[]	GetDomainOfCardinalitynInHead(x in? D.l1,n,l2)	=>
+	GetDomainOfCardinalitynInHead(l1,n,x in? D.l2)
+	if	not(GetCard(D) == n)
+end
+[]	GetDomainOfCardinalitynInHead(c.l1,n,l2)	=>
+	append(c.l1,l2)
+end
+[]	GetDomainOfCardinalitynInHead(nil,n,l2)	=>
+	nil
+end
+
+[]	GetRemainingConstraints(c1 V c2.C,l,c3,c4)	=>
+	GetRemainingConstraints(C,c1 V c2.l,c3,c4)
+end
+
+[]	GetRemainingConstraints(c.C,l,c1,c2)	=>
+	GetRemainingConstraints(C,c.l,c1,c2)
+	if	size(GetVarOfFormula(c)) >= 2
+end
+
+[]	GetRemainingConstraints(c.C,l,c1,c2)	=>
+	GetRemainingConstraints(C,NormalFormOfUnaryConstraint(c).l,c1,c2)
+	if	size(GetVarOfFormula(c)) == 1
+end
+
+[]	GetRemainingConstraints(c.C,l,c1,c2)	=>
+	GetRemainingConstraints(C,l,c1,c2)
+	if	EvaluateFormula(c)
+end
+
+[]	GetRemainingConstraints(c.C,l,c1,c2)	=>
+	c2.nil
+end
+
+[]	GetRemainingConstraints(nil,l,c1,c2)	=>
+	c1.l
+end
+
+[]	GetConstraintOfAritynInHead(c.l1,n,l2)		=>
+	GetConstraintOfAritynInHead(l1,n,c.l2)
+	if	not(size(GetVarOfFormula(c)) == n)
+end
+[]	GetConstraintOfAritynInHead(c.l1,n,l2)		=>
+	append(c.l1,l2)
+end
+[]	GetConstraintOfAritynInHead(nil,n,l2)		=>
+	nil
+end
+
+[]	GetDisyuntiveConstraintInHead(c1 V c2.C,l)	=>
+	append(c1 V c2.C,l)
+end
+[]	GetDisyuntiveConstraintInHead(c.C,l)		=>
+	GetDisyuntiveConstraintInHead(C,c.l)
+end
+[]	GetDisyuntiveConstraintInHead(nil,l)		=>
+	nil
+end
+
+[]	GetVarInHead(x,c.l1,l2)			=>
+	GetVarInHead(x,l1,c.l2)
+	if	not(occurs x in c)
+end
+[]	GetVarInHead(x,c.l1,l2)			=>
+	append(c.l1,l2)
+end
+[]	GetVarInHead(x,nil,l2)		=>
+	nil
+end
+
+[]	GetValueInHead(c.l1,C,l2)		=>
+	GetValueInHead(l1,C,c.l2)
+	if	not(occurs GetVarOfEqualityConstraint(c) in C)
+end
+
+[]	GetValueInHead(c.l1,C,l2)		=>
+	append(c.l1,l2)
+end
+
+[]	GetValueInHead(nil,C,l2)		=>
+	nil
+end
+
+[]	GetMinimumDomain(c1.x2 in? D2.l1,l2,n)	=>
+	GetMinimumDomain(x2 in? D2.l1,c1.l2,m)
+	if 	m < n
+	where	m := ()GetCard(D2)
+end
+[]	GetMinimumDomain(c1.c2.l1,l2,n)	=>
+	GetMinimumDomain(c1.l1,c2.l2,n)
+end
+[]	GetMinimumDomain(c.nil,l2,n)	=>
+	c.l2
+end
+
+[]	GetMaximumDegree(c1.x2 in? D2.l1,C,l2,n)	=>
+	GetMaximumDegree(x2 in? D2.l1,C,c1.l2,m)
+	if 	m > n
+	where	m := ()GetDegreeOfConstraint(x2,C)
+end
+[]	GetMaximumDegree(c1.c2.l1,C,l2,n)	=>
+	GetMaximumDegree(c1.l1,C,c2.l2,n)
+end
+[]	GetMaximumDegree(c.nil,C,l2,n)	=>
+	c.l2
+end
+
+
+
+end
+
+
+end
+
+
+
+
+

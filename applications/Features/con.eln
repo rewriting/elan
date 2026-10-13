@@ -1,0 +1,74 @@
+module con
+
+import global int; end
+
+sort Foo; end
+
+operators global
+  a : Foo;
+  b : Foo;
+  c : Foo;
+  s(@)	: (Foo) Foo;
+  foo(@)	: (int) Foo;
+  loop		: Foo;
+end
+
+stratop global
+  ALL		: <Foo -> Foo> 			builtin;
+
+  ALLDC		: <Foo -> Foo> 			builtin;
+  ALLDK		: <Foo -> Foo> 			builtin;
+  ALLONE	: <Foo -> Foo> 			builtin;
+
+  ALLdk		: <Foo -> Foo> 			builtin;
+  ALLdc		: <Foo -> Foo> 			builtin;
+  ALLone	: <Foo -> Foo> 			builtin;
+
+  STR1		: <Foo -> Foo> 			builtin;
+  STR2		: <Foo -> Foo> 			builtin;
+  STR3		: <Foo -> Foo> 			builtin;
+end
+
+rules for Foo
+x:Foo;
+n:int;
+global
+  []	loop => loop		end
+  []	foo(0) => a		end
+  []	foo(n) => s(foo(n-1))	end
+  [R1]  x => a  end
+  [R2]  x => b  end
+  [R3]  x => c  end
+  [L1]  x => foo(400) end
+//  [L1]  x => loop    end
+  [L2]  x => foo(2) end
+  [L3]  x => foo(30) end
+end
+
+strategies for Foo
+implicit
+  [.]  STR1 => dk(R3,R2,R1)			end
+//  [.]  ALL => dkconcur(id) 			end
+
+//  [.]  ALL => dkconcur(id, id, id) 		end
+
+//  [.]  ALL => dkconcur(dk(R3)) 	end
+//  [.]  ALL => dkconcur(dk(R2,R1)) 	end
+//  [.]  ALL => dkconcur(dk(R3), id, dk(R2,R1)) 	end
+
+
+  [.]  ALLdk => dkconcur(STR1, id, dk(R1,R2)) 	end
+  [.]  ALLdc => dcconcur(STR1, id, dk(R1,R2)) 	end
+  [.]  ALLone => oneconcur(STR1, id, dk(R1,R2)) 	end
+
+  [.]  ALLONE => oneconcur(dk(L1,L2), dk(L2,L3), dk(L3,L1)) 	end
+  [.]  ALLDK => dkconcur(dk(L1,L2), dk(L2,L3), dk(L3,L1)) 	end
+  [.]  ALLDC => dcconcur(dk(L1,L2), dk(L2,L3), dk(L3,L1)) 	end
+
+//  [.]  ALL => ALLDK 					end
+//  [.]  ALL => ALLDK ; ALLdk					end
+//  [.]  ALL => ALLDK ; ALLdc					end
+  [.]  ALL => ALLDK  ; ALLone					end
+end
+
+end

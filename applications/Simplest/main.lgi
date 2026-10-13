@@ -1,0 +1,8 @@
+LPL main description 
+
+      query 	of sort Foo
+      result 	of sort Foo
+      import  	main
+      start with 	(ss)query
+
+end

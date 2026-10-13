@@ -1,0 +1,345 @@
+module renaming[vars,fss,prec]
+
+/* Module containing operations concerning the renaming of variables */
+/* of terms, of equations and of equational systems */
+
+/* vars : variables, 
+   fss  : operators,
+   prec : precedence */
+
+
+import	
+        local 
+		vars
+		fss
+		prec
+		bool 
+		int
+		eqSystem[fss,vars] /* defined the sort eqSystem so equation */
+		termCommons[fss,vars] /* defined the sort term so variable*/
+		identifier
+		pair[identifier,int]
+		list[pair[identifier,int]]
+		substitution
+		applySubstOn[fss,vars,term]
+		lvariables[vars,fss,prec]
+		eq[term]
+		eq[variable]
+	;
+end
+
+operators
+  global
+    	
+	/* Give the number i of the variable writtem by var(i) such */
+	/* that i is maximum in the term or in the equational system */
+	/* or the integer n if n > i */
+	maxvar(@,@)	: (term int) int;
+	maxvar(@,@)	: (eqSystem int) int;
+
+	/* Normalization of a term by a substitution */
+	/* A variable is replaced by another variable in all the term */
+	/* rename( f(x,y) , x->y o y->x ) ==> f(x,x) */
+	/* but normalize( f(x,y) , x->y o y->x ) ==> f(y,x) */
+	/* The term does not need to be written using var(i) */
+	normalize(@,@)	: (term substitution) term;
+
+	/* Normalization of an equation by a substitution */
+	normalize(@,@)	: (equation substitution) equation;
+	
+	/* Normalization of an equationnal system by a substitution*/
+	normalize(@,@)	: (eqSystem substitution) eqSystem;
+
+	/* Given 2 integers n and i. rename_subst constructs recursively */
+	/* a substitution var(0) -> var(i),..., var(n) -> var(n+i) */
+	rename_subst(@,@)     : (int int) substitution;
+
+	/* Renaming of a term starting from var(i) even if it is not */
+	/* expressed using var(j) */
+	/* The resulted term is only written using var(i) */
+	/* normalize(f(g(x),y),3) => f(g(var(4)),var(3))*/
+	normalize(@,@)	: (term int) term;
+
+	/* Renaming of an equation starting from var(i) even if it is not */
+	/* expressed using var(j) */
+	/* The resulted equation is only written using var(i) */
+	/* normalize(f(g(x),y) \approx x,3) => f(g(var(4)),var(3))=var(4) */
+	normalize(@,@)	: (equation int) equation;
+
+	/* Renaming of the term from var(0) */
+	/* normalize(f(g(x),y)) => f(g(var(1)),var(0)) */
+	normalize(@)	: (term) term;
+
+	/* Renaming of the equation from var(0) */
+	/* normalize(f(g(x),y)=x) => f(g(var(1)),var(0))=var(1) */
+	normalize(@)	: (equation) equation;
+
+	/* Renaming of a term from var(i) when i = n+1 */
+	/* translate(f(g(var(1)),var(0)),3) => */
+	/* f(g(var(5)),var(4)) */
+	translate(@,@)	: (term int) term;
+
+	/* Renaming of an equation from var(i) when i = n+1 */
+	/* translate(f(g(var(1)),var(0))=var(1),3) => */
+	/* f(g(var(5)),var(4))=var(5) */
+	translate(@,@)	: (equation int) equation;
+
+	/* Renaming of a term containing var(0)...var(n) from var(n+1)*/
+	/* translate(f(g(var(1)),var(0)) => */
+	/* f(g(var(3)),var(2)) */
+	translate(@)	: (term) term;
+
+	/* Renaming of an equation containing var(0)...var(n) from var(n+1)*/
+	/* translate(f(g(var(1)),var(0))=var(1)) => */
+	/* f(g(var(3)),var(2))=var(3) */
+	translate(@)	: (equation) equation;
+end
+
+
+/* maxvar */
+
+FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+SUCH THAT SS:=(listExtract) elem(fss) AND F:=()first(SS) 
+AND N:=()second(SS) :{
+  rules for int
+   t_1,...,t_N : term;
+   m: int;
+  global
+      [] maxvar(F(t_1,...,t_N),m) => { maxvar(t_I, }_I=1...N m {)}_I=1...N
+      end
+  end
+}
+
+
+/* maxvar */
+
+rules for int
+	m : int;
+	n : int;
+	X : variable;
+	N : int;
+	s, t : term;
+	C: eqSystem;
+	b: bool;
+global
+  [] maxvar(var(n),m)	=> switch
+			case n > m then n
+			otherwise m
+			end
+  end
+
+  [] maxvar(X,m) 	=> m
+  end
+
+  [] maxvar(s->t,N)    	=> maxvar(s,N)
+  end
+
+  [] maxvar(s=t,N)     	=> maxvar(s,maxvar(t,N))
+  end
+
+  [] maxvar(C & s=t,N) 	=> maxvar(C,maxvar(s,maxvar(t,N)))
+  end
+
+  [] maxvar(C & s->t,N) => maxvar(C,maxvar(s,N))
+  end
+
+  [] maxvar(C & b,N)   	=> maxvar(C,N)
+  end
+
+  [] maxvar(true,N)     => N
+  end
+end
+
+
+/* normalize */
+/* Renaming of a term such that normalize((x,y),x->y o y->x) => f(y,x) */
+
+rules for term
+	X,Y,Z : variable;
+	sigma : substitution;
+	n : int;
+global
+  [] normalize(X,identity)		=> X 
+  end
+
+  [] normalize(var(n),identity)		=> var(n)
+  end
+
+  [] normalize(X,Z->Y o sigma)		=> Y if eq_variable(X,Z) 
+  end
+
+  [] normalize(var(n),Z->Y o sigma)	=> Y if eq_variable(var(n),Z) 
+  end
+
+  [] normalize(X,Z->Y)			=> Y if eq_variable(X,Z) 
+  end
+
+  [] normalize(var(n),Z->Y)		=> Y if eq_variable(var(n),Z) 
+  end
+
+  [] normalize(X,Y->Z o sigma)		=> normalize(X,sigma) 
+					if not eq_variable(X,Y) 
+  end
+
+  [] normalize(var(n),Y->Z o sigma)	=> normalize(var(n),sigma) 
+					if not eq_variable(var(n),Y) 
+  end
+end
+
+
+FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+SUCH THAT SS:=(listExtract) elem(fss) AND F:=()first(SS) 
+AND N:=()second(SS) :{
+rules for term
+	t_1,...,t_N : term;
+	sigma : substitution;
+global
+    [] normalize(F(t_1,...,t_N),sigma) => F({normalize(t_I,sigma),}_I=1...N)  
+    end
+end
+}
+
+
+/* normalize */
+/* Renaming of an equation (based on the renaming of a term) */
+
+rules for equation
+l,r : term;
+sigma : substitution;
+global
+  [] normalize(l=r,sigma)	=> normalize(l,sigma)=normalize(r,sigma)
+  end
+
+  [] normalize(l->r,sigma) 	=> normalize(l,sigma)->normalize(r,sigma)
+  end
+end
+
+
+/* Renaming of an equationnal system (based on the renaming of an equation) */
+
+rules for eqSystem
+	s,t	: term;
+	C	: eqSystem;
+	sigma	: substitution;
+	b	: bool;
+global
+  [] normalize(C & s=t,sigma) => normalize(C,sigma) & normalize(s,sigma) = 
+	normalize(t,sigma)
+  end
+
+  [] normalize(C & s->t,sigma) => normalize(C,sigma) & normalize(s,sigma) -> 
+	normalize(t,sigma)
+  end
+
+  [] normalize(C & b,sigma) => normalize(C,sigma) 
+  end
+
+  [] normalize(true,sigma) => true
+  end
+end
+
+
+/* rename_subst */
+/* Renaming of a substitution such that var(0) ... var(n) is renamed in */
+/* var(n) ... var(n+i) */
+
+rules for substitution
+	i,n : int;
+global
+  [] rename_subst(0,i)	=> var(0)->var(i)
+  end
+
+  [] rename_subst(n,i)	=> var(n)->var(n+i) o rename_subst(n-1 ,i) 
+  end
+end
+
+
+/* normalize */
+
+rules for term
+	t : term;
+	lv : list[variable];
+	N : int;
+	sigma : substitution;
+global
+  [] normalize(t,N) 		=> normalize(t,sigma)
+				where lv := ()list_variables(t)
+				where sigma := ()rename_subst(lv,N)
+  end
+
+  [] normalize(t)		=> normalize(t,0)
+  end 
+end
+
+
+/* normalize */
+
+rules for equation
+	equ : equation;
+	lv : list[variable];
+	N : int;
+	sigma : substitution;
+global
+  [] normalize(equ,N) 		=> normalize(equ,sigma)
+				where lv := ()list_variables(equ)
+				where sigma := ()rename_subst(lv,N)
+				/* rename_subst : function of */
+				/* termCommons.eln */
+  end
+
+  [] normalize(equ)		=> normalize(equ,0)
+  end
+end
+
+
+/* translate */
+
+
+rules for term
+	t : term;
+	sigma : substitution;
+	N : int;
+global
+ [] translate(t,N) 	=> normalize(t,sigma)
+			where sigma := () rename_subst(maxvar(t,0),N+1)
+ end
+
+ [] translate(t)	=> normalize(t,sigma)
+			where N:=() maxvar(t,0)
+			where sigma := () rename_subst(N,N+1)
+ end
+end
+
+
+/* translate */
+
+rules for equation
+	equ : equation;
+	sigma : substitution;
+	N : int;
+global
+ [] translate(equ,N) 	=> normalize(equ,sigma)
+			where sigma := () rename_subst(maxvar(equ,0),N+1)
+ end
+
+ [] translate(equ)	=> normalize(equ,sigma)
+			where N:=() maxvar(equ,0)
+			where sigma := () rename_subst(N,N+1)
+ end
+end
+
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+

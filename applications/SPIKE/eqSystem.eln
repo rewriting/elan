@@ -1,0 +1,73 @@
+//--------------------------------------------------------------------------------------
+// Another eqSystem  -> very similar to the module from lib
+//--------------------------------------------------------------------------------------
+module eqSystem[Vars,Ars]
+import 	global	
+	applySubstOn[Vars,Ars,eqSystem] 
+;end
+
+sort eqSystem equation;
+end
+
+operators
+global
+  @ = @		: ( term term ) equation;
+
+  @		: ( bool ) eqSystem;
+  @ 		: ( equation ) eqSystem;
+  @ & @		: ( eqSystem eqSystem ) eqSystem	assocLeft;
+  (@ & @)	: ( eqSystem eqSystem ) eqSystem	alias @ & @:;
+
+  system_to_subst(@)	: ( eqSystem ) substitution;
+    //Pierrot
+    system_to_subst(@,@) : (list[term] list[term]) substitution;
+end
+
+stratop
+  global
+    delete_new_variables : <eqSystem>	builtin;
+end
+
+rules  for substitution
+	P,Q,R	: eqSystem;
+	$t	: term;
+	$x	: variable;
+	//Pierrot
+	lv      : list[term];
+	lt      : list[term];
+	$v      : variable;
+global
+  [] system_to_subst(true) 	=> identity			end
+  [] system_to_subst($x=$t) 	=> $x->$t			end
+  [] system_to_subst(P & Q) 	=> system_to_subst(P) o system_to_subst(Q)
+  end
+    //Pierrot
+  [] system_to_subst(lv,nil)    => identity                     end
+  [] system_to_subst($v.lv,$t.lt) => $v->$t o system_to_subst(lv,lt) 
+  end
+end
+
+rules for eqSystem
+ P,Q,R	: eqSystem;
+	n	: int;
+	$t	: term;
+	e	: equation;
+global
+  [new_var_elim] P & var(n) = $t 	=> apply(var(n)->$t,P)	end
+  [unfold]	 P & (Q & R)		=> (P & Q) & R		end
+  [eqPass] 	 P & e	 		=> e & P		end
+
+
+end
+
+strategies for eqSystem
+implicit
+  [.] delete_new_variables =>
+  repeat* (
+    //dc(new_var_elim , unfold , eqPass)
+    dc one(new_var_elim , unfold , eqPass)
+  )
+  end
+end
+
+end

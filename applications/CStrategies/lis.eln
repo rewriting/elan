@@ -1,0 +1,34 @@
+module lis[X]
+
+import global 	Any list[Any] any[X] 
+		strat[X] strat[Any] strat[list[Any]];
+end
+operators global
+  lis(@)	: (<X>) <Any>;
+ local
+  map(@)	: (<X>) <list[Any]>;
+  mis(@)	: (<X>) <Any>;
+end
+
+strategies for Any
+	s	: <X>;
+	a	: Any;
+	as	: list[Any];
+defined
+  [lis(s)] first(mis(s),(X)s)				end
+  [mis(s)]a => implode(functor(a),as) where as:=[map(s)]explode(a) end
+end
+
+strategies for list[Any]
+	s	: <X>;
+defined
+  [map(s)] first(cons(lis(s),id), cons(id,map(s)))	end 
+end
+
+end
+
+
+
+
+
+

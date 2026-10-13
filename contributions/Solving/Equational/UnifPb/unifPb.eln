@@ -1,0 +1,62 @@
+module unifPb
+import 	global	applySubstOn[unifPb];
+	local	bool int term;
+end
+
+sort unifPb equation; end
+
+
+operators
+global
+  @ = @		: ( term term ) equation;
+
+  @		: ( bool ) unifPb;
+  @ 		: ( equation ) unifPb;
+  @ /\ @	: ( unifPb unifPb ) unifPb      (AC) ;
+  (@ /\ @)	: ( unifPb unifPb ) unifPb	alias @ /\ @:;
+
+  system_to_subst(@)	: ( unifPb ) substitution;
+end
+
+stratop global
+
+delete_new_variable : < unifPb > builtin ;
+
+end
+
+
+rules for substitution
+ P,Q,R	: unifPb;
+	$t	: term;
+	$x	: variable;
+global 
+  [] system_to_subst(true) 	=> identity			end
+  [] system_to_subst($x=$t) 	=> $x->$t			end
+  [] system_to_subst(P /\ Q) 	=> system_to_subst(P) o system_to_subst(Q)
+  end
+end
+
+rules for unifPb
+ P,Q,R	: unifPb;
+	n	: int;
+	$t	: term;
+	e	: equation;
+global
+  [new_var_elim] P /\ var(n) = $t 	=> apply(var(n)->$t,P)	end
+end
+
+
+strategies for unifPb
+
+implicit 
+
+  [.] delete_new_variable => 
+  repeat* (
+    dc(new_var_elim)
+  ) end
+
+end
+
+end
+
+

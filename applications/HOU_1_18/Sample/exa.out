@@ -1,0 +1,105 @@
+ true.nil end
+
+ end end
+end
+
+ false.nil end
+
+ end end
+end
+
+ true.nil end
+
+ end end
+end
+
+ nil end
+
+ end end
+end
+
+ a=Z.nil end
+
+ end end
+end
+
+ nil end
+
+ end end
+end
+
+ nil end
+
+ end end
+end
+
+ Z=W.nil end
+
+ end end
+end
+
+ false.nil end
+
+ end end
+end
+
+ nil end
+
+ end end
+end
+
+ a=Z.nil end
+
+ end end
+end
+
+(f a)=Z.nil end
+
+ end end
+end
+
+ Z=W.nil end
+
+ end end
+end
+
+ false.(la V_Bvars(1).b)=X.nil end
+
+ end end
+end
+
+(la V_Bvars(1).V_Bvars(1))=X.(la V_Bvars(1).a)=X.nil end
+
+ end end
+end
+
+(la V_Bvars(1).V_Bvars(1))=Y.(la V_Bvars(1).c)=Y.nil end
+
+ end end
+end
+
+ nil end
+
+ end end
+end
+
+ true-AND-(V_Mvars(2)a)=(V_Mvars(3)c)-AND-V_Mvars(2)=X-AND-V_Mvars(3)=V.nil end
+
+ end end
+end
+
+(f a)=Z-AND-(la V_Bvars(1).V_Bvars(1))=X.a=Z-AND-f=X.(la V_Bvars(1).(f a))=X.nil end
+
+ end end
+end
+
+(la V_Bvars(1).(f(f(f(f V_Bvars(1))))))=X.(la V_Bvars(1).(f(f(f V_Bvars(1)))))=X.(la V_Bvars(1).(f(f V_Bvars(1))))=X.f=X.(la V_Bvars(1).V_Bvars(1))=X.nil end
+
+ end end
+end
+
+ f=X.nil end
+
+ end end
+end
+

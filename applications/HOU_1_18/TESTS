@@ -1,0 +1,27 @@
+# tests of HOU_1_18 (from legacy/elan3 tst_all; format: tests/apps/README.md)
+itest hou exa exa exa
+itest phou specPat specPat specPat
+long itest hou specPat specPat specPat
+long itest hou specPat1 specPat1 specPat1
+long itest hou specPat2 specPat2 specPat2
+long itest hou specPat3 specPat3 specPat3
+long itest hou specPat4 specPat4 specPat4
+long itest hou specPat5 specPat5 specPat5
+long itest phou specPat1 specPat1 specPat1p
+long itest phou specPat2 specPat2 specPat2p
+long itest phou specPat3 specPat3 specPat3p
+long itest phou specPat4 specPat4 specPat4p
+long itest phou specPat5 specPat5 specPat5p
+aitest hou exa exa exa
+aitest phou specPat specPat specPat
+long aitest hou specPat specPat specPat
+long aitest hou specPat1 specPat1 specPat1
+long aitest hou specPat2 specPat2 specPat2
+long aitest hou specPat3 specPat3 specPat3
+long aitest hou specPat4 specPat4 specPat4
+long aitest hou specPat5 specPat5 specPat5
+long aitest phou specPat1 specPat1 specPat1p
+long aitest phou specPat2 specPat2 specPat2p
+long aitest phou specPat3 specPat3 specPat3p
+long aitest phou specPat4 specPat4 specPat4p
+long aitest phou specPat5 specPat5 specPat5p

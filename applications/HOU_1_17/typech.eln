@@ -1,0 +1,137 @@
+module typech[mvars,btypes,bvars]
+import
+  global  	int bool 
+		list[wtterm] terms[mvars,btypes,bvars] contexts[btypes] 
+		//----
+		types[btypes] contexts[btypes] 
+		pair[list[obj_Bvars],list[obj_Bvars]]
+		vars[bvars,btypes] vars[mvars,btypes];
+  local	eq[type];
+op
+  global
+    typech(@)		: (lterm) wtterm;
+    typech(@,@)		: (wtterm context) wtterm;
+    typech(@,@)         : (wtsubst context) wtsubst;
+    typeof(@)		: (wtterm) type;
+    //-------------------------------------------------------------//
+    typech(@,@)		: (list[wtterm] wtterm) wtterm;
+    typech(@,@)		: (list[wtterm] wtsubst) wtsubst;
+    typeof(@,@)		: (obj_Mvars list[wtterm]) type;
+    listvardefstolistgoal(@) : (list[vardefs]) list[wtterm];
+endop
+
+rules for list[wtterm]
+declare	mvrs	: list[vardefs];
+	cc	: context;
+	tt	: type;
+	mm	: obj_Mvars;
+bodies
+  []	listvardefstolistgoal(nil)	=> nil
+  end
+  []	listvardefstolistgoal(cc|-mm:tt.mvrs)	=>
+		mm:cc|-tt.listvardefstolistgoal(mvrs)
+  end
+end of rules
+
+rules for wtsubst
+declare
+  cc, cc1, cc2, cc3, cc4, cc5, cc6	: context;
+  tt, tt1, tt2, tt3, tt4, tt5, tt6	: type;
+  sss, ttt				: tsubst;
+  sss1, ttt1				: wtsubst;
+  aaa, bbb				: tterm;
+  aaa1, bbb1				: wtterm;
+  aa					: lterm;
+  var					: obj_Mvars;
+  mvrs					: list[wtterm];
+bodies
+  []    typech(sss1,cc) => typech(listvardefstolistgoal(listdefs_Mvars),
+                                  replace_c(sss1,cc))
+  end
+  []	typech(mvrs,id: cc1|>cc2)	=> id: cc1|>cc1
+  end
+  []	typech(mvrs,^:tt.cc1|>cc2)	=> ^:tt.cc1|>cc1
+  end
+  []	typech(mvrs,aaa:cc1|-tt1. sss:cc2|>cc3 :cc4|>cc5) =>
+		aaa1. sss1 :cc4|>type(aaa1).context2(sss1)
+		where aaa1:=()typech(mvrs,aaa:cc4|-notype)
+		where sss1:=()typech(mvrs,sss:cc4|>nocontext)
+  end
+  []	typech(mvrs,sss:cc1|>cc2 o ttt:cc3|>cc4 :cc5|>cc6) =>
+		sss1 o ttt1 : cc5|> context2(sss1)
+		where sss1:=()typech(mvrs,sss:context2(ttt1)|>nocontext)
+  		where ttt1:=()typech(mvrs,ttt:cc5|>nocontext)		
+  end
+end of rules
+
+rules for type
+declare	mvrs		: list[wtterm];
+	mm, $mmm	: obj_Mvars;
+	cc		: context;
+	tt		: type;
+	aa		: tterm;
+bodies
+  []	typeof(mm,nil)	=> notype				
+  end
+  []	typeof(mm, mm : cc|-tt.mvrs) => tt			
+  end
+  []	typeof(mm, $mmm : cc|-tt.mvrs) => 
+		typeof(mm,mvrs) if mm != $mmm
+  end
+  []	typeof(aa:cc|-tt)	=> tt if known(tt)		
+  end
+  []	typeof(aa:cc|-tt)	=> notype if not known(tt)	
+  end
+end of rules
+
+rules for wtterm
+declare
+  cc, cc1, cc2, cc3, cc4, cc5, cc6	: context;
+  tt, tt1, tt2, tt3, tt4, tt5, tt6	: type;
+  sss, ttt				: tsubst;
+  sss1, ttt1				: wtsubst;
+  aaa, bbb				: tterm;
+  aaa1, bbb1				: wtterm;
+  aa					: lterm;
+  var					: obj_Mvars;
+  mvrs					: list[wtterm];
+  k					: int;
+bodies
+  []	typech(aa)	=> typech(listvardefstolistgoal(listdefs_Mvars),
+				  replace_c( fill(F(ltodB(aa))),
+				  make_context(
+				  second(collect_fbvars(aa,[nil,nil])))))
+  end
+  []	typech(aaa1,cc)	=> typech(listvardefstolistgoal(listdefs_Mvars),
+				  replace_c(aaa1,cc))
+  end
+  []	typech(mvrs,#k:cc|-tt1)	=> #k:cc|-k-th elem(cc)
+  end
+  []	typech(mvrs,(la tt.aaa:cc1|-tt1):cc2|-tt2) =>
+		(la tt.aaa1):cc2|-tt->type(aaa1)
+		where aaa1:=()typech(mvrs,aaa:tt.cc2|-notype)
+  end	
+  []	typech(mvrs,(aaa:cc1|-tt1 bbb:cc2|-tt2):cc3|-tt3) =>
+		(aaa1 bbb1):cc3|-codomain_type(type(aaa1))
+		if functional_type(type(aaa1)) and
+		   domain_type(type(aaa1)) == type(bbb1)
+ 		where aaa1:=()typech(mvrs,aaa:cc3|-notype)
+ 		where bbb1:=()typech(mvrs,bbb:cc3|-notype)
+  end
+  []	typech(mvrs,aaa:cc1|-tt1 [sss:cc2|>cc3] :cc4|-tt4) =>
+		aaa1 [sss1] :cc4|-type(aaa1)
+		where aaa1:=()typech(mvrs,aaa:context2(sss1)|-notype)
+		where sss1:=()typech(mvrs,sss:cc4|>nocontext)
+  end
+  []	typech(mvrs,var:cc1|-tt1)	=> var:cc1|-typeof(var,mvrs)
+  end		
+end of rules
+
+end of module
+
+
+
+
+
+
+

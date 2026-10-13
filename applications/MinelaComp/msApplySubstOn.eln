@@ -1,0 +1,27 @@
+module msApplySubstOn[X,Vars,Ops,Types]
+/*
+	specify substitution applicable on sort X
+*/
+import msTermCommons[Vars,Ops,Types] replace[term,X];
+end
+
+sort X;
+end
+
+operators
+  global
+
+    @(@)	: ( substitution X ) X;
+    apply(@,@)	: ( substitution X ) X		alias @(@):;
+
+end
+
+rules for X
+ tt:X; s1,s2:substitution; v:variable; t:term;
+global
+  [] apply(identity,tt) 	=> tt				end
+  [] apply(s1 o s2 ,tt) 	=> apply(s2,apply(s1,tt))	end
+  [] apply(v->t,tt) 		=> replace(v,t,tt)		end
+end
+
+end

@@ -1,0 +1,26 @@
+module atom
+/*
+   this module define some notions commons for all first order atoms
+   this is for the case, that you use two kinds of atoms built on different
+   signatures, but defined both by the module atomP
+*/
+import	global	eq[atom] eq[Psymbol] ;
+	local	int term ;
+end
+
+sort Psymbol atom;
+end
+
+operators
+  global
+
+
+  head(@)		: ( atom ) Psymbol;
+
+  arity(@)              : ( Psymbol ) int;
+
+  @-th subterm(@) 	: ( int atom ) term;
+
+end
+
+end

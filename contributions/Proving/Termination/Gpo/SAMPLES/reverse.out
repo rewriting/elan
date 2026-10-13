@@ -1,0 +1,5 @@
+ precedence=(prec(append>cons)^(prec(rev>append)^(prec(rev>cons)^(prec(cons>nil)^Tinterp)))) end
+
+ end end
+end
+

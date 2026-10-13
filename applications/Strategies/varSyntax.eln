@@ -1,0 +1,13 @@
+module varSyntax
+
+	// This module describes a possible syntax for the user specification
+
+import global	anyIdentifier;
+       local	identifier list[identifier] ;
+op global
+  @	  : ( ident ) identifier;
+  Epsilon : list[identifier]		      		      alias nil:;
+  @  @	  : ( identifier list[identifier] ) list[identifier]  alias cons(@,@):;
+end
+
+end

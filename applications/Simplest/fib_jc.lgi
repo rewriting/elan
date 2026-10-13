@@ -1,0 +1,7 @@
+LPL fib_jc description
+  query    of sort int
+  result   of sort int
+  import   fib
+  start with () fib(20)
+
+end

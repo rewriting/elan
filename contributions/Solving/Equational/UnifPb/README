@@ -1,0 +1,25 @@
+Interpreted version
+===================
+
+elan unification simplesig
+
+elan unificationC simplesig
+
+
+Compiled version
+================
+
+elanc unification simplesig ; gmake --file unification.make ; a.out
+
+elanc unificationC simplesig ; gmake --file unificationC.make ; a.out
+
+
+Equations
+=========
+
+f(z,u)=f(a,w) /\ f(w,z) = f(g(c),v) end
+
+g(v) = g(c) /\ z=g(g(a)) /\ w=g(z) end
+
+v = a /\ w = z /\ z = b /\ v=w end
+

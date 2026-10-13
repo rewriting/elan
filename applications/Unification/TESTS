@@ -1,0 +1,7 @@
+# tests of Unification (from legacy/elan3 tst_all; format: tests/apps/README.md)
+itest unification simplesig simple1 isimple1
+itest unification boolean bool1 ibool1
+itest unification boolean bool2 ibool2
+aitest unification simplesig simple1 isimple1
+aitest unification boolean bool1 ibool1
+aitest unification boolean bool2 ibool2

@@ -1,0 +1,61 @@
+module new_meta
+
+import global 
+   Meta_apply[Foo];
+end
+
+sort Foo; end
+
+operators global
+  a	: Foo;
+  b	: Foo;
+  c	: Foo;
+  d	: Foo;
+  e	: Foo;
+  f	: Foo;
+  do(@)		: (Foo) Foo;
+  dolist(@)	: (Foo) list[Foo];
+end
+
+stratop global 
+  RRR	: <Foo> builtin;
+  DDD	: <Foo> builtin;
+  MMM	: <list[Foo]> builtin;
+end
+
+rules for list[Foo]
+x, y	: Foo;
+z 	: list[Foo];
+global
+  [M1]  dolist(x)  =>  set_of(call "RRR":Foo,x) end
+  [M2]  dolist(x)  => z where z:=(META)meta_apply(call "RRR":Foo,x,1,2) end
+  [M3]  dolist(x)  => z where z:=(META)meta_apply(call "RRR":Foo,x,4,5) end
+  [M4]  dolist(x)  => z where z:=(META)meta_apply(call "RRR":Foo ,x,0,99) end
+  [M5]  dolist(x)  => z where z:=(META)meta_apply(call "RRR":Foo ,x,3,-1) end
+  [M6]  dolist(x)  => z where z:=(META)meta_apply(call "RRR":Foo ,x,2,0) end
+  [M7]  dolist(x)  => z where z:=()set_of(call "RRR":Foo ,x) end
+end
+
+rules for Foo
+x, y	: Foo;
+global
+  [R]  do(x)  =>  y where y:=(RRR)x end
+  [R1]  a => a  end
+  [R2]  a => b  end
+  [R3]  a => c  end
+  [R3]  a => d  end
+  [R3]  a => e  end
+  [R3]  a => f  end
+end
+
+strategies for Foo
+implicit
+  [.]  RRR => dk(R1,R2,R3) end
+  [.]  DDD => dk(R) end  
+end
+
+strategies for list[Foo]
+implicit
+  [.]  MMM => dk(M1, M2, M3, M4, M5, M6, M7) end
+end
+end

@@ -1,0 +1,35 @@
+module funSyntax
+import 	global	
+		anyIdentifier
+		ident 
+		list[ident] 
+		pair[list[ident],ident]
+		pair[ident,pair[list[ident],ident]]
+		list[pair[ident,pair[list[ident],ident]]]
+	;
+end
+operators
+ global
+//----------- constructors ------------------------------------------------------
+   Epsilon : list[ident]		      		alias nil:;
+   @  @	  : ( ident list[ident] ) list[ident]   
+							alias cons(@,@):;
+
+   @ '-''>' @	: ( list[ident] ident ) 
+			pair[list[ident],ident]   alias [@,@]:;
+
+   @ ':' @	: ( ident pair[list[ident],ident] ) 
+			pair[ident,pair[list[ident],ident]]  alias [@,@]:;
+
+   Epsilon : list[pair[ident,pair[list[ident],ident]]]	alias nil:;
+   @  @	  : ( pair[ident,pair[list[ident],ident]] 
+		list[pair[ident,pair[list[ident],ident]]]  ) 
+			   list[pair[ident,pair[list[ident],ident]]]
+							alias cons(@,@):;
+
+
+end
+
+end
+
+

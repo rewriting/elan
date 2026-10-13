@@ -1,0 +1,17 @@
+module S28[S]
+ 
+import global int S strat[S];
+end
+rules for S
+	x	: S;
+	m, q 	: int;
+global
+  [add(q,m)]	x => x[q<-m][q+m+1<-m][q+2*m+2<-m]
+				if x[q] 	== 0
+				if x[q+m+1] 	== 0
+				if x[q+2*m+2]	== 0
+  end
+end
+
+end
+

@@ -1,0 +1,67 @@
+module trc
+
+import global bool eq[Foo]; end
+
+sort Foo; end
+
+operators global
+  a	: Foo;
+  b	: Foo;
+  c	: Foo;
+  d	: Foo;
+  f(@)	: (Foo) Foo;
+  @(@)	: (Foo Foo) Foo;
+end
+
+stratop global
+  AB	: <Foo> builtin;
+  BC	: <Foo> builtin;
+  ABC	: <Foo> builtin;
+  ALLSOL	: <Foo> builtin;
+end
+
+rules for Foo
+x, y, z, u, uu, m	: Foo;
+global
+  [all]	f(x) => z(y(uu(x))) // z(y(uu(x)))
+		where z:=(AB)x
+		choose
+		  try where u:=()a where y:=()b if true if x == a
+		  try where y:=(BC)x if x == b
+		  try where y:=()c if x == c
+/*
+		  try
+			choose
+			  try if true where u:=()x  where y:=()x
+			  try if false  where y:=()x
+			end
+*/
+		end
+		where uu:=(ABC)d
+		if x == a or x == c
+  end 
+  [LA]  x => a end
+  [LB]  x => b end
+  [LC]  x => c end
+end 
+
+strategies for Foo
+implicit
+  [.] AB => dk(LA,LB)  end
+  [.] ABC => dk(LA,LB,LC)  end
+  [.] BC => dk(LB,LC)  end
+end
+
+strategies for Foo
+implicit
+  [.] ALLSOL => dk(all) end
+//  [.] ALLSOL => dc(all) end
+//  [.] ALLSOL => first one(all) end
+end
+
+end
+
+
+
+
+

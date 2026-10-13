@@ -1,0 +1,43 @@
+module nonblock
+
+import global string bool io[string] io[int]; end
+
+operators global
+  floop(@,@) 	: (string int) int;
+  rloop(@,@,@) 	: (Pid int int) int;
+  wait(@) 	: (int) int;
+  ord(@)	: (bool) int;
+end
+
+rules for int
+	s1, s2, n, n1, n2, i, mm , N1	: int;
+        pid, pid1    		: Pid;
+	Id, Id1			: string;
+	delai			: int;
+global
+ []	ord(true) => 1 end
+ []	ord(false) => 0 end
+ [] floop(Id,n) => n1	
+			where pid :=()create_noblock(Id)
+//			where pid :=()create(Id)
+                        if iserr(pid) == false
+			where mm:=()wait(1000) 
+			where n1  :=()rloop(pid,n,20)
+			where pid1:=()close(pid)
+			if iserr(pid1) == false
+  end
+  [] rloop(pid,0,delai) => 0 						end
+  [] rloop(pid,n,delai) => n1+N1
+			where mm:=()wait(delai) 
+			where n1:=()read(pid)
+			where n2:=()write(stdout,n1) 
+			where N1:=()rloop(pid,n-1,
+				delai+5*ord(iserror(n1)))
+	end
+  []  wait(0) => 0 end
+  []  wait(n) => wait(n-1) end
+end
+
+end
+
+

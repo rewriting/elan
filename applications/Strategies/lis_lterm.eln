@@ -1,0 +1,17 @@
+module lis_lterm
+
+import global 	strat[lterm] any[lterm] lterm
+                any[int] lis[lterm];
+
+end
+
+
+
+
+
+
+
+
+
+
+

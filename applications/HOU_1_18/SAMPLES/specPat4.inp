@@ -1,0 +1,1 @@
+(la x.(la y.(la z.(la w.((((F y) z) x) x))))) = (la x.(la y.(la z.(la w.((((F z) y) w) x))))),slt end

@@ -1,0 +1,23 @@
+module loops
+
+import global strat[integ] integ;
+op global 
+  loop		: <integ>;
+end
+
+rules for integ
+ x	: integ;
+bodies
+  [sub1]	x => x-1 if x > 1	end
+end
+
+strategies for <integ>
+bodies
+//  []	loop ==> dk(sub1;loop, id)	end  
+  []	loop ==> dk(id, sub1;loop)	end  
+end
+
+end
+
+
+

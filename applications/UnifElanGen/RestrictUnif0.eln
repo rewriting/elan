@@ -1,0 +1,80 @@
+module RestrictUnif0[Vars,Fss]
+import 	global 	term bool eqSystem varUnif[Vars] termUnif[Fss] 
+                elimPred freeDec[Fss] ;
+
+ 	local  	int identifier pair[identifier,int]
+		list[int] list[identifier] list[pair[identifier,int]] 
+		occur[term,term] ;
+end
+
+operators
+
+local 
+
+     conj(@,@)            :(eqSystem eqSystem) eqSystem ;
+     propagate(@,@)       :(eqSystem eqSystem) eqSystem ;
+
+end
+
+
+
+rules for eqSystem
+// declare 
+	P,Q,R,S: eqSystem;
+        x: variable ;
+        s,t: term ;
+        mv,mn: int ;
+ 
+local
+ 
+  [solveEq] (true | R) => (true | R) end
+
+  [solveEq] (P | R) => (S | R) 
+                where S:= (unify0) P 
+            end
+
+  [solveEnd] (P | true) => P end
+
+  [] propagate(P & x = t,Q) => propagate(P, apply(x -> t,Q)) end
+  [] propagate(x=t,Q) => propagate(true, apply(x -> t,Q)) end
+  [] propagate(true,Q) => Q end
+
+
+  [propRestrict] (P | R) => (P | propagate(P,R)) end
+
+  [solveRestrict] ( P | elim(s,t)) => (P | true)
+                   if not occurs(s,t) end 
+
+  [solveRestrict] ( P | elim(s,t)) => (P | false)
+                   if occurs(s,t) end 
+
+  [solveRestrict] ( P | R & elim(s,t)) => (P | R)
+                   if not occurs(s,t) end 
+
+  [solveRestrict] ( P | R & elim(s,t)) => (P | false)
+                   if occurs(s,t) end 
+
+
+end
+
+strategies for eqSystem
+
+ global 
+
+[restrictUnif0]
+
+dont care choose (solveEq) ;
+
+dont care choose(propRestrict) ;
+
+repeat*(
+   dont care choose(solveRestrict)
+   ) ;
+
+dont care choose(solveEnd)
+
+end
+
+end
+
+end

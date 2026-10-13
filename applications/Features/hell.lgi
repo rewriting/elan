@@ -1,0 +1,8 @@
+LPL hell description 
+
+  query 	of sort 	Foo
+         	result of sort  Foo
+	 	modules	string  hell
+        	start with 	(kkkk)query
+
+end

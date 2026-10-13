@@ -1,0 +1,34 @@
+module label[Labels]
+import
+global	list[label]
+	;
+local	identifier Labels list[identifier]
+	;
+end
+
+sort label sig;
+end
+
+operators
+global
+
+//  label[@] : (identifier) label;
+
+  FOR EACH X:identifier SUCH THAT X:=(listExtract) elem(Labels)
+  :{
+	X : label;
+   }
+end
+
+/*
+rules for label
+global
+  FOR EACH X:identifier SUCH THAT X:=(listExtract) elem(Labels)
+  :{
+    [] X => label[X] end
+   }
+end
+*/
+
+end
+

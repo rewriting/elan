@@ -1,0 +1,24 @@
+LPL nf_automaton description 
+ 
+  specification description
+
+    part Vars		of sort list[identifier]
+			import sigSyntax
+    part Ops		of sort list[pair[identifier,int]]
+	 		import sigSyntax
+    part R1 	 	of sort list[rwrule]
+			import variable[Vars] ECterm[Vars] Cterm[Ops]
+			rwrule[Ops, Vars] list[rwrule]
+    part Automata 	of sort list[automaton]
+			import automaton[Ops] list[automaton]
+
+  end
+
+  query 	of sort automaton 
+         	result of sort automaton 
+	 	import R1 Automata variable[Vars] ECterm[Vars] Cterm[Ops] 
+		automaton[Ops]
+		rwrule[Ops, Vars] list[rwrule] nf_automaton[Ops, Vars]
+		tools[Ops] rewriting[Ops, Vars] references[Ops, Automata]
+         	start with () query
+end

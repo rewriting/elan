@@ -1,0 +1,13 @@
+# tests of MinelaComp (from legacy/elan3 tst_all; format: tests/apps/README.md)
+itest rewriting append iappend iappend
+itest rewriting congruence icong icong
+itest rewriting or ior ior
+itest rewriting peano ipeano ipeano
+long itest rewriting primes iprimes4 iprimes4
+long itest rewriting sample isample isample
+aitest rewriting append iappend iappend
+aitest rewriting congruence icong icong
+aitest rewriting or ior ior
+aitest rewriting peano ipeano ipeano
+long aitest rewriting primes iprimes4 iprimes4
+long aitest rewriting sample isample isample

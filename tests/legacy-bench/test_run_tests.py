@@ -259,5 +259,142 @@ class CaseRenamesTest(unittest.TestCase):
             self.assertTrue((wd / "nim.eln").read_text(encoding="latin-1").startswith("module nim"))
 
 
+class CopyDiscoveryTest(unittest.TestCase):
+    def test_tests_files_of_the_copy(self):
+        with tempfile.TemporaryDirectory(dir=rt.HERE) as tmp:
+            repo = Path(tmp)
+            app = repo / "applications" / "App"
+            app.mkdir(parents=True)
+            (app / "TESTS").write_text("itest p no q r\nlong gtest p no q r-c\njtest p no jr\n")
+            leg = repo / "legacy" / "elan" / "sources" / "T"
+            leg.mkdir(parents=True)
+            (leg / "tst_all").write_text("itest x no y z\n")
+            old = rt.REPO, rt.ROOT
+            rt.REPO, rt.ROOT = repo, repo / "legacy"
+            try:
+                tests = rt.discover(suites=[repo / "legacy" / "elan" / "sources"],
+                                    apps=[repo / "applications"])
+            finally:
+                rt.REPO, rt.ROOT = old
+            ids = {t["id"]: t for t in tests}
+            self.assertIn("elan/sources/T::I::x:no:y:z", ids)
+            self.assertFalse(ids["elan/sources/T::I::x:no:y:z"]["copy"])
+            self.assertTrue(ids["applications/App::I::p:no:q:r"]["copy"])
+            self.assertTrue(ids["applications/App::G::p:no:q:r-c"]["long"])
+            self.assertEqual({k for k in ids if k.startswith("applications/App::")},
+                             {"applications/App::I::p:no:q:r", "applications/App::G::p:no:q:r-c",
+                              "applications/App::J::p:no:-:jr", "applications/App::JO::p:no:-:jr",
+                              "applications/App::R::p:no:-:jr", "applications/App::G::p:no:-:jr"})
+
+    def test_real_tree_ids(self):
+        ids = {t["id"] for t in rt.discover()}
+        self.assertIn("applications/Simplest::I::prim:no:primes:primes", ids)
+        self.assertIn("applications/Robot::I::nim2:non:nim2:nim2", ids)
+        self.assertIn("elan/sources/Compiler.4.0/Test::J::enum:no:-:enum", ids)
+        self.assertFalse(any(i.startswith("elan3/") for i in ids))
+
+
+class CopyRunTest(unittest.TestCase):
+    def make(self, tmp):
+        d = Path(tmp) / "applications" / "App"
+        (d / "SAMPLES").mkdir(parents=True)
+        (d / "p.lgi").write_text("lgi\n")
+        (d / "SAMPLES" / "new.inp").write_text("new input\n")
+        return dict(dir=d, lgi="p", spc="no", inp="new", out="new",
+                    kind="I", flags=[], copy=True, id="applications/App::I::p:no:new:new")
+
+    def fake_prefix(self, tmp, script):
+        prefix = Path(tmp) / "prefix"
+        (prefix / "bin").mkdir(parents=True)
+        fake = prefix / "bin" / "elan"
+        fake.write_text(script)
+        fake.chmod(0o755)
+        return prefix
+
+    def test_locate_finds_the_samples_file(self):
+        with tempfile.TemporaryDirectory(dir=rt.HERE) as tmp:
+            t = self.make(tmp)
+            self.assertEqual(rt.locate(t, "new.inp"),
+                             (t["dir"] / "SAMPLES" / "new.inp", Path("SAMPLES/new.inp")))
+            self.assertEqual(rt.locate(t, "none.out"), (None, None))
+
+    def test_produce_runs_with_the_input(self):
+        with tempfile.TemporaryDirectory(dir=rt.HERE) as tmp:
+            t = self.make(tmp)
+            old = rt.PREFIX
+            rt.PREFIX = self.fake_prefix(tmp, '#!/bin/sh\necho "elan $*"; cat\n')
+            try:
+                out, err, rc = rt.produce(t, 30)
+            finally:
+                rt.PREFIX = old
+            self.assertEqual(out, "elan -b p.lgi\nnew input\n")
+            self.assertEqual(rc, 0)
+
+    def test_a_failing_run_with_empty_stderr_reports_its_rc(self):
+        with tempfile.TemporaryDirectory(dir=rt.HERE) as tmp:
+            t = self.make(tmp)
+            (t["dir"] / "SAMPLES" / "new.out").write_text("expected\n")
+            old = rt.PREFIX
+            rt.PREFIX = self.fake_prefix(tmp, '#!/bin/sh\necho got; exit 3\n')
+            try:
+                self.assertEqual(rt.produce(t, 30)[2], 3)
+                status, detail, _ = rt.run_test(t, 30)
+            finally:
+                rt.PREFIX = old
+            self.assertEqual(status, "FAIL")
+            self.assertIn("rc=3", detail)
+
+    def test_a_failing_run_with_stderr_reports_its_rc_too(self):
+        with tempfile.TemporaryDirectory(dir=rt.HERE) as tmp:
+            t = self.make(tmp)
+            (t["dir"] / "SAMPLES" / "new.out").write_text("expected\n")
+            old = rt.PREFIX
+            rt.PREFIX = self.fake_prefix(tmp, '#!/bin/sh\necho got; echo oops >&2; exit 3\n')
+            try:
+                status, detail, _ = rt.run_test(t, 30)
+            finally:
+                rt.PREFIX = old
+            self.assertEqual(status, "FAIL")
+            self.assertIn("--- rc=3, stderr:", detail)
+            self.assertIn("oops", detail)
+
+    def test_produce_reports_a_missing_input(self):
+        with tempfile.TemporaryDirectory(dir=rt.HERE) as tmp:
+            t = dict(self.make(tmp), inp="absent")
+            with self.assertRaises(rt.Unrunnable) as e:
+                rt.produce(t, 30)
+            self.assertEqual(e.exception.status, "NOINP")
+
+
+class CopyJudgeTest(unittest.TestCase):
+    def test_new_copy_tests_must_pass(self):
+        st = {"applications/A::I::p:no:q:r": "FAIL", "applications/A::G::p:no:q:r-c": "UNSUPPORTED",
+              "applications/A::I::old:no:q:r": "FAIL"}
+        base = {"applications/A::I::old:no:q:r": "FAIL"}
+        reg, _ = rt.judge(st, base, {}, new_ids={"applications/A::I::p:no:q:r",
+                                                 "applications/A::G::p:no:q:r-c"})
+        self.assertEqual(reg, [("applications/A::I::p:no:q:r", "PASS", "FAIL")])
+
+    def test_new_r_cases_may_be_unsupported(self):
+        st = {"applications/A::R::p:no:q:r": "UNSUPPORTED", "applications/A::R::p:no:q:s": "FAIL"}
+        reg, _ = rt.judge(st, {}, {}, new_ids=set(st))
+        self.assertEqual(reg, [("applications/A::R::p:no:q:s", "PASS", "FAIL")])
+
+    def test_new_tests_are_those_of_the_copy_absent_from_the_baseline(self):
+        def t(tid, kind, copy=True):
+            return dict(id=tid, kind=kind, copy=copy)
+        tests = [t("applications/A::I::p:no:q:r", "I"), t("applications/A::I::n:no:q:r", "I"),
+                 t("applications/A::G::p:no:-:jr", "G"), t("applications/A::G::p:no:q:r-c", "G"),
+                 t("elan/sources/T::G::x:no:-:x", "G", copy=False)]
+        base = {"applications/A::I::p:no:q:r": "PASS", "applications/A::J::p:no:-:jr": "FAIL"}
+        # a G (or R) case of a historical jtest line has its J case in the baseline
+        self.assertEqual(rt.new_tests(tests, base),
+                         {"applications/A::I::n:no:q:r", "applications/A::G::p:no:q:r-c"})
+
+    def test_historical_tests_keep_the_old_rule(self):
+        regress, _ = rt.judge({"A::I::p:no:p:p": "FAIL"}, {}, set())
+        self.assertEqual(regress, [])
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -1,0 +1,9 @@
+# tests of Csp (from legacy/elan3 tst_all; format: tests/apps/README.md)
+itest SolverIntegerCSP IntegerSpecification carlos carlos
+itest SolverIntegerCSP IntegerSpecification ex1 ex1
+long itest SolverIntegerCSP IntegerSpecification ex2 ex2
+long itest SolverIntegerCSP IntegerSpecification ex3 ex3
+aitest SolverIntegerCSP IntegerSpecification carlos carlos
+aitest SolverIntegerCSP IntegerSpecification ex1 ex1
+long aitest SolverIntegerCSP IntegerSpecification ex2 ex2
+long aitest SolverIntegerCSP IntegerSpecification ex3 ex3

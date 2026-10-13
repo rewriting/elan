@@ -1,0 +1,776 @@
+module rewriting[Fss, Vars]
+import local 
+	Fss Vars
+	pair[identifier, int]
+	list[pair[identifier, int]]
+
+	symbol[Fss] eq[symbol]
+
+	configuration[Fss] eq[configuration]
+	match[Fss, Vars]
+	substitution[Fss, Vars]
+	list[substitution] eq[list[substitution]] eq[list[affectation]]
+	transition[Fss]	list[transition] occur[transition, list[transition]]
+	automaton[Fss]	aut_name
+	list[Catom]
+	rwrule[Fss, Vars]
+	variable[Vars] ECterm[Vars] Cterm[Fss] list[Cterm]
+	state state_set list[state]
+	list[unr_trans] eq[unr_trans]
+	tools[Fss]
+	list[rwrule]
+	position
+	approximation[Fss, Vars];
+end
+
+/*		Computation of approximation automata 
+		-------------------------------------
+
+* Global functions
+
+T_up(@) on(@): (list[rwrule] automaton) automaton;
+	
+Approximation automata computation starting from a list of rw rules and 
+a tree automaton.
+
+
+apply_rule(@) on(@): (rwrule automaton) automaton;
+
+Applies one step of rewriting with one rule on a tree automaton.
+
+
+(@) applies on (@): (list[rwrule] automaton) bool;
+
+Tests if a rule "applies" on a tree automaton, i.e. if a rewrite may be applied
+and may add a transition to the automaton (a transition that is not already
+in the automaton)
+
+
+* Local functions
+
+T_up(@,@) on (@,@) with(@,@,@): applies a list of rw rules on a tree 
+automaton with an history of inclusions already proved (list[Catom]) for an
+optimized verification of inclusions. The bool parameter is a flag "is there at
+least one rewriting?".
+
+* Local sort:
+
+unr_trans: these are non-normalised transitions (i.e. whose lhs depth is 
+strictly greater to 1)
+
+*/
+
+
+sort apply_step relevant_match_step unr_trans add_trans_step T_up_step decompose_step;
+end
+
+operators 
+global
+	T_up(@) on(@)				: (list[rwrule] automaton) automaton;	
+
+	apply_rule(@) on(@)			: (rwrule automaton) automaton;
+	
+	(@) applies on (@)			: (list[rwrule] automaton) bool;
+
+local
+	T_up(@,@) on (@,@) with(@,@,@)	: (list[rwrule] list[rwrule] state_set 
+							list[transition] list[Catom] bool
+							approximation) T_up_step;
+	
+	state_set(@)				: (T_up_step) state_set;
+	list_trans(@)				: (T_up_step) list[transition];
+
+	apply_rule(@) on(@,@,@,@) with(@,@,@,@)	: (rwrule state_set list[transition] list[transition] 
+							int list[Catom] list[Catom] bool approximation) apply_step;
+	state_set(@)				: (apply_step) state_set;
+	list_trans(@)				: (apply_step) list[transition];
+	int_of(@)				: (apply_step) int;
+	true_facts(@)				: (apply_step) list[Catom];
+	bool(@)					: (apply_step) bool;
+	approximation(@)			: (apply_step) approximation;
+
+
+	relevant_match(@, @, @, @, @, @)	: (Cterm list[substitution] state list[transition] 
+							list[Catom] list[Catom]) relevant_match_step;
+	list_match(@)				: (relevant_match_step) list[substitution];
+	true_facts(@)				: (relevant_match_step) list[Catom];
+	false_facts(@)				: (relevant_match_step) list[Catom];
+
+	
+	@ -> @					: (Cterm state) unr_trans;
+	(@ -> @)				: (Cterm state) unr_trans alias @ -> @:;
+	void_unr_trans				: unr_trans;
+	add(@, @)				: (unr_trans list[unr_trans]) list[unr_trans];
+	add(@, @)				: (transition list[transition]) list[transition];
+	add(@, @)				: (list[transition] list[transition]) list[transition];
+	add_trans_to(@, @, @) for(@,@) with(@, @)	: (state_set list[transition] int list[unr_trans] rwrule 
+							transition approximation) add_trans_step; 
+	state_set(@)				: (add_trans_step) state_set;
+	list_trans(@)				: (add_trans_step) list[transition];
+	int_of(@)				: (add_trans_step) int;
+	first_trans(@)				: (add_trans_step) transition;
+	approximation(@)			: (add_trans_step) approximation;
+	state_for_replacing(@, @, @)		: (Cterm position list[affectation]) state;
+
+	normalize(@, @)				: (list[transition] transition) list[transition];
+	@ -> @					: (state state) transition;
+
+	global_match(@, @, @)			: (Cterm state_set list[transition]) bool;
+	empty(@)				: (list[substitution]) bool;
+	
+	subterms(@)				: (Cterm) list[Cterm];
+	subterms(@)				: (configuration) list[state];
+	
+	state_set(@)				: (list[transition]) state_set;
+	apply_decompo(@, @, @)			: (list[affectation] unr_trans position) list[transition];
+	decompose(@, @, @, @, @, @)		: (unr_trans list[transition] rwrule approximation 
+							list[affectation] int) decompose_step;
+	last(@)					: (decompose_step) int;
+	transitions(@)				: (decompose_step) list[transition];
+	approximation(@)			: (decompose_step) approximation;
+end
+
+
+
+
+
+stratop global
+  T_up_strat : <T_up_step> builtin;
+  global_match_strat : <bool> builtin;
+  applies_strat : <bool> builtin;
+  add_trans_strat3 : <add_trans_step> builtin;
+  apply_rule_strat : <apply_step> builtin;
+  relevant_match_strat : <relevant_match_step> builtin;
+  decompose_strat : <decompose_step> builtin;
+end
+
+/* les regles non nommees pour les appels exterieurs... */
+
+rules for automaton
+          name, name: aut_name;
+	Q, Qf: state_set;
+	R: list[transition];
+	r1: rwrule;
+	res1: apply_step;
+	res2: T_up_step;
+	rs: list[rwrule];
+global
+[]	apply_rule(r1) on ((name, Q, Qf, R)) => (name, state_set(res1), Qf, list_trans(res1))
+	
+	where res1:= (apply_rule_strat) apply_rule(r1) on(Q, R, R, max(Q, 0)) with(nil, nil, false, nil)
+end
+
+[]	T_up(rs) on((name, Q, Qf, R)) => (name, state_set(res2), Qf, list_trans(res2))
+
+	where res2:= (T_up_strat) T_up(rs, rs) on(Q, R) with(nil, false, nil) 
+end 
+end
+
+
+/* Calcul de l'approximation de l'ensemble des descendants: T^R(A) */
+
+rules for T_up_step
+          rs1, rs2: list[rwrule];
+	Q: state_set;
+	res: apply_step;
+	R: list[transition];
+	facts: list[Catom];
+	r1: rwrule;
+	b: bool;
+	lct: approximation;
+global
+[T_up_r1] T_up(rs1, rs2) on(Q, R) with(facts, true, lct) =>  T_up(rs2, rs2) on(Q, R) with(facts, false, lct)	end
+[T_up_r2] T_up(r1 . rs1, rs2) on(Q, R) with(facts, false, lct) => T_up(rs1, rs2) on(state_set(res), list_trans(res))
+										with(true_facts(res),
+										bool(res), approximation(res))
+
+		where res:= (apply_rule_strat) apply_rule(r1) on(Q, R, R, max(Q, 0)) with(facts, nil, false, lct)	end
+end
+
+
+
+/* Verifier qu'un regle s'applique encore sur un automate */
+
+rules for bool
+          l, r: Cterm;
+	rs1: list[rwrule];
+	name: aut_name;
+	Q, Qf: state_set;
+	R: list[transition];
+	res1, res2: bool;
+	q: state;
+	s: substitution;
+	ls: list[substitution];
+global
+[applies_r1] (l -> r . rs1) applies on ((name, Q, Qf, R)) => (res1 or res2)
+		where res2:= (global_match_strat) global_match(l, Q, R)			
+		where res1:= (applies_strat) (rs1) applies on ((name, Q, Qf, R))
+end
+
+[applies_r2] (nil) applies on ((name, Q, Qf, R)) => false				end
+
+[global_match_r1] global_match(l, q . Q, R) => res1 or res2
+		where res2:= (global_match_strat) global_match(l, Q, R)
+		where res1:= () not(empty((l ?= q) with(R)))
+end
+
+[global_match_r2] global_match(l, nil, R) => false					end
+
+[] empty(nil) => true									end
+[] empty(s . ls) => false								end
+end
+
+
+
+FOR EACH SS:pair[identifier,int]; F:identifier; N:int
+SUCH THAT SS:=(listExtract) elem(Fss) AND F :=()first(SS) AND N:=()second(SS) :{
+rules for list[Cterm]
+          s_1, ..., s_N: Cterm;
+global
+  []	subterms(F(s_1, ..., s_N)) => {s_I .}_I=1...N nil
+  end
+end
+}
+
+
+FOR EACH SS:pair[identifier,int]; F:identifier; N:int
+SUCH THAT SS:=(listExtract) elem(Fss) AND F :=()first(SS) AND N:=()second(SS) :{
+rules for list[state]
+          s_1, ..., s_N: state;
+global
+  []	subterms(F(s_1, ..., s_N)) => {s_I .}_I=1...N nil
+  end
+end
+}
+
+
+/* Si on tente d'ajouter un Cterm a un automate, si le Cterm est un etat q, 
+alors  state_for replacing vaut q (il n'est pas necessaire d'en creer un 
+nouveau) sinon si le Cterm t n'est pas un etat, il est necessaire de 
+creer un nouvel etat pour stocker t sous forme d'un automate en forme 
+normalisee (depth configuration = 1) */
+
+rules for state
+        q: state;
+	t: Cterm;
+	p: position;
+	l: list[affectation];
+global
+[]	state_for_replacing(q, p, l) => q							end
+[]	state_for_replacing(t, p, l) => grep_state(p, l)					end
+end
+
+
+/* fonction d'ajout dans une liste de transition irregulieres (unregular 
+transition), on supprime toutes les occurences de unr_transition du type q->q
+qui sont inutiles */
+
+rules for list[unr_trans]
+          q: state;
+	l: list[unr_trans];
+	ut: unr_trans;
+global
+[]	add(q->q, l)	=> l			end
+[]	add(ut, l)	=> ut . l		end
+end
+
+
+/* Un match sigma est "relevant" si (la partie droite de la regle de reecriture 
+concernee  etant r)  r sigma ajoute
+bien quelquechose a l'automate qui n'y figure pas encore ... d'ou le test 
+d'inclusion t <= q qui verifie que ca n'est pas encore dans l'automate,
+utilise pour verifier qu'une regle "rajoute" bien quelquechose dans l'ensemble des descendants (ou verifier qu'une regle s'applique)*/
+
+
+rules for relevant_match_step
+          s, t: Cterm;
+	subst: substitution;
+	l: list[substitution];
+	q: state;
+	R: list[transition];
+	facts, unfacts: list[Catom];
+	inclusion_test: inclusion_step;
+global
+
+[relevant_match_r1]  relevant_match(s, subst . l, q, R, facts, unfacts)
+			=> 
+
+		 relevant_match(s, l, q, R, true_facts(inclusion_test), false_facts(inclusion_test))
+	where t:= (apply_subst_strat) apply(subst, s)
+	where inclusion_test:= (subseteq_strat_simple) (( t <= q ^ true) v false) 
+		trans(R, R) true(facts) false(unfacts)
+	if bool(inclusion_test)
+end
+
+end
+
+
+rules for list[substitution]
+          s: Cterm;
+	subst: substitution;
+	l: list[substitution];
+	q: state;
+	facts, unfacts: list[Catom];
+	R: list[transition];
+global
+  []	list_match(relevant_match(s, l, q, R, facts, unfacts)) => l
+  end
+end
+
+
+
+/* L'ajout de transition pour un Cterm (qui n'est pas necessairement une config) 
+et un etat donne: t -> q. Pour garder un automate en forme normalisee, il est
+necessaire de decouper t en niveaux en creant de nouveaux etat... dans le 
+cas d'un appel recursif, les etats peuvent etre pioches dans la table 
+approx: approximation; pour empecher tout bouclage */
+
+
+rules for add_trans_step
+          name: aut_name;
+	Q, Qf: state_set;
+	q, q2: state;
+	last: int;
+	trans: transition;
+	l: list[unr_trans];
+	A: automaton;
+	R: list[transition];
+	approx: approximation;
+	c1, c2: configuration;
+	s: Cterm;
+	res: decompose_step;
+	new_unr: unr_trans;
+	r1: rwrule;
+	q: state;
+	p: position;
+global
+
+[global_add_trans_r1] add_trans_to(Q, R, last) for(q2 -> q.nil,r1) with(void_transition, approx)
+
+		=>
+
+	add_trans_to(Q, R, last) for(nil,r1) with(q2 -> q, approx)
+		if q2 != q
+end
+
+[global_add_trans_r2] add_trans_to(Q, R, last) for(s->q.nil,r1) with(void_transition, approx)
+
+		=> 
+
+
+	add_trans_to(add(state_set(transitions(res)),Q), add(transitions(res),R), last(res)) 
+				for(nil, r1) with(void_transition, approximation(res))
+
+		where res:= (decompose_strat) decompose(s->q, nil, r1, approx, grep(r1,q,approx), last)
+end
+end
+
+
+
+rules for decompose_step
+	s: Cterm;
+	q, adam: state;
+	r1: rwrule;
+	approx, new_approx: approximation;
+	last, new_last: int;
+	R: list[transition];
+	new_states: state_set;
+	father_approx: list[rule_affectation];
+	l: list[affectation];
+	res: pair[list[affectation], int];
+global
+
+/* Decompose une transition non normalisee avec des nouveaux etats puisque la 
+liste d'affectations trouvee est vide. Ici on fait appel au module approx par le biais de l'appel 
+
+	 res:= () new_decomposition(s, last)
+
+L'autre point important est que l'on applique une approximation particuliere:
+La "ancestor" approximation qui lie chaque nouvel etat son ancetre (l'etat initial dont il est issu) et qui lui donne la meme approximation pour chaque regle.*/
+
+
+  [decompose_r1] 
+	decompose(s->q, nil, r1, approx, nil, last) => decompose(s->q, R, r1, new_approx, nil, new_last)
+		where res:= () new_decomposition(s, last)
+		where new_last:= () second(res)
+		where R:= () apply_decompo(first(res), s->q, epsilon)
+		where new_states:= () states(first(res))
+		where adam:= ()initial(q, approx)
+		where new_approx:= () add(adam, rule(r1, first(res)).nil, add(new_states, adam, approx))
+  end
+
+
+/* Decompose une transition avec des etats existants a partir de la liste 
+d'affectations, puisque celle-ci est non vide */
+
+
+  [decompose_r2] decompose(s->q, nil, r1, approx, l, last) => decompose(s->q, R, r1, approx, l, last)
+	if neq_list[affectation](l, nil)
+	where R:= () apply_decompo(l, s->q, epsilon)
+  end
+end
+
+
+/* Regles de projection */
+rules for state_set
+          l, r: Cterm;
+	q: state;
+	Q: state_set;
+	R, Rreste: list[transition];
+	last: int;
+	t: transition;
+	lunr: list[unr_trans];
+	facts, unfacts: list[Catom];
+	b: bool;
+	rs1, rs2: list[rwrule];
+	c: configuration;
+	lct: approximation;
+	rwr: rwrule;
+global
+[]	state_set(apply_rule(l -> r) on(Q, Rreste, R, last) with(facts, unfacts, b, lct)) => Q	end
+[]	state_set(add_trans_to(Q, R, last) for(lunr, rwr) with(t,lct)) => Q			end
+[]	state_set(T_up(rs1, rs2) on(Q, R) with(facts, b, lct)) => Q				end
+[]	state_set(nil) => nil 									end
+
+[]	state_set(c->q.R) => q.state_set(R)							end
+end
+
+
+/* Regles de projection */
+
+rules for list[transition]
+          l, r: Cterm;
+	Q: state_set;
+	R, Rreste: list[transition];
+	last: int;
+	lunr: list[unr_trans];
+	t: transition;
+	facts, unfacts: list[Catom];
+	b: bool;
+	rs1, rs2: list[rwrule];
+	c: configuration;
+	lct: approximation;
+	l: list[affectation];
+	q: state;
+	p: position;
+	unr: unr_trans;
+	rwr: rwrule;
+	a: approximation;
+	laf: list[affectation];
+	i: int;
+global
+[]	list_trans(apply_rule(l -> r) on(Q, Rreste, R, last) with(facts, unfacts, b, lct)) => R		end
+[]	list_trans(add_trans_to(Q, R, last) for(lunr, rwr) with(t, lct)) => R				end
+[]	list_trans(T_up(rs1, rs2) on(Q, R) with(facts, b, lct)) => R					end
+[]	transitions(decompose(unr, R, rwr, a, laf, i)) => R						end
+
+
+/* Application d'une decomposition (list affectation) a une transition 
+non normalisee */
+
+  [] apply_decompo(l, q -> q, p) => nil
+  end
+
+FOR EACH SS:pair[identifier,int]; F:identifier; N:int
+SUCH THAT SS:=(listExtract) elem(Fss) AND F :=()first(SS) AND N:=()second(SS) :{
+rules for list[transition]
+	t_1,...,t_N: Cterm;
+	q_1,...,q_N: state;
+global
+  [] apply_decompo(l, F(t_1, ..., t_N)->q, p) => 
+		{append(apply_decompo(l, t_I -> q_I, p.I), }_I=1...N
+			F(q_1, ..., q_N) -> q .nil {)}_I=1...N
+	{where q_I := () state_for_replacing(t_I, p.I, l)}_I=1...N
+  end
+end
+}
+end
+
+
+/*
+FOR EACH SS:pair[identifier,int]; F:identifier; N:int
+SUCH THAT SS:=(listExtract) elem(Fss) AND F :=()first(SS) AND N:=()second(SS) :{
+rules for list[transition]
+	t_1,...,t_N: Cterm;
+	q_1,...,q_N: state;
+global
+  [] apply_decompo(l, F(t_1, ..., t_N)->q, p) => 
+		{append(apply_decompo(l, t_I ->  state_for_replacing(t_I, p.I, l), p.I), }_I=1...N
+			F({state_for_replacing(t_I, p.I, l) , }_I=1...N ) -> q .nil {)}_I=1...N
+  end
+end
+}
+*/
+
+
+/* Regles de projection */
+
+rules for int
+	Q: state_set;
+	R, Rreste: list[transition];
+	last, i: int;
+	t: transition;
+	lunr: list[unr_trans];
+	facts, unfacts: list[Catom];
+	b: bool;
+	c: configuration;
+	unr: unr_trans;
+	rwr: rwrule;
+	a, lct: approximation;
+	laf: list[affectation];
+global
+  []	int_of(apply_rule(rwr) on(Q, Rreste, R, last) with(facts, unfacts, b, lct)) => last		end
+  []	int_of(add_trans_to(Q, R, last) for(lunr, rwr) with(t, lct)) => last				end
+  []	last(decompose(unr, R, rwr, a, laf, i)) => i							end
+end
+
+
+rules for approximation
+	Q: state_set;
+	R, Rreste: list[transition];	
+	unr: unr_trans;
+	lunr: list[unr_trans];
+	t: transition;
+	rwr: rwrule;
+	a, lct: approximation;
+	laf: list[affectation];
+	i, last: int;
+	facts, unfacts: list[Catom];
+	b: bool;
+global
+  []	approximation(decompose(unr, R, rwr, a, laf, i)) => a						end
+  []	approximation(apply_rule(rwr) on(Q, Rreste, R, last) with(facts, unfacts, b, lct)) => lct	end
+  []	approximation(add_trans_to(Q, R, last) for(lunr, rwr) with(t, lct)) => lct			end
+end
+
+
+
+
+
+/* Regles de projection */
+
+rules for transition
+          l, r: Cterm;
+	r1: rwrule;
+	Q: state_set;
+	R, Rreste: list[transition];
+	last: int;
+	t: transition;
+	lunr: list[unr_trans];
+	facts, unfacts: list[Catom];
+	c: configuration;
+	lct: approximation;
+global
+  []	first_trans(add_trans_to(Q, R, last) for(lunr,r1) with(t, lct)) => t		
+  end
+end
+
+
+
+/* Regles de projection */
+
+rules for list[Catom]
+          l, r, s: Cterm;
+	ls: list[substitution];
+	q: state;
+	Q: state_set;
+	R, Rreste: list[transition];
+	last: int;
+	facts, unfacts: list[Catom];
+	b: bool;
+	lct: approximation;
+global
+[]	true_facts(apply_rule(l -> r) on(Q, Rreste, R, last) with(facts, unfacts, b, lct)) => facts		end
+[]	true_facts(relevant_match(s, ls, q, R, facts, unfacts)) => facts				end
+[]	false_facts(relevant_match(s, ls, q, R, facts, unfacts)) => unfacts				end
+end
+
+
+/* Regles de projection */
+
+rules for bool
+          l, r: Cterm;
+	Q: state_set;
+	R, Rreste: list[transition];
+	last: int;
+	facts, unfacts: list[Catom];
+	b: bool;
+	lct: approximation;
+global
+  []	bool(apply_rule(l -> r) on(Q, Rreste, R, last) with(facts, unfacts, b, lct)) => b		
+  end
+end
+
+
+/* l'application d'une regle a un automate...
+
+c->q : la transition en cours d'etude: recherche d'un match + reecriture.
+last: numero du dernier etat cree
+R: la liste totale des transitions
+facts, unfacts: faits et nons faits deduits des tests d'inclusions precedents 
+(optimisation)
+
+res_subst: les matchs qu'on a trouve
+res_first_rel_match: le premier match qui ajoute quelquechose
+res_add_trans: le resultat de l'ajout d'une transition non reguliere a un 
+automate par normalisation de la transition non reguliere en des transitions 
+regulieres.
+first_trans: la transition reguliere provenant de la normalisation de la 
+unr_trans. La premiere est celle s'appliquant au sommet du terme.
+
+
+*/
+
+
+rules for apply_step
+        term_c, l, r, t: Cterm;
+	subst: substitution;
+	res_substs, list_first_match: list[substitution];
+	res_Q, Q: state_set;
+	c: configuration;
+	q: state;
+	res_R, R, Rreste: list[transition];
+	last: int;
+	facts, unfacts: list[Catom];
+	res_first_rel_match: relevant_match_step;
+	res_add_trans: add_trans_step;
+	first_trans: transition;
+	b: bool;
+	lct, new_lct: approximation;
+global
+	
+[apply_rule_r1] apply_rule(l -> r) on(Q, c ->q . Rreste, R, last) with(facts, unfacts, false, lct)
+		=>
+
+		apply_rule(l -> r) on(res_Q, Rreste, res_R, int_of(res_add_trans))
+			with(true_facts(res_first_rel_match), nil, true, new_lct)
+
+
+		where term_c:= () config_to_Cterm(c)
+		where res_substs:= () (l ?= term_c) with(R)
+		if res_substs != nil
+		where res_first_rel_match:= (relevant_match_strat) relevant_match(r, res_substs, q, R, facts, unfacts)
+		where list_first_match:= () list_match(res_first_rel_match)
+		if list_first_match != nil
+		where subst:= () 1-th elem(list_first_match)
+		where t:= (apply_subst_strat) apply(subst, r)
+		where res_add_trans:= (add_trans_strat3) add_trans_to(Q, R, last) for((t -> q).nil, l->r) 
+					with(void_transition, lct)
+		where first_trans:= () first_trans(res_add_trans)
+		where res_Q:= () state_set(res_add_trans)
+		where res_R:= () normalize(list_trans(res_add_trans), first_trans)
+		where new_lct:= () approximation(res_add_trans)
+end
+
+
+[apply_rule_r2] apply_rule(l -> r) on(Q, c ->q . Rreste, R, last) with(facts, unfacts, false, lct)
+		=>
+
+		apply_rule(l -> r) on(Q, Rreste, R, last) with(true_facts(res_first_rel_match), false_facts(res_first_rel_match), false, lct)
+
+		where term_c:= () config_to_Cterm(c)
+		where res_substs:= () (l ?= term_c) with(R)
+		if res_substs != nil
+		where res_first_rel_match:= (relevant_match_strat) relevant_match(r, res_substs, q, R, facts, unfacts)
+		where list_first_match:= () list_match(res_first_rel_match)
+		if list_first_match == nil
+end
+
+[apply_rule_r3] apply_rule(l -> r) on(Q, c ->q . Rreste, R, last) with(facts, unfacts, false, lct)
+		=>
+
+		apply_rule(l -> r) on(Q, Rreste, R, last) with(facts, unfacts, false, lct)
+end
+end
+
+
+
+/* La normalisation par transition non normalisable du type q1 -> q2 */
+
+rules for list[transition]
+	q, q1, q2: state;
+	res, l: list[transition];
+	trans: transition;
+	c: configuration;	
+global
+  [] normalize(nil, trans) => nil	
+  end
+
+  [] normalize(l, void_transition) => l
+  end
+
+  [] normalize(c -> q.l, q -> q2) => c -> q . add(c -> q2, normalize(l, q -> q2)	)	
+  end
+
+  [] normalize(c -> q.l, q1 -> q2) => c -> q . normalize(l, q1 -> q2)
+		if q != q1							
+  end
+
+  [] add(trans, l) => trans.l if not(occurs(trans, l))		end
+  [] add(trans, l) => l	if occurs(trans, l)			end
+
+  [] add(nil, l) => l						end
+  [] add(l, nil) => l						end
+  [] add(trans.l,res) => add(trans,add(l,res))			end
+end
+
+
+
+strategies for T_up_step
+implicit
+  [.] T_up_strat =>
+	repeat*(dc one(T_up_r1 , T_up_r2))
+  end
+end
+
+
+/*
+strategy add_simple
+	while dc one(add_simple_r1 add_simple_r2) endwhile
+end
+*/
+
+
+strategies for bool
+implicit
+  [.] global_match_strat =>
+	repeat*(dc one(global_match_r1 , global_match_r2))
+  end
+
+  [.] applies_strat =>
+	repeat*(dc one(applies_r1 , applies_r2))
+  end
+end
+
+
+strategies for add_trans_step
+implicit
+  [.] add_trans_strat3 =>
+	dc one(global_add_trans_r1 , global_add_trans_r2)
+  end
+end
+
+
+strategies for apply_step
+implicit
+  [.] apply_rule_strat =>
+	repeat*(dc one(apply_rule_r1 , apply_rule_r2 , apply_rule_r3))
+  end
+end
+
+
+strategies for relevant_match_step
+implicit
+  [.] relevant_match_strat =>
+	repeat*(dc one(relevant_match_r1))
+  end
+end
+
+
+strategies for decompose_step
+implicit
+  [.] decompose_strat =>
+	dc one(decompose_r1 , decompose_r2)
+  end
+end
+end

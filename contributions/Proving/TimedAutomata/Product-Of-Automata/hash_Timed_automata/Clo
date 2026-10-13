@@ -1,0 +1,354 @@
+module ClockZone[K]
+
+//----  MODULES IMPORTÉS  ----//
+
+import
+ global
+  bool
+  K                    // les symboles pour les horloges
+  identifier           // pour définir les symboles
+  list[identifier]
+  list[clock]          // pour la projection multiple
+  int                  // pour les constantes
+  cmp[clock];
+end
+
+
+//----  SORTES INTRODUITES  ----//
+
+sort
+  clock         //  une horloge
+  clause        //  une inégalité
+  clockzone ;   //  une conjontion d'inégalités
+end
+
+
+//----  CONSTRUCTEURS  ----//
+
+operators
+ global
+
+  //  définition des horloges
+
+  FOR EACH x : identifier SUCH THAT x := (listExtract) elem(K) :
+  { x  :  clock ; }
+
+
+  //  définition des clauses
+
+  true   :  clause  ;
+  false  :  clause  ;
+
+  @ <  @  :  ( clock int ) clause  ;
+  @ <= @  :  ( clock int ) clause  ;
+  @ >  @  :  ( clock int ) clause  ;
+  @ >= @  :  ( clock int ) clause  ;
+
+  @ - @ <= @  :  ( clock clock int ) clause  ;
+  @ - @ <  @  :  ( clock clock int ) clause  ;
+
+
+  //  définition des conjonctions de clauses
+
+  @      :  ( clause ) clockzone ;
+  @ ^ @  :  ( clockzone clockzone ) clockzone  assocRight;
+  [ @ ^ @ ] :  ( clockzone clockzone ) clockzone  alias @ ^ @ :;
+
+
+  //  fonctions sur les zones
+
+  empty( @ )  :  ( clockzone ) bool ;
+
+  quantify( @ , @ )  :  ( clockzone clock ) clockzone  ;
+
+  inter( @ , @ )  :  ( clockzone clockzone ) clockzone ;
+  proj( @ , @ )   :  ( clockzone clock ) clockzone  ;
+  time( @ )       :  ( clockzone ) clockzone ;
+
+  lproj( @ , @ )  :  ( clockzone list[clock] ) clockzone ;
+
+  min( @ , @ )  :  ( int int ) int ;
+  max( @ , @ )  :  ( int int ) int ;
+  
+  elim(@)       :  ( clockzone ) clockzone ;
+
+ local
+
+  //  termes intermédiaires pour l'insertion d'une clause
+
+
+  ( @ and @ and @ )  :  ( clockzone clause clockzone ) clockzone ;
+
+  @ >> @  :  ( clockzone clockzone ) clockzone  ;
+
+  //  termes intermédiaire pour le découpage de conjonctions
+
+  [@|@|@]          : ( clockzone clockzone clockzone ) clockzone ;
+  . @ >>[@|@|@]    : ( clockzone clockzone clockzone clockzone ) 
+                        clockzone ;
+  @ . @ >>[@|@|@]  : ( clock clockzone clockzone clockzone clockzone )
+                        clockzone ;
+
+  second( @ )      : ( clockzone ) clockzone ;
+
+  //  termes pour la combinaison de clauses
+
+  @ + @  :  ( clause clause ) clause ;
+
+  //  pour la satisfiabilité
+
+  emp( @ )  :  ( clockzone ) bool ;
+end
+
+
+//----  STRATÉGIES  ----//
+
+stratop
+ local
+  ins     :  < clockzone -> clockzone >  bs ;
+
+  div     :  < clockzone -> clockzone >  bs ;
+  app     :  < clockzone -> clockzone >  bs ;
+
+  empty   :  < bool -> bool >  bs ;
+end
+
+
+//----  RÈGLES DE RÉDUCTION  ----//
+
+////  combinaison de clauses
+
+/*  Attention : il ne s'agit pas de règles génériques, mais de
+ *  règles adaptées aux cas qui nous intéressent, c'est pourquoi 
+ *  x>5 + x<7 se réduit en true puisque cette combinaison doit
+ *  être ignorée dans le cas de l'opérateur time, seul cas où
+ *  cette combinaison apparait.
+ */
+
+rules for clause
+  x, y, z : clock  ;
+  c, d, e : int    ;
+  t       : clause ;
+
+ global
+
+  []  x> c  +  x< d  =>  t  choose try where t:=()true  if d> c
+                               try where t:=()false if d<=c end  end
+  []  x> c  +  x<=d  =>  t  choose try where t:=()true  if d> c
+                               try where t:=()false if d<=c end  end
+  []  x>=c  +  x< d  =>  t  choose try where t:=()true  if d> c
+                               try where t:=()false if d<=c end  end
+  []  x>=c  +  x<=d  =>  t  choose try where t:=()true  if d>=c
+                               try where t:=()false if d< c end  end
+
+  []  x >  c  +  y <  d  =>  y - x <  e  where e:=()d - c  end
+  []  x >  c  +  y <= d  =>  y - x <  e  where e:=()d - c  end
+  []  x >= c  +  y <  d  =>  y - x <  e  where e:=()d - c  end
+  []  x >= c  +  y <= d  =>  y - x <= e  where e:=()d - c  end
+
+  []  x >  c  +  x - y <  d  =>  y >  e  where e:=()c - d  end
+  []  x >  c  +  x - y <= d  =>  y >  e  where e:=()c - d  end
+  []  x >= c  +  x - y <  d  =>  y >  e  where e:=()c - d  end
+  []  x >= c  +  x - y <= d  =>  y >= e  where e:=()c - d  end
+
+  []  x - y <  c  +  y <  d  =>  x <  e  where e:=()c + d  end
+  []  x - y <  c  +  y <= d  =>  x <  e  where e:=()c + d  end
+  []  x - y <= c  +  y <  d  =>  x <  e  where e:=()c + d  end
+  []  x - y <= c  +  y <= d  =>  x <= e  where e:=()c + d  end
+
+  []  x - y <  c  +  y - z <  d  =>  x - z <  e  where e:=()c + d  end
+  []  x - y <  c  +  y - z <= d  =>  x - z <  e  where e:=()c + d  end
+  []  x - y <= c  +  y - z <  d  =>  x - z <  e  where e:=()c + d  end
+  []  x - y <= c  +  y - z <= d  =>  x - z <= e  where e:=()c + d  end
+end
+
+
+////  réduction des opérateurs
+
+rules for int
+  p, q : int ;
+ global
+  []  min(p,q)  =>  p  if p <= q  end
+  []  min(p,q)  =>  q  if p >  q  end
+
+  []  max(p,q)  =>  p  if p >= q  end
+  []  max(p,q)  =>  q  if p <  q  end
+end
+
+rules for clockzone
+  x, y       : clock       ;
+  c, d       : int         ;
+  t, tt      : clause      ;
+  u, v, w, cc,  C : clockzone   ;
+  lc         : list[clock] ;
+
+ global
+  [] elim(x-x<=c ^ C) => elim(C)     end
+  [] elim(true ^ C)   => elim(C)     end
+  [] elim(t ^ C)      => t ^ elim(C) end
+  [] elim(true)       => true        end
+
+  //  simplification des termes
+
+  []  true ^ u  =>  u  end
+
+  []  false ^ u  =>  false  end
+  []  u ^ false  =>  false  end
+
+  [] [ [ u ^ v ] ^ w ]  =>  [ u ^ [ v ^ w ] ]  end
+
+  []  inter(t ^ u, v)  =>  inter(u, w)
+        where w := (ins) (true and t and v)  end
+  []  inter(t, v)  =>  w
+        where w := (ins) (true and t and v)  end
+
+  []  quantify(C,x)  =>  v
+        where cc:= ()elim(C)
+        where u := (div) x . cc >> [true|true|true]
+        where v := (app) u
+        end
+
+  []  proj(C,x)  =>  x>=0 ^ x<=0 ^ quantify(C,x)  end
+
+  []  lproj(C,x.lc)  =>  lproj(proj(C,x),lc)  end
+  []  lproj(C,nil)   =>  C                    end
+
+  []  time(C)  =>  second(u) ^ v
+        where cc:= ()elim(C)
+        where u := (repeat*(select)) . cc >> [true|true|true]
+        where v := (app) u
+        end
+
+  []  second([u|v|w])  =>  v  end
+
+ local
+
+  //  insertion contrôlée d'une clause
+
+  [ins0]  (true and true and u)  =>  u      end
+  [ins0]  (u and t and false)    =>  false  end
+
+  [ins1]  (u and true and t ^ v)  =>  (t ^ u and true and v)  end
+
+  [ins1]  (u and x<=c and x<=d ^ v)  =>
+                (x<=min(c,d) ^ u and true and v)  end
+  [ins1]  (u and x< c and x< d ^ v)  =>
+                (x< min(c,d) ^ u and true and v)  end
+  [ins1]  (u and x<=c and x< d ^ v)  =>  (t ^ u and true and v)
+                choose try where t:=()x<=c  if c< d
+                       try where t:=()x< d  if d<=c end  end
+  [ins1]  (u and x< c and x<=d ^ v)  =>  (t ^ u and true and v)
+                choose try where t:=()x< c  if c<=d
+                       try where t:=()x<=d  if d< c end  end
+
+  [ins1]  (u and x>=c and x>=d ^ v)  =>
+                (x>=max(c,d) ^ u and true and v)  end
+  [ins1]  (u and x> c and x> d ^ v)  =>
+                (x> max(c,d) ^ u and true and v)  end
+  [ins1]  (u and x>=c and x> d ^ v)  =>  (t ^ u and true and v)
+                choose try where t:=()x>=c  if c> d
+                       try where t:=()x> d  if d>=c end  end
+  [ins1]  (u and x> c and x>=d ^ v)  =>  (t ^ u and true and v)
+                choose try where t:=()x> c  if c>=d
+                       try where t:=()x>=d  if d> c end  end
+
+  [ins1]  (u and x-y<=c and x-y<=d ^ v)  =>
+                (x-y<=min(c,d) ^ u and true and v)  end
+  [ins1]  (u and x-y< c and x-y< d ^ v)  =>
+                (x-y< min(c,d) ^ u and true and v)  end
+  [ins1]  (u and x-y<=c and x-y< d ^ v)  =>  (t ^ u and true and v)
+                choose try where t:=()x-y<=c  if c< d
+                       try where t:=()x-y< d  if d<=c end  end
+  [ins1]  (u and x-y< c and x-y<=d ^ v)  =>  (t ^ u and true and v)
+                choose try where t:=()x-y< c  if c<=d
+                       try where t:=()x-y<=d  if d< c end  end
+
+  [ins2]  (u and t and tt ^ v)  =>  (tt ^ u and t and v)  end
+
+  [ins3]  (u and true and true)  =>  u      end
+  [ins4]  (u and t    and true)  =>  t ^ u  end
+
+  //  division des termes pour la projection
+
+  [div1]  x .  x < c ^ C >> [u|v|w]  =>  x . C >> [u|v| x < c ^ w]  end
+  [div1]  x .  x <=c ^ C >> [u|v|w]  =>  x . C >> [u|v| x <=c ^ w]  end
+  [div1]  x . x-y< c ^ C >> [u|v|w]  =>  x . C >> [u|v|x-y< c ^ w]  end
+  [div1]  x . x-y<=c ^ C >> [u|v|w]  =>  x . C >> [u|v|x-y<=c ^ w]  end
+
+  [div1]  x .  x > c ^ C >> [u|v|w]  =>  x . C >> [u| x > c ^ v|w]  end
+  [div1]  x .  x >=c ^ C >> [u|v|w]  =>  x . C >> [u| x >=c ^ v|w]  end
+  [div1]  x . y-x< c ^ C >> [u|v|w]  =>  x . C >> [u|y-x< c ^ v|w]  end
+  [div1]  x . y-x<=c ^ C >> [u|v|w]  =>  x . C >> [u|y-x<=c ^ v|w]  end
+
+  [div2]  x . t ^ C >> [u|v|w]  =>  x . C >> [t ^ u|v|w]  end
+
+  [div3]  x . true >> [u|v|w]  =>  [u|v|w]  end
+
+  //  division des termes pour time
+
+  [select]  . x< c ^ C >> [u|v|w]  =>  . C >> [u|v|x< c ^ w]  end
+  [select]  . x<=c ^ C >> [u|v|w]  =>  . C >> [u|v|x<=c ^ w]  end
+
+  [select]  . x> c ^ C >> [u|v|w]  =>  . C >> [u|x> c ^ v|w]  end
+  [select]  . x>=c ^ C >> [u|v|w]  =>  . C >> [u|x>=c ^ v|w]  end
+
+  [select]  . x-y< c ^ C >> [u|v|w]  =>  . C >> [x-y< c ^ u|v|w]  end
+  [select]  . x-y<=c ^ C >> [u|v|w]  =>  . C >> [x-y<=c ^ u|v|w]  end
+
+  [select]  . true >> [u|v|w]  =>  [u|v|w]  end
+
+  //  combinaison des listes de clauses
+
+  [appOne]  [u|t|tt ^ v]  =>  [inter(t+tt,u)|t|v]  end
+  [appOne]  [u|t|true]    =>  u               end
+
+  [appList]  [u|t ^ v|w]  =>  [C|v|w]
+        where C := (repeat*(appOne)) [u|t|w]  end
+  [appList]  [u|true|v]   =>  u               end
+
+end
+
+//// test de satisfiabilité
+
+rules for bool
+  x, y : clock     ;
+  c    : int       ;
+  u    : clockzone ;
+  b    : bool      ;
+ global
+  []  empty(u)  =>  b
+        where b := (empty) emp(u)  end
+
+ local
+  [empty1]  emp( x  <= c ^ u)  =>  emp(quantify( x  <= c ^ u, x))  end
+  [empty1]  emp( x  <  c ^ u)  =>  emp(quantify( x  <  c ^ u, x))  end
+  [empty1]  emp( x  >= c ^ u)  =>  emp(quantify( x  >= c ^ u, x))  end
+  [empty1]  emp( x  >  c ^ u)  =>  emp(quantify( x  >  c ^ u, x))  end
+  [empty1]  emp(x-y <= c ^ u)  =>  emp(quantify(x-y <= c ^ u, x))  end
+  [empty1]  emp(x-y <  c ^ u)  =>  emp(quantify(x-y <  c ^ u, x)) if neq_clock(x,y) end
+  
+  [empty2]  emp(x-x <  c ^ u)  => true end
+  [empty2]  emp(false)  =>  true   end
+  [empty2]  emp(true)   =>  false  end
+end
+
+
+//----  DÉFINITION DES STRATÉGIES  ----//
+
+strategies for clockzone
+ implicit
+  []   div  =>  repeat*(first one(div1, div2)) ; div3  end
+  []   app  =>  repeat*(appList)                       end
+
+  []   ins  =>  first one(ins0,
+                          repeat*(first one(ins1, ins2)) ;
+                          first one(ins3, ins4))
+                end
+end
+
+strategies for bool
+ implicit
+  []  empty  =>  repeat*(empty1) ; empty2  end
+end
+
+end

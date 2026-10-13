@@ -1,0 +1,36 @@
+//--------------------------------------------------------------------------------
+// Import modules
+//--------------------------------------------------------------------------------
+module definitions[Vars,Ars,Sorts,Css,Fss,Axs,Es,Lm,Lss,Equiv,Status]
+
+import  
+	global
+		eq[list[term]]
+		eq[list[pair[term,term]]]
+		eq[list[pair[equationS, clause]]]
+		eq[list[pair[ident,variable]]]
+		eq[list[substitution]]
+		//-------- Constructors -----------------------------------------
+		list[ident] 
+		pair[list[ident],ident]
+		pair[ident,pair[list[ident],ident]]
+		list[pair[ident,pair[list[ident],ident]]]
+		 
+		//-------- Axioms -----------------------------------------
+		pair[term,term]  
+		list[pair[term,term]]
+		pair[list[pair[term,term]],list[pair[term,term]]]
+		list[pair[list[pair[term,term]],list[pair[term,term]]]]
+
+		//-------- General -----------------------------------------
+		termAux[Vars,Ars]
+
+		Css Fss Axs Es L
+
+
+;end  // END import
+
+//--------------------------------------------------------------------------------------
+
+
+end

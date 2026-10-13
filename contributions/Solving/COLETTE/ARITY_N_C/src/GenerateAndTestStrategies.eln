@@ -1,0 +1,74 @@
+module GenerateAndTestStrategies[Variables,Type,Values]
+
+import
+global
+	EnumerationRules[Variables,Type,Values]
+	PropagationRules[Variables,Type,Values]
+	;
+end
+
+stratop
+global
+	GenerateTestFirstToLastAll	: < csp -> csp >         	bs;
+	GenerateTestFirstToLastOne	: < csp -> csp >         	bs;
+	GenerateTestLastToFirstAll	: < csp -> csp >         	bs;
+	GenerateTestLastToFirstOne	: < csp -> csp >         	bs;
+end
+
+
+strategies for csp
+implicit
+
+/* Strategy		: Generate and Test  	*/
+/* Value selection 	: From first to last	*/
+/* Number of solutions	: All 			*/
+
+[] GenerateTestFirstToLastAll =>
+repeat* (
+	dk (iterate* (EliminateFirstValueOfDomain));
+	first one (InstantiateFirstValueOfDomain)
+	);
+repeat* (
+	first one (Elimination)
+	);
+first one (GetSolutionCSP)
+end
+
+
+/* Strategy		: Generate and Test  	*/
+/* Value selection 	: From first to last	*/
+/* Number of solutions	: First			*/
+
+[] GenerateTestFirstToLastOne =>
+first one (GenerateTestFirstToLastAll)
+end
+
+
+/* Strategy		: Generate and Test	*/
+/* Value selection 	: From last to first	*/
+/* Number of solutions	: All 			*/
+
+[] GenerateTestLastToFirstAll =>
+repeat* (
+	dk (iterate* (EliminateLastValueOfDomain));
+	first one (InstantiateLastValueOfDomain)
+	);
+repeat* (
+	first one (Elimination)
+	);
+first one (GetSolutionCSP)
+end
+
+
+/* Strategy		: Generate and Test	*/
+/* Value selection 	: From last to first	*/
+/* Number of solutions	: First			*/
+
+[] GenerateTestLastToFirstOne =>
+first one (GenerateTestLastToFirstAll)
+end
+
+end
+
+
+end

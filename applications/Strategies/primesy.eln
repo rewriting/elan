@@ -1,0 +1,11 @@
+module primesy
+
+import global symbol[1,int,bool];
+end
+
+operators global
+  prime(@)	: (int) bool;
+end
+
+end
+  

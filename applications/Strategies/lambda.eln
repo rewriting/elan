@@ -1,0 +1,56 @@
+module lambda
+
+import 	global int;
+	local bool;
+end
+sort lterm;
+end
+operators global
+  	@	: (int) lterm;
+	(@ @)	: (lterm lterm) lterm;
+	la @.@	: (int lterm) lterm;
+ //  local
+	repl(@,@,@)	: (int lterm lterm) lterm;
+	free(@,@)	: (int lterm) bool;
+end
+
+rules for bool
+ v, w	: int;
+	M, N, Q	: lterm;
+local
+/*
+  []	free(v,v) => true				end
+  []	free(v,(M N)) => free(v,M) or free(v,N)		end
+  []	free(v,la v.N) => false				end
+  []	free(v,la w.N) => free(v,N)			end
+  []	free(v,M) => false				end
+*/
+  []	free(v,v) => true				end
+  []	free(v,(M N)) => free(v,M) or free(v,N)		end
+  []	free(v,la v.N) => false				end
+  []	free(v,la w.N) => free(v,N)			end
+  []	free(v,M) => false				end
+end
+
+rules for lterm
+ v, w	: int;
+	M, N, Q	: lterm;
+local
+  []	repl(v,v,M) => M				end
+  []	repl(v,w,M) => w				end
+  []	repl(v,(M N),Q) => (repl(v,M,Q) repl(v,N,Q))	end
+  []	repl(v,la v.N,M) => la v.N			end
+  []	repl(v,la w.N,M) => la w.repl(v,N,M)		end
+
+  [beta] (la v.M N) => repl(v,M,N)			end
+  [eta]	 (la v.M v) => M if not free(v,M)		end
+end
+
+strategy 
+local
+ [reduce]
+  dc(beta eta)
+ end
+end
+
+end

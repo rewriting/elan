@@ -1,0 +1,13 @@
+LPL poly3 description
+
+  specification description
+    part Vars	of sort list[identifier]
+	 	modules identifier list[identifier]
+  end
+
+  query    of sort 		poly
+	   result of sort 	poly
+           modules  		poly3[Vars]
+           start with 		() query
+
+end

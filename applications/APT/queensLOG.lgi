@@ -1,0 +1,19 @@
+LPL queensLOG description
+
+query		of sort  	arrayLOG[4,int]
+		result of sort 	arrayLOG[4,int]
+		import	 	int queens[arrayLOG[4,int]]
+				strat[arrayLOG[4,int]]
+				loops[col,arrayLOG[4,int]]
+				loops[row,arrayLOG[4,int]]
+				loops[i,arrayLOG[4,int]]
+		start with 	[for col=0 to 3 do
+				   some row=0 to 3 do
+				     for i=0 to col-1 do
+				       verify(col,row,i)
+				     od;	
+				     drop(col,row)
+				   od
+				 od]new(0)
+
+end

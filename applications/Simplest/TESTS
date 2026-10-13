@@ -1,0 +1,26 @@
+# tests of Simplest (from legacy/elan3 tst_all; format: tests/apps/README.md)
+itest prim no primes primes
+itest primes no primes primes
+itest main no main main
+itest hanoi no hanoi ihanoi
+itest nhorse no nhorse inhorse
+itest fib no ifib ifib
+long itest nqueens no nqueens nqueens
+long itest queens no queens queens
+long itest hor no hor hor
+jtest prim_jc no prim_jc
+jtest primes_jc no primes_jc
+jtest main_jc no main_jc
+jtest hanoi_jc no hanoi_jc
+jtest nhorse_jc no nhorse_jc
+jtest fib_jc no fib_jc
+jtest nqueens_jc no nqueens_jc
+jtest queens_jc no queens_jc
+aitest prim no primes primes
+aitest primes no primes primes
+aitest hanoi no hanoi ihanoi
+aitest nhorse no nhorse inhorse
+aitest fib no ifib ifib
+aitest main no main main
+long aitest nqueens no nqueens nqueens
+long aitest queens no queens queens

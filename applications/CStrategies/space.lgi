@@ -1,0 +1,11 @@
+LPL space description
+
+  query	of sort		Space
+  result of sort	Space
+  modules int 		space
+  start with 		(qq)query
+
+end
+
+
+

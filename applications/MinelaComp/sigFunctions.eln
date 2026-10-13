@@ -1,0 +1,134 @@
+module sigFunctions[Types]
+import global 	identifier list[identifier]
+		pair[identifier,int] 
+		list[pair[identifier,int]]
+		type[Types]
+		pair[identifier,type]
+		list[pair[identifier,type]]
+		list[type] pair[list[type],type] 
+		list[pair[identifier,pair[list[type],type]]]
+
+		pair[identifier,sig]
+		list[pair[identifier,sig]]
+
+	;
+       local	bool int
+//		pair[identifier,type]
+		pair[identifier,pair[list[type],type]]
+//		pair[identifier,sig]
+	;
+end
+
+sort symbol;
+end
+
+operators
+  global
+//	non - sorted signatures
+  @	: ( identifier ) symbol;			// variables
+  @ 	: ( pair[identifier,int] ) symbol;		// functional symbols
+
+//	many - sorted signatures
+  @	: ( pair[identifier,type] ) symbol;
+//  @	: ( pair[identifier,pair[list[type],type]] ) symbol;
+  @	: ( pair[identifier,sig] ) symbol;
+
+/* ********************************* */
+//	general acces functions      //
+/* ********************************* */
+
+  arity(@)	: ( symbol ) int;
+  stoi(@)	: ( symbol ) identifier;
+
+//	many sorted functions
+  cod(@)	: ( symbol ) type;
+  dom(@,@)	: ( int symbol ) type;
+
+end
+
+rules for identifier
+ $ide : identifier;
+	n  : int;
+	t,t2  : type;
+	s : sig;
+	tl : list[type];
+global
+  [] stoi($ide)	=> $ide
+  end
+  [] stoi([$ide,n])=> $ide
+  end
+  [] stoi([$ide,t])=> $ide
+  end
+//  [] stoi([$ide,[tl,t2]])	=> $ide
+//  end
+  [] stoi([$ide,s])	=> $ide
+  end
+end
+
+rules for int
+ $ide : identifier;
+	n  : int;
+	t,t2  : type;
+	s : sig;
+	tl : list[type];
+global
+  [] arity($ide)	=> 0
+  end
+  [] arity([$ide,n])=> n
+  end
+
+  [] arity([$ide,t])		=> 0
+  end
+//  [] arity([$ide,[tl,t2]])	=> size(tl)
+//  end
+  [] arity([$ide,s])		=> size(dom(s))
+  end
+end
+
+rules for type
+	$ide : identifier;
+	t  : type;
+	tl : list[type];
+	n  : int;
+	s  : sig;
+global
+  [] cod([$ide,t])		=> t
+  end
+//  [] dom([$ide,[tl,t]])		=> t
+//  end
+  [] cod([$ide,s])		=> cod(s)
+  end
+//  [] cod(n,[$ide,[tl,t]])		=> n-th elem(tl)
+//  end
+  [] dom(n,[$ide,s])		=> n-th elem(dom(s))
+  end
+
+end
+
+/*
+rules for symbol
+ idl : list[identifier];
+	$ide  : identifier;
+	pl  : list[pair[identifier,int]];
+	p   : pair[identifier,int];
+	sidl : list[pair[identifier,type]];
+	sid  : pair[identifier,type];
+//	spl  : list[pair[identifier,pair[list[type],type]]];
+//	sp   : pair[identifier,pair[list[type],type]];
+	spl  : list[pair[identifier,sig]];
+	sp   : pair[identifier,sig];
+
+	
+local
+  [extractrule] elem(idl)	=> $ide	where $ide:=(listExtract)elem(idl)
+  end
+  [extractrule] elem(pl)	=> p	where p:=(listExtract)elem(pl)
+  end
+
+  [extractrule] elem(sidl)	=> sid	where sid:=(listExtract)elem(sidl)
+  end
+  [extractrule] elem(spl)	=> sp	where sp:=(listExtract)elem(spl)
+  end
+end
+*/
+end

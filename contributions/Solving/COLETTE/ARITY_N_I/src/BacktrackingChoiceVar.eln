@@ -1,0 +1,76 @@
+module BacktrackingChoiceVar[Variables,Type,Values]
+
+import
+global
+	EnumerationRules[Variables,Type,Values]
+	PropagationRules[Variables,Type,Values]
+	;
+end
+
+stratop
+global
+	BacktrackingChoiceVarFirstToLastAll	: < csp -> csp >         bs;
+	BacktrackingChoiceVarFirstToLastOne	: < csp -> csp >         bs;
+	BacktrackingChoiceVarLastToFirstAll	: < csp -> csp >         bs;
+	BacktrackingChoiceVarLastToFirstOne	: < csp -> csp >         bs;
+end
+
+
+strategies for csp
+implicit
+
+/* Strategy		: Backtracking  	*/
+/* Variable selection	: Specified by the user	*/
+/* Value selection	: From first to last	*/
+/* Number of solutions	: All 			*/
+
+[] BacktrackingChoiceVarFirstToLastAll =>
+repeat* (
+	first one (GetVarSpecifiedByUser);
+	dk (iterate* (EliminateFirstValueOfDomain));
+	first one (InstantiateFirstValueOfDomain);
+	first one (Elimination)
+	);
+first one (GetSolutionCSP)
+end
+
+
+/* Strategy		: Backtracking 		*/
+/* Variable selection	: Specified by the user	*/
+/* Value selection	: From first to last	*/
+/* Number of solutions	: First			*/
+
+[] BacktrackingChoiceVarFirstToLastOne =>
+first one (BacktrackingChoiceVarFirstToLastAll)
+end
+
+
+/* Strategy		: Backtracking 		*/
+/* Variable selection	: Specified by the user	*/
+/* Value selection	: From last to first	*/
+/* Number of solutions	: All 			*/
+
+[] BacktrackingChoiceVarLastToFirstAll =>
+repeat* (
+	first one (GetVarSpecifiedByUser);
+	dk (iterate* (EliminateLastValueOfDomain));
+	first one (InstantiateLastValueOfDomain);
+	first one (Elimination)
+	);
+first one (GetSolutionCSP)
+end
+
+
+/* Strategy		: Backtracking		*/
+/* Variable selection	: Specified by the user	*/
+/* Value selection	: From last to first	*/
+/* Number of solutions	: First			*/
+
+[] BacktrackingChoiceVarLastToFirstOne =>
+first one (BacktrackingChoiceVarLastToFirstAll)
+end
+
+end
+
+
+end

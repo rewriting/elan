@@ -1,0 +1,9 @@
+#! /bin/csh
+setenv REP    $APPLICATIONS/Hou
+setenv LGI    hou
+setenv SPC    exa
+setenv OPTION -b
+setenv INPUT  $REP/Sample/exa.inp
+setenv OUTPUT $REP/Sample/exa.out
+
+

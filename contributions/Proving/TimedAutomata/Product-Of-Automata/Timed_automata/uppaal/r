@@ -1,0 +1,49 @@
+chan sready, dpick, dput ;
+chan middle, gpick, sempty, gput ;
+process DRobot{
+clock X ;
+state DWait, DPick{X<=2}, DTurnR{X<=6}, DPut{X<=2}, DTurnL{X<=6};
+init DWait;
+trans DWait -> DPick {sync sready?; assign X:=0; },
+DPick -> DTurnR {guard X>=1, X<=2; sync dpick!; assign X:=0; },
+DTurnR -> DPut {guard X>=5, X<=6; assign X:=0; },
+DPut -> DTurnL {guard X>=1,X<=2; sync dput!; assign X:=0; },
+DTurnL -> DWait {guard X>=5,X<=6; assign X:=0; };
+}
+process GRobot{
+clock Y ;
+state GInspect, GPick{Y<=8}, GTurnR{Y<=10}, GWait, GPut{Y<=2}, GTurnL{Y<=10};
+init GInspect;
+trans GInspect -> GPick {sync middle?; assign Y:=0; },
+GPick -> GTurnR {guard Y>=3,Y<=8; sync gpick!; assign Y:=0; },
+GTurnR -> GWait {guard Y>=6,Y<=10; assign Y:=0; },
+GWait -> GPut {sync sempty?; assign Y:=0; },
+GPut -> GTurnL {guard Y>=1,Y<=2; sync gput!; assign Y:=0; },
+GTurnL -> GInspect {guard Y>=8,Y<=10; assign Y:=0; };
+}
+process PStation{
+clock Z ;
+state SEmpty, SBusy{Z<=10}, SReady;
+init SEmpty;
+trans SEmpty -> SBusy {sync gput?; assign Z:=0; },
+SBusy -> SReady {guard Z>=8,Z<=10; assign Z:=0; },
+SReady -> SEmpty {sync dpick?; assign Z:=0; },
+SEmpty -> SEmpty {sync sempty!; },
+SReady -> SReady {sync sready!; };
+}
+process Box{
+clock B;
+state BMov{B<=134}, BInspect{B<=21}, BOnG, BOnD, BOnS;
+init BMov;
+trans BMov -> BInspect {guard B>=133,B<=134; assign B:=0; },
+BInspect -> BOnG {sync gpick?; },
+BOnG -> BOnS {sync gput?; },
+BOnS -> BOnD {sync dpick?; },
+BOnD -> BMov {sync dput?; assign B:=0; },
+BInspect -> BInspect {sync middle!; };
+}
+DRobot1:=DRobot();
+GRobot1:=GRobot();
+PStation1:=PStation();
+Box1:=Box();
+system DRobot1, GRobot1, PStation1,Box1;

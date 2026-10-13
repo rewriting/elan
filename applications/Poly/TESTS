@@ -1,0 +1,9 @@
+# tests of Poly (from legacy/elan3 tst_all; format: tests/apps/README.md)
+itest poly1 someVariables poly1 poly1
+itest poly2 someVariables poly2 poly2
+itest poly3 someVariables poly3 poly3
+itest poly4 someVariables poly4 poly4
+aitest poly1 someVariables poly1 poly1
+aitest poly2 someVariables poly2 poly2
+aitest poly3 someVariables poly3 poly3
+aitest poly4 someVariables poly4 poly4

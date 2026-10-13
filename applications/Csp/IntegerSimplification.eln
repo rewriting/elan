@@ -1,0 +1,217 @@
+module IntegerSimplification
+
+import
+global	tuple[2,list[term],int]
+	IntegerSignature
+	;
+end
+
+operators
+global	SimplifyTerm(@)			: (term)				term;
+
+local	ExpandTerm(@)			: (term)				term;
+	SimplifyMult(@)			: (term)				term;
+	SimplifyConstantTerms(@,@,@)	: (list[term] list[term] int)		tuple[list[term],int];
+	CreateListOfTerms(@,@)		: (term list[term])			list[term];
+	SimplifyCoeficients(@,@,@,@,@)	: (list[term] var list[term] int int)	term;
+
+end
+
+
+rules for term
+
+	x,x1,x2	:	var;
+	k,v,v1,v2,sum,cons	:	int;
+	t,t1,t2,t3	:	term;
+	lv	:	list[var];
+	lt,ts	: list[term];
+
+global 
+
+[]	SimplifyTerm(t)
+	=>
+	where	t1 := ()ExpandTerm(t)
+	where	t2 := ()SimplifyMult(t1)
+	where	lt := ()CreateListOfTerms(t2,nil)
+	where	(tuple[list[term],int]) [ts,sum] := ()SimplifyConstantTerms(lt,nil,0)
+	switch
+	case	ts != nil	then
+		t3
+		where	(term) v(*)x  := ()1-th elem(ts)
+		where	t3 := ()SimplifyCoeficients(ts,x,nil,0,sum)
+	otherwise
+		sum
+	end
+end
+
+[]	ExpandTerm((t))
+	=>
+	ExpandTerm(t)
+end
+[]	ExpandTerm(t1 (+) t2)
+	=>
+	ExpandTerm(t1) (+) ExpandTerm(t2)
+end
+[]	ExpandTerm(t1 (-) t2)
+	=>
+	ExpandTerm(t1) (+) ExpandTerm(-1 (*) t2)
+end
+[]	ExpandTerm(t (*) (t1 (+) t2))
+	=>
+	ExpandTerm(t (*) (t1)) (+) ExpandTerm(t (*) (t2))
+end
+[]	ExpandTerm((t1 (+) t2) (*) t)
+	=>
+	ExpandTerm((t1) (*) t) (+) ExpandTerm((t2) (*) t)
+end
+[]	ExpandTerm(t (*) (t1 (-) t2))
+	=>
+	ExpandTerm(t (*) (t1)) (+) ExpandTerm(t (*) (ExpandTerm(-1 (*) t2)))
+end
+[]	ExpandTerm((t1 (-) t2) (*) t)
+	=>
+	ExpandTerm((t1) (*) t) (+) ExpandTerm((ExpandTerm(-1 (*) t2) (*) t))
+end
+[]	ExpandTerm(t (*) (t1 (*) t2))
+	=>
+	ExpandTerm(ExpandTerm(t (*) t1) (*) t2)
+end
+[]	ExpandTerm((t1 (*) t2) (*) t)
+	=>
+	ExpandTerm(t1 (*) ExpandTerm(t2 (*) t))
+end
+[]	ExpandTerm(x)
+	=>
+	1(*)x
+end
+[]	ExpandTerm(t)
+	=>
+	t
+end
+
+[]	SimplifyMult((t))
+	=>
+	SimplifyMult(t)
+end
+[]	SimplifyMult(t1 (+) t2)
+	=>
+	SimplifyMult(t1) (+) SimplifyMult(t2)
+end
+[]	SimplifyMult(x (*) t)
+	=>
+	SimplifyMult(t) (*) x
+end
+[]	SimplifyMult(t (*) x)
+	=>
+	SimplifyMult(t) (*) x
+end
+[]	SimplifyMult(v1 (*) v2)
+	=>
+	v1 * v2
+end
+[]	SimplifyMult(v (*) t)
+	=>
+	SimplifyMult(v (*) SimplifyMult(t))
+end
+[]	SimplifyMult((v) (*) t)
+	=>
+	SimplifyMult(v (*) SimplifyMult(t))
+end
+[]	SimplifyMult(t (*) v)
+	=>
+	SimplifyMult(v (*) SimplifyMult(t))
+end
+[]	SimplifyMult(t (*) (v))
+	=>
+	SimplifyMult(v (*) SimplifyMult(t))
+end
+[]	SimplifyMult(t)
+	=>
+	t
+end
+
+[]	SimplifyCoeficients(v(*)x1.lt,x2,ts,sum,cons)
+	=>
+	switch
+	case	x1 == x2	then
+		SimplifyCoeficients(lt,x2,ts,sum+v,cons)
+	otherwise
+		SimplifyCoeficients(lt,x2,v(*)x1.ts,sum,cons)
+	end
+end
+
+[]	SimplifyCoeficients(nil,x1,v(*)x2.lt,sum,cons)
+	=>
+	switch
+	case	sum != 0	then
+		sum(*)x1 (+) SimplifyCoeficients(v(*)x2.lt,x2,nil,0,cons)
+	otherwise
+		SimplifyCoeficients(v(*)x2.lt,x2,nil,0,cons)
+	end
+end
+
+[]	SimplifyCoeficients(nil,x,nil,sum,cons)
+	=>
+	switch
+	case	sum != 0	then
+		sum(*)x (+) cons
+	otherwise
+		cons
+	end
+end
+
+
+end
+
+
+
+rules for tuple[list[term],int]
+
+	x	: var;
+	v,sum	: int;
+	lt,ts	: list[term];
+
+global 
+
+[]	SimplifyConstantTerms(v(*)x.lt,ts,sum)
+	=>
+	SimplifyConstantTerms(lt,v(*)x.ts,sum)
+end
+[]	SimplifyConstantTerms(v.lt,ts,sum)
+	=>
+	SimplifyConstantTerms(lt,ts,sum+v)
+end
+[]	SimplifyConstantTerms(nil,ts,sum)
+	=>
+	[ts,sum]
+end
+
+end
+
+
+rules for list[term]
+
+	t,t1,t2	: term;
+	l,l1,l2	: list[term];
+
+global 
+
+[]	CreateListOfTerms(t1 (+) t2,l)
+	=>
+	l2
+	where	l1 := ()CreateListOfTerms(t1,l)
+	where	l2 := ()CreateListOfTerms(t2,l1)
+end
+[]	CreateListOfTerms(t,l)
+	=>
+	t.l
+end
+
+end
+
+
+end
+
+
+
+

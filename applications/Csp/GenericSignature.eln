@@ -1,0 +1,183 @@
+module GenericSignature[Variables,Type]
+
+import
+global	list[formule] tuple[4,list[formule],list[formule],list[formule],list[formule]]
+	bool string 
+	Variables Type 
+	list[identifier] list[var] list[Type] list[term] 
+	eq[var] eq[list[var]] eq[list[term]] eq[list[Type]] eq[domain] eq[formule] eq[list[formule]]
+	replace[term,term] replace[term,list[formule]] replace[term,formule]
+	;
+local	eq[term]
+	;
+end
+
+sort
+
+	var domain term formule csp;
+end
+
+operators
+
+global
+
+FOR EACH x:identifier SUCH THAT x:=(listExtract)elem(Variables): {x: var;}
+
+empty		:								domain;
+@		: (Type)							term;
+@		: (var)								term;
+(@)		: (term)							term;
+@		: (bool)							formule;
+@ in? @		: (var domain)							formule;
+@ = @		: (var Type)							formule;
+@ & @		: (formule formule)						formule	assocRight pri 40;
+@ V @		: (formule formule)						formule	assocRight pri 30;
+@ -> @		: (formule formule)						formule		assocRight;
+NOT(@)		: (formule)							formule;
+CSP@		: (set:tuple[list[formule],list[formule],list[formule],list[formule]])	csp;
+Unsatisfiable	:								csp;
+
+// Basic operators
+
+iguales(@,@)				: (term term)		bool;
+Replacee(@,@,@)				: (term term term)	term;
+Negation(@)				: (formule)		formule;
+SimplifyOr(@)				: (formule)		formule;
+
+// Operators that depend on the specific signature
+
+ArityOfConstraint(@)			: (formule)				int;
+ArityOfTerm(@)				: (term)				int;
+ReviseDxWRTc(@,@)			: (formule formule)			domain;
+ReviseDx1WRTDx2(@,@,@)			: (formule formule formule)		domain;
+GetVarOfAtomicFormule(@)		: (formule)				list[var];
+GetVarOfTerm(@,@)			: (term list[var])			list[var];
+GetCard(@)				: (domain)				int;
+EvaluateFormula(@)			: (formule)				bool;
+EvaluateFormule(@)			: (formule)				formule;
+EvaluateGroundFormule(@)		: (formule)				bool;
+GetFirstValueOfDomain(@)                : (domain)				Type;
+EvaluateTerm(@,@,@)			: (term var Type)			Type;
+EvaluateGroundTerm(@)			: (term)				Type;
+NormalFormOfConstraint(@)		: (formule)				formule;
+GetInverse(@)				: (formule)				formule;
+GetCanonicalForm(@)			: (formule)				formule;
+EliminateFirstValueOfDomain(@)		: (domain)				domain;
+CreateDomainFromValue(@)		: (Type)				domain;
+
+end
+
+
+rules for bool
+
+	t1,t2	: term;
+
+global 
+
+[]	iguales(t1,t2)
+	=>
+	t1 == t2
+end
+
+[]	EvaluateGroundFormule(true)
+	=>
+	true
+end
+[]	EvaluateGroundFormule(false)
+	=>
+	false
+end
+
+end
+
+
+rules for term
+
+	t1,t2,t3	: term;
+
+global 
+
+[]	Replacee(t1,t2,t3)
+	=>
+	switch
+	case	iguales(t1,t3)	then
+		t2
+	otherwise
+		replace(t1,t2,t3)
+	end
+end
+
+end
+
+
+rules for formule
+
+	c,c1,c2	: formule;
+
+global 
+
+[]	Negation(true)
+	=>
+	false
+end
+[]	Negation(false)
+	=>
+	true
+end
+[]	Negation(NOT(c))
+	=>
+	c
+end
+[]	Negation(c1 & c2)
+	=>
+	NOT(c1) V NOT(c2)
+end
+[]	Negation(c1 V c2)
+	=>
+	NOT(c1) & NOT(c2)
+end
+
+[]	Negation(c1 -> c2)
+	=>
+	c1 & NOT(c2)
+end
+
+[]	GetCanonicalForm(true)
+	=>
+	true
+end
+[]	GetCanonicalForm(false)
+	=>
+	false
+end
+[]	GetCanonicalForm(c1 V c2)
+	=>
+	SimplifyOr(GetCanonicalForm(c1) V GetCanonicalForm(c2))
+end
+[]	SimplifyOr(true V c1)
+	=>
+	true
+end
+[]	SimplifyOr(c1 V true)
+	=>
+	true
+end
+[]	SimplifyOr(false V c1)
+	=>
+	c1
+end
+[]	SimplifyOr(c1 V false)
+	=>
+	c1
+end
+[]	SimplifyOr(c1 V c2)
+	=>
+	c1 V c2
+end
+
+end
+
+
+end
+
+

@@ -13,6 +13,7 @@
 #                        when go >= 1.24 exists): go vet/test, the harness
 #                        elan-lextrace, lexem streams, module trees, error corpus
 #   make check-case      no two tracked paths differ only by case (CASE-RENAMES.tsv)
+#   make check-apps      S9: coverage of applications/ and contributions/, unit tests of tests/apps
 #   make check-golden    golden tests: .ref files, -d dump, statistics, errors
 #   make check-compiler  compiled tests (J, JO) only: elanc-rem, REM, runtime libraries
 #   make check-elanc     what bin/elanc is (ELAN_ELANC: go by default, rem), CMake's fallback
@@ -20,7 +21,7 @@
 #                        removed afterwards)
 #   make reference       build the 2004 reference system (REFERENCE_PREFIX, default
 #                        reference/install; on a case-sensitive volume, see reference/README.md)
-#   make check-reference full bench (778 tests) against the reference
+#   make check-reference full bench (800 tests) against the reference
 BUILD   ?= build
 PREFIX  ?= $(CURDIR)/$(BUILD)/install
 BENCH    = tests/legacy-bench/run_tests.py
@@ -41,7 +42,7 @@ else
   ELAN_CXX ?= g++
 endif
 
-.PHONY: check-case front-tables check-front manual manual-update all configure install check check-rust check-go check-compiler check-elanc check-elanc-rem elanc-kind check-golden check-sanitize check-arch check-unit test-runner smoke reference check-reference clean toolchain
+.PHONY: check-case check-apps front-tables check-front manual manual-update all configure install check check-rust check-go check-compiler check-elanc check-elanc-rem elanc-kind check-golden check-sanitize check-arch check-unit test-runner smoke reference check-reference clean toolchain
 
 all: configure
 	cmake --build $(BUILD) -j $(JOBS)
@@ -97,6 +98,11 @@ smoke: install
 # No two tracked paths may differ only by case (CASE-RENAMES.tsv).
 check-case:
 	tests/check_case.sh
+
+# Spec S9: every program of applications/ and contributions/ is tested,
+# unloadable or to do; unit tests of the tools of tests/apps.
+check-apps:
+	cd tests/apps && python3 test_import.py && python3 test_tools.py && python3 check_coverage.py
 
 check-arch:
 	cd tests/architecture && python3 test_check_deps.py && python3 test_check_limits.py && python3 test_check_rem_name.py
@@ -210,7 +216,7 @@ check-front: install
 	  && tests/front/test_front_errors.sh $(PREFIX); \
 	else echo "elanc-go not built (go >= 1.24 missing or -DELAN_GO=OFF): front tests skipped"; fi
 
-check: check-case smoke test-runner check-arch check-unit check-golden check-rust check-go check-elanc check-front
+check: check-case check-apps smoke test-runner check-arch check-unit check-golden check-rust check-go check-elanc check-front
 	$(BENCH) --prefix $(PREFIX) --kinds I,A
 	@$(CHECK_COMPILER)
 

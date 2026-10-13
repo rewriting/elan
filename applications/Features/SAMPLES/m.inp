@@ -1,0 +1,26 @@
+la la 1 end
+la la la (2 ((3 2) 1)) end
+(  la la la (2 ((3 2) 1))  la la 1   ) end
+la la(2 ((la la 1 2)1)) end
+la la(2 (la 1 1)) end
+la la (2 1) end
+(  la la la (2 ((3 2) 1))  la la (2 1)  )  end
+la la(2 ((la la( 2 1) 2)1)) end
+la la (2 (2 1)) end
+(  la la la (2 ((3 2) 1))  la la (2 (2 1)) ) end
+la la ( 2 ( ( la la (2 (2 1)) 2) 1)) end
+la la (2 (2 (2 1))) end
+
+
+(  la la la (2 ((3 2) 1))
+ (  la la la (2 ((3 2) 1))
+  (  la la la (2 ((3 2) 1))
+   (  la la la (2 ((3 2) 1))
+    (  la la la (2 ((3 2) 1))
+     (  la la la (2 ((3 2) 1))
+      (  la la la (2 ((3 2) 1))
+	(  la la la (2 ((3 2) 1))
+         (  la la la (2 ((3 2) 1))
+                (  la la la (2 ((3 2) 1))
+                 (  la la la (2 ((3 2) 1))
+	            la la 1 ))))))))))) end

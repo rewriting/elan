@@ -1,0 +1,38 @@
+module Terms[K,Q,S]
+
+import
+ global
+  K Q S
+  int
+  identifier
+  list[identifier]
+  list[invariant]
+  list[transition]
+  ClockZone[K] ;
+end
+
+sort
+  invariant     //  spécification d'un invariant
+  transition    //  spécification d'une transition
+  label         //  les étiquettes des états
+  state         //  les états discrets
+  statezone ;   //  les zones d'états temporels
+end
+
+operators
+ global
+  
+  FOR EACH a : identifier SUCH THAT a := (listExtract) elem(S) :
+  { a  :  label; }
+
+  FOR EACH q : identifier SUCH THAT q := (listExtract) elem(Q) :
+  { q  :  state; }
+
+  @ ':' @  :  ( state clockzone ) invariant ;
+
+  @ , @ ':' @ , @ , @  :  ( state label clockzone list[clock] state )
+                                transition ;
+
+end
+
+end

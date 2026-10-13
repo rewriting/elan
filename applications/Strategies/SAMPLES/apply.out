@@ -1,0 +1,35 @@
+ true.true.true.true.nil end
+
+ false.true.true.true.nil end
+
+ true.false.true.true.nil end
+
+ false.false.true.true.nil end
+
+ true.true.false.true.nil end
+
+ false.true.false.true.nil end
+
+ true.false.false.true.nil end
+
+ false.false.false.true.nil end
+
+ true.true.true.false.nil end
+
+ false.true.true.false.nil end
+
+ true.false.true.false.nil end
+
+ false.false.true.false.nil end
+
+ true.true.false.false.nil end
+
+ false.true.false.false.nil end
+
+ true.false.false.false.nil end
+
+ false.false.false.false.nil end
+
+ end end
+end
+

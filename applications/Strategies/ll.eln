@@ -1,0 +1,142 @@
+module ll
+
+import 	global int bool strat[lterm];
+end
+sort lterm;
+end
+operators global
+  	@		: (int) lterm;
+	(@ @)		: (lterm lterm) lterm;
+	la @		: (lterm) lterm;
+  	lis(@)  	: (<lterm>) <lterm>;
+  	los(@)  	: (<lterm>) <lterm>;
+  	repeat @  	: (<lterm>) <lterm>;
+  	rep @  		: (int) <lterm>;
+  local
+	repl(@,@,@)	: (int lterm lterm) lterm;
+	free(@,@)	: (int lterm) bool;
+end
+
+rules for bool
+v	: int;
+M, N	: lterm;
+global
+  []	free(v,v) => true				end
+  []	free(v,(M N)) => free(v,M) or free(v,N)		end
+  []	free(v,la M) => free(v+1,M)			end
+  []	free(v,M) => false				end
+end
+
+rules for lterm
+v, w	: int;
+M, N, Q	: lterm;
+global
+  []	repl(v,v,M) => M				end
+  []	repl(v,w,M) => w				end
+  []	repl(v,(M N),Q) => (repl(v,M,Q) repl(v,N,Q))	end
+  []	repl(v,la N,M) => la repl(v+1,N,M)		end
+end
+
+rules for lterm
+M, N	: lterm;
+global
+  [beta](la M N) => repl(1,M,N)				end
+  [eta]	(la M 1) => M if not free(1,M)			end
+end
+
+strategies for lterm
+s	: <lterm>;
+t, y	: lterm;
+n1, n	: int;
+explicit
+  [.] [lis(s)]t => 
+//	t end
+//	y where y:=[id]t end
+//	y where y:=[first(beta,eta)]t end
+//	y where y:=[(lis(s) id)]t end
+	y where y:=[first((lis(s) id),(id lis(s)), la lis(s), s )]t	end
+  [.] [los(s)]t => 
+  	y where y:=[first(s, (los(s) id),(id los(s)), la los(s))]t end
+implicit
+/*
+  [rep 0]t	=> la 2000				end
+  [rep n]t 	=> y 
+		if n > 0
+		where n1:=()n-1
+		where y:=[rep n1]t 
+	end
+*/  
+  [.] repeat s =>	first(s; repeat s, id)			end
+end
+
+end
+
+/*
+
+( la la la (2 ((3 2) 1))
+ ( la la la (2 ((3 2) 1))
+  ( la la la (2 ((3 2) 1))
+   ( la la la (2 ((3 2) 1))
+    ( la la la (2 ((3 2) 1))
+     ( la la la (2 ((3 2) 1))
+      ( la la la (2 ((3 2) 1))	
+	la la 1  			
+)))))))
+	end
+
+
+
+
+
+ Statistics:
+ total time     (2.327+0.000)=2.327 sec (main+subprocesses)
+
+ average speed  1290 inf/sec
+                0 nonamed rules applied,     0 tried
+             3004   named rules applied, 35036 tried
+
+ named rules
+           applied   tried    rule for symbol
+                 0    1001    NF1:yesno
+                 0    1001    1CONCAT:lterm
+                 0    1001    11LAB:lterm
+                 0    1001    21LAB:lterm
+                 0    1001    22LAB:lterm
+              1000    1001    3DSTR:lterm
+                 0    1001    DC:lterm
+                 0    1001    ID:lterm
+                 0    1001    DK:lterm
+                 0    1001    IF1:lterm
+                 0    1001    IF2:lterm
+              1001    1001    NF2:yesno
+              1001    1001    FIN:lterm
+                 0    1001    20LAB:lterm
+                 0    1001    0LAB:lterm
+                 0    1001    1LAB:lterm
+                 0    1001    2LAB:lterm
+                 0    1001    3LAB:lterm
+                 0    1001    4LAB:lterm
+                 0    1001    5LAB:lterm
+                 0    1001    6LAB:lterm
+                 0    1001    7LAB:lterm
+                 0    1001    8LAB:lterm
+                 0    1001    9LAB:lterm
+                 0    1001    IFO1:lterm
+                 0    1001    IFO2:lterm
+                 0    1001    10LAB:lterm
+                 1       1    START_RULE:lterm
+                 0    1001    12LAB:lterm
+                 0    1001    13LAB:lterm
+                 0    1001    14LAB:lterm
+                 0    1001    0DSTR:lterm
+                 1    1001    2DSTR:lterm
+                 0    1001    1FSYM:lterm
+                 0    1001    2FSYM:lterm
+                 0    1001    CONST:lterm
+
+
+*/
+
+
+
+

@@ -1,0 +1,7 @@
+LPL print description 
+
+  query 	of sort list[int]
+         	result of sort list[int]
+	 	modules	int list[int] print[int] print[list[int]]
+        	start with (sd) print(read.nil)
+end

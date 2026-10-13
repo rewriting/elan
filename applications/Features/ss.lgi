@@ -1,0 +1,33 @@
+LPL ss description
+
+/*
+   query of sort  	string 
+   result of sort 	string
+   modules 		ss //strlist
+   start with		(kk)query
+*/
+
+  query of sort  	int //string 
+   result of sort 	int //string
+   modules 		ss
+  start with		(kk)query
+
+/*
+  query of sort  	list[int]
+   result of sort 	list[int]
+   modules 		strlist
+  start with		(kk)query
+*/
+end
+
+
+
+
+
+
+
+
+
+
+
+

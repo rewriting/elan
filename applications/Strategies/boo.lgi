@@ -1,0 +1,9 @@
+LPL boo description
+
+query		of sort  	Any
+		result of sort 	Any
+		modules 	tcstrat[Any,Any] tcstrat[integ,Any]
+		start with 	(doo)query
+
+end
+

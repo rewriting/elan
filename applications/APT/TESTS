@@ -1,0 +1,5 @@
+# tests of APT (from legacy/elan3 tst_all; format: tests/apps/README.md)
+itest queens queens queens queens
+itest queensLIN queensLIN queensLIN queensLIN
+itest queensLOG queensLOG queensLOG queensLOG
+itest buble buble buble buble

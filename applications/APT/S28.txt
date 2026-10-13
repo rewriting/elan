@@ -1,0 +1,11 @@
+		start with 	[for i=1 to 9 do
+				     some j=1 to 25-2*i do
+				       add(j-1,i)
+				     od
+				   od
+				]new(0)
+
+  [add(q,m)]	x => x[q<-m][q+m+1<-m][q+2*m+2<-m]
+				if x[q] 	== 0
+				if x[q+m+1] 	== 0
+				if x[q+2*m+2]	== 0

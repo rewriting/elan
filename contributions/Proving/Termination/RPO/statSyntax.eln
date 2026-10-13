@@ -1,0 +1,20 @@
+module statSyntax
+
+import 
+	global	
+		ident int
+		ident list[ident] pair[ident,ident] 
+		list[pair[ident,ident]];
+end
+operators
+ global
+
+  @ ':' @ : ( ident  ident) pair[ident,ident]	alias [@,@]:;
+
+  Epsilon : list[pair[ident,ident]]			alias nil:;
+  @  @	  : ( pair[ident,ident] list[pair[ident,ident]] ) 
+			  list[pair[ident,ident]]	alias cons(@,@):;
+
+end
+
+end

@@ -1,0 +1,14 @@
+#!/bin/tcsh
+
+set ELANDIR = $PWD/..
+set ELANBINDIR = /users/protheo/moreau/bin/`uname -m`
+set ELAN = $ELANBINDIR/elan
+set EXAMPLEDIR = Examples
+
+foreach f ($EXAMPLEDIR/*.spc)
+   if ($f != "$EXAMPLEDIR/Other") then
+	echo "File: $f"
+	echo "Results:"
+	$ELAN -q -b rewriting $f < $f.in
+   endif
+end

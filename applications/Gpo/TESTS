@@ -1,0 +1,7 @@
+# tests of Gpo (from legacy/elan3 tst_all; format: tests/apps/README.md)
+itest gpo append gpo append
+itest gpo reverse gpo reverse
+itest gpo echec gpo echec
+itest gpo gdiv gpo gdiv
+itest gpo sample gpo sample
+long itest gpo fib gpo fib

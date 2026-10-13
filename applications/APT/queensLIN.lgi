@@ -1,0 +1,19 @@
+LPL queensLIN description
+
+query		of sort  	arrayLIN[int]
+		result of sort 	arrayLIN[int]
+		import	 	int queens[arrayLIN[int]]
+				strat[arrayLIN[int]]
+				loops[col,arrayLIN[int]]
+				loops[row,arrayLIN[int]]
+				loops[i,arrayLIN[int]]
+		start with 	[for col=0 to 3 do
+				   some row=0 to 3 do
+				     for i=0 to col-1 do
+				       verify(col,row,i)
+				     od;	
+				     drop(col,row)
+				   od
+				 od]new(0)
+
+end

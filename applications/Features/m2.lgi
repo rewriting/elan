@@ -1,0 +1,8 @@
+LPL m2 description
+
+query		of sort  	lterm
+		result of sort 	lterm
+		import	 	m2
+		start with 	()query
+
+end

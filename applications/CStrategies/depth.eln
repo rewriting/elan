@@ -1,0 +1,22 @@
+module depth[X]
+
+import global symbol[1,X,booleg] booleg eq[booleg] strat[X];
+end
+operators global
+  depth-first(@,@) : (Symbol[X,booleg] <X>) <X>;
+end
+
+strategies for X
+	p : Symbol[X,booleg];
+	s : <X>;
+defined
+  [depth-first(p,s)]
+	if p(self)==true then
+	  s; depth-first(p,s)	
+	else
+	  id
+	fi
+  end
+end
+
+end

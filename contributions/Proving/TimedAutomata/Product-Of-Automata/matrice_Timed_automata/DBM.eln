@@ -1,0 +1,201 @@
+/*
+ *   Difference-bounds matrices
+ */
+module DBM[K]
+
+//----  MODULES IMPORTÉS  ----//
+
+import global
+   K 
+   list[clock]
+   occur[clock,list[clock]]
+   ClockZone[K]
+   matrix[bound]
+   eq[matrix[bound]]
+   pair[int,int]
+   pair[clockzone,clockzone] 
+   pair[matrix[bound],matrix[bound]]
+   replace[clock,pair[clockzone,clockzone]] ;
+end
+
+//----  SORTES INTRODUITES  ----//
+
+sort
+  bound   //ce sont les elts de la matrice
+  index ;
+end
+
+operators global
+  oo        : bound ;
+  o         : bound ;
+  @         : (pair[int,int]) bound ;
+  X(@)      : (int) clock ;
+  rank(@)   : (clock) int ;
+  init_DBM(@) : (int) matrix[bound] ;
+  zeros(@,@) : (matrix[bound] int) matrix[bound] ;
+  cons_DBM(@,@) : (clockzone matrix[bound]) matrix[bound] ;
+  cons2DBM(@)   : (pair[clockzone,clockzone]) pair[matrix[bound],matrix[bound]] ;
+
+  @+@           : (bound bound) bound ;
+  minb(@,@)     : (bound bound) bound ;
+
+  db_list_var(@): (pair[clockzone,clockzone]) list[clock] ;
+  list_var(@)   : (clockzone) list[clock] ; 
+  setof(@)      : (list[clock]) list[clock] ;
+  replace_var(@,@,@) : (pair[clockzone,clockzone] list[clock] int) pair[clockzone,clockzone] ; 
+  indexed_form(@) : (pair[clockzone,clockzone]) pair[clockzone,clockzone] ;
+  pairFloyd(@)    : (pair[matrix[bound],matrix[bound]]) pair[matrix[bound],matrix[bound]] ;
+
+  Floyd_Cell(@,@,@,@) : (matrix[bound] int int int) matrix[bound] ;
+  Floyd_Line(@,@,@)   : (matrix[bound] int int) matrix[bound];
+  Floyd(@,@)          : (matrix[bound] int) matrix[bound];
+
+  cmp_DBMs(@) : (pair[clockzone,clockzone]) bool ;
+end
+
+rules for int
+  i  : int ;
+ global
+  [] rank(X(i))   => i               end
+end
+
+rules for matrix[bound]
+  i, j, k, n : int ;
+  dbm, dbm1, i_dbm : matrix[bound] ;
+  X, Y : clock ;
+  cz : clockzone ;
+ global
+  [] init_DBM(i) => dbm 
+                    where dbm1:=()new(i,i,oo) 
+                    where dbm :=()zeros(dbm1,0)
+                    end
+
+  [] zeros(dbm,i) => zeros(dbm[i,i]<-o,i+1)
+                     if i <= size(K)-1
+                     end
+  [] zeros(dbm,i) => dbm end
+
+  [] cons_DBM($X<n^cz,i_dbm)     => cons_DBM(cz,i_dbm[rank($X),0]<-[n,0]) end
+  [] cons_DBM($X<=n^cz,i_dbm)    => cons_DBM(cz,i_dbm[rank($X),0]<-[n,1]) end
+  [] cons_DBM($X>n^cz,i_dbm)     => cons_DBM(cz,i_dbm[0,rank($X)]<-[-n,0]) end
+  [] cons_DBM($X>=n^cz,i_dbm)    => cons_DBM(cz,i_dbm[0,rank($X)]<-[-n,1]) end
+  [] cons_DBM($X-$Y<n^cz,i_dbm)  => cons_DBM(cz,i_dbm[rank($X),rank($Y)]<-[n,0]) end
+  [] cons_DBM($X-$Y<=n^cz,i_dbm) => cons_DBM(cz,i_dbm[rank($X),rank($Y)]<-[n,1]) end
+  [] cons_DBM(true,i_dbm)        => i_dbm end
+
+  [] Floyd_Cell(dbm,i,j,k) => Floyd_Cell(dbm1,i,j,k+1)
+                              if k <= size(K)-1
+                              where dbm1:=()dbm[i,j]<-minb(dbm[i,j],dbm[i,k]+dbm[k,j])
+                              end
+  [] Floyd_Cell(dbm,i,j,k) => dbm end
+
+  [] Floyd_Line(dbm,i,j)   => Floyd_Line(dbm1,i,j+1)
+                              if j <= size(K)-1
+                              where dbm1:=()Floyd_Cell(dbm,i,j,0)
+                              end
+  [] Floyd_Line(dbm,i,j)   => dbm end
+
+  [] Floyd(dbm,i)          => Floyd(dbm1,i+1)
+                              if i <= size(K)-1
+                              where dbm1:=()Floyd_Line(dbm,i,0)
+                              end
+  [] Floyd(dbm,i)          => dbm end
+
+end
+
+rules for pair[matrix[bound],matrix[bound]] 
+  dbm, dbm1, dbm2 : matrix[bound] ;
+  pcz, i_pcz : pair[clockzone,clockzone] ;
+  p_dbm : pair[matrix[bound],matrix[bound]] ;
+ global
+  [] cons2DBM(pcz) => [dbm1,dbm2]
+                      where i_pcz:=()indexed_form(pcz)
+                      where dbm:=()init_DBM(size(K))
+                      where dbm1:=()cons_DBM(elim(first(i_pcz)),dbm)
+                      where dbm2:=()cons_DBM(elim(second(i_pcz)),dbm)
+                      end
+  [] pairFloyd(p_dbm) => [Floyd(first(p_dbm),0),Floyd(second(p_dbm),0)] end
+end
+
+
+rules for pair[clockzone,clockzone]
+  pcz : pair[clockzone,clockzone] ;
+  c : clause ;
+  $X : clock ;
+  lc : list[clock] ;
+  n : int ;
+ global
+  [] replace_var(pcz,$X.lc,n) => replace($X,X(n),replace_var(pcz,lc,n+1)) end 
+  [] replace_var(pcz,nil,n)  => pcz                                     end
+  [] indexed_form(pcz)       => replace_var(pcz,setof(db_list_var(pcz)),0)  end
+end
+
+rules for list[clock]
+  pcz: pair[clockzone,clockzone] ;
+  cz : clockzone ;
+  c : clause ;
+  $X, $Y : clock ;
+  lc : list[clock] ;
+  n : int ;
+ global
+  [] db_list_var(pcz) => list_var(first(pcz)) @ list_var(second(pcz)) end
+  [] list_var(c^cz)   => list_var(c) @ list_var(cz) end
+  [] list_var($X<n)    => $X.nil                      end
+  [] list_var($X<=n)   => $X.nil                      end
+  [] list_var($X>n)    => $X.nil                      end
+  [] list_var($X>=n)   => $X.nil                      end
+  [] list_var($X-$Y<n)  => $X.$Y.nil                    end
+  [] list_var($X-$Y<=n) => $X.$Y.nil                    end
+  [] list_var(true)   => nil                        end
+  [] list_var(false)  => nil                        end
+
+  [] setof($X.lc)      => $X.setof(lc) 
+                         if not occurs($X,lc)        end
+  [] setof($X.lc)      => setof(lc)                  end
+  [] setof(nil)       => nil                        end
+end
+
+rules for bound
+  b, res : bound ;
+  x1, x2, x3, r1, r2, r3 : int ;
+ global
+  [] o + oo   => oo   end
+  [] oo + o   => oo   end
+  [] b + o    => b    end
+  [] o + b    => b    end
+  [] b + oo   => oo   end
+  [] oo + b   => oo   end
+  [] [x1,r1] + [x2,r2]     => [x1+x2,min(r1,r2)] end
+
+  [] minb(o,oo) => o  end
+  [] minb(oo,o) => o  end
+  [] minb(o,b)  => minb([0,1],b)  end
+  [] minb(b,o)  => minb([0,1],b)  end
+  [] minb(oo,b) => b  end
+  [] minb(b,oo) => b  end
+  [] minb([x1,r1],[x2,r2]) => [x3,r3]
+                              choose try if x1<x2
+                                         where x3:=()x1
+                                         where r3:=()r1
+                                     try if x2<x1
+                                         where x3:=()x2
+                                         where r3:=()r2
+                                     try 
+                                         where x3:=()x1
+                                         where r3:=()min(r1,r2)
+                              end    end 
+end
+
+rules for bool
+  pcz : pair[clockzone,clockzone] ;
+  p_dbm : pair[matrix[bound],matrix[bound]] ;
+ global
+  [] cmp_DBMs(pcz) => true 
+                      where p_dbm:=()pairFloyd(cons2DBM(pcz))
+                      if first(p_dbm)==second(p_dbm)
+                      end
+  [] cmp_DBMs(pcz) => false  end
+end
+
+
+end

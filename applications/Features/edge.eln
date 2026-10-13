@@ -1,0 +1,32 @@
+module edge
+
+/* Definition of the sort edge */
+
+import	
+	global
+		int
+		label
+	;
+end
+
+sort edge;
+end
+
+operators
+  global
+	/* Constructor of the sort edge */
+	/* The edge is from vertexin to vertexout ( vertexin -> vertexout) */
+	/* lab is the label of the edge (I,C or S) */
+	/* The following functions can be called: 1,2,I.vertexin => 1 */
+	/* 1,2,I[.lab<-S] => 1,2,S */
+
+	edgeempty	: edge;
+
+	[@, @, @] : (vertexin:int vertexout:int lab:label) edge;
+
+end
+
+end
+
+
+

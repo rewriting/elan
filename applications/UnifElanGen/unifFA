@@ -1,0 +1,12 @@
+#! /bin/sh
+# unification dans les algebres finies
+# argument = taille du domaine
+# ATTENTION: changement de syntaxe
+#                C_i --> C.i
+# new variables: Y_j --> Y:j
+/users/protheo/ringeiss/UnifElan/unifFA/bin/`arch`/unif_fa 2
+read r
+while (test "$r" != ";") do 
+  read r 
+done
+

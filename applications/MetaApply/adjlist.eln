@@ -1,0 +1,162 @@
+module adjlist
+
+/* Definition of the sort adjlist which is a set of paths constructed */ 
+/* using U. */ 
+/* For a vertex v, adjlist is the list of the vertices adjacent to v */ 
+/* For example, if there is a path from 1 to 4 and a path from 1 to */ 
+/* 3, then 4 and 3 are in the adjacency list of 1. adjlist is 4 and 3 */
+
+import	
+	global
+		bool
+		label
+		eq[label]
+		path
+		edge
+	;
+end
+
+
+sort adjlist;
+end
+
+
+operators
+  global
+
+	/* Constructor of the sort adjlist */
+	@		: (path) adjlist;
+	adjempty	: adjlist;
+	@ U @		: (adjleft:adjlist adjright:adjlist) adjlist	
+			(AC) assocLeft;
+
+	/* Let e be an edge from v0 to v1 and adj be the adjlist of v1. */
+	/* The addition of e to the graph implies recalculation of the */
+	/* transitive closure of the graph. The adjlist of v0 is extended */
+	/* using information of adj. We add an edge from v0 to all the */
+	/* vertices in the adjacency list of v1, if the condition */
+	/* concerning the reducibility constraints is respected i.e. */
+	/* the condition suiv concerning the labels of edges is true */
+	/* This function is called in the module oneadjlist in the right */
+	/* circumstances */
+	addl_adjlist(@,@)	: (edge adjlist) adjlist;
+
+	/* Let e be an edge from v0 to v1 and adj be the adjlist of a */
+	/* vertex v2 that contains v0. The addition of e to the graph */
+	/* implies recalculation of the transitive closure of the graph. */
+	/* The adjlist of v2 is extended such that v1 is now in adj. */
+	/* This function is called in the module oneadjlist in the right */
+	/* circumstances */
+	addr_adjlist(@,@)	: (edge adjlist) adjlist;
+end
+
+
+/* Rules for simplification */
+
+rules for adjlist
+	v0 		: int;
+	c1, c2, c3 	: bool;
+	lab1, lab2 	: label;
+	X 		: adjlist;
+global
+	[] pathempty U X				=> X
+	end
+
+	[] adjempty U X					=> X
+	end
+
+	[] [v0,c1,lab1,lab2] U [v0,c2,lab1,lab2]	=> 
+			[v0,c1 or c2,lab1,lab2] 
+	end
+
+	[] [v0,c1,lab1,lab2] U [v0,c2,lab1,lab2] U X	=> 
+			[v0,c1 or c2,lab1,lab2] U X
+	end
+end
+
+
+/* addl_adjlist */
+
+rules for adjlist
+	v0, v1, v2 		: int;
+	c, c1, bc, b		: bool;
+	lab, lab1, lab2, lab3 	: label;
+	X, ad 			: adjlist;
+global
+
+	[] addl_adjlist(edgeempty, X)				=> 
+			adjempty
+	end
+
+	[] addl_adjlist([v0,v1,lab], adjempty)			=> 
+			adjempty
+	end
+
+	[] addl_adjlist([v0,v1,lab1],[v2,c,lab2,lab3])		=>
+			switch 
+			case suiv(lab1,lab2)
+			then [v2,c or eqlabel(C,lab1),lab1,lab3]
+			otherwise adjempty
+			end
+	end
+
+
+	[] addl_adjlist([v0,v1,lab1],[v2,c,lab2,lab3] U X)	=> 
+			[v2,c or eqlabel(C,lab1),lab1,lab3] U ad
+			if suiv(lab1,lab2)
+			where ad := ()addl_adjlist([v0,v1,lab1],X)
+	end
+
+	[] addl_adjlist([v0,v1,lab1],[v2,c,lab2,lab3] U X)	=> 
+			addl_adjlist([v0,v1,lab1],X)
+        end
+
+	[] addl_adjlist([v0,v1,lab1],X)				=> 
+			adjempty
+	end
+end
+
+
+/* addr_adjlist */
+
+rules for adjlist
+	v0, v1, v2 		: int;
+	c, bc, c1, b 		: bool;
+	lab, lab1, lab2, lab3 	: label;
+	X, ad 			: adjlist;
+global
+	[] addr_adjlist(edgeempty, X)			=> 
+		adjempty
+	end
+
+	[]  addr_adjlist([v0,v1,lab], adjempty)		=> 
+		adjempty
+	end
+
+	[] addr_adjlist([v0,v1,lab1],[v0,c,lab2,lab3])	=>
+		switch 
+		case suiv(lab3,lab1) 
+		then [v1,c or eqlabel(C,lab1),lab2,lab1]
+		otherwise adjempty
+		end
+	end
+
+	[] addr_adjlist([v0,v1,lab1],[v0,c,lab2,lab3] U X)	=>  
+		[v1,c or eqlabel(C,lab1),lab2,lab1] U ad
+		if suiv(lab3,lab1)
+		where ad := ()addr_adjlist([v0,v1,lab1],X)
+	end
+
+	[] addr_adjlist([v0,v1,lab1],[v0,c,lab2,lab3] U X)	=>  
+		addr_adjlist([v0,v1,lab1],X)
+	end
+
+	[] addr_adjlist([v0,v1,lab1],X) 				=> 
+		adjempty
+	end
+end
+
+
+end
+
+

@@ -1,0 +1,57 @@
+module lambd
+
+import 	global int any[lterm] strat[lterm] lis3[lterm];
+	local bool;
+end
+sort lterm;
+end
+operators global
+  	@		: (int) lterm;
+	(@ @)		: (lterm lterm) lterm;
+	la @		: (lterm) lterm;
+   local
+	repl(@,@,@)	: (int lterm lterm) lterm;
+	free(@,@)	: (int lterm) bool;
+end
+
+stratop global
+	reduce_top	: <lterm>;
+	reduce		: <lterm>;
+	reduce_all	: <lterm>;
+end
+
+rules for bool
+ v, w	: int;
+	M, N, Q	: lterm;
+global
+  []	free(v,v) => true				end
+  []	free(v,(M N)) => free(v,M) or free(v,N)		end
+  []	free(v,la M) => free(v+1,M)			end
+  []	free(v,M) => false				end
+end
+
+rules for lterm
+ v, w	: int;
+	M, N, Q	: lterm;
+global
+  []	repl(v,v,M) => M				end
+  []	repl(v,w,M) => w				end
+  []	repl(v,(M N),Q) => (repl(v,M,Q) repl(v,N,Q))	end
+  []	repl(v,la N,M) => la repl(v+1,N,M)		end
+
+  [beta](la M N) => repl(1,M,N)			end
+  [eta]	(la M 1) => M if not free(1,M)			end
+end
+
+strategies for lterm
+implicit
+  [.] reduce_top =>		dc(beta,eta)			end
+  [.] reduce => 		lis(dc(beta,eta))		end
+  [.] reduce_all =>		 dc(reduce;reduce_all, id)	end
+///////////////  [reduce]	lis(id)			end
+//  [reduce] 	los(dc(beta,eta))			end
+//  [reduce]		 dc(lis(beta),lis(eta))		end
+end
+
+end
+

@@ -1,0 +1,2 @@
+# programs of legacy/elan3/{applications,contributions} that cannot be loaded
+# even with a port (spec S9 §5): path<TAB>reason

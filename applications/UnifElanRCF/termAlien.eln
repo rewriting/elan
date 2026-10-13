@@ -1,0 +1,260 @@
+module termAlien[Vars,Fss1,Fss2]
+import 	global 	term varabst varUnif[Vars] 
+                termUnif[Fss1] termUnif[Fss2]  
+                purify renvarabst ; 
+
+ 	local  	Fss1 Fss2 int anyIdentifier bool pair[identifier,int]
+		list[int] list[identifier] list[pair[identifier,int]]
+                list[variable] ;
+
+end
+
+
+
+/// THEORY 1
+
+FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+SUCH THAT SS:=(listExtract) elem(Fss1) AND F:=()first(SS) 
+	AND N:=()second(SS) ANDIF N>0 :{
+
+   rules for int
+   // declare 
+   t_1,...,t_N:term ;
+   
+   global
+
+       [] theory(F(t_1,...,t_N))	=> 1 end
+                
+   end
+}
+
+
+FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+SUCH THAT SS:=(listExtract) elem(Fss1) AND F:=()first(SS) 
+	AND N:=()second(SS) ANDIF N==0 :{
+
+   rules for int
+   // declare 
+   t_1,...,t_N:term ;
+
+   global
+
+       [] theory(F)	=> 1 end
+                
+   end
+}
+
+FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+SUCH THAT SS:=(listExtract) elem(Fss1) AND F:=()first(SS) 
+	AND N:=()second(SS) ANDIF N>0 :{
+
+   {
+   rules for list[int]
+   // declare 
+
+   oocc:list[int]; t_1,...,t_N:term ; Th: int ;
+   
+   global 
+   [inOcc]      alienocc(F(t_1,...,t_N), Th)	=> J.oocc 
+                if theory(F(t_1,...,t_N)) == Th
+		where oocc:=(chooseOcc) alienocc(t_J, Th)
+                end
+   end
+
+   }_J=1...N
+}
+
+
+FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+SUCH THAT SS:=(listExtract) elem(Fss1) AND F:=()first(SS) 
+	AND N:=()second(SS) ANDIF N>0 :{
+
+   rules for bool
+   // declare 
+
+   t_1,...,t_N:term ; Th: int ;
+   
+   global
+
+       [] pure(F(t_1,...,t_N), Th)	=>  
+	     theory(F(t_1,...,t_N)) == Th
+             { and pure(t_I,Th) }_I=1...N  end
+                
+   end
+   }
+
+
+FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+SUCH THAT SS:=(listExtract) elem(Fss1) AND F:=()first(SS) 
+	AND N:=()second(SS) ANDIF N==0 :{
+
+   rules for bool
+   // declare 
+   t_1,...,t_N:term ; Th: int ;
+   
+   global
+       [] pure(F, Th)	=>  theory(F) == Th end
+                
+   end
+   }
+
+
+FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+SUCH THAT SS:=(listExtract) elem(Fss1) AND F:=()first(SS) 
+	AND N:=()second(SS) ANDIF N>0 :{
+
+   rules for list[variable]
+   // declare 
+   t_1,...,t_N:term ; Th: int ;
+   
+   global
+       [] multivabst(F(t_1,...,t_N))	=>  
+	     multivabst(t_1)
+             { @ multivabst(t_I) }_I=2...N  end
+                
+   end
+   }
+
+
+FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+SUCH THAT SS:=(listExtract) elem(Fss1) AND F:=()first(SS) 
+	AND N:=()second(SS) ANDIF N==0 :{
+
+   rules for list[variable]
+   // declare 
+   t_1,...,t_N:term ; Th: int ;
+   global
+
+       [] multivabst(F)	=>  nil end
+                
+   end
+   }
+
+
+/// THEORY 2
+
+
+FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+SUCH THAT SS:=(listExtract) elem(Fss2) AND F:=()first(SS) 
+	AND N:=()second(SS) ANDIF N>0 :{
+
+   rules for int
+   // declare 
+   t_1,...,t_N:term ;
+   global
+
+       [] theory(F(t_1,...,t_N))	=> 2 end
+                
+   end
+}
+
+
+FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+SUCH THAT SS:=(listExtract) elem(Fss2) AND F:=()first(SS) 
+	AND N:=()second(SS) ANDIF N==0 :{
+
+   rules for int
+   // declare 
+   t_1,...,t_N:term ;
+   global
+
+       [] theory(F)	=> 2 end
+                
+   end
+}
+
+
+
+
+
+
+FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+SUCH THAT SS:=(listExtract) elem(Fss2) AND F:=()first(SS) 
+	AND N:=()second(SS) ANDIF N>0 :{
+
+   {
+   rules for list[int]
+   // declare
+   oocc:list[int]; t_1,...,t_N:term ; Th: int ;
+   global
+       [inOcc]  alienocc(F(t_1,...,t_N), Th)	=> J.oocc 
+                if theory(F(t_1,...,t_N)) == Th
+		where oocc:=(chooseOcc) alienocc(t_J, Th)
+                end
+   end
+   }_J=1...N
+}
+
+
+FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+SUCH THAT SS:=(listExtract) elem(Fss2) AND F:=()first(SS) 
+	AND N:=()second(SS) ANDIF N>0 :{
+
+   rules for bool
+   // declare 
+   t_1,...,t_N:term ; Th: int ;
+   global
+       [] pure(F(t_1,...,t_N), Th)	=>  
+	     theory(F(t_1,...,t_N)) == Th
+             { and pure(t_I,Th) }_I=1...N  end
+                
+   end
+   }
+
+
+FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+SUCH THAT SS:=(listExtract) elem(Fss2) AND F:=()first(SS) 
+	AND N:=()second(SS) ANDIF N==0 :{
+
+   rules for bool
+   // declare 
+   t_1,...,t_N:term ; Th: int ;
+   global
+       [] pure(F, Th)	=>  theory(F) == Th end
+                
+   end
+   }
+
+FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+SUCH THAT SS:=(listExtract) elem(Fss2) AND F:=()first(SS) 
+	AND N:=()second(SS) ANDIF N>0 :{
+
+   rules for list[variable]
+   // declare 
+   t_1,...,t_N:term ; Th: int ;
+   global
+       [] multivabst(F(t_1,...,t_N))	=>  
+	     multivabst(t_1)
+             { @ multivabst(t_I) }_I=2...N  end
+                
+   end
+   }
+
+
+FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+SUCH THAT SS:=(listExtract) elem(Fss2) AND F:=()first(SS) 
+	AND N:=()second(SS) ANDIF N==0 :{
+
+   rules for list[variable]
+   // declare 
+   t_1,...,t_N:term ; Th: int ;
+   global
+       [] multivabst(F)	=>  nil end
+                
+   end
+   }
+
+
+strategies for list[int] 
+
+  global
+
+  [chooseOcc]
+  dont know choose(topOcc || inOcc)
+  end
+
+end
+
+
+end
+

@@ -1,0 +1,76 @@
+module BacktrackingMaximumDegreeInEC[Variables,Type,Values]
+
+import
+global
+	EnumerationRules[Variables,Type,Values]
+	PropagationRules[Variables,Type,Values]
+	;
+end
+
+stratop
+global
+	BacktrackingMaximumDegreeInECFirstToLastAll	: < csp -> csp >         bs;
+	BacktrackingMaximumDegreeInECFirstToLastOne	: < csp -> csp >         bs;
+	BacktrackingMaximumDegreeInECLastToFirstAll	: < csp -> csp >         bs;
+	BacktrackingMaximumDegreeInECLastToFirstOne	: < csp -> csp >         bs;
+end
+
+
+strategies for csp
+implicit
+
+/* Strategy		: Backtracking  	*/
+/* Variable selection	: Maximum Degree	*/
+/* Value selection	: From first to last	*/
+/* Number of solutions	: All 			*/
+
+[] BacktrackingMaximumDegreeInECFirstToLastAll =>
+repeat* (
+	first one (GetVarWithMaximumDegreeInEC);
+	dk (iterate* (EliminateFirstValueOfDomain));
+	first one (InstantiateFirstValueOfDomain);
+	first one (Elimination)
+	);
+first one (GetSolutionCSP)
+end
+
+
+/* Strategy		: Backtracking 		*/
+/* Variable selection	: Maximum Degree	*/
+/* Value selection	: From first to last	*/
+/* Number of solutions	: First			*/
+
+[] BacktrackingMaximumDegreeInECFirstToLastOne =>
+first one (BacktrackingMaximumDegreeInECFirstToLastAll)
+end
+
+
+/* Strategy		: Backtracking 		*/
+/* Variable selection	: Maximum Degree	*/
+/* Value selection	: From last to first	*/
+/* Number of solutions	: All 			*/
+
+[] BacktrackingMaximumDegreeInECLastToFirstAll =>
+repeat* (
+	first one (GetVarWithMaximumDegreeInEC);
+	dk (iterate* (EliminateLastValueOfDomain));
+	first one (InstantiateLastValueOfDomain);
+	first one (Elimination)
+	);
+first one (GetSolutionCSP)
+end
+
+
+/* Strategy		: Backtracking		*/
+/* Variable selection	: Maximum Degree	*/
+/* Value selection	: From last to first	*/
+/* Number of solutions	: First			*/
+
+[] BacktrackingMaximumDegreeInECLastToFirstOne =>
+first one (BacktrackingMaximumDegreeInECLastToFirstAll)
+end
+
+end
+
+
+end

@@ -1,0 +1,45 @@
+module alien[Vars,Fss1,Fss2]
+import 	global 	termAlien[Vars,Fss1,Fss2] VA[Vars,Fss1,Fss2] ;
+
+ 	local   purifcombiSystem ;
+end
+
+
+rules for combiSystem
+
+//declare 
+
+PH,QH,P1,Q1,P2,Q2,Sol:eqSystem ; s,t: term ; CS,PCS:combiSystem ;
+
+global
+
+[VA]       PH . P1 . P2 . Sol => QH . P1 . P2 . Sol 
+           where QH := (VAstrat) PH end
+
+[renbynew]  PH  . P1 . P2 . Sol => QH . P1 . P2 . Sol
+            where QH := (renamingstrat) PH end
+
+[purifyrule] CS => PCS 
+             where PCS := (purifystrat) CS end
+
+end
+
+
+
+strategies for combiSystem 
+
+  global
+
+
+  [purifystrat]
+  dont care choose(VA) ;
+
+  repeat*(
+    dont care choose(pure1 || pure2 || clash)
+  )
+  end
+end
+
+
+
+end

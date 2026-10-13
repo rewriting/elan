@@ -1,0 +1,68 @@
+module permut
+import local bool
+	int list[int] list[list[int]];
+end
+
+operators 
+  global
+        p(@,@)		: (int int) list[list[int]];
+  local
+	permut(@,@)	: (int list[int]) list[list[int]];
+	init(@,@)	: (int int) list[int];
+	next(@, @)	: (int list[int]) list[int];
+	last(@)		: (list[int]) bool;
+end
+
+/* p(n,k) */
+
+
+rules for list[list[int]]
+        x, y: int;
+	res: list[list[int]];
+	init: list[int];
+global
+  [] p(x, y) => permut(x, init)
+	where init:= () init(x, y)
+  end
+end
+
+
+rules for list[int]
+          n, i: int;
+global
+[]	init(n, 0) => nil			end
+[]	init(n, i) => n.init(n, i-1) if i>0 	end 
+end
+
+
+rules for bool
+          l: list[int];
+	i: int;
+global
+[]	last(nil) => true			end
+[]	last(1.nil) => true			end
+[]	last(i.nil) => false	if i>1		end
+[]	last(i.l) => false if i!=1		end
+[]	last(1.l) => last(l)			end
+end
+
+
+rules for list[int]
+          i, j: int;
+	l: list[int];
+global
+[]	next(i, nil) => nil			end
+[]	next(i, 1.l) => i.next(i, l)		end
+[]	next(i, j.l) => j-1.l 	if j>1		end
+end
+
+
+rules for list[list[int]]
+          x: int;
+	l: list[int];
+global
+[]	permut(x, l) => l.nil	if last(l)	end
+[]	permut(x, l) => l.permut(x, next(x, l)) if not(last(l)) end
+end
+
+end

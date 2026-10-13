@@ -1,0 +1,28 @@
+module lis2_int
+
+import global 	any[int] int
+		any[tree[int]] tree[int] 
+		Any strat[Any]
+		lis2;
+end
+
+stratop
+  global
+    swapo	: <Any>;
+    swap	: <Any>;
+    swap	: <Any>;
+end
+
+strategies for Any
+ x,z	: tree[int];
+ y	: int;
+explicit
+  [.] [swapo] (tree[int])node(x,y,z) => (tree[int])node(z,y,x)	end
+  [.] [swap] (int)y => (int)y+1 if y < 10			end
+  [.] [swap] (tree[int])node(x,y,z) => (tree[int])node(z,y,x)	end
+end
+
+end
+
+
+

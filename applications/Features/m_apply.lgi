@@ -1,0 +1,16 @@
+LPL m_apply description 
+
+/*
+        query           of sort int
+        result          of sort string
+        import          m_apply 
+        start with 	()foo(query)
+*/
+
+        query           of sort int
+        result          of sort Term
+        import          m_apply 
+        start with 	()goo(query)
+
+end
+

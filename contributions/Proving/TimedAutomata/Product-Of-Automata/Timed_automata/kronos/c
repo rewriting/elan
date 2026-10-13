@@ -1,0 +1,22 @@
+/*CONTROLLER*/
+
+#locs 3
+#trans 4
+#clocks Z
+#sync lower raise approach exit
+
+loc: 0
+     prop: u0
+     invar: TRUE
+     trans: TRUE => approach; Z:=0; goto 1
+            TRUE => exit;     Z:=0; goto 2
+
+loc: 1
+     prop: u1
+     invar: Z<=1
+     trans: Z=1 => lower; ;  goto 0
+
+loc: 2
+     prop: u2
+     invar: Z<=1
+     trans: TRUE => raise; ;  goto 0

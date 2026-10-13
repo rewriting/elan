@@ -1,0 +1,5 @@
+module example
+
+import global tclist[bool,int];
+
+end

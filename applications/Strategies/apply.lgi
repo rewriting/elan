@@ -1,0 +1,11 @@
+LPL apply description
+
+query	of sort list[int] result of sort list[bool]
+	//of sort int result of sort bool
+	import apply[int,bool] 
+	start with [apply(dk(tr(5),trr(6)))]query
+//	start with [tr(5)]query
+
+end
+
+	

@@ -1,0 +1,14 @@
+LPL nim description
+
+  query	of sort		state
+//  query of sort	list[list[state]]
+  result of sort	list[list[state]]
+  import 		integ nim
+//  start with 		(eval)query
+//  start with 		(eval)[movetowin]query.nil.nil
+  start with 		(eval)[movetowin]query.nil.nil
+
+end
+
+
+

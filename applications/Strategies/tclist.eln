@@ -1,0 +1,7 @@
+module tclist[X,Y,Module]
+
+import global Module tc_list[X,Y];
+
+end
+
+

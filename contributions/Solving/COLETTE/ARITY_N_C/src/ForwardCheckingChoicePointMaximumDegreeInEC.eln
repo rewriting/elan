@@ -1,0 +1,267 @@
+module ForwardCheckingChoicePointMaximumDegreeInEC[Variables,Type,Values]
+
+import
+global
+	LocalConsistencyStrategies[Variables,Type,Values]
+	EnumerationRules[Variables,Type,Values]
+	PropagationRules[Variables,Type,Values]
+	ChoicePointStrategies[Variables,Type,Values]
+	;
+end
+
+stratop
+global
+	FCChoicePointMaximumDegreeInECFirstToLastAll		: < csp -> csp >	bs;
+	FCChoicePointMaximumDegreeInECFirstToLastOne		: < csp -> csp >	bs;
+	FCChoicePointMaximumDegreeInECLastToFirstAll		: < csp -> csp >	bs;
+	FCChoicePointMaximumDegreeInECLastToFirstOne		: < csp -> csp >	bs;
+	FCChoicePointMaximumDegreeInECSplitFirstToLastAll	: < csp -> csp >	bs;
+	FCChoicePointMaximumDegreeInECSplitFirstToLastOne	: < csp -> csp >	bs;
+	FCChoicePointMaximumDegreeInECSplitLastToFirstAll	: < csp -> csp >	bs;
+	FCChoicePointMaximumDegreeInECSplitLastToFirstOne	: < csp -> csp >	bs;
+end
+
+
+strategies for csp
+implicit
+
+/* Strategy		: Forward Checking with Choice Point	*/
+/* Variable selection	: Maximum Degree			*/
+/* Value selection	: Value enumeration first to last	*/
+/* Number of solutions	: All 					*/
+
+[] FCChoicePointMaximumDegreeInECFirstToLastAll =>
+dk (LocalConsistencyForECandDC);
+repeat* (
+	first one (GetVarWithMaximumDegreeInEC);
+	dk (iterate* (EliminateFirstValueOfDomain));
+	first one (InstantiateFirstValueOfDomain);
+	first one (ExtractConstraintsOnEqualityVar, id);
+	first one (Elimination, id);
+	first one (LocalConsistencyInEC, id)
+	);
+first one (GetSolutionCSP)
+end
+
+
+/* Strategy		: Forward Checking with Choice Point	*/
+/* Variable selection	: Maximum Degree			*/
+/* Value selection	: Value enumeration first to last	*/
+/* Number of solutions	: First 				*/
+
+[] FCChoicePointMaximumDegreeInECFirstToLastOne =>
+first one (FCChoicePointMaximumDegreeInECFirstToLastAll)
+end
+
+
+/* Strategy		: Forward Checking with Choice Point	*/
+/* Variable selection	: Maximum Degree			*/
+/* Value selection	: Value enumeration last to first	*/
+/* Number of solutions	: All 					*/
+
+[] FCChoicePointMaximumDegreeInECLastToFirstAll =>
+dk (LocalConsistencyForECandDC);
+repeat* (
+	first one (GetVarWithMaximumDegreeInEC);
+	dk (iterate* (EliminateLastValueOfDomain));
+	first one (InstantiateLastValueOfDomain);
+	first one (ExtractConstraintsOnEqualityVar, id);
+	first one (Elimination, id);
+	first one (LocalConsistencyInEC, id)
+	);
+first one (GetSolutionCSP)
+end
+
+
+/* Strategy		: Forward Checking with Choice Point	*/
+/* Variable selection	: Maximum Degree			*/
+/* Value selection	: Value enumeration last to first	*/
+/* Number of solutions	: First 				*/
+
+[] FCChoicePointMaximumDegreeInECLastToFirstOne =>
+first one (FCChoicePointMaximumDegreeInECLastToFirstAll)
+end
+
+
+/* Strategy		: Forward Checking with Choice Point	*/
+/* Variable selection	: Maximum Degree			*/
+/* Value selection	: Split domain first to last		*/
+/* Number of solutions	: All 					*/
+
+[] FCChoicePointMaximumDegreeInECSplitFirstToLastAll =>
+dk (LocalConsistencyForECandDC);
+repeat* (
+	first one (GetVarWithMaximumDegreeInEC);
+	dk (first one (SplitDomainFirstMiddle), first one (SplitDomainSecondMiddle));
+	first one (first one (ExtractConstraintsOnEqualityVar);
+		   first one (Elimination, id);
+		   first one (LocalConsistencyInEC, id)
+		   ,
+		   first one (ExtractConstraintsOnDomainVar);
+		   first one (LocalConsistencyInEC, id)
+		   ,
+		   id)
+	);
+first one (GetSolutionCSP)
+end
+
+
+/* Strategy		: Forward Checking with Choice Point	*/
+/* Variable selection	: Maximum Degree			*/
+/* Value selection	: Split domain first to last		*/
+/* Number of solutions	: First					*/
+
+[] FCChoicePointMaximumDegreeInECSplitFirstToLastOne =>
+first one (FCChoicePointMaximumDegreeInECSplitFirstToLastAll)
+end
+
+
+/* Strategy		: Forward Checking with Choice Point	*/
+/* Variable selection	: Maximum Degree			*/
+/* Value selection	: Split domain last to first		*/
+/* Number of solutions	: All 					*/
+
+[] FCChoicePointMaximumDegreeInECSplitLastToFirstAll =>
+dk (LocalConsistencyForECandDC);
+repeat* (
+	first one (GetVarWithMaximumDegreeInEC);
+	dk (first one (SplitDomainSecondMiddle), first one (SplitDomainFirstMiddle));
+	first one (first one (ExtractConstraintsOnEqualityVar);
+		   first one (Elimination, id);
+		   first one (LocalConsistencyInEC, id)
+		   ,
+		   first one (ExtractConstraintsOnDomainVar);
+		   first one (LocalConsistencyInEC, id)
+		   ,
+		   id)
+	);
+first one (GetSolutionCSP)
+end
+
+
+/* Strategy		: Forward Checking with Choice Point	*/
+/* Variable selection	: Maximum Degree			*/
+/* Value selection	: Split domain last to first		*/
+/* Number of solutions	: First					*/
+
+[] FCChoicePointMaximumDegreeInECSplitLastToFirstOne =>
+first one (FCChoicePointMaximumDegreeInECSplitLastToFirstAll)
+end
+
+end
+
+
+rules for csop
+
+	x, y				: var;
+	ub, lb, newub, newlb, middle	: Type;
+	P, Q				: csp;
+	lmc, lec, EC, DC, store		: list[constraint];
+	l				: list[constraint];
+
+global
+
+[FCChoicePointMaximumDegreeInECFirstToLastOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[Q,x,lb,ub]
+	where	Q :=(FCChoicePointMaximumDegreeInECFirstToLastOne)P
+end
+
+[FCChoicePointMaximumDegreeInECLastToFirstOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[Q,x,lb,ub]
+	where	Q :=(FCChoicePointMaximumDegreeInECLastToFirstOne)P
+end
+
+[FCChoicePointMaximumDegreeInECSplitFirstToLastOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[Q,x,lb,ub]
+	where	Q :=(FCChoicePointMaximumDegreeInECSplitFirstToLastOne)P
+end
+
+[FCChoicePointMaximumDegreeInECSplitLastToFirstOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[Q,x,lb,ub]
+	where	Q :=(FCChoicePointMaximumDegreeInECLastToFirstOne)P
+end
+
+[GetUBFCChoicePointMaximumDegreeInECFirstToLastOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[P,x,lb,newub]
+	where	Q :=(FCChoicePointMaximumDegreeInECFirstToLastOne)P
+	if	Q != Unsatisfiable
+	where	(list[constraint]) y = newub.l := ()GetVarInHead(x,GetLEC(Q),nil)
+end
+
+[GetUBFCChoicePointMaximumDegreeInECLastToFirstOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[P,x,lb,newub]
+	where	Q :=(FCChoicePointMaximumDegreeInECLastToFirstOne)P
+	if	Q != Unsatisfiable
+	where	(list[constraint]) y = newub.l := ()GetVarInHead(x,GetLEC(Q),nil)
+end
+
+[GetUBFCChoicePointMaximumDegreeInECSplitFirstToLastOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[P,x,lb,newub]
+	where	Q :=(FCChoicePointMaximumDegreeInECSplitFirstToLastOne)P
+	if	Q != Unsatisfiable
+	where	(list[constraint]) y = newub.l := ()GetVarInHead(x,GetLEC(Q),nil)
+end
+
+[GetUBFCChoicePointMaximumDegreeInECSplitLastToFirstOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[P,x,lb,newub]
+	where	Q :=(FCChoicePointMaximumDegreeInECSplitLastToFirstOne)P
+	if	Q != Unsatisfiable
+	where	(list[constraint]) y = newub.l := ()GetVarInHead(x,GetLEC(Q),nil)
+end
+
+[GetLBFCChoicePointMaximumDegreeInECFirstToLastOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[P,x,newlb,ub]
+	where	Q :=(FCChoicePointMaximumDegreeInECFirstToLastOne)P
+	if	Q != Unsatisfiable
+	where	(list[constraint]) y = newlb.l := ()GetVarInHead(x,GetLEC(Q),nil)
+end
+
+[GetLBFCChoicePointMaximumDegreeInECLastToFirstOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[P,x,newlb,ub]
+	where	Q :=(FCChoicePointMaximumDegreeInECLastToFirstOne)P
+	if	Q != Unsatisfiable
+	where	(list[constraint]) y = newlb.l := ()GetVarInHead(x,GetLEC(Q),nil)
+end
+
+[GetLBFCChoicePointMaximumDegreeInECSplitFirstToLastOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[P,x,newlb,ub]
+	where	Q :=(FCChoicePointMaximumDegreeInECSplitFirstToLastOne)P
+	if	Q != Unsatisfiable
+	where	(list[constraint]) y = newlb.l := ()GetVarInHead(x,GetLEC(Q),nil)
+end
+
+[GetLBFCChoicePointMaximumDegreeInECSplitLastToFirstOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[P,x,newlb,ub]
+	where	Q :=(FCChoicePointMaximumDegreeInECSplitLastToFirstOne)P
+	if	Q != Unsatisfiable
+	where	(list[constraint]) y = newlb.l := ()GetVarInHead(x,GetLEC(Q),nil)
+end
+
+end
+
+
+end

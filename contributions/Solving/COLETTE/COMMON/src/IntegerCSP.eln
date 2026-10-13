@@ -1,0 +1,654 @@
+module IntegerCSP[Variables,Values]
+
+import
+global
+	CSPDefinition[Variables,int,Values]
+//	Alldiff[Variables,Values]
+	Values
+	tuple[3,list[constraint],list[constraint],list[var]]
+	occur[var,list[constraint]]
+	occur[domain,list[constraint]]
+	tuple[2,int,list[term]]
+	;
+end
+
+operators
+global
+	CreateListOfSubTerms(@,@)		: (term list[term])		list[term];
+	CreateListOfTerms(@,@)	 		: (constraint list[term])	list[term];
+
+local
+	UpdateUpperBoundsLTE(@,@,@,@,@,@,@)	: (list[constraint] list[constraint] list[constraint] list[term] int list[var] list[var]) tuple[list[constraint],list[constraint],list[var]];
+	UpdateUpperBoundsLT(@,@,@,@,@,@,@)	: (list[constraint] list[constraint] list[constraint] list[term] int list[var] list[var]) tuple[list[constraint],list[constraint],list[var]];
+	UpdateLowerBoundsGTE(@,@,@,@,@,@,@)	: (list[constraint] list[constraint] list[constraint] list[term] int list[var] list[var]) tuple[list[constraint],list[constraint],list[var]];
+	UpdateLowerBoundsGT(@,@,@,@,@,@,@)	: (list[constraint] list[constraint] list[constraint] list[term] int list[var] list[var]) tuple[list[constraint],list[constraint],list[var]];
+	UpdateDomainNEQ(@,@,@,@,@,@,@)		: (list[constraint] list[constraint] list[constraint] term int list[var] list[var]) tuple[list[constraint],list[constraint],list[var]];
+	GetUpboundLTE(@,@)			: (int int)			int;
+	GetUpboundLT(@,@)			: (int int)			int;
+	GetLowboundGTE(@,@)			: (int int)			int;
+	GetLowboundGT(@,@)			: (int int)			int;
+	GetKandT(@,@,@)				: (list[term] var list[term])	tuple[int,list[term]];
+end
+
+
+rules for tuple[int,list[term]]
+
+	k		: int;
+	x, y		: var;
+	lt1, lt2	: list[term];
+	tf		: tuple[int,list[term]];
+
+global
+
+[]	GetKandT(k(*)y.lt1,x,lt2)
+	=>
+	tf
+	choose
+	try
+		if x == y
+		where tf := () [k,append(lt2,lt1)]
+	try
+		where tf := () GetKandT(lt1,x,k(*)y.lt2)
+	end
+end
+
+end
+
+
+rules for tuple[list[constraint],list[constraint],list[var]]
+
+	x, x1, y				: var;
+	lv, lv1, lv2, lvm1, lvm2		: list[var];
+	k, min, max,v,w,mint1,maxt1,mint1b,maxt1b,mint2,maxt2	: int;
+	D, D1, D2				: domain;
+	t, t1, t2, t3				: term;
+	lt, lt1, lt2				: list[term];
+	upbound, lowbound			: int;
+	lec, lmc, newlmc, lmc1, lmc2, lmc3, lmc4, lmc5, lmc6, l1	: list[constraint];
+	tupla					: tuple[int,list[term]];
+	tf					: tuple[list[constraint],list[constraint],list[var]];
+
+global 
+
+// Revise Domain
+
+[]	ReviseDxWRTc(lmc, lec, t1 >=? t2)
+	=>
+	tf
+	where	lv1   := ()VarsOfTerm(t1,nil)
+	where	lv2   := ()VarsOfTerm(t2,nil)
+	where	lt1   := ()CreateListOfSubTerms(t1,nil)
+	where	lt2   := ()CreateListOfSubTerms(t2,nil)
+	where	maxt1 := ()MaxOfTerm(t1,lmc,lec,0)
+	where	mint2 := ()MinOfTerm(t2,lmc,lec,0)
+	where	(tuple[list[constraint],list[constraint],list[var]])
+	[lmc1,lmc2,lvm1] := ()UpdateLowerBoundsGTE(nil,lmc,lec,lt1,mint2-maxt1,lv1,nil)
+	choose
+	try
+		if occurs empty in lmc1
+		where tf := () [lmc1,lmc2,lvm1]
+	try
+		where	(tuple[list[constraint],list[constraint],list[var]])
+		[lmc3,lmc4,lvm2] := ()UpdateUpperBoundsLTE(lmc1,lmc2,lec,lt2,maxt1-mint2,lv2,lvm1)
+		where tf := () [lmc3,lmc4,lvm2]
+	end
+end
+
+[]	ReviseDxWRTc(lmc, lec, t1 >? t2)
+	=>
+	tf
+	where	lv1   := ()VarsOfTerm(t1,nil)
+	where	lv2   := ()VarsOfTerm(t2,nil)
+	where	lt1   := ()CreateListOfSubTerms(t1,nil)
+	where	lt2   := ()CreateListOfSubTerms(t2,nil)
+	where	maxt1 := ()MaxOfTerm(t1,lmc,lec,0)
+	where	mint2 := ()MinOfTerm(t2,lmc,lec,0)
+	where	(tuple[list[constraint],list[constraint],list[var]])
+	[lmc1,lmc2,lvm1] := ()UpdateLowerBoundsGT(nil,lmc,lec,lt1,mint2-maxt1,lv1,nil)
+	choose
+	try
+		if occurs empty in lmc1
+		where tf := () [lmc1,lmc2,lvm1]
+	try
+		where	(tuple[list[constraint],list[constraint],list[var]])
+		[lmc3,lmc4,lvm2] := ()UpdateUpperBoundsLT(lmc1,lmc2,lec,lt2,maxt1-mint2,lv2,lvm1)
+		where tf := () [lmc3,lmc4,lvm2]
+	end
+end
+
+[]	ReviseDxWRTc(lmc, lec, t1 <=? t2)
+	=>
+	tf
+	where	lv1   := ()VarsOfTerm(t1,nil)
+	where	lv2   := ()VarsOfTerm(t2,nil)
+	where	lt1   := ()CreateListOfSubTerms(t1,nil)
+	where	lt2   := ()CreateListOfSubTerms(t2,nil)
+	where	mint1 := ()MinOfTerm(t1,lmc,lec,0)
+	where	maxt2 := ()MaxOfTerm(t2,lmc,lec,0)
+	where	(tuple[list[constraint],list[constraint],list[var]])
+	[lmc1,lmc2,lvm1] := ()UpdateUpperBoundsLTE(nil,lmc,lec,lt1,maxt2-mint1,lv1,nil)
+	choose
+	try
+		if occurs empty in lmc1
+		where tf := () [lmc1,lmc2,lvm1]
+	try
+		where	(tuple[list[constraint],list[constraint],list[var]])
+		[lmc3,lmc4,lvm2] := ()UpdateLowerBoundsGTE(lmc1,lmc2,lec,lt2,mint1-maxt2,lv2,lvm1)
+		where tf := () [lmc3,lmc4,lvm2]
+	end
+end
+
+[]	ReviseDxWRTc(lmc, lec, t1 <? t2)
+	=>
+	tf
+	where	lv1   := ()VarsOfTerm(t1,nil)
+	where	lv2   := ()VarsOfTerm(t2,nil)
+	where	lt1   := ()CreateListOfSubTerms(t1,nil)
+	where	lt2   := ()CreateListOfSubTerms(t2,nil)
+	where	mint1 := ()MinOfTerm(t1,lmc,lec,0)
+	where	maxt2 := ()MaxOfTerm(t2,lmc,lec,0)
+	where	(tuple[list[constraint],list[constraint],list[var]])
+	[lmc1,lmc2,lvm1] := ()UpdateUpperBoundsLT(nil,lmc,lec,lt1,maxt2-mint1,lv1,nil)
+	choose
+	try
+		if occurs empty in lmc1
+		where tf := () [lmc1,lmc2,lvm1]
+	try
+		where	(tuple[list[constraint],list[constraint],list[var]])
+		[lmc3,lmc4,lvm2] := ()UpdateLowerBoundsGT(lmc1,lmc2,lec,lt2,mint1-maxt2,lv2,lvm1)
+		where tf := () [lmc3,lmc4,lvm2]
+	end
+end
+
+[]	ReviseDxWRTc(lmc, lec, t1 =? t2)
+	=>
+	tf
+	where	(tuple[list[constraint],list[constraint],list[var]])
+	[lmc1,lmc2,lvm1] := ()ReviseDxWRTc(lmc, lec, t1 >=? t2)
+	choose
+	try
+		if occurs empty in lmc1
+		where tf := () [lmc1,lmc2,lvm1]
+	try
+		where	(tuple[list[constraint],list[constraint],list[var]])
+		[lmc3,lmc4,lvm2] := ()ReviseDxWRTc(append(lmc1,lmc2), lec, t1 <=? t2)
+		where tf := () [lmc3,lmc4,append(lvm1,lvm2)]
+	end
+end
+
+
+[]	ReviseDxWRTc(lmc, lec, t1 !=? t2)
+	=>
+	tf
+	where	mint2 := ()MinOfTerm(t2,lmc,lec,0)
+	where	maxt2 := ()MaxOfTerm(t2,lmc,lec,0)
+	choose
+	try
+		if mint2 == maxt2
+		where	lv1   := ()VarsOfTerm(t1,nil)
+		where	(tuple[list[constraint],list[constraint],list[var]])
+		[lmc1,lmc2,lvm1] := ()UpdateDomainNEQ(nil,lmc,lec,t1,mint2,lv1,nil)
+		choose
+		try
+			if occurs empty in lmc1
+			where tf := () [lmc1,lmc2,lvm1]
+		try
+			where  newlmc := ()append(lmc1,lmc2)
+			where	mint1 := ()MinOfTerm(t1,newlmc,lec,0)
+			where	maxt1 := ()MaxOfTerm(t1,newlmc,lec,0)
+			choose
+			try
+				if mint1 == maxt1
+				where	lv2   := ()VarsOfTerm(t2,nil)
+				where	(tuple[list[constraint],list[constraint],list[var]])
+				[lmc3,lmc4,lvm2] := ()UpdateDomainNEQ(nil,newlmc,lec,t2,mint1,lv2,nil)
+				where tf := () [lmc3,lmc4,append(lvm1,lvm2)]
+			try
+				where tf := () [lmc1,lmc2,lvm1]
+			end
+		end
+	try
+		where	mint1 := ()MinOfTerm(t1,lmc,lec,0)
+		where	maxt1 := ()MaxOfTerm(t1,lmc,lec,0)
+		choose
+		try
+			if mint1 == maxt1
+			where	lv2   := ()VarsOfTerm(t2,nil)
+			where	(tuple[list[constraint],list[constraint],list[var]])
+			[lmc5,lmc6,lvm2] := ()UpdateDomainNEQ(nil,lmc,lec,t2,mint1,lv2,nil)
+			where tf := () [lmc5,lmc6,lvm2]
+		try
+			where tf := () [nil,lmc,nil]
+		end
+	end
+end
+
+/*
+
+[]	ReviseDxWRTc(lmc, lec, alldiff?(lt))
+	=>
+	tf
+	choose
+	try
+		if Alldiff(GetListOfDomains(lt,lmc))
+		where tf := () [lmc,nil,nil]
+	try
+		where tf := () [nil,nil,nil]
+	end
+end
+
+*/
+
+[]	UpdateDomainNEQ(lmc1, lmc2, lec, t, v, x.lv, lv1)
+	=>
+	tf
+	choose
+	try
+		if occurs x in lmc2
+		where	lt    := ()CreateListOfSubTerms(t,nil)
+		where	tupla := ()GetKandT(lt,x,nil)
+		where	k     := ()1-th(tupla)
+		where	(list[constraint])
+			x1 in? D1.l1 := ()GetVarInHead(x,lmc2,nil)
+		choose
+		try
+			if MinOfTerm(t,lmc2,lec,0) - k*MinOfDomain(D1) == MaxOfTerm(t,lmc2,lec,0) - k*MaxOfDomain(D1)
+			where	w := ()v - MinOfTerm(t,lmc2,lec,0) + k*MinOfDomain(D1)
+			choose
+			try
+				if w%k == 0 and w/k >= MinOfDomain(D1) and w/k <= MaxOfDomain(D1)
+				where	D2 :=() EliminateValueOfDomain(D1,w/k)
+				choose
+				try
+					if GetCard(D2) == 0
+					where tf := () [x in? empty.lmc1,l1,x.lv1]
+				try
+					if GetCard(D2) == 1
+					where tf := () UpdateDomainNEQ(x in? D2.lmc1,l1,lec, t, v, lv, x.lv1)
+				try
+					where tf := () UpdateDomainNEQ(lmc1,x in? D2.l1,lec, t, v, lv, x.lv1)
+				end
+			try
+				where tf := () UpdateDomainNEQ(lmc1, lmc2, lec, t, v, lv, lv1)
+			end
+		try
+			where tf := () UpdateDomainNEQ(lmc1, lmc2, lec, t, v, lv, lv1)
+		end
+	end
+end
+
+[]	UpdateDomainNEQ(lmc1, lmc2, lec, t, v, nil, lv1)
+	=>
+	[lmc1,lmc2,lv1]
+end
+
+[]	UpdateLowerBoundsGTE(lmc1, lmc2, lec, lt, v, x.lv, lv1)
+	=>
+	tf
+	choose
+	try
+		if occurs x in lmc2
+		where	tupla := ()GetKandT(lt,x,nil)
+		where	k:=()1-th(tupla)
+		where	lt1:=()2-th(tupla)
+		where	(list[constraint])
+			x1 in? D1.l1 := ()GetVarInHead(x,lmc2,nil)
+		where	min	 := ()v + k*MaxOfDomain(D1)
+		where	lowbound := ()GetLowboundGTE(k,min)
+		choose
+		try
+			if MinOfDomain(D1) >= lowbound
+			where tf := () UpdateLowerBoundsGTE(lmc1,lmc2,lec,lt1,v,lv,lv1)
+		try
+			choose
+			try
+				if MaxOfDomain(D1) >= lowbound
+				where	D2 := ()UpdateMinOfDomain(D1,lowbound)
+				choose
+				try
+					if GetCard(D2) == 1
+					where tf := () UpdateLowerBoundsGTE(x in? D2.lmc1,l1,lec,lt1,v,lv,x.lv1)
+				try
+					where tf := () UpdateLowerBoundsGTE(lmc1,x in? D2.l1,lec,lt1,v,lv,x.lv1)
+				end
+			try
+				where tf := () [x in? empty.lmc1,l1,x.lv1]
+			end
+		end
+	end
+end
+
+[]	UpdateLowerBoundsGTE(lmc1, lmc2, lec, lt, v, nil, lv1)
+	=>
+	[lmc1, lmc2, lv1]
+end
+
+[]	UpdateLowerBoundsGT(lmc1, lmc2, lec, lt, v, x.lv, lv1)
+	=>
+	tf
+	choose
+	try
+		if occurs x in lmc2
+		where	tupla := ()GetKandT(lt,x,nil)
+		where	k:=()1-th(tupla)
+		where	lt1:=()2-th(tupla)
+		where	(list[constraint])
+			x1 in? D1.l1 := ()GetVarInHead(x,lmc2,nil)
+		where	min	 := ()v + k*MaxOfDomain(D1)
+		where	lowbound := ()GetLowboundGT(k,min)
+		choose
+		try
+			if MinOfDomain(D1) >= lowbound
+			where tf := () UpdateLowerBoundsGT(lmc1,lmc2,lec,lt1,v,lv,lv1)
+		try
+			choose
+			try
+				if MaxOfDomain(D1) >= lowbound
+				where	D2 := ()UpdateMinOfDomain(D1,lowbound)
+				choose
+				try
+					if GetCard(D2) == 1
+					where tf := () UpdateLowerBoundsGT(x in? D2.lmc1,l1,lec,lt1,v,lv,x.lv1)
+				try
+					where tf := () UpdateLowerBoundsGT(lmc1,x in? D2.l1,lec,lt1,v,lv,x.lv1)
+				end
+			try
+				where tf := () [x in? empty.lmc1,l1,x.lv1]
+			end
+		end
+	end
+end
+
+[]	UpdateLowerBoundsGT(lmc1, lmc2, lec, lt, v, nil, lv1)
+	=>
+	[lmc1, lmc2, lv1]
+end
+
+[]	UpdateUpperBoundsLTE(lmc1, lmc2, lec, lt, v, x.lv, lv1)
+	=>
+	tf
+	choose
+	try
+		if occurs x in lmc2
+		where	tupla := ()GetKandT(lt,x,nil)
+		where	k:=()1-th(tupla)
+		where	lt1:=()2-th(tupla)
+		where	(list[constraint])
+			x1 in? D1.l1 := ()GetVarInHead(x,lmc2,nil)
+		where	max	:= ()v + k*MinOfDomain(D1)
+		where	upbound := ()GetUpboundLTE(k,max)
+		choose
+		try
+			if MaxOfDomain(D1) <= upbound
+			where tf := () UpdateUpperBoundsLTE(lmc1,lmc2,lec,lt1,v,lv,lv1)
+		try
+			choose
+			try
+				if MinOfDomain(D1) <= upbound
+				where	D2 := ()UpdateMaxOfDomain(D1,upbound)
+				choose
+				try
+					if GetCard(D2) == 1
+					where tf := () UpdateUpperBoundsLTE(x in? D2.lmc1,l1,lec,lt1,v,lv,x.lv1)
+				try
+					where tf := () UpdateUpperBoundsLTE(lmc1,x in? D2.l1,lec,lt1,v,lv,x.lv1)
+				end
+			try
+				where tf := () [x in? empty.lmc1,l1,x.lv1]
+			end
+		end
+	end
+end
+
+[]	UpdateUpperBoundsLTE(lmc1, lmc2, lec, lt, v, nil, lv1)
+	=>
+	[lmc1, lmc2, lv1]
+end
+
+[]	UpdateUpperBoundsLT(lmc1, lmc2, lec, lt, v, x.lv, lv1)
+	=>
+	tf
+	choose
+	try
+		if occurs x in lmc2
+		where	tupla := ()GetKandT(lt,x,nil)
+		where	k:=()1-th(tupla)
+		where	lt1:=()2-th(tupla)
+		where	(list[constraint])
+			x1 in? D1.l1 := ()GetVarInHead(x,lmc2,nil)
+		where	max	:= ()v + k*MinOfDomain(D1)
+		where	upbound := ()GetUpboundLT(k,max)
+		choose
+		try
+			if MaxOfDomain(D1) <= upbound
+			where tf := () UpdateUpperBoundsLT(lmc1,lmc2,lec,lt1,v,lv,lv1)
+		try
+			choose
+			try
+				if MinOfDomain(D1) <= upbound
+				where	D2 := ()UpdateMaxOfDomain(D1,upbound)
+				choose
+				try
+					if GetCard(D2) == 1
+					where tf := () UpdateUpperBoundsLT(x in? D2.lmc1,l1,lec,lt1,v,lv,x.lv1)
+				try
+					where tf := () UpdateUpperBoundsLT(lmc1,x in? D2.l1,lec,lt1,v,lv,x.lv1)
+				end
+			try
+				where tf := () [x in? empty.lmc1,l1,x.lv1]
+			end
+		end
+	end
+end
+
+[]	UpdateUpperBoundsLT(lmc1, lmc2, lec, lt, v, nil, lv1)
+	=>
+	[lmc1, lmc2, lv1]
+end
+
+end
+
+
+rules for term
+
+	t	:	term;
+
+global 
+
+[]	CreateFunction(t =? 0)
+	=>
+	t
+end
+
+end
+
+
+rules for int
+
+	x, x1			: var;
+	k, k1, k2, v		: int;
+	maxt, maxt1, maxt2 	: int;
+	mint, mint1, mint2 	: int;
+	t1, t2			: term;
+	intf			: int;
+	lmc, lec, l		: list[constraint];
+	D			: domain;
+
+global 
+
+[]	GetLowboundGTE(k1,k2)
+	=>
+	intf
+	choose
+	try
+		if k2%k1 == 0
+		where intf := () k2/k1
+	try
+		choose
+		try
+			if k2 > 0
+			where intf := () (k2/k1)+1
+		try
+			if k2 < 0
+			where intf := () k2/k1
+		try
+			where intf := () 0
+		end
+	end
+end
+[]	GetLowboundGT(k1,k2)
+	=>
+	intf
+	choose
+	try
+		if (1+k2)%k1 == 0
+		where intf := () (1+k2)/k1
+	try
+		choose
+		try
+			if 1+k2 > 0
+			where intf := () ((1+k2)/k1)+1
+		try
+			if (1+k2) < 0
+			where intf := () (1+k2)/k1
+		try
+			where intf := () 0
+		end
+	end
+end
+
+[]	GetUpboundLTE(k1,k2)
+	=>
+	intf
+	choose
+	try
+		if k2%k1 == 0
+		where intf := () k2/k1
+	try
+		choose
+		try
+			if k2 > 0
+			where intf := () k2/k1
+		try
+			if k2 < 0
+			where intf := () (k2/k1)-1
+		try
+			where intf := () 0
+		end
+	end
+end
+
+[]	GetUpboundLT(k1,k2)
+	=>
+	intf
+	choose
+	try
+		if (k2-1)%k1 == 0
+		where intf := () (k2-1)/k1
+	try
+		choose
+		try
+			if k2-1 > 0
+			where intf := () (k2-1)/k1
+		try
+			if k2-1 < 0
+			where intf := () ((k2-1)/k1)-1
+		try
+			where intf := () 0
+		end
+	end
+end
+
+[]	MaxOfTerm(t1 (+) t2,lmc,lec,maxt)
+	=>
+	maxt2
+	where	maxt1 := ()MaxOfTerm(t1,lmc,lec,maxt)
+	where	maxt2 := ()MaxOfTerm(t2,lmc,lec,maxt1)
+end
+
+[]	MaxOfTerm(k(*)x,lmc,lec,maxt)
+	=>
+	intf
+        choose
+	try
+        	if occurs x in lec
+                where   (list[constraint]) x1 = v.l := ()GetVarInHead(x,lec,nil)
+		where intf := () maxt + k*v
+	try
+		where	(list[constraint]) x1 in? D.l := ()GetVarInHead(x,lmc,nil)
+		where intf := () maxt + k*MaxOfDomain(D)
+	end
+end
+
+[]	MaxOfTerm(k,lmc,lec,maxt)
+	=>
+	maxt + k
+end
+
+[]	MinOfTerm(t1 (+) t2,lmc,lec,mint)
+	=>
+	mint2
+	where	mint1 := ()MinOfTerm(t1,lmc,lec,mint)
+	where	mint2 := ()MinOfTerm(t2,lmc,lec,mint1)
+end
+
+[]	MinOfTerm(k(*)x,lmc,lec,mint)
+	=>
+	intf
+        choose
+	try
+        	if occurs x in lec
+                where   (list[constraint]) x1 = v.l := ()GetVarInHead(x,lec,nil)
+		where intf := () mint + k*v
+	try
+		where	(list[constraint]) x1 in? D.l := ()GetVarInHead(x,lmc,nil)
+		where intf := () mint + k*MinOfDomain(D)
+	end
+end
+
+[]	MinOfTerm(k,lmc,lec,mint)
+	=>
+	mint + k
+end
+
+end
+
+
+rules for list[term]
+
+	t,t1,t2		: term;
+	l,l1,l2,lt	: list[term];
+	c		: constraint;
+
+global 
+
+/*
+
+[]	CreateListOfTerms(alldiff?(lt),l)
+	=>
+	lt
+end
+
+*/
+
+[]	CreateListOfTerms(c,l)
+	=>
+	CreateListOfSubTerms(GetTermOfConstraint(c),nil)
+end
+
+[]	CreateListOfSubTerms(t1 (+) t2,l)
+	=>
+	l1
+	where	l2 := ()CreateListOfSubTerms(t2,l)
+	where	l1 := ()CreateListOfSubTerms(t1,l2)
+end
+[]	CreateListOfSubTerms(t,l)
+	=>
+	t.l
+end
+
+end
+
+
+end
+

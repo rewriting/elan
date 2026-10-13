@@ -1,0 +1,25 @@
+module refstr
+
+import global refstring2string
+	ref2string[Foo]
+	; 
+end
+
+sort Foo; end
+
+operators global
+  a		: Foo;
+  b 		: Foo;
+  f(@,@)	: (Foo Foo) Foo;
+  g(@)		: (Foo) Foo;
+  foo(@)	: (Foo) string;
+end
+
+rules for string
+t	: Foo;
+global
+  []	foo(t) => term2refstring(t)			end
+//  []	foo(t) => term2string(t,ThisProgram)		end
+end
+
+end

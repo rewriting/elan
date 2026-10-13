@@ -1,0 +1,18 @@
+module Eclass[Fss]
+import local state configuration[Fss];
+end
+
+sort Equiv Eclass;
+end
+
+operators global
+	@ ->> @		: (configuration configuration) Equiv;
+	(@ ->> @)	: (configuration configuration) Equiv alias @ ->> @:;
+
+	@ ->> @		: (state state) Equiv;
+	(@ ->> @)	: (state state) Equiv alias @ ->> @:;
+	nil		: Eclass;
+	@ . @		: (Equiv Eclass) Eclass;
+end
+
+end

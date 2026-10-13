@@ -1,0 +1,42 @@
+module label
+
+/* Definition of the sort label */
+
+import
+	global
+		int
+		bool;	
+end
+
+
+sort label;
+end
+
+operators
+  global
+
+	/* Label of the edges */
+	C		: label;
+	I		: label;
+	S		: label;
+
+	/* Test if a label can be followed by another label */
+	suiv(@,@)	: (label label) bool;
+
+end
+
+
+rules for bool
+	lab1, lab2 : label;
+global
+	[] suiv(I,C)		=> false
+	end
+
+	[] suiv(C,C)		=> false
+	end
+
+	[] suiv(lab1,lab2)	=> true
+	end
+end
+
+end

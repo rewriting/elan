@@ -1,0 +1,25 @@
+LPL pdt_automates description
+
+  specification description
+    part Clocks of sort list[identifier]
+        import identifier list[identifier]
+    part States of sort list[identifier]
+        import identifier list[identifier]
+    part Labels of sort list[identifier]
+        import identifier list[identifier]
+    part D_Robot of sort Automaton
+        import  Automaton[Clocks,States,Labels]
+    part G_Robot of sort Automaton
+        import  Automaton[Clocks,States,Labels]
+    part P_Station of sort Automaton
+        import  Automaton[Clocks,States,Labels]
+    part Box of sort Automaton
+        import  Automaton[Clocks,States,Labels]
+  end
+
+  query of sort  pair[list[movement],bool]
+  result of sort  pair[list[movement],bool]
+  import pdt_automates[Clocks,States,Labels,D_Robot,G_Robot,P_Station,Box]
+  start with ()query 
+
+end

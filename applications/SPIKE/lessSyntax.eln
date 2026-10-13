@@ -1,0 +1,24 @@
+module lessSyntax
+import 	global	
+		anyIdentifier
+		ident 
+		list[ident] list[list[ident]]
+	;
+end
+operators
+ global
+//----------- constructors ------------------------------------------------------
+   Epsilon : list[ident]		      		alias nil:;
+   @  @	  : ( ident list[ident] ) list[ident]   
+							alias cons(@,@):;
+
+   Epsilon : list[list[ident]]	alias nil:;
+   @ '#' @	  : ( list[ident] list[list[ident]] ) list[list[ident]]
+							alias cons(@,@):;
+
+
+end
+
+end
+
+

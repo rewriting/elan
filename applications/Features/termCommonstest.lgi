@@ -1,0 +1,50 @@
+LPL termCommonstest description
+
+	specification description
+
+		part Vars of sort list[identifier]
+	 	import sigSyntax
+
+		part Ops of sort list[pair[identifier,int]]
+	 	import sigSyntax
+
+		part Prec of sort list[pair[identifier,int]]
+	 	import sigSyntax
+
+		part System of sort list[equation]
+		import 	sigSyntax
+			list[equation]
+			eqSystem[Ops,Vars]
+			termCommonstest[Ops,Vars]
+	end
+
+/*	query of sort list[term]
+
+	result of sort list[term]
+
+	import 	termCommonstest[Ops,Vars]
+
+       	start with (lsoustrat)query 
+*/
+	query of sort list[list[int]]
+
+	result of sort list[list[int]]
+
+	import 	termCommonstest[Ops,Vars]
+
+       	start with ()query
+/*
+	query of sort list[int]
+
+	result of sort list[int]
+
+	import 	termCommonstest[Ops,Vars]
+
+       	start with (My_chooseOccurence)query
+*/
+
+end
+
+
+
+

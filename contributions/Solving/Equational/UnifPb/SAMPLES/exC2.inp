@@ -1,0 +1,2 @@
+eq(z,u) = eq(v,a) /\ u=b 
+end

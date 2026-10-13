@@ -1,0 +1,29 @@
+module depth_int
+
+import global integ primesy symbol[1,integ,booleg] depth[integ] strat[integ];
+end
+operators global
+  hop	: <integ>;	
+  foo	: <integ>;
+end
+
+rules for booleg
+ n:integ;
+global
+  [] prime(n) => true if n < 10 		end
+  [] prime(n) => false				end
+end 
+
+rules for integ
+ x,n	: integ;
+global
+  [ass(n)] x => n 				end
+  [add(n)] x => x+n 				end
+end
+
+strategies for integ
+defined
+  [hop] dk(add(3),add(5))			end
+end
+
+end

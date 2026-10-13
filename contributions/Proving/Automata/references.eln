@@ -1,0 +1,41 @@
+module references[Fss, Auts]
+import local 
+	Auts automaton[Fss]
+	aut_name eq[aut_name]
+	state_set
+	transition[Fss] list[transition];
+end
+
+operators
+  global		
+	!@				: (aut_name) automaton;
+  local		
+	get_name(@)		: (automaton) aut_name;
+	value(@, @)		: (aut_name list[automaton]) automaton;
+end
+
+
+rules for aut_name
+          name: aut_name;
+		Q, Qf: state_set;
+		R: list[transition];
+global
+  []	get_name((name, Q, Qf, R)) => name	
+  end
+end
+
+
+rules for automaton
+          a: automaton;
+		name: aut_name;
+		l: list[automaton];
+global
+
+[]	! name => value(name, Auts)						end
+
+[]	value(name, a.l) => a	if get_name(a) == name			end
+[]	value(name, a.l) => value(name, l) if get_name(a) != name	end
+end
+
+end
+
