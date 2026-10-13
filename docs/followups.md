@@ -5,6 +5,11 @@ sub-project (S1–S5b). Each item says where it comes from.
 
 ## Behaviour (needs tests against the interpreter or the reference)
 
+- **Local alias as printing form** (`aliasprint`): REM (`termOut.c
+  findTextForm`) and elanc-rs print an operator through a local alias
+  declared after it (`cat(a,b)` for `a ++ b`, `hh(a,b)` instead of the
+  global alias `hh2`); the interpreter prints the grammar rule marked
+  Printable, and elanc now follows it.
 - **`call "name":X` in compiled programs** (`ref.cc`, review of branch
   `compiled-start-term`): the `.ref` export resolves the name with any sort
   (the sort printed with the shared `call` symbol, code 144, is the last

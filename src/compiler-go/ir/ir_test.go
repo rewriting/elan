@@ -494,23 +494,39 @@ func TestBuiltinOnASortOfTermsIsAConstructor(t *testing.T) {
 	}
 }
 
-func TestPrintingFormIsTheLastGrammarRule(t *testing.T) {
-	p := peano()
-	// an alias declared after: `@ + @` with the same symbol as plus
-	g := &p.p.Grammars.Both[1]
-	g.Operators = append(g.Operators, ref.Operator{Flag: 3, Symbol: 320, Rhs: []ref.Lexem{
-		{Kind: ref.LexType, N: sNat}, {Kind: ref.LexChar, N: '+'}, {Kind: ref.LexType, N: sNat}}})
-	ir := p.lower(t)
-	want := []PrintItem{{Kind: PArg, Arg: 0}, {Kind: PChar, Char: '+'}, {Kind: PArg, Arg: 1}}
-	if got := opNamed(t, ir, "plus").Print; !reflect.DeepEqual(got, want) {
-		t.Fatalf("print %+v", got)
+func TestPrintingFormIsTheRuleMarkedPrintable(t *testing.T) {
+	infix := []PrintItem{{Kind: PArg, Arg: 0}, {Kind: PChar, Char: '+'}, {Kind: PArg, Arg: 1}}
+	alias := func(p *prog, syn ref.SyntaxFlags) {
+		// an alias declared after: `@ + @` with the same symbol as plus
+		g := &p.p.Grammars.Both[1]
+		g.Operators = append(g.Operators, ref.Operator{Flag: 3, Symbol: 320, Syntax: syn, Rhs: []ref.Lexem{
+			{Kind: ref.LexType, N: sNat}, {Kind: ref.LexChar, N: '+'}, {Kind: ref.LexType, N: sNat}}})
 	}
-	// the last rule of the symbol with the operator's profile: an operator
-	// of another profile declared after (eq_builtinInt after eq_bool) does
-	// not give its form
+	// a local alias declared after the operator is not marked: plus(a,b)
+	p := peano()
+	alias(p, 0)
+	if got := opNamed(t, p.lower(t), "plus").Print; reflect.DeepEqual(got, infix) || len(got) != 6 {
+		t.Fatalf("unmarked alias last: print %+v", got)
+	}
+	// the marked alias is the form
+	p = peano()
+	alias(p, ref.Printable)
+	if got := opNamed(t, p.lower(t), "plus").Print; !reflect.DeepEqual(got, infix) {
+		t.Fatalf("marked alias: print %+v", got)
+	}
+	// none marked: the last rule
+	p = peano()
+	p.p.Grammars.Both[1].Operators[len(p.p.Grammars.Both[1].Operators)-1].Syntax = 0
+	alias(p, 0)
+	if got := opNamed(t, p.lower(t), "plus").Print; !reflect.DeepEqual(got, infix) {
+		t.Fatalf("none marked: print %+v", got)
+	}
+	// an operator of another profile declared after (eq_builtinInt after
+	// eq_bool) does not give its form
+	p = peano()
+	alias(p, ref.Printable)
 	p.op(sStr, 320, "plusStr", []uint32{sStr, sStr}, 0, 0)
-	ir = p.lower(t)
-	if got := opNamed(t, ir, "plus").Print; !reflect.DeepEqual(got, want) {
+	if got := opNamed(t, p.lower(t), "plus").Print; !reflect.DeepEqual(got, infix) {
 		t.Fatalf("print with another profile last: %+v", got)
 	}
 }

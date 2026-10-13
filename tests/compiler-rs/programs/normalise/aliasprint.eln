@@ -1,0 +1,18 @@
+module aliasprint
+import global int; end
+sort t; end
+operators global
+  a : t; b : t;
+  @ ++ @ : (t t) t;
+  @ ** @ : (t t) t;
+  @ ## @ : (t t) t;
+  r(@,@,@) : (t t t) t;
+  mul(@,@) : (t t) t alias @ ** @:;
+local
+  cat(@,@) : (t t) t alias @++ @:;
+  hh(@,@) : (t t) t alias @ ## @:;
+end
+operators global
+  hh2(@,@) : (t t) t alias @ ## @:;
+end
+end
