@@ -1,0 +1,16 @@
+Enter a query term of sort 'Foo'
+
+
+result = [a,b,c]
+
+result = [b,a,c]
+
+result = [a,c,b]
+
+result = [c,a,b]
+
+result = [b,c,a]
+
+result = [c,b,a]
+
+rewrite_step = 6

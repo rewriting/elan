@@ -51,6 +51,24 @@ Found while testing the programs of the copy against the 2004 reference
 (S9a Task 7):
 
 - `S28` and `S28LOG` take more than 20 s with the reference.
+
+Found in S9b (programs loaded by the reference, still untested, kept in
+`todo.tsv`):
+
+- `APT/S28`, `APT/S28LOG`, `APT/S28LIN`: the start term (`new(0)` searched
+  by the strategy of the `.lgi`) does all the work and the query cannot make
+  it smaller (every placement needs all 27 cells); the reference needs more
+  than 60 s (the modern interpreter about 20 s).
+- `APT/bubleLIN`: more than 20 s with the reference (100 elements sorted in
+  a linear array, fixed by the start term).
+- `APT/bubleLOG`: tested by `itest` only: the import of its exported `.ref`
+  fails with both systems (syntax error on `tone`), and the reference REM
+  build crashes (no `gtest`).
+- `Features/con`: hangs with both systems, without output (`dkconcur`,
+  `oneconcur` of the start strategy).
+- `Features/re`: segfaults with both systems on every query (the rule calls
+  `printnl`); `Features/hello` too (`print`) on `hello`: its test only
+  queries a string.
 - The reference REM build of `bubleLOG` crashes (Boehm GC out of memory,
   rc=-11).
 - The reference interpreter segfaults on `Features/hello` (rc=139).
