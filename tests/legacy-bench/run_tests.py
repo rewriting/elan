@@ -197,7 +197,9 @@ def discover(suites=None, apps=None):
             if tst.parent != suite:          # top-level driver (tst_one ...)
                 add(tst.parent, parse_tst_all(tst), tst.parent.relative_to(ROOT), False)
     for top in apps:
-        for tf in sorted(top.rglob("TESTS")):
+        # exact name from the listing: rglob("TESTS") would also return a data
+        # file `tests` on a case-insensitive volume
+        for tf in sorted(Path(d) / "TESTS" for d, _, fs in os.walk(top) if "TESTS" in fs):
             add(tf.parent, parse_tests(tf), tf.parent.relative_to(REPO).as_posix(), True)
     return tests
 
