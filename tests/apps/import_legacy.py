@@ -38,17 +38,9 @@ def tests_lines(tst_all, renames):
     return lines
 
 
-def parse_tests(path):
-    """Yield (cmd, args, long) for each line of a TESTS file."""
-    for raw in path.read_text(errors="replace").splitlines():
-        words = raw.split("#", 1)[0].split()
-        if not words:
-            continue
-        long_ = words[0] == "long"
-        if long_:
-            words = words[1:]
-        if words and words[0] in rt.KIND_OF_CMD:
-            yield words[0], words[1:], long_
+# The reader of TESTS files is the bench's (run_tests imports nothing of
+# this module: no circular import).
+parse_tests = rt.parse_tests
 
 
 def rename_robot(d):

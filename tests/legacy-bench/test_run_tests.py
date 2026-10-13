@@ -259,105 +259,70 @@ class CaseRenamesTest(unittest.TestCase):
             self.assertTrue((wd / "nim.eln").read_text(encoding="latin-1").startswith("module nim"))
 
 
-class OverlayDiscoveryTest(unittest.TestCase):
-    def make(self, tmp):
-        root = Path(tmp) / "legacy"
-        app = root / "elan3" / "applications" / "App"
-        (app / "SAMPLES").mkdir(parents=True)
-        (app / "tst_all").write_text("itest p no p p\n")
-        bare = root / "elan3" / "applications" / "Bare"   # no tst_all of its own
-        bare.mkdir(parents=True)
-        ov = Path(tmp) / "overlay"
-        (ov / "elan3" / "applications" / "App").mkdir(parents=True)
-        (ov / "elan3" / "applications" / "App" / "tst_all.overlay").write_text(
-            "itest q no q q\naitest q no q q\ngtest q no q q-c\n")
-        (ov / "elan3" / "applications" / "Bare").mkdir(parents=True)
-        (ov / "elan3" / "applications" / "Bare" / "tst_all.overlay").write_text("itest b no b b\n")
-        return root, ov
-
-    def test_overlay_lines_are_tests_with_the_usual_ids(self):
+class CopyDiscoveryTest(unittest.TestCase):
+    def test_tests_files_of_the_copy(self):
         with tempfile.TemporaryDirectory(dir=rt.HERE) as tmp:
-            root, ov = self.make(tmp)
-            tests = rt.discover(suites=[root / "elan3" / "applications"], overlay=ov, root=root)
+            repo = Path(tmp)
+            app = repo / "applications" / "App"
+            app.mkdir(parents=True)
+            (app / "TESTS").write_text("itest p no q r\nlong gtest p no q r-c\njtest p no jr\n")
+            leg = repo / "legacy" / "elan" / "sources" / "T"
+            leg.mkdir(parents=True)
+            (leg / "tst_all").write_text("itest x no y z\n")
+            old = rt.REPO, rt.ROOT
+            rt.REPO, rt.ROOT = repo, repo / "legacy"
+            try:
+                tests = rt.discover(suites=[repo / "legacy" / "elan" / "sources"],
+                                    apps=[repo / "applications"])
+            finally:
+                rt.REPO, rt.ROOT = old
             ids = {t["id"]: t for t in tests}
-            self.assertIn("elan3/applications/App::I::p:no:p:p", ids)
-            self.assertFalse(ids["elan3/applications/App::I::p:no:p:p"]["overlay"])
-            q = ids["elan3/applications/App::I::q:no:q:q"]
-            self.assertTrue(q["overlay"])
-            self.assertEqual(q["dir"], root / "elan3" / "applications" / "App")
-            self.assertEqual(q["ovdir"], ov / "elan3" / "applications" / "App")
-            self.assertIn("elan3/applications/App::A::q:no:q:q", ids)
-            self.assertIn("elan3/applications/Bare::I::b:no:b:b", ids)
+            self.assertIn("elan/sources/T::I::x:no:y:z", ids)
+            self.assertFalse(ids["elan/sources/T::I::x:no:y:z"]["copy"])
+            self.assertTrue(ids["applications/App::I::p:no:q:r"]["copy"])
+            self.assertTrue(ids["applications/App::G::p:no:q:r-c"]["long"])
+            self.assertEqual({k for k in ids if k.startswith("applications/App::")},
+                             {"applications/App::I::p:no:q:r", "applications/App::G::p:no:q:r-c",
+                              "applications/App::J::p:no:-:jr", "applications/App::JO::p:no:-:jr",
+                              "applications/App::R::p:no:-:jr", "applications/App::G::p:no:-:jr"})
 
-    def test_gtest_is_kind_G_with_an_input(self):
-        with tempfile.TemporaryDirectory(dir=rt.HERE) as tmp:
-            root, ov = self.make(tmp)
-            tests = rt.discover(suites=[root / "elan3" / "applications"], overlay=ov, root=root)
-            g = [t for t in tests if t["id"] == "elan3/applications/App::G::q:no:q:q-c"]
-            self.assertEqual(len(g), 1)
-            self.assertEqual((g[0]["kind"], g[0]["inp"], g[0]["out"]), ("G", "q", "q-c"))
-
-    def test_overlay_of_a_missing_directory_is_an_error(self):
-        with tempfile.TemporaryDirectory(dir=rt.HERE) as tmp:
-            root, ov = self.make(tmp)
-            (ov / "elan3" / "applications" / "Nowhere").mkdir()
-            (ov / "elan3" / "applications" / "Nowhere" / "tst_all.overlay").write_text("itest x no x x\n")
-            with self.assertRaises(SystemExit):
-                rt.discover(suites=[root / "elan3" / "applications"], overlay=ov, root=root)
-
-    def test_real_tree_ids_are_unchanged(self):
-        # the default arguments give the historical tests with overlay False
-        ids = [t["id"] for t in rt.discover() if not t["overlay"]]
-        self.assertIn("elan3/applications/Robot::I::Nim:non:Nim:Nim", ids)
+    def test_real_tree_ids(self):
+        ids = {t["id"] for t in rt.discover()}
+        self.assertIn("applications/Simplest::I::prim:no:primes:primes", ids)
+        self.assertIn("applications/Robot::I::nim2:non:nim2:nim2", ids)
+        self.assertIn("elan/sources/Compiler.4.0/Test::J::enum:no:-:enum", ids)
+        self.assertFalse(any(i.startswith("elan3/") for i in ids))
 
 
-class OverlayCopyTest(unittest.TestCase):
+class CopyRunTest(unittest.TestCase):
     def make(self, tmp):
-        d = Path(tmp) / "legacy" / "App"
+        d = Path(tmp) / "applications" / "App"
         (d / "SAMPLES").mkdir(parents=True)
-        (d / "p.lgi").write_text("legacy lgi\n")
-        (d / "m.eln").write_text("legacy module\n")
-        (d / "SAMPLES" / "old.inp").write_text("old input\n")
-        ov = Path(tmp) / "overlay" / "App"
-        (ov / "SAMPLES").mkdir(parents=True)
-        (ov / "m.eln").write_text("ported module\n")
-        (ov / "SAMPLES" / "new.inp").write_text("new input\n")
-        (ov / "tst_all.overlay").write_text("itest p no new new\n")
-        (ov / "PORTING.md").write_text("notes\n")
-        return dict(dir=d, ovdir=ov, lgi="p", spc="no", inp="new", out="new",
-                    kind="I", flags=[], overlay=True, id="App::I::p:no:new:new")
+        (d / "p.lgi").write_text("lgi\n")
+        (d / "SAMPLES" / "new.inp").write_text("new input\n")
+        return dict(dir=d, lgi="p", spc="no", inp="new", out="new",
+                    kind="I", flags=[], copy=True, id="applications/App::I::p:no:new:new")
 
-    def test_locate_prefers_the_overlay_then_legacy(self):
+    def fake_prefix(self, tmp, script):
+        prefix = Path(tmp) / "prefix"
+        (prefix / "bin").mkdir(parents=True)
+        fake = prefix / "bin" / "elan"
+        fake.write_text(script)
+        fake.chmod(0o755)
+        return prefix
+
+    def test_locate_finds_the_samples_file(self):
         with tempfile.TemporaryDirectory(dir=rt.HERE) as tmp:
             t = self.make(tmp)
-            f, rel = rt.locate(t, "new.inp")
-            self.assertEqual((f, rel), (t["ovdir"] / "SAMPLES" / "new.inp", Path("SAMPLES/new.inp")))
-            f, rel = rt.locate(t, "old.inp")
-            self.assertEqual((f, rel), (t["dir"] / "SAMPLES" / "old.inp", Path("SAMPLES/old.inp")))
+            self.assertEqual(rt.locate(t, "new.inp"),
+                             (t["dir"] / "SAMPLES" / "new.inp", Path("SAMPLES/new.inp")))
             self.assertEqual(rt.locate(t, "none.out"), (None, None))
 
-    def test_private_copy_puts_the_overlay_over_legacy(self):
+    def test_produce_runs_with_the_input(self):
         with tempfile.TemporaryDirectory(dir=rt.HERE) as tmp:
             t = self.make(tmp)
-            wd = Path(tmp) / "wd"
-            rt.private_copy(t, wd)
-            self.assertEqual((wd / "m.eln").read_text(), "ported module\n")
-            self.assertEqual((wd / "p.lgi").read_text(), "legacy lgi\n")
-            self.assertTrue((wd / "SAMPLES" / "new.inp").exists())
-            self.assertTrue((wd / "SAMPLES" / "old.inp").exists())
-            self.assertFalse((wd / "tst_all.overlay").exists())
-            self.assertFalse((wd / "PORTING.md").exists())
-
-    def test_produce_runs_with_the_overlay_input(self):
-        with tempfile.TemporaryDirectory(dir=rt.HERE) as tmp:
-            t = self.make(tmp)
-            prefix = Path(tmp) / "prefix"
-            (prefix / "bin").mkdir(parents=True)
-            fake = prefix / "bin" / "elan"
-            fake.write_text('#!/bin/sh\necho "elan $*"; cat\n')
-            fake.chmod(0o755)
             old = rt.PREFIX
-            rt.PREFIX = prefix
+            rt.PREFIX = self.fake_prefix(tmp, '#!/bin/sh\necho "elan $*"; cat\n')
             try:
                 out, err, rc = rt.produce(t, 30)
             finally:
@@ -368,14 +333,9 @@ class OverlayCopyTest(unittest.TestCase):
     def test_a_failing_run_with_empty_stderr_reports_its_rc(self):
         with tempfile.TemporaryDirectory(dir=rt.HERE) as tmp:
             t = self.make(tmp)
-            (t["ovdir"] / "SAMPLES" / "new.out").write_text("expected\n")
-            prefix = Path(tmp) / "prefix"
-            (prefix / "bin").mkdir(parents=True)
-            fake = prefix / "bin" / "elan"
-            fake.write_text('#!/bin/sh\necho got; exit 3\n')
-            fake.chmod(0o755)
+            (t["dir"] / "SAMPLES" / "new.out").write_text("expected\n")
             old = rt.PREFIX
-            rt.PREFIX = prefix
+            rt.PREFIX = self.fake_prefix(tmp, '#!/bin/sh\necho got; exit 3\n')
             try:
                 self.assertEqual(rt.produce(t, 30)[2], 3)
                 status, detail, _ = rt.run_test(t, 30)
@@ -392,13 +352,25 @@ class OverlayCopyTest(unittest.TestCase):
             self.assertEqual(e.exception.status, "NOINP")
 
 
-class OverlayJudgeTest(unittest.TestCase):
-    def test_overlay_tests_must_pass_unless_in_the_baseline(self):
-        st = {"A::I::p:no:q:q": "PASS~", "A::G::p:no:q:q-c": "UNSUPPORTED",
-              "A::I::r:no:r:r": "FAIL", "A::I::h:no:h:h": "FAIL"}
-        regress, _ = rt.judge(st, {"A::I::r:no:r:r": "FAIL"}, set(),
-                              overlay_ids=set(st))
-        self.assertEqual(sorted(r[0] for r in regress), ["A::I::h:no:h:h", "A::I::p:no:q:q"])
+class CopyJudgeTest(unittest.TestCase):
+    def test_new_copy_tests_must_pass(self):
+        st = {"applications/A::I::p:no:q:r": "FAIL", "applications/A::G::p:no:q:r-c": "UNSUPPORTED",
+              "applications/A::I::old:no:q:r": "FAIL"}
+        base = {"applications/A::I::old:no:q:r": "FAIL"}
+        reg, _ = rt.judge(st, base, {}, new_ids={"applications/A::I::p:no:q:r",
+                                                 "applications/A::G::p:no:q:r-c"})
+        self.assertEqual(reg, [("applications/A::I::p:no:q:r", "PASS", "FAIL")])
+
+    def test_new_tests_are_those_of_the_copy_absent_from_the_baseline(self):
+        def t(tid, kind, copy=True):
+            return dict(id=tid, kind=kind, copy=copy)
+        tests = [t("applications/A::I::p:no:q:r", "I"), t("applications/A::I::n:no:q:r", "I"),
+                 t("applications/A::G::p:no:-:jr", "G"), t("applications/A::G::p:no:q:r-c", "G"),
+                 t("elan/sources/T::G::x:no:-:x", "G", copy=False)]
+        base = {"applications/A::I::p:no:q:r": "PASS", "applications/A::J::p:no:-:jr": "FAIL"}
+        # a G (or R) case of a historical jtest line has its J case in the baseline
+        self.assertEqual(rt.new_tests(tests, base),
+                         {"applications/A::I::n:no:q:r", "applications/A::G::p:no:q:r-c"})
 
     def test_historical_tests_keep_the_old_rule(self):
         regress, _ = rt.judge({"A::I::p:no:p:p": "FAIL"}, {}, set())

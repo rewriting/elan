@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 """ELAN regression test bench.
 
-Replays the historical test bench of the ELAN project (the `tst_all` files that
-drive the csh scripts `itest`, `aitest` and `jtest` from elan/sources/Scripts)
-against an installed ELAN system: by default the reference build
-(reference/install, see reference/build.sh); use --prefix to test another one
-(e.g. the modern port).
+Replays the test bench of the ELAN project against an installed ELAN system:
+the `TESTS` files of applications/ and contributions/ (the living copy of the
+ELAN 3 applications, spec S9 §8; format: tests/apps/README.md) and the
+historical `tst_all` files of legacy/elan/sources (they drive the csh scripts
+`itest`, `aitest` and `jtest` from elan/sources/Scripts). The system is by
+default the reference build (reference/install, see reference/build.sh); use
+--prefix to test another one (e.g. the modern port).
 
 Test kinds (same semantics as the original scripts):
   I  itest  : elan -b LGI.lgi [SPC.spc] < SAMPLES/INP.inp       == SAMPLES/OUT.out
@@ -95,13 +97,11 @@ def restore_case(src, dst, lgi=None):
         os.replace(dst / stored.relative_to(src), target)
 
 
-# Directories whose tst_all files are harvested
-SUITES = [ELAN3 / "applications", ELAN3 / "contributions", ROOT / "elan" / "sources"]
-
-# Spec S9: tests added to the legacy applications without touching legacy/:
-# tests/legacy-overlay/<path below legacy>/ holds tst_all.overlay, SAMPLES/
-# inputs and expected outputs, and ported files that replace legacy files.
-OVERLAY = REPO / "tests" / "legacy-overlay"
+# Historical tst_all files still read in legacy/ (compiler test directories,
+# BenchThesis: not copied), and the living copy of the ELAN 3 applications
+# (spec S9 §8), whose tests are in TESTS files (tests/apps/README.md).
+SUITES = [ROOT / "elan" / "sources"]
+APPS = [REPO / "applications", REPO / "contributions"]
 
 # gtest LGI SPC INP OUT (spec S9): elanc-go, the compiled program reading INP
 KIND_OF_CMD = {"itest": ["I"], "aitest": ["A"], "jtest": ["J", "JO", "R", "G"],
@@ -150,17 +150,32 @@ def parse_tst_all(path):
             yield words[0], words[1:], any(stack)
 
 
-def discover(suites=None, overlay=None, root=None):
-    """Tests of the historical tst_all files of the suites, then of the
-    tst_all.overlay files of the overlay (spec S9). t["overlay"] tells which;
-    t["ovdir"] is the application's overlay directory (it may not exist)."""
+def parse_tests(path):
+    """Yield (cmd, args, long) for each line of a TESTS file
+    (tests/apps/README.md); an unknown command is an error (a typo must not
+    drop a test)."""
+    for n, raw in enumerate(path.read_text(errors="replace").splitlines(), 1):
+        words = raw.split("#", 1)[0].split()
+        if not words:
+            continue
+        long_ = words[0] == "long"
+        if long_:
+            words = words[1:]
+        if not words or words[0] not in KIND_OF_CMD:
+            raise SystemExit(f"{path}:{n}: unknown test command: {raw.strip()}")
+        yield words[0], words[1:], long_
+
+
+def discover(suites=None, apps=None):
+    """Tests of the historical tst_all files of the suites (ids relative to
+    legacy/) and of the TESTS files of the living copy (spec S9 §8; ids
+    relative to the repository, t["copy"] True)."""
     suites = SUITES if suites is None else suites
-    overlay = OVERLAY if overlay is None else overlay
-    root = ROOT if root is None else root
+    apps = APPS if apps is None else apps
     tests, seen = [], set()
 
-    def add(d, path, from_overlay):
-        for cmd, a, long_ in parse_tst_all(path):
+    def add(d, lines, rel, copy):
+        for cmd, a, long_ in lines:
             if cmd == "jtest":
                 if len(a) < 3:
                     continue
@@ -169,26 +184,21 @@ def discover(suites=None, overlay=None, root=None):
                 if len(a) < 4:
                     continue
                 lgi, spc, inp, out, flags = a[0], a[1], a[2], a[3], a[4:]
-            rel = d.relative_to(root)
             for kind in KIND_OF_CMD[cmd]:
                 tid = f"{rel}::{kind}::{lgi}:{spc}:{inp or '-'}:{out}"
                 if tid in seen:
                     continue
                 seen.add(tid)
                 tests.append(dict(id=tid, dir=d, kind=kind, lgi=lgi, spc=spc,
-                                  inp=inp, out=out, flags=flags, long=long_,
-                                  overlay=from_overlay, ovdir=overlay / rel))
+                                  inp=inp, out=out, flags=flags, long=long_, copy=copy))
 
     for suite in suites:
         for tst in sorted(suite.rglob("tst_all")):
             if tst.parent != suite:          # top-level driver (tst_one ...)
-                add(tst.parent, tst, False)
-    if overlay.is_dir():
-        for tst in sorted(overlay.rglob("tst_all.overlay")):
-            d = root / tst.parent.relative_to(overlay)
-            if not d.is_dir():
-                raise SystemExit(f"{tst}: no directory {d} in legacy/")
-            add(d, tst, True)
+                add(tst.parent, parse_tst_all(tst), tst.parent.relative_to(ROOT), False)
+    for top in apps:
+        for tf in sorted(top.rglob("TESTS")):
+            add(tf.parent, parse_tests(tf), tf.parent.relative_to(REPO).as_posix(), True)
     return tests
 
 
@@ -297,33 +307,23 @@ class Unrunnable(Exception):
 
 
 def locate(t, name):
-    """(file, path relative to its application directory) of the SAMPLES
-    file `name` of test t: in the overlay first (spec S9), then in legacy/
-    (stored names: CASE-RENAMES.tsv); (None, None) when neither has it."""
-    ov = t.get("ovdir")
-    for base in ([ov] if ov is not None and ov.is_dir() else []) + [t["dir"]]:
-        p = samples(base) / name
-        if src_path(p).exists():
-            return src_path(p), p.relative_to(base)
+    """(file, path relative to the test's directory) of its SAMPLES file
+    `name` (stored names of legacy/: CASE-RENAMES.tsv), or (None, None)."""
+    p = samples(t["dir"]) / name
+    if src_path(p).exists():
+        return src_path(p), p.relative_to(t["dir"])
     return None, None
 
 
 def has_lgi(t):
-    ov = t.get("ovdir")
-    return ((ov is not None and (ov / f"{t['lgi']}.lgi").exists())
-            or src_path(t["dir"] / f"{t['lgi']}.lgi").exists())
+    return src_path(t["dir"] / f"{t['lgi']}.lgi").exists()
 
 
 def private_copy(t, wd):
-    """wd: the legacy directory of t, its case names restored, then its
-    overlay directory over it (ported files replace legacy ones)."""
+    """wd: a copy of the test's directory (legacy/: case names restored)."""
     shutil.copytree(t["dir"], wd, symlinks=True,
                     ignore=shutil.ignore_patterns("CVS", "*.o", "a.out", ".elan.*"))
     restore_case(t["dir"], wd, t["lgi"])
-    ov = t.get("ovdir")
-    if ov is not None and ov.is_dir():
-        shutil.copytree(ov, wd, symlinks=True, dirs_exist_ok=True,
-                        ignore=shutil.ignore_patterns("tst_all.overlay", "PORTING.md"))
 
 
 def produce(t, timeout):
@@ -480,12 +480,12 @@ def load_baseline():
 RANK = {"PASS": 0, "PASS~": 1, "PASS≈": 2}
 
 
-def judge(statuses, base, exceptions, overlay_ids=frozenset()):
+def judge(statuses, base, exceptions, new_ids=frozenset()):
     """Compare test statuses with the baseline: return (regressions, improvements),
     lists of (id, old, new). Cases of tests/regression must PASS exactly (their
     expected.out is the oracle, whatever the baseline says); tests listed in the
-    platform exceptions are exempt. Overlay tests (spec S9) not in the baseline must
-    PASS (kind G: or UNSUPPORTED): the reference is their oracle."""
+    platform exceptions are exempt. Tests of the living copy (spec S9 §8) not in
+    the baseline must PASS (kind G: or UNSUPPORTED): the reference is their oracle."""
     regress, improve = [], []
     for tid, new in sorted(statuses.items()):
         if new == "SANITIZER":          # a sanitizer report is always a failure
@@ -497,7 +497,7 @@ def judge(statuses, base, exceptions, overlay_ids=frozenset()):
             if new not in ("PASS", "MODERN-ONLY"):
                 regress.append((tid, "PASS", new))
             continue
-        if tid in overlay_ids and tid not in base:
+        if tid in new_ids and tid not in base:
             ok = ("PASS", "UNSUPPORTED") if "::G::" in tid else ("PASS",)
             if new not in ok:
                 regress.append((tid, "PASS", new))
@@ -509,6 +509,14 @@ def judge(statuses, base, exceptions, overlay_ids=frozenset()):
             elif RANK.get(new, 9) < RANK.get(old, 9):
                 improve.append((tid, old, new))
     return regress, improve
+
+
+def new_tests(tests, base):
+    """Ids of the tests of the living copy added since the baseline: neither
+    the test nor its J case (kinds R, G: the baseline has the J case of a
+    historical jtest line) is in it."""
+    return {t["id"] for t in tests
+            if t.get("copy") and t["id"] not in base and snapshot_id(t) not in base}
 
 
 def run_repeated(t, timeout, repeat):
@@ -609,10 +617,10 @@ def main():
     print(f"details: {outdir}")
 
     base = load_baseline()
-    overlay_ids = {t["id"] for t in tests if t.get("overlay")}
+    new_ids = new_tests(tests, base)
     regress, improve = judge({tid: results[tid][0] for tid in ids}, base, exceptions,
-                             overlay_ids)
-    if base or regress or overlay_ids:
+                             new_ids)
+    if base or regress or new_ids:
         print(f"vs baseline: {len(regress)} regressions, {len(improve)} improvements")
         for tid, old, new in regress:
             print(f"  REGRESSION {tid}: {old} -> {new}")

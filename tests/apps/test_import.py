@@ -33,6 +33,15 @@ class TestsFileTest(unittest.TestCase):
                               ("aitest", ["p", "s", "q", "r", "-flag"], True)])
 
 
+    def test_parse_tests_refuses_an_unknown_command(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            t = Path(tmp) / "TESTS"
+            t.write_text("itest p no q r\nitset p no q r\n")
+            with self.assertRaises(SystemExit) as e:
+                list(il.parse_tests(t))
+            self.assertIn(f"{t}:2", str(e.exception))
+            self.assertIn("itset", str(e.exception))
+
 class ImportTreeTest(unittest.TestCase):
     def test_copy_cleans_converts_and_folds_the_overlay(self):
         with tempfile.TemporaryDirectory() as tmp:
