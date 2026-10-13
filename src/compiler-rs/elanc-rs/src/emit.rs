@@ -2167,35 +2167,258 @@ impl<'a> Emitter<'a> {
         )
     }
 
+    /// The query parser's tables (S6d): the grammar (REM's `gram[]`), the
+    /// names of the sorts, the table of identifiers, and the builder of the
+    /// terms of the grammar rules (`QueryBuilder`: each by the function of
+    /// its operator, the terms passed as `Box<dyn Any>` of their Rust
+    /// types, a number, an identifier or a string read as its native
+    /// value, converted to the sort of the argument it is by `q_<Type>`).
+    fn query(&mut self) {
+        let ir = self.ir;
+        let q = &ir.start.query;
+        self.out
+            .line("// ==== query ====================================================");
+        self.out.line("");
+        let entries: Vec<String> = ir.idents.iter().map(|(i, n)| format!("({i}, {n:?})")).collect();
+        self.out
+            .line("/// The table of identifiers of the program (its .ref file): an identifier is its index there.");
+        self.out
+            .line(&format!("static IDENTS: &[(i32, &str)] = &[{}];", entries.join(", ")));
+        self.out.line("");
+        self.out
+            .line("/// The grammar of the query parser (REM's gram[]: the grammar rules of the .ref file).");
+        self.out
+            .open("static QUERY_RULES: &[elan_runtime::earley::Rule] = &[");
+        for g in &q.grammar {
+            let rhs: Vec<String> = g
+                .rhs
+                .iter()
+                .map(|(k, c)| format!("elan_runtime::earley::RhsLexem({k}, {c})"))
+                .collect();
+            self.out.line(&format!(
+                "elan_runtime::earley::Rule {{ sort: {}, symbol: {}, info: {}, rhs: &[{}] }},",
+                g.sort,
+                g.symbol,
+                g.info,
+                rhs.join(", ")
+            ));
+        }
+        self.out.close("];");
+        let names: Vec<String> = q
+            .sort_names
+            .iter()
+            .map(|(i, n)| format!("({i}, {n:?})"))
+            .collect();
+        self.out.line(&format!(
+            "static QUERY_SORTS: &[(i32, &str)] = &[{}];",
+            names.join(", ")
+        ));
+        self.out.line(&format!(
+            "static QUERY_TABLES: elan_runtime::earley::Tables = elan_runtime::earley::Tables {{ \
+             rules: QUERY_RULES, sort_names: QUERY_SORTS, intern_ident: {}, intern_int: {}, intern_string: {} }};",
+            q.intern_ident, q.intern_int, q.intern_string
+        ));
+        self.out.line("");
+        let Some(qs) = q.sort_id else { return };
+        // the conversions of the terms of the query to the sorts they are
+        let mut conv: Vec<SortId> = vec![qs];
+        for r in &q.rules {
+            if let QueryRule::Op(o) = r {
+                for &a in &ir.ops[*o].args {
+                    if !conv.contains(&a) {
+                        conv.push(a);
+                    }
+                }
+            }
+        }
+        conv.sort_unstable();
+        for &c in &conv {
+            let ty = self.ty(c);
+            let tn = &ir.sorts[c].type_name;
+            self.out.line(&format!(
+                "/// A term of the query as a term of sort {}.",
+                ir.sorts[c].name
+            ));
+            self.out
+                .open(&format!("fn q_{tn}(a: Box<dyn std::any::Any>) -> {ty} {{"));
+            self.out.line(&format!(
+                "let a = match a.downcast::<{ty}>() {{ Ok(t) => return *t, Err(a) => a }};"
+            ));
+            if let Some(f) = ir.family_of(c) {
+                if self.wrapped(c) {
+                    let v = Self::native(f.kind);
+                    self.out.line(&format!(
+                        "if let Some(v) = a.downcast_ref::<{v}>() {{ return Builtin::Val(v.clone()); }}"
+                    ));
+                }
+            }
+            self.out.line(&format!(
+                "fatal(\"query: a term of another sort than {} (internal error)\")",
+                ir.sorts[c].name
+            ));
+            self.out.close("}");
+            self.out.line("");
+        }
+        self.out.line("/// The terms of the query: each grammar rule built by the function of its operator.");
+        self.out.line("struct QueryBuilder;");
+        self.out.line("");
+        self.out
+            .open("impl elan_runtime::earley::Builder for QueryBuilder {");
+        self.out.line("type T = Box<dyn std::any::Any>;");
+        self.out.open(
+            "fn op(&mut self, r: usize, a: Vec<Box<dyn std::any::Any>>) -> Box<dyn std::any::Any> {",
+        );
+        self.out.line("let mut a = a.into_iter();");
+        self.out.open("match r {");
+        let mut done: Vec<OpId> = Vec::new();
+        let mut umin = Vec::new();
+        let mut unsupported = Vec::new();
+        for (r, x) in q.rules.iter().enumerate() {
+            match x {
+                QueryRule::Umin => umin.push(r.to_string()),
+                QueryRule::Unsupported(_) => unsupported.push(r),
+                _ => {}
+            }
+        }
+        for x in &q.rules {
+            let QueryRule::Op(o) = x else { continue };
+            if done.contains(o) {
+                continue;
+            }
+            done.push(*o);
+            let rs: Vec<String> = q
+                .rules
+                .iter()
+                .enumerate()
+                .filter(|(_, y)| *y == x)
+                .map(|(r, _)| r.to_string())
+                .collect();
+            let op = &ir.ops[*o];
+            self.out
+                .open(&format!("{} => {{ // {}", rs.join(" | "), op.decl));
+            let mut vars = Vec::new();
+            for (i, &s) in op.args.iter().enumerate() {
+                self.out.line(&format!(
+                    "let x{i} = &q_{}(a.next().unwrap());",
+                    ir.sorts[s].type_name
+                ));
+                vars.push(VarIr {
+                    name: format!("x{i}"),
+                    sort: s,
+                });
+            }
+            let e = Expr::Op {
+                op: *o,
+                args: (0..op.args.len()).map(Expr::Var).collect(),
+            };
+            let ex = self.expr(&e, &vars);
+            let ty = self.ty(op.result);
+            self.out.line(&format!("let t: {ty} = {ex};"));
+            self.out.line("Box::new(t)");
+            self.out.close("}");
+        }
+        if !umin.is_empty() {
+            // the number read, negated (a builtinInt)
+            self.out.open(&format!("{} => {{ // - n (INTCONSTUMIN)", umin.join(" | ")));
+            self.out.line("let n = *a.next().unwrap().downcast::<Int>().unwrap_or_else(|_| fatal(\"query: - of a term that is not a number (internal error)\"));");
+            self.out.line("Box::new(builtin::int_neg(n))");
+            self.out.close("}");
+        }
+        self.out.open("_ => {");
+        self.out.line("let why = match r {");
+        for r in unsupported {
+            let QueryRule::Unsupported(why) = &q.rules[r] else { unreachable!() };
+            self.out.line(&format!("    {r} => {:?},", format!(": {why}")));
+        }
+        self.out.line("    _ => \"\",");
+        self.out.line("};");
+        self.out.line("elan_runtime::unsupported(&format!(\"a query with the operator of grammar rule {r}{why}\"))");
+        self.out.close("}");
+        self.out.close("}");
+        self.out.close("}");
+        self.out
+            .line("fn int(&mut self, n: i32) -> Box<dyn std::any::Any> { Box::new(n as Int) }");
+        self.out.line("fn ident(&mut self, i: i32) -> Box<dyn std::any::Any> { Box::new(elan_runtime::Ident(i)) }");
+        self.out
+            .line("fn str(&mut self, s: &[u8]) -> Box<dyn std::any::Any> { Box::new(Str::from(s)) }");
+        self.out.close("}");
+        self.out.line("");
+        let ty = self.ty(qs);
+        self.out.line("/// The query of a derivation, normalised.");
+        self.out.open(&format!(
+            "fn query_build(t: &elan_runtime::earley::Tree) -> Result<{ty}, elan_runtime::earley::Fatal> {{"
+        ));
+        self.out.line(&format!(
+            "Ok(q_{}(elan_runtime::earley::build(t, &mut QueryBuilder)?))",
+            ir.sorts[qs].type_name
+        ));
+        self.out.close("}");
+        self.out.line("");
+        if !ir.start.uses_query {
+            let skipped: Vec<String> = q
+                .rules
+                .iter()
+                .enumerate()
+                .filter(|(_, x)| matches!(x, QueryRule::Uncompiled | QueryRule::Unsupported(_)))
+                .map(|(r, _)| r.to_string())
+                .collect();
+            self.out.line("/// Is the operator of grammar rule r not compiled? (A query containing it is");
+            self.out.line("/// parsed, not built: the start term does not use the query.)");
+            self.out.open("fn query_uncompiled(r: usize) -> bool {");
+            if skipped.is_empty() {
+                self.out.line("false");
+            } else {
+                self.out.line(&format!("matches!(r, {})", skipped.join(" | ")));
+            }
+            self.out.close("}");
+            self.out.line("");
+        }
+    }
+
     fn main_fn(&mut self) {
         let ir = self.ir;
+        self.query();
         self.out
             .line("// ==== main =====================================================");
         self.out.line("");
         match ir.start.strategy {
             None => self
                 .out
-                .line("/// `-noInput`: the start term of the query, normalised and printed."),
+                .line("/// The start term of the query, normalised and printed."),
             Some(st) => self.out.line(&format!(
-                "/// `-noInput`: the start term of the query, normalised, then each result of {}.",
+                "/// The start term of the query, normalised, then each result of {}.",
                 ir.strategies[st].name
             )),
         }
+        if ir.start.uses_query {
+            self.out.line("/// It uses the query (read from the standard input).");
+        }
         self.out.open("fn main() {");
+        let qty = match ir.start.query.sort_id {
+            Some(s) => self.ty(s),
+            None => "()".to_string(),
+        };
+        let query = match ir.start.query.sort_id {
+            None => format!("elan_runtime::Query::<()> {{ tables: &QUERY_TABLES, sort: {}, build: None, uncompiled: None }}", ir.start.query.sort),
+            Some(_) => format!(
+                "elan_runtime::Query {{ tables: &QUERY_TABLES, sort: {}, build: Some(query_build), uncompiled: {} }}",
+                ir.start.query.sort,
+                if ir.start.uses_query { "None" } else { "Some(query_uncompiled)" }
+            ),
+        };
         self.out.open(&format!(
-            "elan_runtime::main_program({:?}, |s| {{",
-            ir.start.query_sort
+            "elan_runtime::main_program({:?}, IDENTS, {}, Some({query}), |s, q: Option<{qty}>| {{",
+            ir.start.query_sort, ir.start.uses_query
         ));
         self.out.line("s.writer.string_style = StringStyle::Raw;");
-        if !ir.idents.is_empty() {
-            let entries: Vec<String> =
-                ir.idents.iter().map(|(i, n)| format!("({i}, {n:?})")).collect();
+        if ir.start.uses_query {
+            let v = &ir.start.vars[0];
             self.out.line(&format!(
-                "elan_runtime::init_idents(&[{}]);",
-                entries.join(", ")
+                "let {} = &q.expect(\"the query\");",
+                v.name
             ));
         }
-        let e = self.expr(&ir.start.term, &[]);
+        let e = self.expr(&ir.start.term, &ir.start.vars);
         let ty = self.ty(ir.start.sort);
         self.out.line(&format!("let t: {ty} = {e};"));
         match ir.start.strategy {

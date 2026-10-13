@@ -50,8 +50,8 @@ pub fn ident_index(name: &str) -> Ident {
         if let Some(&i) = t.indices.get(name) {
             return Ident(i);
         }
-        // (C chars: signed bytes)
-        let sum: i32 = name.bytes().map(|b| b as i8 as i32).sum();
+        // (C chars: signed bytes; the characters of a name are Latin-1)
+        let sum: i32 = name.chars().map(|c| c as u32 as u8 as i8 as i32).sum();
         let mut pos = sum % TABLE_SIZE;
         if pos < 0 {
             pos += TABLE_SIZE; // (out of REM's table: undefined there)

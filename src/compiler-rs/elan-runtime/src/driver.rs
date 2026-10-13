@@ -27,6 +27,7 @@ use std::io::Write;
 use std::sync::{Mutex, MutexGuard, TryLockError};
 use std::time::Instant;
 
+use crate::earley;
 use crate::print::{Print, Writer};
 
 thread_local! {
@@ -244,15 +245,42 @@ pub fn run_with_stack<R: Send + 'static, F: FnOnce() -> R + Send + 'static>(
     }
 }
 
+/// The query parser of a program (S6d): its grammar, the query's sort
+/// (the start symbol) and how a query is built.
+pub struct Query<Q> {
+    pub tables: &'static earley::Tables,
+    pub sort: i32,
+    /// Builds the term of a derivation, normalised (`None`: the query's
+    /// sort is not compiled, a query is parsed but not built).
+    pub build: Option<fn(&earley::Tree) -> Result<Q, earley::Fatal>>,
+    /// When the start term does not use the query: whether the operator
+    /// of a grammar rule is not compiled (a query containing it is parsed
+    /// but not built).
+    pub uncompiled: Option<fn(usize) -> bool>,
+}
+
 /// The `main` of a generated program: parse the options, then run
 /// `program` on a big-stack thread with a session on the standard output.
 /// `program` computes and prints the results (`session.result(&t)`); the
-/// statistics are printed after it returns. `query_sort` is used for the
-/// prompt when a query must be read (not supported before S6d: the program
-/// then stops with an error, exit status 2).
-pub fn main_program<F>(query_sort: &'static str, program: F)
-where
-    F: FnOnce(&mut Session<ProgramOut>) + Send + 'static,
+/// statistics are printed after it returns. `idents` is the table of
+/// identifiers of the program ([`crate::init_idents`]).
+///
+/// Without `-noInput`, the program prints the prompt (`query_sort` is the
+/// sort named there), reads a term of the query's sort from the standard
+/// input up to `end` ([`crate::earley`], REM's Earley parser), prints a
+/// newline, then runs `program` with the term, normalised (REM's
+/// `termParser`, query mode 2, as elanc-go's `Main`). A syntax error: REM's
+/// message on the standard error, status 1. `uses_query`: the start term
+/// uses the query; under `-noInput`, the program then prints REM's message
+/// (`rem/compiler/Query.java`) and exits with status 0 without running.
+pub fn main_program<Q: 'static, F>(
+    query_sort: &'static str,
+    idents: &'static [(i32, &'static str)],
+    uses_query: bool,
+    query: Option<Query<Q>>,
+    program: F,
+) where
+    F: FnOnce(&mut Session<ProgramOut>, Option<Q>) + Send + 'static,
 {
     let options = Options::from_env();
     if options.help {
@@ -261,16 +289,83 @@ where
     }
     let code = run_with_stack(BIG_STACK, move || {
         crate::depth::set_limit(BIG_STACK);
+        crate::init_idents(idents);
         let mut s = Session::new(options, ProgramOut);
+        if s.options.no_input && uses_query {
+            let _ = write!(
+                s.out,
+                "No ground term is defined\nDo not use -noInput in this case\n"
+            );
+            let _ = s.out.flush();
+            return 0;
+        }
+        let mut q = None;
         if !s.options.no_input {
             let _ = writeln!(s.out, "Enter a query term of sort '{}'", query_sort);
             let _ = s.out.flush();
-            eprintln!("elan-runtime: reading a query is not supported yet; use -noInput");
-            return 2;
+            let Some(query) = query else {
+                eprintln!("elan-runtime: reading a query is not supported yet: the program has no query grammar; use -noInput");
+                return 2;
+            };
+            q = read_query(&query, uses_query);
+            let _ = s.out.write_all(b"\n");
         }
-        program(&mut s);
+        program(&mut s, q);
         s.finish();
         0
     });
     std::process::exit(code);
+}
+
+/// Read the query from the standard input: the term built and normalised
+/// (`None` when it is not built: its sort is not compiled, or the start
+/// term does not use it and it contains an operator that is not
+/// compiled); an error stops the program.
+fn read_query<Q>(query: &Query<Q>, uses_query: bool) -> Option<Q> {
+    let mut stderr = Vec::new();
+    let stdin = std::io::stdin();
+    let mut input = stdin.lock();
+    let tree = earley::parse(&mut input, "standard input", query.tables, query.sort, &mut stderr);
+    let _ = std::io::stderr().write_all(&stderr);
+    let stop = |e: earley::Error| -> ! {
+        flush_output();
+        match e {
+            earley::Error::Syntax => std::process::exit(1),
+            earley::Error::Fatal(f) => {
+                eprint!("{}", f.msg);
+                std::process::exit(f.status)
+            }
+        }
+    };
+    let tree = tree.unwrap_or_else(|e| stop(e));
+    let build = query.build?;
+    if !uses_query {
+        if let Some(u) = query.uncompiled {
+            let mut finder = UncompiledFinder(u);
+            if earley::build(&tree, &mut finder).unwrap_or_else(|f| stop(f.into())) {
+                return None;
+            }
+        }
+    }
+    Some(build(&tree).unwrap_or_else(|f| stop(f.into())))
+}
+
+/// Finds an operator that is not compiled in a derivation: a term is true
+/// when it contains one.
+struct UncompiledFinder(fn(usize) -> bool);
+
+impl earley::Builder for UncompiledFinder {
+    type T = bool;
+    fn op(&mut self, rule: usize, args: Vec<bool>) -> bool {
+        (self.0)(rule) || args.contains(&true)
+    }
+    fn int(&mut self, _: i32) -> bool {
+        false
+    }
+    fn ident(&mut self, _: i32) -> bool {
+        false
+    }
+    fn str(&mut self, _: &[u8]) -> bool {
+        false
+    }
 }

@@ -422,13 +422,27 @@ fn unsupported_constructs_are_refused_when_reachable() {
         Err(Error::Unsupported { stage: "S6c", what }) => assert!(what.contains("AC"), "{what}"),
         r => panic!("{r:?}"),
     }
-    // a start term with the query, a strategy
+    // a start term with the query (S6d): the query variable; every
+    // operator of the query grammar is compiled
     let mut p = peano();
     p.start(f(319, vec![v(0, NAT)]), NAT);
-    assert!(matches!(
-        p.lower(),
-        Err(Error::Unsupported { stage: "S6d", .. })
-    ));
+    let ir = p.lower().unwrap();
+    assert!(ir.start.uses_query && ir.start.vars.len() == 1);
+    let id = |n: &str| ir.ops.iter().position(|o| o.name == n).unwrap();
+    assert_eq!(
+        ir.start.term,
+        Expr::Op {
+            op: id("s"),
+            args: vec![Expr::Var(0)]
+        }
+    );
+    // o, s and plus may be in the query: compiled; the rules of bool are
+    // not (a query of sort nat has none)
+    let rules = &ir.start.query.rules;
+    for n in ["o", "s", "plus"] {
+        assert!(rules.contains(&QueryRule::Op(id(n))), "{n}: {rules:?}");
+    }
+    assert!(rules.contains(&QueryRule::None));
     // a traversal (S6d); a strategy of the strategy interpreter strat[X]
     // is compiled as any other (S6b task 2)
     let mut p = peano();

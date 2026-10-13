@@ -20,6 +20,7 @@ elan/sources/Compiler.2.1/Test::R::dcfail2:no:-:dcfail2	PASS
 elan/sources/Compiler.2.1/Test::R::dcfail3:no:-:dcfail3	PASS≈
 elan/sources/Compiler.2.1/Test::R::enum2:no:-:enum2	PASS≈
 elan/sources/Compiler.2.1/Test::R::enum:no:-:enum	PASS≈
+elan/sources/Compiler.2.1/Test::R::ident1:no:-:ident1	FAIL
 elan/sources/Compiler.2.1/Test::R::match11:no:-:match11	PASS
 elan/sources/Compiler.2.1/Test::R::match12:no:-:match12	PASS
 elan/sources/Compiler.2.1/Test::R::match13:no:-:match13	PASS
@@ -27,6 +28,7 @@ elan/sources/Compiler.2.1/Test::R::match14:no:-:match14	PASS
 elan/sources/Compiler.2.1/Test::R::match2:no:-:match2	PASS
 elan/sources/Compiler.2.1/Test::R::match3:no:-:match3	PASS≈
 elan/sources/Compiler.2.1/Test::R::match4:no:-:match4	PASS
+elan/sources/Compiler.2.1/Test::R::rep:no:-:rep	PASS≈
 elan/sources/Compiler.2.1/Test::R::wpattern:no:-:wpattern	PASS≈
 elan/sources/Compiler.3.0/Test::R::choice1:no:-:choice1	PASS
 elan/sources/Compiler.3.0/Test::R::dcfail1:no:-:dcfail1	PASS
@@ -34,6 +36,7 @@ elan/sources/Compiler.3.0/Test::R::dcfail2:no:-:dcfail2	PASS
 elan/sources/Compiler.3.0/Test::R::dcfail3:no:-:dcfail3	PASS≈
 elan/sources/Compiler.3.0/Test::R::enum2:no:-:enum2	PASS≈
 elan/sources/Compiler.3.0/Test::R::enum:no:-:enum	PASS≈
+elan/sources/Compiler.3.0/Test::R::ident1:no:-:ident1	FAIL
 elan/sources/Compiler.3.0/Test::R::match11:no:-:match11	PASS
 elan/sources/Compiler.3.0/Test::R::match12:no:-:match12	PASS
 elan/sources/Compiler.3.0/Test::R::match13:no:-:match13	PASS
@@ -41,6 +44,7 @@ elan/sources/Compiler.3.0/Test::R::match14:no:-:match14	PASS
 elan/sources/Compiler.3.0/Test::R::match2:no:-:match2	PASS
 elan/sources/Compiler.3.0/Test::R::match3:no:-:match3	PASS≈
 elan/sources/Compiler.3.0/Test::R::match4:no:-:match4	PASS
+elan/sources/Compiler.3.0/Test::R::rep:no:-:rep	PASS≈
 elan/sources/Compiler.3.0/Test::R::wpattern:no:-:wpattern	PASS≈
 elan/sources/Compiler.3.2/Test::R::choice1:no:-:choice1	PASS
 elan/sources/Compiler.3.2/Test::R::dcfail1:no:-:dcfail1	PASS
@@ -48,6 +52,7 @@ elan/sources/Compiler.3.2/Test::R::dcfail2:no:-:dcfail2	PASS
 elan/sources/Compiler.3.2/Test::R::dcfail3:no:-:dcfail3	PASS≈
 elan/sources/Compiler.3.2/Test::R::enum2:no:-:enum2	PASS≈
 elan/sources/Compiler.3.2/Test::R::enum:no:-:enum	PASS≈
+elan/sources/Compiler.3.2/Test::R::ident1:no:-:ident1	FAIL
 elan/sources/Compiler.3.2/Test::R::match11:no:-:match11	PASS
 elan/sources/Compiler.3.2/Test::R::match12:no:-:match12	PASS
 elan/sources/Compiler.3.2/Test::R::match13:no:-:match13	PASS
@@ -55,6 +60,7 @@ elan/sources/Compiler.3.2/Test::R::match14:no:-:match14	PASS
 elan/sources/Compiler.3.2/Test::R::match2:no:-:match2	PASS
 elan/sources/Compiler.3.2/Test::R::match3:no:-:match3	PASS≈
 elan/sources/Compiler.3.2/Test::R::match4:no:-:match4	PASS
+elan/sources/Compiler.3.2/Test::R::rep:no:-:rep	PASS≈
 elan/sources/Compiler.3.2/Test::R::wpattern:no:-:wpattern	PASS≈
 elan/sources/Compiler.4.0/Test::R::choice1:no:-:choice1	PASS
 elan/sources/Compiler.4.0/Test::R::dcfail1:no:-:dcfail1	PASS
@@ -62,6 +68,7 @@ elan/sources/Compiler.4.0/Test::R::dcfail2:no:-:dcfail2	PASS
 elan/sources/Compiler.4.0/Test::R::dcfail3:no:-:dcfail3	PASS≈
 elan/sources/Compiler.4.0/Test::R::enum2:no:-:enum2	PASS≈
 elan/sources/Compiler.4.0/Test::R::enum:no:-:enum	PASS≈
+elan/sources/Compiler.4.0/Test::R::ident1:no:-:ident1	FAIL
 elan/sources/Compiler.4.0/Test::R::match11:no:-:match11	PASS
 elan/sources/Compiler.4.0/Test::R::match12:no:-:match12	PASS
 elan/sources/Compiler.4.0/Test::R::match13:no:-:match13	PASS
@@ -69,6 +76,7 @@ elan/sources/Compiler.4.0/Test::R::match14:no:-:match14	PASS
 elan/sources/Compiler.4.0/Test::R::match2:no:-:match2	PASS
 elan/sources/Compiler.4.0/Test::R::match3:no:-:match3	PASS≈
 elan/sources/Compiler.4.0/Test::R::match4:no:-:match4	PASS
+elan/sources/Compiler.4.0/Test::R::rep:no:-:rep	PASS≈
 elan/sources/Compiler.4.0/Test::R::wpattern:no:-:wpattern	PASS≈
 elan3/applications/Simplest::R::fib_jc:no:-:fib_jc	PASS≈
 elan3/applications/Simplest::R::hanoi_jc:no:-:hanoi_jc	PASS≈

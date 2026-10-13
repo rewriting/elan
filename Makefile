@@ -164,7 +164,8 @@ check-rust: install
 	  && ELANC=elanc-rs tests/compiler-rs/test_strategies.sh "$(PREFIX)" \
 	  && ELANC=elanc-rs tests/compiler-rs/test_strategies.sh "$(PREFIX)" -d strategy_terms \
 	  && ELANC=elanc-rs tests/compiler-rs/test_depth.sh "$(PREFIX)" \
-	  && tests/compiler-rs/bench_parity.py "$(PREFIX)" --kind R; \
+	  && tests/compiler-rs/bench_parity.py "$(PREFIX)" --kind R \
+	  && ELANC=elanc-rs tests/compiler-rs/test_query.sh "$(PREFIX)"; \
 	else echo "elanc-rs not built (-DELAN_RUST=OFF, the default since S7e): Rust tests skipped"; fi
 
 # Tests of the Go compiler (src/compiler-go, spec S7), when go >= 1.24 exists.

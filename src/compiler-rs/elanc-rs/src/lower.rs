@@ -83,6 +83,25 @@ const NEVER_BUILT: &str =
 /// The symbol code of a strategy call in a term (`Call`, `term/codes.h`).
 const CALL_SYMBOL: SymbolCode = 144;
 
+/// Codes of the query grammar (`term/codes.h`): semantic actions of the
+/// parser (NUMTOTERM, IDENTTOTERM, STRINGTOTERM; NUMRULE 69, IDENTRULE 70
+/// and STRINGRULE 82 are its standard rules) and INTCONSTUMIN.
+const NUM_TO_TERM: SymbolCode = 67;
+const IDENT_TO_TERM: SymbolCode = 68;
+const STRING_TO_TERM: SymbolCode = 81;
+const INT_CONST_UMINUS: SymbolCode = 79;
+
+/// How a query builds the term of a grammar rule ([`QueryRule`], the
+/// operator as a candidate).
+#[derive(Clone, Debug)]
+enum QRule {
+    None,
+    Op(usize),
+    Umin,
+    Unsupported(String),
+    Uncompiled,
+}
+
 /// Does a semantic code make an operator a builtin operation? The codes
 /// of the strategy constructors of `strsig[X,Y]`/`strat[X]` (`code -180`
 /// .. `-190`, `-205` .. `-208`, `DS_*` in `term/codes.h`) do not: the
@@ -430,12 +449,6 @@ impl<'p> Lowerer<'p> {
     fn run(&self, name: &str) -> Result<Ir, Error> {
         let q = &self.p.query;
         let start = self.type_top(&q.start_with, Some(q.result_sort), "start term")?;
-        if contains_var(&start) {
-            return Err(unsupported(
-                "S6d",
-                "query input: the start term uses the query",
-            ));
-        }
 
         // Reachability
         let mut reach = Reach::default();
@@ -443,23 +456,84 @@ impl<'p> Lowerer<'p> {
         if let Some(s) = q.strategy {
             reach.reach_strategy(s);
         }
-        // every refusal is collected; the first one is reported
+        self.fixpoint(&mut reach)?;
+        self.check_sorts(&reach)?;
+
+        // the operators of the query: those of the grammar rules that a
+        // term of the query's sort can contain
+        let grammar = self.grammar()?;
+        let mut qrules = self.query_rules(&grammar);
+        if !contains_var(&start) {
+            // the query is not used: the query operators that the program
+            // reaches are compiled, a query containing another one is
+            // parsed but not built
+            for r in qrules.iter_mut() {
+                if matches!(r, QRule::Op(c) if !reach.seen.contains(c)) {
+                    *r = QRule::Uncompiled;
+                }
+            }
+            return Builder::new(self, reach).build(name, &start, q, grammar, qrules);
+        }
+        // the query is used: every query operator is compiled; one by one
+        // when one of them is refused (refused at run time, the others
+        // kept)
+        let base = reach.clone();
+        for r in &qrules {
+            if let QRule::Op(c) = r {
+                reach.reach(*c);
+            }
+        }
+        if self.fixpoint(&mut reach).is_err() {
+            reach = base.clone();
+            for r in qrules.iter_mut() {
+                let QRule::Op(c) = *r else { continue };
+                if base.seen.contains(&c) {
+                    continue;
+                }
+                let snap = reach.clone();
+                reach.reach(c);
+                if let Err(e) = self.fixpoint(&mut reach) {
+                    reach = snap;
+                    *r = QRule::Unsupported(e.to_string());
+                }
+            }
+        }
+        let built = self
+            .check_sorts(&reach)
+            .and_then(|_| Builder::new(self, reach).build(name, &start, q, grammar.clone(), qrules.clone()));
+        match built {
+            Ok(ir) => Ok(ir),
+            Err(e) => {
+                // the program alone, its query refused at run time
+                for r in qrules.iter_mut() {
+                    if matches!(r, QRule::Op(_) | QRule::Umin) {
+                        *r = QRule::Unsupported(e.to_string());
+                    }
+                }
+                Builder::new(self, base).build(name, &start, q, grammar, qrules)
+            }
+        }
+    }
+
+    /// Expand what `reach` has reached until nothing new is reached; every
+    /// refusal is collected, the first one is reported.
+    fn fixpoint(&self, reach: &mut Reach<'p>) -> Result<(), Error> {
         let mut errors = Vec::new();
         loop {
             let r = if let Some(c) = reach.todo.pop() {
-                self.expand(c, &mut reach)
+                self.expand(c, reach)
             } else if let Some(l) = reach.labels_todo.pop() {
-                self.expand_label(l, &mut reach)
+                self.expand_label(l, reach)
             } else if let Some(s) = reach.strategies_todo.pop() {
-                self.expand_strategy(s, &mut reach)
+                self.expand_strategy(s, reach)
             } else if let Some(i) = reach
                 .pending
                 .iter()
-                .position(|p| self.lhs_possible(&p.lhs, &reach))
+                .position(|p| self.lhs_possible(&p.lhs, reach))
             {
                 // a rule whose left-hand side has become possible
                 let p = reach.pending.swap_remove(i);
-                self.accept_rule(p.rule, &p.lhs, &p.ctx, &mut reach)
+                self.accept_rule(p.rule, &p.lhs, &p.ctx, reach)
             } else {
                 break;
             };
@@ -471,14 +545,18 @@ impl<'p> Lowerer<'p> {
         if !errors.is_empty() {
             return Err(errors.swap_remove(0));
         }
+        Ok(())
+    }
+
+    /// Refuse the sorts of the parser's grammar.
+    fn check_sorts(&self, reach: &Reach) -> Result<(), Error> {
         for &s in &reach.sorts {
             let n = self.sort_name(s);
             if n.starts_with("intern ") {
                 return Err(unsupported("S6d", format!("builtin sort {n}")));
             }
         }
-
-        Builder::new(self, reach).build(name, &start, q)
+        Ok(())
     }
 
     fn visit(&self, t: &TT, r: &mut Reach) {
@@ -569,6 +647,119 @@ impl<'p> Lowerer<'p> {
             self.accept_rule(rule, &lhs, &ctx, r)?;
         }
         Ok(())
+    }
+
+    // ------------------------------------------------------------------
+    // The query grammar (S6d)
+    // ------------------------------------------------------------------
+
+    /// The grammar rules of the program in REM's `gram[]` order: the
+    /// three dumps (Both, GlobalOnly, TopOnly) in file order. A String
+    /// lexem, which REM does not read ("Wrong lexem in REF file"), is
+    /// refused.
+    fn grammar(&self) -> Result<Vec<GrammarRule>, Error> {
+        let mut rules = Vec::new();
+        for (g, o) in self.p.operators() {
+            let mut rhs = Vec::new();
+            for l in &o.rhs {
+                rhs.push(match l {
+                    Lexem::Blank => continue,
+                    Lexem::Ident(i) => (0, *i as i32),
+                    Lexem::Type(s) => (1, *s as i32),
+                    Lexem::Char(c) => (2, *c),
+                    Lexem::Num(n) => (3, *n),
+                    Lexem::String(_) => {
+                        return Err(unsupported(
+                            "S6d",
+                            format!(
+                                "query grammar: a string lexem in the grammar rule of symbol {} (REM does not read it either)",
+                                o.symbol
+                            ),
+                        ))
+                    }
+                });
+            }
+            rules.push(GrammarRule {
+                sort: g.sort,
+                symbol: o.symbol,
+                info: o.priority + o.syntax.0 * 4096,
+                rhs,
+            });
+        }
+        Ok(rules)
+    }
+
+    /// Per grammar rule, how a query builds its term ([`QueryRule`], the
+    /// operators as candidates): the rules of the sorts that a term of the
+    /// query's sort can contain (that sort, and the sorts of the arguments
+    /// of their rules) are built by their operators, but the `1:` rules
+    /// (s ::= intern int, intern ident, intern string, built by the
+    /// parser), the codes of the parser's semantic actions (another term)
+    /// and the operators of a lexical sort (refused).
+    fn query_rules(&self, grammar: &[GrammarRule]) -> Vec<QRule> {
+        let mut inside: HashSet<SortIndex> = HashSet::from([self.p.query.sort]);
+        loop {
+            let mut changed = false;
+            for g in grammar {
+                if inside.contains(&g.sort) {
+                    for &(k, c) in &g.rhs {
+                        if k == 1 {
+                            changed |= inside.insert(c as SortIndex);
+                        }
+                    }
+                }
+            }
+            if !changed {
+                break;
+            }
+        }
+        let lexical = |s: SortIndex| self.sort_name(s).starts_with("intern ");
+        grammar
+            .iter()
+            .map(|g| {
+                if !inside.contains(&g.sort) {
+                    return QRule::None;
+                }
+                let intern = match g.symbol {
+                    NUM_TO_TERM => Some("intern int"),
+                    IDENT_TO_TERM => Some("intern ident"),
+                    STRING_TO_TERM => Some("intern string"),
+                    _ => None,
+                };
+                if let (Some(n), [(1, s)]) = (intern, g.rhs.as_slice()) {
+                    if self.sort_name(*s as SortIndex) == n {
+                        return QRule::None;
+                    }
+                }
+                if matches!(g.symbol, NUM_TO_TERM | IDENT_TO_TERM | 69 | 70 | STRING_TO_TERM | 82) {
+                    return QRule::Unsupported(format!(
+                        "code {} is a semantic action of REM's parser, which builds another term",
+                        g.symbol
+                    ));
+                }
+                if g.symbol == INT_CONST_UMINUS {
+                    return QRule::Umin;
+                }
+                let args: Vec<SortIndex> = g
+                    .rhs
+                    .iter()
+                    .filter(|(k, _)| *k == 1)
+                    .map(|&(_, c)| c as SortIndex)
+                    .collect();
+                if args.iter().any(|&a| lexical(a)) {
+                    return QRule::Unsupported(format!("code {} on a lexical sort", g.symbol));
+                }
+                let cand = self.by_symbol.get(&g.symbol).and_then(|cs| {
+                    cs.iter()
+                        .copied()
+                        .find(|&c| self.cands[c].args == args && self.cands[c].result == g.sort)
+                });
+                match cand {
+                    Some(c) => QRule::Op(c),
+                    None => QRule::Unsupported(format!("code {}: no operator", g.symbol)),
+                }
+            })
+            .collect()
     }
 
     /// An operator that can be at the top of a term without being built by
@@ -995,6 +1186,7 @@ fn contains_evar(t: &TT) -> bool {
 
 /// A rule whose left-hand side cannot match yet (see
 /// [`Lowerer::lhs_possible`]).
+#[derive(Clone)]
 struct Pending<'p> {
     rule: &'p Rule,
     lhs: TT,
@@ -1008,7 +1200,7 @@ struct Pending<'p> {
 type CallMap =
     BTreeMap<(Vec<u8>, SortIndex), (StrategyNameIndex, Option<Result<StrategyNameIndex, String>>)>;
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 struct Reach<'p> {
     pending: Vec<Pending<'p>>,
     /// Refusals found while visiting terms.
@@ -1095,7 +1287,14 @@ impl<'a, 'p> Builder<'a, 'p> {
         }
     }
 
-    fn build(mut self, name: &str, start: &TT, q: &elan_ref::Query) -> Result<Ir, Error> {
+    fn build(
+        mut self,
+        name: &str,
+        start: &TT,
+        q: &elan_ref::Query,
+        grammar: Vec<GrammarRule>,
+        qrules: Vec<QRule>,
+    ) -> Result<Ir, Error> {
         let l = self.l;
         // sorts, in table order
         let mut sort_indices: Vec<SortIndex> = self.reach.sorts.iter().copied().collect();
@@ -1358,16 +1557,59 @@ impl<'a, 'p> Builder<'a, 'p> {
                 Some(id)
             }
         };
-        let start = expr_of(&self, start, &mut |_, _| unreachable!("no variable"));
-        let idents = match l.ident_sort {
-            Some(s) if self.sort_of.contains_key(&s) => l
-                .p
-                .identifiers
-                .iter()
-                .map(|e| (e.index as i32, e.name.clone()))
-                .collect(),
-            _ => Vec::new(),
+        // the query variable
+        let mut vars: Vec<VarIr> = Vec::new();
+        let start_e = expr_of(&self, start, &mut |_, s| {
+            if vars.is_empty() {
+                vars.push(VarIr {
+                    name: "query".to_string(),
+                    sort: self.sort_of[&s],
+                });
+            }
+            0
+        });
+        let query = {
+            let named = |n: &str, def: SortIndex| {
+                l.p.sorts
+                    .iter()
+                    .find(|s| s.name == n)
+                    .map_or(def, |s| s.index)
+            };
+            let sort_id = self.sort_of.get(&q.sort).copied();
+            let rules = qrules
+                .into_iter()
+                .map(|r| match r {
+                    QRule::None => QueryRule::None,
+                    // the query's sort is not compiled: parsed only
+                    QRule::Op(_) if sort_id.is_none() => QueryRule::Uncompiled,
+                    QRule::Op(c) => match self.op_of.get(&c) {
+                        Some(&o) => QueryRule::Op(o),
+                        None => QueryRule::Uncompiled,
+                    },
+                    QRule::Umin => QueryRule::Umin,
+                    QRule::Unsupported(why) => QueryRule::Unsupported(why),
+                    QRule::Uncompiled => QueryRule::Uncompiled,
+                })
+                .collect();
+            QueryIr {
+                sort: q.sort,
+                sort_id,
+                grammar,
+                rules,
+                sort_names: l.p.sorts.iter().map(|s| (s.index, s.name.clone())).collect(),
+                intern_ident: named("intern ident", 220),
+                intern_int: named("intern int", 19),
+                intern_string: named("intern string", 351),
+            }
         };
+        // the table of identifiers: the parser of the query reads them (and
+        // the identifiers of its grammar rules are their indices)
+        let idents = l
+            .p
+            .identifiers
+            .iter()
+            .map(|e| (e.index as i32, e.name.clone()))
+            .collect();
         Ok(Ir {
             program: name.to_string(),
             sorts,
@@ -1380,8 +1622,11 @@ impl<'a, 'p> Builder<'a, 'p> {
             start: Start {
                 query_sort: l.sort_name(q.sort),
                 sort: start_sort,
-                term: start,
+                term: start_e,
+                uses_query: !vars.is_empty(),
+                vars,
                 strategy: start_strategy,
+                query,
             },
         })
     }
