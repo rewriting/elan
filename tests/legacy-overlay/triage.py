@@ -21,6 +21,7 @@ import run_tests as rt  # noqa: E402
 import check_coverage as cc  # noqa: E402
 
 REPORT = HERE / "triage.tsv"
+MAX_SPC = 10   # .spc files tried per program
 
 
 def reason(text):
@@ -49,10 +50,29 @@ def unbatched_reason(t, timeout):
 
 
 def load_status_in(app, name, prefix, timeout):
-    """Load status of app/name.lgi with prefix's elan (see the module doc)."""
+    """Load status of app/name.lgi with prefix's elan (see the module doc).
+    A program that needs a specification (elan prints its usage without a
+    .spc) is tried with the .spc files of its directory, overlay included:
+    ok:<name>.spc, or needs-spc: ..."""
     ovdir = rt.OVERLAY / app.relative_to(rt.ROOT) if rt.ROOT in app.parents else None
+    st = load_one(app, ovdir, name, "no", prefix, timeout)
+    if st != "usage":
+        return st
+    spcs = sorted({f.stem for d in (app, ovdir) if d and d.is_dir() for f in d.glob("*.spc")})
+    if not spcs:
+        return "needs-spc: no .spc"
+    first = None
+    for spc in spcs[:MAX_SPC]:
+        st = load_one(app, ovdir, name, spc, prefix, timeout)
+        if st == "ok":
+            return f"ok:{spc}.spc"
+        first = first or st
+    return f"needs-spc: none of {min(len(spcs), MAX_SPC)} loads ({first})"[:200]
+
+
+def load_one(app, ovdir, name, spc, prefix, timeout):
     t = dict(id=name, dir=app, ovdir=ovdir, kind="I",
-             lgi=name, spc="no", inp=None, out=name, flags=[], overlay=False)
+             lgi=name, spc=spc, inp=None, out=name, flags=[], overlay=False)
     old = rt.PREFIX
     rt.PREFIX = prefix
     try:
@@ -101,10 +121,10 @@ def main(argv=None):
     rows = [one(p) for p in todo]
     REPORT.write_text("# path\treference\tmodern\tinputs\toutputs (triage.py)\n"
                       + "".join("\t".join(r) + "\n" for r in rows))
-    both = sum(1 for r in rows if r[1] == "ok" and r[2] == "ok")
-    ref_only = sum(1 for r in rows if r[1] == "ok" and r[2] != "ok")
-    modern_only = sum(1 for r in rows if r[1] != "ok" and r[2] == "ok")
-    neither = sum(1 for r in rows if r[1] != "ok" and r[2] != "ok")
+    both = sum(1 for r in rows if r[1].startswith("ok") and r[2].startswith("ok"))
+    ref_only = sum(1 for r in rows if r[1].startswith("ok") and not r[2].startswith("ok"))
+    modern_only = sum(1 for r in rows if not r[1].startswith("ok") and r[2].startswith("ok"))
+    neither = sum(1 for r in rows if not r[1].startswith("ok") and not r[2].startswith("ok"))
     print(f"triage: {len(rows)} programs: {both} load with both, {ref_only} with the reference "
           f"only, {modern_only} with the modern only, {neither} with neither; "
           f"report in {REPORT.name}")

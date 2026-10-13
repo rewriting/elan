@@ -26,8 +26,8 @@ applications/CStrategies/nim1.lgi	[error] :file=nim1.lgi line=4 pos=10 [PARSER] 
 applications/CStrategies/robot.lgi	[error] :file=robot.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules'	[error] :file=robot.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules'	robot.inp	
 applications/CStrategies/robot1.lgi	[error] :file=robot1.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules'	[error] :file=robot1.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules'		
 applications/CStrategies/space.lgi	[error] :file=space.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules'	[error] :file=space.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules'		
-applications/FastCompletion/cp.lgi	usage	usage		cp2.out,cp5.out
-applications/FastCompletion/critical_pairs.lgi	usage	usage		
+applications/FastCompletion/cp.lgi	ok:KNZ86.spc	ok:KNZ86.spc		cp2.out,cp5.out
+applications/FastCompletion/critical_pairs.lgi	ok:KNZ86.spc	ok:KNZ86.spc		
 applications/Features/ac1.lgi	[error] :file=ac1.eln line=0 pos=1 [PARSER] syntax error on symbol 'ENDOFLSTREAM'	[error] :file=ac1.eln line=0 pos=1 [PARSER] syntax error on symbol 'ENDOFLSTREAM'		
 applications/Features/bblock.lgi	[error] can't open input file 'io.eln'	[error] can't open input file 'io.eln'		
 applications/Features/block.lgi	[error] can't open input file 'io.eln'	[error] can't open input file 'io.eln'		
@@ -64,7 +64,7 @@ applications/Features/nqueens.lgi	ok	ok
 applications/Features/oneadjlist.lgi	[error] :file=oneadjlist.eln line=61 pos=55 [earley] syntax error on symbol ','	[error] :file=oneadjlist.eln line=61 pos=55 [earley] syntax error on symbol ','		
 applications/Features/path.lgi	ok	ok		
 applications/Features/plus.lgi	[error] :file=plus.lgi line=4 pos=11 [PARSER] syntax error on symbol 'modules'	[error] :file=plus.lgi line=4 pos=11 [PARSER] syntax error on symbol 'modules'		
-applications/Features/poly3.lgi	usage	usage	poly3.inp	
+applications/Features/poly3.lgi	needs-spc: none of 1 loads ([error] :file=poly3.lgi line=4 pos=11 [PARSER] syntax error on symbol 'modules')	needs-spc: none of 1 loads ([error] :file=poly3.lgi line=4 pos=11 [PARSER] syntax error on symbol 'modules')	poly3.inp	
 applications/Features/print.lgi	[error] :file=print.lgi line=4 pos=11 [PARSER] syntax error on symbol 'modules'	[error] :file=print.lgi line=4 pos=11 [PARSER] syntax error on symbol 'modules'		
 applications/Features/pwhere.lgi	ok	ok		
 applications/Features/pwhere1.lgi	ok	ok		
@@ -76,7 +76,7 @@ applications/Features/s.lgi	[error] :file=s.lgi line=4 pos=11 [PARSER] syntax er
 applications/Features/solvers.lgi	[error] can't open input file 'io.eln'	[error] can't open input file 'io.eln'		
 applications/Features/ss.lgi	[error] :file=ss.lgi line=11 pos=11 [PARSER] syntax error on symbol 'modules'	[error] :file=ss.lgi line=11 pos=11 [PARSER] syntax error on symbol 'modules'		
 applications/Features/str_to_term.lgi	[error] can't open input file 'io.eln'	[error] can't open input file 'io.eln'		
-applications/Features/termCommonstest.lgi	usage	usage		
+applications/Features/termCommonstest.lgi	needs-spc: none of 1 loads (rc=1)	needs-spc: none of 1 loads (rc=1)		
 applications/Features/toi_meme.lgi	ok	ok	toi_meme.inp	toi_meme.out
 applications/Features/tri.lgi	ok	ok		
 applications/Features/trii.lgi	ok	ok		
@@ -84,41 +84,41 @@ applications/Features/try1.lgi	[error] :file=try1.eln line=0 pos=1 [PARSER] synt
 applications/Features/try2.lgi	[error] :file=try2.eln line=3 pos=10 [PARSER] semaction error on symbol 'sort'	[error] :file=try2.eln line=3 pos=10 [PARSER] semaction error on symbol 'sort'		
 applications/Features/try3.lgi	[error] :file=try3.eln line=2 pos=19 [PARSER] semaction error on symbol 'import'	[error] :file=try3.eln line=2 pos=19 [PARSER] semaction error on symbol 'import'		
 applications/Features/v.lgi	[error] :file=v.lgi line=4 pos=11 [PARSER] syntax error on symbol 'modules'	[error] :file=v.lgi line=4 pos=11 [PARSER] syntax error on symbol 'modules'	sieve.inp	sieve.out
-applications/HOU_1_17/hou.lgi	usage	usage		
-applications/HOU_1_17/norm.lgi	usage	usage		
-applications/HOU_1_17/phou.lgi	usage	usage		
-applications/HOU_1_17/test.lgi	usage	usage		
-applications/HOU_1_17/tex.lgi	usage	usage		
+applications/HOU_1_17/hou.lgi	needs-spc: none of 8 loads ([error] :file=hou.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules')	needs-spc: none of 8 loads ([error] :file=hou.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules')		
+applications/HOU_1_17/norm.lgi	needs-spc: none of 8 loads ([error] :file=norm.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules')	needs-spc: none of 8 loads ([error] :file=norm.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules')		
+applications/HOU_1_17/phou.lgi	needs-spc: none of 8 loads ([error] :file=phou.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules')	needs-spc: none of 8 loads ([error] :file=phou.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules')		
+applications/HOU_1_17/test.lgi	needs-spc: none of 8 loads ([error] :file=test.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules')	needs-spc: none of 8 loads ([error] :file=test.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules')		
+applications/HOU_1_17/tex.lgi	needs-spc: none of 8 loads ([error] :file=tex.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules')	needs-spc: none of 8 loads ([error] :file=tex.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules')		
 applications/HOU_1_17/tst.lgi	[error] :file=tst.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules'	[error] :file=tst.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules'		
-applications/HOU_1_18/norm.lgi	usage	usage		
-applications/HOU_1_18/test.lgi	usage	usage		
-applications/HOU_1_18/tex.lgi	usage	usage		
+applications/HOU_1_18/norm.lgi	needs-spc: none of 8 loads ([error] :file=norm.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules')	needs-spc: none of 8 loads ([error] :file=norm.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules')		
+applications/HOU_1_18/test.lgi	needs-spc: none of 8 loads ([error] :file=test.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules')	needs-spc: none of 8 loads ([error] :file=test.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules')		
+applications/HOU_1_18/tex.lgi	needs-spc: none of 8 loads ([error] :file=tex.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules')	needs-spc: none of 8 loads ([error] :file=tex.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules')		
 applications/HOU_1_18/tst.lgi	[error] :file=tst.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules'	[error] :file=tst.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules'		
-applications/Hou/norm.lgi	usage	usage		
-applications/Hou/test.lgi	usage	usage		
-applications/Hou/tex.lgi	usage	usage		
+applications/Hou/norm.lgi	needs-spc: none of 8 loads ([error] :file=norm.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules')	needs-spc: none of 8 loads ([error] :file=norm.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules')		
+applications/Hou/test.lgi	needs-spc: none of 8 loads ([error] :file=test.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules')	needs-spc: none of 8 loads ([error] :file=test.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules')		
+applications/Hou/tex.lgi	needs-spc: none of 8 loads ([error] :file=tex.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules')	needs-spc: none of 8 loads ([error] :file=tex.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules')		
 applications/Hou/tst.lgi	[error] :file=tst.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules'	[error] :file=tst.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules'		
-applications/IO_Call/Unif.lgi	usage	usage		
+applications/IO_Call/Unif.lgi	needs-spc: none of 1 loads ([error] :file=termUnif.eln line=193 pos=29 [PARSER] syntax error on symbol '|')	needs-spc: none of 1 loads ([error] :file=termUnif.eln line=193 pos=29 [PARSER] syntax error on symbol '|')		
 applications/MetaApply/adjlist.lgi	[error] :file=adjlist.eln line=96 pos=14 [earley] syntax error on symbol 'switch'	[error] :file=adjlist.eln line=96 pos=14 [earley] syntax error on symbol 'switch'		
-applications/MetaApply/compbasic.lgi	usage	usage		
-applications/MetaApply/cpbasic.lgi	usage	usage		
-applications/MetaApply/cpbasic2.lgi	usage	usage		
+applications/MetaApply/compbasic.lgi	needs-spc: no .spc	needs-spc: no .spc		
+applications/MetaApply/cpbasic.lgi	needs-spc: no .spc	needs-spc: no .spc		
+applications/MetaApply/cpbasic2.lgi	needs-spc: no .spc	needs-spc: no .spc		
 applications/MetaApply/edge.lgi	ok	ok		
-applications/MetaApply/eqSystem.lgi	usage	usage		
-applications/MetaApply/extequation.lgi	usage	usage		
-applications/MetaApply/extequation1.lgi	usage	usage		
+applications/MetaApply/eqSystem.lgi	needs-spc: no .spc	needs-spc: no .spc		
+applications/MetaApply/extequation.lgi	needs-spc: no .spc	needs-spc: no .spc		
+applications/MetaApply/extequation1.lgi	needs-spc: no .spc	needs-spc: no .spc		
 applications/MetaApply/graph.lgi	[error] :file=adjlist.eln line=96 pos=14 [earley] syntax error on symbol 'switch'	[error] :file=adjlist.eln line=96 pos=14 [earley] syntax error on symbol 'switch'		
 applications/MetaApply/label.lgi	ok	ok		
 applications/MetaApply/list.lgi	[error] :file=list.eln line=143 pos=17 [earley] syntax error on symbol 'switch'	[error] :file=list.eln line=143 pos=17 [earley] syntax error on symbol 'switch'		
-applications/MetaApply/lpo.lgi	usage	usage		
-applications/MetaApply/lvariables.lgi	usage	usage		
+applications/MetaApply/lpo.lgi	needs-spc: no .spc	needs-spc: no .spc		
+applications/MetaApply/lvariables.lgi	needs-spc: no .spc	needs-spc: no .spc		
 applications/MetaApply/oneadjlist.lgi	[error] :file=adjlist.eln line=96 pos=14 [earley] syntax error on symbol 'switch'	[error] :file=adjlist.eln line=96 pos=14 [earley] syntax error on symbol 'switch'		
 applications/MetaApply/path.lgi	ok	ok		
-applications/MetaApply/position.lgi	usage	usage		
-applications/MetaApply/renaming.lgi	usage	usage		
-applications/MetaApply/termCommons.lgi	usage	usage		
-applications/MetaApply/terms.lgi	usage	usage		
-applications/Picalc/picalc.lgi	usage	usage		
+applications/MetaApply/position.lgi	needs-spc: no .spc	needs-spc: no .spc		
+applications/MetaApply/renaming.lgi	needs-spc: no .spc	needs-spc: no .spc		
+applications/MetaApply/termCommons.lgi	needs-spc: no .spc	needs-spc: no .spc		
+applications/MetaApply/terms.lgi	needs-spc: no .spc	needs-spc: no .spc		
+applications/Picalc/picalc.lgi	needs-spc: none of 1 loads ([error] :file=picalc.lgi line=5 pos=12 [PARSER] syntax error on symbol 'modules')	needs-spc: none of 1 loads ([error] :file=picalc.lgi line=5 pos=12 [PARSER] syntax error on symbol 'modules')		
 applications/Prover/fopc.lgi	[error] can't open input file 'io.eln'	[error] can't open input file 'io.eln'	fopc.inp	fopc.out
 applications/Robot/iden.lgi	[error] :file=iden.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules'	[error] :file=iden.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules'		
 applications/Robot/iforelse.lgi	[error] :file=iforelse.lgi line=4 pos=8 [PARSER] syntax error on symbol 'modules'	[error] :file=iforelse.lgi line=4 pos=8 [PARSER] syntax error on symbol 'modules'		
@@ -144,37 +144,37 @@ applications/Strategies/map2.lgi	[error] :file=map2.lgi line=4 pos=9 [PARSER] sy
 applications/Strategies/map3.lgi	[error] :file=map3.lgi line=4 pos=9 [PARSER] syntax error on symbol 'modules'	[error] :file=map3.lgi line=4 pos=9 [PARSER] syntax error on symbol 'modules'		
 applications/Strategies/map99.lgi	[error] :file=map99.lgi line=4 pos=9 [PARSER] syntax error on symbol 'modules'	[error] :file=map99.lgi line=4 pos=9 [PARSER] syntax error on symbol 'modules'		
 applications/Strategies/moo.lgi	[error] :file=moo.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules'	[error] :file=moo.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules'		
-applications/Strategies/polyDer.lgi	usage	usage		
+applications/Strategies/polyDer.lgi	needs-spc: none of 1 loads ([error] :file=polyDer.lgi line=4 pos=11 [PARSER] syntax error on symbol 'modules')	needs-spc: none of 1 loads ([error] :file=polyDer.lgi line=4 pos=11 [PARSER] syntax error on symbol 'modules')		
 applications/Strategies/tclist.lgi	[error] :file=tclist.lgi line=23 pos=10 [PARSER] syntax error on symbol 'modules'	[error] :file=tclist.lgi line=23 pos=10 [PARSER] syntax error on symbol 'modules'		
-applications/UnifElanGen/ElimFA.lgi	usage	usage		
+applications/UnifElanGen/ElimFA.lgi	needs-spc: none of 4 loads ([error] :file=termUnif.eln line=166 pos=29 [PARSER] syntax error on symbol '|')	needs-spc: none of 4 loads ([error] :file=termUnif.eln line=166 pos=29 [PARSER] syntax error on symbol '|')		
 applications/UnifElanGen/Id.lgi	[error] :file=eqSystem.eln line=49 pos=30 [PARSER] syntax error on symbol '|'	[error] :file=eqSystem.eln line=49 pos=30 [PARSER] syntax error on symbol '|'		
 applications/UnifElanGen/Lin.lgi	[error] :file=eqSystem.eln line=49 pos=30 [PARSER] syntax error on symbol '|'	[error] :file=eqSystem.eln line=49 pos=30 [PARSER] syntax error on symbol '|'		
 applications/UnifElanGen/Part.lgi	[error] :file=Part.eln line=47 pos=36 [PARSER] syntax error on symbol '|'	[error] :file=Part.eln line=47 pos=36 [PARSER] syntax error on symbol '|'		
-applications/UnifElanGen/RestrictUnif0.lgi	usage	usage		
-applications/UnifElanGen/RestrictUnifFA.lgi	usage	usage		
-applications/UnifElanGen/UnifFA.lgi	usage	usage		
-applications/UnifElanGen/combi0plusFA.lgi	usage	usage		
-applications/UnifElanGen/combiBrKnn.lgi	usage	usage		
-applications/UnifElanRCF/alien.lgi	usage	usage		
-applications/UnifElanRCF/combiACplusC.lgi	usage	usage		
-applications/UnifElanRCF/combiRCF.lgi	usage	usage		
-contributions/Proving/Automata/all_operations.lgi	usage	usage		
-contributions/Proving/Automata/automaton.lgi	usage	usage		
-contributions/Proving/Automata/nf_automaton.lgi	usage	usage		
-contributions/Proving/Automata/termination.lgi	usage	usage		
+applications/UnifElanGen/RestrictUnif0.lgi	needs-spc: none of 4 loads ([error] :file=eqSystem.eln line=49 pos=30 [PARSER] syntax error on symbol '|')	needs-spc: none of 4 loads ([error] :file=eqSystem.eln line=49 pos=30 [PARSER] syntax error on symbol '|')		
+applications/UnifElanGen/RestrictUnifFA.lgi	needs-spc: none of 4 loads ([error] :file=termUnif.eln line=166 pos=29 [PARSER] syntax error on symbol '|')	needs-spc: none of 4 loads ([error] :file=termUnif.eln line=166 pos=29 [PARSER] syntax error on symbol '|')		
+applications/UnifElanGen/UnifFA.lgi	needs-spc: none of 4 loads ([error] :file=termUnif.eln line=166 pos=29 [PARSER] syntax error on symbol '|')	needs-spc: none of 4 loads ([error] :file=termUnif.eln line=166 pos=29 [PARSER] syntax error on symbol '|')		
+applications/UnifElanGen/combi0plusFA.lgi	needs-spc: none of 4 loads ([error] :file=eqSystem.eln line=49 pos=30 [PARSER] syntax error on symbol '|')	needs-spc: none of 4 loads ([error] :file=eqSystem.eln line=49 pos=30 [PARSER] syntax error on symbol '|')		
+applications/UnifElanGen/combiBrKnn.lgi	needs-spc: none of 4 loads ([error] :file=eqSystem.eln line=49 pos=30 [PARSER] syntax error on symbol '|')	needs-spc: none of 4 loads ([error] :file=eqSystem.eln line=49 pos=30 [PARSER] syntax error on symbol '|')		
+applications/UnifElanRCF/alien.lgi	needs-spc: none of 4 loads ([error] :file=termUnif.eln line=181 pos=29 [PARSER] syntax error on symbol '|')	needs-spc: none of 4 loads ([error] :file=termUnif.eln line=181 pos=29 [PARSER] syntax error on symbol '|')		
+applications/UnifElanRCF/combiACplusC.lgi	needs-spc: none of 4 loads ([error] :file=termUnif.eln line=181 pos=29 [PARSER] syntax error on symbol '|')	needs-spc: none of 4 loads ([error] :file=termUnif.eln line=181 pos=29 [PARSER] syntax error on symbol '|')		
+applications/UnifElanRCF/combiRCF.lgi	needs-spc: none of 4 loads ([error] :file=termUnif.eln line=181 pos=29 [PARSER] syntax error on symbol '|')	needs-spc: none of 4 loads ([error] :file=termUnif.eln line=181 pos=29 [PARSER] syntax error on symbol '|')		
+contributions/Proving/Automata/all_operations.lgi	ok:ex_termination.spc	ok:ex_termination.spc		
+contributions/Proving/Automata/automaton.lgi	ok:ex_automaton.spc	ok:ex_automaton.spc		
+contributions/Proving/Automata/nf_automaton.lgi	ok:ex_nf_automaton.spc	ok:ex_nf_automaton.spc		
+contributions/Proving/Automata/termination.lgi	ok:ex_termination.spc	ok:ex_termination.spc		
 contributions/Proving/NeedhamSchroeder/nsh.lgi	ok	ok		
-contributions/Proving/Provers/Propositional/NamedRules/propositional.lgi	usage	usage		
-contributions/Proving/Provers/Propositional/NoNamedRules/propositional.lgi	usage	usage		
-contributions/Proving/Provers/Propositional/propositional.lgi	usage	usage		
-contributions/Proving/Termination/LPO-MPO/lpo.lgi	usage	usage		
-contributions/Proving/Termination/RPO/rpo.lgi	usage	usage		
-contributions/Proving/TimedAutomata/One-Automaton/ClockZone.lgi	usage	usage		
-contributions/Proving/TimedAutomata/One-Automaton/Timed_Automaton.lgi	usage	usage		
-contributions/Proving/TimedAutomata/Product-Of-Automata/Timed_automata/Timed_Automata.lgi	usage	usage		
-contributions/Proving/TimedAutomata/Product-Of-Automata/Timed_automata/pdt_automates.lgi	usage	usage		
-contributions/Proving/TimedAutomata/Product-Of-Automata/hash_Timed_automata/Timed_Automata.lgi	usage	usage		
-contributions/Proving/TimedAutomata/Product-Of-Automata/hash_Timed_automata/pdt_automates.lgi	usage	usage		
-contributions/Proving/TimedAutomata/Product-Of-Automata/matrice_Timed_automata/Timed_Automata.lgi	usage	usage		
-contributions/Proving/TimedAutomata/Product-Of-Automata/matrice_Timed_automata/pdt_automates.lgi	usage	usage		
-contributions/Solving/COLETTE/ARITY_N_I/src/colette.lgi	usage	usage		
-contributions/Solving/Equational/MatchingAC/CompMatchingAC.lgi	usage	usage		
+contributions/Proving/Provers/Propositional/NamedRules/propositional.lgi	ok:propositional.spc	ok:propositional.spc		
+contributions/Proving/Provers/Propositional/NoNamedRules/propositional.lgi	ok:propositional.spc	ok:propositional.spc		
+contributions/Proving/Provers/Propositional/propositional.lgi	ok:propositional.spc	ok:propositional.spc		
+contributions/Proving/Termination/LPO-MPO/lpo.lgi	ok:lpo.spc	ok:lpo.spc		
+contributions/Proving/Termination/RPO/rpo.lgi	ok:rpo.spc	ok:rpo.spc		
+contributions/Proving/TimedAutomata/One-Automaton/ClockZone.lgi	ok:clocks.spc	ok:clocks.spc		
+contributions/Proving/TimedAutomata/One-Automaton/Timed_Automaton.lgi	ok:simple.spc	ok:simple.spc		
+contributions/Proving/TimedAutomata/Product-Of-Automata/Timed_automata/Timed_Automata.lgi	ok:Eng_train.spc	ok:Eng_train.spc		
+contributions/Proving/TimedAutomata/Product-Of-Automata/Timed_automata/pdt_automates.lgi	needs-spc: none of 4 loads ([error] :file=Eng_train.spc line=13 pos=0 [earley] syntax error on symbol '(')	needs-spc: none of 4 loads ([error] :file=Eng_train.spc line=13 pos=0 [earley] syntax error on symbol '(')		
+contributions/Proving/TimedAutomata/Product-Of-Automata/hash_Timed_automata/Timed_Automata.lgi	ok:Eng_train.spc	ok:Eng_train.spc		
+contributions/Proving/TimedAutomata/Product-Of-Automata/hash_Timed_automata/pdt_automates.lgi	needs-spc: none of 4 loads ([error] :file=Eng_train.spc line=13 pos=0 [earley] syntax error on symbol '(')	needs-spc: none of 4 loads ([error] :file=Eng_train.spc line=13 pos=0 [earley] syntax error on symbol '(')		
+contributions/Proving/TimedAutomata/Product-Of-Automata/matrice_Timed_automata/Timed_Automata.lgi	ok:Eng_train.spc	ok:Eng_train.spc		
+contributions/Proving/TimedAutomata/Product-Of-Automata/matrice_Timed_automata/pdt_automates.lgi	needs-spc: none of 4 loads ([error] :file=Eng_train.spc line=13 pos=0 [earley] syntax error on symbol '(')	needs-spc: none of 4 loads ([error] :file=Eng_train.spc line=13 pos=0 [earley] syntax error on symbol '(')		
+contributions/Solving/COLETTE/ARITY_N_I/src/colette.lgi	needs-spc: no .spc	needs-spc: no .spc		
+contributions/Solving/Equational/MatchingAC/CompMatchingAC.lgi	ok:CompCtesig.spc	ok:CompCtesig.spc		

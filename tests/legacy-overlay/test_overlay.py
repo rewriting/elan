@@ -176,7 +176,19 @@ class TriageTest(unittest.TestCase):
         with tempfile.TemporaryDirectory(dir=HERE) as tmp:
             app, prefix = self.fake_prefix(
                 tmp, 'if [ "$1" != -b ]; then echo "usage: elan [--elanlib D] f" >&2; fi; exit 1')
-            self.assertEqual(tr.load_status_in(app, "x", prefix, 30), "usage")
+            self.assertEqual(tr.load_status_in(app, "x", prefix, 30), "needs-spc: no .spc")
+
+    def test_a_program_needing_a_spc_is_tried_with_the_spc_files(self):
+        with tempfile.TemporaryDirectory(dir=HERE) as tmp:
+            app, prefix = self.fake_prefix(
+                tmp, 'case "$3" in b.spc) exit 0;; "") echo "usage: elan f" >&2; exit 1;; '
+                     '*) echo "[error] bad spc" >&2; exit 1;; esac')
+            self.assertEqual(tr.load_status_in(app, "x", prefix, 30), "needs-spc: no .spc")
+            (app / "a.spc").write_text("")
+            self.assertEqual(tr.load_status_in(app, "x", prefix, 30),
+                             "needs-spc: none of 1 loads ([error] bad spc)")
+            (app / "b.spc").write_text("")
+            self.assertEqual(tr.load_status_in(app, "x", prefix, 30), "ok:b.spc")
 
     def test_a_location_error_is_joined_with_its_message_on_one_line(self):
         with tempfile.TemporaryDirectory(dir=HERE) as tmp:
