@@ -8,6 +8,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(HERE.parent / "legacy-bench"))
+import check_coverage as cc  # noqa: E402
 import make_expected as me  # noqa: E402
 import run_tests as rt  # noqa: E402
 
@@ -76,6 +77,36 @@ class WriteExpectedTest(unittest.TestCase):
                 self.assertEqual(me.write_expected(me.plan([t]), True, 30), (0, 1, 0))
             finally:
                 rt.PREFIX = old
+
+
+class CoverageTest(unittest.TestCase):
+    def test_every_program_in_exactly_one_state(self):
+        progs = {"applications/A/p.lgi", "applications/A/q.lgi", "applications/B/r.lgi",
+                 "applications/B/s.lgi"}
+        problems = cc.check(progs, tested={"applications/A/p.lgi", "applications/B/s.lgi"},
+                            unloadable={"applications/A/q.lgi": "ELAN 2 syntax"},
+                            todo={"applications/B/s.lgi": "", "applications/C/x.lgi": ""})
+        self.assertEqual(sorted(problems), [
+            "applications/B/r.lgi: not tested, not in unloadable.tsv nor todo.tsv",
+            "applications/B/s.lgi: in 2 states (tested, todo.tsv)",
+            "applications/C/x.lgi: listed but no such program",
+        ])
+
+    def test_programs_uses_original_names_and_skips_cvs(self):
+        with tempfile.TemporaryDirectory(dir=HERE) as tmp:
+            root = Path(tmp)
+            (root / "applications" / "A" / "CVS").mkdir(parents=True)
+            (root / "applications" / "A" / "p.lgi").write_text("")
+            (root / "applications" / "A" / "CVS" / "old.lgi").write_text("")
+            (root / "contributions" / "C").mkdir(parents=True)
+            (root / "contributions" / "C" / "c.lgi").write_text("")
+            self.assertEqual(cc.programs(root), {"applications/A/p.lgi", "contributions/C/c.lgi"})
+
+    def test_robot_upper_case_variant_has_its_original_name(self):
+        progs = cc.programs(rt.ELAN3)
+        self.assertIn("applications/Robot/Nim.lgi", progs)
+        self.assertIn("applications/Robot/nim.lgi", progs)
+        self.assertNotIn("applications/Robot/x-case-Nim.lgi", progs)
 
 
 if __name__ == "__main__":
