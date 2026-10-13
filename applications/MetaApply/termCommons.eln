@@ -1,0 +1,411 @@
+module termCommons[Fss,Vars]
+
+/*
+   This module defines notions common to all first-order terms.
+   Terms built w.r.t. some concrete signatures are then defined by
+   modules 'termV' for variables and 'termF' for terms built on
+   functional symbols, both parametrized by the corresponding
+   signatures.  This choice (which is not unique) allows in particular
+   an easy description of terms built on constructors and defined
+   operators.
+*/
+
+import global	eq[term] eq[variable] substitution list[list[int]] list[term];
+       local	int bool identifier list[int] list[variable] list[identifier] 
+		Fss Vars pair[identifier,int] list[pair[identifier,int]];
+end
+
+
+sort variable term;
+end
+
+
+operators global
+
+/*--- term ---*/
+
+  var(@)       		: ( int ) variable;
+  @            		: ( variable ) term		pri 1000;
+
+  head(@)		: ( term ) identifier;
+  @-th subterm(@) 	: ( int term ) term;
+  isvar(@)              : ( term ) bool;
+  nvocc(@)              : ( term ) list[int];
+
+  @ at @                : ( term list[int] ) term;
+  @[@] at @             : ( term term list[int] ) term;
+
+  rename_subst(@,@)     : ( list[variable] int ) substitution;
+
+  /* New functions */
+  
+  /* list of non variable positions of a term */
+  lnonvarpos(@,@)	: (term position:list[int]) list[list[int]];
+  lnonvarpos(@)		: (term) list[list[int]];	
+
+  /* Given a term and a list of its subterms, this function gives the list of */
+  /* position of this subterms */
+  listpos3(@,@,@)		: (term term list[int]) list[list[int]];
+  listpos2(@,@)			: (term term)	list[list[int]];
+  listpos1(@,@)			: (term list[term]) list[list[int]];
+
+  /* Give the first position of a term in a term */
+  firstposition(@,@)		: (term term)	list[int];
+
+  /* vocc returns the list of all variables positions in the given */
+  /* term */
+  vocc(@)		: ( term ) list[list[int]];
+
+  /* isvarpos tests if a position is a variable position */
+  isvarpos(@,@)		: (term list[int]) bool;
+
+  /* Auxilliary function used for vocc */
+  /* list of variables positions from a given position */
+  /* lvocc(X,p) => p and lvocc(f(x1,...,xn),p) => lvocc(x1,p.1.nil) @ ... */
+  /* lvocc(xn,p.n.nil) @ nil */
+  /* For example, lvocc(g(f(x,y)),nil) = lvocc(f(x,y),1.nil) @ nil */
+  /* = lvocc(x,1.1.nil) @  lvocc(y,1.2.nil) @ nil ... */
+  lvocc(@,@)		: ( term position:list[int]) list[list[int]];
+
+  /* size of a term in the number of symbols and variables */
+   size(@)		: (term) int;
+
+/*--- termF ---*/
+
+	// This creates from the user specification the actual 
+	// rank for operators d of arity zero (the constants)
+  FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+  SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS) 
+	AND N:=()second(SS) ANDIF N==0 :{
+      F()     	: term;
+      F	: term				alias F():;
+    }
+
+	// From the user specification, this creates the actual
+	// rank for non constant operators
+FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS) 
+	AND N:=()second(SS) ANDIF N > 0 :{
+
+     F({,@}~N) 	: ({term}~N)term;
+
+     F({@,}~N)		: ({term}~N)term 	alias F({,@}~N):;
+     F(,{@,}~N)	: ({term}~N)term 	alias F({,@}~N):;
+     F(@ {,@}~(N-1))	:({term}~N) term 	alias F({,@}~N):;
+
+    }
+
+/*--- termV ---*/
+
+    FOR EACH SS:identifier SUCH THAT SS:=(listExtract) elem(Vars) :{
+      SS     : variable;
+    }
+    varlist_Vars	: list[variable];
+    varnum_Vars         : int;
+end
+
+
+stratop
+  global
+   chooseOccurence	: <list[int]>		builtin;
+end
+
+
+/*--- termV ---*/
+
+rules for list[variable]
+global
+  [] varlist_Vars => 
+  FOR EACH SS:identifier SUCH THAT SS:=(listExtract) elem(Vars) :{ SS.} nil
+  end
+end
+
+
+FOR EACH N:int SUCH THAT 
+	N:=() size_of_variable_list(FOR EACH SS:identifier 
+				    SUCH THAT SS:=(listExtract) elem(Vars) 
+					:{ SS.} nil ) 
+:{
+rules for int 
+global
+  [] varnum_Vars => N end
+end
+}
+
+
+/* --- termF ---*/
+
+FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS) 
+	AND N:=()second(SS) ANDIF N > 0 :{
+  rules for term
+   t_1,...,t_N : term;
+  global
+
+   { [] I-th subterm(F(t_1,...,t_N))   => t_I		end
+   }_I=1...N
+
+   rules for identifier
+   global
+     [] head(F(t_1,...,t_N)) => F end
+   end
+
+   rules for list[int]
+    oocc:list[int];
+   local
+   { [inOccRule] nvocc(F(t_1,...,t_N))	=> J.oocc 
+		where oocc:=(chooseOccurence) nvocc(t_J)
+      end
+   }_J=1...N
+   end
+
+  end
+}
+
+
+FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS) 
+	AND N:=()second(SS) :{
+   rules for identifier
+    t_1,...,t_N : term;
+   global  
+     [] head(F(t_1,...,t_N)) => F end
+   end
+}
+
+
+FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS) 
+	AND N:=()second(SS) ANDIF N != 0 :{
+  rules for term
+   t_1,...,t_N : term;
+	  $s	: term;
+	  l	: list[int];
+  global
+  { [] F(t_1,...,t_N)[$s] at I.l => F(t_1,...,t_(I-1),t_I[$s] at l,t_(I+1),...,t_N)
+    end
+  }_I=1...N
+  end
+}
+
+
+/*--- term ---*/
+
+rules for term
+ t,s:term;  i:int;  l:list[int];
+global
+  [] t at nil   	=> t				end
+  [] t at i.l		=> i-th subterm(t) at l		end
+  [] t[s] at nil        => s				end
+end
+
+
+rules for bool
+	v:variable;
+	t:term;
+global
+  [] isvar($v)   => true				end
+  [] isvar($t)   => false				end
+end
+
+
+rules for substitution
+ i:int; vn:variable; vl:list[variable];
+global
+  [] rename_subst(nil,i)     => identity			    end
+  [] rename_subst(vn.vl , i) => vn->var(i) o rename_subst(vl , i+1) end
+end
+
+
+rules for list[int]
+ t:term;
+local
+  [topOccRule]  nvocc(t)          => nil	if not isvar(t)	    end
+end
+
+
+rules for identifier
+ x:variable;
+global
+  [] head($x)	=> var			end
+end
+
+
+/* vocc */
+
+rules for list[list[int]]
+	t : term;
+global
+	[] vocc(t)	=> lvocc(t,nil)
+	end
+end
+
+
+rules for list[list[int]]
+	t : term;
+global
+	[] lnonvarpos(t)	=> lnonvarpos(t,nil)
+	end
+end
+
+
+rules for list[list[int]]
+	t1,t2 : term;
+global
+	[] listpos2(t1,t2)	=> listpos3(t1,t2,nil)
+	end
+end
+
+
+/* isvarpos */
+
+rules for bool
+	t : term;
+	p : list[int];
+global
+	[] isvarpos(t,p)=> isvar(t at p)
+	end
+end
+
+
+/* lvocc */
+/* + = append associatif left */
+
+FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS) 
+AND N:=()second(SS) :{
+rules for list[list[int]]
+	t_1,...,t_N : term;
+	p, p1 : list[int];
+global
+	[] lvocc(F(t_1,...,t_N),p) => 
+		{lvocc(t_I,append(p,I.nil)) + }_I=1...N nil
+	end
+end
+}
+
+
+
+FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS) 
+AND N:=()second(SS) :{
+rules for list[list[int]]
+	t_1,...,t_N : term;
+	p, p1 : list[int];
+	l1: list[list[int]];
+global
+ 	[] lnonvarpos(F(t_1,...,t_N),p) => p.l1
+		where l1 := (){lnonvarpos(t_I,append(p,I.nil)) + }_I=1...N nil
+	end 
+end
+}
+
+
+rules for list[list[int]]
+	t, t1 : term;
+	p : list[int];
+global
+	[] listpos3(t,t,p)	=> p.nil
+	end
+end
+
+FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS) 
+AND N:=()second(SS) :{
+rules for list[list[int]]
+	t_1,...,t_N : term;
+	p, p1 : list[int];
+	l1: list[list[int]];
+	t : term;
+global
+ 	[] listpos3(F(t_1,...,t_N),t,p) => l1
+		where l1 := (){listpos3(t_I,t,append(p,I.nil)) + }_I=1...N nil
+	end 
+end
+}
+
+
+rules for list[int]
+	t1, t2	: term;
+global
+	[] firstposition(t1,t2)	=> 1-th elem(listpos1(t1,t2.nil))
+	end
+end
+
+
+rules for list[list[int]]
+	X : variable;
+	p : list[int];
+	i : int;
+global
+	[] lvocc(X,p)	=> p.nil
+	end
+
+	[] lvocc(var(i),p)	=> p.nil
+	end
+end
+
+
+rules for list[list[int]]
+	X : variable;
+	p : list[int];
+	i : int;
+global
+	[] lnonvarpos(X,p)	=> nil
+	end
+
+	[] lnonvarpos(var(i),p)	=> nil
+	end
+end
+
+
+rules for list[list[int]]
+	t,t1 : term;
+	p : list[int];
+global
+	[] listpos3(t,t1,p)	=> nil
+	end
+end
+
+
+rules for list[list[int]]
+	t, t1 	: term;
+	lt	: list[term];
+global
+	[] listpos1(t,nil)	=> nil
+	end
+
+	[] listpos1(t,t1.lt)	=> listpos2(t,t1) + listpos1(t,lt)
+	end
+end
+
+
+rules for int
+	X : variable;
+global
+  [] size(X) => 2
+  end
+end
+
+
+  FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+  SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS) 
+        AND N:=()second(SS) :{
+  rules for int
+  
+	t_1,...,t_N : term;
+	m : int;
+  global
+    [] size(F(t_1,...,t_N)) => {size(t_I)+}_I=1...N 1
+    end
+	end
+}
+
+strategies for list[int]
+implicit
+ [.] chooseOccurence 	=> dk(topOccRule || inOccRule)	end
+end
+
+end
+
+

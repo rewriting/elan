@@ -1,0 +1,23 @@
+LPL combiRCF description
+
+  specification description
+
+    part Vars	of sort list[identifier]
+	 	import sigSyntax
+    part Ops1   of sort list[pair[identifier,int]]
+                import sigSyntax
+    part Ops2   of sort list[pair[identifier,int]]
+                import sigSyntax
+     
+  end
+
+  query 	of sort eqSystem
+         	result of sort eqSystem
+	 	import combiRCF[Vars,Ops1,Ops2] bool eqSystem 
+                        combiSystem
+			
+         	start with (combieqSysstrat) query 
+
+
+end
+

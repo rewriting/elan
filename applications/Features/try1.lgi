@@ -1,0 +1,13 @@
+LPL try1 description
+
+   query of sort  	Foo
+   result of sort 	Foo
+   import 		try1
+   start with 		() f(a)
+
+end
+
+
+
+
+

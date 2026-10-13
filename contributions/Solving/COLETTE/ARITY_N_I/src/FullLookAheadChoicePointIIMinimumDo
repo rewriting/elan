@@ -1,0 +1,273 @@
+module FullLookAheadChoicePointIIMinimumDomain[Variables,Type,Values]
+
+import
+global
+	LocalConsistencyStrategies[Variables,Type,Values]
+	EnumerationRules[Variables,Type,Values]
+	;
+end
+
+stratop
+global
+	FLAChoicePointIIMinimumDomainFirstToLastAll  		: < csp -> csp >	bs;
+	FLAChoicePointIIMinimumDomainFirstToLastOne  		: < csp -> csp >	bs;
+	FLAChoicePointIIMinimumDomainLastToFirstAll  		: < csp -> csp >	bs;
+	FLAChoicePointIIMinimumDomainLastToFirstOne  		: < csp -> csp >	bs;
+	FLAChoicePointIIMinimumDomainSplitFirstToLastAll  	: < csp -> csp >	bs;
+	FLAChoicePointIIMinimumDomainSplitFirstToLastOne  	: < csp -> csp >	bs;
+	FLAChoicePointIIMinimumDomainSplitLastToFirstAll  	: < csp -> csp >	bs;
+	FLAChoicePointIIMinimumDomainSplitLastToFirstOne  	: < csp -> csp >	bs;
+end
+
+
+strategies for csp
+implicit
+
+/* Strategy		: Full Lookahead with Choice Point and Enumeration	*/
+/* Variable selection	: Minimum Domain					*/
+/* Value selection	: Value enumeration first to last			*/
+/* Number of solutions	: All							*/
+
+[] FLAChoicePointIIMinimumDomainFirstToLastAll =>
+LocalConsistencyForEC;
+repeat* (
+	dk (PostElementaryDisjunct);
+	LocalConsistencyForEC;
+	first one (GetVarWithMinimumDomain);
+	dk (iterate* (EliminateFirstValueOfDomain));
+	first one (InstantiateFirstValueOfDomain);
+	first one (ExtractConstraintsOnEqualityVar, id);
+	first one (Elimination, id);
+	LocalConsistencyForEC
+	);
+first one (GetSolutionCSP)
+end
+
+
+/* Strategy		: Full Lookahead with Choice Point and Enumeration	*/
+/* Variable selection	: Minimum Domain					*/
+/* Value selection	: Value enumeration first to last			*/
+/* Number of solutions	: First							*/
+
+[] FLAChoicePointIIMinimumDomainFirstToLastOne =>
+first one (FLAChoicePointIIMinimumDomainFirstToLastAll)
+end
+
+
+/* Strategy		: Full Lookahead with Choice Point and Enumeration	*/
+/* Variable selection	: Minimum Domain					*/
+/* Value selection	: Value enumeration last to first			*/
+/* Number of solutions	: All							*/
+
+[] FLAChoicePointIIMinimumDomainLastToFirstAll =>
+LocalConsistencyForEC;
+repeat* (
+	dk (PostElementaryDisjunct);
+	LocalConsistencyForEC;
+	first one (GetVarWithMinimumDomain);
+	dk (iterate* (EliminateLastValueOfDomain));
+	first one (InstantiateLastValueOfDomain);
+	first one (ExtractConstraintsOnEqualityVar, id);
+	first one (Elimination, id);
+	LocalConsistencyForEC
+	);
+first one (GetSolutionCSP)
+end
+
+
+/* Strategy		: Full Lookahead with Choice Point and Enumeration	*/
+/* Variable selection	: Minimum Domain					*/
+/* Value selection	: Value enumeration last to first			*/
+/* Number of solutions	: First							*/
+
+[] FLAChoicePointIIMinimumDomainLastToFirstOne =>
+first one (FLAChoicePointIIMinimumDomainLastToFirstAll)
+end
+
+
+/* Strategy		: Full Lookahead with Choice Point and Enumeration	*/
+/* Variable selection	: Minimum Domain					*/
+/* Value selection	: Split domain first to last				*/
+/* Number of solutions	: All 							*/
+
+[] FLAChoicePointIIMinimumDomainSplitFirstToLastAll =>
+LocalConsistencyForEC;
+repeat* (
+	dk (PostElementaryDisjunct);
+	LocalConsistencyForEC;
+	first one (GetVarWithMinimumDomain);
+	dk (first one (SplitDomainFirstMiddle), first one (SplitDomainSecondMiddle));
+	first one (first one (ExtractConstraintsOnEqualityVar);
+		   first one (Elimination, id);
+		   LocalConsistencyForEC
+		   ,
+		   first one (ExtractConstraintsOnDomainVar);
+		   LocalConsistencyForEC
+		   ,
+		   id)
+	);
+first one (GetSolutionCSP)
+end
+
+
+/* Strategy		: Full Lookahead with Choice Point and Enumeration	*/
+/* Variable selection	: Minimum Domain					*/
+/* Value selection	: Split domain first to last				*/
+/* Number of solutions	: First							*/
+
+[] FLAChoicePointIIMinimumDomainSplitFirstToLastOne =>
+first one (FLAChoicePointIIMinimumDomainSplitFirstToLastAll)
+end
+
+
+/* Strategy		: Full Lookahead with Choice Point and Enumeration	*/
+/* Variable selection	: Minimum Domain					*/
+/* Value selection	: Split domain last to first				*/
+/* Number of solutions	: All 							*/
+
+[] FLAChoicePointIIMinimumDomainSplitLastToFirstAll =>
+LocalConsistencyForEC;
+repeat* (
+	dk (PostElementaryDisjunct);
+	LocalConsistencyForEC;
+	first one (GetVarWithMinimumDomain);
+	dk (first one (SplitDomainSecondMiddle), first one (SplitDomainFirstMiddle));
+	first one (first one (ExtractConstraintsOnEqualityVar);
+		   first one (Elimination, id);
+		   LocalConsistencyForEC
+		   ,
+		   first one (ExtractConstraintsOnDomainVar);
+		   LocalConsistencyForEC
+		   ,
+		   id)
+	);
+first one (GetSolutionCSP)
+end
+
+
+/* Strategy		: Full Lookahead with Choice Point and Enumeration	*/
+/* Variable selection	: Minimum Domain					*/
+/* Value selection	: Split domain last to first				*/
+/* Number of solutions	: First							*/
+
+[] FLAChoicePointIIMinimumDomainSplitLastToFirstOne =>
+first one (FLAChoicePointIIMinimumDomainSplitLastToFirstAll)
+end
+
+end
+
+
+rules for csop
+
+	x, y				: var;
+	ub, lb, newub, newlb, middle	: Type;
+	P, Q				: csp;
+	lmc, lec, EC, DC, store		: list[constraint];
+	l				: list[constraint];
+
+global
+
+[FLAChoicePointIIMinimumDomainFirstToLastOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[Q,x,lb,ub]
+	where	Q :=(FLAChoicePointIIMinimumDomainFirstToLastOne)P
+end
+
+[FLAChoicePointIIMinimumDomainLastToFirstOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[Q,x,lb,ub]
+	where	Q :=(FLAChoicePointIIMinimumDomainLastToFirstOne)P
+end
+
+[FLAChoicePointIIMinimumDomainSplitFirstToLastOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[Q,x,lb,ub]
+	where	Q :=(FLAChoicePointIIMinimumDomainSplitFirstToLastOne)P
+end
+
+[FLAChoicePointIIMinimumDomainSplitLastToFirstOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[Q,x,lb,ub]
+	where	Q :=(FLAChoicePointIIMinimumDomainSplitLastToFirstOne)P
+end
+
+[GetUBFLAChoicePointIIMinimumDomainFirstToLastOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[P,x,lb,newub]
+	where	Q :=(FLAChoicePointIIMinimumDomainFirstToLastOne)P
+	if	Q != Unsatisfiable
+	where	(list[constraint]) y = newub.l := ()GetVarInHead(x,GetLEC(Q),nil)
+end
+
+[GetUBFLAChoicePointIIMinimumDomainLastToFirstOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[P,x,lb,newub]
+	where	Q :=(FLAChoicePointIIMinimumDomainLastToFirstOne)P
+	if	Q != Unsatisfiable
+	where	(list[constraint]) y = newub.l := ()GetVarInHead(x,GetLEC(Q),nil)
+end
+
+[GetUBFLAChoicePointIIMinimumDomainSplitFirstToLastOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[P,x,lb,newub]
+	where	Q :=(FLAChoicePointIIMinimumDomainSplitFirstToLastOne)P
+	if	Q != Unsatisfiable
+	where	(list[constraint]) y = newub.l := ()GetVarInHead(x,GetLEC(Q),nil)
+end
+
+[GetUBFLAChoicePointIIMinimumDomainSplitLastToFirstOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[P,x,lb,newub]
+	where	Q :=(FLAChoicePointIIMinimumDomainSplitLastToFirstOne)P
+	if	Q != Unsatisfiable
+	where	(list[constraint]) y = newub.l := ()GetVarInHead(x,GetLEC(Q),nil)
+end
+
+[GetLBFLAChoicePointIIMinimumDomainFirstToLastOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[P,x,newlb,ub]
+	where	Q :=(FLAChoicePointIIMinimumDomainFirstToLastOne)P
+	if	Q != Unsatisfiable
+	where	(list[constraint]) y = newlb.l := ()GetVarInHead(x,GetLEC(Q),nil)
+end
+
+[GetLBFLAChoicePointIIMinimumDomainLastToFirstOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[P,x,newlb,ub]
+	where	Q :=(FLAChoicePointIIMinimumDomainLastToFirstOne)P
+	if	Q != Unsatisfiable
+	where	(list[constraint]) y = newlb.l := ()GetVarInHead(x,GetLEC(Q),nil)
+end
+
+[GetLBFLAChoicePointIIMinimumDomainSplitFirstToLastOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[P,x,newlb,ub]
+	where	Q :=(FLAChoicePointIIMinimumDomainSplitFirstToLastOne)P
+	if	Q != Unsatisfiable
+	where	(list[constraint]) y = newlb.l := ()GetVarInHead(x,GetLEC(Q),nil)
+end
+
+[GetLBFLAChoicePointIIMinimumDomainSplitLastToFirstOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[P,x,newlb,ub]
+	where	Q :=(FLAChoicePointIIMinimumDomainSplitLastToFirstOne)P
+	if	Q != Unsatisfiable
+	where	(list[constraint]) y = newlb.l := ()GetVarInHead(x,GetLEC(Q),nil)
+end
+
+end
+
+
+end

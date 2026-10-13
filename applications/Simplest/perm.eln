@@ -1,0 +1,40 @@
+module perm
+import global int list[int] bool;
+op
+global
+
+  i(@,@,@)	: ( int list[int] list[int])list[int];
+
+
+end
+
+
+rules for list[int]
+          e,e1,e2     : int;
+	y,z,z1,z2 : list[int];
+bodies
+
+  [i1] i(e,y,z)		=> y @ e.z			end
+  [i2] i(e1,y,e2.z)	=> i(e1,y @ e2.nil,z)		end
+
+  [p1]	nil		=> nil				                end
+  [p2]  e.z1		=> i(e,nil,z2)     where z2:=(permute) z1	end
+  [fail] y		=> y 		if false			end
+
+end
+
+strategy permute
+  dk(p1 || p2) ;
+  repeat* (   dk(i1 || i2) )
+end
+
+strategy permute_fail
+  dk(p1 || p2) ;
+  repeat* (   dk(i1 || i2)  ) ;
+  dc(fail)
+end
+
+end
+
+
+

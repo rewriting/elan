@@ -1,0 +1,265 @@
+module FullLookAheadChoiceVar[Variables,Type,Values]
+
+import
+global
+	LocalConsistencyStrategies[Variables,Type,Values]
+	EnumerationRules[Variables,Type,Values]
+	;
+end
+
+stratop
+global
+	FLAChoiceVarFirstToLastAll      		: < csp -> csp >	bs;
+	FLAChoiceVarFirstToLastOne      		: < csp -> csp >	bs;
+	FLAChoiceVarLastToFirstAll      		: < csp -> csp >	bs;
+	FLAChoiceVarLastToFirstOne      		: < csp -> csp >	bs;
+	FLAChoiceVarSplitFirstToLastAll  		: < csp -> csp >	bs;
+	FLAChoiceVarSplitLastToFirstAll  		: < csp -> csp >	bs;
+	FLAChoiceVarSplitFirstToLastOne  		: < csp -> csp >	bs;
+	FLAChoiceVarSplitLastToFirstOne  		: < csp -> csp >	bs;
+end
+
+
+strategies for csp
+implicit
+
+/* Strategy		: Full Lookahead			*/
+/* Variable selection	: Specified by the user			*/
+/* Value selection	: Value enumeration first to last	*/
+/* Number of solutions	: All					*/
+
+[] FLAChoiceVarFirstToLastAll =>
+LocalConsistencyForEC;
+repeat* (
+	first one (GetVarSpecifiedByUser);
+	dk (iterate* (EliminateFirstValueOfDomain));
+	first one (InstantiateFirstValueOfDomain);
+	first one (ExtractConstraintsOnEqualityVar, id);
+	first one (Elimination, id);
+	LocalConsistencyForEC
+	);
+first one (GetSolutionCSP)
+end
+
+
+/* Strategy		: Full Lookahead			*/
+/* Variable selection	: Specified by the user			*/
+/* Value selection	: Value enumeration first to last	*/
+/* Number of solutions	: First					*/
+
+[] FLAChoiceVarFirstToLastOne =>
+first one (FLAChoiceVarFirstToLastAll)
+end
+
+
+/* Strategy		: Full Lookahead			*/
+/* Variable selection	: Specified by the user			*/
+/* Value selection	: Value enumeration last to first	*/
+/* Number of solutions	: All					*/
+
+[] FLAChoiceVarLastToFirstAll =>
+LocalConsistencyForEC;
+repeat* (
+	first one (GetVarSpecifiedByUser);
+	dk (iterate* (EliminateLastValueOfDomain));
+	first one (InstantiateLastValueOfDomain);
+	first one (ExtractConstraintsOnEqualityVar, id);
+	first one (Elimination, id);
+	LocalConsistencyForEC
+	);
+first one (GetSolutionCSP)
+end
+
+
+/* Strategy		: Full Lookahead			*/
+/* Variable selection	: Specified by the user			*/
+/* Value selection	: Value enumeration last to first	*/
+/* Number of solutions	: First					*/
+
+[] FLAChoiceVarLastToFirstOne =>
+first one (FLAChoiceVarLastToFirstAll)
+end
+
+
+/* Strategy		: Full Lookahead			*/
+/* Variable selection	: Specified by the user			*/
+/* Value selection	: Split domain first to last		*/
+/* Number of solutions	: All 					*/
+
+[] FLAChoiceVarSplitFirstToLastAll =>
+LocalConsistencyForEC;
+repeat* (
+	first one (GetVarSpecifiedByUser);
+	dk (first one (SplitDomainFirstMiddle), first one(SplitDomainSecondMiddle));
+	first one (first one (ExtractConstraintsOnEqualityVar);
+		   first one (Elimination, id);
+		   LocalConsistencyForEC
+		   ,
+		   first one (ExtractConstraintsOnDomainVar);
+		   LocalConsistencyForEC
+		   ,
+		   id)
+	);
+first one (GetSolutionCSP)
+end
+
+
+/* Strategy		: Full Lookahead			*/
+/* Variable selection	: Specified by the user			*/
+/* Value selection	: Split domain first to last		*/
+/* Number of solutions	: First					*/
+
+[] FLAChoiceVarSplitFirstToLastOne =>
+first one (FLAChoiceVarSplitFirstToLastAll)
+end
+
+
+/* Strategy		: Full Lookahead			*/
+/* Variable selection	: Specified by the user			*/
+/* Value selection	: Split domain last to first		*/
+/* Number of solutions	: All 					*/
+
+[] FLAChoiceVarSplitLastToFirstAll =>
+LocalConsistencyForEC;
+repeat* (
+	first one (GetVarSpecifiedByUser);
+	dk (first one (SplitDomainFirstMiddle), first one(SplitDomainSecondMiddle));
+	first one (first one (ExtractConstraintsOnEqualityVar);
+		   first one (Elimination, id);
+		   LocalConsistencyForEC
+		   ,
+		   first one (ExtractConstraintsOnDomainVar);
+		   LocalConsistencyForEC
+		   ,
+		   id)
+	);
+first one (GetSolutionCSP)
+end
+
+
+/* Strategy		: Full Lookahead			*/
+/* Variable selection	: Specified by the user			*/
+/* Value selection	: Split domain last to first		*/
+/* Number of solutions	: First					*/
+
+[] FLAChoiceVarSplitLastToFirstOne =>
+first one (FLAChoiceVarSplitLastToFirstAll)
+end
+
+end
+
+
+rules for csop
+
+	x, y				: var;
+	ub, lb, newub, newlb, middle	: Type;
+	P, Q				: csp;
+	lmc, lec, EC, DC, store		: list[constraint];
+	l				: list[constraint];
+
+global
+
+[FLAChoiceVarFirstToLastOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[Q,x,lb,ub]
+	where	Q :=(FLAChoiceVarFirstToLastOne)P
+end
+
+[FLAChoiceVarLastToFirstOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[Q,x,lb,ub]
+	where	Q :=(FLAChoiceVarLastToFirstOne)P
+end
+
+[FLAChoiceVarSplitFirstToLastOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[Q,x,lb,ub]
+	where	Q :=(FLAChoiceVarSplitFirstToLastOne)P
+end
+
+[FLAChoiceVarSplitLastToFirstOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[Q,x,lb,ub]
+	where	Q :=(FLAChoiceVarSplitLastToFirstOne)P
+end
+
+[GetUBFLAChoiceVarFirstToLastOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[P,x,lb,newub]
+	where	Q :=(FLAChoiceVarFirstToLastOne)P
+	if	Q != Unsatisfiable
+	where	(list[constraint]) y = newub.l := ()GetVarInHead(x,GetLEC(Q),nil)
+end
+
+[GetUBFLAChoiceVarLastToFirstOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[P,x,lb,newub]
+	where	Q :=(FLAChoiceVarLastToFirstOne)P
+	if	Q != Unsatisfiable
+	where	(list[constraint]) y = newub.l := ()GetVarInHead(x,GetLEC(Q),nil)
+end
+
+[GetUBFLAChoiceVarSplitFirstToLastOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[P,x,lb,newub]
+	where	Q :=(FLAChoiceVarSplitFirstToLastOne)P
+	if	Q != Unsatisfiable
+	where	(list[constraint]) y = newub.l := ()GetVarInHead(x,GetLEC(Q),nil)
+end
+
+[GetUBFLAChoiceVarSplitLastToFirstOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[P,x,lb,newub]
+	where	Q :=(FLAChoiceVarSplitLastToFirstOne)P
+	if	Q != Unsatisfiable
+	where	(list[constraint]) y = newub.l := ()GetVarInHead(x,GetLEC(Q),nil)
+end
+
+[GetLBFLAChoiceVarFirstToLastOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[P,x,newlb,ub]
+	where	Q :=(FLAChoiceVarFirstToLastOne)P
+	if	Q != Unsatisfiable
+	where	(list[constraint]) y = newlb.l := ()GetVarInHead(x,GetLEC(Q),nil)
+end
+
+[GetLBFLAChoiceVarLastToFirstOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[P,x,newlb,ub]
+	where	Q :=(FLAChoiceVarLastToFirstOne)P
+	if	Q != Unsatisfiable
+	where	(list[constraint]) y = newlb.l := ()GetVarInHead(x,GetLEC(Q),nil)
+end
+
+[GetLBFLAChoiceVarSplitFirstToLastOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[P,x,newlb,ub]
+	where	Q :=(FLAChoiceVarSplitFirstToLastOne)P
+	if	Q != Unsatisfiable
+	where	(list[constraint]) y = newlb.l := ()GetVarInHead(x,GetLEC(Q),nil)
+end
+
+[GetLBFLAChoiceVarSplitLastToFirstOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[P,x,newlb,ub]
+	where	Q :=(FLAChoiceVarSplitLastToFirstOne)P
+	if	Q != Unsatisfiable
+	where	(list[constraint]) y = newlb.l := ()GetVarInHead(x,GetLEC(Q),nil)
+end
+
+end
+
+
+end

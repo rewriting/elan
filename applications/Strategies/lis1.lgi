@@ -1,0 +1,18 @@
+LPL lis1 description
+
+query		of sort  	Any
+		result of sort 	Any
+		import 	lis1_int
+		start with 	(eval)query
+//		start with 	[lis(swap)]query
+//		start with 	[los(swap)]query
+
+/*
+[lis(swap)](tree[int])node(node(leaf(1),2,leaf(3)),4,node(leaf(5),6,empty)) end
+[lis(swapo)](tree[int])node(node(leaf(1),2,leaf(3)),4,node(leaf(5),6,empty))end
+[los(swap)](tree[int])node(node(leaf(1),2,leaf(3)),4,node(leaf(5),6,empty)) end
+[los(swapo)](tree[int])node(node(leaf(1),2,leaf(3)),4,node(leaf(5),6,empty))end
+*/
+
+end
+

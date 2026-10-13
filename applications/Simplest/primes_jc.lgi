@@ -1,0 +1,8 @@
+LPL primes_jc description 
+
+query 		of sort list
+      result 	of sort list
+      import   	primes int
+      start with 	() primes(100)
+
+end

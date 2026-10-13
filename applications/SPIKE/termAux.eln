@@ -1,0 +1,121 @@
+//--------------------------------------------------------------------------------------
+// Auxiliary functions for terms (infix operators) -> used in execute.eln
+//--------------------------------------------------------------------------------------
+// Computes the list of variables from a term giving the position of the variable
+// in its function and the head of the function -> varTerm(f(x,ct))=[x,[f,1]]
+//--------------------------------------------------------------------------------------
+module termAux[Vars,Ars]
+
+import  global
+		termCommons[Vars,Ars]
+		pair[variable,pair[ident,int]] list[pair[variable,pair[ident,int]]]
+;end
+
+operators
+  global 
+	varTerm(@) 	: (term) list[pair[variable,pair[ident,int]]];
+	listVar(@,@,@) 	: (ident term int) list[pair[variable,pair[ident,int]]];
+end
+
+
+//--------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------
+FOR EACH SS:pair[ident,pair[int,int]]; 
+	P:ident; A:pair[int,int];
+	AL:int; AR:int
+SUCH THAT SS:=(listExtract) elem(Ars) 
+	AND P:=()first(SS)
+        AND A:=()second(SS) 
+	AND AL:=()first(A)
+        AND AR:=()second(A)  
+	ANDIF AL == 0 
+	ANDIF AR != 0 :{
+rules for list[pair[variable,pair[ident,int]]]
+   t_1,...,t_AR : term;
+   r_1,...,r_AR : list[pair[variable,pair[ident,int]]];
+global
+  [] varTerm(P(t_1,...,t_AR)) => {append(r_I,}_I=1...AR nil {)}_I=1...AR
+	{where r_I := ()listVar(P,t_I,I)}_I=1...AR
+  end
+end
+}
+/**/
+FOR EACH SS:pair[ident,pair[int,int]]; 
+	F:ident;  A:pair[int,int]; N:int; NEXT:int;
+	AL:int; AR:int
+SUCH THAT SS:=(listExtract) elem(Ars) 
+	AND F:=()first(SS) 
+	AND A:=()second(SS) 
+	AND AL:=()first(A) 
+	AND AR:=()second(A) 
+	AND NEXT:=()AL+1
+	AND N:=()AL+AR
+	ANDIF AL>0 :{
+rules for list[pair[variable,pair[ident,int]]]
+	{t_I,}_I=1...N xst : term;
+	{r_I,}_I=1...N rst : list[pair[variable,pair[ident,int]]];
+global
+  [] varTerm({t_I }_I=1...AL F {t_I }_I=NEXT...N) => 
+	{r_I @ }_I=1...N nil
+	{where r_I := ()listVar(F,t_I,I)}_I=1...N
+  end
+end
+}
+/**//*
+FOR EACH SS:pair[ident,pair[int,int]];
+        P:ident; A:pair[int,int];
+        AL:int; AR:int
+SUCH THAT SS:=(listExtract) elem(Ars)
+        AND P:=()first(SS)
+        AND A:=()second(SS)
+        AND AL:=()first(A)
+        AND AR:=()second(A)
+        ANDIF AL == 1
+        ANDIF AR == 1 :{
+rules for list[pair[variable,pair[ident,int]]]
+   t_1,s_1 : term;
+   r_1,p_1 : list[pair[variable,pair[ident,int]]];
+global
+  [] varTerm(t_1 P s_1) =>
+        append(r_1,p_1)
+        where r_1 := ()listVar(P,t_1,1)
+        where p_1 := ()listVar(P,s_1,2)
+  end
+end
+}
+*/
+
+FOR EACH SS:pair[ident,pair[int,int]]; 
+	P:ident; A:pair[int,int];
+	AL:int; AR:int
+SUCH THAT SS:=(listExtract) elem(Ars) 
+	AND P:=()first(SS)
+        AND A:=()second(SS) 
+	AND AL:=()first(A)
+        AND AR:=()second(A)  
+	ANDIF AL == 0 
+	ANDIF AR == 0 :{
+rules for list[pair[variable,pair[ident,int]]]
+global
+  [] varTerm(P()) 	=> nil		end
+  [] varTerm(P) 	=> nil		end
+
+end
+}
+
+//--------------------------------------------------------------------------------------
+rules for list[pair[variable,pair[ident,int]]]
+	P:ident;
+	xx:variable;
+	nn:int;
+	t:term;
+global
+  [] listVar(P,xx,nn) => [xx,[P,nn]].nil
+  end
+  [] listVar(P,t,nn) => varTerm(t)
+  end
+end
+
+//--------------------------------------------------------------------------------------
+
+end

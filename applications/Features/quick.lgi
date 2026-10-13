@@ -1,0 +1,26 @@
+LPL quick description
+
+/*
+   query of sort  	list[int]
+   result of sort 	pair
+   import 		quick
+   start with 		(fou)pivot(5,query,nil,nil)
+*/
+   query of sort  	list[int]
+   result of sort 	list[int]
+   import 		quick
+   start with 		()sort(query)
+/*
+           4.5.6.7.8.9.8.7.6.5.4.3.2.1.2.3.4.5.6.7.
+           4.5.6.7.8.9.8.7.6.5.4.3.2.1.2.3.4.5.6.7.
+           4.5.6.7.8.9.8.7.6.5.4.3.2.1.2.3.4.5.6.7.
+           4.5.6.7.8.9.8.7.6.5.4.3.2.1.2.3.4.5.6.7.
+           4.5.6.7.8.9.8.7.6.5.4.3.2.1.2.3.4.5.6.7.
+           4.5.6.7.8.9.8.7.6.5.4.3.2.1.2.3.4.5.6.7.nil end
+*/             
+//append(query,1.2.3.nil)
+
+end
+
+
+

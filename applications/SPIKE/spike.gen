@@ -1,0 +1,52 @@
+LPL spike description
+
+  specification description
+
+    part vars	of sort list[ident]
+	 	import sigSyntax
+    part ops	of sort list[pair[ident,int]]
+	 	import sigSyntax
+    part ars	of sort list[pair[ident,pair[int,int]]]
+	 	import arSyntax
+//----------------------------------------------------------------------------------
+    part sorts	of sort list[ident]
+	 	import sigSyntax
+
+    part constructors 	of sort list[pair[ident,pair[list[ident],ident]]]
+			import funSyntax
+
+    part functions 	of sort list[pair[ident,pair[list[ident],ident]]]
+			import funSyntax
+
+    part axioms 	of sort list[pair[list[pair[term,term]],list[pair[term,term]]]]
+	 		import axmSyntax[ops,vars,ars]
+
+    part E	of sort list[pair[list[pair[term,term]],list[pair[term,term]]]]
+		import 	axmSyntax[ops,vars,ars]
+
+    part less	of sort list[list[ident]]
+	 	import lessSyntax
+
+    part equiv	of sort list[list[ident]]
+	 	import lessSyntax
+
+    part status	of sort list[pair[ident,ident]]
+	 	import statSyntax
+
+  end
+//----------------------------------------------------------------------------------
+ 
+  query 	of sort  	  list[substitution] //bool //int //Rez //eqSystem //Rez 
+         	result of sort 	  list[substitution] //bool //int //Rez //eqSystem //Rez 
+	 	import 
+			spike[vars,ops,ars,sorts,constructors,functions,axioms,E,less,equiv,status]
+         	//start with (match) query
+         	//start with (mainStrat) Start
+         	//start with (mainStrat) query
+         	//start with (teste) query
+         	//start with (VchooseOccurence) query
+         	start with () query
+         	//start with (indyStrat) query
+
+//list[pair[ident,variable]] //list[pair[equation, clause]] //list[term] //list[variable] //pair[bool,substitution] //bool //eqaux //Rez //equation//
+end

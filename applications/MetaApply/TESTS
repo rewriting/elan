@@ -1,0 +1,2 @@
+# tests of MetaApply (from legacy/elan3 tst_all; format: tests/apps/README.md)
+itest compbasic2 group kbgroup1c kbgroup1c

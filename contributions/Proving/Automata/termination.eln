@@ -1,0 +1,135 @@
+module termination[Fss, Vars, TRS1, TRS2]
+import  global pair[bool, automaton];
+	local 
+	TRS1 TRS2
+	aut_name automaton[Fss] tools[Fss] nf_automaton[Fss, Vars]
+	rewriting[Fss, Vars];
+end	
+	
+
+operators
+global
+	start		: pair[bool, automaton];
+	start(@)	: (automaton) pair[bool, automaton];
+local	
+	step(@, @, @, @)	: (automaton automaton automaton automaton) pair[bool, automaton];
+	last(@)			: (automaton) pair[bool, automaton];
+	
+end
+
+stratop global
+  termination_proof_strat2 : <pair[bool, automaton]> builtin;
+  termination_proof_strat : <pair[bool, automaton]> builtin;
+  end_proof_strat : <pair[bool, automaton]> builtin;
+end
+
+
+/* start et start(a): preuve de terminaison sur T(F) ou sur un automate decrivant
+un sous-ensemble des termes initiaux possibles */
+
+rules for pair[bool, automaton]
+          res: pair[bool, automaton];
+	a, a_old, afn1, afn2,res1, res2: automaton;
+	b: bool;
+global	
+
+[] start => res
+
+	where res2:= () build_nf(TRS2)
+	where res1:= () build_nf(TRS1)
+	where res:= (termination_proof_strat) step(res1, (nil, nil, nil, nil) , res1, res2)
+end
+
+[] start(a) => res
+
+	where res2:= () build_nf(TRS2)
+	where res1:= () build_nf(TRS1)
+	where res:= (termination_proof_strat2) step(a, a , res1, res2)
+end
+
+/* Suivant que l'on parte de T(F) ou de a la strategie de demonstration est
+differente...
+
+Suivent les regles appliquant l'un (TRS1) ou l'autre (TRS2) systeme jusqu'a ce 
+que l'on atteigne un poit fixe (le pas n est inclus dans n+1 a_old <= a)
+*/
+
+
+/* */
+[termination_r1] step(a, a_old, afn1, afn2) => res
+			if  a_old <= a							
+			where res:=(end_proof_strat) last(a)
+
+end
+/* */
+
+[termination_r1] step(a, a_old, afn1, afn2) => [true, a]
+			where b:= (applies_strat) (TRS1) applies on(a)			
+			if not(b) 
+end
+
+
+[termination_r2] step(a, a_old, afn1, afn2) => step(simplify(res1 inter afn1), a, afn1, afn2)
+			where res1:= () T_up(TRS1) on(a)				end
+
+
+[termination_r3] step(a, a_old, afn1, afn2) => step(a, a_old, afn1, afn2)
+			where b:= (applies_strat) (TRS2) applies on(a)
+			if not b
+end
+
+[termination_r3] step(a, a_old, afn1, afn2) => step(simplify(res1 inter afn2), a_old, afn1, afn2)
+			where res1:= () T_up(TRS2) on(a)				end
+
+
+[termination_first_r3] step(a, a_old, afn1, afn2) => [true, a]
+			where b:= (applies_strat) (TRS2) applies on(a)
+			if not(b)
+end
+
+
+[termination_first_r3] step(a, a_old, afn1, afn2) => step(simplify(res1 inter afn2), a, afn1, afn2)
+			where res1:= () T_up(TRS2) on(a)				end
+
+
+
+[end_proof_r1] last(a) => [true, a] 
+			where b:= (applies_strat) (TRS1) applies on(a)
+			if not(b)
+end
+
+
+[end_proof_r2] last(a) => [false, a] 
+			where b:= (applies_strat) (TRS1) applies on(a)
+			if b
+end
+end
+
+
+
+strategies for pair[bool, automaton]
+implicit
+  [.] termination_proof_strat2 =>
+	dc one(termination_r2);
+	dc one(termination_r3);
+	repeat*(dc one(
+			dc one(termination_r1) ,
+
+			dc one(termination_r2) ;
+			dc one(termination_r3)))
+  end
+
+  [.] termination_proof_strat => 
+	dc one(termination_first_r3);
+	repeat*(dc one(
+			dc one(termination_r1) ,
+
+			dc one(termination_r2);
+			dc one(termination_r3)))
+  end
+
+  [.] end_proof_strat => 
+	dc one(end_proof_r1 , end_proof_r2)
+  end
+end
+end

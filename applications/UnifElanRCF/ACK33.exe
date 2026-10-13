@@ -1,0 +1,899 @@
+
+	******** ELAN version test-3 (11/03/97.13:12) ********
+
+	 (c)   INRIA-Lorraine  &  CRIN,   1994, 1995, 1996       
+
+	 Options: 	+Strategies+Pem+CLang+I/Os+Built-ins+Normalise
+			+Meta+Anys+Symbs+Select+Strings+Case&Patterns
+			+Earley
+   handling module sigSyntax
+     handling module identifier
+       handling module ident
+         handling module bool
+         end of bool
+       end of ident
+       handling module eq[identifier]
+         handling module cmp[identifier]
+         end of cmp[identifier]
+       end of eq[identifier]
+     end of identifier
+     handling module int
+     end of int
+     handling module list[identifier]
+     end of list[identifier]
+     handling module pair[identifier,int]
+     end of pair[identifier,int]
+     handling module list[pair[identifier,int]]
+     end of list[pair[identifier,int]]
+   end of sigSyntax
+   handling module combiRCF[Vars,Ops1,Ops2]
+     handling module termAlien[Vars,Ops1,Ops2]
+       handling module term
+         handling module eq[term]
+           handling module cmp[term]
+           end of cmp[term]
+         end of eq[term]
+         handling module substitution
+         end of substitution
+         handling module list[int]
+         end of list[int]
+         handling module list[variable]
+         end of list[variable]
+       end of term
+       handling module varabst
+       end of varabst
+       handling module varUnif[Vars]
+       end of varUnif[Vars]
+       handling module termUnif[Ops1]
+       end of termUnif[Ops1]
+       handling module termUnif[Ops2]
+       end of termUnif[Ops2]
+       handling module purify
+       end of purify
+       handling module renvarabst
+         handling module occur[variable,list[variable]]
+         end of occur[variable,list[variable]]
+         handling module eqSystem
+           handling module applySubstOn[eqSystem]
+             handling module replace[term,eqSystem]
+             end of replace[term,eqSystem]
+           end of applySubstOn[eqSystem]
+         end of eqSystem
+       end of renvarabst
+     end of termAlien[Vars,Ops1,Ops2]
+     handling module alien[Vars,Ops1,Ops2]
+       handling module VA[Vars,Ops1,Ops2]
+       end of VA[Vars,Ops1,Ops2]
+       handling module purifcombiSystem
+         handling module combiSystem
+           handling module eq[variable]
+             handling module cmp[variable]
+             end of cmp[variable]
+           end of eq[variable]
+           handling module eq[eqSystem]
+             handling module cmp[eqSystem]
+             end of cmp[eqSystem]
+           end of eq[eqSystem]
+           handling module occur[variable,term]
+           end of occur[variable,term]
+           handling module occur[variable,eqSystem]
+           end of occur[variable,eqSystem]
+         end of combiSystem
+       end of purifcombiSystem
+     end of alien[Vars,Ops1,Ops2]
+     handling module callSolve[Vars,Ops1,Ops2]
+       handling module eqMulti
+       end of eqMulti
+     end of callSolve[Vars,Ops1,Ops2]
+   end of combiRCF[Vars,Ops1,Ops2]
+
+enter query term finished by the key word 'end':
+
+[] start with term :
+   ((((((z.1=g(f(x.11),x.12,x.13,y.1)&z.2=g(x.21,f(x.22),x.23,y.2))&z.3=g(x.31,x.32,f(x.33),y.3))&z.4=g(f(a),f(a),f(a),f(a)))&z.5=g(f(a),f(a),f(a),f(f(a))))&z.6=g(f(a),f(a),f(a),f(f(f(a)))))&f0(z.1,f0(z.2,z.3))=f0(z.4,f0(z.5,z.6)))
+
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+   (((((((((((((((((z.6=g(f(a),f(a),f(a),f(f(f(a))))&z.5=g(f(a),f(a),f(a),f(f(a))))&z.4=g(f(a),f(a),f(a),f(a)))&x.11=a)&x.22=a)&x.33=a)&y.1=f(a))&x.13=f(a))&x.12=f(a))&y.2=f(f(a)))&x.23=f(a))&x.21=f(a))&y.3=f(f(f(a))))&x.32=f(a))&x.31=f(a))&z.1=g(f(a),f(a),f(a),f(a)))&z.2=g(f(a),f(a),f(a),f(f(a))))&z.3=g(f(a),f(a),f(a),f(f(f(a)))))
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+   (((((((((((((((((z.6=g(f(a),f(a),f(a),f(f(f(a))))&z.5=g(f(a),f(a),f(a),f(f(a))))&z.4=g(f(a),f(a),f(a),f(a)))&x.11=a)&x.22=a)&x.33=a)&y.1=f(f(a)))&x.13=f(a))&x.12=f(a))&y.2=f(a))&x.23=f(a))&x.21=f(a))&y.3=f(f(f(a))))&x.32=f(a))&x.31=f(a))&z.1=g(f(a),f(a),f(a),f(f(a))))&z.2=g(f(a),f(a),f(a),f(a)))&z.3=g(f(a),f(a),f(a),f(f(f(a)))))
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+   (((((((((((((((((z.6=g(f(a),f(a),f(a),f(f(f(a))))&z.5=g(f(a),f(a),f(a),f(f(a))))&z.4=g(f(a),f(a),f(a),f(a)))&x.11=a)&x.22=a)&x.33=a)&y.1=f(a))&x.13=f(a))&x.12=f(a))&y.2=f(f(f(a))))&x.23=f(a))&x.21=f(a))&y.3=f(f(a)))&x.32=f(a))&x.31=f(a))&z.1=g(f(a),f(a),f(a),f(a)))&z.2=g(f(a),f(a),f(a),f(f(f(a)))))&z.3=g(f(a),f(a),f(a),f(f(a))))
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+   (((((((((((((((((z.6=g(f(a),f(a),f(a),f(f(f(a))))&z.5=g(f(a),f(a),f(a),f(f(a))))&z.4=g(f(a),f(a),f(a),f(a)))&x.11=a)&x.22=a)&x.33=a)&y.1=f(f(f(a))))&x.13=f(a))&x.12=f(a))&y.2=f(a))&x.23=f(a))&x.21=f(a))&y.3=f(f(a)))&x.32=f(a))&x.31=f(a))&z.1=g(f(a),f(a),f(a),f(f(f(a)))))&z.2=g(f(a),f(a),f(a),f(a)))&z.3=g(f(a),f(a),f(a),f(f(a))))
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+   (((((((((((((((((z.6=g(f(a),f(a),f(a),f(f(f(a))))&z.5=g(f(a),f(a),f(a),f(f(a))))&z.4=g(f(a),f(a),f(a),f(a)))&x.11=a)&x.22=a)&x.33=a)&y.1=f(f(a)))&x.13=f(a))&x.12=f(a))&y.2=f(f(f(a))))&x.23=f(a))&x.21=f(a))&y.3=f(a))&x.32=f(a))&x.31=f(a))&z.1=g(f(a),f(a),f(a),f(f(a))))&z.2=g(f(a),f(a),f(a),f(f(f(a)))))&z.3=g(f(a),f(a),f(a),f(a)))
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+   (((((((((((((((((z.6=g(f(a),f(a),f(a),f(f(f(a))))&z.5=g(f(a),f(a),f(a),f(f(a))))&z.4=g(f(a),f(a),f(a),f(a)))&x.11=a)&x.22=a)&x.33=a)&y.1=f(f(f(a))))&x.13=f(a))&x.12=f(a))&y.2=f(f(a)))&x.23=f(a))&x.21=f(a))&y.3=f(a))&x.32=f(a))&x.31=f(a))&z.1=g(f(a),f(a),f(a),f(f(f(a)))))&z.2=g(f(a),f(a),f(a),f(f(a))))&z.3=g(f(a),f(a),f(a),f(a)))
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+[] result term:
+    false
+
+
+[] end
+
+
+enter query term finished by the key word 'end':
+
+
+[ executionAbort Continue Dump Exit Statistics
+  changeTrace changeQuiet Input Output stRategy (ACDESTQIOR|acdestqior)] ?

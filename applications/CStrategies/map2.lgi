@@ -1,0 +1,11 @@
+LPL map2 description
+
+	query	of sort	list[integ]
+	result of sort 	list[integ] 
+	import int 	map2[integ] 
+	start with 	[start 2]query
+
+end
+
+
+

@@ -1,0 +1,18 @@
+LPL graph description
+
+	query of sort bool
+
+	result of sort bool
+
+	import oneadjlist bool graph
+
+       	start with ()query
+
+end
+
+
+
+
+
+
+

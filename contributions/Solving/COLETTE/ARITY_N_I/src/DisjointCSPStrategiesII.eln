@@ -1,0 +1,88 @@
+module DisjointCSPStrategiesII[Variables,Type,Values]
+
+import
+global
+	DisjointCSPRulesII[Variables,Type,Values]
+	;
+end
+
+stratop
+global
+	SolveDisjointCSPInIIBlock	: < csp -> csp >		bs;
+	SolveCSPDisIIBlock		: < cspdisII -> cspdisII >	bs;
+	SolveDisjointCSPInIINoBlock	: < csp -> csp >		bs;
+	SolveCSPDisIINoBlock		: < cspdisII -> cspdisII >	bs;
+end
+
+
+strategies for cspdisII
+implicit
+
+[] SolveCSPDisIIBlock =>
+
+first one (DecomposeCSPDisII);
+repeat* (first one (CreateSolverCSPDisIIBlock));
+repeat* (first one (SendToSolverCSPDisII));
+repeat* (first one (GetFirstOutputOfSolverCSPDisIIBlock));
+repeat* (first one (ComposeCSPDisII));
+repeat* (first one (CloseSolverCSPDisII))
+end
+
+[] SolveCSPDisIINoBlock =>
+
+first one (DecomposeCSPDisII);
+repeat* (first one (CreateSolverCSPDisIINoBlock));
+repeat* (first one (SendToSolverCSPDisII));
+repeat* (first one (GetFirstOutputOfSolverCSPDisIINoBlock));
+repeat* (first one (ComposeCSPDisII));
+repeat* (first one (CloseSolverCSPDisII))
+end
+
+end
+
+
+rules for csp
+
+	P, Q	: csp;
+	D1, D2	: cspdisII;
+
+global 
+
+[SolveCSPDisIIBlock]
+	P
+	=>
+	Q
+	where	D1 := ()CreateCSPDisII(P)
+	where	D2 := (SolveCSPDisIIBlock)D1
+	where	Q  := ()GetCSP(D2)
+end
+
+[SolveCSPDisIINoBlock]
+	P
+	=>
+	Q
+	where	D1 := ()CreateCSPDisII(P)
+	where	D2 := (SolveCSPDisIINoBlock)D1
+	where	Q  := ()GetCSP(D2)
+end
+
+end
+
+
+strategies for csp
+implicit
+
+[] SolveDisjointCSPInIIBlock =>
+first one (SolveCSPDisIIBlock);
+first one (GetSolutionCSP)
+end
+
+[] SolveDisjointCSPInIINoBlock =>
+first one (SolveCSPDisIINoBlock);
+first one (GetSolutionCSP)
+end
+
+end
+
+
+end

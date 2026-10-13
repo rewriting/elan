@@ -1,0 +1,83 @@
+module proofterm[Vars,Ops,Types,Rwrules,Labels]
+import 	
+global		list[proofterm]
+	;
+local		msTermCommons[Vars,Ops,Types]
+		msApplySubstOn[term,Vars,Ops,Types]
+		label[Labels]
+	;
+end
+
+sort proofterm;
+end
+
+operators
+  global
+    	comp(@,@) 	: (proofterm proofterm) proofterm;
+    	@;@	 	: (proofterm proofterm) proofterm pri 1 alias comp(@,@):;
+    	@(@)	 	: (label substitution) proofterm;
+	@		: (label) proofterm;
+//    	<@,@>	 	: (proofterm list[proofterm]) proofterm;
+    	@[[@]]	 	: (proofterm list[proofterm]) proofterm pri 10;
+
+
+	t2pt(@)		: (term) proofterm;
+	@		: (term) proofterm alias t2pt(@):;
+
+	pt2t(@)		: (proofterm) term;
+	(@)		: (proofterm) term alias pt2t(@):;
+
+	proofnil	: proofterm;
+	
+	simplif(@)	: (proofterm) proofterm;
+	lsimplif(@)	: (list[proofterm]) list[proofterm];
+
+
+//  local
+//	@		: (proofterm) term;//	alias pt2t(@):;
+
+
+end
+
+rules for proofterm
+
+	t 	: term;
+	pt,pt2 	: proofterm;
+	lab	: label;
+	sigma	: substitution;
+	lpi	: list[proofterm];
+global
+// simplifications :
+[] simplif(proofnil;pt) => simplif(pt)
+end
+[] simplif(pt;proofnil) => simplif(pt)
+end
+[] simplif(pt[[nil]]) => simplif(pt)
+end
+[] simplif(pt[[lpi]]) => simplif(pt)[[lsimplif(lpi)]]
+end
+[] simplif(pt;pt2) => simplif(pt);simplif(pt2)
+end
+
+[] simplif(pt) => pt
+end
+
+end
+
+
+rules for list[proofterm]
+
+	pt 	: proofterm;
+	lpi	: list[proofterm];
+global
+[] lsimplif(proofnil.lpi) => lsimplif(lpi)
+end
+[] lsimplif(pt.lpi) => simplif(pt).lsimplif(lpi)
+end
+[] lsimplif(nil) => nil
+end
+end
+
+
+
+end

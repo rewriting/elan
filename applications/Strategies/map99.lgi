@@ -1,0 +1,11 @@
+LPL map99 description
+
+	query  of sort list[int] 
+	result of sort 	list[int] 
+	modules int 	map99[int] 
+	start with 	(MAPQQQ)[map(dk(add1,ass(55)))]query
+
+end
+
+
+

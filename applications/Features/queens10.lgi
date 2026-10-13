@@ -1,0 +1,8 @@
+LPL queens10 description 
+
+query 		of sort list[builtinInt]
+      result 	of sort list[builtinInt]
+      import   queens10 list[builtinInt]
+      start with (queens) queens
+
+end

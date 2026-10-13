@@ -1,0 +1,9 @@
+(nil|0|((X=jane&Y=john)&true)) end
+
+(nil|0|((X=john&Y=beer)&true)) end
+
+(nil|0|((X=jane&Y=beer)&true)) end
+
+ end end
+end
+

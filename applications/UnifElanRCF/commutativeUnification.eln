@@ -1,0 +1,105 @@
+module commutativeUnification
+import 	global 	term ; 
+ 	local  	int identifier bool pair[identifier,int]
+		list[pair[identifier,int]] eq[variable] eq[term]
+		eqSystem occur[variable,term] occur[variable,eqSystem];
+end 
+
+operators
+
+  global
+    @ = @	: (term term) equation 		alias @=@:;
+    @ 		: ( equation ) eqSystem		alias @:;
+  local
+    mergingClash(@,@,@)	: ( eqSystem variable term ) bool;
+
+end
+
+rules for eqSystem
+//declare	
+P,Q,R:eqSystem; s,t:term; x,y:variable;
+
+global
+
+  [delete] 	P & x=y	=> P		
+			if x==y			
+  end
+  [coalesce] 	P & x=y	=> x=y & apply(x->y,P)
+			if x!=y
+  end
+  [conflict]	P & s=t	=> false
+			if idneq(head(s),head(t)) 
+			   and not(isvar(s)) and not(isvar(t))
+  end
+  [occCheck1]	P & x=s	=> false
+			if occurs x in s and not isvar(s)
+  end
+  [occCheck2]	P & s=x	=> false
+			if occurs x in s and not isvar(s)
+  end
+  [eliminate1]	P & x=s	=> x=s & apply(x->s,P)
+			if not(occurs x in s) 
+  end
+  [eliminate2]	P & s=x	=> x=s & apply(x->s,P)
+			if not(occurs x in s) 
+  end
+  [matchClash]	P & s=x	=> false
+			if not isvar(s) 
+  end
+  [mergeClash] 	P & x=s => false
+			if mergingClash(P,x,s)
+  end
+  [mergePass1] 	P & x=s => x=s & P
+  end
+  [mergePass2] 	P & x=s => x=s & P
+			if not(occurs x in P) // and not mergingClash(P,x,s)
+  end
+  [mergePass3] 	P & x=s => P
+			if occurs x in P // and  not mergingClash(P,x,s)
+  end
+
+
+//  [unfold]	 P & (Q & R)		=> (P & Q) & R		end
+
+
+// initial and final transitions rules
+
+  [trueelim]	P & true	=> P				end
+  [truepass]	P & true	=> true & P			end
+  [trueadd]	P 		=> true & P			end
+  [falsepropag]	false		=> false			end
+  [truepropag]	true		=> true				end
+
+end
+
+rules for bool
+//declare 
+P,Q:eqSystem; s,t:term; x,y:variable;
+
+global
+
+  [] mergingClash(true,x,s) => false				end
+  [] mergingClash(P & Q,x,s) => mergingClash(P,x,s) 
+				or mergingClash(Q,x,s) 		end
+  [] mergingClash(x=s,y,t) => x==y and s!=t			end
+end
+
+
+
+strategies for eqSystem 
+  [Cunify]
+  dont care choose(trueadd) ;
+  repeat*(
+   dont care choose(
+     dont care choose(
+      	unfold || delete || conflict || coalesce || occCheck1 || occCheck2 
+	eliminate1 || eliminate2
+        ) ||
+     dont know choose(decompose || decomposeC) 
+   )
+    ) ;
+  dont care choose(trueelim || truepropag || falsepropag)
+  end
+end
+
+end

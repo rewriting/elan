@@ -1,0 +1,103 @@
+module oneadjlist
+
+/* Definition of the sort oneadjlist which is a set of paths */
+/* For a vertex v, oneadjlist is the list containing v and its adjacent */
+/* vertices. So it is composed of v and its adjlist. */
+/* For example, if there is a path from 1 to 4 and from 1 to 3, then */
+/* 4 and 3 is an adjacency list of vertex 1. the oneadjlist contains */
+/* 1, 4 and 3. */
+
+import	
+	global
+		int
+		path
+		adjlist
+		pair[int,adjlist]
+		edge
+		eq[label]
+	;
+end
+
+sort oneadjlist;
+end
+
+operators
+  global
+
+	/* Constructor of the sort oneadjlist */
+	oneadjempty	: oneadjlist;
+	@		: (pair[int,adjlist]) oneadjlist;
+
+	/* Consequences of the addition of an edge to a oneadjlist */
+	/* The transitive closure of the graph is calculated */
+	/* Assume that the adjacency list of v1 contains v2 and v3 and */
+	/* that we add an edge from v0 to v1. Then the adjacency list */
+	/* of v0 contains v2 and v3 too. */
+	addl_oneadjlist(@,@)	: (edge oneadjlist) oneadjlist;
+end
+
+
+/* Rules for simplification */
+
+rules for oneadjlist
+	v0		: int;
+	c 		: bool;
+	lab1, lab2 	: label;
+	X 		: adjlist;
+global
+
+	[] [v0,adjempty]		=> oneadjempty
+	end
+
+	[] [v0,[v0,c,lab1,lab2]]	=> oneadjempty
+	end
+
+	[] [v0,[v0,c,lab1,lab2] U X]	=> [v0,X]
+	end
+end
+
+
+/* addl_oneadjlist */
+
+rules for oneadjlist
+	v0, v1, v2 		: int;
+	c, bc, c1, b 		: bool;
+	lab, lab1, lab2, lab3 	: label;
+	X, XX : adjlist;
+	Y : oneadjlist;
+global
+
+	[] addl_oneadjlist(edgeempty, Y)			=> 
+		oneadjempty
+	end
+
+	[] addl_oneadjlist([v0,v1,lab], oneadjempty)		=> 
+		oneadjempty
+	end
+
+	[] addl_oneadjlist([v0,v1,lab1], [v1,[v2,c,lab2,lab3]])	=>
+		switch 
+		case suiv(lab1,lab2) 
+		then [v0,[v2,eqlabel(C,lab1) or c,lab1,lab3]]
+		otherwise oneadjempty
+		end
+	end
+
+	[] addl_oneadjlist([v0,v1,lab1], [v1,[v2,c,lab2,lab3] U X])=> 
+		[v0,[v2,eqlabel(C,lab1) or c,lab1,lab3] U XX]
+		if suiv(lab1,lab2)
+		where XX := ()addl_adjlist([v0,v1,lab1],X)
+	end
+
+	[] addl_oneadjlist([v0,v1,lab1], [v1,[v2,c,lab2,lab3] U X]) => 
+		[v0,addl_adjlist([v0,v1,lab1],X)]
+	end
+
+	[] addl_oneadjlist([v0,v1,lab1], Y)			=> 
+		oneadjempty
+	end
+end
+
+end
+
+

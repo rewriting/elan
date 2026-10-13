@@ -1,0 +1,19 @@
+LPL Unif description
+
+  specification description
+
+    part Vars	of sort list[identifier]
+	 	import sigSyntax
+    part Ops	of sort list[pair[identifier,int]]
+	 	import sigSyntax
+
+  end
+
+  query 	of sort eqSystem
+         	result of sort eqSystem
+	 	import Unif[Vars,Ops] eqSystem eqMulti bool 
+			//// termVExt[Vars] termFExt[Ops]
+         	start with (unify) query 
+
+end
+

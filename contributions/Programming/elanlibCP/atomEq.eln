@@ -1,0 +1,38 @@
+module atomEq
+
+import	global atom eqSystem ;
+	local int term ;
+end
+
+operators
+
+  global
+
+  @: ( equation ) atom ;
+  eq___symbol: Psymbol ;
+
+end
+
+rules for Psymbol
+ s,t:term ;
+  global 
+   [] head(s=t) => eq___symbol end
+
+end
+
+rules for int
+ s,t:term ;
+  global 
+   [] arity(eq___symbol) => 2 end
+
+end
+
+rules for term
+ s,t:term ;
+  global 
+   [] 1-th subterm(s=t) => s end
+   [] 2-th subterm(s=t) => t end
+end
+
+
+end

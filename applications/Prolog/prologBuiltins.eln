@@ -1,0 +1,41 @@
+module prologBuiltins[Fss,Vars]
+import	termCommons[Fss,Vars]
+	atom[Fss,Vars]
+	identifier bool;
+end
+
+operators
+  global
+
+   @ \= @	: ( term term ) atom;
+   @ is @	: ( term term ) atom;
+
+   @		: ( int ) term;
+   @ + @	: ( term term ) term;
+   @ - @	: ( term term ) term;
+
+end
+
+rules for identifier
+	t1,t2 : term;
+	v : variable;
+	n : int;
+global
+ [] head(t1\=t2)	=> prologNequal	end
+ [] head(v is t2)	=> prologIs		end
+ [] head(n)		=> prologConstant	end
+ [] head(t1 + t2)	=> prologPlus		end
+ [] head(t1 - t2)	=> prologMinus		end
+end
+
+rules for bool
+        t1,t2 : term;
+	v : variable;
+	n : int;
+global
+  [] isvar(n)		=> false			end
+  [] isvar(t1+t2)	=> false			end
+  [] isvar(t1-t2)	=> false			end
+end
+
+end

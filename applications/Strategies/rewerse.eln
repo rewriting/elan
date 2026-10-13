@@ -1,0 +1,18 @@
+module rewerse[X]
+
+import global list[X] strat[X] 
+		tclist[int,list[int],append[int]];
+
+op global
+  rewers(@)	: (list[X]) list[X];
+end
+
+rules for list[X]
+ x, y, z	: list[X];
+bodies
+  []	rewers(x) => z
+		where z:=[tc_list(nil,rew(int,list[int],list[int]))]x	end
+end
+end
+
+	

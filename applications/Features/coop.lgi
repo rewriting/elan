@@ -1,0 +1,8 @@
+LPL coop description 
+
+  query 	of sort int
+         	result of sort int
+	 	modules	string  coop
+        	start with (kkkk)query
+
+end

@@ -1,0 +1,125 @@
+module sldResolution[Fss,Vars,Preds,Clauses,VarStop]
+import 	global
+	int bool identifier
+	Clauses Preds VarStop
+	atomP[Fss,Vars,Preds]
+	termCommons[Fss,Vars]
+	eqSystem[Fss,Vars] 
+	syntacticUnification[Fss,Vars] 
+	list[atom] pair[atom,list[atom]] list[pair[atom,list[atom]]]
+	applySubstOn[Fss,Vars,list[atom]]
+	applySubstOn[Fss,Vars,atom]
+	applySubstOn[Fss,Vars,term]
+	pair[identifier,int] list[pair[identifier,int]] eq[term]
+	prologBuiltins[Fss,Vars];
+end
+
+sort sldState ;
+end
+
+operators
+  global
+
+   ( @ |@| @ )	: ( list[atom] int eqSystem ) sldState;
+
+local
+
+  pplus(@,@)	: ( term term ) term		alias @ + @:;
+  pminus(@,@)	: ( term term ) term		alias @ - @:;
+
+  eval(@)	: ( term ) term;
+
+end
+
+stratop global
+  sldResolution	: <sldState>	builtin;
+end
+
+
+  FOR EACH SS:pair[identifier,int]; P:identifier;  N:int
+  SUCH THAT SS:=(listExtract) elem(Preds)
+	AND P:=()first(SS) 
+	AND N:=()second(SS) :{
+
+   FOR EACH HC:pair[atom,list[atom]]; H:atom;
+	B:list[atom]; t_1, ... ,t_N :term 
+   SUCH THAT HC:=(listExtract) elem(Clauses)
+	AND H:=()first(HC) AND B:=()second(HC) 
+       	ANDIF head(H)==P
+	{AND t_I := () I-th subterm(H)}_I=1...N :{
+//--------------------------------------------------
+// SLD-Resolution
+//--------------------------------------------------
+rules for sldState
+	cc,cc1	: eqSystem;
+	rest		: list[atom];
+	s_1,...,s_N	: term;
+	sigma		: substitution;
+	n		: int;
+  local
+    [sldStep] (P(s_1, ... ,s_N).rest |n| cc)      
+	=> ( sigma(B) @ rest |n+varnum_Vars| cc1)
+		if n <= VarStop
+		where sigma := () rename_subst(varlist_Vars,n)
+		where cc1 := (unifys) cc {& s_I = sigma(t_I) }_I=1...N
+  end
+end
+//--------------------------------------------------
+
+
+
+}}
+
+rules for sldState
+	sigma1,sigma2	: eqSystem;
+	n		: int;
+local
+  [sldSucces] ( nil |n| sigma1)      => ( nil |0| sigma2 )
+  			where sigma2 := (delete_new_variables) sigma1
+  end
+end
+
+////////////////////////////
+////   and built-ins   /////
+////////////////////////////
+
+rules for sldState
+   cc,cc1	: eqSystem;
+	  t,t1,t2	: term;
+	  v		: variable;
+	  rest		: list[atom];
+	  n		: int;
+	  theta		: substitution;
+local
+  [sldStep] (v is t . rest |n| cc)	=> ( rest |n| cc & v=eval(theta(t)))
+					where theta:=()system_to_subst(cc)
+  end
+  [sldStep] (t1\=t2 . rest |n| cc)	=> ( rest |n| cc )
+					where theta:=()system_to_subst(cc)
+					if theta(t1) != theta(t2)
+  end
+end
+
+
+rules for term
+ i,j	: int;
+global
+  [] eval(pplus(i,j))	=>	plus(i,j)		end
+  [] eval(pminus(i,j))	=>	minus(i,j)		end
+end
+
+
+//--------------------------------------------------
+// Strategie d'application
+//--------------------------------------------------
+strategies for sldState
+implicit
+  [] sldResolution =>
+    iterate*(dk(sldStep)) ; dc(sldSucces)
+  end
+end
+//--------------------------------------------------
+
+end
+
+

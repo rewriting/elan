@@ -1,0 +1,196 @@
+module SolvingRules[Variables,Type,Values]
+
+import
+global	CSPDefinition[Variables,Type,Values]
+	ConsistencyRules[Variables,Type,Values]
+	PropagationRules[Variables,Type,Values]
+	;
+local	occur[var,list[formule]]
+	;
+end
+
+rules for csp
+
+	x,x1,x2,y	: var;
+	v		: Type;
+	D,RD		: domain;
+	c,c1,c2		: formule;
+	lmc,lec,store,C,L,
+	l,newC,newlmc	: list[formule];
+	Q,S		: csp;
+	twolists	: tuple[list[formule],list[formule]];
+
+global 
+
+[NodeConsistency]
+
+	CSP[lmc,lec,c.C,store]
+	=>
+	Q
+	if	ArityOfConstraint(c) == 1
+	where	Q	:= ()Verify_NC(CSP[lmc,lec,c.C,store])
+//	where	S	:= ()WriteCSP("Node Consistency",c,Q)
+end
+
+[ArcConsistency]
+
+	CSP[lmc,lec,c.C,store]
+	=>
+	Q
+	if	ArityOfConstraint(c) == 2
+ 	where	Q	:= ()Verify_AC(CSP[lmc,lec,c.C,store])
+//	where	S	:= ()WriteCSP("Arc Consistency",c,Q)
+end
+
+[Instantiation]
+
+	CSP[x in? D.lmc,lec,C,store]
+	=>
+	CSP[lmc,x = v.lec,C,store]
+	if	GetCard(D) == 1
+	where	v	:= ()GetFirstValueOfDomain(D)
+//	where	S	:= ()WriteCSP("Instantiation",x in? D,CSP[lmc,x = v.lec,C,store])
+end
+
+[Elimination]
+
+	CSP[lmc,x = v.lec,C,store]
+	=>
+	Q
+	if	occurs x in C or occurs x in store
+	where	Q	:= ()Verify_Elimination(CSP[lmc,x = v.lec,C,store])
+//	where	S	:= ()WriteCSP("Elimination",x = v,Q)
+end
+
+[Falsity]
+
+	CSP[x in? empty.lmc,lec,C,store]
+	=>
+	Unsatisfiable
+//	where	S := ()WriteCSP("Falsity",x in? empty,CSP[nil,nil,nil,nil])
+end
+
+[Enumerate1]
+
+	CSP[x in? D.lmc,lec,C,store]
+	=>
+	CSP[lmc,x = v.lec,C,store]
+	if	D != empty
+	where	v	:= ()GetFirstValueOfDomain(D)
+//	where	S	:= ()WriteCSP("Enumerate1",x in? D,CSP[lmc,x = v.lec,C,store])
+end
+
+[Enumerate2]
+
+	CSP[x in? D.lmc,lec,C,store]
+	=>
+	CSP[x in? RD.lmc,lec,C,store]
+	if	GetCard(D) > 1
+	where	RD	:= ()EliminateFirstValueOfDomain(D)
+//	where	S	:= ()WriteCSP("Enumerate2",x in? D,CSP[x in? RD.lmc,lec,C,store])
+end
+
+[GetDisjuntiveNormalForm]
+
+	CSP[lmc,lec,c1 V c2.C,store]
+	=>
+	CSP[lmc,lec,newC,store]
+	where	c	:= ()GetCanonicalForm(c1 V c2)
+	where	newC	:= ()c.C
+//	where	S	:= ()WriteCSP("GetDisjuntiveNormalForm",c1 V c2,CSP[lmc,lec,newC,store])
+end
+
+[PostFirstConstraint]
+
+	CSP[lmc,lec,c1 V c2.C,store]
+	=>
+	CSP[lmc,lec,newC,store]
+	where	l	:= ()AddNormalConstraint(c1)
+	where	newC	:= ()append(l,C)
+//	where	S	:= ()WriteCSP("PostFirstConstraint",c1 V c2,CSP[lmc,lec,newC,store])
+end
+
+[PostSecondConstraint]
+
+	CSP[lmc,lec,c1 V c2.C,store]
+	=>
+	CSP[lmc,lec,newC,store]
+	where	l	:= ()AddNormalConstraint(c2)
+	where	newC	:= ()append(l,C)
+//	where	S	:= ()WriteCSP("PostSecondConstraint",c1 V c2,CSP[lmc,lec,newC,store])
+end
+
+[PostConstraint]
+
+	CSP[lmc,lec,c.C,store]
+	=>
+	switch
+	case	GetVarOfAtomicFormule(c) == nil	then
+		switch
+		case	c == true	then
+			CSP[lmc,lec,C,store]
+//			where	S := ()WriteCSP("PostConstraint",c,CSP[lmc,lec,C,store])
+		otherwise
+			CSP[nil,nil,nil,nil]
+//			where	S := ()WriteCSP("PostConstraint",c,CSP[nil,nil,nil,nil])
+		end
+	otherwise
+		CSP[lmc,lec,newC,store]
+
+		where	l	:= ()AddNormalConstraint(c)
+		where	newC	:= ()append(l,C)
+//		where	S	:= ()WriteCSP("PostConstraint",c,CSP[lmc,lec,newC,store])
+	end
+end
+
+[GetVarWithMinimumDomain]
+
+	CSP[x in? D.lmc,lec,C,store]
+	=>
+	CSP[newlmc,lec,C,store]
+	where	newlmc	:= ()GetMinimumDomain(x in? D.lmc,nil,GetCard(D))
+//	where	S	:= ()WriteCSP("GetVarWithMinimumDomain",x in? D,CSP[newlmc,lec,C,store])
+end
+
+[GetVarWithMaximumDegree]
+
+	CSP[x in? D.lmc,lec,C,store]
+	=>
+	CSP[newlmc,lec,C,store]
+	where	l	:= ()append(C,store)
+	where	newlmc	:= ()GetMaximumDegree(x in? D.lmc,l,nil,GetDegreeOfConstraint(x,l))
+//	where	S	:= ()WriteCSP("GetVarWithMaximumDegree",x in? D,CSP[newlmc,lec,C,store])
+end
+
+end
+
+
+end
+
+/*
+
+[SplitDomain1]
+
+	CSP[x in? D.lmc,lec,C,store]	=>
+	CSP[x in? RD.lmc,lec,C,store]
+	if	D != empty
+	where	RD	:= ()GetSplitDomain1(D)
+end
+
+[SplitDomain2]
+
+	CSP[x in? D.lmc,lec,C,store]	=>
+	CSP[x in? RD.lmc,lec,C,store]
+	if	GetCard(D) > 1
+	where	RD	:= ()GetSplitDomain2(D)
+end
+
+
+*/
+
+
+
+
+
+
+

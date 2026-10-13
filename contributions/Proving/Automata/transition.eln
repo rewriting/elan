@@ -1,0 +1,23 @@
+module transition[Fss]
+import global state configuration[Fss];
+end
+
+sort transition;
+end
+
+operators global
+	(@ -> @)	: (configuration state) transition;
+	@ -> @		: (configuration state) transition	alias (@ -> @):;
+	void_transition	: transition;
+	config(@)	: (transition) configuration;
+end
+
+rules for configuration
+        c: configuration;
+	q: state;
+global
+  [] config(c -> q) => c
+  end
+end
+end
+

@@ -1,0 +1,24 @@
+LPL rewriting description
+
+  specification description
+
+    part MVars  of sort list[pair[identifier,int]]
+                import sigSyntax
+    part Vars   of sort list[identifier]
+                import sigSyntax
+    part Ops    of sort list[pair[identifier,int]]
+                import sigSyntax
+
+    part Rules  of sort list[pair[term,term]]
+                import EtermCommons[Ops,Vars,MVars]
+                        rwRules[Ops,Vars,MVars]
+			list[pair[term,term]]
+  end
+
+  query         of sort term
+                result of sort term
+                import EtermCommons[Ops,Vars,MVars]
+                        rewriting[Ops,Vars,MVars,Rules]
+                start with (s_rewrite) query 
+
+end

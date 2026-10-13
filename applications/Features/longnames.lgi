@@ -1,0 +1,8 @@
+LPL longnames description
+
+query		of sort  	int
+		result of sort 	int
+		import 		longnames
+		start with 	(allsols)doit(query)
+
+end

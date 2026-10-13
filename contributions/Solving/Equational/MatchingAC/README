@@ -1,0 +1,29 @@
+Interpreted version
+===================
+
+elan matchingAC ctesig
+
+
+Compiled version
+================
+
+elanc matchingAC ctesig ; gmake --file matchingAC.make ; a.out
+
+
+Equations
+=========
+
+x + y <=AC a + b + c end
+
+x + y <=AC a + b + c + d end
+
+y + x + y <=AC a + a + c + d end
+
+x <=AC a+b+b+b+c+a+c & x <=AC b+a+c+b+b+a+c end
+
+x <=AC a+b+b+c+a+c & x <=AC b+a+c+b+b+a+c end
+
+x +y+y <=AC a+a+b+b end
+
+x + y + z + v <=AC a + b + c + d + e + f + g   end
+

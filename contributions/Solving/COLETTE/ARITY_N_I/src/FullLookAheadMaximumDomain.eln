@@ -1,0 +1,265 @@
+module FullLookAheadMaximumDomain[Variables,Type,Values]
+
+import
+global
+	LocalConsistencyStrategies[Variables,Type,Values]
+	EnumerationRules[Variables,Type,Values]
+	;
+end
+
+stratop
+global
+	FLAMaximumDomainFirstToLastAll  			: < csp -> csp >	bs;
+	FLAMaximumDomainFirstToLastOne  			: < csp -> csp >	bs;
+	FLAMaximumDomainLastToFirstAll  			: < csp -> csp >	bs;
+	FLAMaximumDomainLastToFirstOne  			: < csp -> csp >	bs;
+	FLAMaximumDomainSplitFirstToLastAll  			: < csp -> csp >	bs;
+	FLAMaximumDomainSplitFirstToLastOne  			: < csp -> csp >	bs;
+	FLAMaximumDomainSplitLastToFirstAll  			: < csp -> csp >	bs;
+	FLAMaximumDomainSplitLastToFirstOne  			: < csp -> csp >	bs;
+end
+
+
+strategies for csp
+implicit
+
+/* Strategy		: Full Lookahead			*/
+/* Variable selection	: Maximum Domain			*/
+/* Value selection	: Value enumeration first to last	*/
+/* Number of solutions	: All					*/
+
+[] FLAMaximumDomainFirstToLastAll =>
+LocalConsistencyForEC;
+repeat* (
+	first one (GetVarWithMaximumDomain);
+	dk (iterate* (EliminateFirstValueOfDomain));
+	first one (InstantiateFirstValueOfDomain);
+	first one (ExtractConstraintsOnEqualityVar, id);
+	first one (Elimination, id);
+	LocalConsistencyForEC
+	);
+first one (GetSolutionCSP)
+end
+
+
+/* Strategy		: Full Lookahead			*/
+/* Variable selection	: Maximum Domain			*/
+/* Value selection	: Value enumeration first to last	*/
+/* Number of solutions	: First					*/
+
+[] FLAMaximumDomainFirstToLastOne =>
+first one (FLAMaximumDomainFirstToLastAll)
+end
+
+
+/* Strategy		: Full Lookahead			*/
+/* Variable selection	: Maximum Domain			*/
+/* Value selection	: Value enumeration last to first	*/
+/* Number of solutions	: All					*/
+
+[] FLAMaximumDomainLastToFirstAll =>
+LocalConsistencyForEC;
+repeat* (
+	first one (GetVarWithMaximumDomain);
+	dk (iterate* (EliminateLastValueOfDomain));
+	first one (InstantiateLastValueOfDomain);
+	first one (ExtractConstraintsOnEqualityVar, id);
+	first one (Elimination, id);
+	LocalConsistencyForEC
+	);
+first one (GetSolutionCSP)
+end
+
+
+/* Strategy		: Full Lookahead			*/
+/* Variable selection	: Maximum Domain			*/
+/* Value selection	: Value enumeration last to first	*/
+/* Number of solutions	: First					*/
+
+[] FLAMaximumDomainLastToFirstOne =>
+first one (FLAMaximumDomainLastToFirstAll)
+end
+
+
+/* Strategy		: Full Lookahead			*/
+/* Variable selection	: Maximum Domain			*/
+/* Value selection	: Split domain first to last		*/
+/* Number of solutions	: All 					*/
+
+[] FLAMaximumDomainSplitFirstToLastAll =>
+LocalConsistencyForEC;
+repeat* (
+	first one (GetVarWithMaximumDomain);
+	dk (first one (SplitDomainFirstMiddle), first one (SplitDomainSecondMiddle));
+	first one (first one (ExtractConstraintsOnEqualityVar);
+		   first one (Elimination, id);
+		   LocalConsistencyForEC
+		   ,
+		   first one (ExtractConstraintsOnDomainVar);
+		   LocalConsistencyForEC
+		   ,
+		   id)
+	);
+first one (GetSolutionCSP)
+end
+
+
+/* Strategy		: Full Lookahead			*/
+/* Variable selection	: Maximum Domain			*/
+/* Value selection	: Split domain first to last		*/
+/* Number of solutions	: First					*/
+
+[] FLAMaximumDomainSplitFirstToLastOne =>
+first one (FLAMaximumDomainSplitFirstToLastAll)
+end
+
+
+/* Strategy		: Full Lookahead			*/
+/* Variable selection	: Maximum Domain			*/
+/* Value selection	: Split domain last to first		*/
+/* Number of solutions	: All 					*/
+
+[] FLAMaximumDomainSplitLastToFirstAll =>
+LocalConsistencyForEC;
+repeat* (
+	first one (GetVarWithMaximumDomain);
+	dk (first one (SplitDomainSecondMiddle), first one (SplitDomainFirstMiddle));
+	first one (first one (ExtractConstraintsOnEqualityVar);
+		   first one (Elimination, id);
+		   LocalConsistencyForEC
+		   ,
+		   first one (ExtractConstraintsOnDomainVar);
+		   LocalConsistencyForEC
+		   ,
+		   id)
+	);
+first one (GetSolutionCSP)
+end
+
+
+/* Strategy		: Full Lookahead			*/
+/* Variable selection	: Maximum Domain			*/
+/* Value selection	: Split domain last to first		*/
+/* Number of solutions	: First					*/
+
+[] FLAMaximumDomainSplitLastToFirstOne =>
+first one (FLAMaximumDomainSplitLastToFirstAll)
+end
+
+end
+
+
+rules for csop
+
+	x, y				: var;
+	ub, lb, newub, newlb, middle	: Type;
+	P, Q				: csp;
+	lmc, lec, EC, DC, store		: list[constraint];
+	l				: list[constraint];
+
+global
+
+[FLAMaximumDomainFirstToLastOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[Q,x,lb,ub]
+	where	Q :=(FLAMaximumDomainFirstToLastOne)P
+end
+
+[FLAMaximumDomainLastToFirstOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[Q,x,lb,ub]
+	where	Q :=(FLAMaximumDomainLastToFirstOne)P
+end
+
+[FLAMaximumDomainSplitFirstToLastOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[Q,x,lb,ub]
+	where	Q :=(FLAMaximumDomainSplitFirstToLastOne)P
+end
+
+[FLAMaximumDomainSplitLastToFirstOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[Q,x,lb,ub]
+	where	Q :=(FLAMaximumDomainSplitLastToFirstOne)P
+end
+
+[GetUBFLAMaximumDomainFirstToLastOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[P,x,lb,newub]
+	where	Q :=(FLAMaximumDomainFirstToLastOne)P
+	if	Q != Unsatisfiable
+	where	(list[constraint]) y = newub.l := ()GetVarInHead(x,GetLEC(Q),nil)
+end
+
+[GetUBFLAMaximumDomainLastToFirstOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[P,x,lb,newub]
+	where	Q :=(FLAMaximumDomainLastToFirstOne)P
+	if	Q != Unsatisfiable
+	where	(list[constraint]) y = newub.l := ()GetVarInHead(x,GetLEC(Q),nil)
+end
+
+[GetUBFLAMaximumDomainSplitFirstToLastOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[P,x,lb,newub]
+	where	Q :=(FLAMaximumDomainSplitFirstToLastOne)P
+	if	Q != Unsatisfiable
+	where	(list[constraint]) y = newub.l := ()GetVarInHead(x,GetLEC(Q),nil)
+end
+
+[GetUBFLAMaximumDomainSplitLastToFirstOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[P,x,lb,newub]
+	where	Q :=(FLAMaximumDomainSplitLastToFirstOne)P
+	if	Q != Unsatisfiable
+	where	(list[constraint]) y = newub.l := ()GetVarInHead(x,GetLEC(Q),nil)
+end
+
+[GetLBFLAMaximumDomainFirstToLastOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[P,x,newlb,ub]
+	where	Q :=(FLAMaximumDomainFirstToLastOne)P
+	if	Q != Unsatisfiable
+	where	(list[constraint]) y = newlb.l := ()GetVarInHead(x,GetLEC(Q),nil)
+end
+
+[GetLBFLAMaximumDomainLastToFirstOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[P,x,newlb,ub]
+	where	Q :=(FLAMaximumDomainLastToFirstOne)P
+	if	Q != Unsatisfiable
+	where	(list[constraint]) y = newlb.l := ()GetVarInHead(x,GetLEC(Q),nil)
+end
+
+[GetLBFLAMaximumDomainSplitFirstToLastOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[P,x,newlb,ub]
+	where	Q :=(FLAMaximumDomainSplitFirstToLastOne)P
+	if	Q != Unsatisfiable
+	where	(list[constraint]) y = newlb.l := ()GetVarInHead(x,GetLEC(Q),nil)
+end
+
+[GetLBFLAMaximumDomainSplitLastToFirstOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[P,x,newlb,ub]
+	where	Q :=(FLAMaximumDomainSplitLastToFirstOne)P
+	if	Q != Unsatisfiable
+	where	(list[constraint]) y = newlb.l := ()GetVarInHead(x,GetLEC(Q),nil)
+end
+
+end
+
+
+end

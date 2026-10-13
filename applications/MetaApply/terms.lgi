@@ -1,0 +1,41 @@
+LPL terms description
+
+	specification description
+
+		part Vars of sort list[identifier]
+	 	import sigSyntax
+
+		part Ops of sort list[pair[identifier,int]]
+	 	import sigSyntax
+
+		part Prec of sort list[pair[identifier,int]]
+	 	import sigSyntax
+
+		part System of sort list[equation]
+		import 	sigSyntax
+			list[equation]
+			eqSystem[Ops,Vars]
+			termCommons[Ops,Vars]
+			lvariables[Vars,Ops,Prec]
+	end
+
+	query of sort bool
+
+	result of sort bool
+
+//	query of sort list[term]
+
+//	result of sort list[term]
+
+	import terms[Vars,Ops,Prec]
+
+       	start with ()query
+
+end
+
+
+
+
+
+
+

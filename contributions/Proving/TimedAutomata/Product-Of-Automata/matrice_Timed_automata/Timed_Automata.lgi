@@ -1,0 +1,19 @@
+LPL Timed_Automata description
+
+  specification description
+    part Clocks of sort list[identifier]
+        import identifier list[identifier]
+    part States of sort list[identifier]
+        import identifier list[identifier]
+    part Labels of sort list[identifier]
+        import identifier list[identifier]
+    part Automata of sort list[Automaton]
+        import Automaton[Clocks,States,Labels] list[Automaton]
+  end
+
+  query of sort pair[list[statezone],bool]
+  result of sort pair[list[statezone],bool]
+  import Timed_Automata[Clocks,States,Labels,Automata]
+  start with (explore)query 
+
+end

@@ -1,0 +1,268 @@
+module ForwardCheckingChoicePointMaximumDomain[Variables,Type,Values]
+
+import
+global
+	LocalConsistencyStrategies[Variables,Type,Values]
+	EnumerationRules[Variables,Type,Values]
+	PropagationRules[Variables,Type,Values]
+	ChoicePointStrategies[Variables,Type,Values]
+	;
+end
+
+stratop
+global
+	FCChoicePointMaximumDomainFirstToLastAll  		: < csp -> csp >	bs;
+	FCChoicePointMaximumDomainFirstToLastOne  		: < csp -> csp >	bs;
+	FCChoicePointMaximumDomainLastToFirstAll  		: < csp -> csp >	bs;
+	FCChoicePointMaximumDomainLastToFirstOne  		: < csp -> csp >	bs;
+	FCChoicePointMaximumDomainSplitFirstToLastAll  		: < csp -> csp >	bs;
+	FCChoicePointMaximumDomainSplitFirstToLastOne  		: < csp -> csp >	bs;
+	FCChoicePointMaximumDomainSplitLastToFirstAll  		: < csp -> csp >	bs;
+	FCChoicePointMaximumDomainSplitLastToFirstOne  		: < csp -> csp >	bs;
+end
+
+
+strategies for csp
+implicit
+
+/* Strategy		: Forward Checking with Choice Point	*/
+/* Variable selection	: Maximum Domain			*/
+/* Value selection	: Value enumeration first to last	*/
+/* Number of solutions	: All 					*/
+
+[] FCChoicePointMaximumDomainFirstToLastAll =>
+dk (LocalConsistencyForECandDC);
+repeat* (
+	first one (GetVarWithMaximumDomain);
+	dk (iterate* (EliminateFirstValueOfDomain));
+	first one (InstantiateFirstValueOfDomain);
+	first one (ExtractConstraintsOnEqualityVar, id);
+	first one (Elimination, id);
+	first one (LocalConsistencyInEC, id)
+	);
+first one (GetSolutionCSP)
+end
+
+
+/* Strategy		: Forward Checking with Choice Point	*/
+/* Variable selection	: Maximum Domain			*/
+/* Value selection	: Value enumeration first to last	*/
+/* Number of solutions	: First 				*/
+
+[] FCChoicePointMaximumDomainFirstToLastOne =>
+first one (FCChoicePointMaximumDomainFirstToLastAll)
+end
+
+
+/* Strategy		: Forward Checking with Choice Point	*/
+/* Variable selection	: Maximum Domain			*/
+/* Value selection	: Value enumeration last to first	*/
+/* Number of solutions	: All 					*/
+
+[] FCChoicePointMaximumDomainLastToFirstAll =>
+dk (LocalConsistencyForECandDC);
+repeat* (
+	first one (GetVarWithMaximumDomain);
+	dk (iterate* (EliminateLastValueOfDomain));
+	first one (InstantiateLastValueOfDomain);
+	first one (ExtractConstraintsOnEqualityVar, id);
+	first one (Elimination, id);
+	first one (LocalConsistencyInEC, id)
+	);
+first one (GetSolutionCSP)
+end
+
+
+/* Strategy		: Forward Checking with Choice Point	*/
+/* Variable selection	: Maximum Domain			*/
+/* Value selection 	: Value enumeration last to first	*/
+/* Number of solutions	: First 				*/
+
+[] FCChoicePointMaximumDomainLastToFirstOne =>
+first one (FCChoicePointMaximumDomainLastToFirstAll)
+end
+
+
+/* Strategy		: Forward Checking with Choice Point	*/
+/* Variable selection	: Maximum Domain			*/
+/* Value selection	: Split domain first to last		*/
+/* Number of solutions	: All 					*/
+
+[] FCChoicePointMaximumDomainSplitFirstToLastAll =>
+dk (LocalConsistencyForECandDC);
+repeat* (
+	first one (GetVarWithMaximumDomain);
+	dk (first one (SplitDomainFirstMiddle), first one (SplitDomainSecondMiddle));
+	first one (first one (ExtractConstraintsOnEqualityVar);
+		   first one (Elimination, id);
+		   first one (LocalConsistencyInEC, id)
+		   ,
+		   first one (ExtractConstraintsOnDomainVar);
+		   first one (LocalConsistencyInEC, id)
+		   ,
+		   id)
+	);
+first one (GetSolutionCSP)
+end
+
+
+/* Strategy		: Forward Checking with Choice Point	*/
+/* Variable selection	: Maximum Domain			*/
+/* Value selection	: Split domain first to last		*/
+/* Number of solutions	: First					*/
+
+[] FCChoicePointMaximumDomainSplitFirstToLastOne =>
+first one (FCChoicePointMaximumDomainSplitFirstToLastAll)
+end
+
+
+/* Strategy		: Forward Checking with Choice Point	*/
+/* Variable selection	: Maximum Domain			*/
+/* Value selection	: Split domain last to first		*/
+/* Number of solutions	: All 					*/
+
+[] FCChoicePointMaximumDomainSplitLastToFirstAll =>
+dk (LocalConsistencyForECandDC);
+repeat* (
+	first one (GetVarWithMaximumDomain);
+	dk (first one (SplitDomainSecondMiddle), first one (SplitDomainFirstMiddle));
+	first one (first one (ExtractConstraintsOnEqualityVar);
+		   first one (Elimination, id);
+		   first one (LocalConsistencyInEC, id)
+		   ,
+		   first one (ExtractConstraintsOnDomainVar);
+		   first one (LocalConsistencyInEC, id)
+		   ,
+		   id)
+	);
+first one (GetSolutionCSP)
+end
+
+
+/* Strategy		: Forward Checking with Choice Point	*/
+/* Variable selection	: Maximum Domain			*/
+/* Value selection	: Split domain last to first		*/
+/* Number of solutions	: First					*/
+
+[] FCChoicePointMaximumDomainSplitLastToFirstOne =>
+first one (FCChoicePointMaximumDomainSplitLastToFirstAll)
+end
+
+end
+
+
+rules for csop
+
+	x, y				: var;
+	ub, lb, newub, newlb, middle	: Type;
+	P, Q				: csp;
+	lmc, lec, EC, DC, store		: list[constraint];
+	l				: list[constraint];
+
+global
+
+[FCChoicePointMaximumDomainFirstToLastOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[Q,x,lb,ub]
+	where	Q :=(FCChoicePointMaximumDomainFirstToLastOne)P
+end
+
+[FCChoicePointMaximumDomainLastToFirstOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[Q,x,lb,ub]
+	where	Q :=(FCChoicePointMaximumDomainLastToFirstOne)P
+end
+
+[FCChoicePointMaximumDomainSplitFirstToLastOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[Q,x,lb,ub]
+	where	Q :=(FCChoicePointMaximumDomainSplitFirstToLastOne)P
+end
+
+[FCChoicePointMaximumDomainSplitLastToFirstOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[Q,x,lb,ub]
+	where	Q :=(FCChoicePointMaximumDomainSplitLastToFirstOne)P
+end
+
+
+[GetUBFCChoicePointMaximumDomainFirstToLastOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[P,x,lb,newub]
+	where	Q :=(FCChoicePointMaximumDomainFirstToLastOne)P
+	if	Q != Unsatisfiable
+	where	(list[constraint]) y = newub.l := ()GetVarInHead(x,GetLEC(Q),nil)
+end
+
+[GetUBFCChoicePointMaximumDomainLastToFirstOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[P,x,lb,newub]
+	where	Q :=(FCChoicePointMaximumDomainLastToFirstOne)P
+	if	Q != Unsatisfiable
+	where	(list[constraint]) y = newub.l := ()GetVarInHead(x,GetLEC(Q),nil)
+end
+
+[GetUBFCChoicePointMaximumDomainSplitFirstToLastOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[P,x,lb,newub]
+	where	Q :=(FCChoicePointMaximumDomainSplitFirstToLastOne)P
+	if	Q != Unsatisfiable
+	where	(list[constraint]) y = newub.l := ()GetVarInHead(x,GetLEC(Q),nil)
+end
+
+[GetUBFCChoicePointMaximumDomainSplitLastToFirstOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[P,x,lb,newub]
+	where	Q :=(FCChoicePointMaximumDomainSplitLastToFirstOne)P
+	if	Q != Unsatisfiable
+	where	(list[constraint]) y = newub.l := ()GetVarInHead(x,GetLEC(Q),nil)
+end
+
+[GetLBFCChoicePointMaximumDomainFirstToLastOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[P,x,newlb,ub]
+	where	Q :=(FCChoicePointMaximumDomainFirstToLastOne)P
+	if	Q != Unsatisfiable
+	where	(list[constraint]) y = newlb.l := ()GetVarInHead(x,GetLEC(Q),nil)
+end
+
+[GetLBFCChoicePointMaximumDomainLastToFirstOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[P,x,newlb,ub]
+	where	Q :=(FCChoicePointMaximumDomainLastToFirstOne)P
+	if	Q != Unsatisfiable
+	where	(list[constraint]) y = newlb.l := ()GetVarInHead(x,GetLEC(Q),nil)
+end
+
+[GetLBFCChoicePointMaximumDomainSplitFirstToLastOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[P,x,newlb,ub]
+	where	Q :=(FCChoicePointMaximumDomainSplitFirstToLastOne)P
+	if	Q != Unsatisfiable
+	where	(list[constraint]) y = newlb.l := ()GetVarInHead(x,GetLEC(Q),nil)
+end
+
+[GetLBFCChoicePointMaximumDomainSplitLastToFirstOne]
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[P,x,newlb,ub]
+	where	Q :=(FCChoicePointMaximumDomainSplitLastToFirstOne)P
+	if	Q != Unsatisfiable
+	where	(list[constraint]) y = newlb.l := ()GetVarInHead(x,GetLEC(Q),nil)
+end
+
+end
+
+
+end

@@ -1,0 +1,113 @@
+module CooperationStrategiesII[Variables,Type,Values]
+
+import
+global
+	CooperationRulesII[Variables,Type,Values]
+	;
+end
+
+stratop
+global
+	MinWithCooperationIINoBlock	: < csop -> csop >		bs;
+	MinWithCooperationIIBlock	: < csop -> csop >		bs;
+	CooperationIINoBlock		: < csopbisII -> csopbisII >	bs;
+	CooperationIIBlock		: < csopbisII -> csopbisII >	bs;
+end
+
+
+rules for csopbisII
+
+	P, Q		: csop;
+	lcsop		: list[csop];
+	laPid, liPid	: list[Pid];
+
+global
+
+[SetUpperAndLowerBounds]
+
+	CSOPbisII[P,lcsop,laPid,liPid]
+	=>
+	CSOPbisII[Q,lcsop,laPid,liPid]
+	where Q := (SetUpperAndLowerBounds)P
+end
+
+end
+
+
+rules for csop
+
+	P1, P2		: csop;
+	PII, QII	: csopbisII;
+
+global
+
+/*
+[CooperationIIBlock]
+	P1
+	=>
+	P2
+        where   PII := ()CreateCSOPbisII(P1)
+        where   QII := (CooperationIIBlock)PII
+        where   P2  := ()GetCSOP(QII)
+end
+*/
+
+[CooperationIINoBlock]
+	P1
+	=>
+	P2
+        where   PII := ()CreateCSOPbisII(P1)
+        where   QII := (CooperationIINoBlock)PII
+        where   P2  := ()GetCSOP(QII)
+end
+
+end
+
+
+strategies for csop
+implicit
+
+[] MinWithCooperationIINoBlock =>
+first one (CooperationIINoBlock);
+first one (GetSolutionCSOP)
+end
+
+/*
+[] MinWithCooperationIIBlock =>
+first one (CooperationIIBlock);
+first one (GetSolutionCSOP)
+end
+*/
+
+end
+
+
+strategies for csopbisII
+implicit
+
+[] CooperationIINoBlock =>
+first one (SetUpperAndLowerBounds);
+first one (WriteCSOPbisIIInASCII);
+first one (CreateSolver1NoBlock);
+first one (WriteCSOPbisIIInASCII);
+first one (CreateSolver2NoBlock);
+first one (WriteCSOPbisIIInASCII);
+repeat* (first one (SendToSolver); first one (WriteCSOPbisIIInASCII));
+/*
+repeat* (first one ( first one (GetOutputOfSolver); 
+		     first one (UpdateBounds);
+	             first one (first one (SendToSolver), id);
+	             first one (ChangePriority)
+	             ,
+	             first one (ChangePriority)
+		   )
+	);
+*/
+repeat* (first one (CloseSolver); first one (WriteCSOPbisIIInASCII));
+first one (GetMinimum)
+end
+
+end
+
+
+end

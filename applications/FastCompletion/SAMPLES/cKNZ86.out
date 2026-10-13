@@ -1,0 +1,1 @@
+  s(s(var(0)))->var(0).f(o,var(0))->var(0).g(o,var(0))->var(0).f(s(var(0)),var(1))->s(f(var(0),var(1))).h(o)->s(o).f(f(var(0),o),o)->var(0).g(s(var(0)),var(1))->f(g(var(0),var(1)),o).nil

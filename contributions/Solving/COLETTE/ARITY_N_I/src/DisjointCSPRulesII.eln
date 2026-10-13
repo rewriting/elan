@@ -1,0 +1,261 @@
+module DisjointCSPRulesII[Variables,Type,Values]
+
+import
+global
+	ForwardCheckingChoicePoint[Variables,Type,Values]
+	DisjointCSPDefinitionII[Variables,Type,Values]
+	list[var]
+	list[constraint]
+	list[csp]
+	stdio
+	io[csp]
+	io[string]
+	occur[var,list[constraint]]
+	;
+end
+
+operators
+global
+	DecomposeCSP(@,@)	: (list[csp] list[constraint])	list[csp];
+	ComposeCSP(@,@)		: (csp csp)			csp;
+	GetCSPInHead(@,@,@)	: (var list[csp] list[csp])	list[csp];
+	CreateListOfCSP(@)	: (list[constraint])		list[csp];
+
+local	ProcessConstraint(@,@)	: (list[csp] list[var])		list[csp];
+end
+
+
+rules for cspdisII
+
+	n, m				: int;
+	string1				: string;
+	pid, pid1			: Pid;
+	c				: constraint;
+	P, Q, R				: csp;
+	lmc, lec, EC, DC, store		: list[constraint];
+	lmc1, lec1, EC1, DC1, store1	: list[constraint];
+	luCsp, luCsp1, lsCsp, newluCsp	: list[csp];
+	laPid, liPid, newliPid		: list[Pid];
+	res				: cspdisII;
+
+global
+
+[DecomposeCSPDisII]
+	CSPDisII[CSP[lmc,lec,EC,DC,store],luCsp,lsCsp,laPid,liPid]
+	=>
+	CSPDisII[CSP[nil,nil,nil,nil,nil],newluCsp,lsCsp,laPid,liPid]
+	where	luCsp1	:= ()CreateListOfCSP(append(lmc,lec))
+	where	newluCsp:= ()DecomposeCSP(luCsp1,append(append(EC,DC),store))
+end
+
+[CreateSolverCSPDisIIBlock]
+	CSPDisII[P,luCsp,lsCsp,laPid,liPid]
+	=>
+	CSPDisII[P,luCsp,lsCsp,laPid,pid.liPid]
+	if	size(luCsp) > size(liPid)
+	where	pid := ()create("solverCSPDisII")
+	if 	not iserr(pid)
+end
+
+[CreateSolverCSPDisIINoBlock]
+	CSPDisII[P,luCsp,lsCsp,laPid,liPid]
+	=>
+	CSPDisII[P,luCsp,lsCsp,laPid,pid.liPid]
+	if	size(luCsp) > size(liPid)
+	where	pid := ()create_noblock("solverCSPDisII")
+	if 	not iserr(pid)
+end
+
+[SendToSolverCSPDisII]
+	CSPDisII[P,Q.luCsp,lsCsp,laPid,pid.liPid]
+	=>
+	CSPDisII[P,luCsp,lsCsp,pid.laPid,liPid]
+	where	R 	:= ()write(pid,Q)
+	where	string1	:= ()write(pid,"\nend\n")
+	if 	not iserror(R) and not iserror(string1)
+end
+
+[GetFirstOutputOfSolverCSPDisIIBlock]
+	CSPDisII[P,luCsp,lsCsp,pid.laPid,liPid]
+	=>
+	res
+	where	Q := ()read(pid)
+	choose
+	try
+		if not iserror (Q)
+		where res := () CSPDisII[P,luCsp,Q.lsCsp,laPid,pid.liPid]
+	try
+		if iserror (Q)
+		where res := () CSPDisII[P,luCsp,lsCsp,laPid,pid.liPid]
+	end
+end
+
+[GetFirstOutputOfSolverCSPDisIINoBlock]
+	CSPDisII[P,luCsp,lsCsp,pid.laPid,liPid]
+	=>
+	res
+	where	Q := ()read(pid)
+	choose
+	try
+		if not iserror (Q)
+		where res := () CSPDisII[P,luCsp,Q.lsCsp,laPid,pid.liPid]
+	try
+		if iserror (Q)
+		where res := () CSPDisII[P,luCsp,lsCsp,pid.laPid,liPid]
+	end
+end
+
+[ComposeCSPDisII]
+	CSPDisII[P,luCsp,Q.lsCsp,laPid,liPid]
+	=>
+	CSPDisII[R,luCsp,lsCsp,laPid,liPid]
+	where	R := ()ComposeCSP(P,Q)
+end
+
+[CloseSolverCSPDisII]
+	CSPDisII[P,luCsp,lsCsp,laPid,pid.liPid]
+	=>
+	CSPDisII[P,luCsp,lsCsp,laPid,liPid]
+	where	pid1 := ()close(pid)
+end
+
+end
+
+
+rules for csp
+
+	P, Q, res			: csp;
+	lmc1,lec1,EC1,DC1,store1	: list[constraint];
+	lmc2,lec2,EC2,DC2,store2	: list[constraint];
+
+global 
+
+[]	ComposeCSP(P,Q)
+	=>
+	res
+	choose
+	try
+		if P == Unsatisfiable or Q == Unsatisfiable
+		where res := () Unsatisfiable
+	try
+		where lmc1	:= ()GetLMC(P)
+		where lec1	:= ()GetLEC(P)
+		where EC1	:= ()GetEC(P)
+		where DC1	:= ()GetDC(P)
+		where store1	:= ()GetSTORE(P)
+		where lmc2	:= ()GetLMC(Q)
+		where lec2	:= ()GetLEC(Q)
+		where EC2	:= ()GetEC(Q)
+		where DC2	:= ()GetDC(Q)
+		where store2	:= ()GetSTORE(Q)
+		where res := () CSP[append(lmc2,lmc1),append(lec2,lec1),append(EC2,EC1),append(DC2,DC1),append(store2,store1)]
+	end
+end
+
+end
+
+
+rules for list[csp]
+
+	x				: var;
+	D				: domain;
+	n				: int;
+	v				: Type;
+	c				: constraint;
+	P, Q				: csp;
+	lv				: list[var];
+	lmc, lec, EC, DC, store		: list[constraint];
+	lmc1, lec1, EC1, DC1, store1	: list[constraint];
+	lf, newlmc, newEC, newDC	: list[constraint];
+	lcsp, lcsp1, newlcsp, lf	: list[csp];
+
+global 
+
+[]	CreateListOfCSP(x in? D.lf)
+	=>
+	CSP[x in? D.nil,nil,nil,nil,nil].CreateListOfCSP(lf)
+end
+[]	CreateListOfCSP(x = v.lf)
+	=>
+	CSP[nil,x = v.nil,nil,nil,nil].CreateListOfCSP(lf)
+end
+[]	CreateListOfCSP(nil)
+	=>
+	nil
+end
+
+[]	DecomposeCSP(lcsp,c.lf)
+	=>
+	DecomposeCSP(newlcsp,lf)
+	where	(list[var]) x.lv :=()VarsOfConstraint(c,nil)
+	where	(list[csp]) CSP[lmc,lec,EC,DC,store].lcsp1:=()GetCSPInHead(x,lcsp,nil)
+	where	n := ()ArityOfConstraint(c)
+	choose
+	try
+		if	n == 1000
+		where	newEC := ()EC
+		where	newDC := ()c.DC
+	try
+		if	n < 1000
+		where	newEC := ()c.EC
+		where	newDC := ()DC
+	end
+	choose
+	try
+		if	lv != nil
+		where	newlcsp := ()ProcessConstraint(CSP[lmc,lec,newEC,newDC,store].lcsp1,lv)
+	try
+		if	lv == nil
+		where	newlcsp := ()CSP[lmc,lec,newEC,newDC,store].lcsp1
+	end
+end
+
+[]	DecomposeCSP(lcsp,nil)
+	=>
+	lcsp
+end
+
+[]	ProcessConstraint(P.lcsp,x.lv)
+	=>
+	newlcsp
+	where	lmc := ()GetLMC(P)
+	where	lec := ()GetLEC(P)
+	choose
+	try
+		if	occurs x in lmc or occurs x in lec
+		where	newlcsp := ()ProcessConstraint(P.lcsp,lv)
+	try
+		if	not occurs x in lmc and not occurs x in lec
+		where   (list[csp]) Q.lcsp1:=()GetCSPInHead(x,lcsp,nil)
+		where	newlcsp := ()ProcessConstraint(ComposeCSP(P,Q).lcsp1,lv)
+	end
+end
+
+[]	ProcessConstraint(lcsp,nil)
+	=>
+	lcsp
+end
+
+[]	GetCSPInHead(x,CSP[lmc,lec,EC,DC,store].lcsp,lcsp1)
+	=>
+	lf
+	choose
+	try
+		if occurs x in lmc
+		where lf := () append(CSP[lmc,lec,EC,DC,store].lcsp,lcsp1)
+	try
+		where lf := () GetCSPInHead(x,lcsp,CSP[lmc,lec,EC,DC,store].lcsp1)
+	end
+end
+
+[]	GetCSPInHead(x,nil,lcsp)
+	=>
+	nil
+end
+
+end
+
+
+end
+
+

@@ -1,0 +1,9 @@
+// elan.2.0.amsterdam Unif2.lgi simplesig.spc
+
+a = a end
+a = b end
+f0(x,y) = f0(a,b) end
+f0(x,y) = f0(u,v) end
+
+
+

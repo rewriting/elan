@@ -1,0 +1,76 @@
+module BacktrackingMinimumDomain[Variables,Type,Values]
+
+import
+global
+	EnumerationRules[Variables,Type,Values]
+	PropagationRules[Variables,Type,Values]
+	;
+end
+
+stratop
+global
+	BacktrackingMinimumDomainFirstToLastAll	: < csp -> csp >         bs;
+	BacktrackingMinimumDomainFirstToLastOne	: < csp -> csp >         bs;
+	BacktrackingMinimumDomainLastToFirstAll	: < csp -> csp >         bs;
+	BacktrackingMinimumDomainLastToFirstOne	: < csp -> csp >         bs;
+end
+
+
+strategies for csp
+implicit
+
+/* Strategy		: Backtracking  	*/
+/* Variable selection	: Minimum Domain	*/
+/* Value selection	: From first to last	*/
+/* Number of solutions	: All 			*/
+
+[] BacktrackingMinimumDomainFirstToLastAll =>
+repeat* (
+	first one (GetVarWithMinimumDomain);
+	dk (iterate* (EliminateFirstValueOfDomain));
+	first one (InstantiateFirstValueOfDomain);
+	first one (Elimination)
+	);
+first one (GetSolutionCSP)
+end
+
+
+/* Strategy		: Backtracking 		*/
+/* Variable selection	: Minimum Domain	*/
+/* Value selection	: From first to last	*/
+/* Number of solutions	: First			*/
+
+[] BacktrackingMinimumDomainFirstToLastOne =>
+first one (BacktrackingMinimumDomainFirstToLastAll)
+end
+
+
+/* Strategy		: Backtracking 		*/
+/* Variable selection	: Minimum Domain	*/
+/* Value selection	: From last to first	*/
+/* Number of solutions	: All 			*/
+
+[] BacktrackingMinimumDomainLastToFirstAll =>
+repeat* (
+	first one (GetVarWithMinimumDomain);
+	dk (iterate* (EliminateLastValueOfDomain));
+	first one (InstantiateLastValueOfDomain);
+	first one (Elimination)
+	);
+first one (GetSolutionCSP)
+end
+
+
+/* Strategy		: Backtracking		*/
+/* Variable selection	: Minimum Domain	*/
+/* Value selection	: From last to first	*/
+/* Number of solutions	: First			*/
+
+[] BacktrackingMinimumDomainLastToFirstOne =>
+first one (BacktrackingMinimumDomainLastToFirstAll)
+end
+
+end
+
+
+end

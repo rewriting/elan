@@ -1,0 +1,36 @@
+module commutativeDec[Fss]
+import 	global 	term termUnif[Fss] ;
+
+ 	local  	Fss anyIdentifier int bool pair[identifier,int]
+		list[pair[identifier,int]] eq[variable] eq[term]
+		eqSystem occur[variable,term] occur[variable,eqSystem];
+end
+
+
+
+FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS) 
+	AND N:=()second(SS) ANDIF N> 0 :{
+   rules for eqSystem
+   // declare 
+   P:eqSystem; s_1,...,s_N:term; t_1,...,t_N:term;
+   global 
+     [decompose] P & F(s_1,...,s_N) = F(t_1,...,t_N) => P { & s_I=t_I }_I=1...N end 
+   end
+
+  }
+
+
+
+FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS) 
+	AND N:=()second(SS) ANDIF N==2 :{
+   rules for eqSystem
+   // declare P:eqSystem; s_1,...,s_N:term; t_1,...,t_N:term;
+
+   global
+     [decomposeC] P & F(s_1,s_2)=F(t_1,t_2)	=> P & s_1 = t_2 & s_2 = t_1  end
+   end
+  }
+
+end

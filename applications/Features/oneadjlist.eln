@@ -1,0 +1,98 @@
+module oneadjlist
+
+/* Definition of the sort oneadjlist which is a set of paths */
+/* For a vertex v, oneadjlist is the list containing v and its adjacent */
+/* vertices. So it is composed of v and its adjlist. */
+/* For example, if there is a path from 1 to 4 and 3, then 4 and 3 is */
+/* an adjacency list of vertex 1. the oneadjlist contains 1, 4 and 3. */
+
+import	
+	global
+		int
+		path
+		adjlist
+		pair[int,adjlist]
+		edge
+	;
+end
+
+sort oneadjlist;
+end
+
+operators
+  global
+
+	/* Constructor of the sort oneadjlist */
+	oneadjempty	: oneadjlist;
+	@		: (pair[int,adjlist]) oneadjlist;
+
+	/* Consequences of the addition of an edge to a oneadjlist */
+	/* Assume that the adjacency list of v1 contains v2 and v3 and */
+	/* that we add an edge from v0 to v1. Then the adjacency list */
+	/* of v0 contains v2 and v3. */
+	add_oneadjlist(@,@)	: (edge oneadjlist) oneadjlist;
+end
+
+
+/* Rules for simplification */
+
+rules for oneadjlist
+	v0 : int;
+global
+	[] [v0,adjempty]	=> oneadjempty
+	end
+end
+
+
+rules for oneadjlist
+	v0, v1, v2, len : int;
+	X, XX : adjlist;
+	Y : oneadjlist;
+	lab, lab1, lab2, lab3 : label;
+	b : bool;
+	R : oneadjlist;
+global
+
+	[] add_oneadjlist(edgeempty, Y)					=> oneadjempty
+	end
+
+	[] add_oneadjlist([v0,v1,lab], oneadjempty)			=> oneadjempty
+	end
+
+	[] add_oneadjlist([v0,v1,lab1], [v1,[v2,len,lab2,lab3]])		=>		R
+		where b:= ()suiv(lab1,lab2)
+		choose
+		try if b where R:=() [v0,[v2,len+1,lab1,lab3]]
+		try where R:=() oneadjempty
+		end
+	end
+
+	[] add_oneadjlist([v0,v1,lab1], [v1,[v2,len,lab2,lab3] U X])
+		=> [v0,[v2,len+1,lab1,lab3] U XX]
+		where b:= () suiv(lab1,lab2)
+		where XX := ()add_adjlist([v0,v1,lab1],X)
+		if b
+	end
+
+	[] add_oneadjlist([v0,v1,lab1], [v1,[v2,len,lab2,lab3] U X]) 	=> [v0,XX]
+		where b:= () suiv(lab1,lab2)
+		where XX := ()add_adjlist([v0,v1,lab1],X)
+	end
+
+/*	[] add_oneadjlist([v0,v1,lab1], [v1,[v2,len,lab2,lab3] U X]) 	=> 
+		where b:= () suiv(lab1,lab2)
+		where XX := ()add_adjlist([v0,v1,lab1],X)
+		switch 
+		case b then [v0,[v2,len+1,lab1,lab3] U XX]
+		otherwise [v0,XX]
+		end
+	end
+*/
+
+	[] add_oneadjlist([v0,v1,lab1], Y)	=> oneadjempty
+	end
+end
+
+end
+
+

@@ -1,0 +1,11 @@
+LPL iden description
+  
+query		of sort int
+		result of sort int
+		modules int iden
+		start with (foo)query
+
+end of LPL description
+
+
+

@@ -1,0 +1,5 @@
+# tests of Proving/Completion/BasicCompletion (from legacy/elan3 tst_all; format: tests/apps/README.md)
+itest completion KNZ86 completion KNZ86
+itest completion Zeh89 completion Zeh89
+itest completion curry completion curry
+itest completion expoclos completion expoclos

@@ -1,0 +1,362 @@
+module Timed_Automaton[K,Q,S,Inv,Trans]
+
+
+//---- IMPORTS  ----//
+
+
+import
+
+ global
+  K      /* clocks list      */ 
+  Q      /* states list      */
+  S      /* labels list      */
+  Inv    /* invariants list  */
+  Trans  /* transitions list */
+  eq[state]
+  Terms[K,Q,S] 
+  DBM[K] /* handles the difference bound matrices */
+  list[invariant]
+  list[statezone] 
+  pair[list[statezone],bool]
+  ;
+
+end // of import
+
+
+//---- OPERATORS  ----//
+
+
+operators global
+  
+  /*** bool ***/
+
+  REACHED                   :                       bool ;
+  CYCLE                     :                       bool ;
+
+  // tests the equivalence of two statezones.
+  cmp_zones(@,@)            : (statezone statezone) bool ;
+
+  // returns REACHED if the statezone given as a first argument is reachable,
+  // and either CYCLE or WRONG_SOURCE_STATE if not.
+  reachability of @ from @  : (statezone statezone) bool ;
+
+
+
+  /*** statezone ***/
+
+  // the statezone constructor
+  @/@                      : (state clockzone) statezone ;
+
+  // discrete transitions operator
+  TransitionOperator.@(@) : (label statezone) statezone ;
+
+
+
+  /*** clockzone ***/
+
+  // returns the invariant of a given state.
+  inv(@) : (state) clockzone ;
+
+
+
+  /*** pair[list[statezone],bool] ***/
+
+  WRONG_SOURCE_STATE : pair[list[statezone],bool] ;
+
+  // returns, when possible, a trajectory starting from a given statezone (the second argument)
+  // and reaching another given statezone (the third argument). Otherwise, it returns a either 
+  // a cyclic trajectory (when the third argument is an unreachable statezone) or the value 
+  // WRONG_SOURCE_STATE. 
+  Transitions_List(@,@,@)  :  (list[statezone] statezone statezone) pair[list[statezone],bool] ;
+
+ local
+
+  start  :  label ;
+
+  // returns the left hand side of a statezone
+  st(@)  :  (statezone) state ;
+
+  // returnss the right hand  side of a statezone
+  zn(@)  :  (statezone) clockzone ;
+
+  // returns the source state of a given transition
+  tr_before(@)  :  (transition) state ;
+
+  // returns the trigger of a given transition
+  tr_label(@)   :  (transition) label ;
+
+  // returns the guard of a given transition
+  tr_cond(@)    :  (transition) clockzone ;
+
+  // returns the set of clocks that have to be reset during a given transition
+  tr_zero(@)    :  (transition) list[clock] ;
+
+  // returns the result state of a given transition
+  tr_after(@)   :  (transition) state ;
+
+  // returns the left hand side of a given invariant
+  inv_state(@)  :  (invariant) state ;
+
+  // returns th right hand side of a given transition
+  inv_zone(@)   :  (invariant) clockzone ;
+  
+  // tests if a given statezone belongs too a given list of statezones
+  // it uses DBM's to test the equivalance of two clockzones
+  @ in @        :  (statezone list[statezone]) bool ;
+
+end // of operators
+
+
+//---- STRATEGIES OPERATORS  ----//
+
+
+stratop
+
+ global
+  TryTrans : <label -> label>  bs ;
+  Post     : <statezone -> statezone>  bs ;
+  AllTrans : <statezone -> statezone>  bs ;
+  TransTimeOperatorStar : <pair[list[statezone],bool] -> pair[list[statezone],bool]> bs ;
+
+end // of stratop
+
+
+//---- RULES  ----//
+
+
+//----------- A U T O M A T O N   E X E C U T I O N -----------
+
+rules for statezone
+
+  lbl     : label ;
+  s       : state ;
+  z, z1   : clockzone ;
+  sz, res : statezone ;
+ global
+  [TransPost] sz  => res
+                     where lbl:=(TryTrans) start
+                     where res:=(AllTrans) TransitionOperator.lbl(sz)  
+  end
+
+  [TimePost]  s/z => s/z1
+                     where z1:=()inter(inv(s), time(z))
+  end
+
+end // of rules for statezone
+
+rules for pair[list[statezone],bool]
+
+  szs, szc, sz1 : statezone ;
+  lsz           : list[statezone] ;
+  lsz1          : pair[list[statezone],bool] ;
+ global
+  [IfReached] Transitions_List(lsz,szs,szc) => lsz1
+                                               where sz1:=(Post)szs
+                                               if eq_state(st(sz1),st(szc)) 
+                                               and not empty(inter(zn(sz1),zn(szc)))
+                                               where lsz1:=()[sz1.lsz,REACHED]
+  end
+
+  [IfNoCycle] Transitions_List(lsz,szs,szc) => lsz1
+                                               where sz1:=(Post)szs
+                                               if not sz1 in lsz
+                                               and not empty(zn(sz1))
+                                               where lsz1:=(TransTimeOperatorStar)Transitions_List(sz1.lsz,sz1,szc)
+  end
+
+  [IfCycle]   Transitions_List(lsz,szs,szc) => lsz1
+                                               where sz1:=(Post)szs
+                                               if sz1 in lsz 
+                                               and not empty(zn(sz1))
+                                               where lsz1:=()[sz1.lsz,CYCLE]
+  end
+
+  [Else]      Transitions_List(lsz,szs,szc) => WRONG_SOURCE_STATE 
+  end
+              
+end // of rules for pair[list[statezone],bool]
+
+rules for bool
+
+  ss1, ss2 : state ;
+  cz1, cz2 : clockzone ;
+  sz, sz1, sz2,
+  szs, szc            : statezone ;
+  lsz  : list[statezone] ;
+  res  : bool ;
+  Path : pair[list[statezone],bool] ;
+ global
+  []  reachability of szc from szs  => res
+                                       where Path:=(TransTimeOperatorStar)Transitions_List(nil,szs,szc)
+                                       where res:=()second(Path)
+  end
+  [] cmp_zones(ss1/cz1,ss2/cz2) => eq_state(ss1,ss2) and cmp_DBMs([elim(cz1),elim(cz2)])
+  end
+  [] sz in nil      => false
+  end
+  [] sz in sz1.lsz  => res
+                       choose try if cmp_zones(sz,sz1) 
+                                  where res:=()true
+                              try 
+                                  where res:=()sz in lsz
+                       end
+  end
+
+end // of rules for bool
+
+//----- E N D  O F  A U T O M A T O N   E X E C U T I O N -----
+
+
+//-------------------- O T H E R  R U L E S -------------------
+
+rules for clockzone
+
+  s, t : state ;
+  z    : clockzone ;
+  lbl  : label ;
+  lc   : list[clock] ;
+ global
+  [] tr_cond(s,lbl:z,lc,t) => z  
+  end
+  [] inv_zone(s:z)         => z
+  end
+  [] zn(s/z)               => z
+  end
+
+end // of rules for clockzone
+
+rules for state
+
+  s, t : state ;
+  z    : clockzone ;
+  lbl  : label ;
+  lc   : list[clock] ;
+ global
+  [] tr_before(s,lbl:z,lc,t) => s
+  end
+  [] tr_after(s,lbl:z,lc,t)  => t
+  end
+  [] inv_state(s:z)          => s
+  end
+  [] st(s/z)                 => s
+  end
+
+end // of rules for state
+
+rules for label
+
+  s, t : state ;
+  z    : clockzone ;
+  lbl  : label ;
+  lc   : list[clock] ;
+ global
+  [] tr_label(s,lbl:z,lc,t) => lbl
+  end
+
+end // of rules for label
+
+rules for list[clock]
+
+  s, t : state ;
+  z    : clockzone ;
+  lbl  : label ;
+  lc   : list[clock] ;
+ global
+  [] tr_zero(s,lbl:z,lc,t) => lc
+  end
+
+end // of rules for list[clock]
+
+
+//-------------- E N D  O F  O T H E R  R U L E S -------------
+
+
+
+//----------------- P R E P R O C E S S I N G -----------------
+
+rules for statezone
+
+  z : clockzone ;
+ global
+  FOR EACH tr       : transition ;
+           bef, aft : state ;
+           label    : label ;
+           cond     : clockzone ;
+           zero     : list[clock]
+  SUCH THAT tr      :=(listExtract) elem(Trans)
+        AND bef     :=()tr_before(tr)
+        AND label   :=()tr_label (tr)
+        AND cond    :=()tr_cond  (tr)
+        AND zero    :=()tr_zero  (tr)
+        AND aft     :=()tr_after (tr) :
+  {
+    [OneTrans] TransitionOperator.label(bef/z) => aft/lproj(inter(cond,z),zero)
+    end
+  }
+
+end // of rules for statezone
+
+rules for clockzone
+
+ global
+  FOR EACH invar : invariant; st : state; cz : clockzone
+  SUCH THAT invar:=(listExtract)elem(Inv)
+        AND st:=()inv_state(invar) AND cz:=()inv_zone(invar) :
+  {
+    [] inv(st) => cz
+    end
+  }
+
+end // of rules for clockzone
+
+rules for label
+
+  lbl : label ;
+ global
+  FOR EACH label : identifier SUCH THAT label:=(listExtract)elem(S) :
+  {
+    [trylabel] lbl => label
+    end
+  }
+
+end // of rules for label
+
+//----------- E N D  O F  P R E P R O C E S S I N G -----------
+
+
+//---  STRATEGIES  ---//
+
+strategies for label
+
+ implicit
+  []  TryTrans  =>  dk(trylabel)
+  end
+
+end // of strategies for label
+
+strategies for statezone
+
+ implicit
+  []  Post     => TimePost ; dk(TransPost)
+  end
+  []  AllTrans => dk(OneTrans)
+  end
+
+end // of strategies for statezone
+
+strategies for pair[list[statezone],bool]
+
+ implicit
+  [] TransTimeOperatorStar => repeat*(
+                                       first one(
+                                                 dk(IfReached),
+                                                 dk(IfNoCycle),
+                                                 IfCycle,
+                                                 Else
+                                                )
+                                      )
+  end
+
+end // of strategies for pair[list[list[state]],bool]
+
+end // of module Timed_Automaton

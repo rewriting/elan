@@ -1,0 +1,311 @@
+module hor
+
+import global builtinInt bool pair[builtinInt,builtinInt] 
+	list[builtinInt] arrayLOG[64,builtinInt]
+	list[pair[builtinInt,builtinInt]]
+	Meta_apply[pair[builtinInt,builtinInt]] 
+	
+	prompt[list[pair[builtinInt,Strategy[pair[builtinInt,builtinInt]]]]]
+	prompt[Strategies[pair[builtinInt,builtinInt]]]
+	pair[builtinInt,Strategy[pair[builtinInt,builtinInt]]] 
+	list[pair[builtinInt,Strategy[pair[builtinInt,builtinInt]]]]; end
+
+sort State; end
+
+operators
+global
+  1st(@)		: ( list[pair[builtinInt,builtinInt]] ) pair[builtinInt,builtinInt];
+  state(@,@,@)		: (path:list[pair[builtinInt,builtinInt]] 
+			   possibs:arrayLOG[64,builtinInt]
+			   origpossibs:arrayLOG[64,builtinInt]) State;
+  list2array(@)		: (list[builtinInt]) arrayLOG[64,builtinInt];
+  l2a(@,,@)		: (builtinInt list[builtinInt]) arrayLOG[64,builtinInt];
+
+  horse(@)		: ( builtinInt ) State;
+  ord(@)		: (bool) builtinInt;
+  possibilites(@,@)	: (pair[builtinInt,builtinInt] arrayLOG[64,builtinInt]) 
+				list[pair[builtinInt,Strategy[pair[builtinInt,builtinInt]]]];
+  extract_strategies(@)	: (list[pair[builtinInt,Strategy[pair[builtinInt,builtinInt]]]]) Strategies[pair[builtinInt,builtinInt]];
+  addapt_possib(@,@)	: (pair[builtinInt,builtinInt] arrayLOG[64,builtinInt]) arrayLOG[64,builtinInt];
+  addapt_possibilites(@,@)	: (pair[builtinInt,builtinInt] arrayLOG[64,builtinInt]) arrayLOG[64,builtinInt];
+  index(@,@)		: (builtinInt builtinInt) builtinInt;
+  Index(@)		: (pair[builtinInt,builtinInt]) builtinInt;
+  R1(@,@,@)		: (builtinInt builtinInt arrayLOG[64,builtinInt]) pair[builtinInt,Strategy[pair[builtinInt,builtinInt]]];
+  R2(@,@,@)		: (builtinInt builtinInt arrayLOG[64,builtinInt] ) pair[builtinInt,Strategy[pair[builtinInt,builtinInt]]];
+  R3(@,@,@)		: (builtinInt builtinInt arrayLOG[64,builtinInt]) pair[builtinInt,Strategy[pair[builtinInt,builtinInt]]];
+  R4(@,@,@)		: (builtinInt builtinInt arrayLOG[64,builtinInt]) pair[builtinInt,Strategy[pair[builtinInt,builtinInt]]];
+  R5(@,@,@)		: (builtinInt builtinInt arrayLOG[64,builtinInt]) pair[builtinInt,Strategy[pair[builtinInt,builtinInt]]];
+  R6(@,@,@)		: (builtinInt builtinInt arrayLOG[64,builtinInt]) pair[builtinInt,Strategy[pair[builtinInt,builtinInt]]];
+  R7(@,@,@)		: (builtinInt builtinInt arrayLOG[64,builtinInt]) pair[builtinInt,Strategy[pair[builtinInt,builtinInt]]];
+  R8(@,@,@)		: (builtinInt builtinInt arrayLOG[64,builtinInt]) pair[builtinInt,Strategy[pair[builtinInt,builtinInt]]];
+
+  substract @ @-th elem(@): (builtinInt builtinInt arrayLOG[64,builtinInt]) arrayLOG[64,builtinInt];
+
+end
+
+stratop
+  global
+    horse_strat		: <State>		builtin;
+    one_horse_strat	: <State>		builtin;
+  local
+    range 		: <pair[builtinInt,builtinInt]>	builtin;
+    range1 		: <pair[builtinInt,builtinInt]>	builtin;
+    range2 		: <pair[builtinInt,builtinInt]>	builtin;
+    range3 		: <pair[builtinInt,builtinInt]>	builtin;
+    range4 		: <pair[builtinInt,builtinInt]>	builtin;
+    range5 		: <pair[builtinInt,builtinInt]>	builtin;
+    range6 		: <pair[builtinInt,builtinInt]>	builtin;
+    range7 		: <pair[builtinInt,builtinInt]>	builtin;
+    range8 		: <pair[builtinInt,builtinInt]>	builtin;
+
+   SORT			: <list[pair[builtinInt,Strategy[pair[builtinInt,builtinInt]]]]> builtin;
+end
+
+
+
+
+rules for pair[builtinInt,builtinInt]
+        x,y : builtinInt;
+	z :  pair[builtinInt,builtinInt];
+	l : list[pair[builtinInt,builtinInt]];
+global
+  [] 1st(z.l) => z end
+  [range_rule1]  [x,y]	=> [x+2,y-1] if x+2<9 and y-1>0 end
+  [range_rule2]  [x,y]	=> [x+2,y+1] if x+2<9 and y+1<9 end
+  [range_rule3]  [x,y]	=> [x-2,y-1] if x-2>0 and y-1>0 end
+  [range_rule4]  [x,y]	=> [x-2,y+1] if x-2>0 and y+1<9 end
+  [range_rule5]  [x,y]	=> [x-1,y-2] if x-1>0 and y-2>0 end
+  [range_rule6]  [x,y]	=> [x+1,y+2] if x+1<9 and y+2<9 end
+  [range_rule7]  [x,y]	=> [x-1,y+2] if x-1>0 and y+2<9 end
+  [range_rule8]  [x,y]	=> [x+1,y-2] if x+1<9 and y-2>0 end
+end
+
+rules for arrayLOG[64,builtinInt]
+i,h	:builtinInt;
+ls 	: list[builtinInt];
+global
+  []  list2array(ls) => l2a(0,,ls)		end
+  []  l2a(i,,nil) => new(0)			end
+  []  l2a(i,,h.ls) => l2a(i+1,,ls)[i<-h]	end
+end
+
+rules for builtinInt
+x, y	: builtinInt;
+global
+  []	index(x,y) => 8*(x-1)+y-1		end
+  []	Index([x,y]) => 8*(x-1)+y-1		end
+  []	ord(true)  => 1				end
+  []	ord(false) => 1				end
+end
+
+rules for pair[builtinInt,Strategy[pair[builtinInt,builtinInt]]]
+x, y	: builtinInt;
+x1, y1	: builtinInt;
+possib		: arrayLOG[64,builtinInt];
+global
+  []  R1(x,y,possib)	=> [possib[index(x1,y1)],call "range1":pair[builtinInt,builtinInt]] 
+			if x+2<9 and y-1>0 where x1:=()x+2 where y1:=()y-1 end
+  []  R1(x,y,possib)	=> [9,id]						   end
+
+  []  R2(x,y,possib)	=> [possib[index(x1,y1)],call "range2":pair[builtinInt,builtinInt]]
+			if x+2<9 and y+1<9 where x1:=()x+2 where y1:=()y+1 end
+  []  R2(x,y,possib)	=> [9,id]						   end
+
+  []  R3(x,y,possib)	=> [possib[index(x1,y1)],call "range3":pair[builtinInt,builtinInt]]
+			if x-2>0 and y-1>0 where x1:=()x-2 where y1:=()y-1 end
+  []  R3(x,y,possib)	=> [9,id]						   end
+
+  []  R4(x,y,possib)	=> [possib[index(x1,y1)],call "range4":pair[builtinInt,builtinInt]]
+			if x-2>0 and y+1<9 where x1:=()x-2 where y1:=()y+1 end
+  []  R4(x,y,possib)	=> [9,id]						   end
+
+  []  R5(x,y,possib)	=> [possib[index(x1,y1)],call "range5":pair[builtinInt,builtinInt]]
+			if x-1>0 and y-2>0 where x1:=()x-1 where y1:=()y-2 end
+  []  R5(x,y,possib)	=> [9,id]						   end
+
+  []  R6(x,y,possib)	=> [possib[index(x1,y1)],call "range6":pair[builtinInt,builtinInt]]
+			if x+1<9 and y+2<9 where x1:=()x+1 where y1:=()y+2 end
+  []  R6(x,y,possib)	=> [9,id]						   end
+
+  []  R7(x,y,possib)	=> [possib[index(x1,y1)],call "range7":pair[builtinInt,builtinInt]]
+			if x-1>0 and y+2<9 where x1:=()x-1 where y1:=()y+2 end
+  []  R7(x,y,possib)	=> [9,id]						   end
+
+  []  R8(x,y,possib)	=> [possib[index(x1,y1)],call "range8":pair[builtinInt,builtinInt]]
+			if x+1<9 and y-2>0 where x1:=()x+1 where y1:=()y-2 end
+  []  R8(x,y,possib)	=> [9,id]						   end
+end
+
+rules for Strategies[pair[builtinInt,builtinInt]]
+p	: builtinInt;
+s	: Strategy[pair[builtinInt,builtinInt]];
+ls	: list[pair[builtinInt,Strategy[pair[builtinInt,builtinInt]]]];
+global
+  []	extract_strategies([p,s].nil) => s				end
+  []	extract_strategies([p,id].ls) => extract_strategies(ls)		end
+  []	extract_strategies([p,s].ls) => s, extract_strategies(ls)	end
+end
+
+rules for list[pair[builtinInt,Strategy[pair[builtinInt,builtinInt]]]]
+u 		: list[pair[builtinInt,Strategy[pair[builtinInt,builtinInt]]]];
+x, y		: builtinInt;
+possib		: arrayLOG[64,builtinInt];
+p1,p2,p3,p4,p5,p6,p7,p8	: builtinInt;
+s1,s2,s3,s4,s5,s6,s7,s8 : Strategy[pair[builtinInt,builtinInt]];
+
+global
+  [S] [p1,s1].[p2,s2].u
+	=>
+      [p2,s2].[p1,s1].u
+      if p1 > p2 			end
+
+  [S] [p1,s1].[p2,s2].[p3,s3].u
+	=>
+      [p1,s1].[p3,s3].[p2,s2].u
+      if p2 > p3 			end
+
+  [S] [p1,s1].[p2,s2].[p3,s3].[p4,s4].u
+	=>
+      [p1,s1].[p2,s2].[p4,s4].[p3,s3].u
+      if p3 > p4 			end
+
+  [S] [p1,s1].[p2,s2].[p3,s3].[p4,s4].[p5,s5].u
+	=>
+      [p1,s1].[p2,s2].[p3,s3].[p5,s5].[p4,s4].u
+      if p4 > p5 			end
+
+  [S] [p1,s1].[p2,s2].[p3,s3].[p4,s4].[p5,s5].[p6,s6].u
+	=>
+      [p1,s1].[p2,s2].[p3,s3].[p4,s4].[p6,s6].[p5,s5].u
+      if p5 > p6 			end
+
+  [S] [p1,s1].[p2,s2].[p3,s3].[p4,s4].[p5,s5].[p6,s6].[p7,s7].u
+	=>
+      [p1,s1].[p2,s2].[p3,s3].[p4,s4].[p5,s5].[p7,s7].[p6,s6].u
+      if p6 > p7 			end
+
+  [S] [p1,s1].[p2,s2].[p3,s3].[p4,s4].[p5,s5].[p6,s6].[p7,s7].[p8,s8].nil
+	=>
+      [p1,s1].[p2,s2].[p3,s3].[p4,s4].[p5,s5].[p6,s6].[p8,s8].[p7,s7].nil
+      if p7 > p8 			end
+
+  []	possibilites([x,y],possib) =>
+	R1(x,y,possib).	
+	R2(x,y,possib).	
+	R3(x,y,possib).	
+	R4(x,y,possib).	
+	R5(x,y,possib).	
+	R6(x,y,possib).	
+	R7(x,y,possib).	
+	R8(x,y,possib).	nil end
+end
+
+rules for arrayLOG[64,builtinInt]
+n1, n, e, x, y, d	: builtinInt;
+l,possib		: arrayLOG[64,builtinInt];
+global
+  []	addapt_possib([x,y],possib) => possib
+		if x >= 9 or x <= 0 or y >= 9 or y <= 0	end
+  []	addapt_possib([x,y],possib) =>
+		substract -1 index(x,y)-th elem(possib)		end
+  []	addapt_possibilites([x,y],possib) =>
+		addapt_possib([x-1,y-2],
+		addapt_possib([x-2,y-1],
+		addapt_possib([x+1,y-2],
+		addapt_possib([x+2,y-1],
+		addapt_possib([x-1,y+2],
+		addapt_possib([x-2,y+1],
+		addapt_possib([x+1,y+2],
+		addapt_possib([x+2,y+1],possib))))))))		end
+  [] 	substract d n-th elem(possib)	=> 
+				possib[n<-d+possib[n]]		end
+end
+
+rules for State
+        n 			: builtinInt;
+	head, x 		:  pair[builtinInt,builtinInt];
+	ql 			: State;
+	path			: list[pair[builtinInt,builtinInt]];
+	new_origpossibs,origpossibs,
+	possibs, new_possibs	: arrayLOG[64,builtinInt];
+	poss, poss1,poss2, poss3	: list[pair[builtinInt,Strategy[pair[builtinInt,builtinInt]]]];
+	strat,	strat1		: Strategies[pair[builtinInt,builtinInt]];
+global
+  
+
+  [horse_0] horse(0)	=> state([1,1].nil,possibs,origpossibs)
+			   where possibs:=()list2array(
+				2.3.4.4.4.4.3.2.
+				3.4.5.6.6.6.4.3.
+				4.5.8.8.8.8.6.4.
+				4.6.8.8.8.8.6.4.
+				4.6.8.8.8.8.6.4.
+				4.6.8.8.8.8.6.4.
+				3.4.6.6.6.6.4.3.
+				2.3.4.4.4.4.3.2.nil)
+			   where origpossibs:=()list2array(
+				1.0.0.0.0.0.0.0.
+				0.0.0.0.0.0.0.0.
+				0.0.0.0.0.0.0.0.
+				0.0.0.0.0.0.0.0.
+				0.0.0.0.0.0.0.0.
+				0.0.0.0.0.0.0.0.
+				0.0.0.0.0.0.0.0.
+				0.0.0.0.0.0.0.0.nil)
+  end
+  [horse_n] horse(n)	=> state(x.path,new_possibs,new_origpossibs)
+			   if n>0
+			   where ql:=(horse_strat)horse(n-1)
+			   where path:=()ql.path
+			   where head:=()1-th elem(path)
+			   where possibs :=()ql.possibs
+			   where origpossibs:=()ql.origpossibs
+			   where poss :=()possibilites(head,possibs)
+			   where poss1:=(SORT)poss
+			   where strat:=()extract_strategies(poss1)
+			   where x:=(META)meta_apply(dk(strat),head)
+			   where new_possibs:=()addapt_possibilites(x,possibs)
+			   if origpossibs[Index(x)] == 0
+			   where new_origpossibs:=()
+			   substract 1 Index(x)-th elem(origpossibs)
+  end
+end
+
+strategies for State
+implicit
+  [.] horse_strat 	=> dk(horse_0, horse_n) end
+//  [.] one_horse_strat 	=> first one(dk(horse_0, horse_n)) end
+  [.] one_horse_strat 	=> first one(horse_strat) end
+end
+
+strategies for list[pair[builtinInt,Strategy[pair[builtinInt,builtinInt]]]]
+implicit
+  [.] SORT => repeat*(first one(S))		end
+end
+
+strategies for pair[builtinInt,builtinInt]
+implicit
+ [.]	range => dk(
+		range_rule1,
+		range_rule2,
+		range_rule3,
+		range_rule4,
+		range_rule5,
+		range_rule6,
+		range_rule7,
+		range_rule8
+		) end
+  [.] 	range1 => first one(range_rule1)				end
+  [.] 	range2 => first one(range_rule2)				end
+  [.] 	range3 => first one(range_rule3)				end
+  [.] 	range4 => first one(range_rule4)				end
+  [.] 	range5 => first one(range_rule5)				end
+  [.] 	range6 => first one(range_rule6)				end
+  [.] 	range7 => first one(range_rule7)				end
+  [.] 	range8 => first one(range_rule8)				end
+end
+
+end
+
+
+

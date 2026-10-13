@@ -1,0 +1,42 @@
+module trii
+
+import global bool eq[Foo]; end
+
+sort Foo; end
+
+operators global
+  a	: Foo;
+  b	: Foo;
+  c	: Foo;
+  d	: Foo;
+  f(@)	: (Foo) Foo;
+  @=@	: (Foo Foo) Foo;
+  @.@   : (Foo Foo) Foo;
+end
+
+rules for Foo
+x, y, z, u, uu	: Foo;
+x0, x1,x2,x3,x4,x5,x6,x7,x8,x9 : Foo;
+s,t:Foo; le, lt, lr, t, R : Foo;
+global
+  []	f(s=t.le) => R
+		where lr:=()le
+		choose
+		  try 
+			if s==t 
+//			where lr:=()le
+			where R:=()lr
+		  try 
+			if s!=t 
+//			where lr:=()le
+			where R:=()t.lr
+		end
+  end
+end 
+
+end
+
+
+
+
+

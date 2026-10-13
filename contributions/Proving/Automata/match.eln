@@ -1,0 +1,190 @@
+module match[Fss, Vars]
+import global match_system[Fss, Vars] list[conj_match];
+	local bool Fss  pair[identifier, int] list[pair[identifier, int]]
+	symbol[Fss] eq[symbol]
+	state eq[state]
+	configuration[Fss]
+	variable[Vars] ECterm[Vars] Cterm[Fss] transition[Fss] list[transition]
+	substitution[Fss, Vars] list[substitution]
+	automaton[Fss];
+end
+
+
+/* 		Matching algorithm in tree automata
+		-----------------------------------
+(@ ?= states) with (@): (Cterm automaton) list[substitution];
+
+Gives a list of matches between a Cterm (a pattern) and every state of the
+automaton.
+
+
+(@ ?= @) with(@): (Cterm state_set automaton) list[substitution];
+
+Gives a list of matches between a Cterm (a pattern) and a list of states of the
+automaton.
+
+
+(@ ?= @) with(@): (Cterm Cterm list[transition]) list[substitution]; 
+
+Gives a list of matches between two Cterms w.r.t. a list of transitions.
+
+*/
+
+
+operators global
+	(@ ?= states) with (@)		: (Cterm automaton) list[substitution];
+	(@ ?= @) with(@)		: (Cterm state_set automaton) list[substitution];
+	(@ ?= @) with(@)		: (Cterm Cterm list[transition]) list[substitution]; 
+
+local
+	(@) with(@) matches(@, @)	: (disj_match list[transition] conj_match list[conj_match]) list[conj_match]; 
+
+	 bag_match(@, @, @, @, @, @)	: (symbol state Cterm conj_match disj_match list[transition]) disj_match;
+	non_var(@)			: (Cterm) bool;
+end
+
+stratop global
+  match_strat : <list[conj_match]> builtin;
+  bag_match_strat : <disj_match> builtin;
+end
+
+FOR EACH SS:pair[identifier,int]; F:identifier; N:int
+SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS)
+     AND N:=()second(SS):{
+rules for bool
+	t_1, ..., t_N: Cterm;
+global
+  [] non_var(F(t_1, ..., t_N)) => true
+  end
+end}
+
+
+rules for bool
+          a_variable: variable;
+global
+  []	non_var(a_variable) => false end
+end
+
+
+
+rules for list[substitution]
+          s, t: Cterm;
+	a: automaton;
+	st: state;
+	A: state_set;
+	R: list[transition];
+	l_match: list[conj_match];
+	l_subst, l_subst1, l_subst2: list[substitution];
+global
+  []	(s ?= states) with(a) => (s ?= A) with(a)
+		where A:=()states(a) 				end
+
+  []    (s ?= nil) with(a)=> nil				end
+  []    (s ?= st.A) with(a)=> l_subst
+		where l_subst1:=() (s ?= st) with(list_trans(a))
+		where l_subst2:=() (s ?= A) with(a)
+		where l_subst :=() append(l_subst1, l_subst2)   end
+
+
+  []	(s ?= t) with(R) => l_subst
+		where l_match:= (match_strat) ((s ?= t ^ true) v false) with(R) 
+					matches(true, nil)
+		where l_subst:= (list_match_to_subst_strat) 
+					list_match_to_subst(l_match)
+  end
+end
+
+
+rules for list[conj_match]
+         
+	R: list[transition];
+	l: list[conj_match];
+	s, t: Cterm;
+	a_variable: variable;
+	q: state;
+	phi1, phi3: conj_match;
+	phi2, res: disj_match;
+global
+
+[configuration] ((s ?= q ^ phi1)v phi2) with(R) matches(phi3, l) => (res) with(R) matches(true, l)		
+
+			if non_var(s)
+			where res:= (bag_match_strat) bag_match(head_of(s), q, s, add(phi1, phi3), phi2, R) 
+end
+
+
+[matching_r1] ((a_variable ?= q ^ phi1) v phi2) with(R) matches(phi3, l) 
+		=> 
+		(phi1 v phi2) with(R) matches(a_variable ?= q ^ phi3, l)
+end
+
+
+FOR EACH SS:pair[identifier,int]; F:identifier; N:int
+SUCH THAT SS:=(listExtract) elem(Fss) AND F :=()first(SS) AND N:=()second(SS):{
+
+rules for list[conj_match] 
+          s_1, ..., s_N: Cterm;
+	t_1, ..., t_N : Cterm;
+global
+  [decompose]
+	((F(s_1, ..., s_N) ?= F(t_1, ..., t_N) ^ phi1) v phi2) with(R) matches(phi3, l)
+	=>
+
+	({s_I ?= t_I ^ }_I=1...N phi1 v phi2) with(R) matches(phi3, l)		
+  end
+end
+}
+
+[clash] (( s ?= t ^ phi1) v phi2) with(R) matches(phi3, l) 
+			=> 
+		(phi2) with(R) matches(true, l)
+		if (non_var(s) and head_of(s) != head_of(t))
+end
+
+[matching_r4] (true v phi2) with(R) matches(phi3, l) => (phi2) with(R) matches(true, phi3.l)				end
+[matching_r5] (false) with(R) matches(phi3, l) => l 									end
+
+end
+
+rules for disj_match
+          var_symbole: symbol;
+	q1,q2: state;
+	R: list[transition];
+	phi1: conj_match;
+	res, phi2: disj_match;
+	c: configuration;
+	s: Cterm;
+	
+
+global
+
+[bag_match_r1] bag_match(var_symbole, q1, s, phi1, phi2, (c -> q2).R) => (s ?= config_to_Cterm(c) ^ phi1) v res
+			
+			if eq_symbol(symbol_of(c), var_symbole) and q1 == q2
+			where res:= (bag_match_strat) bag_match(var_symbole, q1, s, phi1, phi2, R)
+end
+
+[bag_match_r2] bag_match(var_symbole, q1, s, phi1, phi2, (c -> q2).R) => bag_match(var_symbole, q1, s, phi1, phi2, R)
+			if (symbol_of(c) != var_symbole or q1 != q2)				end
+
+[bag_match_r3] bag_match(var_symbole, q1, s, phi1, phi2, nil) => phi2						end
+end
+
+
+
+strategies for disj_match
+implicit
+  [.] bag_match_strat =>
+	repeat*(dc one(bag_match_r1 , bag_match_r2 , bag_match_r3))
+  end
+end
+
+
+strategies for list[conj_match]
+implicit
+  [.] match_strat => 
+	repeat*(dc one(configuration , matching_r1 , decompose , clash , matching_r4 , matching_r5))
+  end
+end
+
+end

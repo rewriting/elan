@@ -1,0 +1,10 @@
+LPL Part description
+
+
+  query 	of sort pair[list[variable],list[variable]] 
+         	result of sort pair[list[variable],list[variable]]
+	 	import term list[variable] pair[list[variable],list[variable]]
+                        Part 
+         	start with (choosePart) query 
+
+end

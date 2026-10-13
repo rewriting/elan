@@ -1,0 +1,43 @@
+module ordre_sig[vars,fss,prec]
+import	global	termCommons[fss,vars];
+	local	prec bool int identifier
+		pair[identifier,int]
+		list[pair[identifier,int]]
+	;
+end
+
+operators
+  global
+    supsig(@,@) : (identifier identifier) bool;
+    eqsig(@,@) : (identifier identifier) bool;
+
+    @ >sig @	: (identifier identifier) bool	alias supsig(@,@):;
+    @ ==sig @	: (identifier identifier) bool	alias eqsig(@,@):;
+    precedence(@) : (identifier) int;
+end
+
+rules for int
+	ide : identifier;
+global
+  FOR EACH SF:pair[identifier,int]; F:identifier;  NF:int
+  SUCH THAT SF:=(listExtract) elem(prec) AND F:=()first(SF) AND NF:=()second(SF) :{
+  [] precedence(F) => NF
+  end
+}
+// pour les cas non definis
+  [] precedence($ide) => 0
+  end
+end
+
+rules for bool
+ 	$F,$G : identifier;
+global
+  [] supsig($F,$G)	=>	precedence($F) > precedence($G)
+  end
+  [] eqsig($F,$G)	=>	precedence($F) == precedence($G)
+  end
+end
+
+
+end
+

@@ -1,0 +1,9 @@
+module length[X]
+
+import global symbol[3,X,list[X],int,int];
+
+op global
+  incr(@,@,@)  : (X list[X] int) int;
+end
+
+end

@@ -1,0 +1,2 @@
+clpExecute( E Vars(0): ( fact(s(s(s(zero))),X).nil  | true , true) )
+end

@@ -1,0 +1,337 @@
+
+//Predicate calculus - First version
+//
+module propositional[Fss]
+import 	
+	definitions[Fss] 
+;end
+
+//--------------------------------------------------------------------------------------
+stratop
+  global
+	SetAON			: <Seq -> Seq>		builtin;
+	SetAXM			: <Seq -> Seq>		builtin;
+	SetIMP			: <Seq -> Seq>		builtin;
+	SetAXMaux		: <Seq -> Seq>		builtin;
+	SetIMPaux		: <Seq -> Seq>		builtin;
+	SetSTOP			: <Seq -> Seq>		builtin;
+	SetTB			: <Seq -> Seq>		builtin;
+	SetHV			: <Seq -> Seq>		builtin;
+	SetHU			: <Seq -> Seq>		builtin;
+	FinalRule		: <Seq -> Seq>		builtin;
+
+	elimHyp			: <Seq -> Seq>		builtin;
+	dedstrat		: <Seq -> Seq>		builtin;
+	dedstratInit		: <Seq -> Seq>		builtin;
+
+end
+
+//--------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------
+//AND-rules 
+rules for Seq
+	P, Q, R : Pred;
+	H : Pred;
+	S1,  S2 : Seq;
+global
+  [AND1] H |- ^(P && Q) |=> R 	=>  S1 :: S2
+			where S1 := (dedstrat) H |- ^Q |=> R
+			where S2 := (dedstrat) H |- ^P |=> R		end
+  [AND2] H |- ^(P && Q) 		=>  H |- P |=> ^Q		end
+  [AND3] H |-  (P && Q) |=> R 	=>  H |- P |=> (Q |=> R) 		end
+  [AND4] H |-  (P && Q)		=>  S1 :: S2
+			where S1 := (dedstrat) H |- Q	
+			where S2 := (dedstrat) H |- P			end
+end
+
+//--------------------------------------------------------------------------------------
+//OR-rules
+rules for Seq
+	P, Q, R : Pred;
+	H : Pred;
+	S1,  S2 : Seq;
+global
+  [OR1] H |- ^(P or Q) |=> R 	=>  H |- ^P |=> (^Q |=> R) 		end
+  [OR2] H |- ^(P or Q) 		=>  S1 :: S2
+			where S1 := (dedstrat) H |- ^Q
+			where S2 := (dedstrat) H |- ^P			end
+  [OR3] H |-  (P or Q) |=> R 	=>  S1 :: S2
+			where S1 := (dedstrat) H |- Q |=> R
+			where S2 := (dedstrat) H |- P |=> R		end
+  [OR4] H |-  (P or Q) 		=>  H |- ^P |=> Q			end
+end
+
+//--------------------------------------------------------------------------------------
+//IMP-rules
+rules for Seq
+	Pp : Prop;
+	P, Q, R : Pred;
+	H : Pred;
+	S1,  S2 : Seq;
+global
+  [IMP1] H |- ^(P |=> Q) |=> R 	=>  H |- P |=> (^Q |=> R) 		end
+  [IMP2] H |- ^(P |=> Q) 	=>  S1 :: S2
+			where S1 := (dedstrat)  H |- ^Q  
+			where S2 := (dedstrat) 	H |- P			end
+  [IMP3] H |-  (P |=> Q) |=> R 	=>  S1 :: S2
+			where S1 := (dedstrat) H |- Q |=> R
+			where S2 := (dedstrat) H |- ^P |=> R		end 
+  //[IMP4] H |-  (P |=> Q) 	=>  H && P |- Q				end
+  [IMP4a] H |-  (Pp |=> Q) 	=>  H && Pp |- Q			end
+  [IMP4b] H |-  (^Pp |=> Q) 	=>  H && ^Pp |- Q			end
+end
+
+//--------------------------------------------------------------------------------------
+//EQV-rules
+rules for Seq
+	P, Q, R : Pred;
+	H : Pred;
+	S1,  S2 : Seq;
+global
+  [EQV1] H |- ^(P <=> Q) |=> R 	=> S1 :: S2
+			where S1 := (dedstrat) H |- P |=> (^Q |=> R)
+			where S2 := (dedstrat) H |- ^P |=> (Q |=> R)		end
+  [EQV2] H |- ^(P <=> Q) 	=> S1 :: S2
+			where S1 := (dedstrat) H |- P |=> ^Q 
+			where S2 := (dedstrat) H |- ^Q |=> P			end
+  [EQV3] H |-  (P <=> Q) |=> R 	=> S1 :: S2
+			where S1 := (dedstrat) H |- P |=> (Q |=> R)
+			where S2 := (dedstrat) H |- ^P |=> (^Q |=> R)		end
+  [EQV4] H |-  (P <=> Q) 	=> S1 :: S2
+			where S1 := (dedstrat) H |- P |=> Q
+			where S2 := (dedstrat) H |- Q |=> P			end
+end
+
+//--------------------------------------------------------------------------------------
+//NOT-rules
+rules for Seq
+	P, R : Pred;
+	H : Pred;
+global
+  [NOT1] H |-  ^^P |=> R	=> H |- P |=> R			end
+  [NOT2] H |-  ^^P 		=> H |- P			end
+end
+
+//--------------------------------------------------------------------------------------
+//AXM-axioms
+rules for Seq
+	P, Q : Pred;
+	H : Pred;
+global
+  [AXM1] H && ^P |- P |=> Q  	=> $			end
+  [AXM2] H && P  |- ^P |=> Q  	=> $			end
+  [AXM3] H && P  |- P		=> $			end
+  [AXM4] H && P && ^P |- Q		=> $		end
+end
+//--------------------------------------------------------------------------------------
+//Enhancements *************************************************************************
+//--------------------------------------------------------------------------------------
+//IMP5
+rules for Seq
+	P,Q : Pred;
+	H : Pred;
+global
+  [IMP5] H && P |-  (P |=> Q) 	=>  H && P |- Q				end
+end 
+//--------------------------------------------------------------------------------------
+//AXM-aux
+rules for Seq
+	P, Q, R : Pred;
+	H : Pred;
+global
+  [AXM4] H && R |- P |=> R  		=> $		end
+  [AXM5] H && ^Q  |- P |=> (Q |=> R)  	=> $		end
+  [AXM6] H && Q  |- P |=> (^Q |=> R)  	=> $		end
+  [AXM7] H |- P	|=> P			=> $		end
+  [AXM8] H |- P && R |=> R		=> $		end
+end
+//--------------------------------------------------------------------------------------
+//AND-aux
+rules for Seq
+	P, R : Pred;
+	a, b : Pred;
+	H : Pred;
+global
+  [AND5] H |- P && a && (a |=>  b) |=> R  	=>  H |- P && a && b |=> R 	end
+end
+
+
+//--------------------------------------------------------------------------------------
+//TRUE-rules
+rules for Seq
+	R : Pred;
+	H : Pred;
+global
+  [VR1] H |- ^TRUE |=> R 	=> $				end
+  [VR2] H |- ^TRUE  		=> H |- FALSE 			end
+  [VR3] H |-  TRUE |=> R 	=> H |- R 			end
+  [VR4] H |-  TRUE  		=> $				end
+end
+
+//--------------------------------------------------------------------------------------
+//FALSE-rules
+rules for Seq
+	R : Pred;
+	H : Pred;
+global
+  [FX1] H |- ^FALSE |=> R 	=> H |- R			end
+  [FX2] H |- ^FALSE  		=> $				end
+  [FX3] H |-  FALSE |=> R 	=> $ 				end
+end
+
+//--------------------------------------------------------------------------------------
+//STOP-rules
+rules for Seq
+	P : Pred;
+	Pp : Prop;
+	H : Pred;
+global
+//  [STOP] H |- P 	=> H |- ^P |=> FALSE
+//				if neq_Pred(P,FALSE)			end
+
+  [STOP] H |- Pp 	=> H |- ^Pp |=> FALSE
+				if neq_Prop(Pp,FALSE)		end
+  [STOP] H |- ^Pp 	=> H |- ^^Pp |=> FALSE
+				if neq_Prop(Pp,FALSE)		end
+end
+
+
+//--------------------------------------------------------------------------------------
+//BUILT-IN  *************************************************************************
+//--------------------------------------------------------------------------------------
+//Built-in
+rules for Seq
+	S : Seq;
+	P, Q, R : Pred;
+global
+	[TB] $ :: S 		=> S					end
+	[HV] Hvide && P |- Q  	=> P |- Q  			end
+//hypothese unique
+	[HU] R && R && P |- Q 	=> R && P |- Q			end
+end 
+
+//--------------------------------------------------------------------------------------
+//Final Rule
+rules for Seq
+global
+
+  [FR] $ => $	end
+
+end
+
+//--------------------------------------------------------------------------------------
+//Make simple hyp.
+rules for Seq
+	P, Q, R : Pred;
+	H : Pred;
+global
+
+  [IMPeM] H && P |- Q	=> H |- (P |=> Q)
+			if neq_Pred(P,Hvide)			
+  end
+  [IMPeS] P |- Q	=> Hvide |- (P |=> Q)
+			if neq_Pred(P,Hvide)			
+  end
+end
+
+//--------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------
+
+//--------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------
+
+//--------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------
+
+strategies  for Seq
+implicit
+
+	[] SetAON  =>  dc one(
+		AND1,AND2,AND3,AND4,
+		OR1,OR2,OR3,OR4,
+		IMP1,IMP2,IMP3,
+		EQV1,EQV2,EQV3,EQV4,
+		NOT1,NOT2,
+		VR1,VR2,VR3,VR4,
+		FX1,FX2,FX3
+		)
+	end
+
+	[] SetAXM  	=>  		 dc one(AXM1,AXM2,AXM3)
+	end
+
+	[] SetIMP  	=>  		 dc one(IMP4a,IMP4b)
+	end
+
+	[] SetAXMaux  	=>  		 dc one(AXM4,AXM5,AXM6,AXM7,AXM8,AND5)
+	end
+
+	[] SetIMPaux  	=>  		 dc one(IMP5)
+	end
+
+	[] SetSTOP  	=>  		 dc one(STOP)
+	end
+
+	[] SetTB  	=>  		 dc one(TB)
+	end
+
+	[] SetHV  	=>  		 dc one(HV)
+	end
+
+	[] SetHU  	=>  		 dc one(HU)
+	end
+
+	[] FinalRule  	=>		 dc one(FR)
+	end
+end
+
+//--------------------------------------------------------------------------------------
+// At the beginning move all predicates from Hypo to But
+strategies  for Seq
+implicit
+	[] elimHyp   =>  	 repeat*(
+		dc one(IMPeM,IMPeS)
+	)
+	end
+end
+//--------------------------------------------------------------------------------------
+strategies  for Seq
+implicit
+	[] dedstrat  =>  
+	  repeat*(
+		dc one(	SetHU,
+			SetAON,
+			SetAXM,
+			SetIMPaux,
+			SetIMP,
+			SetSTOP,
+			SetTB
+			)
+	  )
+	  ;FinalRule
+	end
+
+end
+
+
+strategies  for Seq
+implicit
+	[] dedstratInit  =>  
+	  elimHyp;
+	  repeat*(
+		dc one(	SetHU,
+			SetAON,
+			SetAXM,
+			SetIMPaux,
+			SetIMP,
+			SetSTOP,
+			SetTB
+			)
+	  )
+	  //;FinalRule
+	end
+
+end
+
+
+end

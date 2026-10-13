@@ -1,0 +1,301 @@
+module MaxSatToUnForwardCheckingMaximumDomain[Variables,Type,Values]
+
+import
+global
+	OptimizationRules[Variables,Type,Values]
+	ForwardCheckingMaximumDomain[Variables,Type,Values]
+	ForwardCheckingChoicePointMaximumDomain[Variables,Type,Values]
+	ForwardCheckingChoicePointIIMaximumDomain[Variables,Type,Values]
+	;
+end
+
+stratop
+global
+	MaxSatToUnFCMaximumDomainFirstToLast				: < csop -> csop >	bs;
+	MaxSatToUnFCMaximumDomainLastToFirst				: < csop -> csop >	bs;
+	MaxSatToUnFCMaximumDomainSplitFirstToLast			: < csop -> csop >	bs;
+	MaxSatToUnFCMaximumDomainSplitLastToFirst			: < csop -> csop >	bs;
+	MaxSatToUnFCChoicePointMaximumDomainFirstToLast			: < csop -> csop >	bs;
+	MaxSatToUnFCChoicePointMaximumDomainLastToFirst			: < csop -> csop >	bs;
+	MaxSatToUnFCChoicePointMaximumDomainSplitFirstToLast		: < csop -> csop >	bs;
+	MaxSatToUnFCChoicePointMaximumDomainSplitLastToFirst		: < csop -> csop >	bs;
+	MaxSatToUnFCChoicePointIIMaximumDomainFirstToLast		: < csop -> csop >	bs;
+	MaxSatToUnFCChoicePointIIMaximumDomainLastToFirst		: < csop -> csop >	bs;
+	MaxSatToUnFCChoicePointIIMaximumDomainSplitFirstToLast		: < csop -> csop >	bs;
+	MaxSatToUnFCChoicePointIIMaximumDomainSplitLastToFirst		: < csop -> csop >	bs;
+end
+
+
+strategies for csop
+implicit
+
+/* Optimization Strategy: */
+/* Search Strategy	: */
+/* Variable selection	: */
+/* Value selection	: */
+
+[] MaxSatToUnFCMaximumDomainFirstToLast =>
+first one (PostGTELowerBound);
+LocalConsistencyForEC;
+first one (GetLBFCMaximumDomainFirstToLastOne);
+repeat* (
+	first one( first one (PostGTLowerBound);
+		   LocalConsistencyForEC;
+		   first one (GetLBFCMaximumDomainFirstToLastOne)
+		   ,
+		   first one (SetUpperBoundToLowerBound)
+		 )
+	);
+first one (FCMaximumDomainFirstToLastOne);
+first one (GetSolutionCSOP)
+end
+
+
+/* Optimization Strategy: */
+/* Search Strategy	: */
+/* Variable selection	: */
+/* Value selection	: */
+
+[] MaxSatToUnFCMaximumDomainLastToFirst =>
+first one (PostGTELowerBound);
+LocalConsistencyForEC;
+first one (GetLBFCMaximumDomainLastToFirstOne);
+repeat* (
+	first one( first one (PostGTLowerBound);
+		   LocalConsistencyForEC;
+		   first one (GetLBFCMaximumDomainLastToFirstOne)
+		   ,
+		   first one (SetUpperBoundToLowerBound)
+		 )
+	);
+first one (FCMaximumDomainLastToFirstOne);
+first one (GetSolutionCSOP)
+end
+
+
+/* Optimization Strategy: */
+/* Search Strategy	: */
+/* Variable selection	: */
+/* Value selection	: */
+
+[] MaxSatToUnFCMaximumDomainSplitFirstToLast =>
+first one (PostGTELowerBound);
+LocalConsistencyForEC;
+first one (GetLBFCMaximumDomainSplitFirstToLastOne);
+repeat* (
+	first one( first one (PostGTLowerBound);
+		   LocalConsistencyForEC;
+		   first one (GetLBFCMaximumDomainSplitFirstToLastOne)
+		   ,
+		   first one (SetUpperBoundToLowerBound)
+		 )
+	);
+first one (FCMaximumDomainSplitFirstToLastOne);
+first one (GetSolutionCSOP)
+end
+
+
+/* Optimization Strategy: */
+/* Search Strategy	: */
+/* Variable selection	: */
+/* Value selection	: */
+
+[] MaxSatToUnFCMaximumDomainSplitLastToFirst =>
+first one (PostGTELowerBound);
+LocalConsistencyForEC;
+first one (GetLBFCMaximumDomainSplitLastToFirstOne);
+repeat* (
+	first one( first one (PostGTLowerBound);
+		   LocalConsistencyForEC;
+		   first one (GetLBFCMaximumDomainSplitLastToFirstOne)
+		   ,
+		   first one (SetUpperBoundToLowerBound)
+		 )
+	);
+first one (FCMaximumDomainSplitLastToFirstOne);
+first one (GetSolutionCSOP)
+end
+
+
+/* Optimization Strategy: */
+/* Search Strategy	: */
+/* Variable selection	: */
+/* Value selection	: */
+
+[] MaxSatToUnFCChoicePointMaximumDomainFirstToLast =>
+first one (PostGTELowerBound);
+LocalConsistencyForEC;
+first one (GetLBFCChoicePointMaximumDomainFirstToLastOne);
+repeat* (
+	first one( first one (PostGTLowerBound);
+		   LocalConsistencyForEC;
+		   first one (GetLBFCChoicePointMaximumDomainFirstToLastOne)
+		   ,
+		   first one (SetUpperBoundToLowerBound)
+		 )
+	);
+first one (FCChoicePointMaximumDomainFirstToLastOne);
+first one (GetSolutionCSOP)
+end
+
+
+/* Optimization Strategy: */
+/* Search Strategy	: */
+/* Variable selection	: */
+/* Value selection	: */
+
+[] MaxSatToUnFCChoicePointMaximumDomainLastToFirst =>
+first one (PostGTELowerBound);
+LocalConsistencyForEC;
+first one (GetLBFCChoicePointMaximumDomainLastToFirstOne);
+repeat* (
+	first one( first one (PostGTLowerBound);
+		   LocalConsistencyForEC;
+		   first one (GetLBFCChoicePointMaximumDomainLastToFirstOne)
+		   ,
+		   first one (SetUpperBoundToLowerBound)
+		 )
+	);
+first one (FCChoicePointMaximumDomainLastToFirstOne);
+first one (GetSolutionCSOP)
+end
+
+
+/* Optimization Strategy: */
+/* Search Strategy	: */
+/* Variable selection	: */
+/* Value selection	: */
+
+[] MaxSatToUnFCChoicePointMaximumDomainSplitFirstToLast =>
+first one (PostGTELowerBound);
+LocalConsistencyForEC;
+first one (GetLBFCChoicePointMaximumDomainSplitFirstToLastOne);
+repeat* (
+	first one( first one (PostGTLowerBound);
+		   LocalConsistencyForEC;
+		   first one (GetLBFCChoicePointMaximumDomainSplitFirstToLastOne)
+		   ,
+		   first one (SetUpperBoundToLowerBound)
+		 )
+	);
+first one (FCChoicePointMaximumDomainSplitFirstToLastOne);
+first one (GetSolutionCSOP)
+end
+
+
+/* Optimization Strategy: */
+/* Search Strategy	: */
+/* Variable selection	: */
+/* Value selection	: */
+
+[] MaxSatToUnFCChoicePointMaximumDomainSplitLastToFirst =>
+first one (PostGTELowerBound);
+LocalConsistencyForEC;
+first one (GetLBFCChoicePointMaximumDomainSplitLastToFirstOne);
+repeat* (
+	first one( first one (PostGTLowerBound);
+		   LocalConsistencyForEC;
+		   first one (GetLBFCChoicePointMaximumDomainSplitLastToFirstOne)
+		   ,
+		   first one (SetUpperBoundToLowerBound)
+		 )
+	);
+first one (FCChoicePointMaximumDomainSplitLastToFirstOne);
+first one (GetSolutionCSOP)
+end
+
+
+/* Optimization Strategy: */
+/* Search Strategy	: */
+/* Variable selection	: */
+/* Value selection	: */
+
+[] MaxSatToUnFCChoicePointIIMaximumDomainFirstToLast =>
+first one (PostGTELowerBound);
+LocalConsistencyForEC;
+first one (GetLBFCChoicePointIIMaximumDomainFirstToLastOne);
+repeat* (
+	first one( first one (PostGTLowerBound);
+		   LocalConsistencyForEC;
+		   first one (GetLBFCChoicePointIIMaximumDomainFirstToLastOne)
+		   ,
+		   first one (SetUpperBoundToLowerBound)
+		 )
+	);
+first one (FCChoicePointIIMaximumDomainFirstToLastOne);
+first one (GetSolutionCSOP)
+end
+
+
+/* Optimization Strategy: */
+/* Search Strategy	: */
+/* Variable selection	: */
+/* Value selection	: */
+
+[] MaxSatToUnFCChoicePointIIMaximumDomainLastToFirst =>
+first one (PostGTELowerBound);
+LocalConsistencyForEC;
+first one (GetLBFCChoicePointIIMaximumDomainLastToFirstOne);
+repeat* (
+	first one( first one (PostGTLowerBound);
+		   LocalConsistencyForEC;
+		   first one (GetLBFCChoicePointIIMaximumDomainLastToFirstOne)
+		   ,
+		   first one (SetUpperBoundToLowerBound)
+		 )
+	);
+first one (FCChoicePointIIMaximumDomainLastToFirstOne);
+first one (GetSolutionCSOP)
+end
+
+
+/* Optimization Strategy: */
+/* Search Strategy	: */
+/* Variable selection	: */
+/* Value selection	: */
+
+[] MaxSatToUnFCChoicePointIIMaximumDomainSplitFirstToLast =>
+first one (PostGTELowerBound);
+LocalConsistencyForEC;
+first one (GetLBFCChoicePointIIMaximumDomainSplitFirstToLastOne);
+repeat* (
+	first one( first one (PostGTLowerBound);
+		   LocalConsistencyForEC;
+		   first one (GetLBFCChoicePointIIMaximumDomainSplitFirstToLastOne)
+		   ,
+		   first one (SetUpperBoundToLowerBound)
+		 )
+	);
+first one (FCChoicePointIIMaximumDomainSplitFirstToLastOne);
+first one (GetSolutionCSOP)
+end
+
+
+/* Optimization Strategy: */
+/* Search Strategy	: */
+/* Variable selection	: */
+/* Value selection	: */
+
+[] MaxSatToUnFCChoicePointIIMaximumDomainSplitLastToFirst =>
+first one (PostGTELowerBound);
+LocalConsistencyForEC;
+first one (GetLBFCChoicePointIIMaximumDomainSplitLastToFirstOne);
+repeat* (
+	first one( first one (PostGTLowerBound);
+		   LocalConsistencyForEC;
+		   first one (GetLBFCChoicePointIIMaximumDomainSplitLastToFirstOne)
+		   ,
+		   first one (SetUpperBoundToLowerBound)
+		 )
+	);
+first one (FCChoicePointIIMaximumDomainSplitLastToFirstOne);
+first one (GetSolutionCSOP)
+end
+
+end
+
+
+end
+
+
+

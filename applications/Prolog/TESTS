@@ -1,0 +1,11 @@
+# tests of Prolog (from legacy/elan3 tst_all; format: tests/apps/README.md)
+itest prolog member imember1 imember1
+itest prolog lovers ilovers1 ilovers1
+long itest prolog member imember2 imember2
+long itest prolog lovers ilovers2 ilovers2
+long itest prolog queens iqueens iqueens
+aitest prolog member imember1 imember1
+aitest prolog lovers ilovers1 ilovers1
+long aitest prolog member imember2 imember2
+long aitest prolog lovers ilovers2 ilovers2
+long aitest prolog queens iqueens iqueens

@@ -1,0 +1,22 @@
+module ss
+
+import global int string;
+
+op global 
+	foo : string; 
+	goo:string; 
+end
+rules for string
+x, y : string;
+bodies
+  []    foo => "ABCD"+"EFGH" end
+  []	goo => "BCA" end
+  [R] 	x => "AAA" end
+  [R] 	x => x end
+end
+
+strategy ss
+  dk(R)
+end
+
+end

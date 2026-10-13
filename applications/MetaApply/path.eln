@@ -1,0 +1,44 @@
+module path
+
+/* Definition of the sort path */ 
+/* For a vertex v1, we save the set of the vertex vi we can reach */
+/* from it. So vi is in the adjacency list of v. */
+/* So a path is a vertex, right extermity of the path, a constraint */ 
+/* that saves if the path contains or not a C edge and two labels, */
+/* the label of the first edge and the lable of the last edges of */
+/* the path */
+
+import	
+	global
+		bool
+		int
+		label
+	;
+end
+
+
+sort path;
+end
+
+
+operators
+  global
+	/* Constructor of the sort edge */
+	/* The path is to vertex vertexout ( ? ->* vertexout) */
+	/* Constraint is equal to true if there a C edge in the path, */
+	/* false otherwise */
+	/* labelin is the label of the first edge of the path */
+	/* labelout is the label of the last edge of the path */
+	/* Example : [1,true,C,S] */
+
+	pathempty	: path;
+
+	[@, @, @, @]	: (vertexout:int constraint:bool labelin:label 
+	labelout:label) path;
+
+end
+
+end
+
+
+

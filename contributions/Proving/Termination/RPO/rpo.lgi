@@ -1,0 +1,27 @@
+LPL rpo description
+
+  specification description
+
+    part vars	of sort list[ident]
+	 	import sigSyntax
+    part ars	of sort list[pair[ident,pair[int,int]]]
+	 	import arSyntax
+//----------------------------------------------------------------------------------
+    part less	of sort list[list[ident]]
+	 	import lessSyntax
+
+    part equiv	of sort list[list[ident]]
+	 	import lessSyntax
+
+    part status	of sort list[pair[ident,ident]]
+	 	import statSyntax
+
+  end
+//----------------------------------------------------------------------------------
+ 
+  query 	of sort  	   bool
+         	result of sort 	   bool
+	 	import 
+			rpo[vars,ars,less,equiv,status]
+         	start with () query
+end

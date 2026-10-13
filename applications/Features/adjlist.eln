@@ -1,0 +1,126 @@
+module adjlist
+
+/* Definition of the sort adjlist which is a set of paths */
+/* For a vertex v, adjlist is the list of the vertices adjacent to v */
+/* For example, if there is a path from 1 to 4 and 3, then 4 and 3 are */
+/* in the adjacency list of 1. adjlist is 4 and 3 */
+
+import	
+	global
+		bool
+		label
+		eq[label]
+		path
+		edge
+	;
+end
+
+sort adjlist;
+end
+
+operators
+  global
+
+	/* Constructor of the sort adjlist */
+	adjempty	: adjlist;
+	@		: (path) adjlist;
+	@ U @		: (adjleft:adjlist adjright:adjlist) adjlist	(AC) assocLeft;
+//	@ U @		: (adjlist adjlist) adjlist	(AC) assocLeft;
+
+	/* Let e be an edge from v1 to v0 and a be the adjlist of v0. */
+	/* The addition of e to the graph implies recalculation for the transitive */
+	/* closure of the graph. The adjlist of v1 is changed using information */
+	/* of a. For instance, we add an edge from v1 to v0, we know that in the */
+	/* adjlist of v0, there are v2 and v3. So in the adjlist of v1, we must add */
+	/* v2 and v3. */
+	add_adjlist(@,@)	: (edge adjlist) adjlist;
+
+	addl_adjlist(@,@)	: (edge adjlist) adjlist;
+end
+
+
+/* Rules for simplification */
+
+rules for adjlist
+	v0 : int;
+	c1, c2, c3 : bool;
+	lab1, lab2 : label;
+	X : adjlist;
+	void1		: string;
+global
+	[] pathempty U X				=> X
+	end
+
+	[] adjempty U X					=> X
+	end
+
+	[] [v0,c1,lab1,lab2] U [v0,c2,lab1,lab2]	=> [v0,c3,lab1,lab2] 
+							where c3 := ()c1 or c2
+	end
+
+	[] [v0,c1,lab1,lab2] U [v0,c2,lab1,lab2] U X	=> [v0,c3,lab1,lab2] U X
+							where c3 := ()c1 or c2
+	end
+end
+
+
+rules for adjlist
+	b : bool;
+	v0, v1, v2 : int;
+	c, c1, bc : bool;
+	lab, lab1, lab2, lab3 : label;
+	X, ad, R : adjlist;
+	void1	: string;
+global
+
+	[] add_adjlist(edgeempty, X)			=> adjempty
+	end
+
+	[] add_adjlist([v0,v1,lab], adjempty)		=> adjempty
+	end
+
+	[] add_adjlist([v0,v1,lab1],[v2,c,lab2,lab3])	=> R
+				where bc := ()lab1 == C
+				where c1:= ()c or bc
+				where b:= ()suiv(lab1,lab2)
+				choose
+				try if b where R:=() [v2,c1,lab1,lab3]
+				try where R:=() adjempty
+				end
+	end
+/*
+	[] add_adjlist([v0,v1,lab1],[v2,c,lab2,lab3] U X)	=> 
+				[1000*v2,c,lab1,lab3] U ad
+//				where void1:=()write(stdout,"regle 1")
+				where b:= ()suiv(lab1,lab2)
+				where ad := ()add_adjlist([v0,v1,lab1],X)
+				if b
+	end
+
+	[] add_adjlist([v0,v1,lab1],[v2,c,lab2,lab3] U X)	=> ad
+//				where void1:=()write(stdout,"regle 2")
+				where b:= ()suiv(lab1,lab2)
+				where ad := ()add_adjlist([v0,v1,lab1],X)
+        end
+*/
+	[] add_adjlist([v0,v1,lab1],[v2,c,lab2,lab3] U X)	=> R
+				where b:= ()suiv(lab1,lab2)
+				where ad := ()add_adjlist([v0,v1,lab1],X)
+				choose
+				try if b where R:=() [1000*v2,c,lab1,lab3] U ad
+				try where R:=() ad
+				end
+	end
+
+	[] add_adjlist([v0,v1,lab1],X) 				=> X U X
+	end
+	[] add_adjlist([v0,v1,lab1],X U X) 				=> X 
+		where ad:=()X
+	end
+
+end
+
+// add_adjlist([1,2,I] , [4,true,I,I] U [5,true,I,I] U [6,true,I,I]) end
+end
+
+

@@ -1,0 +1,12 @@
+/*										    */
+/* Strategy                        Results                                          */
+/*										    */
+/* ForwardCheckingFirstToLastOne   CSP[nil,Yb=2.Mb=9.Db=10.Nb=1000.nil,nil,nil,nil] */
+/*										    */
+/* ForwardCheckingFirstToLastAll   CSP[nil,Yb=2.Mb=9.Db=10.Nb=1000.nil,nil,nil,nil] */
+/*										    */
+Nb =?360(*)Yb (+) 30(*)Mb (+) Db & 
+Db <?30 & 
+Mb <?12 &
+Nb =? 1000
+end

@@ -1,0 +1,21 @@
+module ifte[X]
+import global bool;
+end
+sort X;
+end
+operators global
+  ifte(@,@,@)	: (bool X X) X;
+end
+
+rules for X
+ 
+	Then, Else: X;
+local
+ []	ifte(true,Then,Else)	=> Then	end
+ []	ifte(false,Then,Else)	=> Else	end
+end
+
+end
+
+
+

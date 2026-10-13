@@ -1,0 +1,153 @@
+module f
+
+import global int bool eq[Foo];
+end
+sort Foo;
+end
+operators global
+  a	: Foo;
+  b	: Foo;
+  c	: Foo;
+  d	: Foo;
+  [@,@]	: (Foo Foo) Foo;
+  doit(@,@) : (int Foo) Foo;
+  qqq(@) : (Foo) Foo;
+end
+
+stratop
+  global 
+    foo		: <Foo>		builtin;
+    or		: <Foo>		builtin;
+    more	: <Foo>		builtin;
+end
+
+rules for Foo
+ p,r,s,t,rr:Foo;
+	aa,bb:bool;
+	n	: int;
+global
+  [A] p => 
+	     if true
+	     where (Foo)rr:=()p
+	     switch	
+		case true then [s,r]
+			where (Foo)[r,s]:=()[rr,rr]
+	     end
+//	     if false
+//	    where n:=()5
+//	    where (int)n:=()5
+  end
+  []	doit(0,p) => p end
+  []  	doit(n,p) => doit(n-1,s)
+				where r:=()doit(n-1,p)
+				where s:=()qqq(r)
+  end
+  []	qqq([r,s]) => switch
+		case r == s then r
+		otherwise d
+	     end
+  end
+  []	qqq(p) => p end
+
+
+  [MORE]	p => a end
+  [MORE]	p => b end
+  [MORE]	p => c end
+  [MORE]	p => d end
+  [OR]  p => switch
+		case p == a then b
+		case p == b then c
+		case p == c then d
+		otherwise        a
+	     end
+  end
+
+  [FOO]	p => 
+	     where s:=(or)p
+	     switch
+		case s==b then [c,[s,t]] 
+			where t:=(more)p
+			if s!=t 
+		case s==a then [d,[s,t]] 
+			where t:=(more)p
+		otherwise d
+	     end
+  end
+
+  [AA] p => a
+	     where (Foo)t:=()c 
+	     where (Foo)t:=()c 
+  end
+
+/*
+//------------------------------------------------------------------
+
+
+  [B]	p => switch
+		case false then a   where t:=(more)a if true
+		case false then a   where t:=(more)a if true
+		otherwise b         where s:=(more)a if true
+	     end
+	     where rr:=(more)a if true
+  end
+
+  [C]	p =>  switch
+		case true then
+		  switch
+		    case true then p where r :=(more) a
+	            otherwise      b where r :=(or) a 
+		  end
+		  where s:=(more) a
+		otherwise p where r:=(more)a
+	      end
+  end 
+  [D]	p =>  switch  
+		case true then
+		  switch 
+		    case true then [r,r] where r :=(more) a
+	            otherwise      b where r :=(more) a
+		  end
+		  where s:=(more) a
+		case false then p
+		otherwise
+		    switch
+		      case true then b
+		      otherwise      a
+		    end
+		    where r:=(more)a
+		end
+		where rr:=(more)a
+  end
+  [F]	p => switch
+		case aa then [c,c]
+		case true then c where bb:=() true
+	     end
+	     where aa:=()true
+	     where r:=()p
+  end
+  [G]	p => switch  
+		case t == c then [d,d]
+		case t == b then [t,r]  if r != a 
+					if r != b
+					where r:=(more)p
+		otherwise [t,r] if r != a where r:=()[t,t]
+	     end
+	     if t != a
+	     where t:=(or)p
+  end
+*/
+end
+
+strategies for Foo
+implicit
+  [.] foo => 	dk(FOO)      //  dk(A)  //  dc(FOO)
+  end
+  [.] or => 		dc(OR)
+  end
+  [.] more =>	dk(MORE)
+  end
+end
+
+end 
+
+

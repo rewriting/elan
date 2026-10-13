@@ -1,0 +1,11 @@
+LPL pwhere1 description
+
+   query of sort  	Foo
+   result of sort 	Foo
+   import 		pwhere1
+  start with		(all)query
+
+end
+
+
+

@@ -1,0 +1,10 @@
+LPL ref_to_string description 
+
+        query           of sort string
+        result          of sort string
+        import          ref_to_string
+//        start with 	()foo(query)
+        start with 	()goo(query)
+
+end
+

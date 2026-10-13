@@ -1,0 +1,18 @@
+LPL fopc description
+  
+query of sort Goals result of sort Goals import int fopc 
+start with (eval)query
+
+//query of sort list[Sent] result of sort list[Sent] import int fopc
+//start with (foo)query
+
+//query of sort list[Term] result of sort list[Term] import int fopc
+//start with (foo)query
+
+//query of sort list[Var] result of sort list[Var] import  int fopc_bas list[Var] fopc 
+//start with (foo)query
+
+end
+
+
+

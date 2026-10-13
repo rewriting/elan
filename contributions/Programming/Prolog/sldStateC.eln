@@ -1,0 +1,18 @@
+module sldStateC[Vars,Ops,Preds,Clauses]
+
+import 
+       global termV[Vars] termF[Ops] atomP[Preds] atomEq sldState ;
+
+       local Clauses int 
+             list[atom] pair[atom,list[atom]] list[pair[atom,list[atom]]] ; 
+end
+
+rules for list[pair[atom,list[atom]]]
+global
+  [] clpProg => 
+  FOR EACH HC:pair[atom,list[atom]] SUCH THAT HC:=(listExtract) elem(Clauses) :{ HC.} nil  
+  end
+end
+
+end
+

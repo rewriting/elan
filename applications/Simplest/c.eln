@@ -1,0 +1,32 @@
+module c
+
+import global a    b;   local  loca locb; end
+sort Foo; end
+operators global 
+  a30	: Foo;
+  a31	: Foo;
+end
+
+stratop global
+    GG_c	: <Foo>		builtin;
+    RR		: <Foo>		builtin;
+  local
+    LL_c	: <Foo>		builtin;
+end
+
+rules for Foo
+x : Foo;
+global
+  [R]	x => a30	end
+local
+  [R]	x => a31	end
+end
+
+strategies for Foo
+implicit
+  []	GG_c => dk(R) end
+  []	RR => dk(R) end
+  []	LL_c => dk(R) end
+end
+
+end

@@ -1,0 +1,40 @@
+module map3[X]
+
+import global 
+  strat[X] strat[list[X]]
+  X          list[X];
+
+op global
+  map(@) 	: (<X>) <list[X]>;
+  start @ 	: (int) <list[X]>;
+end
+
+rules for X
+ x	: X; 
+    	n	: int;
+bodies
+  [ass(n)] x => n 		end
+  [add(n)] x => x+n 		end
+  [sub(n)] x => x-n 		end
+end
+
+strategies for <list[X]>
+ s : <X>;
+	h, h1 : X;		
+	t, t1 : list[X];	
+	n : int;
+bodies
+  []	start n ==> map(dk(ass(n),dk(add(n),sub(n))))	end
+  []	[map(s)] nil => nil				end
+  []	[map(s)] h.t => h1.t1 
+			where h1:=[s]h 
+			where t1:=[map(s)]t		end
+end
+
+// query	of sort  list[int] result of sort list[int] 
+// modules int map1[int] start with [start 2]query
+
+end
+
+
+

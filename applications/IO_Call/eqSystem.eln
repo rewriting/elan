@@ -1,0 +1,66 @@
+module eqSystem
+import 	global	applySubstOn[eqSystem];
+	local	bool int term;
+end
+
+sort eqSystem equation; end
+
+
+operators
+global
+  @ = @		: ( term term ) equation;
+
+  @		: ( bool ) eqSystem;
+  @ 		: ( equation ) eqSystem;
+  @ & @		: ( eqSystem eqSystem ) eqSystem	assocLeft;
+  (@ & @)	: ( eqSystem eqSystem ) eqSystem	alias @ & @:;
+
+  system_to_subst(@)	: ( eqSystem ) substitution;
+end
+
+
+stratop global 
+ 
+ delete_new_variable : < eqSystem > builtin ;
+
+end
+
+
+rules for substitution
+ P,Q,R	: eqSystem;
+	$t	: term;
+	$x	: variable;
+global 
+  [] system_to_subst(true) 	=> identity			end
+  [] system_to_subst($x=$t) 	=> $x->$t			end
+  [] system_to_subst(P & Q) 	=> system_to_subst(P) o system_to_subst(Q)
+  end
+end
+
+
+
+rules for eqSystem
+ P,Q,R	: eqSystem;
+	n	: int;
+	$t	: term;
+	e	: equation;
+global
+  [new_var_elim] P & var(n) = $t 	=> apply(var(n)->$t,P)	end
+  [unfold]	 P & (Q & R)		=> (P & Q) & R		end
+  [eqPass] 	 P & e	 		=> e & P		end
+
+
+end
+
+strategies for eqSystem
+
+implicit 
+
+  [.] delete_new_variable => 
+  repeat* (
+    dc(new_var_elim || unfold || eqPass)
+  ) end
+
+end
+
+end

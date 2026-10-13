@@ -1,0 +1,25 @@
+LPL S28LOG description
+
+query		of sort  	arrayLOG[27,int]
+		result of sort 	arrayLOG[27,int]
+		import	 	int S28[arrayLOG[27,int]]
+				strat[arrayLOG[27,int]]
+				loops[i,arrayLOG[27,int]]
+				loops[j,arrayLOG[27,int]]
+//				commit[arrayLOG[27,int]]
+		start with 	[
+//				commit 1 do
+				   for i=1 to 9 do
+				     some j=1 to 25-2*i do
+				       add(j-1,i)
+				     od
+				   od
+//				od
+				]new(0)
+
+//[191218246279458634753968357]
+//[181915267285296475384639743]
+//[191618257269258476354938743]
+// ....
+end
+

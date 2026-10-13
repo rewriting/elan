@@ -1,0 +1,43 @@
+module tri
+
+import global bool eq[Foo]; end
+
+sort Foo; end
+
+operators global
+  a	: Foo;
+  b	: Foo;
+  c	: Foo;
+  d	: Foo;
+  f(@)	: (Foo) Foo;
+end
+
+rules for Foo
+x, y, z, u, uu	: Foo;
+global
+  []	f(x) => uu
+		if true
+		where z:=()x
+		choose
+		  try where u:=()a where y:=()b if true if u != x 
+		  try where y:=()x if true if false
+		  try where y:=()c //if false
+/*
+		  try
+			choose
+			  try if true where u:=()x  where y:=()x
+			  try if false  where y:=()x
+			end
+*/
+		end
+		where uu:=()d
+		if false
+  end
+end 
+
+end
+
+
+
+
+

@@ -1,0 +1,4 @@
+FSYM(FSYM(INT(2).nil,200).FSYM(FSYM(INT(4).nil,200).FSYM(FSYM(INT(1).nil,200).FSYM(FSYM(INT(3).nil,200).FSYM(nil,219).nil,220).nil,220).nil,220).nil,220).
+FSYM(FSYM(INT(3).nil,200).FSYM(FSYM(INT(1).nil,200).FSYM(FSYM(INT(4).nil,200).FSYM(FSYM(INT(2).nil,200).FSYM(nil,219).nil,220).nil,220).nil,220).nil,220).FSYM(FSYM(INT(2).nil,200).FSYM(FSYM(INT(4).nil,200).FSYM(FSYM(INT(1).nil,200).FSYM(FSYM(INT(3).nil,200).FSYM(nil,219).nil,220).nil,220).nil,220).nil,220).FSYM(FSYM(INT(3).nil,200).FSYM(FSYM(INT(1).nil,200).FSYM(FSYM(INT(4).nil,200).FSYM(FSYM(INT(2).nil,200).FSYM(nil,219).nil,220).nil,220).nil,220).nil,220).FSYM(FSYM(INT(4).nil,200).FSYM(INT(4).nil,200).nil,222).nil
+end
+

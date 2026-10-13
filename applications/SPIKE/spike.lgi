@@ -1,0 +1,45 @@
+LPL spike description
+
+  specification description
+
+    part vars	of sort list[ident]
+	 	import sigSyntax
+    part ars	of sort list[pair[ident,pair[int,int]]]
+	 	import arSyntax
+//----------------------------------------------------------------------------------
+    part sorts	of sort list[ident]
+	 	import sigSyntax
+
+    part constructors 	of sort list[pair[ident,pair[list[ident],ident]]]
+			import funSyntax
+
+    part functions 	of sort list[pair[ident,pair[list[ident],ident]]]
+			import funSyntax
+
+    part axioms 	of sort list[pair[list[pair[term,term]],list[pair[term,term]]]]
+	 		import axmSyntax[vars,ars]
+
+    part E	of sort list[pair[list[pair[term,term]],list[pair[term,term]]]]
+		import 	axmSyntax[vars,ars]
+
+    part L	of sort list[pair[list[pair[term,term]],list[pair[term,term]]]]
+		import 	axmSyntax[vars,ars]
+
+    part less	of sort list[list[ident]]
+	 	import lessSyntax
+
+    part equiv	of sort list[list[ident]]
+	 	import lessSyntax
+
+    part status	of sort list[pair[ident,ident]]
+	 	import statSyntax
+
+  end
+//----------------------------------------------------------------------------------
+ 
+  query 	of sort  	  Rez 
+         	result of sort 	  Rez 
+	 	import 
+			spike[vars,ars,sorts,constructors,functions,axioms,E,L,less,equiv,status]
+         	start with (mainStrat) query
+end

@@ -1,0 +1,32 @@
+LPL clp description
+
+  specification description
+
+    part Vars	of sort list[identifier]
+	 	import sigSyntax
+    part Ops	of sort list[pair[identifier,int]]
+	 	import sigSyntax
+    part Predicates	of sort list[pair[identifier,int]]
+	 		import sigSyntax
+    part Clauses	of sort list[pair[atom,list[atom]]]
+			import  termV[Vars]
+                                termF[Ops]
+				atomP[Predicates]
+                                atomEq
+				hornClauseSyntax 
+  end
+
+  query 	of sort eqSystem
+         	result of sort eqSystem
+	 	import termV[Vars]
+                       termF[Ops]
+		       atomP[Predicates]
+                       sldStateC[Vars,Ops,Predicates,Clauses] 
+                       clpRules
+
+         start with (clpStrat) query
+
+ 
+end
+
+

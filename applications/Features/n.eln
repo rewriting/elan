@@ -1,0 +1,186 @@
+/////////////// -- norm2
+
+module n
+
+import 	global 	int;
+	local 	bool eq[lterm];
+end
+sort lterm;
+end
+operators global
+  	@		: (int) lterm;
+	(@ @)		: (lterm lterm) lterm;
+	la @		: (lterm) lterm;
+   local
+	repl(@,@,@)	: (int lterm lterm) lterm;
+	free(@,@)	: (int lterm) bool;
+end
+
+rules for bool
+ v, w	: int;
+ M, N, Q	: lterm;
+local
+  []	free(v,v) => true				end
+  []	free(v,(M N)) => free(v,M) or free(v,N)		end
+  []	free(v,la M) => free(v+1,M)			end
+  []	free(v,M) => false				end
+end
+
+rules for lterm
+ v, w	: int;
+ M, N, Q	: lterm;
+local
+  []	repl(v,v,M) => M				end
+  []	repl(v,w,M) => w				end
+  []	repl(v,(M N),Q) => (repl(v,M,Q) repl(v,N,Q))	end
+  []	repl(v,la N,M) => la repl(v+1,N,M)		end
+
+  [Foo] repl(v,v,M) => M
+		where N:=() M
+		if true end
+
+  [beta](la M N) => repl(1,M,N)				end
+  [eta]	(la M 1) => M if not free(1,M)			end
+
+//  [GO_ON] M => Q where Q:=(normalise(go_on))N 
+//		 if M != N
+//		 where N:=(dc(beta , eta , id))M	end
+//  [GO_ON] M => M					end
+end
+
+//strategies for lterm
+// global 
+//  [go_on] 
+//  dc(GO_ON) end
+//end
+
+
+// NORM2 ------------
+strategies for lterm
+global 
+  [ss] 
+//  normalise(go_on)
+//  normalise(dc(beta , eta))
+  normalise(dc(beta , eta , id))
+//  normalise(repeat*(dc(beta , eta)))
+//  repeat*(normalise(dc(beta , eta , id)))
+ end
+end
+
+/*
+la la 1 end
+la la la (2 ((3 2) 1)) end
+(  la la la (2 ((3 2) 1))  la la 1   ) end
+la la(2 ((la la 1 2)1)) end
+la la(2 (la 1 1)) end
+la la (2 1) end
+(  la la la (2 ((3 2) 1))  la la (2 1)  )  end
+la la(2 ((la la( 2 1) 2)1)) end
+la la (2 (2 1)) end
+(  la la la (2 ((3 2) 1))  la la (2 (2 1)) ) end
+la la ( 2 ( ( la la (2 (2 1)) 2) 1)) end
+la la (2 (2 (2 1))) end
+
+(la la la (2 ((3 2) 1))
+ (la la la (2 ((3 2) 1))
+  (la la la (2 ((3 2) 1))
+   (la la la (2 ((3 2) 1))
+    (la la la (2 ((3 2) 1))
+     (la la la (2 ((3 2) 1))
+      (la la la (2 ((3 2) 1))
+	(la la la (2 ((3 2) 1))
+         (la la la (2 ((3 2) 1))
+          (la la la (2 ((3 2) 1))
+           (la la la (2 ((3 2) 1))
+            (la la la (2 ((3 2) 1))
+             (la la la (2 ((3 2) 1))
+              (la la la (2 ((3 2) 1))
+               (la la la (2 ((3 2) 1))
+(la la la (2 ((3 2) 1))
+ (la la la (2 ((3 2) 1))
+  (la la la (2 ((3 2) 1))
+   (la la la (2 ((3 2) 1))
+    (la la la (2 ((3 2) 1))
+     (la la la (2 ((3 2) 1))
+      (la la la (2 ((3 2) 1))
+	(la la la (2 ((3 2) 1))
+         (la la la (2 ((3 2) 1))
+          (la la la (2 ((3 2) 1))
+           (la la la (2 ((3 2) 1))
+            (la la la (2 ((3 2) 1))
+             (la la la (2 ((3 2) 1))
+              (la la la (2 ((3 2) 1))
+               (la la la (2 ((3 2) 1))
+(la la la (2 ((3 2) 1))
+ (la la la (2 ((3 2) 1))
+  (la la la (2 ((3 2) 1))
+   (la la la (2 ((3 2) 1))
+    (la la la (2 ((3 2) 1))
+     (la la la (2 ((3 2) 1))
+      (la la la (2 ((3 2) 1))
+	(la la la (2 ((3 2) 1))
+         (la la la (2 ((3 2) 1))
+          (la la la (2 ((3 2) 1))
+           (la la la (2 ((3 2) 1))
+            (la la la (2 ((3 2) 1))
+             (la la la (2 ((3 2) 1))
+              (la la la (2 ((3 2) 1))
+               (la la la (2 ((3 2) 1))
+(la la la (2 ((3 2) 1))
+ (la la la (2 ((3 2) 1))
+  (la la la (2 ((3 2) 1))
+   (la la la (2 ((3 2) 1))
+    (la la la (2 ((3 2) 1))
+     (la la la (2 ((3 2) 1))
+      (la la la (2 ((3 2) 1))
+	(la la la (2 ((3 2) 1))
+         (la la la (2 ((3 2) 1))
+          (la la la (2 ((3 2) 1))
+           (la la la (2 ((3 2) 1))
+            (la la la (2 ((3 2) 1))
+             (la la la (2 ((3 2) 1))
+              (la la la (2 ((3 2) 1))
+               (la la la (2 ((3 2) 1))
+(la la la (2 ((3 2) 1))
+ (la la la (2 ((3 2) 1))
+  (la la la (2 ((3 2) 1))
+   (la la la (2 ((3 2) 1))
+    (la la la (2 ((3 2) 1))
+     (la la la (2 ((3 2) 1))
+      (la la la (2 ((3 2) 1))
+	(la la la (2 ((3 2) 1))
+         (la la la (2 ((3 2) 1))
+          (la la la (2 ((3 2) 1))
+           (la la la (2 ((3 2) 1))
+            (la la la (2 ((3 2) 1))
+             (la la la (2 ((3 2) 1))
+              (la la la (2 ((3 2) 1))
+               (la la la (2 ((3 2) 1))
+(la la la (2 ((3 2) 1))
+ (la la la (2 ((3 2) 1))
+  (la la la (2 ((3 2) 1))
+   (la la la (2 ((3 2) 1))
+    (la la la (2 ((3 2) 1))
+     (la la la (2 ((3 2) 1))
+      (la la la (2 ((3 2) 1))
+	(la la la (2 ((3 2) 1))
+         (la la la (2 ((3 2) 1))
+          (la la la (2 ((3 2) 1))
+           (la la la (2 ((3 2) 1))
+            (la la la (2 ((3 2) 1))
+             (la la la (2 ((3 2) 1))
+              (la la la (2 ((3 2) 1))
+               (la la la (2 ((3 2) 1))
+
+	       la la 1
+)))))))))))))))
+)))))))))))))))
+)))))))))))))))
+)))))))))))))))
+)))))))))))))))
+))))))))))))))) end
+
+
+*/
+end
+

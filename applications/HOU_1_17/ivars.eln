@@ -1,0 +1,41 @@
+module ivars[btypes]
+import global 	sigSyntax types[btypes] list[vardef];
+sort vardef;
+op
+  global
+    @':'@	: (identifier type) vardef;
+    //--------------------------------------------------//
+    ';'		: list[vardef] alias nil:;		// end of list
+    @ @		: (vardef list[vardef]) list[vardef] alias cons(@,@):;
+    variabla(@)	: (vardef) identifier;
+    type(@)	: (vardef) type;
+endop
+
+rules for identifier
+declare 	$a:identifier;
+		$t:type;
+bodies
+  [] variabla($a : $t)	=> $a		end
+end of rules
+
+rules for type
+declare 	$a	: identifier;
+		$t	: type;
+bodies
+  [] type($a : $t)	=> $t			end
+end of rules
+
+end of module
+
+
+
+
+
+
+
+
+
+
+
+
+

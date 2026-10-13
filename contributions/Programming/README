@@ -1,0 +1,30 @@
+The directory contains some simple ELAN examples in the context of Programming.
+
+Subdirectories:
+===============
+
+Prolog/ : Standard Prolog via CLP operational semantics 
+          elan clp fibCLP.spc < SAMPLES/ex1.inp
+          elan clp arithmeticCLP.spc < SAMPLES/ex2.inp
+
+elanlibCP/ : my own version of some ELAN modules related to 
+             terms, variables, atoms, ...
+            elan clp fibCLP.spc < SAMPLES/ex1.inp
+            elan clp arithmeticCLP.spc < SAMPLES/ex2.inp
+
+
+============================================================================
+
+For any problem/comment/bug, feel free to contact elan@loria.fr
+
+___________________________________
+
+Christophe RINGEISSEN                 E-mail: Christophe.Ringeissen@loria.fr
+				      Web: http://www.loria.fr/~ringeiss/
+
+INRIA-Lorraine & CRIN-CNRS            Projet PROTHEO
+615 rue du Jardin Botanique, BP 101
+54602 Villers-les-Nancy               Tel: (33) 3 83 59 20 22
+France                                Fax: (33) 3 83 27 83 19
+___________________________________
+

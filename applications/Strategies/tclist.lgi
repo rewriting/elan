@@ -1,0 +1,29 @@
+LPL tclist description
+
+/*** REW  
+query		of sort  	list[int]
+		result of sort 	list[int]
+		modules 	int list[int] rewerse[int]
+		start with 	(eee)rewers(query)
+***/
+/*** APEND
+query		of sort  	list[int]
+		result of sort 	list[int]
+		modules 	int list[int] append[int]
+		start with 	(eee)apend(query,5.6.nil)
+***/
+/***
+query		of sort  	list[int]
+		result of sort 	list[int]
+		modules 	int list[int] tclist[int,list[int],rewapp[int]]
+		start with 	[tc_list(5.6.nil,app(int,list[int],list[int]))]
+					query
+***/
+query		of sort  	list[bool]
+		result of sort 	int
+		modules 	int list[bool] tclist[bool,int,incr[bool]]
+		start with 	[tc_list(0,incr(bool,list[bool],int))]query
+
+end
+
+

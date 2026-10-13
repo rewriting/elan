@@ -1,0 +1,337 @@
+//---------------------------------------------------------------------------------------
+// The oreder LPO induced by Equiv and Lss
+//--------------------------------------------------------------------------------------
+module ordre_lpo[Vars,Ars,Lss,Equiv]
+
+import	global	
+		ordre_sig[Vars,Ars,Lss,Equiv] 
+;end
+
+operators
+  global
+//------------- lpo --------------------------------------------------------------------
+    lpo(@,@)	: (term term) bool;
+    suplpo(@,@)	: (term term) bool		alias lpo(@,@):;
+    @ >lpo @	: (term term) bool		alias suplpo(@,@):;
+
+    suplex(@,@)	: (list[term] list[term]) bool;
+    @ >lex @	: (list[term] list[term]) bool	alias suplex(@,@):;
+
+    lpo(@,@)	: (list[term] term) bool;
+    lpo(@,@)	: (term list[term]) bool;
+    lpo1(@,@)	: (term term) bool;
+    lpo2(@,@)	: (term term) bool;
+    lpo3(@,@)	: (term term) bool;
+
+    equiv_lpo(@,@)	: (term term) bool;
+    equiv_lpo(@,@,@)	: (list[term] list[term] list[term]) bool;
+//------------- mpo --------------------------------------------------------------------
+    mpo(@,@)	: (term term) bool;
+    supmpo(@,@)	: (term term) bool		alias mpo(@,@):;
+    @ >mpo @	: (term term) bool		alias supmpo(@,@):;
+
+    supmult(@,@) : (list[term] list[term]) bool;
+    @ >mult @	: (list[term] list[term]) bool	alias supmult(@,@):;
+    multiset(@,@,@) : (list[term] list[term] list[term]) bool;
+    multiset2(@,@,@) : (list[term] list[term] list[term]) bool;
+
+    mpo(@,@)	: (list[term] term) bool;
+    mpo(@,@)	: (term list[term]) bool;
+    mpo1(@,@)	: (term term) bool;
+    mpo2(@,@)	: (term term) bool;
+    mpo3(@,@)	: (term term) bool;
+
+    equiv_mpo(@,@)	: (term term) bool;
+    equiv_mpo(@,@,@)	: (list[term] list[term] list[term]) bool;
+//--------------------------------------------------------------------------------------
+end
+
+//--------------------------------------------------------------------------------------
+rules for bool
+  	u, v : variable;
+	s,t 	: term;
+	ls,lt 	: list[term];
+	b	: bool;
+  global
+//--------------------------------------------------------------------------------------
+// Ordre lexicographique
+//--------------------------------------------------------------------------------------
+//    [] s.ls >lex t.lt => lpo(s,t) or (s ~lpo t and ls >lex lt)
+//    end
+
+    [] s.ls >lex t.lt 	=> true
+			if equiv_lpo(s,t)
+			where b:= () ls >lex lt 
+			if b
+    end
+    [] s.ls >lex t.lt 	=> lpo(s,t)
+    end
+
+    [] nil >lex lt 	=> false
+    end
+    [] s.ls >lex nil 	=> true
+    end
+
+//------------------------------------------------------------------------------------
+// Ordre LPO
+//------------------------------------------------------------------------------------
+//    [] lpo(s,t) => lpo1(s,t) or lpo2(s,t) or lpo3(s,t)
+//    end
+
+//
+// Cas : f(s1,...,sn) >lpo f(t1,...,tn)
+// Il faut : s >lpo t1,...,tn et s1,...,sn >lex t1,...,tn
+//
+    [] lpo(s,t) => true
+		if not(isvar(s)) and not(isvar(t))
+		choose
+		try 
+			if head(s) ==sig head(t) 
+			where b:= () lpo3(s,t) 
+			if b
+		try 
+			if head(s) >sig head(t)
+			where b:= () lpo2(s,t) 
+			if b
+		end
+    end
+    [] lpo3(s,t) => b
+		choose
+		try 
+			if list_subterm(s) >lex list_subterm(t)
+			where b := () lpo(s,list_subterm(t))
+		try
+			where b := () false
+		end
+    end
+
+//
+// Cas : f(s1,...,sn) >lpo g(t1,...,tn) avec f >sig g
+// Il faut : s >lpo t1,...,tn
+//
+    [] lpo2(s,t) => lpo(s,list_subterm(t))
+    end
+//
+// Cas : autre
+// Il faut : si >lpo t
+//
+    [] lpo(s,t) => lpo1(s,t)
+    end
+    [] lpo1(s,t) => lpo(list_subterm(s),t)
+    end
+
+//----------------------------------------------------------------------------------
+//    [] lpo(s.ls,t) => lpo(s,t) or s ~rpo t or lpo(ls,t)
+//    end 
+    [] lpo(s.ls,t) => b
+		choose
+		try 
+			if equiv_lpo(s,t)
+			where b := () true
+		try 
+			if lpo(ls,t)
+			where b := () true
+		try 
+			where b := () lpo(s,t)
+		end
+    end
+    [] lpo(nil,t) => false
+    end
+
+//----------------------------------------------------------------------------------
+//    [] lpo(s,t.lt) => lpo(s,t) and lpo(s,lt)
+    [] lpo(s,t.lt) =>  b
+		choose
+		try 
+			if lpo(s,t)
+			where b := () lpo(s,lt)
+		try 
+			where b := () false
+	 	end
+    end
+    [] lpo(s,nil) => true
+    end
+
+//----------------------------------------------------------------------------------
+//   f(s_1,...,s_n) equiv_lpo g(t_1,...,t_n) => f = g and s_i ~ t_i
+//    end    
+    [] equiv_lpo($v,$u) => false if neq_variable($v,$u)
+    end
+    [] equiv_lpo(s,s) => true
+    end
+    [] equiv_lpo(s,t) => true
+		if not(isvar(s)) and not(isvar(t))
+		if head(s) ==sig head(t)
+		where b:= () equiv_lpo(list_subterm(s),list_subterm(t), nil) 
+		if b
+    end
+
+    [] equiv_lpo(nil, nil, nil) => true
+    end  
+    [] equiv_lpo(s.ls, t.lt, nil) =>  b
+		choose
+		try 
+			if equiv_lpo(s,t) 
+			where b := () equiv_lpo(ls,lt, nil)
+		try 
+			where b := () false
+	 	end
+    end
+
+end
+
+//----------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------
+//	MPO
+//----------------------------------------------------------------------------------
+rules for bool
+  	u, v : variable;
+	s,t 	: term;
+	ls,lt,L	: list[term];
+	b	: bool;
+  global
+//--------------------------------------------------------------------------------------
+// Ordre multiset
+//--------------------------------------------------------------------------------------
+
+    [] ls >mult lt 	=> multiset(ls, lt, nil)
+    end
+
+    []  multiset(s.ls, nil, L)	=> true
+		//if neq_list[term](ls,nil)
+    end
+    []  multiset(nil, t.lt, L)	=> multiset2(L, t.lt, nil)
+    end
+    []  multiset(s.ls, t.lt, L)	=>  b
+		choose
+		try 
+			if equiv_mpo(s,t) 
+			where b := () multiset(ls @ L, lt, nil)
+		try  
+			where b := ()multiset(ls, t.lt, s.L)
+	 	end 
+    end
+
+    []  multiset2(ls, nil, L)	=> true
+    end
+    []  multiset2(nil, t.lt, L)	=> false
+    end
+    []  multiset2(s.ls, t.lt, L)	=>  b
+		choose
+		try 
+			if mpo(s,t) 
+			where b := () multiset2(cons(s,ls) @ L, lt, nil)
+		try 
+			where b := () multiset2(ls, t.lt, s.L)
+	 	end
+    end
+
+//------------------------------------------------------------------------------------
+// Ordre MPO
+//------------------------------------------------------------------------------------
+//    [] mpo(s,t) => mpo1(s,t) or mpo2(s,t) or mpo3(s,t)
+//    end
+
+//
+// Cas : f(s1,...,sn) >mpo f(t1,...,tn)
+// Il faut : s >mpo t1,...,tn et s1,...,sn >lex t1,...,tn
+//
+    [] mpo(s,t) => true
+		if not(isvar(s)) and not(isvar(t))
+		choose
+		try 
+			if head(s) ==sig head(t)
+			where b:= () mpo3(s,t) 
+			if b
+		try 
+			if head(s) >sig head(t)
+			where b:= () mpo2(s,t) 
+			if b
+		end
+    end
+
+    [] mpo3(s,t) => list_subterm(s) >mult list_subterm(t) 
+    end
+//
+// Cas : f(s1,...,sn) >mpo g(t1,...,tn) avec f >sig g
+// Il faut : s >mpo t1,...,tn
+//
+    [] mpo2(s,t) => mpo(s,list_subterm(t))
+    end
+//
+// Cas : autre
+// Il faut : si >mpo t
+//
+    [] mpo(s,t) => mpo1(s,t)
+    end
+    [] mpo1(s,t) => mpo(list_subterm(s),t)
+    end
+
+//----------------------------------------------------------------------------------
+//    [] mpo(s.ls,t) => mpo(s,t) or s~t or mpo(ls,t)
+//    end    
+    [] mpo(s.ls,t) =>  b
+		choose
+		try 
+			if equiv_mpo(s,t)
+			where b := () true
+		try 
+			if mpo(ls,t)
+			where b := () true
+		try 
+			where b := () mpo(s,t)
+		end
+    end
+    [] mpo(nil,t) => false
+    end
+
+//----------------------------------------------------------------------------------
+//    [] mpo(s,t.lt) => mpo(s,t) and mpo(s,lt)
+//    end    
+    [] mpo(s,t.lt) => b
+		choose
+		try 
+			if mpo(s,t) 
+			where b := () mpo(s,lt)
+		try  
+			where b := () false
+	 	end
+    end
+    [] mpo(s,nil) => true
+    end
+
+//----------------------------------------------------------------------------------
+//   f(s_1,...,s_n) equiv_mpo g(t_1,...,t_n) => f = g and s_i ~ t_perm(i)
+//    end    
+    [] equiv_mpo($v,$u) => false if neq_variable($v,$u)
+    end
+    [] equiv_mpo(s,s) => true
+    end
+    [] equiv_mpo(s,t) => true
+		if not(isvar(s)) and not(isvar(t))
+		if head(s) ==sig head(t)
+		where b:= () equiv_mpo(list_subterm(s),list_subterm(t), nil) 
+		if b
+    end
+
+    [] equiv_mpo(nil, nil, nil) => true
+    end  
+    [] equiv_mpo(nil, nil, t.L) => false
+    end  
+    [] equiv_mpo(nil, t.lt, L) => false
+    end  
+    [] equiv_mpo(s.ls, t.lt, L) =>  b
+		choose
+		try 
+			if equiv_mpo(s,t)
+			where b := () equiv_mpo(ls @ L, lt, nil) 
+		try 
+			where b := () equiv_mpo(ls, t.lt, s.L)
+	 	end
+    end
+
+end
+//------------------------------------------------------------------------------------
+
+end
+

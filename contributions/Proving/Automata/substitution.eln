@@ -1,0 +1,100 @@
+module substitution[Fss, Vars]
+import local variable[Vars] ECterm[Vars] Cterm[Fss] state 
+	match_system[Fss, Vars] list[substitution]
+	replace[Cterm, Cterm]
+	list[conj_match];
+end
+
+sort substitution;
+end
+
+operators global
+
+	identity		: substitution;
+	@ -> @			: (variable state) substitution;
+	(@ -> @)		: (variable state) substitution alias @ -> @:;
+	@ o @			: (substitution substitution) substitution;
+	list_match_to_subst(@)	: (list[conj_match]) list[substitution];
+	match_to_subst(@)	: (conj_match) substitution;
+	@(@)			: (substitution Cterm) Cterm;
+	apply(@, @)		: (substitution Cterm) Cterm alias @(@):;
+local
+	temp(@)			: (Cterm) Cterm;
+	
+end
+
+stratop global
+  list_match_to_subst_strat : <list[substitution]> builtin;
+  match_to_subst_strat : <substitution> builtin;
+  apply_subst_strat : <Cterm> builtin;
+end
+
+
+rules for Cterm
+          t: Cterm;
+	q: state;
+	s1, s2: substitution;
+	a_variable: variable;
+	
+global
+[subst_apply_init] apply(s1, t) => apply(s1, temp(t))			end
+[subst_apply_r1] apply(s1 o s2, t) => apply(s2, apply(s1, t))		end
+[subst_apply_r2] apply(a_variable -> q, t) => replace(a_variable, q, t)	end
+[subst_apply_r3] apply(identity, t) => t				end
+[subst_apply_end] temp(t) => t						end
+end
+
+rules for substitution
+          A: conj_match;
+	subst: substitution;
+	a_variable: variable;
+	q: state;
+global
+[match_to_subst_r1] match_to_subst(a_variable ?= q ^ A) => (a_variable -> q) o subst
+		where subst := (match_to_subst_strat) match_to_subst(A)		end
+
+[match_to_subst_r2] match_to_subst(true) => identity					end
+end
+
+
+rules for list[substitution]
+         	l: list[conj_match];
+	A: conj_match;
+	subst: substitution;
+	list_subst: list[substitution];
+global
+[list_match_to_subst_r1] list_match_to_subst(A.l) => subst . list_subst 
+	where list_subst:= (list_match_to_subst_strat) list_match_to_subst(l)
+	where subst:= (match_to_subst_strat) match_to_subst(A)
+end
+
+[list_match_to_subst_r2] list_match_to_subst(nil) => nil			end
+end
+
+
+strategies for list[substitution]
+implicit
+  [.] list_match_to_subst_strat =>
+	repeat*(dc one(list_match_to_subst_r1 , list_match_to_subst_r2))
+  end
+end
+
+
+strategies for substitution
+implicit
+  [.] match_to_subst_strat => 
+	repeat*(dc one(match_to_subst_r1 , match_to_subst_r2))
+  end
+end
+
+
+strategies for Cterm
+implicit
+  [.] apply_subst_strat => 
+	dc one(subst_apply_init);
+	repeat*(dc one(subst_apply_r1 , subst_apply_r2 , subst_apply_r3));
+	dc one(subst_apply_end)
+  end
+end
+
+end

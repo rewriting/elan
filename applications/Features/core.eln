@@ -1,0 +1,38 @@
+module core
+
+import global eq[Foo] 
+		strat[Foo];
+
+op global
+  a	: Foo;
+  b	: Foo;
+  c	: Foo;
+  d 	: Foo;
+  doit(@)	: (Foo) Foo;
+  d(@)	: (Foo) Foo;
+  add(@):(Foo) Foo;
+  p(@,@): (Foo Foo) Foo;
+  @ + @ : (Foo Foo) Foo  (AC);
+end
+
+
+//this core dump depends alsoon strat[Foo] import
+// if I use [id] strategy in a where, it runs
+// if I delete strat[Foo],  it runs also
+
+rules for Foo
+ r,t,y, z, x, u , f, g: Foo;
+bodies
+  [QQ]	doit(x) => y
+	where (Foo) y:=()x
+	end
+
+  [SS]	doit(x) => r
+	where (Foo)r:=()a
+	where (Foo)r:=()a						end
+  [RR]	doit(x) => p(p(f,g),p(t,u))
+	where (Foo) f+g:=()a+b
+	where (Foo) t+u:=()x+b						end
+end
+
+end

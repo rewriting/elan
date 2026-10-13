@@ -1,0 +1,56 @@
+module compute_state[vars,fss,prec,X]
+import	global 	list[X]
+		identity[compute_state]
+	;
+end
+
+sort	compute_state internal_compute_state;
+end
+
+operators
+  global
+    @*@*@*@*@*@		: (list[X] list[X] list[X]
+				list[X] list[X] list[X]) compute_state;
+    @|@|@|@		: (list[X] list[X] list[X]
+				list[X]) internal_compute_state;
+    CS_to_A(@)		: (compute_state) list[X];
+    CS_to_N(@)		: (compute_state) list[X];
+    CS_to_C(@)		: (compute_state) list[X];
+    CS_to_T(@)		: (compute_state) list[X];
+    CS_to_S(@)		: (compute_state) list[X];
+    CS_to_E(@)		: (compute_state) list[X];
+    ICS_to_1(@)		: (internal_compute_state) list[X];
+    ICS_to_2(@)		: (internal_compute_state) list[X];
+    ICS_to_3(@)		: (internal_compute_state) list[X];
+    ICS_to_4(@)		: (internal_compute_state) list[X];
+end
+
+rules for list[X]
+
+	A,N,C,T,S,E	: list[X];
+	c1,c2,c3,c4	: list[X];
+global
+  [] CS_to_A(A*N*C*T*S*E)	=> A
+  end
+  [] CS_to_N(A*N*C*T*S*E)	=> N
+  end
+  [] CS_to_C(A*N*C*T*S*E)	=> C
+  end
+  [] CS_to_T(A*N*C*T*S*E)	=> T
+  end
+  [] CS_to_S(A*N*C*T*S*E)	=> S
+  end
+  [] CS_to_E(A*N*C*T*S*E)	=> E
+  end
+  
+  [] ICS_to_1(c1|c2|c3|c4)	=> c1
+  end
+  [] ICS_to_2(c1|c2|c3|c4)	=> c2
+  end
+  [] ICS_to_3(c1|c2|c3|c4)	=> c3
+  end
+  [] ICS_to_4(c1|c2|c3|c4)	=> c4
+  end
+end
+
+end

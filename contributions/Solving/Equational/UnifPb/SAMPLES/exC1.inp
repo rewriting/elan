@@ -1,0 +1,2 @@
+eq(z,u) = eq(a,b)
+end

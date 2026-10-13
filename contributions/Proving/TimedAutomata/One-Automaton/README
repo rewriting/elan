@@ -1,0 +1,15 @@
+*********13/3/2002.
+
+- La version dans ce répertoire traite le cas d'un seul automate.
+
+- exemple de requete
+    elan Timed_Automaton.lgi simple.spc <input
+
+
+O. Bournez.
+
+****************** 09/2000
+
+Cette version traite toujours un seul automate, mais elle sait dire qu'une zone n'est pas atteignable, pour cela elle utilise les matrices de differences bornees (DBMs).
+
+Hassen KACEM 

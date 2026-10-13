@@ -1,0 +1,10 @@
+module constant
+sort constant;
+
+op global
+	a: constant;
+	b: constant;
+	c: constant;
+end
+
+end

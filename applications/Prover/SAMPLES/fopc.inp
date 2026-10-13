@@ -1,0 +1,20 @@
+run [Start;Timpl;Tnot;existT(1);allT(x.2,0);notT(1);hyp(2)]
+	* |- (A x.1 p(x.1)) impl not (E x.1 not p(x.1));
+run [Start;ind(x.1,INT);AXIOM_plus1;Teq;AXIOM_plus3;AXIOM_plus1;Teq]
+	* |- x.1 ++zero = x.1;
+run [Start;repeat-2 Tall;AXIOM_memb1;Teq] 
+	* |- (A x.1(A x.2 member(x.1,(x.1::x.2))));
+run [Start;repeat-3 Tall;repeat-2 Timpl;AXIOM_memb;Trightor;Tand;hyp(0);hyp(1)]
+*|-(A x.1(A x.2(A x.3 not x.1=x.2 impl member(x.1,x.3)impl 
+	member(x.1,(x.2::x.3)))));
+run [Start;Timpl;Tnot;existT(1);allT(x.2,0);notT(1);hyp(2)]
+	* |- (A x.1 p(x.1)) impl not (E x.1 not p(x.1));
+run [Start;ind(x.1,INT);AXIOM_plus1;Teq;
+	AXIOM_plus2;AXIOM_eq;hyp(0)]* |- x.1 ++ zero = x.1;
+run [Start;ind(x.2,INT);AXIOM_plus1;AXIOM_eq;AXIOM_plus1;Teq;AXIOM_plus2;
+	AXIOM_eq;AXIOM_plus2;hyp(0)]*|-x.2++succ(x.1)=succ(x.2++x.1);
+run [Start;ind(x.1,INT);AXIOM_plus1;LEMMA_7;AXIOM_plus2;LEMMA_8;AXIOM_eq;
+	hyp(0)]*|-x.1++x.2=x.2++x.1;
+run [Start;repeat-2 Tall;AXIOM_memb1;Teq] * |- (A x.1(A x.2 member(x.1,(x.1::x.2))));
+quit;
+

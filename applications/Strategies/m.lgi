@@ -1,0 +1,16 @@
+LPL m description
+
+	query	of sort int
+	result of sort 	int
+	modules int 	m[int] 
+	start with 	[mmm]query //[add1]query //[add1.map]query
+/*
+	query	of sort list[int] 
+	result of sort 	list[int] 
+	modules int 	m[int] 
+	start with 	[map]query //[add1]query //[add1.map]query
+*/
+end
+
+
+

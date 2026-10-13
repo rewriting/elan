@@ -1,0 +1,8 @@
+LPL rqueens description 
+
+query 		of sort list[int]
+      result 	of sort list[int]
+      modules   rqueens list[int]
+      start with (queens) query
+
+end

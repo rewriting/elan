@@ -1,0 +1,58 @@
+module Automaton[K,Q,S]
+
+import global
+  K Q S
+  Terms[K,Q,S]
+  list[state] list[label] list[invariant] list[transition] ;
+end
+
+sort
+  Automaton ;
+end
+
+operators
+ global
+  (States @ Labels @ Invariant @ Transitions @) : (list[state] list[label] list[invariant] list[transition]) Automaton ;
+  lst_states(@) : (Automaton) list[state] ;
+  lst_labels(@) : (Automaton) list[label] ;
+  lst_inv(@)    : (Automaton) list[invariant] ;
+  lst_trans(@)  : (Automaton) list[transition] ;
+end
+
+rules for list[state]
+  ls : list[state] ;
+  ll : list[label] ;
+  li : list[invariant] ;
+  lt : list[transition] ;
+ global
+  [] lst_states((States ls Labels ll Invariant li Transitions lt)) => ls end
+end
+
+rules for list[label]
+  ls : list[state] ;
+  ll : list[label] ;
+  li : list[invariant] ;
+  lt : list[transition] ;
+ global
+  [] lst_labels((States ls Labels ll Invariant li Transitions lt)) => ll end
+end
+
+rules for list[invariant]
+  ls : list[state] ;
+  ll : list[label] ;
+  li : list[invariant] ;
+  lt : list[transition] ;
+ global
+  [] lst_inv((States ls Labels ll Invariant li Transitions lt))    => li end
+end
+
+rules for list[transition]
+  ls : list[state] ;
+  ll : list[label] ;
+  li : list[invariant] ;
+  lt : list[transition] ;
+ global
+  [] lst_trans((States ls Labels ll Invariant li Transitions lt))  => lt end
+end
+
+end

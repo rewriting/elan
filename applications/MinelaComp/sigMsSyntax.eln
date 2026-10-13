@@ -1,0 +1,50 @@
+module sigMsSyntax[Types]
+import	global	
+		anyIdentifier
+		type[Types]
+	;
+	local	Types
+		identifier
+		list[identifier]
+		pair[identifier,type]
+		list[pair[identifier,type]]
+//		pair[list[type],type]
+		pair[identifier,sig]
+		list[pair[identifier,sig]]
+
+		list[sig]
+	;
+end
+
+operators 
+global
+  @	  : ( ident ) identifier			alias @:;
+
+//	many sorted prefix signature
+
+// Variables
+  @ ':' @ : ( identifier type ) pair[identifier,type]	alias [@,@]:;
+
+  Epsilon : list[pair[identifier,type]]	alias nil:;
+  @ @	: ( pair[identifier,type] list[pair[identifier,type]] )
+	  list[pair[identifier,type]]	alias cons(@,@):;
+
+//  --> 	: list[type]	alias nil:;
+  @ @   : ( type list[type] ) list[type]	alias cons(@,@):;
+//  @ @	: ( list[type] type ) pair[list[type],type] 	alias [@,@]:;
+
+// Functions
+  @ ':' @ : ( identifier sig ) pair[identifier,sig]	alias [@,@]:;
+  Epsilon : list[pair[identifier,sig]]			alias nil:;
+  @  @	: (  pair[identifier,sig] list[pair[identifier,sig]] )
+	  list[pair[identifier,sig]]			alias cons(@,@):;
+
+// sig
+  Epsilon : list[type]	alias nil:;
+  Epsilon : list[sig]	alias nil:;
+  @ @   : ( sig list[sig] ) list[sig]		alias cons(@,@):;
+
+
+end
+
+end

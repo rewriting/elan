@@ -1,0 +1,8 @@
+LPL cc description 
+
+query 		of sort int
+      result 	of sort int
+      modules   	int cc
+      start with 	(ss)query
+
+end of LPL description

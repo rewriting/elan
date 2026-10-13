@@ -1,0 +1,19 @@
+module str_to_term
+
+import global refstring2string //ref2string[Foo]
+		; end
+
+sort Foo; end
+
+operators global
+  foo(@)	: (string) string;
+end
+
+rules for string
+t	: string;
+global
+  []	foo(t) => string2refstring("1.2.nil":"list","nqueens.ref")
+  end
+end
+
+end

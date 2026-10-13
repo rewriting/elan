@@ -1,0 +1,11 @@
+LPL solvers description
+
+   query of sort  	int
+   result of sort 	State
+   import		solvers
+  start with		()     load_solvers(100,
+				init_state(
+				 create_solvers(query)))
+
+end
+

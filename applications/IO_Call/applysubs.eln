@@ -1,0 +1,41 @@
+module applysubs
+import  global term ;
+	local bool eq[variable] eqSystem ;
+end
+
+operators
+
+global
+
+applysubs(@,@,@)        : (variable term term) term ;
+applysubs(@,@,@)        : (variable term eqSystem) eqSystem ;
+
+end
+
+
+      rules for term
+      // declare 
+      x,y:variable ; t:term ;
+       
+      global
+   
+      [] applysubs(x,t,y) => y if x != y end
+      [] applysubs(x,t,x) => t end
+
+      end
+
+
+      rules for eqSystem
+      // declare 
+      x:variable ; r,s,t:term ; P: eqSystem ;
+       
+      global 
+   
+      [] applysubs(x,t,r=s) => applysubs(x,t,r) = applysubs(x,t,s) end
+      [] applysubs(x,t,P & r=s) => applysubs(x,t,P) & applysubs(x,t,r=s) end
+      [] applysubs(x,t,true) => true end
+      [] applysubs(x,t,false) => false end
+      [] applysubs(x,t,P & true) => applysubs(x,t,P) & true end
+      end
+
+end

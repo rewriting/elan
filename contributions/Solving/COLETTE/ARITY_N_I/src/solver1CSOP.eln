@@ -1,0 +1,31 @@
+module solver1CSOP[Variables,Type,Values]
+
+import
+global
+	OptimizationRules[Variables,Type,Values]
+	ForwardCheckingChoicePointMinimumDomain[Variables,Type,Values]
+	;
+end
+
+stratop
+global
+	strat1		: < csop -> csop >		bs;
+
+end
+
+strategies for csop
+implicit
+
+[] strat1 =>
+first one ( first one (PostLTUpperBound);
+	    LocalConsistencyForEC;
+	    first one (GetUBFCChoicePointMinimumDomainFirstToLastOne)
+	    ,
+	    first one (SetLowerBoundToUpperBound)
+	  )
+end
+
+end
+
+
+end

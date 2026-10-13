@@ -1,0 +1,94 @@
+module ConstraintManipulation[Variables,Type]
+
+import
+global
+	LogicalOperators[Variables,Type] 
+/* I/O cannot be compiled
+	string
+	io[string]
+	io[constraint]
+	io[list[constraint]]
+*/
+	;
+end
+
+operators
+global	CreateListOfCanonicalConstraints(@,@)	: (constraint list[constraint])	list[constraint];
+	WriteConstraintInASCII(@,@)		: (string  constraint)		constraint;
+	WriteConstraintInHTML(@,@)		: (string  constraint)		constraint;
+end
+
+
+/* I/O cannot be compiled
+
+rules for constraint
+
+	c, c1		: constraint;
+	title, s1, s2	: string;
+
+global 
+
+[]	WriteConstraintInASCII(title,c)
+	=>
+	c
+	where	s1 := ()write(stdout,title)
+	where	c1 := ()write(stdout,c)
+	where	s2 := ()write(stdout,"\n")
+end
+
+[]	WriteConstraintInHTML(title,c)
+	=>
+	c
+	where	s1 := ()write(stdout,"<STRONG>"+title+":</STRONG> ")
+	where	c1 := ()write(stdout,c)
+	where	s2 := ()write(stdout,"\n<BR>")
+end
+
+end
+*/
+
+
+rules for list[var]
+
+	l, l1, l2	: list[var];
+	t		: term;
+	lt		: list[term];
+	c		: constraint;
+
+global 
+
+[]	GetVarOfListOfTerm(t.lt,l)
+	=>
+	l1
+	where	l2 := ()GetVarOfListOfTerm(lt,l)
+	where	l1 := ()VarsOfTerm(t,l2)	
+end
+
+end
+
+
+rules for list[constraint]
+
+	c, c1, c2, c3	: constraint;
+	l, l1, l2	: list[constraint];
+
+global 
+
+[]	CreateListOfCanonicalConstraints(c1 & c2,l)
+	=>
+	l2
+	where	l1 := ()CreateListOfCanonicalConstraints(c1,l)
+	where	l2 := ()CreateListOfCanonicalConstraints(c2,l1)
+end
+[]	CreateListOfCanonicalConstraints(c,l)
+	=>
+	c3.l
+	where	c1 := (normalise( dc one (EliminateNOT) ))c
+	where	c2 := ()SimplifyConstraint(c1)
+	where	c3 := ()GetCanonicalForm(c2,0,0)
+end
+
+end
+
+
+end

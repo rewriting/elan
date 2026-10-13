@@ -1,0 +1,19 @@
+LPL Solve description
+
+  specification description
+
+    part Vars	of sort list[identifier]
+	 	import sigSyntax
+    part Ops	of sort list[pair[identifier,int]]
+	 	import sigSyntax
+
+  end
+
+  query 	of sort combiSystem
+         	result of sort combiSystem 
+	 	import Solve[Vars,Ops] eqSystem eqMulti combiSystem bool
+
+         	start with (trycombi) query 
+
+end
+

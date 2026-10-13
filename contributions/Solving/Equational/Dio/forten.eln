@@ -1,0 +1,306 @@
+module forten[A,B]
+
+
+import 
+       global 
+
+       int list[int] pair[list[int],list[int]]
+       list[pair[list[int],list[int]]]
+       pair[list[pair[list[int],list[int]]],list[pair[list[int],list[int]]]] 
+       eq[list[pair[list[int],list[int]]]] ;
+
+       local
+
+       A B identifier list[identifier] ;
+
+end
+
+sort dioState;
+end
+
+
+
+operators
+
+   global
+
+       FOR EACH E:identifier ; M:int ; N:int SUCH THAT 
+             E:=(listExtract) elem(e.nil)  
+         AND M:= () size_of_int_list(A)
+         AND N:= () size_of_int_list(B)
+
+:{
+        {E_I : pair[list[int],list[int]] ;}_I=1...(M+N)
+    }
+
+
+  dio: pair[list[int],list[int]] ;
+
+
+  [@|@|@]: (list[pair[list[int],list[int]]] 
+            list[pair[list[int],list[int]]]
+            list[pair[list[int],list[int]]])
+            dioState ;
+
+
+  local
+
+  existsInf(@,@) : (list[pair[list[int],list[int]]]
+                    pair[list[int],list[int]]) bool ;
+
+
+  @ <= @ : (list[int] list[int]) bool ;
+
+  @ <= @ : (pair[list[int],list[int]] pair[list[int],list[int]]) bool ;
+
+  (@.@): (int list[int]) list[int] alias @.@:;
+
+
+  @+@: (list[int] list[int]) list[int] ;
+
+
+
+  @+@: (pair[list[int],list[int]] pair[list[int],list[int]])
+        pair[list[int],list[int]] ;
+
+  pdtScal(@,@) : (list[int] list[int]) int ;
+
+  diff(@): (pair[list[int],list[int]]) int ;
+
+  minimize(@,@): (list[pair[list[int],list[int]]] 
+                  list[pair[list[int],list[int]]])
+                  list[pair[list[int],list[int]]] ;
+
+  split(@): (list[pair[list[int],list[int]]])
+                  pair[list[pair[list[int],list[int]]],
+                       list[pair[list[int],list[int]]]] ;
+
+  solutions(@): (dioState) list[pair[list[int],list[int]]] ;
+
+end
+
+
+stratop
+  global 
+
+    fortenbacher : <dioState> builtin;
+
+    fortenStrat : <pair[list[int],list[int]]> builtin;
+end
+
+
+
+rules for bool
+
+i1,i2: int ;
+x1,x2: list[int] ;
+v1,v2: pair[list[int],list[int]] ;
+
+l: list[pair[list[int],list[int]]] ;
+
+global 
+
+[] i1.x1<=i2.x2 => i1<=i2 and x1<=x2 end
+[] nil<=nil => true end
+
+[] v1<=v2 => first(v1)<=first(v2) and second(v1)<=second(v2) end
+
+[] existsInf(v1.l,v2) => v1<=v2 or existsInf(l,v2) end
+[] existsInf(nil,v2) => false end
+
+
+
+end
+
+
+rules for list[int]
+
+i1,i2,i3:int ;
+x1,x2,x3: list[int] ;
+
+global
+
+[] (i1.x1) + (i2.x2) => i3.x3
+                 where i3:=() i1 + i2
+                 where x3:=() x1 + x2
+                 end
+[] nil+nil => nil end
+
+end
+
+
+rules for pair[list[int],list[int]]
+
+v1,v2: pair[list[int],list[int]] ;
+
+global
+
+[] v1+v2 => [first(v1)+first(v2),second(v1)+second(v2)] end
+
+end
+
+
+rules for int
+
+i1,i2:int ;
+x1,x2: list[int] ;
+v: pair[list[int],list[int]] ;
+
+global
+
+[] pdtScal(i1.x1,i2.x2) => i1*i2+ pdtScal(x1,x2) end
+[] pdtScal(nil,nil) => 0 end
+
+[] diff(v) => pdtScal(A,first(v)) - pdtScal(B,second(v)) end
+
+end
+
+
+rules for  pair[list[int],list[int]] 
+
+oneSol: pair[list[int],list[int]] ;
+NormForm: dioState ;
+
+
+global
+
+       FOR EACH E:identifier ; M:int ; N:int SUCH THAT 
+             E:=(listExtract) elem(e.nil)  
+         AND M:= () size_of_int_list(A)
+         AND N:= () size_of_int_list(B)
+
+:{
+        {
+         [] E_I => [{0.}_J=1...(I-1) 1. {0.}_J=(I+1)...M nil,
+                {0.}_J=1...N nil] end
+         }_I=1...M
+
+       {
+         [] E_I => [{0.}_J=1...M nil,
+                {0.}_J=(M+1)...(I-1) 1. {0.}_J=(I+1)...(M+N) nil] end
+         }_I=(M+1)...(M+N)
+
+
+[fortenRule] dio => oneSol
+                  where 
+                  NormForm:= (fortenbacher) [nil | nil | {E_I.}_I=1...M nil]
+                  where 
+                  oneSol:= (listExtract) elem(solutions(NormForm))
+                  end
+
+}
+
+end
+
+
+
+rules for list[pair[list[int],list[int]]]
+
+Sol,Q: list[pair[list[int],list[int]]] ;
+v:pair[list[int],list[int]] ;
+
+global
+
+[] minimize(Sol,v.Q) => minimize(Sol,Q)
+                        if existsInf(Sol,v) end
+
+[] minimize(Sol,v.Q) => v.minimize(Sol,Q) end
+
+[] minimize(Sol,nil) => nil end
+
+[] solutions([Sol | nil | nil]) => Sol end
+
+
+end
+
+
+
+rules for pair[list[pair[list[int],list[int]]],list[pair[list[int],list[int]]]]
+
+S,R: pair[list[pair[list[int],list[int]]],list[pair[list[int],list[int]]]] ;
+Q: list[pair[list[int],list[int]]] ;
+v:pair[list[int],list[int]] ;
+
+ 
+global
+
+
+[] split(v.Q) =>  R
+                  where S:= () split(Q)
+                  choose
+                    try
+                     if diff(v)==0
+                     where R:= () [v.first(S),second(S)]
+                    try
+                     where R:= () [first(S),v.second(S)]
+                  end
+                 end
+
+[] split(nil) => [nil,nil] end
+
+end
+
+
+
+rules for dioState
+
+Sol,Q,P,SolQ,NonSolQ: list[pair[list[int],list[int]]] ;
+v:pair[list[int],list[int]] ;
+
+S: pair[list[pair[list[int],list[int]]],list[pair[list[int],list[int]]]] ;
+ 
+global
+
+       FOR EACH E:identifier ; M:int ; N:int SUCH THAT 
+             E:=(listExtract) elem(e.nil)  
+         AND M:= () size_of_int_list(A)
+         AND N:= () size_of_int_list(B)
+
+:{
+
+[developR] [Sol | Q | v.P] => [Sol | {v+E_I.}_I=(M+1)...(M+N) Q | P] 
+                        if diff(v)>0 end
+
+[developL] [Sol | Q | v.P] => [Sol | {v+E_I.}_I=1...M Q | P] 
+                        if diff(v)<0 end
+}
+
+[leaf] [Sol | Q | nil] => [SolQ @ Sol | nil | minimize(Sol,NonSolQ)] 
+                         if neq_list[pair[list[int],list[int]]](Q,nil)
+                         where S:= () split(Q)
+                         where SolQ := () first(S)
+                         where NonSolQ:= () second(S)
+                         end
+
+end
+
+
+
+strategies for dioState
+
+implicit
+
+  [.] fortenbacher => 
+                     repeat*(
+                        dc one(developR,developL,leaf)
+                        ) 
+
+  end
+
+end
+
+
+strategies for pair[list[int],list[int]]
+implicit
+
+  [.] fortenStrat => dk(fortenRule) 
+
+  end
+
+end
+
+
+end
+
+
+   

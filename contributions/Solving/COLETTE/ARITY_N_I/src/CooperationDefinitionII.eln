@@ -1,0 +1,79 @@
+module CooperationDefinitionII[Variables,Type,Values]
+
+import
+global
+	CSOPDefinition[Variables,Type,Values]
+        tuple[4,csop,list[csop],list[Pid],list[Pid]]
+	list[csop]
+	list[Pid]
+        io[csopbisII]
+	;
+end
+
+sort
+
+	csopbisII;
+
+end
+
+operators
+global
+
+// CSOPbisII definition
+
+	CSOPbisII@		: (set:tuple[csop,list[csop],list[Pid],list[Pid]])	csopbisII;
+
+// CSOPbisII Constructor
+
+	CreateCSOPbisII(@)	: (csop)						csopbisII;
+
+// CSOPbisII Destructor
+
+	GetCSOP(@)		: (csopbisII)						csop;
+	no_more			:							csop;
+
+end
+
+
+rules for csopbisII
+
+        P1		: csop;
+	s1		: string;
+	PbisII, QbisII	: csopbisII;
+
+global
+
+[]	CreateCSOPbisII(P1)
+	=>
+	CSOPbisII[P1,nil,nil,nil]
+end
+
+[WriteCSOPbisIIInASCII]
+
+	PbisII
+	=>
+	PbisII
+	where	QbisII := ()write(stdout,PbisII)
+        where   s1     := ()write(stdout,"\n\n\n")
+end
+
+end
+
+
+rules for csop
+
+	P1		: csop;
+	laPid, liPid	: list[Pid];
+	lcsop		: list[csop];
+
+global
+
+[]	GetCSOP(CSOPbisII[P1,lcsop,laPid,liPid])
+	=>
+	P1
+end
+
+end
+
+
+end

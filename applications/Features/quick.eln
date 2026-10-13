@@ -1,0 +1,40 @@
+module quick
+
+import global int list[int];
+end
+sort pair;
+end
+operators global
+  sort(@) 		: (list[int]) list[int];
+  pivot(@,@,@,@)	: (int list[int] list[int] list[int]) pair;
+  [@,@]			: (list[int] list[int]) pair;
+end
+
+rules for list[int]
+ x	: int;
+	xs,s,l	: list[int];
+global
+  []  sort(nil) => nil					
+  end
+  []  sort(x.xs) => append(sort(s),x.sort(l)) 		
+		where (pair)[s,l]:=()pivot(x,xs,nil,nil)
+  end
+end
+rules for pair
+  p, x	: int;
+  xs,s,l	: list[int];
+  R : pair;
+global
+  []  pivot(p,nil,s,l) => [s,l]			
+  end
+  []  pivot(p,x.xs,s,l) => R
+      choose
+      try if p<x where R:=() pivot(p,xs,s,x.l)
+      try where R:=() pivot(p,xs,x.s,l)
+      end
+  end
+end	
+
+end
+
+

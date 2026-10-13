@@ -1,0 +1,33 @@
+module map1[X]
+
+import global 
+  strat[X] strat[list[X]]
+  X          list[X];
+end
+operators global
+  map(@) 	: (<X>) <list[X]>;
+  start @ 	: (integ) <list[X]>;
+end
+
+rules  for X
+ x	: X; 
+    	n	: integ;
+global
+  [ass(n)] x => n 		end
+  [add(n)] x => x+n 		end
+  [sub(n)] x => x-n 		end
+end
+
+strategies for list[X]
+ s : <X>;
+ n : integ;
+defined
+  [map(s)]	 dc(nil,cons(s,map(s)))		end
+  [start n] map(dk(ass(n),dk(add(n),sub(n))))	end
+end
+
+end
+
+
+
+

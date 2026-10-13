@@ -1,0 +1,236 @@
+/*
+ *   Difference-bounds matrices
+ */
+module DBM[K]
+
+//----  MODULES IMPORTÉS  ----//
+
+import global
+   K int
+   identifier list[identifier]
+
+   ClockZone[K]
+   list[bound] list[list[bound]] eq[list[list[bound]]]
+  
+   pair[int,int]
+   pair[index,bound]
+   list[DBM_elt]
+   list[clock]
+   occur[clock,list[clock]]
+   replace[clock,pair[clockzone,clockzone]]  
+   replace[DBM_elt,list[DBM_elt]]
+   pair[clockzone, clockzone]
+   pair[list[DBM_elt],list[DBM_elt]] 
+   eq[index] 
+   eq[list[DBM_elt]] ;
+end
+
+//----  SORTES INTRODUITES  ----//
+
+sort
+  DBM_elt //ce sont les elts de la liste qui simule la matrice
+  bound   //ce sont les elts de la matrice
+  index ;
+end
+
+operators global
+  oo        : bound ;
+  o         : bound ;
+  @         : (pair[index,bound]) DBM_elt ;
+  @         : (pair[int,int]) bound ;
+  @|@       : (int int) index ;
+  X(@)      : (int) clock ;
+  rank(@)   : (clock) int ;
+  
+  
+  sizeof(@) : (list[identifier]) int ; 
+  
+  init_DBM(@,@) : (int int)  list[DBM_elt] ; 
+  init_line(@,@,@)  : (int int int) list[DBM_elt] ;
+
+  db_list_var(@): (pair[clockzone,clockzone]) list[clock] ;
+  list_var(@)   : (clockzone) list[clock] ; 
+  setof(@)      : (list[clock]) list[clock] ;
+  replace_var(@,@,@) : (pair[clockzone,clockzone] list[clock] int) pair[clockzone,clockzone] ; 
+  indexed_form(@) : (pair[clockzone,clockzone]) pair[clockzone,clockzone] ;
+
+  cons_DBM(@,@) : (clockzone list[DBM_elt]) list[DBM_elt] ;
+  cons2DBM(@)   : (pair[clockzone,clockzone]) pair[list[DBM_elt],list[DBM_elt]] ;
+  
+  @+@           : (bound bound) bound ;
+  minb(@,@)     : (bound bound) bound ;
+
+  FloydOne(@,@,@) : (int list[DBM_elt] int) list[DBM_elt] ;
+  Floyd(@,@)      : (list[DBM_elt] int) list[DBM_elt] ;
+  pairFloyd(@)    : (pair[list[DBM_elt],list[DBM_elt]])pair[list[DBM_elt],list[DBM_elt]] ; 
+  lookfor(@,@)    : (index list[DBM_elt]) bound ;
+
+  cmp_DBMs(@)     : (pair[clockzone,clockzone]) bool ;
+end
+
+rules for int
+  lc : list[identifier] ;
+  $c  : identifier ;
+  n,i  : int ;
+ global
+  [] sizeof($c.lc) => 1 + sizeof(lc)  end
+  [] sizeof(nil)  => 0               end
+  [] rank(X(i))   => i               end
+end
+
+
+rules for list[DBM_elt]
+  n, i, j, k, li, cpt : int ;
+  b, dij, dik, dkj : bound ;
+  l_dbm, l_dbm1 : list[DBM_elt] ;
+  cz : clockzone ;
+  c : clause ;
+  $X, $Y : clock ;
+ global
+  [] init_line(li,n,cpt) => l_dbm 
+                            choose try if cpt<=n and eq_int(li,cpt)
+                                       where l_dbm:=()[li|cpt,o].init_line(li,n,cpt+1)
+                                   try if cpt<=n
+                                       where l_dbm:=()[li|cpt,oo].init_line(li,n,cpt+1)
+                                   try
+                                       where l_dbm:=()nil
+                                   end  end
+
+  [] init_DBM(n,cpt)     => l_dbm 
+                            choose try if cpt<=n
+                                       where l_dbm:=()init_line(cpt,n,0) @ init_DBM(n,cpt+1)
+                                   try
+                                       where l_dbm:=()nil
+                                   end  end
+
+  [] cons_DBM($X<n^cz,l_dbm)    => cons_DBM(cz,replace([rank($X)|0,oo],[rank($X)|0,[n,0]],l_dbm)) end
+  [] cons_DBM($X<=n^cz,l_dbm)   => cons_DBM(cz,replace([rank($X)|0,oo],[rank($X)|0,[n,1]],l_dbm)) end
+  [] cons_DBM($X>n^cz,l_dbm)    => cons_DBM(cz,replace([0|rank($X),oo],[0|rank($X),[-n,0]],l_dbm)) end
+  [] cons_DBM($X>=n^cz,l_dbm)   => cons_DBM(cz,replace([0|rank($X),oo],[0|rank($X),[-n,1]],l_dbm)) end
+  [] cons_DBM($X-$Y<n^cz,l_dbm)  => cons_DBM(cz,replace([rank($X)|rank($Y),oo],[rank($X)|rank($Y),[n,0]],l_dbm)) end
+  [] cons_DBM($X-$Y<=n^cz,l_dbm) => cons_DBM(cz,replace([rank($X)|rank($Y),oo],[rank($X)|rank($Y),[n,1]],l_dbm)) end
+  
+  [] cons_DBM(true,l_dbm)      => l_dbm  end
+
+
+  [] FloydOne(k,[i|j,dij].l_dbm,cpt) => FloydOne(k,l_dbm @ [i|j,b].nil,cpt+1)
+                                        where n:=()(size(K)+1)*(size(K)+1)
+                                        if cpt<n
+                                        where dik:=()lookfor(i|k,[i|j,dij].l_dbm)
+                                        where dkj:=()lookfor(k|j,[i|j,dij].l_dbm)
+                                        where b:=()minb(dij,dik+dkj)
+                                        end
+  [] FloydOne(k,l_dbm,cpt) => l_dbm     end
+  [] Floyd(l_dbm,cpt)      => Floyd(l_dbm1,cpt+1)
+                              if cpt<=size(K)
+                              where l_dbm1:=()FloydOne(cpt,l_dbm,0)
+                              end
+  [] Floyd(l_dbm,cpt)      => l_dbm     end
+
+end
+
+rules for pair[list[DBM_elt],list[DBM_elt]] 
+  l_dbm, l_dbm1, l_dbm2 : list[DBM_elt] ;
+  pcz, i_pcz : pair[clockzone,clockzone] ;
+  pl_dbm : pair[list[DBM_elt],list[DBM_elt]] ;
+ global
+  [] cons2DBM(pcz) => [l_dbm1,l_dbm2]
+                      where i_pcz:=()indexed_form(pcz)
+                      where l_dbm:=()init_DBM(size(K),0)
+                      where l_dbm1:=()cons_DBM(elim(first(i_pcz)),l_dbm)
+                      where l_dbm2:=()cons_DBM(elim(second(i_pcz)),l_dbm)
+                      end
+  [] pairFloyd(pl_dbm) => [Floyd(first(pl_dbm),0),Floyd(second(pl_dbm),0)] end
+end
+
+rules for list[clock]
+  pcz: pair[clockzone,clockzone] ;
+  cz : clockzone ;
+  c : clause ;
+  $X, $Y : clock ;
+  lc : list[clock] ;
+  n : int ;
+ global
+  [] db_list_var(pcz) => list_var(first(pcz)) @ list_var(second(pcz)) end
+  [] list_var(c^cz)   => list_var(c) @ list_var(cz) end
+  [] list_var($X<n)    => $X.nil                      end
+  [] list_var($X<=n)   => $X.nil                      end
+  [] list_var($X>n)    => $X.nil                      end
+  [] list_var($X>=n)   => $X.nil                      end
+  [] list_var($X-$Y<n)  => $X.$Y.nil                    end
+  [] list_var($X-$Y<=n) => $X.$Y.nil                    end
+  [] list_var(true)   => nil                        end
+  [] list_var(false)  => nil                        end
+
+  [] setof($X.lc)      => $X.setof(lc) 
+                         if not occurs($X,lc)        end
+  [] setof($X.lc)      => setof(lc)                  end
+  [] setof(nil)       => nil                        end
+end
+
+rules for pair[clockzone,clockzone]
+  pcz : pair[clockzone,clockzone] ;
+  c : clause ;
+  $X : clock ;
+  lc : list[clock] ;
+  n : int ;
+ global
+  [] replace_var(pcz,$X.lc,n) => replace($X,X(n),replace_var(pcz,lc,n+1)) end 
+  [] replace_var(pcz,nil,n)  => pcz                                     end
+  [] indexed_form(pcz)       => replace_var(pcz,setof(db_list_var(pcz)),1)  end
+end
+
+rules for bound
+  b, res : bound ;
+  x1, x2, x3, r1, r2, r3, i, j  : int ;
+  dex : index ;
+  e : DBM_elt ;
+  l_dbm : list[DBM_elt] ;
+ global
+  [] o + oo   => oo   end
+  [] oo + o   => oo   end
+  [] b + o    => b    end
+  [] o + b    => b    end
+  [] b + oo   => oo   end
+  [] oo + b   => oo   end
+  [] [x1,r1] + [x2,r2]     => [x1+x2,min(r1,r2)] end
+
+  [] minb(o,oo) => o  end
+  [] minb(oo,o) => o  end
+  [] minb(o,b)  => minb([0,1],b)  end
+  [] minb(b,o)  => minb([0,1],b)  end
+  [] minb(oo,b) => b  end
+  [] minb(b,oo) => b  end
+  [] minb([x1,r1],[x2,r2]) => [x3,r3]
+                              choose try if x1<x2
+                                         where x3:=()x1
+                                         where r3:=()r1
+                                     try if x2<x1
+                                         where x3:=()x2
+                                         where r3:=()r2
+                                     try 
+                                         where x3:=()x1
+                                         where r3:=()min(r1,r2)
+                              end    end
+
+  [] lookfor(dex,[i|j,b].l_dbm)  => res
+                              choose try if eq_index(dex,i|j)
+                                         where res:=()b
+                                     try
+                                         where res:=()lookfor(dex,l_dbm)
+                              end  end
+ 
+end
+
+rules for bool
+  pcz : pair[clockzone,clockzone] ;
+  pl_dbm : pair[list[DBM_elt],list[DBM_elt]] ;
+ global
+  [] cmp_DBMs(pcz) => true 
+                      where pl_dbm:=()pairFloyd(cons2DBM(pcz))
+                      if first(pl_dbm)==second(pl_dbm)
+                      end
+  [] cmp_DBMs(pcz) => false  end
+end
+
+end

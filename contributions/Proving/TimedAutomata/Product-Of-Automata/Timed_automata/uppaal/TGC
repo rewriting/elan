@@ -1,0 +1,10 @@
+//Insert declarations of global clocks, variables, constants and channels.
+process Train{
+//Insert local declarations of clocks, variables and constants.
+clock X ;
+state Far, Near{X<=5}, On{X<=5}, After{X<=5};
+init Far;
+}
+//Insert process assignments.
+//Edit system definition.
+system P;

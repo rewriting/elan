@@ -1,0 +1,9 @@
+#! /bin/csh
+setenv REP $APPLICATIONS/Csp
+setenv LGI SolverIntegerCSP
+setenv SPC IntegerSpecification
+setenv OPTION -b
+setenv INPUT $REP/Sample/castro.inp
+setenv OUTPUT $REP/Sample/castro.out
+
+

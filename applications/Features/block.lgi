@@ -1,0 +1,9 @@
+LPL block description
+
+   query of sort  	string 
+   result of sort 	int
+   import		block
+  start with		()floop("b.out",100)
+
+end
+

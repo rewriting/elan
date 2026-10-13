@@ -1,0 +1,13 @@
+LPL poly3 description
+
+  specification description
+    part Vars	of sort list[identifier]
+	 	import identifier list[identifier]
+  end
+
+  query    of sort 		poly
+	   result of sort 	poly
+           import  		poly3[Vars]
+           start with 		(last_simplify) query
+
+end

@@ -1,0 +1,95 @@
+module PropagationRules[Variables,Type,Values]
+
+import
+global	FormuleManipulation[Variables,Type,Values]
+	;
+end
+
+operators
+global	Verify_Elimination(@)		  : (csp)			csp;
+
+local	GetRemainingConstraints(@,@,@,@,@): (list[formule] list[formule] list[formule] formule formule)
+						  list[formule];
+
+end
+
+
+rules for csp
+
+	x,x1,x2,y	: var;
+	lv		: list[var];
+	v,v1,v2		: Type;
+	n		: int;
+	F		: bool;
+	D,D1,D2,RD	: domain;
+	c,c1,c2,c3,c4	: formule;
+	lmc,lec,store,C,L,l,l1,l2,l3,l4	: list[formule];
+	Q		: csp;
+	twolists	: tuple[list[formule],list[formule]];
+
+global 
+
+[]	Verify_Elimination(CSP[lmc,x = v.lec,C,store])
+	=>
+	where	l1:= ()replace(x,v,C)
+	where	l2:= ()replace(x,v,store)
+	where	(list[formule]) c3.l3:= ()GetRemainingConstraints(l1,nil,nil,x = v, x in? empty)
+	where	(list[formule]) c4.l4:= ()GetRemainingConstraints(l2,nil,nil,x = v, x in? empty)
+	switch
+	case	c3 == x = v and c4 == x = v	then
+		CSP[lmc,x = v.lec,l3,l4]
+	otherwise
+		CSP[nil,nil,nil,nil]
+	end
+end
+
+end
+
+
+rules for list[formule]
+
+	x,x1,x2		: var;
+	v		: Type;
+	D,D1,D2		: domain;
+	n,m		: int;
+	c,c1,c2,c3,c4	: formule;
+	l,lu,lb,l1,l2,l3,l4,C	: list[formule];
+	L		: tuple[list[formule],list[formule],list[formule],list[formule]];
+
+
+global 
+
+[]	GetRemainingConstraints(c1 V c2.C,lu,lb,c3,c4)
+	=>
+	c3.append(lu,append(lb,c1 V c2.C))
+end
+
+[]	GetRemainingConstraints(c.C,lu,lb,c1,c2)
+	=>
+	where	n := ()ArityOfConstraint(c)
+	switch
+	case	n >= 2	then
+		GetRemainingConstraints(C,lu,c.lb,c1,c2)
+	case
+		n == 1	then
+		GetRemainingConstraints(C,NormalFormOfConstraint(GetCanonicalForm(c)).lu,lb,c1,c2)
+	otherwise
+		switch
+		case	EvaluateGroundFormule(c)	then
+			GetRemainingConstraints(C,lu,lb,c1,c2)
+		otherwise
+			c2.nil
+		end
+	end
+end
+
+[]	GetRemainingConstraints(nil,lu,lb,c1,c2)
+	=>
+	c1.append(lu,lb)
+end
+
+end
+
+
+end
+

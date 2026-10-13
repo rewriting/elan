@@ -1,0 +1,68 @@
+************ generate1 ************
+
+
+%%%%%%%%%%%%%%%%%% Execute =>indSimplififPLR on:
+[EmptyT,(s(x.1)pl n_0)=s(x.1):EmptyT] 
+
+Clauses to prove:
+---------------------------------------
+[EmptyT,s((x.1pl n_0))=s(x.1):EmptyT] 
+Hypothesis:
+---------------------------------------
+ 
+
+%%%%%%%%%%%%%%%%%% Execute =>indSimplififPLR on:
+[EmptyT,(n_0 pl n_0)=n_0:EmptyT] 
+
+Clauses to prove:
+---------------------------------------
+[EmptyT,n_0=n_0:EmptyT] 
+Hypothesis:
+---------------------------------------
+ ***********************************
+
+
+%%%%%%%%%%%%%%%%%% Execute =>generate1 on:
+[EmptyT,(x pl n_0)=x:EmptyT] 
+
+Clauses to prove:
+---------------------------------------
+[EmptyT,s((x.1pl n_0))=s(x.1):EmptyT] 
+[EmptyT,n_0=n_0:EmptyT] 
+Hypothesis:
+---------------------------------------
+[EmptyT,(var-x pl n_0)=var-x:EmptyT] 
+
+%%%%%%%%%%%%%%%%%% Execute =>tautology1  on:
+[EmptyT,n_0=n_0:EmptyT] 
+
+Clauses to prove:
+---------------------------------------
+[EmptyT,s((x.1pl n_0))=s(x.1):EmptyT] 
+Hypothesis:
+---------------------------------------
+[EmptyT,(var-x pl n_0)=var-x:EmptyT] 
+
+%%%%%%%%%%%%%%%%%% Execute =>posDecomposition on:
+[EmptyT,s((x.1pl n_0))=s(x.1):EmptyT] 
+
+Clauses to prove:
+---------------------------------------
+[EmptyT,(x.1pl n_0)=x.1:EmptyT] 
+Hypothesis:
+---------------------------------------
+[EmptyT,(var-x pl n_0)=var-x:EmptyT] 
+
+%%%%%%%%%%%%%%%%%% Execute =>subsume22 on:
+[EmptyT,(x.1pl n_0)=x.1:EmptyT] 
+
+Clauses to prove:
+---------------------------------------
+ 
+Hypothesis:
+---------------------------------------
+[EmptyT,(var-x pl n_0)=var-x:EmptyT]  FailC#EmptyC*[EmptyT,(var-x pl n_0)=var-x:EmptyT]#EmptyC#pl:([EmptyT,(n_0 pl var-x)=var-x:EmptyT]*[EmptyT,(s(var-x)pl var-y)=s((var-x pl var-y)):EmptyT])*EmptyC#equalT:nil.n_0:nil.s:nil.pl:1.nil.nil.True:nil.False:nil.nil#[nat,s(v-nat-2).n_0.nil].[bol,False.True.nil].nil end
+
+ end end
+end
+

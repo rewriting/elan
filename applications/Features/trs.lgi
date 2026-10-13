@@ -1,0 +1,13 @@
+LPL trs description
+
+   query of sort  	Foo
+   result of sort 	Foo
+   import 		trs
+   start with 		(ALLSOL)f(query)
+
+end
+
+
+
+
+

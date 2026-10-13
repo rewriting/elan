@@ -1,0 +1,31 @@
+module loca
+
+sort Foo; end
+operators global
+  a40	: Foo;
+  a41	: Foo;
+end
+
+stratop global
+    GG_loca	: <Foo->Foo>		builtin;
+    RR		: <Foo->Foo>		builtin;
+  local
+    LL_loca	: <Foo->Foo>		builtin;
+end
+
+rules for Foo
+x : Foo;
+global
+  [R]	x => a40		end
+local
+  [R]	x => a41		end
+end
+
+strategies for Foo
+implicit
+  [] GG_loca => dk(R) end
+  [] RR => dk(R) end
+  [] LL_loca => dk(R) end
+end
+
+end

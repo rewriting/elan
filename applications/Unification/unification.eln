@@ -1,0 +1,105 @@
+module unification[Vars,Fss]
+
+import  global  termCommons[Fss,Vars];
+        local   Fss int identifier bool pair[identifier,int]
+		list[pair[identifier,int]]
+                eq[variable] eq[term]
+		occur[variable,term] occur[variable,constraint]
+                constraint[Fss,Vars]
+		identity[constraint];
+end
+
+operators
+global
+    @ = @       : (term term) equation          alias @=@:;
+    @           : ( equation ) constraint       alias @:;
+end
+
+stratop global
+  unify		: <constraint>		bs;
+  unifys	: <constraint>		bs;
+end
+
+rules for constraint
+	P : constraint;
+	$s,$t : term;
+	$x,$y : variable;
+local
+//--------------------------------------------------
+// Regles d'unification syntaxique
+//--------------------------------------------------
+
+  [delete] 	P & $x=$y	=> P
+			if eq_variable($x,$y)
+  end
+  [coalesce] 	P & $x=$y	=> $x=$y & apply($x->$y,P)
+			if occurs $x in P
+			and occurs $y in P
+			and neq_variable($x,$y)
+  end
+  [conflict]	P & $s=$t	=> false
+			if neq_identifier(head($s),head($t))
+			   and not(isvar($s)) and not(isvar($t))
+  end
+  [occ_check1]	P & $x=$s	=> false
+			if occurs $x in $s and not isvar($s)
+  end
+  [occ_check2]	P & $s=$x	=> false
+			if occurs $x in $s and not isvar($s)
+  end
+  [eliminate1]	P & $x=$s	=> $x=$s & apply($x->$s,P)
+			if not(occurs $x in $s) 
+			and occurs $x in P
+			and not isvar($s)
+  end
+  [eliminate2]	P & $s=$x	=> $x=$s & apply($x->$s,P)
+			if not(occurs $x in $s) 
+			and occurs $x in P 
+			and not isvar($s)
+  end
+
+  FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+  SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS) 
+	AND N:=()second(SS) :{
+   rules for constraint
+       s_1,...,s_N:term;
+       t_1,...,t_N:term;
+   local
+     [decompose] P & F(s_1,...,s_N)=F(t_1,...,t_N) => P { & s_I=t_I }_I=1...N
+     end
+   end
+  }
+
+  [trueelim]    P & true        => P                            end
+  [truepropag]  true            => true                         end
+  [trueadd]     P               => true & P                     end
+  [delete] 	P & true & true	=> P & true			end
+  [delete] 	P & false	=> false 
+  end
+end
+
+//--------------------------------------------------
+// Strategie d'application des regles
+//--------------------------------------------------
+strategies for constraint
+implicit
+  [] unify =>
+  dc(trueadd) ;
+  repeat* (dc(
+      delete , decompose , conflict , coalesce ,
+      occ_check1 , occ_check2 , eliminate1 , eliminate2
+    )) ;
+  dc(trueelim , identity)
+  end
+
+  [] unifys =>
+  dc(trueadd) ;
+  repeat* (dc(
+      delete , decompose , conflict , coalesce ,
+      occ_check1 , occ_check2 , eliminate1 , eliminate2
+    )) ;
+  dc(trueelim , truepropag)
+  end
+end
+
+end

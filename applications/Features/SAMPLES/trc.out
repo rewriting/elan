@@ -1,0 +1,36 @@
+ a(b(a(a))) end
+
+ a(b(b(a))) end
+
+ a(b(c(a))) end
+
+ b(b(a(a))) end
+
+ b(b(b(a))) end
+
+ b(b(c(a))) end
+
+ end end
+end
+
+ end end
+end
+
+ a(c(a(c))) end
+
+ a(c(b(c))) end
+
+ a(c(c(c))) end
+
+ b(c(a(c))) end
+
+ b(c(b(c))) end
+
+ b(c(c(c))) end
+
+ end end
+end
+
+ end end
+end
+

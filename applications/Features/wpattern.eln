@@ -1,0 +1,46 @@
+module wpattern
+
+sort term;
+end
+
+operators global
+ a      : term;
+ b      : term;
+ c      : term;
+ d      : term;
+ e      : term;
+ f      : term;
+
+ go     : term;
+
+ F(@,@) : (term term) term (AC);
+ f(@,@) : (term term) term;
+ g(@) : (term) term;
+ h(@,@) : (term term) term;
+end
+
+stratop global
+  s0 : <term> builtin;
+//  Id : <term> builtin;
+end
+
+rules for term
+  x,y,z,z1,z2,z3,z4 : term;
+global
+  [r0] go => 
+	h(x,y) // h(z1,z2)
+//        where (term) f(F(x,y),z) :=(Id) f(F(a,F(b,c)),d)
+        where (term) f(F(x,y),z) :=() f(F(a,F(b,c)),d)
+//      where (term) F(z1,g(z2)) :=() F(g(x),F(g(y),z))
+  end
+end
+
+strategies for term
+implicit
+  [.] s0 => dk(r0)
+  end
+//  [.] Id => dk(id)
+//  end
+end
+
+end

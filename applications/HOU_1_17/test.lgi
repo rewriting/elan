@@ -1,0 +1,31 @@
+LPL test description
+  
+specification description 
+   part Btypes	of sort list[identifier]
+		modules sigSyntax
+   part Mvars	of sort list[vardef]
+		modules sigSyntax ivars[Btypes]
+   part Bvars	of sort list[vardef]
+		modules sigSyntax ivars[Btypes]
+end  
+query		of sort  	lterm //wtterm
+		result of sort 	lterm //wtterm
+		modules 	typech[Mvars,Btypes,Bvars]
+		start with 	(Protheo)query
+/*
+query		of sort  	list[vardef]
+		result of sort 	list[vardef]
+		modules 	int
+		start with 	(Protheo)query
+*/
+/*
+query		of sort  input
+		result of sort list[uconj]
+		modules hounif[Mvars,Btypes,Bvars]
+		start with (Protheo)hou(query)
+*/
+end of LPL description
+
+
+
+

@@ -1,0 +1,322 @@
+module MinSplittingForwardChecking[Variables,Type,Values]
+
+import
+global
+	OptimizationRules[Variables,Type,Values]
+	ForwardChecking[Variables,Type,Values]
+	ForwardCheckingChoicePoint[Variables,Type,Values]
+	ForwardCheckingChoicePointII[Variables,Type,Values]
+	;
+end
+
+stratop
+global
+	MinSplittingFCFirstToLast				: < csop -> csop >	bs;
+	MinSplittingFCLastToFirst				: < csop -> csop >	bs;
+	MinSplittingFCSplitFirstToLast				: < csop -> csop >	bs;
+	MinSplittingFCSplitLastToFirst				: < csop -> csop >	bs;
+	MinSplittingFCChoicePointFirstToLast			: < csop -> csop >	bs;
+	MinSplittingFCChoicePointLastToFirst			: < csop -> csop >	bs;
+	MinSplittingFCChoicePointSplitFirstToLast		: < csop -> csop >	bs;
+	MinSplittingFCChoicePointSplitLastToFirst		: < csop -> csop >	bs;
+	MinSplittingFCChoicePointIIFirstToLast			: < csop -> csop >	bs;
+	MinSplittingFCChoicePointIILastToFirst			: < csop -> csop >	bs;
+	MinSplittingFCChoicePointIISplitFirstToLast		: < csop -> csop >	bs;
+	MinSplittingFCChoicePointIISplitLastToFirst		: < csop -> csop >	bs;
+end
+
+
+strategies for csop
+implicit
+
+[] MinSplittingFCFirstToLast =>
+first one (PostLTEUpperBound);
+LocalConsistencyForEC;
+first one (GetUBFCFirstToLastOne);
+first one (UndervalueLowerBound);
+repeat* (
+	first one( first one (SetUpperBoundToMiddle);
+		   first one (PostLTUpperBound);
+		   LocalConsistencyForEC;
+		   first one (GetUBFCFirstToLastOne);
+		   first one (UndervalueLowerBound)
+		   ,
+		   first one (SetLowerBoundToMiddle)
+		 )
+	);
+first one (FCFirstToLastOne);
+first one (GetSolutionCSOP)
+end
+
+
+/* Optimization Strategy: */
+/* Search Strategy	: */
+/* Variable selection	: */
+/* Value selection	: */
+
+[] MinSplittingFCLastToFirst =>
+first one (PostLTEUpperBound);
+LocalConsistencyForEC;
+first one (GetUBFCLastToFirstOne);
+first one (UndervalueLowerBound);
+repeat* (
+	first one( first one (SetUpperBoundToMiddle);
+		   first one (PostLTUpperBound);
+		   LocalConsistencyForEC;
+		   first one (GetUBFCLastToFirstOne);
+		   first one (UndervalueLowerBound)
+		   ,
+		   first one (SetLowerBoundToMiddle)
+		 )
+	);
+first one (FCLastToFirstOne);
+first one (GetSolutionCSOP)
+end
+
+
+/* Optimization Strategy: */
+/* Search Strategy	: */
+/* Variable selection	: */
+/* Value selection	: */
+
+[] MinSplittingFCSplitFirstToLast =>
+first one (PostLTEUpperBound);
+LocalConsistencyForEC;
+first one (GetUBFCSplitFirstToLastOne);
+first one (UndervalueLowerBound);
+repeat* (
+	first one( first one (SetUpperBoundToMiddle);
+		   first one (PostLTUpperBound);
+		   LocalConsistencyForEC;
+		   first one (GetUBFCSplitFirstToLastOne);
+		   first one (UndervalueLowerBound)
+		   ,
+		   first one (SetLowerBoundToMiddle)
+		 )
+	);
+first one (FCSplitFirstToLastOne);
+first one (GetSolutionCSOP)
+end
+
+
+/* Optimization Strategy: */
+/* Search Strategy	: */
+/* Variable selection	: */
+/* Value selection	: */
+
+[] MinSplittingFCSplitLastToFirst =>
+first one (PostLTEUpperBound);
+LocalConsistencyForEC;
+first one (GetUBFCSplitLastToFirstOne);
+first one (UndervalueLowerBound);
+repeat* (
+	first one( first one (SetUpperBoundToMiddle);
+		   first one (PostLTUpperBound);
+		   LocalConsistencyForEC;
+		   first one (GetUBFCSplitLastToFirstOne);
+		   first one (UndervalueLowerBound)
+		   ,
+		   first one (SetLowerBoundToMiddle)
+		 )
+	);
+first one (FCSplitLastToFirstOne);
+first one (GetSolutionCSOP)
+end
+
+
+/* Optimization Strategy: */
+/* Search Strategy	: */
+/* Variable selection	: */
+/* Value selection	: */
+
+[] MinSplittingFCChoicePointFirstToLast =>
+first one (PostLTEUpperBound);
+LocalConsistencyForEC;
+first one (GetUBFCChoicePointFirstToLastOne);
+first one (UndervalueLowerBound);
+repeat* (
+	first one( first one (SetUpperBoundToMiddle);
+		   first one (PostLTUpperBound);
+		   LocalConsistencyForEC;
+		   first one (GetUBFCChoicePointFirstToLastOne)
+		   ,
+		   first one (SetLowerBoundToMiddle)
+		 )
+	);
+first one (FCChoicePointFirstToLastOne);
+first one (GetSolutionCSOP)
+end
+
+
+/* Optimization Strategy: */
+/* Search Strategy	: */
+/* Variable selection	: */
+/* Value selection	: */
+
+[] MinSplittingFCChoicePointLastToFirst =>
+first one (PostLTEUpperBound);
+LocalConsistencyForEC;
+first one (GetUBFCChoicePointLastToFirstOne);
+first one (UndervalueLowerBound);
+repeat* (
+	first one( first one (SetUpperBoundToMiddle);
+		   first one (PostLTUpperBound);
+		   LocalConsistencyForEC;
+		   first one (GetUBFCChoicePointLastToFirstOne)
+		   ,
+		   first one (SetLowerBoundToMiddle)
+		 )
+	);
+first one (FCChoicePointLastToFirstOne);
+first one (GetSolutionCSOP)
+end
+
+
+/* Optimization Strategy: */
+/* Search Strategy	: */
+/* Variable selection	: */
+/* Value selection	: */
+
+[] MinSplittingFCChoicePointSplitFirstToLast =>
+first one (PostLTEUpperBound);
+LocalConsistencyForEC;
+first one (GetUBFCChoicePointSplitFirstToLastOne);
+first one (UndervalueLowerBound);
+repeat* (
+	first one( first one (SetUpperBoundToMiddle);
+		   first one (PostLTUpperBound);
+		   LocalConsistencyForEC;
+		   first one (GetUBFCChoicePointSplitFirstToLastOne)
+		   ,
+		   first one (SetLowerBoundToMiddle)
+		 )
+	);
+first one (FCChoicePointSplitFirstToLastOne);
+first one (GetSolutionCSOP)
+end
+
+
+/* Optimization Strategy: */
+/* Search Strategy	: */
+/* Variable selection	: */
+/* Value selection	: */
+
+[] MinSplittingFCChoicePointSplitLastToFirst =>
+first one (PostLTEUpperBound);
+LocalConsistencyForEC;
+first one (GetUBFCChoicePointSplitLastToFirstOne);
+first one (UndervalueLowerBound);
+repeat* (
+	first one( first one (SetUpperBoundToMiddle);
+		   first one (PostLTUpperBound);
+		   LocalConsistencyForEC;
+		   first one (GetUBFCChoicePointSplitLastToFirstOne)
+		   ,
+		   first one (SetLowerBoundToMiddle)
+		 )
+	);
+first one (FCChoicePointSplitLastToFirstOne);
+first one (GetSolutionCSOP)
+end
+
+
+/* Optimization Strategy: */
+/* Search Strategy	: */
+/* Variable selection	: */
+/* Value selection	: */
+
+[] MinSplittingFCChoicePointIIFirstToLast =>
+first one (PostLTEUpperBound);
+LocalConsistencyForEC;
+first one (GetUBFCChoicePointIIFirstToLastOne);
+first one (UndervalueLowerBound);
+repeat* (
+	first one( first one (SetUpperBoundToMiddle);
+		   first one (PostLTUpperBound);
+		   LocalConsistencyForEC;
+		   first one (GetUBFCChoicePointIIFirstToLastOne)
+		   ,
+		   first one (SetLowerBoundToMiddle)
+		 )
+	);
+first one (FCChoicePointIIFirstToLastOne);
+first one (GetSolutionCSOP)
+end
+
+
+/* Optimization Strategy: */
+/* Search Strategy	: */
+/* Variable selection	: */
+/* Value selection	: */
+
+[] MinSplittingFCChoicePointIILastToFirst =>
+first one (PostLTEUpperBound);
+LocalConsistencyForEC;
+first one (GetUBFCChoicePointIILastToFirstOne);
+first one (UndervalueLowerBound);
+repeat* (
+	first one( first one (SetUpperBoundToMiddle);
+		   first one (PostLTUpperBound);
+		   LocalConsistencyForEC;
+		   first one (GetUBFCChoicePointIILastToFirstOne)
+		   ,
+		   first one (SetLowerBoundToMiddle)
+		 )
+	);
+first one (FCChoicePointIILastToFirstOne);
+first one (GetSolutionCSOP)
+end
+
+
+/* Optimization Strategy: */
+/* Search Strategy	: */
+/* Variable selection	: */
+/* Value selection	: */
+
+[] MinSplittingFCChoicePointIISplitFirstToLast =>
+first one (PostLTEUpperBound);
+LocalConsistencyForEC;
+first one (GetUBFCChoicePointIISplitFirstToLastOne);
+first one (UndervalueLowerBound);
+repeat* (
+	first one( first one (SetUpperBoundToMiddle);
+		   first one (PostLTUpperBound);
+		   LocalConsistencyForEC;
+		   first one (GetUBFCChoicePointIISplitFirstToLastOne)
+		   ,
+		   first one (SetLowerBoundToMiddle)
+		 )
+	);
+first one (FCChoicePointIISplitFirstToLastOne);
+first one (GetSolutionCSOP)
+end
+
+
+/* Optimization Strategy: */
+/* Search Strategy	: */
+/* Variable selection	: */
+/* Value selection	: */
+
+[] MinSplittingFCChoicePointIISplitLastToFirst =>
+first one (PostLTEUpperBound);
+LocalConsistencyForEC;
+first one (GetUBFCChoicePointIISplitLastToFirstOne);
+first one (UndervalueLowerBound);
+repeat* (
+	first one( first one (SetUpperBoundToMiddle);
+		   first one (PostLTUpperBound);
+		   LocalConsistencyForEC;
+		   first one (GetUBFCChoicePointIISplitLastToFirstOne)
+		   ,
+		   first one (SetLowerBoundToMiddle)
+		 )
+	);
+first one (FCChoicePointIISplitLastToFirstOne);
+first one (GetSolutionCSOP)
+end
+
+end
+
+
+end
+

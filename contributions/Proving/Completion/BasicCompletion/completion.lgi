@@ -1,0 +1,27 @@
+LPL completion description
+
+specification description
+
+part Vars 	of sort list[identifier]
+		import sigSyntax
+
+part Ops	of sort list[pair[identifier,int]]
+		import sigSyntax
+
+part Prec	of sort list[pair[identifier,int]]
+		import sigSyntax
+
+part System	of sort list[equation]
+		import 	sigSyntax
+			termCommons[Ops,Vars]
+			equation[Vars,Ops,Prec]
+			list[equation]
+end
+
+query	of sort pair[list[equation],list[pair[equation,pair[int,int]]]]
+	result of sort pair[list[equation],list[pair[equation,pair[int,int]]]]
+	import completion[Vars,Ops,Prec,System]
+	start with (init) query
+
+end
+

@@ -1,0 +1,150 @@
+module ordre_lpo[vars,fss,prec]
+
+import	global	ordre_sig[vars,fss,prec] bool list[term]
+		;
+	local	prec int identity[bool] identifier
+		EtermCommons[fss,vars]
+		;
+end
+
+operators
+  global
+    lpo(@,@)	: (term term) bool;
+    suplpo(@,@)	: (term term) bool		alias lpo(@,@):;
+    @ >lpo @	: (term term) bool		alias suplpo(@,@):;
+
+    suplex(@,@)	: (list[term] list[term]) bool;
+    @ >lex @	: (list[term] list[term]) bool	alias suplex(@,@):;
+
+    lpo(@,@)	: (list[term] term) bool;
+    lpo(@,@)	: (term list[term]) bool;
+    lpo1(@,@)	: (term term) bool;
+    lpo2(@,@)	: (term term) bool;
+    lpo3(@,@)	: (term term) bool;
+end
+
+rules for bool
+  
+	s,t 	: term;
+	ls,lt 	: list[term];
+	b	: bool;
+  global
+//----------------------
+// Ordre lexicographique
+//----------------------
+//    [] s.ls >lex t.lt => lpo(s,t) or (s==t and ls >lex lt)
+//    end
+
+/*
+// CETTE TRANSFORMATION EST FAUSSE
+    [] s.ls >lex t.lt =>
+		switch
+		case eq_term(s,t) then true
+			where b:=() ls >lex lt 
+			if b
+		otherwise lpo(s,t)
+		end
+    end
+*/
+
+    [] s.ls >lex t.lt 	=> true
+			if eq_term(s,t)
+			where b:=() ls >lex lt 
+			if b
+    end
+    [] s.ls >lex t.lt 	=> lpo(s,t)
+    end
+
+
+
+//----------
+// Ordre LPO
+//----------
+//    [] lpo(s,t) => lpo1(s,t) or lpo2(s,t) or lpo3(s,t)
+//    end
+
+//
+// Cas : f(s1,...,sn) >lpo f(t1,...,tn)
+// Il faut : s >lpo t1,...,tn et s1,...,sn >lex t1,...,tn
+//
+    [] lpo(s,t) => 
+		if not(isvar(s)) and not(isvar(t))
+		switch
+		case head(s) ==sig head(t) then true
+			where b:=() lpo3(s,t) 
+			if b
+		case head(s) >sig head(t) then true
+			where b:=() lpo2(s,t) 
+			if b
+		end
+    end
+
+/*
+    [] lpo3(s,t) => list_subterm(s) >lex list_subterm(t) 
+                    and lpo(s,list_subterm(t))
+    end
+*/
+
+    [] lpo3(s,t) => 
+		switch
+		case list_subterm(s) >lex list_subterm(t) then lpo(s,list_subterm(t))
+		otherwise false
+		end
+    end
+
+//
+// Cas : f(s1,...,sn) >lpo g(t1,...,tn) avec f >sig g
+// Il faut : s >lpo t1,...,tn
+//
+    [] lpo2(s,t) => lpo(s,list_subterm(t))
+    end
+//
+// Cas : autre
+// Il faut : si >lpo t
+//
+    [] lpo(s,t) => lpo1(s,t)
+    end
+    [] lpo1(s,t) => lpo(list_subterm(s),t)
+    end
+
+//------------------------------------------------------------
+    [] nil >lex lt 	=> false
+    end
+    [] s.ls >lex nil 	=> true
+    end
+
+//    [] lpo(s.ls,t) => lpo(s,t) or s==t or lpo(ls,t)
+//    end    
+
+    [] lpo(s.ls,t) =>
+		switch
+		case eq_term(s,t) then true
+		case lpo(ls,t) then true
+		otherwise lpo(s,t)
+		end
+    end
+
+    [] lpo(nil,t) => false
+    end
+
+
+    [] lpo(s,t.lt) => 
+		switch
+		case lpo(s,t) then lpo(s,lt)
+		otherwise false
+	 	end
+    end
+
+/*
+    [] lpo(s,t.lt) => lpo(s,t) and lpo(s,lt)
+    end
+*/
+
+    [] lpo(s,nil) => true
+    end
+
+
+end
+
+end
+

@@ -1,0 +1,32 @@
+module a
+
+sort Foo; end
+
+operators global
+   a10	: Foo;
+   a11	: Foo;
+end
+
+stratop global
+    GG_a	: <Foo->Foo>	builtin;
+    RR		: <Foo->Foo>	builtin;
+  local
+    LL_a	: <Foo->Foo>	builtin;
+end
+
+rules for Foo
+x : Foo;
+global
+  [R]	x => a10	end
+local
+  [R]	x => a11	end
+end
+
+strategies for Foo
+implicit
+  []  GG_a => dk(R) end
+  []  RR   => dk(R) end
+  []  LL_a => dk(R) end
+end
+
+end

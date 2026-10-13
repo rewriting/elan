@@ -1,0 +1,72 @@
+module commUnification[vars,fss,comfss]
+import 	global term_f[comfss] syntacticUnification[vars,fss];
+	local comfss boolean int signaturesFunctions // list[eqSystem]
+	;
+
+op
+  local
+     @ + (@,@)=(@,@)	: (eqSystem term term term term ) eqSystem;
+end
+
+
+
+
+
+rules for eqSystem
+	P   : eqSystem;
+	s_1,s_2,t_1,t_2 : term;
+bodies
+  FOR EACH F:symbol SUCH THAT F:=(extract)elem(comfss) :{
+//--------------------------------------------------
+// Regles pour l'unification commutative
+//--------------------------------------------------
+  [commChoose]		P & F(s_1,s_2)=F(t_1,t_2)	=>
+				P + (s_1,s_2)=(t_1,t_2)
+    end
+  }
+  [commDecompose]	P + (s_1,s_2)=(t_1,t_2)		=>
+				P & s_1=t_1 & s_2=t_2
+  end
+  [commMutate]		P + (s_1,s_2)=(t_1,t_2)		=>
+				P & s_1=t_2 & s_2=t_1
+  end
+
+end
+
+
+strategy communify
+  dc(trueadd)
+  repeat
+    dc(
+      dc(delete conflict coalesce decompose occ_check eliminate)
+    ||
+      dc(commChoose)
+      dk(commDecompose commMutate)
+    )
+  endrepeat
+  dc(trueelim falsepropag)
+end
+
+
+
+//--------------------------------------------------
+// Strategie d'unification commutative
+//--------------------------------------------------
+strategy communifys
+  dc(trueadd)
+  repeat
+    dc(
+      dc(delete conflict coalesce
+		       decompose occ_check eliminate)
+    ||
+      dc(commChoose)
+      dk(commDecompose commMutate)
+    )
+  endrepeat
+  dc(trueelim)
+end
+
+end
+
+
+

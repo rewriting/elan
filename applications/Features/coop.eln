@@ -1,0 +1,64 @@
+module coop
+
+import global string io[int] io[string];
+
+op global
+  coop(@,@)    	: (string int) int;
+  add(@)    	: (int) int;
+  (@,@,@)       : (int int int) int;
+end
+
+rules for int
+ id, ss : string;
+        pid, pid1 : Pid;
+        n, n1, n2, n3, m, d : int;
+bodies
+  [] coop(id,m) => (n1,n2,n3)
+			where pid1 := (IO)close(pid)
+			where n3   := (IO)read(pid)
+			where n2   := (IO)read(pid)
+			where n1   := (IO)read(pid)
+ 			where ss   := (IO)write(pid,"\n")
+ 			where n    := (IO)write(pid,m)
+			where pid  := (IO)create(id)      end
+  [] add(m) => n1
+			where pid1 := (IO)close(pid)
+			where n1   := (IO)read(pid)
+ 			where ss   := (IO)write(pid,"end\n")
+ 			where n    := (IO)write(pid,m)
+			where pid  := (IO)create(plus)  end
+end
+
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

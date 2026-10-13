@@ -1,0 +1,35 @@
+module state
+
+import global 	integ eq[integ]
+		loops
+		strat[state];
+
+op global
+  state(@,@)	: (integ integ) state;
+end
+
+rules global for state
+ x, y, p	: integ;
+	state1	: state;
+bodies
+  [win]		state(x,y) => state(0,0)  if x <= y			end
+  [move(p)]	state(x,y) => state(x-p,p+p) 	if p <= y if p <= x	end
+  [moves]	state(x,y) => state1
+			where state1:=[move(p)]state(x,y)
+			where p:=[loop]x				end
+end
+
+end
+
+
+
+
+
+
+
+
+
+
+
+
+

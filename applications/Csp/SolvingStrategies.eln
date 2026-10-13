@@ -1,0 +1,178 @@
+module SolvingStrategies[Variables,Type,Values]
+
+import
+global	SolvingRules[Variables,Type,Values]
+	;
+end
+
+stratop
+  global
+  Generate_And_Test	: <csp>		bs;
+  Backtracking		: <csp>		bs;
+  Forward_Checking	: <csp>		bs;
+  Forward_Checking_With_Minimum_Domain	: <csp>		bs;
+  Forward_Checking_With_Maximum_Degree  : <csp>		bs;
+  Unary_And_Binary_Solved_Form		: <csp>		bs;
+  Full_Lookahead			: <csp>		bs;
+  Full_Lookahead_With_Minimum_Domain	: <csp>		bs;
+  Full_Lookahead_With_Maximum_Degree	: <csp>		bs;
+  Unary_Solved_Form			: <csp>		bs;
+  Binary_Solved_Form			: <csp>		bs;
+  Unary_And_Binary_Solved_Form		: <csp>		bs;
+end
+
+strategies for csp
+implicit
+
+[] Generate_And_Test =>
+repeat* (
+	dc (
+	   dk (Enumerate1 , Enumerate2)
+	   ,
+	   dc (Elimination)
+	   )
+	)
+end
+
+[] Backtracking =>
+repeat* (
+	dk (
+	   dc (Enumerate1);
+	   dc (Elimination , id)
+	   ,
+	   dc (Enumerate2)
+	   )
+	)
+end
+
+[] Forward_Checking =>
+Unary_And_Binary_Solved_Form;
+repeat* (
+	dk (
+	   dc (Enumerate1);
+	   dc (Elimination , id);
+	   dc (Unary_Solved_Form , id)
+	   ,
+	   dc (Enumerate2)
+	   )
+	)
+end
+
+[] Forward_Checking_With_Minimum_Domain =>
+Unary_And_Binary_Solved_Form;
+repeat* (
+	dc (GetVarWithMinimumDomain);
+	dk (
+	   dc (Enumerate1);
+	   dc (Elimination , id);
+	   dc (Unary_Solved_Form , id)
+	   ,
+	   dc (Enumerate2)
+	   )
+	)
+end
+
+[] Forward_Checking_With_Maximum_Degree =>
+Unary_And_Binary_Solved_Form;
+repeat* (
+	dc (GetVarWithMaximumDegree);
+	dk (
+	   dc (Enumerate1);
+	   dc (Elimination , id);
+	   dc (Unary_Solved_Form , id)
+	   ,
+	   dc (Enumerate2)
+	   )
+	)
+end
+
+[] Full_Lookahead =>
+Unary_And_Binary_Solved_Form;
+repeat* (
+	dk (
+	   dc (Enumerate1);
+	   dc (Elimination , id);
+	   Unary_And_Binary_Solved_Form
+	   ,
+	   dc (Enumerate2)
+	   )
+	)
+end
+
+[] Full_Lookahead_With_Minimum_Domain =>
+Unary_And_Binary_Solved_Form;
+repeat* (
+	dc (GetVarWithMinimumDomain);
+	dk (
+	   dc (Enumerate1);
+	   dc (Elimination , id);
+	   Unary_And_Binary_Solved_Form
+	   ,
+	   dc (Enumerate2)
+	   )
+	)
+end
+
+[] Full_Lookahead_With_Maximum_Degree =>
+Unary_And_Binary_Solved_Form;
+repeat* (
+	dc (GetVarWithMaximumDegree);
+	dk (
+	   dc (Enumerate1);
+	   dc (Elimination , id);
+	   Unary_And_Binary_Solved_Form
+	   ,
+	   dc (Enumerate2)
+	   )
+	)
+end
+
+[] Unary_Solved_Form =>
+repeat+ (
+	dc (
+	   dc (NodeConsistency);
+	   dc (
+	      dc (Instantiation);
+	      dc (Elimination , id)
+	      ,
+	      dc (Falsity)
+	      ,
+	      id
+	      )
+	   )
+	)
+end
+
+[] Binary_Solved_Form =>
+repeat+ (
+	dc (
+	   dc (ArcConsistency);
+	   dc (
+	      dc (Instantiation);
+	      dc (Elimination , id)
+	      ,
+	      dc (Falsity)
+	      ,
+	      id
+	   )
+	   )
+	)
+end
+
+[] Unary_And_Binary_Solved_Form =>
+repeat* (
+	dc (
+	   Unary_Solved_Form
+	   ,
+	   Binary_Solved_Form
+	   ,
+	   dc(GetDisjuntiveNormalForm);
+	   dc(dk (PostFirstConstraint , PostSecondConstraint) , dc(PostConstraint))
+	   )
+)
+end
+
+end
+
+
+end

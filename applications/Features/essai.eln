@@ -1,0 +1,16 @@
+module essai
+
+import  global  int io[int];
+end
+
+operators       global
+        inout   : int;
+end
+
+rules for int
+        N       : int;
+global
+[] inout        => N where N := () read(stdin) end
+end
+end
+

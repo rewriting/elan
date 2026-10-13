@@ -1,0 +1,28 @@
+Interpreted version
+====================
+
+elan nsh
+
+Compiled version
+================
+
+elanc nsh ; gmake --file nsh.make ; a.out
+
+
+
+Change "AuthVerif" in nsh.eln if you want to check or not the protocol
+
+
+
+
+Queries:
+========
+a+SLEEP+N(a,a).nil <> b+SLEEP+N(b,b).nil <> ii#nil#nil <> nil <> 0 <> 1 <> 0 <> Start
+
+a+SLEEP+N(a,a).nil <> b+SLEEP+N(b,b).nil <> ii#nil#nil <> nil <> 0 <> 2 <> 0 <> Start
+
+a+SLEEP+N(a,a).e+SLEEP+N(e,e).nil <> b+SLEEP+N(b,b).nil <> ii#nil#nil <> nil <> 0 <> 1 <> 0 <> Start
+
+a+SLEEP+N(a,a).e+SLEEP+N(e,e).nil <> b+SLEEP+N(b,b).d+SLEEP+N(d,d).nil <> ii#nil#nil <> nil <> 0 <> 1 <> 0 <> Start
+
+

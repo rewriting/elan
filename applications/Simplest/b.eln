@@ -1,0 +1,31 @@
+module b
+
+sort Foo; end
+operators global
+  a20	: Foo;
+  a21	: Foo;
+end
+
+stratop global
+    GG_b	: <Foo->Foo>	builtin;
+    RR		: <Foo->Foo>	builtin;
+  local
+    LL_b	: <Foo->Foo>	builtin;
+end
+
+rules for Foo
+x : Foo;
+global
+  [R]	x => a20	end
+local
+  [R]	x => a21	end
+end
+
+strategies for Foo
+implicit
+  []	GG_b => dk(R) end
+  []	RR   => dk(R) end
+  []	LL_b => dk(R) end
+end
+
+end

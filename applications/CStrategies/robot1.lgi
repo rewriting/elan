@@ -1,0 +1,11 @@
+LPL robot1 description
+
+  query	of sort		state
+  result of sort	state
+  modules int 		robot
+  start with 		(eval_state)query
+
+end
+
+
+

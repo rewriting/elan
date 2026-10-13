@@ -1,0 +1,7 @@
+(nil|0|(X=cons(3,cons(1,cons(4,cons(2,nil))))&true)) end
+
+(nil|0|(X=cons(2,cons(4,cons(1,cons(3,nil))))&true)) end
+
+ end end
+end
+

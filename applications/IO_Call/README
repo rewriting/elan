@@ -1,0 +1,73 @@
+
+On peut desormais simuler dc/dkcall grace aux primitives d'io 
+de la librairie (standard). Le nouveau module qui effectue ce transfert 
+s'appelle ``ExtCall''. 
+Dans ce module, deux nouvelles strategies ``A la Peter'' 
+sont definies de maniere ``explicit'':  
+
+
+stratop global 
+
+DKcall(@) : (string) <X> ;
+DCcall(@) : (string) <X> ;
+
+end
+
+et peuvent etre utilisees comme suit:
+
+  [solve]       P => Q 
+                 where Q := [DKcall("unifelan")] P end
+
+  [solve1]       P => Q 
+                 where Q := [DCcall("unifelan")] P end
+
+Les deux strategies n'ont plus qu'un seul argument correspondant au string de 
+l'executable (desole' pour ce petit changement de syntaxe).
+
+- L'argument  <number> de dc/dkcall a saute' car je n'ai jamais vu d'exemple 
+d'utilisation avec <number> different de 1. Il s'agit du nombre de probleme(s) 
+pouvant etre transmis a l'executable.
+
+- L'argument  <sort name> de dc/dkcall est obsolete depuis que les strategies
+ont une sorte.
+
+Il n'y a pas besoin de modifier la sortie de l'executable, il suffit d'utiliser
+un filtre sed pour passer du protocole ``A la Marian'' au protocole 
+``A la Peter'' (cf. le shellscript unifelan et le filtre call2io).
+
+Tout ce qui tourne autour de ExtCall se trouve dans 
+/users/protheo/ringeiss/UnifElan/IO.
+
+Voir egalement le fichier ``queries'' pour avoir un exemple d'utilisation:
+Unif2.lgi execute unifelan grace a la strategie DKcall.
+
+Tout commentaire est evidemment le bienvenu.
+Et un grand Merci a la hot-line elan!
+
+	Christophe.
+
+
+PS: Quelques questions pour eventuellement mettre de l'ambiance 
+dans les reunions ELAN:
+
+- probleme des fonctions ``aliases'': quel representant choisir 
+(lors de l'affichage du resultat parse')? 
+la derniere declaree? la premiere declaree? Comment expliquer le comportement 
+non-standard des alias lors de l'utilisation du ``dc/dkcall de Marian''?
+
+
+- affichage intempestif des messages d'erreur en utilisant les 
+primitives d'io!
+
+- Que signifie les warning du genre
+
+[warning] :file=/users/protheo/pot/ELAN/version.2.0.amsterdam/elanlib/strategy/strsig.eln       line=22 pos=8
+[warning] using the 'semantic' option in user's module
+         end of strsig[eqSystem,eqSystem]
+
+[warning] :file=/users/protheo/pot/ELAN/version.2.0.amsterdam/elanlib/strategy/strat.eln        line=25 pos=9
+[warning] using the 'semantic' option in user's module
+
+en utilisant les strategies de Peter?
+
+

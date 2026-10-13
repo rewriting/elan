@@ -1,0 +1,29 @@
+module iforelse
+
+import global int strat[int];
+
+op global
+  s1	: <int>;
+  s2	: <int>;
+  s3	: <int>;
+ endop
+
+rules for int
+ n:int;
+bodies
+  [r1]	n => n+1 if n < 10		end
+  [r11]	n => n-1 if n < 100		end
+  [r2]	n => 100*n			end
+  [r22]	n => 1000*n			end
+  [r3]	n => n				end
+  [r33]	n => -n				end
+end of rules
+
+strategies for <int>
+bodies
+  [] 	s1 ==> dk(r1,r11)			end
+  [] 	s2 ==> dk(r2,r22)			end
+  [] 	s3 ==> dk(r3,r33)			end
+end of strategies
+
+end of module

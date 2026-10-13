@@ -1,0 +1,30 @@
+module lis_foo
+
+import global 	strat[foo] any[foo] foo 
+		strat[tree[foo]] any[tree[foo]] 
+		tree[foo]
+		lis[foo];
+op global
+  swap	: <foo>;
+end
+
+strategies for <foo>
+bodies
+  []	[swap] aa => bb	end
+  []	[swap] bb => cc	end
+  []	[swap] cc => aa	end
+end
+
+end
+
+
+
+
+
+
+
+
+
+
+
+

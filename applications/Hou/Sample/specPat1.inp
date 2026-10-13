@@ -1,0 +1,1 @@
+(la x. (la y. (la z . ((F z) y)))) = (la x. (la y. (la z . (z ((G y) x))))) , slt end

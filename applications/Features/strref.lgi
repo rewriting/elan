@@ -1,0 +1,9 @@
+LPL strref description 
+
+        query           of sort string
+        result          of sort Foo
+        import          strref
+        start with 	()foo(query)
+
+end
+

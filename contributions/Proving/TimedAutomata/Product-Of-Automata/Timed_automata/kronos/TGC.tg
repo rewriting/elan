@@ -1,0 +1,116 @@
+/* Timed graph generated for the parallel composition of:
+	automaton 0: train.tg
+	automaton 1: gate.tg
+	automaton 2: controller.tg
+*/
+#states 16
+#trans  24
+#clocks  3
+	X /* train */
+	Y /* gate */
+	Z /* controller */
+
+
+state: 0	/* vector state: < 0, 0, 0 > */
+prop: FAR UPP U0
+invar: TRUE
+trans:
+L: TRUE =C> APPROACH ; RESET{ X Z }; goto 1
+
+state: 1	/* vector state: < 1, 0, 1 > */
+prop: NEAR UPP U1
+invar: X<=5 and Z<=1
+trans:
+L: 2<X and X<=5 =C> IN ; reset{}; goto 2
+L: Z=1 =C> LOWER ; RESET{ Y }; goto 3
+
+state: 2	/* vector state: < 2, 0, 1 > */
+prop: ON UPP U1
+invar: X<=5 and Z<=1
+trans:
+L: X<=5 =C> OUT ; reset{}; goto 4
+L: Z=1 =C> LOWER ; RESET{ Y }; goto 5
+
+state: 3	/* vector state: < 1, 1, 0 > */
+prop: NEAR T1 U0
+invar: X<=5 and Y<=1
+trans:
+L: 2<X and X<=5 =C> IN ; reset{}; goto 5
+L: Y<=1 =C> DOWN ; reset{}; goto 6
+
+state: 4	/* vector state: < 3, 0, 1 > */
+prop: AFTER UPP U1
+invar: X<=5 and Z<=1
+trans:
+L: Z=1 =C> LOWER ; RESET{ Y }; goto 7
+
+state: 5	/* vector state: < 2, 1, 0 > */
+prop: ON T1 U0
+invar: X<=5 and Y<=1
+trans:
+L: X<=5 =C> OUT ; reset{}; goto 7
+L: Y<=1 =C> DOWN ; reset{}; goto 8
+
+state: 6	/* vector state: < 1, 2, 0 > */
+prop: NEAR DOWNN U0
+invar: X<=5
+trans:
+L: 2<X and X<=5 =C> IN ; reset{}; goto 8
+
+state: 7	/* vector state: < 3, 1, 0 > */
+prop: AFTER T1 U0
+invar: X<=5 and Y<=1
+trans:
+L: Y<=1 =C> DOWN ; reset{}; goto 9
+L: X<=5 =C> EXIT ; RESET{ Z }; goto 10
+
+state: 8	/* vector state: < 2, 2, 0 > */
+prop: ON DOWNN U0
+invar: X<=5
+trans:
+L: X<=5 =C> OUT ; reset{}; goto 9
+
+state: 9	/* vector state: < 3, 2, 0 > */
+prop: AFTER DOWNN U0
+invar: X<=5
+trans:
+L: X<=5 =C> EXIT ; RESET{ Z }; goto 11
+
+state: 10	/* vector state: < 0, 1, 2 > */
+prop: FAR T1 U2
+invar: Y<=1 and Z<=1
+trans:
+L: Y<=1 =C> DOWN ; reset{}; goto 11
+
+state: 11	/* vector state: < 0, 2, 2 > */
+prop: FAR DOWNN U2
+invar: Z<=1
+trans:
+L: Z<=1 =C> RAISE ; RESET{ Y }; goto 12
+
+state: 12	/* vector state: < 0, 3, 0 > */
+prop: FAR T2 U0
+invar: Y<=2
+trans:
+L: 1<=Y and Y<=2 =C> UP ; reset{}; goto 0
+L: TRUE =C> APPROACH ; RESET{ X Z }; goto 13
+
+state: 13	/* vector state: < 1, 3, 1 > */
+prop: NEAR T2 U1
+invar: X<=5 and Y<=2 and Z<=1
+trans:
+L: 2<X and X<=5 =C> IN ; reset{}; goto 14
+L: 1<=Y and Y<=2 =C> UP ; reset{}; goto 1
+
+state: 14	/* vector state: < 2, 3, 1 > */
+prop: ON T2 U1
+invar: X<=5 and Y<=2 and Z<=1
+trans:
+L: X<=5 =C> OUT ; reset{}; goto 15
+L: 1<=Y and Y<=2 =C> UP ; reset{}; goto 2
+
+state: 15	/* vector state: < 3, 3, 1 > */
+prop: AFTER T2 U1
+invar: X<=5 and Y<=2 and Z<=1
+trans:
+L: 1<=Y and Y<=2 =C> UP ; reset{}; goto 4

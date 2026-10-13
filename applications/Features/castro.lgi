@@ -1,0 +1,9 @@
+LPL castro description 
+
+        query           of sort int
+        result          of sort int
+        import          castro[5]
+        start with 	()foo(query)
+
+end
+

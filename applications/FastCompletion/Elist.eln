@@ -1,0 +1,64 @@
+module Elist[X]
+// Extension du module : list
+
+import	global	list[X]
+		occur[X,list[X]]
+	;
+	local
+		bool
+	;
+end
+/*
+	Les operateurs @@ et append_simple permettent
+	d'ajouter des elements en queue d'une liste.
+	Un element ne peut apparaitre qu'une seule
+	fois dans la liste. 
+	On utilise ce type d'operation quand on veut
+	construire une liste de variables par exemple.
+*/
+operators
+  global
+    append_simple(@,@)	: ( list[X] list[X] ) list[X];
+    @ '@''@' @		: ( list[X] list[X] ) list[X]	assocLeft alias append_simple(@,@):;
+
+    append_simple(@,@)	: ( list[X] X ) list[X];
+    @ '@''@' @		: ( list[X] X ) list[X]		assocLeft alias append_simple(@,@):;
+
+    tete(@)		: ( list[X] ) X;
+    queue(@)		: ( list[X] ) list[X];
+end
+
+rules for list[X]
+	l1,l2		: list[X];
+	e		: X;
+global
+  [] append_simple(nil,e)	=> e.nil
+  end
+  [] append_simple(l1,e)	=> l1 @ e.nil
+				if not occurs(e,l1)
+  end
+  [] append_simple(l1,e)	=> l1
+  end
+
+  [] append_simple(nil,l1)	=> l1
+  end
+  [] append_simple(e.l1 , nil)	=> e.l1
+  end
+  [] append_simple(l1 , e.l2)	=> append_simple(append_simple(l1,e),l2)
+  end
+
+  [] queue(e.l1) => l1
+  end
+end
+
+rules for X
+	le	: list[X];
+	e	: X;
+global
+  [] tete(e.le) => e
+  end
+end
+
+end
+
+

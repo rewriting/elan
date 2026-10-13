@@ -1,0 +1,76 @@
+module BacktrackingMaximumDomain[Variables,Type,Values]
+
+import
+global
+	EnumerationRules[Variables,Type,Values]
+	PropagationRules[Variables,Type,Values]
+	;
+end
+
+stratop
+global
+	BacktrackingMaximumDomainFirstToLastAll	: < csp -> csp >         bs;
+	BacktrackingMaximumDomainFirstToLastOne	: < csp -> csp >         bs;
+	BacktrackingMaximumDomainLastToFirstAll	: < csp -> csp >         bs;
+	BacktrackingMaximumDomainLastToFirstOne	: < csp -> csp >         bs;
+end
+
+
+strategies for csp
+implicit
+
+/* Strategy		: Backtracking  	*/
+/* Variable selection	: Maximum Domain	*/
+/* Value selection	: From first to last	*/
+/* Number of solutions	: All 			*/
+
+[] BacktrackingMaximumDomainFirstToLastAll =>
+repeat* (
+	first one (GetVarWithMaximumDomain);
+	dk (iterate* (EliminateFirstValueOfDomain));
+	first one (InstantiateFirstValueOfDomain);
+	first one (Elimination)
+	);
+first one (GetSolutionCSP)
+end
+
+
+/* Strategy		: Backtracking 		*/
+/* Variable selection	: Maximum Domain	*/
+/* Value selection	: From first to last	*/
+/* Number of solutions	: First			*/
+
+[] BacktrackingMaximumDomainFirstToLastOne =>
+first one (BacktrackingMaximumDomainFirstToLastAll)
+end
+
+
+/* Strategy		: Backtracking 		*/
+/* Variable selection	: Maximum Domain	*/
+/* Value selection	: From last to first	*/
+/* Number of solutions	: All 			*/
+
+[] BacktrackingMaximumDomainLastToFirstAll =>
+repeat* (
+	first one (GetVarWithMaximumDomain);
+	dk (iterate* (EliminateLastValueOfDomain));
+	first one (InstantiateLastValueOfDomain);
+	first one (Elimination)
+	);
+first one (GetSolutionCSP)
+end
+
+
+/* Strategy		: Backtracking		*/
+/* Variable selection	: Maximum Domain	*/
+/* Value selection	: From last to first	*/
+/* Number of solutions	: First			*/
+
+[] BacktrackingMaximumDomainLastToFirstOne =>
+first one (BacktrackingMaximumDomainLastToFirstAll)
+end
+
+end
+
+
+end

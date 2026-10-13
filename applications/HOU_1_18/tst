@@ -1,0 +1,5 @@
+# !/bin/csh
+echo "  test of "$1" with "$3
+rm -f SAMPLES/$3.ou
+$ELAN -b $1 $2 < SAMPLES/$2.inp > SAMPLES/$3.ou
+diff SAMPLES/$3.ou SAMPLES/$3.out

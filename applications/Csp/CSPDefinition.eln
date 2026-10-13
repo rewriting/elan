@@ -1,0 +1,148 @@
+module CSPDefinition[Variables,Type,Values]
+
+import
+global	tuple[3,list[formule],list[formule],list[formule]]
+	FormuleManipulation[Variables,Type,Values] Values
+	;
+local	occur[var,list[formule]]
+	;
+
+end
+
+operators
+global	CreateCSP(@)			: (list[formule])				csp;
+
+local	CreateSetOfMembershipConstraints(@,@): (list[formule] list[formule])		list[formule];
+	CreateSetOfConstraints(@) 	: (list[formule])       			list[formule];
+	GetSetOfConstraints(@,@,@,@)	: (list[formule] list[formule] list[formule] list[formule])
+					  tuple[list[formule],list[formule],list[formule]];
+	AllMembershipConstraints	:						list[formule];
+
+end
+
+
+rules for csp
+
+	l,lmc,lec,C,store	: list[formule];
+	S			: csp;
+
+global 
+
+[]	CreateCSP(l)
+	=>
+	CSP[lmc,lec,C,store]
+	where	lmc := ()CreateSetOfMembershipConstraints(AllMembershipConstraints,l)
+	where	lec := ()nil
+	where	C   := ()CreateSetOfConstraints(l)
+	where	store := ()nil
+//	where	S   := ()WriteCSP("CreateCSP",true,CSP[lmc,lec,C,store])
+end
+
+end
+
+
+rules for list[formule]
+
+	x	: var;
+	D	: domain;
+	l,lmc	: list[formule];
+	L	: tuple[list[formule],list[formule],list[formule]];
+
+global 
+
+[]	CreateSetOfConstraints(l)
+	=>
+	append(1-th(L),append(2-th(L),3-th(L)))
+	where	L := ()GetSetOfConstraints(l,nil,nil,nil)
+end
+
+[]	CreateSetOfMembershipConstraints(x in? D.lmc,l)
+	=>
+	switch
+	case	occurs x in l	then
+		x in? D.CreateSetOfMembershipConstraints(lmc,l)
+	otherwise
+		CreateSetOfMembershipConstraints(lmc,l)
+	end
+end
+
+[]	CreateSetOfMembershipConstraints(nil,l)
+	=>
+	nil
+end
+
+[]	AllMembershipConstraints
+	=>
+	FOR EACH x:identifier
+	SUCH THAT x:=(listExtract)elem(Variables):
+
+	{x in? Values}
+
+	nil
+end
+
+end
+
+
+rules for tuple[list[formule],list[formule],list[formule]]
+
+	n		: int;
+	s,s1,s2,s3,s10,s20,s21		: string;
+	u,c,c1,c2,c3,cc,cc1,cc2,cc3,cc4,c10	: formule;
+	l,l1,l2,l3	: list[formule];
+	L		: tuple[list[formule],list[formule],list[formule]];
+
+global 
+
+[]	GetSetOfConstraints(c1 V c2.l,l1,l2,l3)
+	=>
+	GetSetOfConstraints(l,l1,l2,c1 V c2.l3)
+end
+[]	GetSetOfConstraints(c1 & c2.l,l1,l2,l3)
+	=>
+	GetSetOfConstraints(c1.c2.l,l1,l2,l3)
+end
+[]	GetSetOfConstraints(NOT(c1).l,l1,l2,l3)
+	=>
+	GetSetOfConstraints(Negation(c1).l,l1,l2,l3)
+end
+[]	GetSetOfConstraints(c1 -> c2.l,l1,l2,l3)
+	=>
+	GetSetOfConstraints(l,l1,l2,NOT(c1) V c2.l3)
+end
+[]	GetSetOfConstraints(u.l,l1,l2,l3)
+	=>
+//	where	cc1 := ()WriteConstraint("Input Constraint",u)
+	where	c   := ()GetCanonicalForm(u)
+//	where	cc2 := ()WriteConstraint("Canonical Form",c)
+	where	n   := ()ArityOfConstraint(c)
+	switch
+	case	n == 2	then
+		GetSetOfConstraints(l,l1,c1.c2.l2,l3)
+		where	c1  := ()NormalFormOfConstraint(c)
+//		where	cc3 := ()WriteConstraint("Normal Form",c1)
+		where	c2  := ()NormalFormOfConstraint(GetInverse(c))
+//		where	cc4 := ()WriteConstraint("Normal Form",c2)
+	case	n == 1	then
+		GetSetOfConstraints(l,c1.l1,l2,l3)
+		where	c1  := ()NormalFormOfConstraint(c)
+//		where	cc3 := ()WriteConstraint("Normal Form",c1)
+	case	n == 0	then
+//		where	cc3 := ()WriteConstraint("Normal Form",c)
+		switch
+		case	c == true	then
+			GetSetOfConstraints(l,l1,l2,l3)
+		otherwise
+			GetSetOfConstraints(nil,nil,nil,nil)
+		end
+	end
+end
+[]	GetSetOfConstraints(nil,l1,l2,l3)
+	=>
+	[l1,l2,l3]
+end
+
+end
+
+end
+

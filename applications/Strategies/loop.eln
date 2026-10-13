@@ -1,0 +1,43 @@
+module loop
+
+import global int strat[int]
+	list[int] strat[list[int]];
+end
+
+stratop global
+  loop		: <int>;
+  dcloop(@)	: (int) <int>;
+  dkloop(@)	: (int) <int>;
+end
+
+rules for int
+x, n	: int;
+global
+  [add(n)] x => x+n			end
+  [sub1]   x => x-1 if x > 1		end
+end
+
+strategies for int
+n : int;
+implicit
+//  [.] loop =>	 dk(sub1;loop, id)	end  
+  [.] loop => 	 dk(id, sub1;loop)	end  
+
+  [.] dcloop(n) =>	dc(id,
+			if self < n then
+			  add(1);dcloop(n)
+			else
+			  fail
+			fi) end
+  [.] dkloop(n) =>	dk(id,
+			if self < n then
+			  add(1);dkloop(n)
+			else
+			  fail
+			fi) end
+end
+
+end
+
+
+

@@ -1,0 +1,16 @@
+LPL colette description
+
+specification description
+
+	part Variables	of sort list[identifier]
+	import		sigSyntax
+
+	part Values	of sort domain 
+	import		IntegerDomain
+end
+
+	query		of sort constraint
+	result		of sort csp
+	import		colette[Variables,int,Values]
+	start with (FCFirstToLastOne) CreateCSP(query)
+end

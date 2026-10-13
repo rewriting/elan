@@ -1,0 +1,751 @@
+//
+//  Pi-calcul monadique avec indices 
+//
+
+
+// A REVOIR :
+//
+//  - comment etre sur que les codes ne sont pas deja utilises ?
+//
+//  - on utilise le fait que les regles sont appliquees avec priorite
+//    dans l'ordre ou elles sont ecrites, mais il n'y a rien a ce sujet
+//    dans le manuel ELAN
+//
+//  - devrait etre parametrable par des sortes. Ici les messages ne
+//    peuvent contenir que des "int"
+//
+//  - comment definir automatiquement les regles de congruence pour la
+//    substitution sur les built-ins ?
+
+
+module picalc
+
+import ident list[ident]
+       eq[process] eq[topprocess] eq[indice] eq[guard]
+       bool int ;
+
+sort indice chan extchan process guard subst memo topprocess 
+     toto ;
+
+ // la sorte toto sert uniquement a montrer ou` rajouter des declarations
+ // ou des regles lorsqu'on ajoute une nouvelle sorte
+
+
+
+///////////////////////////////////////////////////////////////////////////
+//
+//  					operateurs
+//
+////////////////////////////////////////////////////////////////////////////
+
+op global
+
+  // indices a la "De Bruijn" 
+
+  Z    : indice ;           // '0' est un entier
+  s(@) : (indice) indice ;
+
+  // coercions de type pour les indices
+  // un pour chaque sorte
+  int(@) : (indice) int ;
+
+  // canaux : distinction entre internes et externes
+  chan(@) : (indice) chan ;
+  extchan(@) : (int) chan code 1010 ;
+
+  // processus - VERIFIER s'il n'y a pas de clash avec d'autres codes
+  nil   : process                                code 1000 ;
+  @ | @ : (process process) process (AC) pri 10  code 1001 ; 
+  @ + @ : (process process) process (AC) pri 20  code 1002 ; 
+  @ . @ : (guard process) process        pri 100 code 1003 ;
+  \@ @  : (memo process) process                 code 1004 ;  // "nu" binder
+
+  // gardes
+
+  // un operateur 'out' pour chaque sorte, mais tous avec le meme code
+  out(@,@) : (chan chan) guard code 1005 ;
+  out(@,@) : (chan int)  guard  code 1005 ;
+
+  // bound output
+  bout@(@) : (memo chan) guard code 1006 ; 
+
+  // input
+  in(@)@   : (chan memo) guard code 1007 ;   
+
+  // tau
+  tau      : guard             code 1008 ;
+
+  // open est aussi une garde
+  open(@,@,@)@( @ ) : (ident int int memo process) guard code 1009 ; 
+    //
+    // open(name, mode, type)*(P_fail) . P_success
+    // ouvre le fichier 'name' (devrait etre 'string' plutot que 'ident')
+    // mode : 
+    //    0 : read-only
+    //    1 : write-only
+    // type :
+    //    0 : entiers en representation textuelle
+    //    ... a completer
+    // si open reussi, se comporte comme P_success[extchan(chanNo)/]
+    // si open echoue, se comporte comme P_fail[errno/]
+
+  // replication
+  REP @ : (process) process pri 100 ;                 
+
+  // le symbole # sert a identifier le sommet du processus avec lequel on veut
+  // faire des I/Os
+
+  #(@) : (process) topprocess ;
+  \@ @  : (memo topprocess) topprocess ;
+
+  // le built-in effectuant les I/Os
+
+  picalc_io(@) : (process) process code 80 ;
+
+  // substitution calculus
+
+  // un operateur @[@] pour chaque sorte, tous avec le meme code
+  @[@] : (process subst) process pri 100 code 1011 ;
+  @[@] : (chan subst) chan pri 100 code 1011 ;
+  @[@] : (int subst) int    pri 100 code 1011 ;
+  @[@] : (bool subst) bool    pri 100 code 1011 ;
+
+  // un operateur @/ pour chaque sorte, tous avec le meme code
+  @/ : (chan) subst pri 100 code 1012 ;
+  @/ : (int) subst    pri 100 code 1012 ;
+
+  // "lift" (double fleche vers le haut)
+  $(@) : (subst) subst ;  
+
+  // "^" (simple fleche vers le haut)
+  ! : subst ;
+
+  // la sorte 'memo' sert pour la memorisation optionelle des noms des
+  // variables 
+  * : memo ; 
+  <@> : (ident) memo ;
+
+  //////   puis la meme chose avec des parentheses ...
+  //////   devrait peut-etre etre systematique en ELAN
+
+  (@[@])  : (process subst) process alias @[@] :;
+  (@[@])  : (chan subst) chan alias @[@] :;
+  (@[@])  : (int subst) int alias @[@] :;
+  (@[@])  : (bool subst) bool alias @[@] :;
+  (@ | @) : (process process) process alias @ | @ :;
+  (@ + @) : (process process) process alias @ + @ :;
+  (@ . @) : (guard process) process alias @ . @ :;
+  (\@ @)  : (memo process) process alias \@ @ :;
+  (REP @) : (process) process alias REP @ :;
+  REP(@)  : (process) process pri 100 alias REP @ :;
+
+  ////////  pour les exemples
+
+  // exemple 1 : somme de deux entiers
+  EXAMPLE1 : topprocess ;
+
+  // exemple 2 : filtre
+  sup_a_dix(@) : (int) bool ;
+  if @ then @ else @ : (bool process process) process ;
+  (if @ then @ else @) : (bool process process) process alias if @ then @ else @:;
+  EXAMPLE2 : topprocess ;
+
+local
+
+  //  operateurs locaux
+
+  // application de la regle d'expansion
+  Exp(@,@) : (process process) process ;
+  DExp(@,@) : (process process) process ;
+  DSync1(@,@) : (process process) process ;
+  DSync2(@,@) : (process process) process ;
+  Sync(@,@) : (process process) process ;
+
+  // application de la regle de replication
+  Repl(@) : (process) process ;
+  DRep1(@,@) : (process process) process ;
+  DRep2(@,@,@) : (process process process) process ;
+  DRep3(@,@,@) : (process process process) process ;
+  SRep(@,@,@) : (process process process) process ;
+
+endop
+
+
+
+////////////////////////////////////////////////////////////////////////////
+//
+//  				regles structurelles
+//
+////////////////////////////////////////////////////////////////////////////
+
+rules for process
+declare P : process ;
+bodies
+
+  []  P + nil => P end
+  []  P | nil => P end
+
+end of rules
+
+  //
+  //   strategie 'norm' :
+  //   reduction d'un processus en forme normale de tete
+  //   avec application paresseuse de l'expansion et de la replication
+  //
+
+rules for process
+declare
+  P, P1, P2, Q, U, U1, U2, V : process ;
+  a, b : indice ;
+  e : memo ; 
+bodies
+
+  [norm1] (P1 | P2) + Q => V + Q
+             where V := () Exp(U1, U2)
+             where U1 := (norm) P1
+             where U2 := (norm) P2
+           end
+
+  [norm1e] P1 | P2  => V
+             where V := () Exp(U1, U2)
+             where U1 := (norm) P1
+             where U2 := (norm) P2
+           end
+
+  [norm2] REP(P) + Q => Repl(U) + Q
+             where U := (norm) P
+           end
+
+  [norm2e] REP(P)  =>  Repl(U)
+             where U := (norm) P
+           end
+
+  [norm3] (\e P) + Q => \e U
+             where U := (norm) P + Q[!]
+           end
+
+  [norm3e] (\e P) => \e U
+             if P != U  // for termination
+             where U := (norm) P
+           end
+
+end of rules
+
+  //
+  // application de la strategie 'norm' sous un topprocess
+  // 
+
+rules for topprocess
+declare
+  P, Q : process ;
+  U, V : topprocess ;
+  e : memo ;
+bodies
+
+  // un pas de normalisation ou l'identite
+
+  [top_norm_id] \e U => \e V where V := (top_norm_id) U end
+  [top_norm_id] #(P) => #(Q) where Q := (norm) P end
+
+  // un pas de normalisation
+
+  [top_norm] \e U => \e V where V := (top_norm) U end
+  [top_norm] #(P) => #(Q) where Q := (norm_step) P  end
+
+end of rules
+
+
+
+////////////////////////////////////////////////////////////////////////////
+//
+//  				regles de substitution
+//
+////////////////////////////////////////////////////////////////////////////
+
+//  pour une meilleure efficacite', il faudra utiliser une strategie
+//  "paresseuse" pour l'application des strategies
+//  cf. [Maranget, Pagano, Hardin 1995]
+
+rules for process
+
+declare 
+  n : indice ;
+  P, Q, P_succ, P_fail : process ;
+  s : subst ;
+  c : chan ;
+  e : memo ;
+  file : ident ;
+  type, mode : int ;
+
+  z_chan : chan ;
+  z_int : int ;
+  cond : bool ;
+
+bodies
+
+  []    nil[s]             =>  nil                     end
+  []    (P | Q)[s]         =>  P[s] | Q[s]             end
+  []    (P + Q)[s]         =>  P[s] + Q[s]             end
+  []    (\e P)[s]          =>  \e (P[$(s)])            end 
+  []    (REP P)[s]         =>  REP (P[s])              end
+
+  // gardes
+
+  []    (out(c,z_chan).P)[s]    =>  out(c[s], z_chan[s]) . P[s]  end
+  []    (out(c,z_int).P)[s]     =>  out(c[s], z_int[s]) . P[s]  end
+
+  []    (bout e (c).P)[s]  =>  bout e (c[s]) . P[$(s)]    end
+  []    (in(c)e.P)[s]      =>  in(c[s])e . P[$(s)]     end
+  []    (tau.P)[s]         =>  tau . P[s]              end
+  []        (open(file,mode,type)e(P_fail) . P_succ)[s]  
+        =>  open(file,mode,type)e(P_fail[s]).P_succ[$(s)]  end
+
+  // autres
+
+  [] (if cond then P else Q)[s] => if (cond[s]) then (P[s]) else (Q[s]) end
+
+end of rules
+
+
+///////////////  substitution pour les coercions de type
+
+
+// pour chaque *paire* de sortes
+
+rules for chan
+declare 
+  n : indice ;
+  s : subst ;
+  x_chan : chan ;
+  x_int : int ;
+  i : int ;
+
+bodies
+
+  []    chan(Z)[x_chan/]      =>  x_chan                 end
+  []    chan(Z)[$(s)]         =>  chan(Z)                end
+  []    chan(s(n))[$(s)]      =>  chan(n)[s][!]          end
+  []    chan(n)[!]            =>  chan(s(n))             end
+
+  []    chan(s(n))[x_chan/]   =>  chan(n)                end
+  []    chan(s(n))[x_int/]    =>  chan(n)                end
+
+  // autres construteurs de sorte 'chan'
+  []    extchan(i)[s]         =>  extchan(i[s])          end
+
+end of rules
+
+// idem pour int
+
+rules for int
+declare 
+  n : indice ;
+  s : subst ;
+  x_chan : chan ;
+  x_int : int ;
+  i : int ;
+
+bodies
+
+  []    int(Z)[x_int/]       => x_int                 end
+  []    int(Z)[$(s)]         => int(Z)                end
+  []    int(s(n))[$(s)]      => int(n)[s][!]          end
+  []    int(n)[!]            => int(s(n))             end
+
+  []    int(s(n))[x_int/]    => int(n)                end
+
+  // note : il n'y pas de regle S(Z)[x_T/] => x_T si S != T
+  // le terme est mal type' dans ce cas.
+
+end of rules
+
+
+/////////////// substitution pour les built-ins
+
+// comment faire pour parametrer sur l'ensemble des constructeurs
+// d'une sorte ??? 
+
+
+rules for int
+declare
+  x, y : int ;
+  s : subst ;
+bodies
+
+  [] plus(x,y)[s]  => plus(x[s], y[s])  end
+  [] minus(x,y)[s] => minus(x[s], y[s]) end
+  [] time(x,y)[s]  => time(x[s], y[s])  end
+  [] div(x,y)[s]   => div(x[s], y[s])   end
+  [] mod(x,y)[s]   => mod(x[s], y[s])   end
+  [] and(x,y)[s]   => and(x[s], y[s])   end
+  [] or(x,y)[s]    => or(x[s], y[s])    end
+
+  [] umin(x)[s] => umin(x[s]) end
+
+end of rules
+
+rules for bool
+declare
+  x, y : int ;
+  s : subst ;
+
+bodies
+
+  [] sup_a_dix(x)[s] => sup_a_dix(x[s]) end
+  [] intgreater(x,y)[s] => intgreater(x[s], y[s]) end
+
+end of rules
+
+
+  // regles pour les constantes builtin : comme je ne sais parametrer,
+  // je mets ces regles tout a la fin, elle ne s'appliquent que si
+  // aucune des regles precedentes ne s'applique
+
+rules for int
+declare
+  i : int ;
+  s : subst ;
+bodies
+  []    i[s] => i end
+end of rules
+
+
+
+////////////////////////////////////////////////////////////////////////////
+//
+//  			application de la regle de replication
+//
+////////////////////////////////////////////////////////////////////////////
+
+
+rules for process
+declare
+  P, P1, P2, Q, R, U, V : process ;
+  g, g1, g2 : guard ;
+  a, b, c : chan ;
+  e, f : memo ;
+  file : ident ;
+  mode, type : int ;
+
+bodies
+
+  [] Repl(\e P)  =>  \e Repl(P)  end  // cette regle doit etre
+                                      // appliquee en priorite 
+  [] Repl(U)     =>  DRep1(U,U)  end 
+
+  [] DRep1(nil, U)  =>  nil  end
+
+  // gardes liant une variable
+  []    DRep1(in(c)e.P, U)  =>  in(c)e.(P | REP(U[!]))  end
+  []    DRep1(open(file,mode,type)e(Q).P, U) 
+          => open(file,mode,type)e(Q).(P | REP(U[!])) 
+        end
+
+  // autres gardes
+  [] DRep1(g.P, U)  =>  g.(P | REP(U))  end
+
+  // idem : regles etendues
+  [] DRep1(in(c)e.P + Q, U)  =>  in(c)e.(P | REP(U[!]))  + DRep1(Q, U)  end
+  [] DRep1(open(file,mode,type)e(R).P + Q, U) 
+     => open(file,mode,type)e(R).(P | REP(U[!])) + DRep1(Q, U)  end
+  [] DRep1(g.P + Q, U)  =>  g.(P | REP(U)) + DRep1(Q, U)   end
+
+end of rules
+
+
+///////////////////////////////////////////////////////////////////////////
+//
+//  			application de la regle d'expansion
+//
+////////////////////////////////////////////////////////////////////////////
+
+// Exp(P, Q) simule l'application de la regle d'expansion a P|Q
+//
+//   (\..\ g_1.P1 + ... g_n.P_n) | (\..\ g'_1.Q1 + ... g'_m.Q_m)
+//   =>
+//   \..\    \Sigma g_i . (P_i | Q)
+//         + \Sigma g'_i . (P | Q_i)
+//         + \Sigma_{g_i = in(c), g'_j = out(c,v)} tau . (P_i[v/] | Q_j)
+//         + \Sigma_{g_i = out(c,v), g'_j = in(c)} tau . (P_i | Q_j[v/])
+//
+// P et Q doivent etre en forme normale de tete, cad
+//   P = \..\ g_1.P1 + ... g_n.P_n
+//   Q = \..\ g'_1.Q1 + ... g'_m.Q_m
+
+
+rules for process
+declare
+  P, Q, U, V, R : process ;
+  a, b, c : chan ;
+  g : guard ;
+  e, f : memo ;
+  file : ident ;
+  mode, type : int ;
+  i : int ;
+
+  z_chan : chan ;
+  z_int : int ;
+
+bodies
+
+  // remonter les nu-binders
+  // ces deux regles doivent etre appliquees en priorite
+  []  Exp(\e P, Q)  =>  \e Exp(P, Q[!])  end
+  []  Exp(P, \e Q)  =>  \e Exp(P[!], Q)  end
+
+  // decomposer l'expansion en nondeterminisme + synchronisation
+  []  Exp(P,Q)  =>  DExp(P,Q) + DExp(Q,P) + DSync1(P,Q) + DSync1(Q,P)  end
+
+  // regles pour DExp
+
+  []  DExp(nil, U)  =>  U  end
+  []  DExp( in(a)e.P, U )  =>  in(a)e.(P | (U[!]))  end
+  []  DExp( out(a, z_chan).P , U )  =>  out(a, z_chan).(P | U)  end
+  []  DExp( out(a, z_int).P , U )  =>  out(a, z_int).(P | U)  end
+  []  DExp( bout e(a).P , U )  =>  bout e(a).(P | (U[!]))  end
+  []  DExp( tau.P , U )  =>  tau.(P | U)  end
+  []  DExp( open(file,mode,type)e(R).P, U) =>  
+        open(file,mode,type)e(R | U).(P | (U[!])) end
+
+  // idem : regles etendues
+
+  []  DExp( in(a)e.P + Q, U )  =>  in(a)e.(P | (U[!])) + DExp(Q, U)  end
+  []  DExp( out(a, z_chan).P + Q, U )  
+      =>  out(a, z_chan).(P | U) + DExp(Q, U) end
+  []  DExp( out(a, z_int).P + Q, U )  
+      =>  out(a, z_int).(P | U) + DExp(Q, U) end
+  []  DExp( bout e(a).P + Q , U )  =>  bout e(a).(P | (U[!])) + DExp(Q, U)  end
+  []  DExp( tau.P + Q , U )  =>  tau.(P | U) + DExp(Q, U)  end
+  []  DExp( open(file,mode,type)e(R).P + Q, U) =>  
+         open(file,mode,type)e(R | U).(P | (U[!])) + DExp(Q, U) end
+
+  // DSync1 et DSync2 : distribuer Sync sur toutes les paires de sous-termes
+
+  []  DSync1(nil, U)  =>  nil  end
+  []  DSync1(g.P, U)  =>  DSync2(g.P, U)  end
+  []  DSync1(g.P + Q, U)  =>  DSync2(g.P, U) + DSync1(Q, U)  end
+
+  []  DSync2(U, nil)  =>  nil  end
+  []  DSync2(U, g.P)  =>  Sync(U, g.P)  end
+  []  DSync2(U, g.P + Q)  =>  Sync(U, g.P) + DSync2(U, Q)  end
+
+  // Sync : voir si une synchronisation est possible
+  // definition par cas sur l'argument de gauche (Sync est appele deux fois)
+
+  // (in, out) : synchronisation si les canaux sont les memes
+  []  Sync( in(a)e.P , out(a, z_chan).Q )  =>  tau . (P[z_chan/] | Q)  end
+  []  Sync( in(a)e.P , out(b, z_chan).Q )  =>  nil
+        if P != Q
+      end
+
+  []  Sync( in(a)e.P , out(a, z_int).Q )  =>  tau . (P[z_int/] | Q)  end
+  []  Sync( in(a)e.P , out(b, z_int).Q )  =>  nil
+        if P != Q
+      end
+
+  // (in, bout) : synchronisation si les canaux sont les memes
+  []  Sync( in(a)e.P , bout f(a).Q )  =>  tau . \* (P | Q)  end
+  []  Sync( in(a)e.P , bout f(b).Q )  =>  nil
+        if P != Q
+      end
+
+  // autres cas : pas de synchronisation
+  []  Sync( in(a)e.P , in(b)f.Q )  =>  nil  end
+  []  Sync( in(a)e.P , tau.Q )  =>  nil  end
+  []  Sync( in(a)e.P , open(file,mode,type)e(R).Q )  =>  nil  end
+  []  Sync( out(a, z_chan).P , g.Q )  =>  nil  end
+  []  Sync( out(a, z_int).P , g.Q )  =>  nil  end
+  []  Sync( bout e(a).P , g.Q )  =>  nil  end
+  []  Sync( tau.P , Q )  =>  nil  end
+  []  Sync( open(file,mode,type)e(R).P, g.Q) => nil end
+
+end of rules
+
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+//  				regles de reduction
+//
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+rules for topprocess
+declare
+  P, Q : process ;
+  e : memo ; 
+bodies
+
+  // remonter les nu-binders
+
+  [] #(\e P) => #(P) end
+//  [] #(\e P) => \e #(P) end
+
+  // 
+  //    choix non deterministe
+  //
+
+  [choice] #(tau.P + Q)  =>  #(P)  end
+  [choice] #(tau.P)  =>  #(P)  end
+
+  //
+  //   appel du built-in realisant les E/S externes
+  //
+
+  [ext_comm] #(P) => #(picalc_io(P))
+               if P != nil  // P == nil signifie le programme est termine
+             end
+
+
+end of rules
+
+
+//////////////////////////////////////////////////////////////////////////////
+//
+//  		exemples (operateurs declares plus haut)
+//
+//////////////////////////////////////////////////////////////////////////////
+
+// 1 : somme de deux entiers
+
+rules for topprocess
+bodies
+
+ [] EXAMPLE1 => 
+   #( open("fifo1",0,0)<"c1">(nil) . open("fifo2",1,0)<"c2">(nil) . \<"p"> ( 
+      (out(chan(Z), 0) . nil)
+   |  REP(  in(chan(Z))* 
+	. in(chan(s(s(s(Z)))))<"x">
+	. in(chan(s(s(s(s(Z))))))<"y"> 
+	. out(chan(s(s(s(s(Z))))), int(s(Z))+int(Z)) 
+	. out(chan(s(s(s(Z)))),0) 
+	. nil )))
+ end
+
+end of rules
+
+// 2 : filtre
+
+rules for bool
+declare x : int ;
+bodies
+ [] sup_a_dix(x) =>  x > 10 end
+end of rules
+
+rules for process
+declare x, y : process ;
+bodies
+ [] if true then x else y   =>  x end
+ [] if false then x else y  =>  y end
+end of rules
+
+rules for topprocess
+bodies
+ [] EXAMPLE2 =>
+   #( open("fifo1",0,0)<"c1">(nil) . open("fifo2",1,0)<"c2">(nil) . \<"p"> ( 
+      (out(chan(Z), 0) . nil)
+   |  REP(  in(chan(Z))* 
+	. in(chan(s(s(s(Z)))))<"x">
+        . if sup_a_dix(int(Z)) then   
+			out(chan(s(s(s(Z)))), int(Z))
+                      . out(chan(s(s(Z))),0)
+                      . nil
+                     else   
+			out(chan(s(s(Z))),0)
+                      . nil
+   )))
+ end
+end of rules
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////
+//
+//  				strategies
+//
+//////////////////////////////////////////////////////////////////////////////
+
+// regles [norm...] : mise en forme normale de tete d'un process
+// regles [top_norm] : application de norm sous # et \
+
+  //
+  //   strategie 'norm' :
+  //   reduction d'un processus en forme normale de tete
+  //   avec application paresseuse de l'expansion et de la replication
+  //
+
+strategy norm
+    while
+      dont care choose(norm1 norm1e norm2 norm2e norm3 norm3e)
+    endwhile
+end of strategy
+
+strategy norm_step
+  dont care choose(norm1 norm1e norm2 norm2e norm3 norm3e)
+end of strategy
+
+
+//
+//  strategie principale : 
+//
+//  run =  ((ER*;R);ER*;ExtComm)*;(ER*;R);ER*
+//
+//  on pourrait ecrire plus simplement ((R union ER)*;ExtComm)*;(R union ER)
+//  mais il faut tenir compte de l'application paresseuse de certaines regles
+//
+
+strategy run
+  while
+
+    // reductions internes
+    while
+      // reduire en forme normale de tete
+      while
+        dont care choose(top_norm)
+      endwhile
+      // appliquer choice
+      dont care choose(choice)
+    endwhile
+    while
+      dont care choose(top_norm)
+    endwhile
+
+    // faire une communication externe
+    dont care choose(ext_comm) 
+  endwhile
+
+  // et normaliser le resultat final de la meme facon
+  while
+      // reduire en forme normale de tete
+      while
+        dont care choose(top_norm)
+      endwhile
+    dont care choose(choice)
+  endwhile
+  while
+    dont care choose(top_norm)
+  endwhile
+end of strategy
+
+strategy internal_reductions
+  while
+    // reduire en forme normale de tete
+    while
+      dont care choose(top_norm)
+    endwhile
+    // appliquer choice
+    dont care choose(choice)
+  endwhile
+  while
+    dont care choose(top_norm)
+  endwhile
+end of strategy
+
+strategy top_norm
+    dont care choose(top_norm)
+end of strategy
+
+end of module
+

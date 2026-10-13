@@ -1,0 +1,207 @@
+module highOrderSyntacticUnification[Fss,Vars,Mvs]
+import  global  EtermCommons[Fss,Vars,Mvs];
+        local   Fss Mvs int identifier bool pair[identifier,int]
+                list[pair[identifier,int]] eq[variable] eq[term]
+                myEqSystem[Fss,Vars,Mvs]
+	        occur[term,eqSystem] ident
+                myApplySubstOn[Fss,Vars,Mvs,term] substitution list[term];
+end
+
+sort eqSystemPlus;
+end
+
+operators
+  global
+    @ = @       : (term term) equation          alias @=@:;
+    @           : ( equation ) eqSystem         alias @:;
+    <@,@,@>     : ( eqSystem term list[term] ) eqSystemPlus;
+    first(@)    : ( eqSystemPlus ) eqSystem;
+    second(@)   : ( eqSystemPlus ) term;
+    third(@)    : ( eqSystemPlus ) list[term];
+
+    ismember(@,@) : ( term list[term] ) bool;
+
+    checkVarOcc(@,@) : ( eqSystem list[term] ) bool;
+    checkVars(@,@,@) : ( term term list[term] ) bool;
+
+  local
+    mergingClash(@,@,@) : ( eqSystem term term ) bool;
+
+end
+
+stratop
+  global
+    checkVariableOccurence	: <bool>	 builtin;
+    highOrderMatchs		: <eqSystemPlus> builtin;
+end
+
+rules for eqSystem
+ P: eqSystem; t:term; ts:list[term];
+global
+  [] first(<P,t,ts>) => P end
+end
+
+rules for term
+ P: eqSystem; t:term; ts:list[term];
+global
+  [] second(<P,t,ts>) => t end
+end
+
+rules for list[term]
+ P: eqSystem; t:term; ts:list[term];
+global
+  [] third(<P,t,ts>) => ts end
+end
+
+FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+SUCH THAT SS:=(listExtract) elem(Mvs) AND F:=()first(SS) 
+        AND N:=()second(SS) :{
+rules for eqSystemPlus
+ P:eqSystem; r,s:term; t_1,...,t_N:term; tt_1,...,tt_N:term; 
+        isitamvar:bool; ts:list[term];
+global
+
+  [deleteAMV]   <P & F(t_1,...,t_N)=F(tt_1,...,tt_N), r, ts> => <P, r, ts>
+                                                      if true {and eq_term($t_I,$tt_I)}_I=1...N
+  end
+  [matchClash]  <P & s=F(t_1,...,t_N), r, ts> => <false, r, ts>
+                                             where isitamvar := (checkAMVar) isamvar(s)
+                                             if not isitamvar
+  end
+  [mergeClash]  <P & F(t_1,...,t_N)=s, r, ts> => <false, r, ts>
+                                             if mergingClash(P,F(t_1,...,t_N),s)
+  end
+  [mergePass1]  <P & F(t_1,...,t_N)=s, r, ts> => <F(t_1,...,t_N)=s & P, r, ts>
+  end
+  [mergePass2]  <P & F(t_1,...,t_N)=s, r, ts> => <F(t_1,...,t_N)=s & P, r, ts>
+                        if not(occurs F(t_1,...,t_N) in P) // and not mergingClash(P,x,s)
+  end
+  [mergePass3]  <P & F(t_1,...,t_N)=s, r, ts> => <P, r, ts>
+                        if occurs F(t_1,...,t_N) in P // and not mergingClash(P,x,s)
+  end
+end
+}
+
+rules for eqSystemPlus
+	P,Q,R:eqSystem;
+	r,s,t,a,b:term;
+	h1,h2:identifier;
+	b1,b2:bool; x,y:variable;
+	va,vb : variable;
+        e:equation;
+	ts:list[term];
+global
+  [conflict]    <P & s=t, r, ts> => <false, r, ts>
+                        where b2 := (checkAMVar) isamvar(t)
+                        where b1 := (checkAMVar) isamvar(s)
+                        where h2 := () head(t)
+                        where h1 := () head(s)
+                        if neq_identifier($h1,$h2)
+                           and not(b1) and not(b2)
+  end
+  [metaAbs]     <P & \(va,s)=\(vb,t), r, ts> => <P & s=apply(vb->va,t), 
+                                              apply(va->vb,r), va.ts>
+  end
+  [deleteV]     <P & $x=$y,r, ts> => <P,r, ts> if eq_variable($x,$y)
+  end
+
+FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS) 
+        AND N:=()second(SS) :{
+   rules for eqSystemPlus
+    s_1,...,s_N:term; t_1,...,t_N:term; ts:list[term];
+   global
+     [decompose] <P & F(s_1,...,s_N)=F(t_1,...,t_N),r, ts> =>
+			 <P { & s_I=t_I }_I=1...N, r, ts>
+     end
+   end
+  }
+
+// initial and final transitions rules
+
+  [trueelim]    <P & true, r, ts>       => <P, r,ts>                    end
+  [truepass]    <P & true, r, ts>       => <true & P, r, ts>            end
+  [trueadd]     <P, r, ts>              => <true & P, r, ts>            end
+  [falsepropag] <false, r, ts>          => <false, r, ts>               end
+  [truepropag]  <true, r, ts>           => <true, r, ts>                end
+
+  [unfold]       <P & (Q & R),r,ts>     => <(P & Q) & R,r,ts>   end
+  [eqPass]       <P & e,r,ts>           => <e & P,r,ts>         end
+
+end
+
+rules for bool
+ P,Q:eqSystem; s,t:term;
+global
+  [] mergingClash(true,t,s) => false                    end
+  [] mergingClash(P & Q,t,s) => mergingClash(P,t,s)
+                                 or mergingClash(Q,t,s) end
+end
+
+FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+SUCH THAT SS:=(listExtract) elem(Mvs) AND F:=()first(SS) 
+        AND N:=()second(SS) :{
+rules for bool
+ s,t:term; t_1,...,t_N:term; tt_1,...,tt_N:term;theta:substitution;match:eqSystem;
+global
+  [] mergingClash(F(t_1,...,t_N)=s,F(tt_1,...,tt_N),t) => theta(s) != t
+                where match := (buildSubst) makeEqns(F(t_1,...,t_N),F(tt_1,...,tt_N))
+                where theta := () system_to_subst(match)
+  end
+end
+}
+
+FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+SUCH THAT SS:=(listExtract) elem(Mvs) AND F:=()first(SS) 
+        AND N:=()second(SS) :{
+rules for bool
+ t:term; {t_I:term;}_I=1...N ts:list[term]; P,Q:eqSystem; isok:bool;
+global
+  [] checkVarOcc( true, ts ) => true end
+  [] checkVarOcc( P & Q, ts ) => checkVarOcc( P, ts ) and checkVarOcc( Q, ts ) end
+  [] checkVarOcc( F(t_1,...,t_N)=t, ts ) => isok
+                   where isok := (checkVariableOccurence) checkVars(F(t_1,...,t_N),t,ts)
+                   end
+end
+                 
+rules for bool
+ t,subt:term; {t_I:term;}_I=1...N omega:list[int]; isavar:bool; ts:list[term];
+global
+  [checkVarFirst] checkVars(F(t_1,...,t_N),t,ts) => false
+                          where omega  := (chooseVarOccurence) vocc(t)
+                          where subt   := () t at omega
+                          where isavar := (isVariable) isvar(subt)
+                          if isavar
+                          if ismember(subt,ts)
+                          if true {and neq_term(t_I,$subt)}_I=1...N
+                          end
+  [checkVarAfter] checkVars(F(t_1,...,t_N),t,ts) => true end
+end
+}
+
+rules for bool
+ s,t:term; ts:list[term];
+global
+  [] ismember(t,nil)  => false end
+  [] ismember(t,t.ts) => true end
+  [] ismember(t,s.ts) => ismember(t,ts) end
+end
+
+strategies for bool
+implicit
+  [.] checkVariableOccurence => first one( checkVarFirst , checkVarAfter) end
+end
+
+strategies for eqSystemPlus
+implicit
+  [.] highOrderMatchs =>
+  repeat*(
+    first one(unfold , deleteAMV , deleteV , metaAbs , decompose , 
+		conflict , matchClash , mergePass1)) ;
+  first one(truepass , truepropag) ;
+  repeat*(first one(unfold , mergeClash , mergePass2 , mergePass3)) ;
+  first one(truepass , truepropag)
+end
+end
+
+end

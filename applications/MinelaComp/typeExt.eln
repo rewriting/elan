@@ -1,0 +1,17 @@
+module typeExt[Types]
+import
+local	Types anyIdentifier type[Types]
+	list[identifier]
+	;
+end
+
+//sort type sig;
+
+operators
+ global
+
+  FOR EACH X:identifier SUCH THAT X:=(listExtract) elem(Types)
+  :{	X : type 	alias "X":; }
+end
+
+end

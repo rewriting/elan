@@ -1,0 +1,325 @@
+module MaxSplittingFullLookAheadMaximumDomain[Variables,Type,Values]
+
+import
+global
+	OptimizationRules[Variables,Type,Values]
+	FullLookAheadMaximumDomain[Variables,Type,Values]
+	FullLookAheadChoicePointMaximumDomain[Variables,Type,Values]
+	FullLookAheadChoicePointIIMaximumDomain[Variables,Type,Values]
+	;
+end
+
+stratop
+global
+	MaxSplittingFLAMaximumDomainFirstToLast				: < csop -> csop >	bs;
+	MaxSplittingFLAMaximumDomainLastToFirst				: < csop -> csop >	bs;
+	MaxSplittingFLAMaximumDomainSplitFirstToLast			: < csop -> csop >	bs;
+	MaxSplittingFLAMaximumDomainSplitLastToFirst			: < csop -> csop >	bs;
+	MaxSplittingFLAChoicePointMaximumDomainFirstToLast		: < csop -> csop >	bs;
+	MaxSplittingFLAChoicePointMaximumDomainLastToFirst		: < csop -> csop >	bs;
+	MaxSplittingFLAChoicePointMaximumDomainSplitFirstToLast		: < csop -> csop >	bs;
+	MaxSplittingFLAChoicePointMaximumDomainSplitLastToFirst		: < csop -> csop >	bs;
+	MaxSplittingFLAChoicePointIIMaximumDomainFirstToLast		: < csop -> csop >	bs;
+	MaxSplittingFLAChoicePointIIMaximumDomainLastToFirst		: < csop -> csop >	bs;
+	MaxSplittingFLAChoicePointIIMaximumDomainSplitFirstToLast	: < csop -> csop >	bs;
+	MaxSplittingFLAChoicePointIIMaximumDomainSplitLastToFirst	: < csop -> csop >	bs;
+end
+
+
+strategies for csop
+implicit
+
+/* Optimization Strategy: */
+/* Search Strategy	: */
+/* Variable selection	: */
+/* Value selection	: */
+
+[] MaxSplittingFLAMaximumDomainFirstToLast =>
+first one (PostGTELowerBound);
+LocalConsistencyForEC;
+first one (GetLBFLAMaximumDomainFirstToLastOne);
+first one (OvervalueUpperBound);
+repeat* (
+	first one( first one (SetLowerBoundToMiddle);
+		   first one (PostGTLowerBound);
+		   LocalConsistencyForEC;
+		   first one (GetLBFLAMaximumDomainFirstToLastOne)
+		   ,
+		   first one (SetUpperBoundToMiddle)
+		 )
+	);
+first one (FLAMaximumDomainFirstToLastOne);
+first one (GetSolutionCSOP)
+end
+
+
+/* Optimization Strategy: */
+/* Search Strategy	: */
+/* Variable selection	: */
+/* Value selection	: */
+
+[] MaxSplittingFLAMaximumDomainLastToFirst =>
+first one (PostGTELowerBound);
+LocalConsistencyForEC;
+first one (GetLBFLAMaximumDomainLastToFirstOne);
+first one (OvervalueUpperBound);
+repeat* (
+	first one( first one (SetLowerBoundToMiddle);
+		   first one (PostGTLowerBound);
+		   LocalConsistencyForEC;
+		   first one (GetLBFLAMaximumDomainLastToFirstOne)
+		   ,
+		   first one (SetUpperBoundToMiddle)
+		 )
+	);
+first one (FLAMaximumDomainLastToFirstOne);
+first one (GetSolutionCSOP)
+end
+
+
+/* Optimization Strategy: */
+/* Search Strategy	: */
+/* Variable selection	: */
+/* Value selection	: */
+
+[] MaxSplittingFLAMaximumDomainSplitFirstToLast =>
+first one (PostGTELowerBound);
+LocalConsistencyForEC;
+first one (GetLBFLAMaximumDomainSplitFirstToLastOne);
+first one (OvervalueUpperBound);
+repeat* (
+	first one( first one (SetLowerBoundToMiddle);
+		   first one (PostGTLowerBound);
+		   LocalConsistencyForEC;
+		   first one (GetLBFLAMaximumDomainSplitFirstToLastOne)
+		   ,
+		   first one (SetUpperBoundToMiddle)
+		 )
+	);
+first one (FLAMaximumDomainSplitFirstToLastOne);
+first one (GetSolutionCSOP)
+end
+
+
+/* Optimization Strategy: */
+/* Search Strategy	: */
+/* Variable selection	: */
+/* Value selection	: */
+
+[] MaxSplittingFLAMaximumDomainSplitLastToFirst =>
+first one (PostGTELowerBound);
+LocalConsistencyForEC;
+first one (GetLBFLAMaximumDomainSplitLastToFirstOne);
+first one (OvervalueUpperBound);
+repeat* (
+	first one( first one (SetLowerBoundToMiddle);
+		   first one (PostGTLowerBound);
+		   LocalConsistencyForEC;
+		   first one (GetLBFLAMaximumDomainSplitLastToFirstOne)
+		   ,
+		   first one (SetUpperBoundToMiddle)
+		 )
+	);
+first one (FLAMaximumDomainSplitLastToFirstOne);
+first one (GetSolutionCSOP)
+end
+
+
+/* Optimization Strategy: */
+/* Search Strategy	: */
+/* Variable selection	: */
+/* Value selection	: */
+
+[] MaxSplittingFLAChoicePointMaximumDomainFirstToLast =>
+first one (PostGTELowerBound);
+LocalConsistencyForEC;
+first one (GetLBFLAChoicePointMaximumDomainFirstToLastOne);
+first one (OvervalueUpperBound);
+repeat* (
+	first one( first one (SetLowerBoundToMiddle);
+		   first one (PostGTLowerBound);
+		   LocalConsistencyForEC;
+		   first one (GetLBFLAChoicePointMaximumDomainFirstToLastOne)
+		   ,
+		   first one (SetUpperBoundToMiddle)
+		 )
+	);
+first one (FLAChoicePointMaximumDomainFirstToLastOne);
+first one (GetSolutionCSOP)
+end
+
+
+/* Optimization Strategy: */
+/* Search Strategy	: */
+/* Variable selection	: */
+/* Value selection	: */
+
+[] MaxSplittingFLAChoicePointMaximumDomainLastToFirst =>
+first one (PostGTELowerBound);
+LocalConsistencyForEC;
+first one (GetLBFLAChoicePointMaximumDomainLastToFirstOne);
+first one (OvervalueUpperBound);
+repeat* (
+	first one( first one (SetLowerBoundToMiddle);
+		   first one (PostGTLowerBound);
+		   LocalConsistencyForEC;
+		   first one (GetLBFLAChoicePointMaximumDomainLastToFirstOne)
+		   ,
+		   first one (SetUpperBoundToMiddle)
+		 )
+	);
+first one (FLAChoicePointMaximumDomainLastToFirstOne);
+first one (GetSolutionCSOP)
+end
+
+
+/* Optimization Strategy: */
+/* Search Strategy	: */
+/* Variable selection	: */
+/* Value selection	: */
+
+[] MaxSplittingFLAChoicePointMaximumDomainSplitFirstToLast =>
+first one (PostGTELowerBound);
+LocalConsistencyForEC;
+first one (GetLBFLAChoicePointMaximumDomainSplitFirstToLastOne);
+first one (OvervalueUpperBound);
+repeat* (
+	first one( first one (SetLowerBoundToMiddle);
+		   first one (PostGTLowerBound);
+		   LocalConsistencyForEC;
+		   first one (GetLBFLAChoicePointMaximumDomainSplitFirstToLastOne)
+		   ,
+		   first one (SetUpperBoundToMiddle)
+		 )
+	);
+first one (FLAChoicePointMaximumDomainSplitFirstToLastOne);
+first one (GetSolutionCSOP)
+end
+
+
+/* Optimization Strategy: */
+/* Search Strategy	: */
+/* Variable selection	: */
+/* Value selection	: */
+
+[] MaxSplittingFLAChoicePointMaximumDomainSplitLastToFirst =>
+first one (PostGTELowerBound);
+LocalConsistencyForEC;
+first one (GetLBFLAChoicePointMaximumDomainSplitLastToFirstOne);
+first one (OvervalueUpperBound);
+repeat* (
+	first one( first one (SetLowerBoundToMiddle);
+		   first one (PostGTLowerBound);
+		   LocalConsistencyForEC;
+		   first one (GetLBFLAChoicePointMaximumDomainSplitLastToFirstOne)
+		   ,
+		   first one (SetUpperBoundToMiddle)
+		 )
+	);
+first one (FLAChoicePointMaximumDomainSplitLastToFirstOne);
+first one (GetSolutionCSOP)
+end
+
+
+/* Optimization Strategy: */
+/* Search Strategy	: */
+/* Variable selection	: */
+/* Value selection	: */
+
+[] MaxSplittingFLAChoicePointIIMaximumDomainFirstToLast =>
+first one (PostGTELowerBound);
+LocalConsistencyForEC;
+first one (GetLBFLAChoicePointIIMaximumDomainFirstToLastOne);
+first one (OvervalueUpperBound);
+repeat* (
+	first one( first one (SetLowerBoundToMiddle);
+		   first one (PostGTLowerBound);
+		   LocalConsistencyForEC;
+		   first one (GetLBFLAChoicePointIIMaximumDomainFirstToLastOne)
+		   ,
+		   first one (SetUpperBoundToMiddle)
+		 )
+	);
+first one (FLAChoicePointIIMaximumDomainFirstToLastOne);
+first one (GetSolutionCSOP)
+end
+
+
+/* Optimization Strategy: */
+/* Search Strategy	: */
+/* Variable selection	: */
+/* Value selection	: */
+
+[] MaxSplittingFLAChoicePointIIMaximumDomainLastToFirst =>
+first one (PostGTELowerBound);
+LocalConsistencyForEC;
+first one (GetLBFLAChoicePointIIMaximumDomainLastToFirstOne);
+first one (OvervalueUpperBound);
+repeat* (
+	first one( first one (SetLowerBoundToMiddle);
+		   first one (PostGTLowerBound);
+		   LocalConsistencyForEC;
+		   first one (GetLBFLAChoicePointIIMaximumDomainLastToFirstOne)
+		   ,
+		   first one (SetUpperBoundToMiddle)
+		 )
+	);
+first one (FLAChoicePointIIMaximumDomainLastToFirstOne);
+first one (GetSolutionCSOP)
+end
+
+
+/* Optimization Strategy: */
+/* Search Strategy	: */
+/* Variable selection	: */
+/* Value selection	: */
+
+[] MaxSplittingFLAChoicePointIIMaximumDomainSplitFirstToLast =>
+first one (PostGTELowerBound);
+LocalConsistencyForEC;
+first one (GetLBFLAChoicePointIIMaximumDomainSplitFirstToLastOne);
+first one (OvervalueUpperBound);
+repeat* (
+	first one( first one (SetLowerBoundToMiddle);
+		   first one (PostGTLowerBound);
+		   LocalConsistencyForEC;
+		   first one (GetLBFLAChoicePointIIMaximumDomainSplitFirstToLastOne)
+		   ,
+		   first one (SetUpperBoundToMiddle)
+		 )
+	);
+first one (FLAChoicePointIIMaximumDomainSplitFirstToLastOne);
+first one (GetSolutionCSOP)
+end
+
+
+/* Optimization Strategy: */
+/* Search Strategy	: */
+/* Variable selection	: */
+/* Value selection	: */
+
+[] MaxSplittingFLAChoicePointIIMaximumDomainSplitLastToFirst =>
+first one (PostGTELowerBound);
+LocalConsistencyForEC;
+first one (GetLBFLAChoicePointIIMaximumDomainSplitLastToFirstOne);
+first one (OvervalueUpperBound);
+repeat* (
+	first one( first one (SetLowerBoundToMiddle);
+		   first one (PostGTLowerBound);
+		   LocalConsistencyForEC;
+		   first one (GetLBFLAChoicePointIIMaximumDomainSplitLastToFirstOne)
+		   ,
+		   first one (SetUpperBoundToMiddle)
+		 )
+	);
+first one (FLAChoicePointIIMaximumDomainSplitLastToFirstOne);
+first one (GetSolutionCSOP)
+end
+
+end
+
+
+end
+
+
+

@@ -1,0 +1,19 @@
+LPL norm description
+
+specification description 
+   part Btypes	of sort 	list[identifier]
+		modules 	sigSyntax
+   part Mvars	of sort 	list[vardef]
+		modules 	sigSyntax ivars[Btypes]
+   part Bvars	of sort 	list[vardef]
+		modules 	sigSyntax ivars[Btypes]
+end  
+query		of sort  	wtterm
+		result of sort 	wtterm
+		modules 	terms[Mvars,Btypes,Bvars]
+		start with 	(Protheo)normalize(query)
+end of LPL description
+
+
+
+

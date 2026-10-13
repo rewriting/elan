@@ -1,0 +1,127 @@
+/*
+ *   Difference-bounds matrices
+ */
+module DBM[K,Q,S,LA]
+
+//----  MODULES IMPORTÉS  ----//
+
+import global
+   K Q S LA
+   Automaton[K,Q,S]
+   list[Automaton]
+   matrix[bound]
+   eq[matrix[bound]]
+   pair[int,int] ;
+end
+
+//----  SORTES INTRODUITES  ----//
+
+sort
+  bound ;  //ce sont les elts de la matrice
+end
+
+operators global
+  oo        : bound ;
+  o         : bound ;
+  @         : (pair[int,int]) bound ;
+
+  index(@) : (clock) int ;
+
+  init_DBM(@) : (int) matrix[bound] ;
+  zeros(@,@)  : (matrix[bound] int) matrix[bound] ;
+  cons_DBM(@,@) : (clockzone matrix[bound]) matrix[bound] ;
+
+  @+@           : (bound bound) bound ;
+  minb(@,@)     : (bound bound) bound ;
+
+  Floyd_Cell(@,@,@,@) : (matrix[bound] int int int) matrix[bound] ;
+  Floyd_Line(@,@,@)   : (matrix[bound] int int) matrix[bound] ;
+  Floyd(@,@)          : (matrix[bound] int) matrix[bound] ;
+
+end
+
+rules for int
+ global
+  FOR EACH N : builtinInt SUCH THAT N:=()valueOf(size_of_Automaton_list(LA)) :{
+  {
+  FOR EACH x : clock SUCH THAT x:=()i-th elem(LA).clk :{
+  [] index(x)                   => i end} 
+  }_i=1...N}
+end
+
+rules for matrix[bound]
+  i, j, k, n : int ;
+  dbm, dbm1, i_dbm : matrix[bound] ;
+  X, Y : clock ;
+  cz : clockzone ;
+ global
+  [] init_DBM(i) => dbm 
+                    where dbm1:=()new(i,i,oo) 
+                    where dbm :=()zeros(dbm1,0)
+                    end
+
+  [] zeros(dbm,i) => zeros(dbm[i,i]<-o,i+1)
+                     if i <= size(K)
+                     end
+  [] zeros(dbm,i) => dbm end
+
+  [] cons_DBM($X<n^cz,i_dbm)     => cons_DBM(cz,i_dbm[index($X),0]<-[n,0]) end
+  [] cons_DBM($X<=n^cz,i_dbm)    => cons_DBM(cz,i_dbm[index($X),0]<-[n,1]) end
+  [] cons_DBM($X>n^cz,i_dbm)     => cons_DBM(cz,i_dbm[0,index($X)]<-[-n,0]) end
+  [] cons_DBM($X>=n^cz,i_dbm)    => cons_DBM(cz,i_dbm[0,index($X)]<-[-n,1]) end
+  [] cons_DBM($X-$Y<n^cz,i_dbm)  => cons_DBM(cz,i_dbm[index($X),index($Y)]<-[n,0]) end
+  [] cons_DBM($X-$Y<=n^cz,i_dbm) => cons_DBM(cz,i_dbm[index($X),index($Y)]<-[n,1]) end
+  [] cons_DBM(true,i_dbm)        => i_dbm end
+
+  [] Floyd_Cell(dbm,i,j,k) => Floyd_Cell(dbm1,i,j,k+1)
+                              if k <= size(K)
+                              where dbm1:=()dbm[i,j]<-minb(dbm[i,j],dbm[i,k]+dbm[k,j])
+                              end
+  [] Floyd_Cell(dbm,i,j,k) => dbm end
+
+  [] Floyd_Line(dbm,i,j)   => Floyd_Line(dbm1,i,j+1)
+                              if j <= size(K)
+                              where dbm1:=()Floyd_Cell(dbm,i,j,0)
+                              end
+  [] Floyd_Line(dbm,i,j)   => dbm end
+
+  [] Floyd(dbm,i)          => Floyd(dbm1,i+1)
+                              if i <= size(K)
+                              where dbm1:=()Floyd_Line(dbm,i,0)
+                              end
+  [] Floyd(dbm,i)          => dbm end
+
+end
+
+rules for bound
+  b, res : bound ;
+  x1, x2, x3, r1, r2, r3 : int ;
+ global
+  [] o + oo   => oo   end
+  [] oo + o   => oo   end
+  [] b + o    => b    end
+  [] o + b    => b    end
+  [] b + oo   => oo   end
+  [] oo + b   => oo   end
+  [] [x1,r1] + [x2,r2]     => [x1+x2,min(r1,r2)] end
+
+  [] minb(o,oo) => o  end
+  [] minb(oo,o) => o  end
+  [] minb(o,b)  => minb([0,1],b)  end
+  [] minb(b,o)  => minb([0,1],b)  end
+  [] minb(oo,b) => b  end
+  [] minb(b,oo) => b  end
+  [] minb([x1,r1],[x2,r2]) => [x3,r3]
+                              choose try if x1<x2
+                                         where x3:=()x1
+                                         where r3:=()r1
+                                     try if x2<x1
+                                         where x3:=()x2
+                                         where r3:=()r2
+                                     try 
+                                         where x3:=()x1
+                                         where r3:=()min(r1,r2)
+                              end    end 
+end
+
+end

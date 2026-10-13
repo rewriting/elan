@@ -1,0 +1,13 @@
+LPL poly2 description
+
+  specification description
+    part Vars	of sort list[identifier]
+	 	import identifier list[identifier]
+  end
+
+  query    of sort 		poly
+	   result of sort 	poly
+           import  		poly2[Vars]
+           start with 		() query
+
+end

@@ -1,0 +1,12 @@
+LPL nonblock description
+
+   query of sort  	string 
+   result of sort 	int
+   import		nonblock
+  start with		()floop("b.out",100)
+
+end
+
+
+
+

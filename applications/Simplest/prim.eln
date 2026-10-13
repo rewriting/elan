@@ -1,0 +1,66 @@
+module prim
+
+// not finished, I will need conditions to do this.
+
+import global int bool; end
+sort list; end
+
+operators global
+   nil 		: list;
+   cons(@,@) 	: ( int list ) list;
+
+   app(@,@)  	: ( list list ) list;
+
+   primes(@)		: ( int ) list;
+   addifprime(@,@)	: ( int list ) list;
+   addprime1(@,@,@)	: ( int bool list ) list;
+   addprime2(@,@,@)	: ( int bool list ) list;
+
+   forget(@)	: (list) list;
+end
+
+stratop
+  global
+    qqq		: <list>	builtin;
+end
+
+rules for list
+x : int;
+	y,z : list;
+	n,i,j : int;
+global
+  [] app(nil,y)		=> y					end
+  [] app(cons(x,y),z)	=> cons(x,app(y,z))			end
+
+  [] addifprime(n,nil)		=> cons(n,nil)					end
+  [] addifprime(n,cons(i,y))	=> cons(i,app(y,cons(n,nil))) 	if i*i>n	end
+  [] addifprime(n,cons(i,y))	=> cons(i,y)			if n%i == 0 	end
+  [] addifprime(n,cons(i,y))	=> cons(i,addifprime(n,y))			end
+
+  [] primes(0)		=> nil					end
+  [] primes(1)		=> nil					end
+  [] primes(2)		=> cons(2,nil)				end
+  [] primes(n)		=> addifprime(n,primes(n-1))		end
+
+  [] forget(y)		=> nil					end
+
+end
+
+rules for list
+global
+  [idd] nil => nil end
+end
+
+strategies for list
+implicit
+ []  qqq =>     first one(id, qqq) end
+end
+//strategies for list
+//global
+// [qqq]     dc(id || qqq) end
+//end
+
+end
+
+
+

@@ -1,0 +1,39 @@
+module Esubstitution[Vars,Ops,Types]
+// Extension du module : substitution
+
+import	global	bool
+		substitution
+		msTermCommons[Vars,Ops,Types]
+		occur[variable,term]
+		;
+end
+
+operators
+  global
+    restriction(@,@)	: (substitution term) substitution;
+end
+
+
+rules for substitution
+
+	s 	: substitution;
+	u,t 	: term;
+	x	: variable;
+global
+  [] restriction(x->u o s,t) => x->u o restriction(s,t)
+	if occurs x in t
+  end
+  [] restriction(x->u o s,t) => restriction(s,t)
+	if not occurs x in t
+  end
+  [] restriction(x->u,t) => x->u
+	if occurs x in t
+  end
+  [] restriction(x->u,t) => identity
+	if not occurs x in t
+  end
+  [] restriction(identity,t) => identity
+  end
+end
+end
+

@@ -1,0 +1,22 @@
+module ifte[X]
+import 
+  global
+    bool;
+sort X;
+op
+  global
+  	ifte(@,@,@)	: (bool X X) X;
+endop
+
+rules for X
+declare 
+	Then, Else: X;
+bodies
+ []	ifte(true,Then,Else)	=> Then	end
+ []	ifte(false,Then,Else)	=> Else	end
+end of rules
+
+end of module
+
+
+

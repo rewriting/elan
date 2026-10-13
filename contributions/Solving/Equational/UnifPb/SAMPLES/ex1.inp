@@ -1,0 +1,2 @@
+f(z,u)=f(a,w) /\ f(w,z) = f(g(c),v) 
+end

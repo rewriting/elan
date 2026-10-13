@@ -1,0 +1,48 @@
+module moi_meme
+import global int bool string; end
+operators global
+  moi(@)        : (int) string;
+  loop(@,@,@)   : (int int int) string;
+  trans(@,@)    : (int string) string;
+  moi_meme      : string;
+end
+rules for string
+i, j, k: int; 
+s, R   : string;
+global
+  [] moi(00) => "module moi_meme" end
+  [] moi(01) => "import global int bool string; end" end
+  [] moi(02) => "operators global" end
+  [] moi(03) => "  moi(@)        : (int) string;" end
+  [] moi(04) => "  loop(@,@,@)   : (int int int) string;" end
+  [] moi(05) => "  trans(@,@)    : (int string) string;" end
+  [] moi(06) => "  moi_meme      : string;" end
+  [] moi(07) => "end" end
+  [] moi(08) => "rules for string" end
+  [] moi(09) => "i, j, k: int; " end
+  [] moi(10) => "s, R   : string;" end
+  [] moi(11) => "global" end
+  [] moi(12) => "  [] loop(i,j,k) => choose" end
+  [] moi(13) => "                      try if i <= j and k == 0 where R:=() moi(i)+string(10)+loop(i+1,j,k)" end
+  [] moi(14) => "                      try if i <= j and k == 1 where R:=() trans(i,moi(i))+loop(i+1,j,k)" end
+  [] moi(15) => "                      try where R:=() string(0)" end
+  [] moi(16) => "                    end" end
+  [] moi(17) => "  end" end
+  [] moi(18) => "  [] trans(i,s) => string(32)+string(32)+string(91)+string(93)+string(32)+string(109)+string(111)+string(105)+" end
+  [] moi(19) => "                   string(40)+string(48+i/10)+string(48+i%10)+string(41)+string(32)+string(61)+string(62)+string(32)+" end
+  [] moi(20) => "                   string(34)+s+string(34)+string(32)+string(101)+string(110)+string(100)+string(10) end" end
+  [] moi(21) => "  [] moi_meme => loop(0,11,0)+loop(0,23,1)+loop(12,23,0) end" end
+  [] moi(22) => "end" end
+  [] moi(23) => "end" end
+  [] loop(i,j,k) => R choose
+                      try if i <= j and k == 0 where R:=() moi(i)+string(10)+loop(i+1,j,k)
+                      try if i <= j and k == 1 where R:=() trans(i,moi(i))+loop(i+1,j,k)
+                      try where R:=() string(0)
+                    end
+  end
+  [] trans(i,s) => string(32)+string(32)+string(91)+string(93)+string(32)+string(109)+string(111)+string(105)+
+                   string(40)+string(48+i/10)+string(48+i%10)+string(41)+string(32)+string(61)+string(62)+string(32)+
+                   string(34)+s+string(34)+string(32)+string(101)+string(110)+string(100)+string(10) end
+  [] moi_meme => loop(0,11,0)+loop(0,23,1)+loop(12,23,0) end
+end
+end

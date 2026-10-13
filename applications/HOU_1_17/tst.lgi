@@ -1,0 +1,11 @@
+LPL tst description
+  
+query		of sort  int
+		result of sort int
+		modules list[int]
+		start with (Protheo)hou(query)
+end of LPL description
+
+
+
+

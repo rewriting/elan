@@ -1,0 +1,79 @@
+module configuration[Fss]
+import global state symbol[Fss];
+	local int Fss pair[identifier, int]
+		list[pair[identifier, int]] ;
+end
+
+sort configuration;
+end
+
+/*
+		Configuration definition and basic functions
+		--------------------------------------------
+
+A configuration is any term build on signature Fss and any state symbol. 
+Configurations are left-hand side of transitions.
+
+
+*/
+
+operators
+  global
+	
+	void		:configuration;
+
+	FOR EACH SS:pair[identifier,int]; F:identifier; N:int
+	SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS)
+		AND N:=()second(SS) ANDIF N==0:{
+
+		F()	:configuration;
+		F	:configuration 	alias F():;
+
+}
+
+	FOR EACH SS:pair[identifier,int]; F:identifier; N:int
+	SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS)
+		AND N:=()second(SS) ANDIF N>0:{
+		
+		F({,@}~N)		: ({state}~N) configuration;
+
+		F({@,}~N)		: ({state}~N) configuration
+			alias F({,@}~N):;
+		F(,{@,}~N)		: ({state}~N) configuration 
+			alias F({,@}~N):;
+		F(@ {,@}~(N-1))		: ({state}~N) configuration
+			alias F({,@}~N):;
+
+}
+
+		symbol_of(@)	:(configuration) symbol;
+		mix_config(@, @):(configuration configuration) configuration;
+
+end
+
+FOR EACH SS:pair[identifier,int]; F:identifier; N:int
+SUCH THAT SS:=(listExtract) elem(Fss) AND F :=()first(SS) AND N:=()second(SS) :{
+
+rules for symbol
+	q_1, ..., q_N : state;
+global
+  [] symbol_of(F(q_1, ..., q_N)) => F 
+  end
+end
+}
+
+
+FOR EACH SS:pair[identifier,int]; F:identifier; N:int
+SUCH THAT SS:=(listExtract) elem(Fss) AND F :=()first(SS) AND N:=()second(SS):{
+
+rules for configuration
+	q_1, ..., q_N: state;
+	r_1, ..., r_N : state;
+global
+  [] mix_config(F(q_1, ..., q_N), F(r_1, ..., r_N)) => F( {, [q_I, r_I]}_I=1...N )
+  end
+end
+}
+
+end
+

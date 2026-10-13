@@ -1,0 +1,5 @@
+[cons(a,cons(b,nil)),proofnil;(r1(z->cons(b,nil)o x->a o y->nil))[[(r2(z->cons(b,nil))).nil]]] end
+
+ end end
+end
+

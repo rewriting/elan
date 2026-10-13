@@ -1,0 +1,8 @@
+LPL norm description
+
+query		of sort  	T
+		result of sort 	T
+		import 	norm
+		start with 	(ss)query
+
+end

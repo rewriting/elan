@@ -1,0 +1,18 @@
+LPL propositional description
+
+  specification description
+
+    part Props   of sort list[pair[identifier,int]]
+                import sigSyntax
+     
+  end
+
+  query 	of sort  Seq		
+         	result of sort Seq	
+	 	import
+			int bool  
+			definitions[Props]  
+			propositional[Props]
+         	start with () query
+end
+

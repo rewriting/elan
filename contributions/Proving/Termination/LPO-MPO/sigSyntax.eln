@@ -1,0 +1,24 @@
+module sigSyntax
+
+import 
+	global	
+		ident int
+		ident list[ident] pair[ident,int] 
+		list[pair[ident,int]];
+end
+operators
+ global
+
+  @ ':' @ : ( ident int ) pair[ident,int]	alias [@,@]:;
+
+  Epsilon : list[ident]		      		alias nil:;
+  @  @	  : ( ident list[ident] ) list[ident]   
+							alias cons(@,@):;
+
+  Epsilon : list[pair[ident,int]]			alias nil:;
+  @  @	  : ( pair[ident,int] list[pair[ident,int]] ) 
+			  list[pair[ident,int]]	alias cons(@,@):;
+
+end
+
+end

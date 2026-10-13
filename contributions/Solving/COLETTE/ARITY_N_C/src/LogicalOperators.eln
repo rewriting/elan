@@ -1,0 +1,274 @@
+module LogicalOperators[Variables,Type] 
+
+import
+global	
+	IntegerSignature[Variables]
+	Variables Type 
+	list[constraint]
+	occur[var,list[var]]
+	;
+end
+
+operators
+global
+
+// Conjunction
+
+@ & @		: (constraint constraint)		constraint	assocRight pri 20;
+
+// Disjunction
+
+@ V @		: (constraint constraint)		constraint	assocRight pri 40;
+
+// Implication
+
+@ -> @		: (constraint constraint)		constraint	assocRight pri 60;
+
+// Equivalence
+
+@ <-> @		: (constraint constraint)		constraint	assocRight pri 80;
+
+// Negation
+
+NOT(@)		: (constraint)				constraint	pri 100;
+
+local
+
+EliminateDoubleVar(@,@)	: (list[var] list[var])		list[var];
+
+end
+
+
+rules for constraint
+
+	c, c1, c2	: constraint;
+
+global 
+
+// Equivalence
+
+[]	c1 <-> c2
+	=>
+	NOT(c1) V c2 & NOT(c2) V c1 
+end
+
+// Implication
+
+[]	c1 -> c2
+	=>
+	NOT(c1) V c2
+end
+
+// Double Negation Law
+
+[]	NOT(NOT(c))
+	=>
+	c
+end
+
+// De Morgan's Law: Negation of Conjunction
+
+[]	NOT(c1 & c2)
+	=>
+	NOT(c1) V NOT(c2)
+end
+
+// De Morgan's Law: Negation of Disjunction
+
+[]	NOT(c1 V c2)
+	=>
+	NOT(c1) & NOT(c2)
+end
+
+// Distribution of disjunction
+// 
+// []	c V (c1 & c2)
+// 	=>
+// 	(c V c1) & (c V c2)
+// end
+// Distribution of disjunction
+// 
+// []	(c1 & c2) V c
+// 	=>
+// 	(c V c1) & (c V c2)
+// end
+
+// Identity Law of Disjunction
+
+[]	c V false
+	=>
+	c
+end
+
+[]	false V c
+	=>
+	c
+end
+
+// Identity Law of Conjunction
+
+[]	c & true
+	=>
+	c
+end
+
+[]	true & c
+	=>
+	c
+end
+
+// Domination Law of Disjunction
+
+[]	c V true
+	=>
+	true
+end
+
+[]	true V c
+	=>
+	true
+end
+
+// Domination Law of Conjunction
+
+[]	c & false
+	=>
+	false
+end
+
+[]	false & c
+	=>
+	false
+end
+
+// Tautology
+
+[]	c V NOT(c)
+	=>
+	true
+end
+
+[]	NOT(c) V c
+	=>
+	true
+end
+
+// Contradiction
+
+[]	c & NOT(c)
+	=>
+	false
+end
+
+[]	NOT(c) & c
+	=>
+	false
+end
+
+// Idempotent Law of Conjunction
+
+[]	c & c
+	=>
+	c
+end
+
+// Idempotent Law of Disjunction
+
+[]	c V c
+	=>
+	c
+end
+
+[]	NOT(true)
+	=>
+	false
+end
+
+[]	NOT(false)
+	=>
+	true
+end
+
+[EliminateNOT]
+
+	NOT(c)
+	=>
+	Negation(c)
+end
+
+[]	SimplifyConstraint(c1 V c2)
+	=>
+	SimplifyConstraint(c1) V SimplifyConstraint(c2)
+end
+
+[]	SimplifyConstants(c1 V c2)
+	=>
+	SimplifyConstants(c1) V SimplifyConstants(c2)
+end
+
+[]	GetCanonicalForm(c1 V c2,0,0)
+	=>
+	GetCanonicalForm(c1,0,0) V GetCanonicalForm(c2,0,0)
+end
+
+end
+
+
+rules for int
+
+	c, c1, c2	: constraint;
+
+global 
+
+[]	ArityOfConstraint(c1 V c2)
+	=>
+	1000
+end
+
+[]	ArityOfConstraint(c)
+	=>
+	size(VarsOfConstraint(c,nil))
+end
+
+end
+
+
+rules for list[var]
+
+	v		: var;
+	l, lv, l1, l2	: list[var];
+	c1, c2		: constraint;
+
+global 
+
+[]	VarsOfConstraint(c1 V c2,l)
+	=>
+	lv
+	where	l2 := ()VarsOfConstraint(c2,l)
+	where	l1 := ()VarsOfConstraint(c1,l2)
+	where	lv := ()EliminateDoubleVar(l1,nil)
+end
+
+[]	EliminateDoubleVar(v.l1,l2)
+	=>
+	EliminateDoubleVar(l1,lv)
+	choose
+	try
+		if	occurs v in l2
+		where	lv :=()l2
+	try
+		if	not occurs v in l2
+		where	lv :=()v.l2
+	end
+end
+
+[]	EliminateDoubleVar(nil,l)
+	=>
+	l
+end
+
+end
+
+
+end
+

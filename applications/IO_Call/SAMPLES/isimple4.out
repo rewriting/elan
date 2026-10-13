@@ -1,0 +1,17 @@
+(u=x&v=y) end
+
+(x=f0(u,x:1)&v=f0(y,x:1)) end
+
+(u=y&v=x) end
+
+(x=f0(x:2,v)&u=f0(y,x:2)) end
+
+(y=f0(u,x:3)&v=f0(x:3,x)) end
+
+(y=f0(x:4,v)&u=f0(x:4,x)) end
+
+(((x=f0(x:2,x:1)&y=f0(x:4,x:3))&u=f0(x:4,x:2))&v=f0(x:3,x:1)) end
+
+ end end
+end
+

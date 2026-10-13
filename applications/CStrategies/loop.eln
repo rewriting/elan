@@ -1,0 +1,49 @@
+module loop
+
+import global strat[integ] integ;
+end
+operators global 
+  dc-loop(@)	: (integ) <integ>;
+  dk-loop(@)	: (integ) <integ>;
+  loop		: <integ>;
+end
+
+rules for integ
+ x, n	: integ;
+global
+  [add(n)] x => x+n			end
+end
+
+rules for integ
+ x	: integ;
+global
+  [sub1]	x => x-1 if x > 1	end
+end
+
+strategies for integ
+defined
+//  [loop] dk(sub1;loop, id)	end  
+  [loop] dk(id, sub1;loop)	end  
+end
+
+strategies for integ
+ n:integ;
+defined
+  [dc-loop(n)] dc(id,
+			if self < n then
+			  add(1);dc-loop(n)
+			else
+			  fail
+			fi) end
+  [dk-loop(n)] dk(id,
+			if self < n then
+			  add(1);dk-loop(n)
+			else
+			  fail
+			fi) end
+end
+
+end
+
+
+

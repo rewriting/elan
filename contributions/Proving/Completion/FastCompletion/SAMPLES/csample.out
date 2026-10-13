@@ -1,0 +1,1 @@
+  a->b.f(g(var(0)))->g(var(0)).g(b)->b.f(b)->b.nil

@@ -1,0 +1,78 @@
+module unification[Vars,Fss]
+
+import  global  termV[Vars] termF[Fss] unifPb ;
+        local   Fss int identifier bool pair[identifier,int]
+		list[pair[identifier,int]]
+                eq[variable] eq[term] eq[Fsymbol]
+		occur[variable,term] occur[variable,unifPb] ;
+end
+
+stratop global
+  unify		: <unifPb>		builtin;
+
+end
+
+rules for unifPb
+	P : unifPb;
+	s,t : term;
+	x,y : variable;
+local
+
+  [delete] 	P /\ x=y	=> P
+			if eq_variable(x,y)
+  end
+  [coalesce] 	P /\ x=y	=> apply(x->y,P) /\ x=y 
+			if occurs x in P
+			and occurs y in P
+			and neq_variable(x,y)
+  end
+  [conflict]	P /\ s=t	=> false
+			if neq_Fsymbol(head(s),head(t))
+			   and not(isvar(s)) and not(isvar(t))
+  end
+  [occ_check]	P /\ x=s	=> false
+			if occurs x in s and not isvar(s)
+  end
+  [occ_check]	P /\ s=x	=> false
+			if occurs x in s and not isvar(s)
+  end
+  [eliminate]	P /\ x=s	=> apply(x->s,P) /\ x=s
+			if not(occurs x in s) 
+			and occurs x in P
+			and not isvar(s)
+  end
+  [eliminate]	P /\ s=x	=> apply(x->s,P) /\ x=s
+			if not(occurs x in s) 
+			and occurs x in P 
+			and not isvar(s)
+  end
+
+  FOR EACH SS:pair[identifier,int]; F:identifier;  N:int
+  SUCH THAT SS:=(listExtract) elem(Fss) AND F:=()first(SS) 
+	AND N:=()second(SS) :{
+   rules for unifPb
+       s_1,...,s_N:term; t_1,...,t_N:term;
+   local
+     [decompose] P /\ F(s_1,...,s_N)=F(t_1,...,t_N) => P { /\ s_I=t_I }_I=1...N
+     end
+   end
+  }
+
+  [trueadd]     P               => true /\ P                    end
+  [trueelim]    true /\ P       => P                            end
+  [identity] 	P       	=> P                            end
+
+end
+
+strategies for unifPb
+implicit
+  [] unify =>
+  firstOne(trueadd) ;
+  repeat* (firstOne(
+      delete , decompose , conflict , coalesce , occ_check , eliminate)) ;
+  firstOne(trueelim , identity)
+  end
+
+end
+
+end

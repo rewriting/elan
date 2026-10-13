@@ -1,0 +1,30 @@
+module rewriteStep[vars,fss,prec]
+import 	global	equation[vars,fss,prec]
+		applySubstOn[fss,vars,term]
+		substitution
+		list[int]
+	;
+	local	syntacticUnification[fss,vars] EtermCommons[fss,vars]
+	;
+end
+
+operators
+  global
+    rewriteStep(@,@)	: (term equation) term;
+end
+
+rules for term
+ 
+	filtre		: eqSystem;
+        s,l,r	 	: term;
+        theta 		: substitution;
+        omega 		: list[int];
+global
+  [rewriteStep] rewriteStep(s,l->r)	=> s[theta(r)] at omega
+                where omega := (nvocc) nvocc(s)
+                where filtre := (matchs) true & l = s at omega
+                where theta := () system_to_subst(filtre)
+  end
+end
+
+end

@@ -1,0 +1,43 @@
+//////////// --norm1 --los --lis
+module m2
+
+import 	global 	int;
+	local 	bool eq[lterm];
+end
+sort lterm;
+end
+operators global
+  	@		: (int) lterm;
+	(@ @)		: (lterm lterm) lterm;
+	la @		: (lterm) lterm;
+   local
+	repl(@,@,@)	: (int lterm lterm) lterm;
+	free(@,@)	: (int lterm) bool;
+end
+
+rules for bool
+ v, w	: int;
+ M, N, Q	: lterm;
+local
+  []	free(v,v) => true				end
+  []	free(v,(M N)) => free(v,M) or free(v,N)		end
+  []	free(v,la M) => free(v+1,M)			end
+  []	free(v,M) => false				end
+end
+
+rules for lterm
+ v, w	: int;
+ M, N, Q	: lterm;
+ M1, N1, Q1	: lterm;
+local
+  []	repl(v,v,M) => M				end
+  []	repl(v,w,M) => w				end
+  []	repl(v,(M N),Q) => (repl(v,M,Q) repl(v,N,Q))	end
+  []	repl(v,la N,M) => la repl(v+1,N,M)		end
+
+  [](la M N) => repl(1,M,N)				end
+  []	(la M 1) => M if not free(1,M)			end
+end
+
+end
+

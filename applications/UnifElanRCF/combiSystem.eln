@@ -1,0 +1,200 @@
+module combiSystem 
+import 	global 	term varabst ;
+ 	local  	bool 
+                eq[variable] eq[term]
+		eqSystem eq[eqSystem] 
+                occur[variable,term] occur[variable,eqSystem] ; 
+end
+
+sort combiSystem ; end
+
+
+operators
+
+  global
+
+    @ . @ . @ . @ : (eqSystem eqSystem eqSystem eqSystem) combiSystem;
+
+    theoryClash(@,@,@) : (eqSystem variable term) bool ;
+    issolved(@)        : (eqSystem) bool ;
+    vareq?(@)          : (eqSystem) bool ;
+
+    extractSol(@)      : (combiSystem) eqSystem ;
+
+end
+
+
+
+rules for bool
+
+// declare 
+
+P: eqSystem ; x,y: variable ; s,t: term ;
+
+global
+
+[] theoryClash(true,x,s) => false end 
+[] theoryClash(P & x = t,x,s) => true end 
+[] theoryClash(P & y = t,x,s) => true 
+   if x != y and not isvar(t) 
+      and occurs(x,t) and occurs(y,s) end
+[] theoryClash(P & y = t,x,s) => theoryClash(P,x,s)
+   if x != y and ((not occurs(x,t)) or (not occurs(y,s))) end 
+
+
+[] issolved(true) => true end 
+[] issolved(P & x = t) => issolved(P) 
+   if (not occurs(x,t)) and (not occurs(x,P)) end
+[] issolved(x = t) => true 
+   if (not occurs(x,t)) end
+[] issolved(P & x = t) => false
+   if occurs(x,t) or occurs(x,P) end
+[] issolved(x = t) => false
+   if occurs(x,t) end
+[] issolved(P & s = t) => false 
+   if not isvar(s) end
+[] issolved(s = t) => false 
+   if not isvar(s) end
+
+
+
+[] vareq?(P & x = y) => true end
+[] vareq?(P & s = t) => vareq?(P) 
+   if (not isvar(s)) or (not isvar(t)) end
+[] vareq?(x = y) => true end
+[] vareq?(s = t) => false
+   if (not isvar(s)) or (not isvar(t)) end
+[] vareq?(true) => false end
+
+
+end
+
+
+rules for eqSystem
+
+// declare 
+
+P,PH,P1,P2,Sol:eqSystem ; x: variable; t:term ;
+
+global
+
+[] extractSol( true . true . true. Sol ) => Sol end
+[] extractSol( PH . P1 . P2 . Sol ) => false 
+   if neq(PH,true) or neq(P1,true) or neq(P2,true) end
+
+
+[truePass] true => true end
+[falsePass] false => false end
+[trueadd] P => true & P  end 
+[trueelim] P & true => P end
+[Rep] P & x = t => apply(x -> t, P) & x = t
+                                if (not occurs(x,t)) and occurs(x,P) end 
+[Pass] P & x = t => x = t & P if not occurs(x,P) end 
+end
+
+
+
+rules for combiSystem
+// declare 
+
+PH,P1,P2,Sol,Q1,Q2,Q:eqSystem ; x,y: variable; t: term ;
+
+global
+
+[propagate1] PH . x = t . P2 . Sol =>
+             PH . true . P2  . Q 
+             where Q := (treeSolvedForm) Sol & x = t 
+             if not isvar(t) and not theoryClash(Sol,x,t) 
+	     end
+
+[propagate1] PH . P1 & x = t . P2 . Sol =>
+             PH . P1 . P2 . Q 
+             where Q := (treeSolvedForm) Sol & x = t 
+             if not isvar(t) and not theoryClash(Sol,x,t) 
+	     end
+
+[propagate2] PH . P1 . x = t . Sol =>
+             PH . P1 . true  . Q
+             where Q := (treeSolvedForm) Sol & x = t 
+             if not isvar(t) and not theoryClash(Sol,x,t) 
+	     end
+
+[propagate2] PH . P1 . P2 & x = t . Sol =>
+             PH . P1 . P2 . Q
+             where Q := (treeSolvedForm) Sol & x = t 
+             if not isvar(t) and not theoryClash(Sol,x,t) 
+	     end
+
+[varRep1]    PH . P1 & x = y . P2 . Sol =>
+             PH . P1 . apply(x -> y,P2) . apply(x -> y,Sol) & x = y 
+             end 
+
+[varRep2]    PH . P1 . P2 & x = y . Sol =>
+             PH . apply(x -> y,P1) . P2 . apply(x -> y,Sol) & x = y 
+             end 
+
+
+[trueadd1]   PH . P1 . P2 . Sol => PH . true & P1 . P2 . Sol end 
+
+[unfold1]    PH . P1 . P2 . Sol 
+          => PH . Q1 . P2 . Sol where Q1 := (unfoldstrat) P1 end
+
+             
+[trueelim1]  PH . P1 & true . P2 . Sol => PH . P1 . P2 . Sol end 
+
+[truepass1]  PH . true . P2 . Sol => PH . true . P2 . Sol end 
+
+[next1]      PH . P1 & x = t . P2 . Sol => PH . x = t & P1 . P2 . Sol  
+             if not isvar(t) end 
+
+
+[trueadd2]   PH . P1 . P2 . Sol => PH . P1 . true & P2 . Sol end 
+
+[unfold2]    PH . P1 . P2 . Sol 
+          => PH . P1 . Q2 . Sol where Q2 := (unfoldstrat) P2 end
+
+[trueelim2]  PH . P1 . P2 & true . Sol => PH . P1 . P2 . Sol end 
+
+[truepass2]  PH . P1 . true . Sol => PH . P1 . true . Sol end 
+
+[next2]      PH . P1 . P2 & x = t . Sol => PH . P1 . x = t & P2 . Sol  
+             if not isvar(t) end 
+
+[unsolved1] PH . P1 . P2 . Sol => PH . false . P2 . Sol 
+           if not issolved(P1) end
+
+[unsolved2] PH . P1 . P2 . Sol => PH . P1    . false . Sol 
+           if not issolved(P2) end
+
+[combiident] PH . P1 . P2 . Sol => PH . P1 . P2 . Sol end
+
+[vareq]      PH . P1 . P2 . Sol => PH . P1 . P2 . Sol
+             if vareq?(P1) or vareq?(P2) end            
+end
+
+
+strategies for eqSystem
+
+  global 
+
+  [unfoldstrat]
+  dont care choose(unfold)
+  end
+
+
+  [treeSolvedForm]
+  repeat*(
+  dont care choose(Rep || Pass || unfold)
+  ) ;
+  dont care choose(trueelim) ;
+  dont care choose(trueadd) ;
+
+  repeat*(
+  dont care choose(unfold)
+  )
+  end
+
+end
+
+end
+

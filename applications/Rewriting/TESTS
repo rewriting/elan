@@ -1,0 +1,4 @@
+# tests of Rewriting (from legacy/elan3 tst_all; format: tests/apps/README.md)
+itest rewriting rwAppend rwAppend irwAppend
+itest rewriting gdiv gdiv1 igdiv1
+itest rewriting gdiv gdiv2 igdiv2

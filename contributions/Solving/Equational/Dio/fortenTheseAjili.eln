@@ -1,0 +1,309 @@
+module fortenTheseAjili[A,B]
+
+
+import 
+       global 
+
+       int list[int] pair[list[int],list[int]]
+       list[pair[list[int],list[int]]]
+       pair[list[pair[list[int],list[int]]],list[pair[list[int],list[int]]]] 
+       eq[list[pair[list[int],list[int]]]] ;
+
+       local
+
+       A B identifier list[identifier] ;
+
+end
+
+
+
+operators
+
+   global
+
+       FOR EACH E:identifier ; M:int ; N:int SUCH THAT 
+             E:=(listExtract) elem(e.nil)  
+         AND M:= () size_of_int_list(A)
+         AND N:= () size_of_int_list(B)
+
+:{
+        {E_I : pair[list[int],list[int]] ;}_I=1...(M+N)
+    }
+
+
+  dio: pair[list[int],list[int]] ;
+
+
+  local
+
+  existsInf(@,@) : (list[pair[list[int],list[int]]]
+                    pair[list[int],list[int]]) bool ;
+
+
+  @ <= @ : (list[int] list[int]) bool ;
+
+  @ <= @ : (pair[list[int],list[int]] pair[list[int],list[int]]) bool ;
+
+  (@.@): (int list[int]) list[int] alias @.@:;
+
+
+  @+@: (list[int] list[int]) list[int] ;
+
+
+
+  @+@: (pair[list[int],list[int]] pair[list[int],list[int]])
+        pair[list[int],list[int]] ;
+
+  pdtScal(@,@) : (list[int] list[int]) int ;
+
+  diff(@): (pair[list[int],list[int]]) int ;
+
+  sgn(@): (int) int ;
+
+  selectCan(@,@): (pair[list[int],list[int]] list[pair[list[int],list[int]]])
+                 list[pair[list[int],list[int]]] ;
+ 
+
+end
+
+
+stratop
+  global 
+
+    fortenbacher : <pair[list[pair[list[int],list[int]]],
+                        list[pair[list[int],list[int]]]]> builtin;
+
+    contejeanDevie : <pair[list[pair[list[int],list[int]]],
+                        list[pair[list[int],list[int]]]]> builtin;
+
+    fortenStrat : <pair[list[int],list[int]]> builtin;
+
+    contejStrat : <pair[list[int],list[int]]> builtin;
+end
+
+
+
+rules for bool
+
+i1,i2: int ;
+x1,x2: list[int] ;
+v1,v2: pair[list[int],list[int]] ;
+
+l: list[pair[list[int],list[int]]] ;
+
+global 
+
+[] i1.x1<=i2.x2 => i1<=i2 and x1<=x2 end
+[] nil<=nil => true end
+
+[] v1<=v2 => first(v1)<=first(v2) and second(v1)<=second(v2) end
+
+[] existsInf(v1.l,v2) => v1<=v2 or existsInf(l,v2) end
+[] existsInf(nil,v2) => false end
+
+
+
+end
+
+
+rules for list[int]
+
+i1,i2,i3:int ;
+x1,x2,x3: list[int] ;
+
+global
+
+[] (i1.x1) + (i2.x2) => i3.x3
+                 where i3:=() i1 + i2
+                 where x3:=() x1 + x2
+                 end
+[] nil+nil => nil end
+
+end
+
+
+rules for pair[list[int],list[int]]
+
+v1,v2: pair[list[int],list[int]] ;
+
+global
+
+[] v1+v2 => [first(v1)+first(v2),second(v1)+second(v2)] end
+
+end
+
+
+rules for int
+
+i1,i2:int ;
+x1,x2: list[int] ;
+v: pair[list[int],list[int]] ;
+
+global
+
+[] pdtScal(i1.x1,i2.x2) => i1*i2+ pdtScal(x1,x2) end
+[] pdtScal(nil,nil) => 0 end
+
+[] diff(v) => pdtScal(A,first(v)) - pdtScal(B,second(v)) end
+
+end
+
+
+rules for  pair[list[int],list[int]] 
+
+oneSol: pair[list[int],list[int]] ;
+NormForm: pair[list[pair[list[int],list[int]]],
+               list[pair[list[int],list[int]]]] ;
+
+
+global
+
+       FOR EACH E:identifier ; M:int ; N:int SUCH THAT 
+             E:=(listExtract) elem(e.nil)  
+         AND M:= () size_of_int_list(A)
+         AND N:= () size_of_int_list(B)
+
+:{
+        {
+         [] E_I => [{0.}_J=1...(I-1) 1. {0.}_J=(I+1)...M nil,
+                {0.}_J=1...N nil] end
+         }_I=1...M
+
+       {
+         [] E_I => [{0.}_J=1...M nil,
+                {0.}_J=(M+1)...(I-1) 1. {0.}_J=(I+1)...(M+N) nil] end
+         }_I=(M+1)...(M+N)
+
+
+[fortenRule] dio => oneSol
+                  where 
+                  NormForm:= (fortenbacher) [nil,{E_I.}_I=1...(M+N) nil]
+                  where 
+                  oneSol:= (listExtract) elem(first(NormForm))
+                  end
+
+
+[contejRule] dio => oneSol
+                  where 
+                  NormForm:= (contejeanDevie) [nil,{E_I.}_I=1...(M+N) nil]
+                  where 
+                  oneSol:= (listExtract) elem(first(NormForm))
+                  end
+
+}
+
+end
+
+
+rules for int
+
+i:int ;
+
+global
+
+[] sgn(i) => 1
+             if i>0 end
+[] sgn(i) => -1
+             if i<0 end
+[] sgn(i) => 0 end
+
+
+end
+
+
+rules for list[pair[list[int],list[int]]]
+
+v,w,e:pair[list[int],list[int]] ;
+Q:list[pair[list[int],list[int]]] ;
+
+global
+
+[] selectCan(v,e.Q) => w.selectCan(v,Q)
+                       if sgn(diff(v))*sgn(diff(e)) < 0
+                       where w:=() v+e 
+                       end
+
+[] selectCan(v,e.Q) => selectCan(v,Q) end
+
+[] selectCan(v,nil) => nil end
+
+end
+
+
+
+
+rules for pair[list[pair[list[int],list[int]]],list[pair[list[int],list[int]]]]
+
+Sol,Q,P: list[pair[list[int],list[int]]] ;
+v:pair[list[int],list[int]] ;
+ 
+global
+
+
+[leaf] [Sol,v.P] => [Sol,P]
+                         if existsInf(Sol,v) end
+
+
+       FOR EACH E:identifier ; M:int ; N:int SUCH THAT 
+             E:=(listExtract) elem(e.nil)  
+         AND M:= () size_of_int_list(A)
+         AND N:= () size_of_int_list(B)
+
+:{
+
+[developR] [Sol,v.P] => [Sol, P @ {v+E_I.}_I=(M+1)...(M+N) nil] 
+                        if diff(v)>0 end
+
+[developL] [Sol,v.P] => [Sol,P @ {v+E_I.}_I=1...M nil] 
+                        if diff(v)<0 end
+
+[develop]  [Sol,v.P] => [Sol,P @ Q]
+                        where Q:=() selectCan(v,{E_I.}_I=1...(M+N) nil) 
+                        if  neq_list[pair[list[int],list[int]]](Q,nil)
+                        end
+
+}
+
+[solution] [Sol,v.P] => [v.Sol,P] if diff(v)==0 end
+
+
+
+end
+
+
+
+strategies for 
+     pair[list[pair[list[int],list[int]]],list[pair[list[int],list[int]]]]
+implicit
+
+  [.] fortenbacher => 
+                     repeat*(
+                        first one(leaf,developL,developR,solution)
+                        ) 
+  end
+
+  [.] contejeanDevie => 
+                     repeat*(
+                        first one(leaf,develop,solution)
+                        ) 
+  end
+
+end
+
+
+strategies for pair[list[int],list[int]]
+implicit
+
+  [.] fortenStrat => dk(fortenRule) 
+  end
+
+  [.] contejStrat => dk(contejRule) 
+  end
+
+end
+
+
+end
+
+
+   

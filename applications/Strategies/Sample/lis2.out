@@ -1,0 +1,20 @@
+(tree[int])node(node(leaf(2),2,leaf(3)),4,node(leaf(5),6,empty)) end
+
+ end end
+end
+
+(tree[int])node(node(leaf(3),2,leaf(1)),4,node(leaf(5),6,empty)) end
+
+ end end
+end
+
+(tree[int])node(node(leaf(5),6,empty),4,node(leaf(1),2,leaf(3))) end
+
+ end end
+end
+
+(tree[int])node(node(leaf(5),6,empty),4,node(leaf(1),2,leaf(3))) end
+
+ end end
+end
+

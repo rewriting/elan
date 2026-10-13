@@ -1,0 +1,468 @@
+module IntegerSignature[Variables]
+
+import
+global	GenericSignature[Variables,int] 
+	Variables
+	;
+end
+
+operators
+global	@ (*) @		: (term term)	term	assocRight (AC)	pri 40;
+	@ (/) @ 	: (term term)	term			pri 30;
+	@ (-) @ 	: (term term)	term			pri 80;
+	@ (+) @ 	: (term term)	term	assocRight (AC)	pri 10;
+
+	@ my_eq @ 	: (term term)	constraint;
+	@ my_ne @ 	: (term term)	constraint;
+	@ my_ge @ 	: (term term)	constraint;
+	@ my_gt @ 	: (term term)	constraint;
+	@ my_le @ 	: (term term)	constraint;
+	@ my_lt @ 	: (term term)	constraint;
+
+	@  =? @ 	: (term term)	constraint alias @ my_eq @ :;
+	@ !=? @ 	: (term term)	constraint alias @ my_ne @ :;
+	@ >=? @ 	: (term term)	constraint alias @ my_ge @ :;
+	@  >? @ 	: (term term)	constraint alias @ my_gt @ :;
+	@ <=? @ 	: (term term)	constraint alias @ my_le @ :;
+	@  <? @ 	: (term term)	constraint alias @ my_lt @ :;
+
+	@ elan_eq @ 	: (int int)	bool alias @ == @ :;
+	@ elan_ne @ 	: (int int)	bool alias @ != @ :;
+	@ elan_ge @ 	: (int int)	bool alias @ >= @ :;
+	@ elan_gt @ 	: (int int)	bool alias @ >  @ :;
+	@ elan_le @ 	: (int int)	bool alias @ <= @ :;
+	@ elan_lt @ 	: (int int)	bool alias @ <  @ :;
+
+	eq		:		identifier;
+	ne		:		identifier;
+	lt		:		identifier;
+	le		:		identifier;
+	gt		:		identifier;
+	ge		:		identifier;
+
+//	alldiff?(@)	: (list[term])	constraint;
+
+	Negation(@)			: (constraint)		constraint;
+	CreateListOfTerms(@,@)          : (term list[term])                     list[term];
+
+end
+
+
+stratop
+global
+  ExpandTerm		: <term>         bs;
+  ReduceCoeficients	: <term>         bs;
+  ReduceConstants	: <term>         bs;
+  SimplifyTerm		: <term>         bs;
+end
+
+
+rules for term
+
+	x, x1, x2	: var;
+	v, v1, v2, v3	: int;
+	t, t1, t2, t3	: term;
+	lt		: list[term];
+
+global 
+
+// Rules for expanding terms
+
+[ExpandPlus]
+	t (+) t1 (*) (t2 (+) t3)
+	=>
+	t (+) t1 (*) (t2) (+) t1 (*) (t3)
+end
+
+[ExpandMinus]
+	t (+) t1 (*) (t2 (-) t3)
+	=>
+	t (+) t1 (*) (t2) (+) -1 (*) (t1 (*) t3)
+end
+
+[ExpandTimes]
+	t (+) t1 (*) ( t2 (*) t3)
+	=>
+	t (+) t1 (*) t2 (*) t3
+end
+
+[ChangeMinus]
+	t (+) t1 (-) t2
+	=>
+	t (+) t1 (+) -1(*)(t2)
+end
+
+[EliminatePar1]
+	t (+) (t1)
+	=>
+	t (+) t1
+end
+
+[EliminatePar2]
+	t (+) (t1) (*) t2
+	=>
+	t (+) t1 (*) t2
+end
+
+[AddCoeficientOne]
+	t (+) x
+	=>
+	t (+) 1 (*) x
+end
+
+// Rules for simplification of coeficients
+
+[MultiplyCoeficients]
+	t (+) v1 (*) v2 (*) x
+	=>
+	t (+) v (*) x
+	where	v :=() v1 * v2
+end
+
+[AddCoeficients]
+	t (+) v1 (*) x (+) v2 (*) x
+	=>
+	t (+) v (*) x
+	where	v := () v1 + v2
+end
+
+[EliminateCoeficientZero]
+	t (+) 0 (*) x
+	=>
+	t
+end
+
+// Rules for simplification of constants
+
+[MultiplyConstants]
+	t (+) v1 (*) v2
+	=>
+	t (+) v
+	where	v := () v1 * v2
+end
+
+[MultiplyConstants]
+	t (+) v1 (*) v2 (*) v3
+	=>
+	t (+) v (*) v3
+	where	v := () v1 * v2
+end
+
+[AddConstants1]
+	t (+) v1 (+) v2	
+	=>
+	t (+) v
+	where	v := () v1 + v2
+end
+
+[AddConstants2]
+	v1 (+) v2	
+	=>
+	v
+	where	v := () v1 + v2
+end
+
+FOR EACH op: identifier
+SUCH THAT op := (listExtract) elem(eq.ne.ge.gt.le.lt.nil):
+{
+[]	GetTermOfConstraint(t1 my_op t2)
+	=>
+	t1 (+) t2
+end
+}
+
+//[]	GetTermOfConstraint(alldiff?(lt))
+//	=>
+//	lt
+//end
+
+end
+
+
+strategies for term
+implicit
+
+[] ExpandTerm =>
+   repeat*(first one(ExpandPlus));
+   repeat*(first one(ExpandMinus));
+   repeat*(first one(ExpandTimes));
+   repeat*(first one(ChangeMinus));
+   repeat*(first one(EliminatePar1));
+   repeat*(first one(EliminatePar2));
+   repeat*(first one(AddCoeficientOne))
+end
+
+[] ReduceCoeficients =>
+   repeat*(first one(MultiplyCoeficients));
+   repeat*(first one(AddCoeficients));
+   repeat*(first one(EliminateCoeficientZero))
+end
+
+[] ReduceConstants =>
+   repeat*(first one(MultiplyConstants));
+   repeat*(first one(AddConstants1));
+   repeat*(first one(AddConstants2))
+end
+
+[] SimplifyTerm =>
+   ExpandTerm;
+   ReduceCoeficients;
+   ReduceConstants
+end
+
+end
+
+
+rules for constraint
+
+	x			: var;
+	k			: int;
+	t, t1, t2, t3, t4, t12	: term;
+	l			: list[term];
+	c			: constraint;
+
+global 
+
+FOR EACH w:tuple[identifier,identifier]; op1,op2:identifier
+SUCH THAT w:= (listExtract) elem([eq,ne].[ne,eq].[ge,lt].[gt,le].[le,gt].[lt,ge].nil)
+	AND	op1:=()1-th(w)
+	AND	op2:=()2-th(w):
+{
+[]	Negation(t1 my_op1 t2)
+	=>
+	t1 my_op2 t2
+end
+}
+
+FOR EACH  op : identifier
+SUCH THAT op := (listExtract) elem(eq.ne.ge.gt.le.lt.nil):
+{
+[]	SimplifyConstraint(t1 my_op t2)
+	=>
+	c
+	where	t12 := ()t1 (+) -1(*)(t2) (+) 0
+	where	t3 := (SimplifyTerm)t12
+	choose
+	try
+		if ArityOfTerm(t3) == 0
+		where c :=()EvaluateGroundConstraint(t3 my_op 0)
+	try
+		where c :=()t3 my_op 0
+	end
+end
+}
+
+/*
+
+[]	SimplifyConstraint(alldiff?(l))
+	=>
+	alldiff?(l)
+end
+
+*/
+
+
+FOR EACH  op : identifier
+SUCH THAT op := (listExtract) elem(eq.ne.ge.gt.le.lt.nil):
+{
+[]	SimplifyConstants(t1 my_op t2)
+	=>
+	c
+	where	t3 := (ReduceConstants)t1 (+) 0
+	where	t4 := (ReduceConstants)t2 (+) 0
+	choose
+	try
+		if ArityOfTerm(t3) == 0 and ArityOfTerm(t4) == 0
+		where c :=()EvaluateGroundConstraint(t3 my_op t4)
+	try
+		where c :=()t3 my_op t4
+	end
+end
+}
+
+/*
+
+[]	SimplifyConstants(alldiff?(l))
+	=>
+	alldiff?(l)
+end
+
+*/
+
+
+FOR EACH w:tuple[identifier,identifier]; op1,op2:identifier
+SUCH THAT w:= (listExtract) elem([eq,eq].[ne,ne].[ge,le].[gt,lt].[le,ge].[lt,gt].nil)
+	AND	op1:=()1-th(w)
+	AND	op2:=()2-th(w):
+{
+[]	GetCanonicalForm(k(*)x (+) t my_op1 0, t1, t2)
+	=>
+	c
+	choose
+	try
+		if k > 0
+		where c :=()GetCanonicalForm(t my_op1 0, k(*)x (+) t1, t2)
+	try
+		where c :=()GetCanonicalForm(t my_op1 0, t1, -k(*)x (+) t2)
+	end
+end
+
+[]	GetCanonicalForm(k my_op1 0, t1, t2)
+	=>
+	c
+	choose
+	try
+		if k > 0
+		where c :=()k (+) t1 my_op1 t2 (+) 0
+	try
+		where c :=()t1 (+) 0 my_op1 -k (+) t2
+	end
+end
+}
+
+/*
+
+[]	GetCanonicalForm(alldiff?(l), t1, t2)
+	=>
+	alldiff?(l)
+end
+
+*/
+
+
+end
+
+
+rules for bool
+
+	t1,t2	: term;
+	lt	: list[term];
+
+global 
+
+FOR EACH op: identifier
+SUCH THAT op := (listExtract) elem(eq.ne.ge.gt.le.lt.nil):
+{
+[]	EvaluateGroundConstraint(t1 my_op t2)
+	=>
+	EvaluateGroundTerm(t1,0) elan_op EvaluateGroundTerm(t2,0)
+end
+}
+
+//[] 	EvaluateGroundConstraint(alldiff?(lt))
+//	=>
+//	Alldiff(alldiff?(lt))
+//end
+
+end
+
+
+rules for int
+
+	total, subtotal1, subtotal2	: int;
+	k, k1, k2			: int;
+	t1, t2				: term;
+
+global 
+
+[]	EvaluateGroundTerm(t1 (+) t2,total)
+	=>
+	subtotal2
+	where	subtotal1 := ()EvaluateGroundTerm(t1,total)
+	where	subtotal2 := ()EvaluateGroundTerm(t2,subtotal1)
+end
+[]	EvaluateGroundTerm(k1(*)k2,total)
+	=>
+	total + k1*k2
+end
+[]	EvaluateGroundTerm(k,total)
+	=>
+	total + k
+end
+
+end
+
+
+rules for list[var]
+
+	k		: int;
+	x		: var;
+	l, l1, l2	: list[var];
+	t1, t2		: term;
+	lt		: list[term];
+
+global 
+
+FOR EACH op: identifier
+SUCH THAT op := (listExtract) elem(eq.ne.ge.gt.le.lt.nil):
+{
+[]	VarsOfConstraint(t1 my_op t2,l)
+	=>
+	l1
+	where	l2 := ()VarsOfTerm(t2,l)
+	where	l1 := ()VarsOfTerm(t1,l2)
+end
+}
+
+/*
+
+[]	VarsOfConstraint(alldiff?(x.lt),l)
+	=>
+	x.VarsOfConstraint(alldiff?(lt),l)
+end
+
+*/
+
+
+/*
+
+[]	VarsOfConstraint(alldiff?(nil),l)
+	=>
+	nil
+end
+
+*/
+
+
+[]	VarsOfTerm(t1 (+) t2,l)
+	=>
+	l1
+	where	l2 := ()VarsOfTerm(t2,l)
+	where	l1 := ()VarsOfTerm(t1,l2)
+end
+[]	VarsOfTerm(k(*)x,l)
+	=>
+	x.l
+end
+[]	VarsOfTerm(k,l)
+	=>
+	l
+end
+
+end
+
+
+rules for list[term]
+
+        t,t1,t2 : term;
+        l,l1,l2 : list[term];
+
+global 
+
+[]      CreateListOfTerms(t1 (+) t2,l)
+        =>
+        l2
+        where   l1 := ()CreateListOfTerms(t1,l)
+        where   l2 := ()CreateListOfTerms(t2,l1)
+end
+[]      CreateListOfTerms(t,l)
+        =>
+        t.l
+end
+
+end
+
+
+end
+
+

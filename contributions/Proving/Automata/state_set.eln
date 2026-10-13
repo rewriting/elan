@@ -1,0 +1,69 @@
+module state_set
+import global bool state eq[state];
+end
+
+sort state_set;
+end
+
+operators 
+global
+	
+	nil		: state_set pri 1;
+	(@ . @)		: (state state_set) state_set pri 2;
+	@ @		: (state state_set) state_set pri 2 alias (@ . @):;
+	@ . @		: (state state_set) state_set pri 2 alias (@ . @):;
+	add(@, @)	: (state state_set) state_set;
+	add(@, @)	: (state_set state_set) state_set;
+
+	@ U @		: (state_set state_set) state_set pri 1;
+	(@ U @)		: (state_set state_set) state_set pri 1 alias @ U @:;
+	@ x @           : (state_set state_set) state_set pri 1;
+        (@ x @)         : (state_set state_set) state_set pri 1	alias @ x @ :;
+	@ - @		: (state_set state_set)	state_set	assocLeft;
+	(@ - @)		: (state_set state_set)	state_set	alias @ - @:;
+	@ in @		: (state state_set) bool;
+	(@ in @)	: (state state_set) bool	alias @ in @:;
+
+	max(@, @)	: (state_set int) int;
+end
+
+rules for bool
+        s1, s2: state;
+        set1, set2: state_set;
+global
+[]	s1 in nil => false						end
+[]	s1 in s1 . set1 => true						end
+[]	s1 in s2 . set1 => s1 in set1 	if s1 != s2			end
+
+[]	s1 in (set1 U set2) => s1 in set1 or s1 in set2			end
+[]	[s1, s2] in (set1 x set2) => s1 in set1 and s2 in set2 		end
+[]	s1 in (set1 - set2) => s1 in set1 and not(s1 in set2)		end
+end
+
+
+rules for state_set
+        s1: state;
+	set1, set2: state_set;
+global
+[]	add(s1, set1) => s1 . set1	if not(s1 in set1)		end
+[]	add(s1, set1) => set1		if s1 in set1			end
+
+[]	add(nil, set1) => set1						end
+[]	add(set1, nil) => set1						end
+[]	add(s1.set1, set2) => add(s1, add(set1, set2))			end
+end
+
+
+rules for int
+        i, j: int;
+	set: state_set;
+global
+[]	max(q|i . set, j) => max(set, j) if j>=i			end
+[]	max(q|i . set, j) => max(set, i) if i>j				end 
+[]	max(nil, j) => j						end
+end
+
+
+end
+
+

@@ -1,0 +1,111 @@
+module LocalConsistencyStrategies[Variables,Type,Values]
+
+import
+global	PropagationRules[Variables,Type,Values]
+	SimplificationRules[Variables,Type,Values]
+	ChoicePointStrategies[Variables,Type,Values]
+	CSOPDefinition[Variables,Type,Values]
+	;
+end
+
+stratop
+global	LocalConsistencyForEC				: < csp -> csp >		bs;
+	LocalConsistencyForDC				: < csp -> csp >		bs;
+	LocalConsistencyForECandDC			: < csp -> csp >		bs;
+	LocalConsistencyForElementaryConstraintsInEC	: < csp -> csp >		bs;
+end
+
+
+strategies for csp
+implicit
+
+[] LocalConsistencyForEC =>
+repeat* (
+	first one (ArcConsistency) ;
+	repeat*	  (first one (
+			     first one (Instantiation) ;
+			     first one (ExtractConstraintsOnEqualityVar , id) ;
+			     first one (Elimination , id)
+			     ,
+			     first one (Falsity)
+	    		     )
+		  )
+	)
+end
+
+[] LocalConsistencyForDC =>
+repeat* (
+	dk (PostElementaryDisjunct) ;
+	LocalConsistencyForEC
+	)
+end
+
+[] LocalConsistencyForECandDC =>
+LocalConsistencyForEC;
+repeat* (
+	dk (PostElementaryDisjunct) ;
+	LocalConsistencyForEC
+	)
+end
+
+[] LocalConsistencyForElementaryConstraintsInEC =>
+repeat* (
+	first one (ArcConsistency) ;
+	first one (Falsity , id)
+	)
+end
+
+end
+
+
+rules for csp
+
+	c			: constraint;
+	lmc, lec, EC, DC, store	: list[constraint];
+	lmc1, lec1, EC1, store1	: list[constraint];
+	P, P1			: csp;
+
+global
+
+[LocalConsistencyInEC]
+
+	CSP[lmc,lec,c.EC,DC,store]
+	=>
+	P1
+	where	P := (LocalConsistencyForElementaryConstraintsInEC)CSP[lmc,lec,c.EC,DC,nil]
+	choose
+	try
+		if P == Unsatisfiable
+		where P1 := () Unsatisfiable
+	try
+		where	lmc1	:= ()GetLMC(P)
+		where	lec1	:= ()GetLEC(P)
+		where	EC1	:= ()GetEC(P)
+		where	store1	:= ()GetSTORE(P)
+		where   P1 := () CSP[lmc1,lec1,EC1,DC,append(store,store1)]
+	end
+end
+
+end
+
+
+rules for csop
+
+	x			: var;
+	lb, ub			: Type;
+	P, Q			: csp;
+
+global
+
+[LocalConsistencyForEC]
+
+	CSOP[P,x,lb,ub]
+	=>
+	CSOP[Q,x,lb,ub]
+	where	Q := (LocalConsistencyForEC)P
+end
+
+end
+
+
+end

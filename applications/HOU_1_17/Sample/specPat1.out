@@ -1,0 +1,5 @@
+ true-AND-V_Mvars(8)=G-AND-(la(A->A).(la A.(#2((V_Mvars(6)[^o^]#1[^])#1))))=F-AND-(la A.(la A.(la(A->A).((V_Mvars(6)[^o^o^]#1)#2))))=(la A.(la A.(la(A->A).((V_Mvars(8)[^o^o^]#2)#3)))).false.nil end
+
+ end end
+end
+

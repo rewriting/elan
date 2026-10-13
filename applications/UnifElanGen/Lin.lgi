@@ -1,0 +1,9 @@
+LPL Lin description
+
+
+  query 	of sort list[variable]
+         	result of sort list[variable]
+	 	import term list[variable] Lin
+         	start with (chooseLin) query 
+
+end

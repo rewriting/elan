@@ -1,0 +1,186 @@
+module interp_constraint[Ops]
+import	local	Ops
+		int bool identifier
+		eq[identifier]
+		occur[interp_term, interp_constraint]
+	;
+end
+
+sort interp_term interp_constraint;  
+end
+
+operators 
+global
+	prec(@ > @)		: (identifier identifier) interp_term;
+	prec(@ = @)		: (identifier identifier) interp_term;
+
+	Tinterp		: interp_constraint;
+
+	@ ^ @		: (interp_term interp_constraint) interp_constraint;
+	(@ ^ @)		: (interp_term interp_constraint) interp_constraint alias @ ^ @:;
+
+	simplify(@)	: (interp_constraint) interp_constraint;
+	sat(@)		: (interp_constraint) bool;
+local
+	sat(@, @, @)	: (interp_constraint interp_constraint interp_constraint) bool;
+
+end
+
+stratop global
+  sat_strat : <bool> builtin;
+end
+
+rules for interp_constraint
+        Cprec: interp_constraint;
+	Tprec1, Tprec2: interp_term;
+	symbol_f, symbol_g: identifier;
+global
+[] simplify(Tinterp) => Tinterp						end
+[] simplify(prec(symbol_f = symbol_g) ^ Cprec) => simplify(Cprec)
+	if symbol_f == symbol_g						end
+[] simplify(Tprec1 ^ Cprec) => simplify(Cprec)				
+	if occurs(Tprec1, Cprec)					end
+[] simplify(Tprec1 ^ Cprec) => Tprec1 ^ simplify(Cprec)			
+	if not(occurs(Tprec1, Cprec))end
+
+end
+
+
+rules for bool
+          Cprec: interp_constraint;
+	Cprec2, Cprec3, Cprec4: interp_constraint;
+	tprec, tprec2: interp_term;
+	symbol_f, symbol_g, symbol_h, symbol_k: identifier;
+	b: bool;
+global
+[] sat(Cprec) => b
+
+	where b:= (sat_strat) sat(Cprec, Cprec, Cprec)		end
+
+[sat1] sat(Tinterp, Cprec, Cprec2) => true				end
+
+[sat2] sat(prec(symbol_f > symbol_g) ^ Cprec, Cprec2, Cprec3) => false
+	
+	if symbol_g == symbol_f					end
+
+[sat3] sat(tprec ^ Cprec, Tinterp, Cprec2) => sat(Cprec, Cprec2, Cprec2) end
+
+[sat4] sat(prec(symbol_f > symbol_g) ^ Cprec, 
+	prec(symbol_k > symbol_h) ^ Cprec2,
+	Cprec3)
+	
+	=>
+
+   sat(Cprec4, Cprec4, Cprec4)
+	
+	where Cprec4:= () prec(symbol_f > symbol_h) ^ Cprec3
+	if not(occurs(prec(symbol_f > symbol_h), Cprec3))
+	if symbol_k == symbol_g
+end
+
+[sat5] sat(prec(symbol_f > symbol_g) ^ Cprec, 
+	prec(symbol_k = symbol_h) ^ Cprec2,
+	Cprec3)
+	
+	=>
+
+   sat(Cprec4, Cprec4, Cprec4)
+	
+	where Cprec4:= () prec(symbol_f > symbol_h) ^ Cprec3
+	if not(occurs(prec(symbol_f > symbol_h), Cprec3))
+	if symbol_k == symbol_g
+end
+
+[sat6] sat(prec(symbol_f > symbol_g) ^ Cprec, 
+	prec(symbol_k = symbol_h) ^ Cprec2,
+	Cprec3)
+	
+	=>
+
+   sat(Cprec4, Cprec4, Cprec4)
+	
+	where Cprec4:= () prec(symbol_f > symbol_k) ^ Cprec3
+	if not(occurs(prec(symbol_f > symbol_k), Cprec3))
+	if symbol_h == symbol_g
+end
+
+[sat7] sat(prec(symbol_f > symbol_g) ^ Cprec, 
+	prec(symbol_k = symbol_h) ^ Cprec2,
+	Cprec3)
+	
+	=>
+
+   sat(Cprec4, Cprec4, Cprec4)
+	
+	where Cprec4:= () prec(symbol_h > symbol_g) ^ Cprec3
+	if not(occurs(prec(symbol_h > symbol_g), Cprec3))
+	if symbol_f == symbol_k
+end
+
+[sat8] sat(prec(symbol_f > symbol_g) ^ Cprec, 
+	prec(symbol_k = symbol_h) ^ Cprec2,
+	Cprec3)
+	
+	=>
+
+   sat(Cprec4, Cprec4, Cprec4)
+	
+	where Cprec4:= () prec(symbol_k > symbol_g) ^ Cprec3
+	if not(occurs(prec(symbol_k > symbol_g), Cprec3))
+	if symbol_h == symbol_f
+end
+
+
+[sat9] sat(prec(symbol_f = symbol_g) ^ Cprec, 
+	prec(symbol_k = symbol_h) ^ Cprec2,
+	Cprec3)
+	
+	=>
+
+   sat(Cprec4, Cprec4, Cprec4)
+	
+	where Cprec4:= () prec(symbol_f = symbol_h) ^ Cprec3
+	if not(occurs(prec(symbol_f = symbol_h), Cprec3))
+	if symbol_k == symbol_g
+end
+
+[sat10] sat(prec(symbol_f = symbol_g) ^ Cprec, 
+	prec(symbol_k = symbol_h) ^ Cprec2,
+	Cprec3)
+	
+	=>
+
+   sat(Cprec4, Cprec4, Cprec4)
+	
+	where Cprec4:= () prec(symbol_f = symbol_k) ^ Cprec3
+	if not(occurs(prec(symbol_f = symbol_k), Cprec3))
+	if symbol_h == symbol_g
+end
+
+[sat11] sat(tprec ^ Cprec, tprec2 ^ Cprec2, Cprec3)
+
+	=> 
+
+   sat(tprec ^ Cprec, Cprec2, Cprec3)
+end
+
+
+[sat12] sat(tprec ^ Cprec, Tinterp, Cprec3)
+	
+	=>
+
+   sat(Cprec, Cprec3, Cprec3)
+end
+end
+
+strategies for bool
+implicit
+  [.] sat_strat =>
+	repeat*(
+		dc one(sat1,sat2,sat3,sat4,sat5,sat6,sat7,sat8,
+				sat9,sat10,sat11,sat12)
+	) 
+  end
+end
+end
+

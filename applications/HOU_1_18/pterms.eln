@@ -1,0 +1,247 @@
+module pterms[mvars,btypes,bvars]
+import
+  global 	int bool 
+		types[btypes] contexts[btypes]
+		typech[mvars,btypes,bvars]
+		ivars[btypes] vars[mvars,btypes] list[obj_Bvars]
+			      vars[bvars,btypes] list[obj_Mvars]
+		terms[mvars,btypes,bvars] 
+		list[int];
+end
+sort pair triple;
+end
+operators global 
+    [@,@]	: (fst:wtterm second:int) pair;
+    rigid(@,@)	: (int wtterm) bool;
+    flexi(@,@)	: (int wtterm) pair;
+    flexii(@,@,@)	: (int int wtsubst) int;
+    occ(@,@)    : (int wtterm) bool;
+    occ(@,@)    : (int wtsubst) bool;
+
+    is_flexi(@)		: (pair) bool;
+    pattern_subst(@)	: (wtsubst) bool;
+    atomic_pattern(@)	: (wtterm) bool;
+    no_occ_and_rigid(@,@,@,@)
+			: (int int wtsubst wtterm) bool;
+    no_occ_and_flexi(@,@,@,@)
+                        : (int int wtsubst wtterm) pair;
+    same_indices(@,@,@)	: (wtsubst list[int] int) bool;
+    nshift(@)		: (int) subst;
+    up(@,@,@)		: (int int subst) subst;
+    upnshift(@,@)	: (int context) wtsubst;
+    complete(@,@,@,@,@,@,@):
+			(int int wtsubst context list[wtterm] int wtsubst) triple;
+    samevars(@,@)	: (int wtsubst) wtsubst;
+    [@,@,@]		: ( fst:wtsubst second:list[wtterm] third:int) triple;
+  local
+    pos @ in @	: ( int list[int] ) int;	// possition in list
+    pos(@,@)	: ( int list[int] ) int 	alias pos @ in @:;
+    poss(@,@,@)	: ( int list[int] int) int;   
+end
+
+rules for triple
+
+	i,j,jj,fvars	:int;
+	cn,cc1,cc2	: context;
+	mvs		: list[wtterm];
+	sss,ttt		: wtsubst;
+	tt1,tt2		: type;
+	ss		: tsubst;
+global
+  []	complete(i,j,ttt,cn,mvs,fvars,sss) =>[sss,mvs,fvars] if i > j
+  end
+  []	complete(i,j,ttt,cn,mvs,fvars,ss:cc1|>cc2) => 
+		complete(i,j-1,ttt,cn,mvs,fvars,#jj:cc1|-tt1.ss:cc1|>cc2 :cc1 |> tt1.cc2)
+	        where tt1 := ()j-th elem(cn)
+		where jj := ()flexii(1,j,ttt)
+		if jj > 0
+  end   // else -- dirty
+  []	complete(i,j,ttt,cn,mvs,fvars,ss:cc1|>cc2) =>
+                complete(i,j-1,ttt,cn,
+			V_Mvars(fvars):cc1|-tt1.mvs,fvars+1,
+		V_Mvars(fvars):cc1|-tt1.ss:cc1|>cc2 :cc1 |> tt1.cc2)
+	where tt1 := ()j-th elem(cn)
+  end          
+end
+
+rules for int
+
+	i,k		: int;
+	cc,cc1,cc2,cc3	: context;
+	aa		: wtterm;
+	tt,tt1		: type;
+	ss		: wtsubst;
+global
+  [] 	flexii(i,k,#k:cc1|-tt1 . ss : cc2|>cc3) => i
+  end   // else
+  []    flexii(i,k,aa.ss:cc|>cc1) => flexii(i+1,k,ss)
+  end   // else
+  []    flexii(i,k,ss) => 0
+  end
+end
+
+rules for pair
+
+	k,i,j	: int;
+	aa,bb	: wtterm;
+	cc,cc1	: context;
+	ss	: wtsubst;
+	tt,tt1	: type;
+        ww                      : obj_Mvars;
+	fl	: pair;
+global
+  []	no_occ_and_flexi(i,j,ss,bb) => [bb,0] if i > j
+  end
+  []    no_occ_and_flexi(i,j,ss,bb) => fl
+		if not occ(i,ss)
+		where fl := ()flexi(i,bb)
+		if is_flexi(fl)
+  end
+  []	no_occ_and_flexi(i,j,ss,bb) =>
+		no_occ_and_flexi(i+1,j,ss,bb)
+  end
+  []    flexi(k,(aa bb):cc|-tt) => fl
+		where fl:=()flexi(k,aa)
+		if is_flexi(fl)
+  end
+  []    flexi(k,(aa bb):cc|-tt) => fl
+                where fl:=()flexi(k,bb)
+                if is_flexi(fl)
+  end
+  []    flexi(k,(la tt.aa):cc1|-tt1) => flexi(k+1,aa)
+  end
+  []    flexi(k,ww:cc|-tt[ss]:cc1|-tt1) => [ww:cc|-tt,flexii(1,k,ss)]
+  end   // else
+  []    flexi(k,aa) => [aa,0]  // == false
+  end
+end
+
+rules for bool
+
+        aaa, bbb                : tterm;
+        sss, ttt                : tsubst;
+        tt, tt1, tt2, tt3       : type;
+        cc, cc1, cc2, cc3, cc4  : context;
+        n, k, i, j, p	       	: int;
+        ww                      : obj_Mvars;
+        aa,bb        		: wtterm;
+	ss			: wtsubst;
+	lst			: list[int];
+	fl			: pair;
+global
+  []	is_flexi([aa,p]) => p > 0
+  end
+  []	atomic_pattern((ww:cc1|-tt1[ss]:cc2|-tt2 aa):cc|-tt) => false
+  end   // else
+  []    atomic_pattern((aa bb):cc|-tt) => atomic_pattern(aa) and atomic_pattern(bb)
+  end
+  []    atomic_pattern((la tt.aa):cc1|-tt1) => atomic_pattern(aa)
+  end
+  []	atomic_pattern(ww:cc1|-tt1[ss]:cc2|-tt2) => false if same_indices(ss,nil,9999)
+  end   // else - dirty
+  []    atomic_pattern(aa) => true
+  end
+
+  []	pattern_subst(ss) => not same_indices(ss,nil,exp(ss))
+  end
+
+  []    same_indices(#k:cc1|-tt1 . ss : cc2|>cc3,lst,n) => true if pos(k,lst) > 0 or k > n
+  end   // else
+  []    same_indices(#k:cc1|-tt1 . ss : cc2|>cc3,lst,n) => 
+		same_indices(ss,k.lst,n)
+  end
+  []    same_indices(aa.ss:cc|>cc1,lst,n) => true  // not dB index
+  end  // else -- dirty
+  []	same_indices(ss,lst,n) => false
+  end
+  []    rigid(k,(aa bb):cc|-tt) => rigid(k,aa) or rigid(k,bb)
+  end
+  []    rigid(k,(la tt.aa):cc1|-tt1) => rigid(k+1,aa)
+  end
+  []    rigid(k,#k:cc|-tt) => true
+  end   // else
+  []    rigid(k,aa) => false
+  end
+
+  []	no_occ_and_rigid(i,j,ss,aa) => false if i > j
+  end
+  []	no_occ_and_rigid(i,j,ss,aa) => true 
+		if not occ(i,ss) and rigid(i,aa)
+  end
+  []	no_occ_and_rigid(i,j,ss,aa) =>
+		no_occ_and_rigid(i+1,j,ss,aa)
+  end
+
+  []	occ(k,(aa bb):cc3|-tt3) => occ(k,aa) or occ(k,bb)
+  end
+  []   	occ(k,(la tt.aa):cc1|-tt1) => occ(k+1,aa)
+  end
+  []	occ(k,#k:cc|-tt) => true
+  end
+  []	occ(k,ww:cc|-tt) => true
+  end
+  []	occ(k,ww:cc1|-tt1[ss]:cc2|-tt2) => true
+          if k > exp(ss)
+  end // else
+  []	occ(k,aa) => false
+  end
+  []    occ(k,ww:cc1|-tt1[ss]:cc2|-tt2) =>
+	  occ(k,ss)
+  end
+  []	occ(k,aa.ss:cc|>cc1) => occ(k,aa) or occ(k,ss)
+  end // else
+  []	occ(k,ss) => false
+  end
+end  
+
+
+rules for subst
+
+	ii,i,n	: int;
+	s	: subst;
+global
+  []	nshift(0) => id
+  end
+  []	nshift(1) => ^
+  end
+  []	nshift(n) => ^ o nshift(n-1) if n > 1
+  end
+  []	up(i,i,s) => s
+  end
+  []	up(ii,i,s) => #ii.up(ii+1,i,s) if ii < i
+  end
+end
+
+rules for wtsubst
+
+	i,k	: int;
+	cc,cc1,cc2,cc3	: context;
+	tt,tt1	: type;
+	ss	: wtsubst;
+	aa	: wtterm;
+global
+  []	upnshift(i,cc) => typech(fill(up(1,i,nshift(i))),cc)
+  end
+  []	samevars(k,#k:cc1|-tt1 . ss : cc2|>cc3) => #k:cc1|-tt1 . 
+			samevars(k+1,ss) : cc2|>cc3
+  end  // else - dirty
+  []    samevars(k,aa.ss : cc2|>cc3) => samevars(k+1,ss)
+  end  // else - dirty
+  []	samevars(k,ss) => ss
+  end
+end
+
+rules for int
+ e, f : int;
+	l : list[int];
+        i : int;
+global
+  [] size(nil)	=> 0					end
+  [] size(e.l)	=> 1+size(l)				end
+  [] pos(e,l) 		=> poss(e,l,1)			end
+  [] poss(e,nil,i)	=> 0				end
+  [] poss(e,f.l,i) 	=> i if e == f 			end
+  [] poss(e,f.l,i) 	=> poss(e,l,i+1) if e != f	end
+end
+
+end

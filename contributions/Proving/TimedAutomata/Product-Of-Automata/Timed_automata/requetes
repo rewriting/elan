@@ -1,0 +1,25 @@
+DT(b_mov,D_Wait.G_Inspect.S_Empty.B_Mov.nil/true) end
+
+DT(g_pick,D_Wait.G_Inspect.S_Empty.B_Mov.nil/true) end
+
+
+
+
+try_all_DT(D_Wait.G_Inspect.S_Empty.B_Mov.nil/true) end
+try_all_DT(D_Wait.G_Inspect.S_Empty.B_Inspect.nil/true) end
+
+
+
+convert(effective_labels(possible_labels(D_Wait.G_Inspect.S_Ready.B_Mov.nil,Automata),nil)) end
+
+
+lst_trans(nil,D_Wait.G_Inspect.S_Empty.B_Mov.nil/true,D_Wait.G_Inspect.S_Empty.B_Mov.nil/true) end
+
+lst_trans(nil,D_Wait.G_Inspect.S_Empty.B_Mov.nil/true,D_Turn_R.G_Turn_L.S_Empty.B_On_S.nil/true) end
+
+
+lst_trans(nil,Loin.Haut.u0.nil/true,Sur.Bas.u0.nil/true) end
+
+lst_trans(nil,Loin.Haut.u0.nil/true,Loin.Haut.u0.nil/true) end
+
+lst_trans(nil,Loin.Haut.u0.nil/true,Sur.Haut.u0.nil/true) end

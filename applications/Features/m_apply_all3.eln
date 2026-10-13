@@ -1,0 +1,23 @@
+module m_apply_all3
+
+import global builtinInt string REF Meta_Apply refstring2string ref2string[Strategy] ref2string[Term] ref2string[Program] string2refterm; end
+
+operators global
+  goo(@)	: (int) list[Term];
+end
+
+
+rules for list[Term]
+x	: int;
+xx	: builtinInt;
+s	: list[Term];
+global
+  []   goo(xx) => s
+		where s:=()meta_apply(
+		DK(call(126) , fail , DC( call(126) , id) , id),
+		FSYM( FSYM(INT(4).nil, 200).nil,223):"list",
+		spec2ref("nqueens",""),//SPEC("nqueens",""),
+		xx,9999)	end
+end
+
+end

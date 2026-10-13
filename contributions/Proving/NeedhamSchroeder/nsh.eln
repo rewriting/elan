@@ -1,0 +1,448 @@
+module nsh
+import
+ global
+    bool int 
+    Alist[message] Alist[Actor] Alist[Nonce] Alist[int]
+    list[message] list[Actor] list[Nonce] list[int]
+    cmp[AgentId] cmp[TypMes] cmp[list[Nonce]] 
+;end
+
+//---------------------------------------------------------------//
+
+sort
+  AgentId SWC Nonce TypMes Key Address message
+  Actor intruder
+  rule trace
+  state
+;end
+
+//---------------------------------------------------------------//
+
+operators
+ global
+   NCcoma1 : rule;
+   NCcoma2 : rule;
+   NCcomb1 : rule;
+   NCcomb2 : rule;
+   IIcomi1 : rule;
+   IIcomi2 : rule;
+   IIcomi3 : rule;
+   IIcomi4 : rule;
+
+   a   : AgentId;
+   b   : AgentId; 
+   c   : AgentId;
+   e   : AgentId;
+   d   : AgentId; 
+   ii  : AgentId;
+   dai   : AgentId;  //dummy AgentId
+  
+   AuthVerif 		: bool 	alias true:; // false:;// 
+
+   SLEEP  : SWC;
+   WAIT   : SWC;
+   COMMIT : SWC;
+
+   MNA  : TypMes;
+   MNNA : TypMes;
+   MN   : TypMes;
+
+
+   K(@)   : (AgentId) Key;
+
+   N(@,@) : (AgentId AgentId) Nonce;
+   DN     :  Nonce;  // Dummy Nonce
+
+   A(@)   : (AgentId) Address;
+   DA     :  Address;  // Dummy Address
+
+   @ + @ + @  : ( AgentId SWC Nonce ) Actor; 
+
+   @'-''-''>'@':'@'['@','@','@']''T'':'@ : 
+	(AgentId AgentId Key Nonce Nonce Address TypMes) message;
+
+   @ # @ # @ : ( AgentId list[Nonce] list[message] ) intruder; 
+
+   @ <> @ <> @ <> @ <> @ <> @ <> @ <> @ : 
+	( list[Actor] list[Actor] intruder list[message] int int int trace ) state;
+//   ATTACK  : state;
+   ERROR   : state;
+
+   COMMIT	:  message;
+   INTERCEPT(@)	: (message) message;
+   DECRYPT(@)	: (list[Nonce]) message;
+
+   Start : trace;
+   @ ':'':' @   : (rule message) trace;
+   @ / @	: (trace trace) trace;
+   @		: (trace) state;
+   ATTACK  	: trace ;
+
+end
+
+//---------------------------------------------------------------//
+
+stratop  global
+   attStrat   : < state -> state > 		bs;
+end
+ 
+//---------------------------------------------------------------//
+
+rules for state
+	
+         x,x1,y,y1,z,w,w1,v,t,xadd : AgentId;
+         n1,n2,n3,n4 : AgentId;
+         resp,init,dn,dn1 : Nonce;
+	 S : state;
+         I  : intruder;
+         E,E1,D,D1  : list[Actor];
+         l,l1  : list[Nonce];
+         ls,ls1,ll,ll1 : list[message];
+         st : TypMes;
+         cmp, nrm, MaxNr : int;
+         std, std1 : SWC;
+         act  : Actor;
+	 mes,dm : message;
+	 tr : trace;
+global
+
+//--------------------------------------------------------------------
+// 3 (A --> B)
+
+// sender creates message
+// sender waits a message from y(or ii) with the nonce N(x,y)(or N(x,ii))
+
+[rulescoma]
+E <> D <> w#l#ll <> ls 
+  <> nrm <> MaxNr <> cmp <> tr => 
+
+x+WAIT+N(x,y).E1 <> D <> w#l#ll <> x-->y:K(y)[N(x,y),DN,A(x)]T:MNA.ls
+  <> nrm+1 <> MaxNr <> cmp+1 <> tr / NCcoma1::x-->y:K(y)[N(x,y),DN,A(x)]T:MNA
+
+	if nrm < MaxNr
+	where (Actor)x+SLEEP+resp :=(listExtract) elem(E)
+	where  E1 := ()elim(x+SLEEP+resp,E)
+	where (Actor)y+std+init :=(listExtract) elem(D @ w+SLEEP+DN.nil)
+end
+
+
+//--------------------------------------------------------------------
+// 3/6 (--> B --> A)
+
+// receiver checks if 
+//  - y is the dest
+//  - message encrypted with K(y)
+//  - message type is MNA
+
+// receiver sends
+//  - to z (identifier of sender; normally N(n2,n4)==N(dai,dai))
+//  - received nonce (N(n1,n3)) and its nonce (N(y,z))
+// receiver waits a message from z with the nonce N(y,z)
+
+[rulescomb]
+E <> D <> w#l#ll <>  ls
+  <> nrm <> MaxNr <> cmp <> tr => 
+
+E <> y+WAIT+N(y,z).D1 <> w#l#ll <> y-->z:K(z)[N(n1,n3),N(y,z),A(y)]T:MNNA.ls1
+  <> nrm <> MaxNr <> cmp+1 <> tr /NCcomb1::y-->z:K(z)[N(n1,n3),N(y,z),A(y)]T:MNNA
+
+	where act :=(listExtract) elem(D)
+	where (Actor)y+SLEEP+init := ()act
+	where mes :=(listExtract)elem(ls)
+	where (message)w1-->y1:K(y1)[N(n1,n3),N(n2,n4),A(z) ]T:MNA:= ()mes
+	if y1==y
+	if w1==w	// from the intruder
+	where  D1 := ()elim(act,D)
+	where  ls1 := ()elim(mes,ls)
+end
+
+//--------------------------------------------------------------------
+// 6/7 (--> A --> B)
+
+// sender checks if 
+//  - x is the dest
+//  - message encrypted with K(x)
+//  - message type is MNNA
+//  - nonce is N(x,v) --> if not: ERROR
+//  ?? (eventually checks address : A(v) ) ??
+
+// sender sends a message 
+//   - to the the initial receiver (stored in N(x,v)->v)
+//   - with the received nonce
+
+[rulescoma]
+E <> D <> w#l#ll <> ls
+  <> nrm <> MaxNr <> cmp <> tr =>
+
+S
+
+	where act :=(listExtract) elem(E)
+	where (Actor)x+WAIT+N(x,v) := ()act
+	where mes :=(listExtract)elem(ls)
+	where (message)w1-->x1:K(x1)[N(n1,n3),N(n2,n4),A(z) ]T:MNNA:= ()mes
+	if x==x1
+	if w1==w	// from the intruder
+	choose
+		try
+			if x==n1 and v==n3
+		     if not(AuthVerif) or v==z //---- Lowe's correction ----//
+			where  E1 := ()elim(act,E)
+			where  ls1 := ()elim(mes,ls)
+			where S:=() x+COMMIT+N(x,v).E1 <> D <> w#l#ll <> x-->v:K(v)[N(n2,n4),DN,DA]T:MN.ls1 <> nrm <> MaxNr <> cmp+1 <> tr / NCcoma2::x-->v:K(v)[N(n2,n4),DN,DA]T:MN
+		try
+			if x!=n1 or v!=n3
+		     if not(AuthVerif) or v!=z //---- Lowe's correction ----//
+			where S:=() ERROR
+	end
+end
+
+//--------------------------------------------------------------------
+// 7 (B --> A)
+
+// receiver checks if 
+//  - y is the dest
+//  - message encrypted with K(y)
+//  - message type is MN
+//  - nonce is N(y,x) --> if not: ERROR
+
+[rulescomb] 
+E <> D <> w#l#ll <> ls
+  <> nrm <> MaxNr <> cmp <> tr =>
+
+S
+
+	where act :=(listExtract) elem(D)
+	where (Actor)y+WAIT+N(y,x) :=  ()act
+	where mes :=(listExtract)elem(ls)
+	where (message)w1-->y1:K(y1)[N(n1,n3),N(n2,n4),A(v)]T:MN:= ()mes
+	if y==y1
+	if w1==w	// from the intruder
+	choose
+		try
+			if x==n3 and y==n1
+			where  D1 := ()elim(act,D)
+			where  ls1 := ()elim(mes,ls)
+			where S:=()E <> y+COMMIT+N(y,x).D1 <> w#l#ll <> ls1 <> nrm-1 <> MaxNr <> cmp+1 <> tr / NCcomb2::COMMIT
+		try
+			if y!=n1 or x!=n3
+			where S:=() ERROR
+	end
+			
+end
+
+//--------------------------------------------------------------------
+// intruder intercepts message
+
+//--------------------------------------------------------------------
+// intruder intercepts message encrypted with its key
+// we may replace N(n1,n3) with a variable Nonce:n13
+// 		  N(n2,n4) with a variable Nonce:n24
+// 		  A(v) with a variable Address:add
+
+[rulescomi1]
+E <> D <> w#l#ll <> ls
+  <> nrm <> MaxNr <> cmp <> tr =>
+
+E <> D <> I <> ls1
+  <> nrm-1 <> MaxNr <> cmp+1 <> tr / IIcomi1::dm
+
+	where mes :=(listExtract)elem(ls)
+	where (message)z-->x:K(w1)[N(n1,n3),N(n2,n4),A(v)]T:st := ()mes
+	if w==w1
+	if w!=z	 // not its messages
+	where  ls1 := ()elim(mes,ls)
+	choose
+		try
+			if st==MN
+			where I:=()w#insUnic(N(n1,n3),l)#ll
+			where dm := ()DECRYPT(N(n1,n3).nil)
+		try
+			if st==MNA
+			where I:=()w#insUnic(N(n1,n3),l)#ll
+			where dm := ()DECRYPT(N(n1,n3).nil)
+		try
+			if st==MNNA
+			where I:=()w#insUnic(N(n1,n3),insUnic(N(n2,n4),l))#ll
+			where dm := ()DECRYPT(N(n1,n3).N(n2,n4).nil)
+	end
+		
+end
+
+//--------------------------------------------------------------
+// learn messages
+// intruder should check if has not already intercepted it
+// (with nonamed rules --> we might get infinite loops !!!)
+// (with insUnic)
+
+[rulescomi2] 
+E <> D <> w#l#ll <> ls
+  <> nrm <> MaxNr <> cmp <> tr =>
+
+E <> D <> w#l#insUnic(z-->x:K(y)[N(n1,n3),N(n2,n4),A(v)]T:st,ll) <> ls1
+  <> nrm-1 <> MaxNr <> cmp+1 <> tr / IIcomi2::INTERCEPT(mes)
+
+	where mes :=(listExtract)elem(ls)
+	where (message)z-->x:K(y)[N(n1,n3),N(n2,n4),A(v)]T:st:= ()mes
+	if w!=z  // not its messages
+	if w!=y	 // not encrypted with its key 
+	where  ls1 := ()elim(mes,ls)
+end
+
+//--------------------------------------------------------------
+// intruder sends (random) stored messages to
+//		  (random) agents from E and D
+// !! allow dupplicates in the network (in the list version)
+
+[rulescomi3]
+E <> D <> w#l#ll <> ls
+  <> nrm <> MaxNr <> cmp <> tr =>
+
+E <> D <> w#l#ll <> w-->t:K(z)[N(n1,n3),N(n2,n4),A(v)]T:st.ls
+  <> nrm+1 <> MaxNr <> cmp+1 <> tr / IIcomi3::w-->t:K(z)[N(n1,n3),N(n2,n4),A(v)]T:st
+
+	if nrm < MaxNr
+	where mes :=(listExtract)elem(ll)
+	where (message)x-->y:K(z)[N(n1,n3),N(n2,n4),A(v)]T:st:= ()mes
+	//where  ll1 := ()elim(mes,ll)
+	choose
+		try
+		 if st==MNA or st==MN
+		 where (Actor)t+std+dn :=(listExtract) elem(D)
+		try
+		 if st==MNNA
+		 where (Actor)t+std+dn :=(listExtract) elem(E)
+	end
+end
+
+//--------------------------------------------------------------
+// intruder sends mnessages starting from the 
+//		  (random) nonces it knows with --> resp, init
+//		  (random) destination   --> y
+//		  (random) message type  --> 3 rules
+//		  (random) nonce1 --> resp
+//		  (random) nonce2 --> init
+//		  (random) address --> A(xadd)
+// !! allow dupplicates in the network (in the list version)
+
+[rulescomi4]
+E <> D <> w # l # ll <> ls
+  <> nrm <> MaxNr <> cmp <> tr =>
+S
+	if nrm < MaxNr
+	where resp := (listExtract) elem(l)
+	where l1 := () elim(resp,l)
+	choose
+		try
+        		where (Actor)y+std+dn :=(listExtract) elem(D)
+        		where (Actor)xadd+std1+dn1 :=(listExtract) elem(E)
+        		where S:=()E <> D <> w # l # ll <> w-->y:K(y)[resp,DN,A(xadd)]T:MNA.ls <> nrm+1 <> MaxNr <> cmp+1 <> tr / IIcomi4::w-->y:K(y)[resp,DN,A(xadd)]T:MNA
+		try
+        		where (Actor)y+std+dn :=(listExtract) elem(D)
+        		where S:=()E <> D <> w # l # ll <> w-->y:K(y)[resp,DN,DA]T:MN.ls <> nrm+1 <> MaxNr <> cmp+1 <> tr / IIcomi4::w-->y:K(y)[resp,DN,DA]T:MN
+		try
+			if l1!=nil
+        		where (Actor)y+std+dn :=(listExtract) elem(E)
+        		where (Actor)xadd+std1+dn1 :=(listExtract) elem(D)
+			where init := (listExtract) elem(l1)
+        		where S:=()E <> D <> w # l # ll <> w-->y:K(y)[resp,init,A(xadd)]T:MNNA.ls <> nrm+1 <> MaxNr <> cmp+1 <> tr / IIcomi4::w-->y:K(y)[resp,init,A(xadd)]T:MNNA
+	end
+end
+
+
+//--------------------------------------------------------------------
+// the ATTACK
+
+//--------------------------------------------------------------------
+// attack on the receiver
+
+[rulescomAT1]
+E <> D <> w#l#ll <> ls
+  <> nrm <> MaxNr <> cmp <> tr => 
+
+tr / ATTACK
+
+	where (Actor)x+COMMIT+N(x,y) :=(listExtract) elem(E)
+	if y!=w
+	if not(member(y+WAIT+N(y,x),D)) and
+	   not(member(y+COMMIT+N(y,x),D))  
+end
+
+
+//--------------------------------------------------------------------
+// attack on the sender
+
+[rulescomAT2]
+E <> D <> w#l#ll <> ls
+  <> nrm <> MaxNr <> cmp <> tr => 
+
+tr / ATTACK
+
+	where (Actor)y+COMMIT+N(y,x) :=(listExtract) elem(D)
+	if x!=w
+	if not(member(x+COMMIT+N(x,y),E))
+end
+
+//--------------------------------------------------------------
+
+[attackFound]
+tr / ATTACK => tr / ATTACK
+end
+
+//--------------------------------------------------------------
+end
+
+
+//--------------------------------------------------------------
+// generate dummies
+
+rules for Nonce
+global
+	[] DN => N(dai,dai)		 end 
+end
+
+rules for Address
+global
+	[] DA => A(dai)			 end 
+end
+
+
+//--------------------------------------------------------------
+
+rules for list[Nonce]
+	l		: list[Nonce];
+global
+  [] insUnic(N(dai,dai),l)	=> l
+  end
+end
+
+//--------------------------------------------------------------
+
+strategies for state 
+implicit 
+    []attStrat => 
+	dc one(
+		repeat*(
+		        dk(
+                           rulescomAT1,
+                           rulescomAT2,
+
+                           rulescomi1,
+                           rulescomi2,
+                           rulescomi3,
+                           rulescomi4,
+
+                           rulescoma, 
+                           rulescomb
+			)
+		);
+		attackFound
+	)
+	end
+
+
+end
+
+//--------------------------------------------------------------
+
+end
+

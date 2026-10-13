@@ -1,0 +1,9 @@
+LPL b description
+  
+query		of sort   	tree[int]
+		result of sort  tree[int]
+		modules  	b[int]
+		start with 	[bup(dk(ass1(5),ass2(5)),TRY swap(1998))]query
+
+end
+

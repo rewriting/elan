@@ -1,0 +1,3 @@
+# tests of HOR (from legacy/elan3 tst_all; format: tests/apps/README.md)
+itest rewriting diff diff idiff
+long itest rewriting lambdaMember lambdaMember ilambdaMember

@@ -1,0 +1,454 @@
+module graph
+
+/* Definition of the sort graph ahich is a set of adjacency lists constructed */
+/* using UU */
+
+import	
+	global
+		int
+		bool
+		edge
+		path
+		adjlist
+		oneadjlist
+		eq[label]
+	;
+end
+
+sort graph;
+end
+
+operators
+  global
+
+	/* Constructor of the sort graph */
+	ginit		: graph;
+	gerror 		: graph;
+	@		: (oneadjlist) graph;
+	@ UU @		: (graph graph) graph (AC) assocLeft;
+
+	/* Add an edge to the graph and calculate the transitive closure */
+	/* of the graph. The graph is so saved such that we know all the */
+	/* the paths that exist in the graph. First we have the graph, the */
+	/* new edge is added to the graph, then the transitive closure is */
+	/* calculated. The functions called from other modules just calculate */
+	/* the transitive closure and add the new information. */
+
+	/* add_edge add only the edge to the graph without calculation for the */
+	/* transitive closure */
+	add_edge(@,@)	: (edge graph)	graph;
+
+	/* closure1 calculates the transitive closure of the graph such that */
+	/* [v0,v1,lab] + [v1,[v2 ....]] UU gives the previous graph +/
+	/ * [v0,[v1,..v2]] */
+	closure1(@,@)	: (edge graph) graph;
+
+	/* closure2 calculates the transitive closure of the graph such that */
+	/* [v0,v1,lab] + [v2,[v0 ....]] UU gives the previous graph +/
+	/ * [v2,[v1,..]] */
+	closure2(@,@)	: (edge graph) graph;
+
+	add(@,@)	: (edge graph) graph;
+
+	suiv(@,@,@,@,@,@) : (int int int label label label) oneadjlist;
+
+	/* Test the existence of a cycle in the graph following the addition */
+	/* of an S edge */
+	iscycle(@,@)	: (edge graph) bool;
+end
+
+
+/* Rules for simplification */
+
+rules for graph
+	G : graph;
+	v0 : int;
+	X, Y : adjlist;
+global
+	[] oneadjempty			=> ginit
+	end
+
+	[] oneadjempty UU G		=> G
+	end
+
+	[] ginit UU G			=> G
+	end
+
+	[] gerror UU G			=> gerror
+	end
+
+	[] [v0,adjempty]		=> ginit
+	end
+
+	[] [v0,adjempty] UU G		=> G
+	end
+
+	[] [v0,X] UU [v0,X] 		=> [v0,X] 
+	end
+
+	[] [v0,X] UU [v0,X] UU G	=> [v0,X] UU G
+	end
+
+	[] [v0,X] UU [v0,Y]		=> [v0, X U Y] 
+	end
+
+	[] [v0,X] UU [v0,Y] UU G	=> [v0, X U Y] UU G
+	end
+
+end
+
+
+rules for bool
+	e : edge;
+	G : graph;
+	v0, v1, v2 : int;
+	len : int;
+	lab1, lab2, lab3 : label;
+	X : adjlist;
+	b : bool;
+global
+	[] iscycle(edgeempty, G)		=> false
+	end
+
+	[] iscycle(e, ginit)			=> false
+	end
+
+	[] iscycle(e,gerror)			=> false
+	end
+
+	[] iscycle([v0,v1,lab1], [v1, [v0,len,lab2,lab3]]) 	=> b
+				where b:= ()suiv(lab1,lab2)				
+	end
+
+	[] iscycle([v0,v1,lab1], [v1,[v0,len,lab2,lab3] U X]) 	=> b
+				where b:= ()suiv(lab1,lab2)
+	end
+
+	[] iscycle([v0,v1,lab1],[v1,[v0,len,lab2,lab3]] UU G) 	=> b
+				where b:= ()suiv(lab1,lab2)
+	end
+
+	[] iscycle([v0,v1,lab1],[v1,[v0,len,lab2,lab3] U X] UU G) => b
+				where b:= ()suiv(lab1,lab2)
+	end
+
+	[] iscycle(e,G)						=> false
+	end
+
+end
+
+
+rules for oneadjlist
+	v2,v1,len : int;
+	lab1, lab2, lab3 : label;
+	b : bool;
+	R : oneadjlist;
+global
+	[] suiv(v2,v1,len,lab1,lab2,lab3)= > R
+		where b:= ()suiv(lab3,lab1)
+		choose 
+		try if b where R:=() [v2,[v1,len+1,lab2,lab3]]
+		try where R:=() oneadjempty
+		end
+	end
+end
+
+
+rules for graph
+	v0, v1 : int;
+	lab, lab1 : label;
+	X : adjlist;
+	G : graph;
+	e : edge;
+global
+	[] add_edge(edgeempty, G)		=> G
+	end
+
+	[] add_edge(e, gerror)			=> gerror
+	end
+
+	[] add_edge([v0,v1,lab], ginit)		=> [v0,[v1,1,lab,lab]] 	
+						where b := ()lab == C
+						if b
+	end
+
+	[] add_edge([v0,v1,lab], ginit)		=> [v0,[v1,0,lab,lab]] 	
+	end
+
+	[] add_edge([v0,v1,lab1], [v0,X] UU G)	=> [v0,X U [v1,1,lab1,lab1]] UU G 
+						where b:= ()lab1 == C
+						if b
+	end
+
+	[] add_edge([v0,v1,lab1], [v0,X] UU G)	=> [v0,X U [v1,0,lab1,lab1]] UU G 
+	end
+
+	[] add_edge([v0,v1,lab1], G)		=> [v0,[v1,1,lab1,lab1]] UU G
+						where b:= ()lab1 == C
+						if b
+	end
+
+	[] add_edge([v0,v1,lab1], G)		=> [v0,[v1,0,lab1,lab1]] UU G
+	end
+
+end
+
+
+rules for graph
+	G : graph;
+	e : edge;
+	v0, v1 : int;
+	lab1 : label;
+	Y : adjlist;
+	bi, bc, bs, bcycle : bool;
+	gr : graph;
+global
+	
+	[] closure1(edgeempty, G)	=> ginit
+	end
+
+	[] closure1(e, ginit)		=> ginit
+	end
+
+	[] closure1(e, gerror)		=> gerror
+	end
+
+	/* Try If of the addition of an edge from v0 to v1 such that v1 has an */
+	/* adjlist containing v2 and v3 then we add to the adjlist of v0 */
+	/* v2 and v3. */
+
+	[] closure1([v0,v1,lab1], [v1, Y]) => gr
+		where bi := ()lab1 == I
+		where bc := ()lab1 == C
+		where gr := ()add_oneadjlist([v0,v1,lab1],[v1,Y]) 
+		if bi or bc
+	end
+
+	[] closure1([v0,v1,lab1], [v1, Y]) => ginit
+		where bs := ()lab1 == S
+		where bcycle := ()iscycle([v0,v1,lab1],[v1,Y])
+		if bs and bcycle
+	end
+
+	[] closure1([v0,v1,lab1], [v1, Y]) => gr
+		where bs := ()lab1 == S
+		where bcycle := ()iscycle([v0,v1,lab1],[v1,Y])
+		where gr := ()add_oneadjlist([v0,v1,lab1],[v1,Y]) 
+		if bs and not bcycle
+	end
+
+	[] closure1([v0,v1,lab1], [v1, Y] UU G) => gr
+		where bi := ()lab1 == I
+		where bc := ()lab1 == C
+		where gr := ()add_oneadjlist([v0,v1,lab1],[v1,Y]) 
+		if bi or bc
+	end	
+
+	[] closure1([v0,v1,lab1], [v1, Y] UU G) => ginit
+		where bs := ()lab1 == S
+		where gr := ()add_oneadjlist([v0,v1,lab1],[v1,Y]) 
+		where bcycle := ()iscycle([v0,v1,lab1],[v1,Y] UU G)
+		if bs and bcycle
+	end
+
+	[] closure1([v0,v1,lab1], [v1, Y] UU G) => gr
+		where bs := ()lab1 == S
+		where gr := ()add_oneadjlist([v0,v1,lab1],[v1,Y]) 
+		where bcycle := ()iscycle([v0,v1,lab1],[v1,Y] UU G)
+		if bs and not bcycle
+	end
+
+	[] closure1([v0,v1,lab1], G) => ginit
+	end
+end
+
+rules for graph
+	e : edge;
+	G : graph;
+	v0, v1, v2 : int;
+	len : int;
+	lab, lab1, lab2, lab3 : label;
+	X, Y : adjlist;
+	bi, bc, bs, bcycle : bool;
+	ad : adjlist;
+	ad1, ad2 : oneadjlist;
+	gr, grr : graph;
+global
+	
+	[] closure2(edgeempty, G)	=> ginit
+	end
+
+	[] closure2(e, ginit)		=> ginit
+	end
+
+	[] closure2(e, gerror)		=> gerror
+	end
+
+	/* Case of the addition of an edge from v0 to v1 such that v1 is in an */
+	/* adjlist of v2 then we add to the adjlist of v2, v0 */
+
+	[] closure2([v0,v1,lab1], [v2,[v0,len,lab2,lab3]])			=> 
+		gr
+		where bi := ()lab1 == I
+		where bc := ()lab1 == C
+		where gr := ()suiv(v2,v1,len,lab1,lab2,lab3)
+			/* [v2,[v1,len+1,lab2,lab3]] if suiv(lab3,lab1) */
+			/* oneadjempty otherwise */
+		if bi or bc
+	end
+
+	[] closure2([v0,v1,lab1], [v2,[v0,len,lab2,lab3]])			=> 
+		gr
+		where bs := ()lab1 == S
+		where bcycle := ()iscycle([v0,v1,lab1],[v2,[v0,len,lab2,lab3]])
+		where gr := ()suiv(v2,v1,len,lab1,lab2,lab3)
+			/* [v2,[v1,len+1,lab2,lab3]] if suiv(lab3,lab1) */
+			/* oneadjempty otherwise */
+		if bs and not bcycle
+	end
+
+	[] closure2([v0,v1,lab1], [v2,[v0,len,lab2,lab3]])			=> 
+		ginit
+		where bs := ()lab1 == S
+		where bcycle := ()iscycle([v0,v1,lab1],[v2,[v0,len,lab2,lab3]])
+		if bs and bcycle
+	end
+
+	[] closure2([v0,v1,lab1], [v2,[v0,len,lab2,lab3]] UU G)			=> 
+		gr
+		where bi := ()lab1 == I
+		where bc := ()lab1 == C
+		where grr := ()closure2([v0,v1,lab1],G)
+		where gr := ()suiv(v2,v1,len,lab1,lab2,lab3) UU grr 
+			/* [v2,[v1,len+1,lab2,lab3]] if suiv(lab3,lab1) */
+			/* oneadjempty otherwise */
+		if bi or bc
+	end
+
+	[] closure2([v0,v1,lab1], [v2,[v0,len,lab2,lab3]] UU G)			=> 
+		gr
+		where bs := ()lab1 == S
+		where bcycle := ()iscycle([v0,v1,lab1],[v2,[v0,len,lab2,lab3]])
+		where grr := ()closure2([v0,v1,lab1],G)
+		where gr := ()suiv(v2,v1,len,lab1,lab2,lab3) UU grr 
+			/* [v2,[v1,len+1,lab2,lab3]] if suiv(lab3,lab1) */
+			/* oneadjempty otherwise */
+		if bs and not bcycle
+	end
+
+	[] closure2([v0,v1,lab1], [v2,[v0,len,lab2,lab3]] UU G)			=> 
+		ginit
+		where bs := ()lab1 == S
+		where bcycle := ()iscycle([v0,v1,lab1],[v2,[v0,len,lab2,lab3]])
+		if bs and bcycle
+	end 
+
+	[] closure2([v0,v1,lab1], [v2,[v0,len,lab2,lab3] U X])			=> 
+		gr
+		where bi := ()lab1 == I
+		where bc := ()lab1 == C
+		where ad := ()addl_adjlist([v0,v1,lab1],X)
+		where ad2 := ()suiv(v2,v1,len,lab1,lab2,lab3)
+			/* [v2,[v1,len+1,lab2,lab3]] if suiv(lab3,lab1) */
+			/* oneadjempty otherwise */
+		where gr := ()ad2 UU [v2,ad] 
+		if bi or bc
+	end
+
+	[] closure2([v0,v1,lab1], [v2,[v0,len,lab2,lab3] U X])			=> 
+		gr
+		where bs := ()lab1 == S
+		where bcycle := ()iscycle([v0,v1,lab1],[v2,[v0,len,lab2,lab3] U X])
+		where ad := ()addl_adjlist([v0,v1,lab1],X)
+		where ad2 := ()suiv(v2,v1,len,lab1,lab2,lab3)
+			/* [v2,[v1,len+1,lab2,lab3]] if suiv(lab3,lab1) */
+			/* oneadjempty otherwise */
+		where gr := ()ad2 UU [v2,ad] 
+		if bs and not bcycle
+	end
+
+	[] closure2([v0,v1,lab1], [v2,[v0,len,lab2,lab3] U X])			=> 		
+		ginit
+		where bs:= ()lab1 == S
+		where bcycle := ()iscycle([v0,v1,lab1],[v2,[v0,len,lab2,lab3] U X])
+		if bs and bcycle
+	end
+
+	[] closure2([v0,v1,lab1], [v2,[v0,len,lab2,lab3] U X] UU G)		=> 
+		gr
+		where bi := ()lab1 == I
+		where bc := ()lab1 == C
+		where ad := ()addl_adjlist([v0,v1,lab1],X)
+		where ad2 := ()suiv(v2,v1,len,lab1,lab2,lab3)
+			/* [v2,[v1,len+1,lab2,lab3]] if suiv(lab3,lab1) */
+			/* oneadjempty otherwise */
+		where grr := ()closure2([v0,v1,lab1],G)
+		where gr := ()ad2 UU [v2,ad] UU grr
+		if bi or bc
+	end
+
+	[] closure2([v0,v1,lab1], [v2,[v0,len,lab2,lab3] U X] UU G)		=> 
+		gr
+		where bs := ()lab1 == S
+		where bcycle := ()iscycle([v0,v1,lab1],[v2,[v0,len,lab2,lab3] U X] UU G)
+		where ad := ()addl_adjlist([v0,v1,lab1],X)
+		where ad2 := ()suiv(v2,v1,len,lab1,lab2,lab3)
+			/* [v2,[v1,len+1,lab2,lab3]] if suiv(lab3,lab1) */
+			/* oneadjempty otherwise */
+		where grr := ()closure2([v0,v1,lab1],G)
+		where gr := ()ad2 UU [v2,ad] UU grr
+		if bs and not bcycle
+	end
+
+	[] closure2([v0,v1,lab1], [v2,[v0,len,lab2,lab3] U X] UU G)		=> 		
+		ginit
+		where bs:= ()lab1 == S
+		where bcycle := ()iscycle([v0,v1,lab1],[v2,[v0,len,lab2,lab3] U X] UU G)
+		if bs and bcycle
+	end
+
+
+	[] closure2([v0,v1,lab1], G) => ginit
+	end
+end
+
+//closure2([1,2,I],[4,[1,5,I,I]U[1,6,S,S]]UU[7,[1,4,I,I]U[5,6,I,I]] UU [10,[1,4,I,I]] UU [9,[7,1,I,I]]) end
+
+//closure2([1,2,I],[4,[1,5,I,I]]UU[7,[1,4,I,I]U[5,6,I,I]] UU [10,[1,4,I,I]] UU [9,[7,1,I,I]]) end
+
+// closure2([1,2,I],[4,[1,5,I,I]]UU[10,[1,4,I,I]]UU[9,[7,1,I,I]]) end
+
+
+rules for graph
+	e : edge;
+	G : graph;
+	v0, v1 : int;
+	lab1 : label;
+	grres, gr1, gr2, gr3 : graph;
+global
+	/* Basic cases */
+
+	[] add(e,gerror)			=> gerror 	
+	end
+
+	[] add(edgeempty,G)			=> G		
+	end
+
+	[] add([v0,v1,lab1],ginit)		=> [v0,[v1,1,lab1,lab1]]
+	end
+
+	/* General case */
+
+	[] add([v0,v1,lab1], G)			=> grres
+						where gr1 := ()add_edge([v0,v1,lab1],G)
+						where gr2 := ()closure1([v0,v1,lab1],G)
+						where gr3 := ()closure2([v0,v1,lab1],G)
+						where grres := ()gr1 UU gr2 UU gr3
+
+	
+	end
+end
+
+end
+
+

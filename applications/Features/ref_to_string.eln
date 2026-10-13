@@ -1,0 +1,30 @@
+module ref_to_string
+
+import global string refstring2string
+	;
+	end
+
+operators global
+  foo(@)	: (string) string;
+  goo(@)	: (string) string;
+end
+
+rules for string
+s,s1,s2,s3	: string;
+global
+  []	goo(s) => s1+s2+s3
+		where s1:=()string2refstring("5":"int","tmp.ref")	
+		where s2:=()string2refstring("6":"int","tmp.ref")	
+		where s3:=()string2refstring("7":"int","tmp.ref")	
+
+	end
+  []	foo(s) => s1+s2+s3
+		where s1:=()refstring2string("INT(5)","tmp.ref")	
+		where s2:=()refstring2string("INT(6)","tmp.ref")	
+		where s3:=()refstring2string("INT(7)","tmp.ref")	
+
+	end
+end
+
+end
+

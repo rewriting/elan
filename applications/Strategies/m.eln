@@ -1,0 +1,41 @@
+module m[X]
+
+import global 
+  strat[X] strat[list[X]] 
+  X list[X];
+
+op global
+  mmm	:  <X>;
+  map 	:  <list[X]>;
+end
+
+rules for X
+ x	: X; 
+ n,m 	: int;
+ ms	: list[int];
+ s	: <X>;
+bodies
+  [add1] x => x+1 				end
+  [sub1] x => x-1 				end
+  [mul2] x => x*2 				end
+  [div2] x => x/2 				end
+end
+
+strategies for <X>
+bodies
+  [] mmm ==> id end
+end
+
+strategies for <list[X]>
+ s : <X>;
+ h : X;			h1 : X;
+ t : list[X];		t1 : list[X];
+bodies
+  [] map	 ==> add1.nil end
+end
+
+end
+
+
+
+
