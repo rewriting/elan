@@ -1,0 +1,5 @@
+# tests of Proving/NeedhamSchroeder (S9b; format: tests/apps/README.md)
+# S9b: programs loaded by the 2004 reference without a test (tests/apps/triage.tsv)
+itest nsh no nsh nsh-i
+aitest nsh no nsh nsh-i
+gtest nsh no nsh nsh-c

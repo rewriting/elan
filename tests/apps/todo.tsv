@@ -134,10 +134,6 @@ applications/UnifElanGen/combiBrKnn.lgi
 applications/UnifElanRCF/alien.lgi
 applications/UnifElanRCF/combiACplusC.lgi
 applications/UnifElanRCF/combiRCF.lgi
-contributions/Proving/NeedhamSchroeder/nsh.lgi
-contributions/Proving/Provers/Propositional/NamedRules/propositional.lgi
-contributions/Proving/Provers/Propositional/NoNamedRules/propositional.lgi
-contributions/Proving/Provers/Propositional/propositional.lgi
 contributions/Proving/Termination/LPO-MPO/lpo.lgi
 contributions/Proving/Termination/RPO/rpo.lgi
 contributions/Proving/TimedAutomata/One-Automaton/ClockZone.lgi
