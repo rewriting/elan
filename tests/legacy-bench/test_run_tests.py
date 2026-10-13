@@ -259,5 +259,57 @@ class CaseRenamesTest(unittest.TestCase):
             self.assertTrue((wd / "nim.eln").read_text(encoding="latin-1").startswith("module nim"))
 
 
+class OverlayDiscoveryTest(unittest.TestCase):
+    def make(self, tmp):
+        root = Path(tmp) / "legacy"
+        app = root / "elan3" / "applications" / "App"
+        (app / "SAMPLES").mkdir(parents=True)
+        (app / "tst_all").write_text("itest p no p p\n")
+        bare = root / "elan3" / "applications" / "Bare"   # no tst_all of its own
+        bare.mkdir(parents=True)
+        ov = Path(tmp) / "overlay"
+        (ov / "elan3" / "applications" / "App").mkdir(parents=True)
+        (ov / "elan3" / "applications" / "App" / "tst_all.overlay").write_text(
+            "itest q no q q\naitest q no q q\ngtest q no q q-c\n")
+        (ov / "elan3" / "applications" / "Bare").mkdir(parents=True)
+        (ov / "elan3" / "applications" / "Bare" / "tst_all.overlay").write_text("itest b no b b\n")
+        return root, ov
+
+    def test_overlay_lines_are_tests_with_the_usual_ids(self):
+        with tempfile.TemporaryDirectory(dir=rt.HERE) as tmp:
+            root, ov = self.make(tmp)
+            tests = rt.discover(suites=[root / "elan3" / "applications"], overlay=ov, root=root)
+            ids = {t["id"]: t for t in tests}
+            self.assertIn("elan3/applications/App::I::p:no:p:p", ids)
+            self.assertFalse(ids["elan3/applications/App::I::p:no:p:p"]["overlay"])
+            q = ids["elan3/applications/App::I::q:no:q:q"]
+            self.assertTrue(q["overlay"])
+            self.assertEqual(q["dir"], root / "elan3" / "applications" / "App")
+            self.assertEqual(q["ovdir"], ov / "elan3" / "applications" / "App")
+            self.assertIn("elan3/applications/App::A::q:no:q:q", ids)
+            self.assertIn("elan3/applications/Bare::I::b:no:b:b", ids)
+
+    def test_gtest_is_kind_G_with_an_input(self):
+        with tempfile.TemporaryDirectory(dir=rt.HERE) as tmp:
+            root, ov = self.make(tmp)
+            tests = rt.discover(suites=[root / "elan3" / "applications"], overlay=ov, root=root)
+            g = [t for t in tests if t["id"] == "elan3/applications/App::G::q:no:q:q-c"]
+            self.assertEqual(len(g), 1)
+            self.assertEqual((g[0]["kind"], g[0]["inp"], g[0]["out"]), ("G", "q", "q-c"))
+
+    def test_overlay_of_a_missing_directory_is_an_error(self):
+        with tempfile.TemporaryDirectory(dir=rt.HERE) as tmp:
+            root, ov = self.make(tmp)
+            (ov / "elan3" / "applications" / "Nowhere").mkdir()
+            (ov / "elan3" / "applications" / "Nowhere" / "tst_all.overlay").write_text("itest x no x x\n")
+            with self.assertRaises(SystemExit):
+                rt.discover(suites=[root / "elan3" / "applications"], overlay=ov, root=root)
+
+    def test_real_tree_ids_are_unchanged(self):
+        # the default arguments give the historical tests with overlay False
+        ids = [t["id"] for t in rt.discover() if not t["overlay"]]
+        self.assertIn("elan3/applications/Robot::I::Nim:non:Nim:Nim", ids)
+
+
 if __name__ == "__main__":
     unittest.main()

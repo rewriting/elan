@@ -98,7 +98,14 @@ def restore_case(src, dst, lgi=None):
 # Directories whose tst_all files are harvested
 SUITES = [ELAN3 / "applications", ELAN3 / "contributions", ROOT / "elan" / "sources"]
 
-KIND_OF_CMD = {"itest": ["I"], "aitest": ["A"], "jtest": ["J", "JO", "R", "G"]}
+# Spec S9: tests added to the legacy applications without touching legacy/:
+# tests/legacy-overlay/<path below legacy>/ holds tst_all.overlay, SAMPLES/
+# inputs and expected outputs, and ported files that replace legacy files.
+OVERLAY = REPO / "tests" / "legacy-overlay"
+
+# gtest LGI SPC INP OUT (spec S9): elanc-go, the compiled program reading INP
+KIND_OF_CMD = {"itest": ["I"], "aitest": ["A"], "jtest": ["J", "JO", "R", "G"],
+               "gtest": ["G"]}
 # kinds compiled by the new compilers (not in the default kinds): spec S6
 # (elanc-rs, Rust) and S7 (elanc-go, Go)
 COMPILER_KINDS = {"R": "elanc-rs", "G": "elanc-go"}
@@ -143,30 +150,45 @@ def parse_tst_all(path):
             yield words[0], words[1:], any(stack)
 
 
-def discover():
+def discover(suites=None, overlay=None, root=None):
+    """Tests of the historical tst_all files of the suites, then of the
+    tst_all.overlay files of the overlay (spec S9). t["overlay"] tells which;
+    t["ovdir"] is the application's overlay directory (it may not exist)."""
+    suites = SUITES if suites is None else suites
+    overlay = OVERLAY if overlay is None else overlay
+    root = ROOT if root is None else root
     tests, seen = [], set()
-    for suite in SUITES:
+
+    def add(d, path, from_overlay):
+        for cmd, a, long_ in parse_tst_all(path):
+            if cmd == "jtest":
+                if len(a) < 3:
+                    continue
+                lgi, spc, inp, out, flags = a[0], a[1], None, a[2], a[3:]
+            else:
+                if len(a) < 4:
+                    continue
+                lgi, spc, inp, out, flags = a[0], a[1], a[2], a[3], a[4:]
+            rel = d.relative_to(root)
+            for kind in KIND_OF_CMD[cmd]:
+                tid = f"{rel}::{kind}::{lgi}:{spc}:{inp or '-'}:{out}"
+                if tid in seen:
+                    continue
+                seen.add(tid)
+                tests.append(dict(id=tid, dir=d, kind=kind, lgi=lgi, spc=spc,
+                                  inp=inp, out=out, flags=flags, long=long_,
+                                  overlay=from_overlay, ovdir=overlay / rel))
+
+    for suite in suites:
         for tst in sorted(suite.rglob("tst_all")):
-            d = tst.parent
-            if d == suite:          # top-level driver (tst_one ...)
-                continue
-            for cmd, a, long_ in parse_tst_all(tst):
-                if cmd == "jtest":
-                    if len(a) < 3:
-                        continue
-                    lgi, spc, inp, out, flags = a[0], a[1], None, a[2], a[3:]
-                else:
-                    if len(a) < 4:
-                        continue
-                    lgi, spc, inp, out, flags = a[0], a[1], a[2], a[3], a[4:]
-                for kind in KIND_OF_CMD[cmd]:
-                    rel = d.relative_to(ROOT)
-                    tid = f"{rel}::{kind}::{lgi}:{spc}:{inp or '-'}:{out}"
-                    if tid in seen:
-                        continue
-                    seen.add(tid)
-                    tests.append(dict(id=tid, dir=d, kind=kind, lgi=lgi, spc=spc,
-                                      inp=inp, out=out, flags=flags, long=long_))
+            if tst.parent != suite:          # top-level driver (tst_one ...)
+                add(tst.parent, tst, False)
+    if overlay.is_dir():
+        for tst in sorted(overlay.rglob("tst_all.overlay")):
+            d = root / tst.parent.relative_to(overlay)
+            if not d.is_dir():
+                raise SystemExit(f"{tst}: no directory {d} in legacy/")
+            add(d, tst, True)
     return tests
 
 
