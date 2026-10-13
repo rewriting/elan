@@ -302,3 +302,57 @@ func TestACSubject(t *testing.T) {
 		t.Fatal("an existing term: not its shared node")
 	}
 }
+
+// TestEqRawAndTakeAC: a non-linear AC-level variable is compared as it
+// is (EqRaw: transient nodes by their elements), and a known value is
+// taken from the rest at once (TakeAC).
+func TestEqRawAndTakeAC(t *testing.T) {
+	a, b, c := atom(61), atom(62), atom(63)
+	x := ACSubject(symAnd, MergeAC(symAnd, a, b))
+	y := ACSubject(symAnd, MergeAC(symAnd, b, a))
+	if !x.isTmp() || x == y || !EqRaw(x, y) || !EqRaw(a, a) || EqRaw(x, a) || EqRaw(a, x) {
+		t.Fatal("EqRaw of transient nodes")
+	}
+	if z := ACSubject(symAnd, Flatten(symAnd, a, b, c)); EqRaw(x, z) {
+		t.Fatal("EqRaw of different multisets")
+	}
+	s := and(b, c) // shared
+	if !EqRaw(s, ACSubject(symAnd, Flatten(symAnd, c, b))) || EqRaw(s, ACSubject(symAnd, Flatten(symAnd, a, b))) {
+		t.Fatal("EqRaw of a shared node")
+	}
+	e := Flatten(symAnd, a, a, b, c, c, c)
+	for _, tc := range []struct {
+		x    []Term
+		m    int
+		rest string
+		ok   bool
+	}{
+		{Elems(symAnd, a), 1, "and(p(61),and(p(62),and(p(63),and(p(63),p(63)))))", true},
+		{Elems(symAnd, and(a, c)), 1, "and(p(61),and(p(62),and(p(63),p(63))))", true},
+		{Elems(symAnd, c), 3, "and(p(61),and(p(61),p(62)))", true},
+		{Elems(symAnd, and(a, c)), 2, "and(p(62),p(63))", true},
+		{Elems(symAnd, b), 2, "", false},
+		{Elems(symAnd, atom(64)), 1, "", false},
+		{e, 1, "", true},
+	} {
+		rest, ok := TakeAC(e, tc.x, tc.m)
+		got := ""
+		if len(rest) > 0 {
+			got = Format(MkAC(symAnd, rest))
+		}
+		if ok != tc.ok || got != tc.rest {
+			t.Errorf("TakeAC(%s, %s, %d) = %s, %v", fmtMS(e), fmtMS(tc.x), tc.m, got, ok)
+		}
+	}
+}
+
+// TestApplyACm: repeated arguments given once with their multiplicity.
+func TestApplyACm(t *testing.T) {
+	a, b, c := atom(71), atom(72), atom(73)
+	if ApplyACm(symAnd, nil, []int{2, 1}, a, b) != ApplyAC(symAnd, nil, a, a, b) {
+		t.Error("ApplyACm")
+	}
+	if ExtendACm(symAnd, nil, []Term{c}, []int{1, 3}, b, a) != ApplyAC(symAnd, nil, a, a, a, b, c) {
+		t.Error("ExtendACm")
+	}
+}

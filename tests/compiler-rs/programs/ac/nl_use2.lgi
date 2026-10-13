@@ -1,0 +1,6 @@
+LPL nl_use2 description
+  query of sort bool
+  result of sort T
+  import acnl
+  start with () h(P(a,P(b,F(P(a,c),c))),d)
+end

@@ -294,6 +294,19 @@ sub-project (S1–S5b). Each item says where it comes from.
   loop (`dc(dk(dec) ; dc one(taildc), id)`: `one3` in `k2`) is still made
   at each call of the closure (taildc 10^7 0.13 s, one object per turn).
 
+- **Non-linear variable in an AC part given to Eker's matcher** (bug hunt
+  of the AC matching, 2026-10-13): a variable that occurs twice, at the
+  level of an AC operator with rules and in another pattern, is now
+  compared as it is and takes the value of its other occurrence at once
+  (`gen/ac.go` acVars, `rt.TakeAC`: `programs/ac` nl_slow, 24 s → 0.08 s
+  with 18 elements). Left: when the level has two variables besides an
+  element modulo an extension (`G(x, G(w, F(x, y))) => G(y, w)`), REM
+  abstracts the part into a where matched by Eker's matcher
+  (transformation1/2); elanc-go enumerates the cores (2^n) and Eker's
+  values are normalised before the comparison (`ek.Value(i, acNorm)`):
+  > 100 s on the start term of nl_slow with 16 elements, where REM takes
+  1.9 s (18 elements: REM 18 s, exponential too).
+
 - **Or-parallelism of `dk` in elanc-go** (idea of the user, 2026-10-12, not
   started): run the branches of a `dk` (all results) on goroutines. Gain
   expected only on programs enumerating every solution of a large search

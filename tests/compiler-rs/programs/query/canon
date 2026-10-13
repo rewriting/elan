@@ -6,3 +6,4 @@ query/newident	U
 examples/poly2	--infix + * -- + *
 examples/poly3	--infix + * -- + *
 examples/unification	--infix & = -- &
+query/acrep	F G

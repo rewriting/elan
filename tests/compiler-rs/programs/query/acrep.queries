@@ -1,0 +1,11 @@
+G(g(a),G(g(a),g(a))) end
+G(g(a),g(a)) end
+h(g(a),g(a)) end
+G(h(g(a),g(a)),h(g(a),g(a))) end
+G(g(a),F(g(a),g(a))) end
+G(F(g(a),g(a)),F(g(a),g(a))) end
+G(F(g(a),g(b)),F(g(b),g(a))) end
+G(G(g(a),d),G(g(a),d)) end
+k2(a) end
+k3(a,g(a)) end
+k(a,a,a) end

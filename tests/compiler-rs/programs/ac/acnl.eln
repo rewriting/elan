@@ -1,0 +1,35 @@
+module acnl
+// A variable twice in a left-hand side, at an AC level and in a nested AC
+// pattern: REM and the interpreter compare the elements the variable takes
+// as they are (the multiset, not its normal form: G(b, c) is not a,
+// nl_raw), and normalise the value only when it is used; the candidates
+// that differ cost no rewrite step (nl_steps) and no normalisation (the
+// candidates of G(x, ...) modulo an extension are the 2^n sub-multisets:
+// nl_slow, exponential when each one was normalised).
+import global int bool eq[T]; end
+sort T; end
+operators global
+  d : T;
+  e : T;
+  b : T;
+  c : T;
+  a : T;
+  g(@) : (T) T;
+  h(@,@) : (T T) T;
+  k(@,@) : (T T) T;
+  F(@,@) : (T T) T (AC);
+  G(@,@) : (T T) T (AC);
+  P(@,@) : (T T) T (AC);
+end
+rules for T
+  x, y, z : T;
+global
+  [] G(x,F(x,y)) => y end
+  [] G(b,F(a,e)) => d end
+  [] G(b,c) => a end
+  // the value of the variable used (nl_use)
+  [] h(P(x,F(x,y)),z) => g(P(x,z)) end
+  [] k(P(x,y),F(x,z)) => g(P(x,z)) end
+  [] P(e,e) => e end
+end
+end

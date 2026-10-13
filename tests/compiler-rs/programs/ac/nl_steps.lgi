@@ -1,0 +1,6 @@
+LPL nl_steps description
+  query of sort bool
+  result of sort T
+  import acnl
+  start with () G(b,G(c,G(g(a),G(g(b),F(d,d)))))
+end

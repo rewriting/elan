@@ -1,5 +1,11 @@
 package earley
 
+import (
+	"slices"
+	"strconv"
+	"strings"
+)
+
 // The term of a derivation: REM's semantic actions (esemact,
 // earley/runtimeInit.cc) record the derivation in reverse order in
 // earleyRes/earleyKind/earleyString, which computeTerm
@@ -143,18 +149,21 @@ func build[T any](t *raw, b Builder[T]) T {
 		return b.Str(t.str)
 	}
 	if t.rule.index >= 0 && b.IsAC(t.rule.index) {
+		// the distinct elements (modulo AC), each built once and given
+		// as many times as it occurs: REM's term_add_onf_term merges
+		// equal elements (a multiplicity), whose normalisation then
+		// counts its rewrite steps once
 		var elems []T
-		var flatten func(t *raw)
-		flatten = func(x *raw) {
-			for _, a := range x.args {
-				if a.kind == defaultRule && a.rule.rulenumber == x.rule.rulenumber {
-					flatten(a)
-				} else {
-					elems = append(elems, build(a, b))
-				}
+		built := map[string]T{}
+		for _, a := range flatAC(t) {
+			k := rawKey(a, b.IsAC)
+			x, ok := built[k]
+			if !ok {
+				x = build(a, b)
+				built[k] = x
 			}
+			elems = append(elems, x)
 		}
-		flatten(t)
 		return b.AC(t.rule.index, elems)
 	}
 	args := make([]T, len(t.args))
@@ -162,4 +171,49 @@ func build[T any](t *raw, b Builder[T]) T {
 		args[i] = build(a, b)
 	}
 	return b.Op(t.rule.index, args)
+}
+
+// flatAC returns the arguments of the AC term t, those of the same
+// operator flattened.
+func flatAC(t *raw) []*raw {
+	var elems []*raw
+	var flatten func(x *raw)
+	flatten = func(x *raw) {
+		for _, a := range x.args {
+			if a.kind == defaultRule && a.rule.rulenumber == x.rule.rulenumber {
+				flatten(a)
+			} else {
+				elems = append(elems, a)
+			}
+		}
+	}
+	flatten(t)
+	return elems
+}
+
+// rawKey is a key of the term t, the same for terms equal modulo AC (the
+// elements of an AC operator sorted); isAC tells whether the operator of
+// a rule is AC.
+func rawKey(t *raw, isAC func(r int) bool) string {
+	switch t.kind {
+	case numRule:
+		return "n" + strconv.Itoa(int(t.res))
+	case identRule:
+		return "i" + strconv.Itoa(int(t.res))
+	case stringRule:
+		return "s" + strconv.Quote(t.str)
+	}
+	head := "o" + strconv.Itoa(int(t.rule.rulenumber)) + "/" + strconv.Itoa(t.rule.index)
+	var keys []string
+	if t.rule.index >= 0 && isAC(t.rule.index) {
+		for _, a := range flatAC(t) {
+			keys = append(keys, rawKey(a, isAC))
+		}
+		slices.Sort(keys)
+		return head + "[" + strings.Join(keys, ",") + "]"
+	}
+	for _, a := range t.args {
+		keys = append(keys, rawKey(a, isAC))
+	}
+	return head + "(" + strings.Join(keys, ",") + ")"
 }

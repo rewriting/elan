@@ -1,0 +1,6 @@
+LPL rep_rhs_ac description
+  query of sort bool
+  result of sort T
+  import acrep
+  start with () k4(a)
+end

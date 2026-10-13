@@ -5,8 +5,12 @@ package gen
 // tests/compiler-rs/programs/ac).
 
 import (
+	"context"
+	"os/exec"
+	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"elan/ref"
 )
@@ -115,5 +119,60 @@ func TestEkerProgramRuns(t *testing.T) {
 	want = "\nresult = r(u(single(o),single(s(o))),s(s(o)),twice(w(single(o),w(single(s(o)),single(s(s(o)))))))\n"
 	if got := run(t, p); !strings.HasPrefix(got, want) {
 		t.Errorf("x U x U y: got %q, want %q", got, want)
+	}
+}
+
+// nonLinearAC: u(x, w(x, y)) => y (u, w AC; w without rules): x at the
+// level of u modulo an extension, its 2^n sub-multisets the candidates,
+// compared with x in w(...). The start term u(w(o, s(o)), w(o, s(o)),
+// s^2(o), ..., s^(n+1)(o)) has no solution.
+func nonLinearAC(n int) *prog {
+	p := newProg()
+	p.op(sNat, 318, "o", nil, 0)
+	p.op(sNat, 319, "s", []uint32{sNat}, 0)
+	p.op(sNat, 340, "u", []uint32{sNat, sNat}, 0)
+	p.setAC(340)
+	p.op(sNat, 341, "w", []uint32{sNat, sNat}, 0)
+	p.setAC(341)
+	x, y, ext := v(0, sNat), v(1, sNat), ref.EVar{Index: 2, Sort: sNat}
+	p.rule(sNat, f(340, x, f(341, x, y)), y)
+	p.rule(sNat, f(340, ext, f(340, x, f(341, x, y))), f(340, ext, y))
+	o := f(318)
+	w := f(341, o, f(319, o))
+	t, e := f(340, w, w), f(319, o)
+	for range n {
+		e = f(319, e)
+		t = f(340, e, t)
+	}
+	p.p.Query.StartWith = t
+	return p
+}
+
+// TestNonLinearACLevelVariable: the candidates of a variable that occurs
+// twice are compared as they are (the multiset), only the chosen one is
+// normalised: normalising each of the 2^n candidates (each one a
+// normalisation of u that enumerates its own sub-multisets) took 24 s
+// with n = 16 elements besides the two w (tests/compiler-rs/programs/ac
+// nl_slow; REM 0.1 s).
+func TestNonLinearACLevelVariable(t *testing.T) {
+	if testing.Short() {
+		t.Skip("go build")
+	}
+	dir, src := module(t, nonLinearAC(16))
+	build := goCmd(dir, "build", "-trimpath", "-buildvcs=false", "-o", "prog", ".")
+	if out, err := build.CombinedOutput(); err != nil {
+		t.Fatalf("go build: %v\n%s\n%s", err, out, src)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+	out, err := exec.CommandContext(ctx, filepath.Join(dir, "prog"), "-noInput", "-quiet").Output()
+	if ctx.Err() != nil {
+		t.Fatalf("not finished in 2 s (exponential enumeration of the candidates)")
+	}
+	if err != nil {
+		t.Fatalf("run: %v\n%s", err, out)
+	}
+	if !strings.HasSuffix(string(out), "\nrewrite_step = 0\n") {
+		t.Errorf("got %q", out)
 	}
 }

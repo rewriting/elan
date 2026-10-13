@@ -234,3 +234,49 @@ func TestComputeTermNoRule(t *testing.T) {
 	}()
 	Build[string](tr, prefix{&Tables{}})
 }
+
+// counting is prefix, counting the operators built.
+type counting struct {
+	prefix
+	ops *int
+}
+
+func (c counting) Op(r int, a []string) string { *c.ops++; return c.prefix.Op(r, a) }
+
+// TestACRepeatedElements: the equal elements (modulo AC) of an AC term
+// are built once each, as REM merges them into a multiplicity before
+// normalising (the rewrite steps of a query G(g(a), G(g(a), g(a))) are
+// those of one g(a)).
+func TestACRepeatedElements(t *testing.T) {
+	id := newIdents("end")
+	a, b, g := id.add("a"), id.add("b"), id.add("g")
+	// s ::= s + s (999, AC) | a | b | g ( s )
+	rules := []Rule{
+		{Sort: 7, Symbol: 999, Info: 0, Rhs: []RhsLexem{{RhsSort, 7}, {RhsChar, '+'}, {RhsSort, 7}}},
+		{Sort: 7, Symbol: 500, Rhs: []RhsLexem{{RhsIdent, a}}},
+		{Sort: 7, Symbol: 501, Rhs: []RhsLexem{{RhsIdent, b}}},
+		{Sort: 7, Symbol: 502, Rhs: []RhsLexem{{RhsIdent, g}, {RhsChar, '('}, {RhsSort, 7}, {RhsChar, ')'}}},
+	}
+	tab := id.tables(rules, map[int32]string{7: "s"})
+	for _, tc := range []struct {
+		src, want string
+		ops       int
+	}{
+		{"g(a) + g(a) + g(a) end", "999{502(500),502(500),502(500)}", 2},
+		{"g(a) + g(b) + g(a) + b end", "999{502(500),502(501),502(500),501}", 5},
+		// modulo AC: g(a + b) and g(b + a) are one element
+		{"g(a + b) + g(b + a) end", "999{502(999{500,501}),502(999{500,501})}", 3},
+		// the arguments of other operators are built each time
+		{"g(g(a) + g(a)) end", "502(999{502(500),502(500)})", 3},
+	} {
+		var stderr bytes.Buffer
+		tr, err := Parse(strings.NewReader(tc.src), tab, 7, &stderr)
+		if err != nil {
+			t.Fatalf("%s: %v %s", tc.src, err, stderr.String())
+		}
+		ops := 0
+		if got := Build[string](tr, counting{prefix{tab}, &ops}); got != tc.want || ops != tc.ops {
+			t.Errorf("%s: %s with %d operators built, want %s with %d", tc.src, got, ops, tc.want, tc.ops)
+		}
+	}
+}

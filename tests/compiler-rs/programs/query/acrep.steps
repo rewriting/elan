@@ -1,0 +1,5 @@
+Repeated elements of an AC term in a query (G(g(a), G(g(a), g(a)))): REM
+merges the equal elements (modulo AC) into a multiplicity before
+normalising the term, each distinct element normalised once (its rewrite
+steps counted once; elanrt/earley build); the rewrite_step line is
+compared with REM's.
