@@ -1,0 +1,180 @@
+# path	reference	modern	inputs	outputs (triage.py)
+applications/APT/S28.lgi	ok	ok	S28.inp,S28LOG.inp	S28.out,S28LOG.out
+applications/APT/S28LIN.lgi	ok	ok		
+applications/APT/S28LOG.lgi	ok	ok	S28LOG.inp	S28LOG.out
+applications/APT/bubleLIN.lgi	ok	ok	bubleLIN.inp	
+applications/APT/bubleLOG.lgi	ok	ok	bubleLOG.inp	bubleLOG.out
+applications/APT/queen.lgi	[error] :file=queen.lgi	line=9	pos=26	[error] :file=queen.lgi	line=9	pos=26	queens.inp,queensLIN.inp,queensLOG.inp	queens.out,queensLIN.out,queensLOG.out
+applications/CStrategies/apply.lgi	[error] :file=apply.eln	line=26	pos=1	[error] :file=apply.eln	line=26	pos=1	apply.inp	apply.out
+applications/CStrategies/bup.lgi	[error] :file=bup.eln	line=46	pos=1	[error] :file=bup.eln	line=46	pos=1	bup.inp	bup.out
+applications/CStrategies/bup1.lgi	[error] :file=bup1.lgi	line=4	pos=10	[error] :file=bup1.lgi	line=4	pos=10		
+applications/CStrategies/depth.lgi	[error] :file=depth.eln	line=22	pos=1	[error] :file=depth.eln	line=22	pos=1	depth.inp	
+applications/CStrategies/filter.lgi	[error] :file=filter.eln	line=26	pos=1	[error] :file=filter.eln	line=26	pos=1	filter.inp	
+applications/CStrategies/fopc.lgi	[error] can't open input file 'io.eln'	[error] can't open input file 'io.eln'		
+applications/CStrategies/lis.lgi	[error] :file=lis.eln	line=21	pos=20	[error] :file=lis.eln	line=21	pos=20	lis.inp,lis1.inp,lis2.inp,lis3.inp	
+applications/CStrategies/lis1.lgi	[error] :file=lis1.eln	line=28	pos=20	[error] :file=lis1.eln	line=28	pos=20	lis1.inp	
+applications/CStrategies/lis2.lgi	[error] :file=lis2.eln	line=24	pos=20	[error] :file=lis2.eln	line=24	pos=20	lis2.inp	
+applications/CStrategies/lis3.lgi	[error] :file=lis.eln	line=21	pos=20	[error] :file=lis.eln	line=21	pos=20	lis3.inp	
+applications/CStrategies/loop.lgi	[error] :file=loop.eln	line=29	pos=0	[error] :file=loop.eln	line=29	pos=0	loop.inp	loop.out
+applications/CStrategies/lterm.lgi	[error] :file=lis.eln	line=21	pos=20	[error] :file=lis.eln	line=21	pos=20	lterm.inp	
+applications/CStrategies/map.lgi	[error] :file=map.eln	line=38	pos=1	[error] :file=map.eln	line=38	pos=1	map.inp,map1.inp,map2.inp,map3.inp	map.out,map1.out,map2.out,map3.out
+applications/CStrategies/map1.lgi	[error] :file=map1.eln	line=33	pos=1	[error] :file=map1.eln	line=33	pos=1	map1.inp	map1.out
+applications/CStrategies/map2.lgi	[error] :file=map2.eln	line=35	pos=1	[error] :file=map2.eln	line=35	pos=1	map2.inp	map2.out
+applications/CStrategies/map3.lgi	[error] :file=map3.eln	line=38	pos=1	[error] :file=map3.eln	line=38	pos=1	map3.inp	map3.out
+applications/CStrategies/nim.lgi	[error] :file=/Users/pem/github/elan-cs/reference/install/share/elanlib/strategy/strcapply.eln	line=12	pos=46	[error] :file=/Users/pem/github/elan-cs/build/install/share/elanlib/strategy/strcapply.eln	line=12	pos=46	nim.inp	
+applications/CStrategies/nim1.lgi	[error] :file=nim1.lgi	line=4	pos=10	[error] :file=nim1.lgi	line=4	pos=10		
+applications/CStrategies/robot.lgi	[error] :file=robot.lgi	line=4	pos=10	[error] :file=robot.lgi	line=4	pos=10	robot.inp	
+applications/CStrategies/robot1.lgi	[error] :file=robot1.lgi	line=4	pos=10	[error] :file=robot1.lgi	line=4	pos=10		
+applications/CStrategies/space.lgi	[error] :file=space.lgi	line=4	pos=10	[error] :file=space.lgi	line=4	pos=10		
+applications/FastCompletion/cp.lgi	ok	ok		cp2.out,cp5.out
+applications/FastCompletion/critical_pairs.lgi	ok	ok		
+applications/Features/ac1.lgi	[error] :file=ac1.eln	line=0	pos=1	[error] :file=ac1.eln	line=0	pos=1		
+applications/Features/bblock.lgi	[error] can't open input file 'io.eln'	[error] can't open input file 'io.eln'		
+applications/Features/block.lgi	[error] can't open input file 'io.eln'	[error] can't open input file 'io.eln'		
+applications/Features/castro.lgi	[error] :file=castro.eln	line=20	pos=1	[error] :file=castro.eln	line=20	pos=1		
+applications/Features/con.lgi	ok	ok		
+applications/Features/coop.lgi	[error] :file=coop.lgi	line=4	pos=11	[error] :file=coop.lgi	line=4	pos=11		
+applications/Features/core.lgi	[error] :file=core.lgi	line=4	pos=11	[error] :file=core.lgi	line=4	pos=11		
+applications/Features/core1.lgi	[error] :file=core1.eln	line=36	pos=18	[error] :file=core1.eln	line=36	pos=18		
+applications/Features/edge.lgi	ok	ok		
+applications/Features/essai.lgi	[error] can't open input file 'io.eln'	[error] can't open input file 'io.eln'		
+applications/Features/fromto.lgi	[error] can't open input file 'io.eln'	[error] can't open input file 'io.eln'		
+applications/Features/g.lgi	[error] :file=g.eln	line=0	pos=1	[error] :file=g.eln	line=0	pos=1		
+applications/Features/getc.lgi	[error] :file=getc.lgi	line=4	pos=11	[error] :file=getc.lgi	line=4	pos=11		
+applications/Features/graph.lgi	[error] :file=oneadjlist.eln	line=61	pos=55	[error] :file=oneadjlist.eln	line=61	pos=55		
+applications/Features/hell.lgi	[error] :file=hell.lgi	line=4	pos=11	[error] :file=hell.lgi	line=4	pos=11	hello.inp,hello2.inp	chello.out,chello2.out,hello2.out
+applications/Features/hello.lgi	ok	ok	hello.inp,hello2.inp	chello.out,chello2.out,hello2.out
+applications/Features/i2str.lgi	ok	ok		
+applications/Features/j.lgi	[error] :file=j.lgi	line=1	pos=0	[error] :file=j.lgi	line=1	pos=0	adjlist.inp	adjlist.out
+applications/Features/label.lgi	ok	ok		
+applications/Features/lambda1.lgi	ok	ok		
+applications/Features/longnames.lgi	ok	ok		
+applications/Features/m1.lgi	ok	ok		
+applications/Features/m2.lgi	ok	ok		
+applications/Features/m_apply.lgi	[error] can't open input file 'io.eln'	[error] can't open input file 'io.eln'		
+applications/Features/m_apply_all.lgi	[error] :file=m_apply_all.lgi	line=0	pos=29	[error] :file=m_apply_all.lgi	line=0	pos=29		
+applications/Features/mc.lgi	ok	ok	termCommontest.inp	termCommontest.out
+applications/Features/mm.lgi	ok	ok	termCommontest.inp	termCommontest.out
+applications/Features/mv.lgi	[error] :file=mv.eln	line=0	pos=1	[error] :file=mv.eln	line=0	pos=1		
+applications/Features/n.lgi	ok	ok	cnorm.inp,new_meta.inp,norm.inp,termCommontest.inp	cnorm.out,new_meta.out,norm.out,termCommontest.out
+applications/Features/nonbblock.lgi	[error] can't open input file 'io.eln'	[error] can't open input file 'io.eln'		
+applications/Features/nonblock.lgi	[error] can't open input file 'io.eln'	[error] can't open input file 'io.eln'		
+applications/Features/normap.lgi	[error] :file=normap.eln	line=0	pos=1	[error] :file=normap.eln	line=0	pos=1		
+applications/Features/nqueens.lgi	ok	ok		
+applications/Features/oneadjlist.lgi	[error] :file=oneadjlist.eln	line=61	pos=55	[error] :file=oneadjlist.eln	line=61	pos=55		
+applications/Features/path.lgi	ok	ok		
+applications/Features/plus.lgi	[error] :file=plus.lgi	line=4	pos=11	[error] :file=plus.lgi	line=4	pos=11		
+applications/Features/poly3.lgi	ok	ok	poly3.inp	
+applications/Features/print.lgi	[error] :file=print.lgi	line=4	pos=11	[error] :file=print.lgi	line=4	pos=11		
+applications/Features/pwhere.lgi	ok	ok		
+applications/Features/pwhere1.lgi	ok	ok		
+applications/Features/qq.lgi	[error] :file=qq.lgi	line=4	pos=11	[error] :file=qq.lgi	line=4	pos=11		
+applications/Features/queens10.lgi	[error] :file=queens10.eln	line=0	pos=1	[error] :file=queens10.eln	line=0	pos=1		
+applications/Features/re.lgi	ok	ok	tre.inp	tre.out
+applications/Features/ref_to_string.lgi	[error] can't open input file 'io.eln'	[error] can't open input file 'io.eln'		
+applications/Features/s.lgi	[error] :file=s.lgi	line=4	pos=11	[error] :file=s.lgi	line=4	pos=11	adjlist.inp,prtest.inp,sel.inp,sieve.inp,termCommontest.inp,trs.inp	adjlist.out,cprtest.out,csel.out,prtest.out,sel.out,sieve.out,termCommontest.out,trs.out
+applications/Features/solvers.lgi	[error] can't open input file 'io.eln'	[error] can't open input file 'io.eln'		
+applications/Features/ss.lgi	[error] :file=ss.lgi	line=11	pos=11	[error] :file=ss.lgi	line=11	pos=11		
+applications/Features/str_to_term.lgi	[error] can't open input file 'io.eln'	[error] can't open input file 'io.eln'		
+applications/Features/termCommonstest.lgi	ok	ok		
+applications/Features/toi_meme.lgi	ok	ok	toi_meme.inp	toi_meme.out
+applications/Features/tri.lgi	ok	ok		
+applications/Features/trii.lgi	ok	ok		
+applications/Features/try1.lgi	[error] :file=try1.eln	line=0	pos=1	[error] :file=try1.eln	line=0	pos=1		
+applications/Features/try2.lgi	[error] :file=try2.eln	line=3	pos=10	[error] :file=try2.eln	line=3	pos=10		
+applications/Features/try3.lgi	[error] :file=try3.eln	line=2	pos=19	[error] :file=try3.eln	line=2	pos=19		
+applications/Features/v.lgi	[error] :file=v.lgi	line=4	pos=11	[error] :file=v.lgi	line=4	pos=11	sieve.inp	sieve.out
+applications/HOU_1_17/hou.lgi	ok	ok		
+applications/HOU_1_17/norm.lgi	ok	ok		
+applications/HOU_1_17/phou.lgi	ok	ok		
+applications/HOU_1_17/test.lgi	ok	ok		
+applications/HOU_1_17/tex.lgi	ok	ok		
+applications/HOU_1_17/tst.lgi	[error] :file=tst.lgi	line=4	pos=10	[error] :file=tst.lgi	line=4	pos=10		
+applications/HOU_1_18/norm.lgi	ok	ok		
+applications/HOU_1_18/test.lgi	ok	ok		
+applications/HOU_1_18/tex.lgi	ok	ok		
+applications/HOU_1_18/tst.lgi	[error] :file=tst.lgi	line=4	pos=10	[error] :file=tst.lgi	line=4	pos=10		
+applications/Hou/norm.lgi	ok	ok		
+applications/Hou/test.lgi	ok	ok		
+applications/Hou/tex.lgi	ok	ok		
+applications/Hou/tst.lgi	[error] :file=tst.lgi	line=4	pos=10	[error] :file=tst.lgi	line=4	pos=10		
+applications/IO_Call/Unif.lgi	ok	ok		
+applications/MetaApply/adjlist.lgi	[error] :file=adjlist.eln	line=96	pos=14	[error] :file=adjlist.eln	line=96	pos=14		
+applications/MetaApply/compbasic.lgi	ok	ok		
+applications/MetaApply/cpbasic.lgi	ok	ok		
+applications/MetaApply/cpbasic2.lgi	ok	ok		
+applications/MetaApply/edge.lgi	ok	ok		
+applications/MetaApply/eqSystem.lgi	ok	ok		
+applications/MetaApply/extequation.lgi	ok	ok		
+applications/MetaApply/extequation1.lgi	ok	ok		
+applications/MetaApply/graph.lgi	[error] :file=adjlist.eln	line=96	pos=14	[error] :file=adjlist.eln	line=96	pos=14		
+applications/MetaApply/label.lgi	ok	ok		
+applications/MetaApply/list.lgi	[error] :file=list.eln	line=143	pos=17	[error] :file=list.eln	line=143	pos=17		
+applications/MetaApply/lpo.lgi	ok	ok		
+applications/MetaApply/lvariables.lgi	ok	ok		
+applications/MetaApply/oneadjlist.lgi	[error] :file=adjlist.eln	line=96	pos=14	[error] :file=adjlist.eln	line=96	pos=14		
+applications/MetaApply/path.lgi	ok	ok		
+applications/MetaApply/position.lgi	ok	ok		
+applications/MetaApply/renaming.lgi	ok	ok		
+applications/MetaApply/termCommons.lgi	ok	ok		
+applications/MetaApply/terms.lgi	ok	ok		
+applications/Picalc/picalc.lgi	ok	ok		
+applications/Prover/fopc.lgi	[error] can't open input file 'io.eln'	[error] can't open input file 'io.eln'	fopc.inp	fopc.out
+applications/Robot/iden.lgi	[error] :file=iden.lgi	line=4	pos=10	[error] :file=iden.lgi	line=4	pos=10		
+applications/Robot/iforelse.lgi	[error] :file=iforelse.lgi	line=4	pos=8	[error] :file=iforelse.lgi	line=4	pos=8		
+applications/Robot/space.lgi	[error] :file=space.lgi	line=4	pos=10	[error] :file=space.lgi	line=4	pos=10		
+applications/Robot/tictac.lgi	ok	ok	tictactoe.inp	tictactoe.out
+applications/Server/Firewall/firewall.lgi	ok	ok		
+applications/Server/fac.lgi	[error] can't open input file 'e_list.eln'	[error] can't open input file 'e_list.eln'		
+applications/Simplest/cc.lgi	[error] :file=cc.lgi	line=4	pos=14	[error] :file=cc.lgi	line=4	pos=14		
+applications/Simplest/horse.lgi	[error] :file=horse.eln	line=69	pos=41	[error] :file=horse.eln	line=69	pos=41	nhorse.inp	cnhorse.out,inhorse.out,nhorse_jc.out
+applications/Simplest/perm.lgi	[error] :file=perm.lgi	line=4	pos=14	[error] :file=perm.lgi	line=4	pos=14		
+applications/Simplest/queens4.lgi	ok	ok		
+applications/Simplest/rqueens.lgi	[error] :file=rqueens.lgi	line=4	pos=14	[error] :file=rqueens.lgi	line=4	pos=14		
+applications/Simplest/test_rewrite.lgi	ok	ok		
+applications/Strategies/b.lgi	[error] :file=b.lgi	line=4	pos=10	[error] :file=b.lgi	line=4	pos=10	bup.inp,lambda.inp	bup.out,lambda.out
+applications/Strategies/boo.lgi	[error] :file=boo.lgi	line=4	pos=10	[error] :file=boo.lgi	line=4	pos=10		
+applications/Strategies/bup1.lgi	[error] :file=bup1.lgi	line=4	pos=10	[error] :file=bup1.lgi	line=4	pos=10		
+applications/Strategies/foo.lgi	[error] :file=foo.lgi	line=4	pos=10	[error] :file=foo.lgi	line=4	pos=10		
+applications/Strategies/ll.lgi	ok	ok		
+applications/Strategies/llterm.lgi	[error] :file=llterm.lgi	line=5	pos=23	[error] :file=llterm.lgi	line=5	pos=23		
+applications/Strategies/m.lgi	[error] :file=m.lgi	line=4	pos=9	[error] :file=m.lgi	line=4	pos=9	lambda.inp,lterm.inp,map.inp	lambda.out,lterm.out,map.out
+applications/Strategies/map1.lgi	[error] :file=map1.lgi	line=4	pos=9	[error] :file=map1.lgi	line=4	pos=9		
+applications/Strategies/map2.lgi	[error] :file=map2.lgi	line=4	pos=9	[error] :file=map2.lgi	line=4	pos=9		
+applications/Strategies/map3.lgi	[error] :file=map3.lgi	line=4	pos=9	[error] :file=map3.lgi	line=4	pos=9		
+applications/Strategies/map99.lgi	[error] :file=map99.lgi	line=4	pos=9	[error] :file=map99.lgi	line=4	pos=9		
+applications/Strategies/moo.lgi	[error] :file=moo.lgi	line=4	pos=10	[error] :file=moo.lgi	line=4	pos=10		
+applications/Strategies/polyDer.lgi	ok	ok		
+applications/Strategies/tclist.lgi	[error] :file=tclist.lgi	line=23	pos=10	[error] :file=tclist.lgi	line=23	pos=10		
+applications/UnifElanGen/ElimFA.lgi	ok	ok		
+applications/UnifElanGen/Id.lgi	[error] :file=eqSystem.eln	line=49	pos=30	[error] :file=eqSystem.eln	line=49	pos=30		
+applications/UnifElanGen/Lin.lgi	[error] :file=eqSystem.eln	line=49	pos=30	[error] :file=eqSystem.eln	line=49	pos=30		
+applications/UnifElanGen/Part.lgi	[error] :file=Part.eln	line=47	pos=36	[error] :file=Part.eln	line=47	pos=36		
+applications/UnifElanGen/RestrictUnif0.lgi	ok	ok		
+applications/UnifElanGen/RestrictUnifFA.lgi	ok	ok		
+applications/UnifElanGen/UnifFA.lgi	ok	ok		
+applications/UnifElanGen/combi0plusFA.lgi	ok	ok		
+applications/UnifElanGen/combiBrKnn.lgi	ok	ok		
+applications/UnifElanRCF/alien.lgi	ok	ok		
+applications/UnifElanRCF/combiACplusC.lgi	ok	ok		
+applications/UnifElanRCF/combiRCF.lgi	ok	ok		
+contributions/Proving/Automata/all_operations.lgi	ok	ok		
+contributions/Proving/Automata/automaton.lgi	ok	ok		
+contributions/Proving/Automata/nf_automaton.lgi	ok	ok		
+contributions/Proving/Automata/termination.lgi	ok	ok		
+contributions/Proving/NeedhamSchroeder/nsh.lgi	ok	ok		
+contributions/Proving/Provers/Propositional/NamedRules/propositional.lgi	ok	ok		
+contributions/Proving/Provers/Propositional/NoNamedRules/propositional.lgi	ok	ok		
+contributions/Proving/Provers/Propositional/propositional.lgi	ok	ok		
+contributions/Proving/Termination/LPO-MPO/lpo.lgi	ok	ok		
+contributions/Proving/Termination/RPO/rpo.lgi	ok	ok		
+contributions/Proving/TimedAutomata/One-Automaton/ClockZone.lgi	ok	ok		
+contributions/Proving/TimedAutomata/One-Automaton/Timed_Automaton.lgi	ok	ok		
+contributions/Proving/TimedAutomata/Product-Of-Automata/Timed_automata/Timed_Automata.lgi	ok	ok		
+contributions/Proving/TimedAutomata/Product-Of-Automata/Timed_automata/pdt_automates.lgi	ok	ok		
+contributions/Proving/TimedAutomata/Product-Of-Automata/hash_Timed_automata/Timed_Automata.lgi	ok	ok		
+contributions/Proving/TimedAutomata/Product-Of-Automata/hash_Timed_automata/pdt_automates.lgi	ok	ok		
+contributions/Proving/TimedAutomata/Product-Of-Automata/matrice_Timed_automata/Timed_Automata.lgi	ok	ok		
+contributions/Proving/TimedAutomata/Product-Of-Automata/matrice_Timed_automata/pdt_automates.lgi	ok	ok		
+contributions/Solving/COLETTE/ARITY_N_I/src/colette.lgi	ok	ok		
+contributions/Solving/Equational/MatchingAC/CompMatchingAC.lgi	ok	ok		

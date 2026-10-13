@@ -11,6 +11,7 @@ sys.path.insert(0, str(HERE.parent / "legacy-bench"))
 import check_coverage as cc  # noqa: E402
 import make_expected as me  # noqa: E402
 import run_tests as rt  # noqa: E402
+import triage as tr  # noqa: E402
 
 
 def overlay_test(tmp, kind="I", out="q", inp="q"):
@@ -107,6 +108,28 @@ class CoverageTest(unittest.TestCase):
         self.assertIn("applications/Robot/Nim.lgi", progs)
         self.assertIn("applications/Robot/nim.lgi", progs)
         self.assertNotIn("applications/Robot/x-case-Nim.lgi", progs)
+
+
+class TriageTest(unittest.TestCase):
+    def test_load_status_with_a_fake_prefix(self):
+        with tempfile.TemporaryDirectory(dir=HERE) as tmp:
+            prefix = Path(tmp) / "p"
+            (prefix / "bin").mkdir(parents=True)
+            (prefix / "bin" / "elan").write_text(
+                '#!/bin/sh\ncase "$2" in good.lgi) exit 0;; *) echo "[error] bad module" >&2; exit 1;; esac\n')
+            (prefix / "bin" / "elan").chmod(0o755)
+            app = Path(tmp) / "App"
+            app.mkdir()
+            (app / "good.lgi").write_text("")
+            (app / "other.lgi").write_text("")
+            self.assertEqual(tr.load_status_in(app, "good", prefix, 30), "ok")
+            self.assertEqual(tr.load_status_in(app, "absent", prefix, 30), "NOLGI")
+            self.assertEqual(tr.load_status_in(app, "other", prefix, 30), "[error] bad module")
+
+    def test_candidates_match_the_program_name(self):
+        inps, outs = tr.candidates("applications/APT/bubleLOG.lgi")
+        self.assertIn("bubleLOG.inp", inps)
+        self.assertIn("bubleLOG.out", outs)
 
 
 if __name__ == "__main__":
