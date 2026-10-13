@@ -187,3 +187,62 @@ case-sensitive volume (its library installs both `strategy/Any.eln` and
   with its own runner, or copies of the applications in `tests/`).
 - The three design sections (overlay and bench, triage, criteria and
   stages): approved ("oui, continue", "oui, écris la spec").
+
+## 8. Revision (2026-10-13): a living copy instead of the overlay
+
+Decided by the user on 2026-10-13 (translated): "Simpler: copy the legacy
+applications directory into the project and make the changes there:
+fix the programs, rewrite the test scripts, etc. We still have legacy for
+history." Answers: location `applications/` and `contributions/` at the root
+of the repository; the bench switches to the copy. This section supersedes
+§4 (overlay) and the S9a/S9b parts of §6; §2, §3 (criteria, with
+`applications/`/`contributions/` in place of the legacy trees), §5 (triage)
+and the oracle (the 2004 reference) stand.
+
+**The copy.** `applications/` and `contributions/` are copies of
+`legacy/elan3/applications` and `legacy/elan3/contributions`, taken once
+(S9a) and maintained from then on: programs are fixed in place, test files
+rewritten, queries and expected outputs added. Not copied: `CVS/`, build
+products (`*.o`, `a.out`, `.elan.*/`, `.elan-go.*/`, `*.make`, `*.ref`).
+The case collisions of these trees (`CASE-RENAMES.tsv`: Robot) are resolved
+for good in the copy (one file of each pair renamed, its imports updated),
+so the copy has no `x-case-` file. `legacy/` stays untouched, as the
+archive; `applications/HISTORY.md` records the copy (source commit) and
+every later change of a program, with its reason (what `PORTING.md` was).
+
+**Test files.** Each directory's csh `tst_all` is replaced by a plain file
+`TESTS`: one test per line, `<cmd> LGI SPC INP OUT [long]`, `cmd` among
+`itest` (I), `aitest` (A), `jtest` (J, JO, R, G: as today), `gtest` (G, the
+compiled program reading INP); `long` replaces the `if ($1 =~ *L*)` blocks;
+`#` comments. The migration of the existing lines is mechanical (same tests,
+same files). `applications/tst_all` and `contributions/tst_all` (sh) run the
+bench on their tree (`tst_all [KINDS]`), the historical entry point kept.
+
+**Bench.** `run_tests.py` discovers `TESTS` files under `applications/` and
+`contributions/`, and keeps reading the historical `tst_all` files of
+`legacy/elan/sources` (compiler test directories and BenchThesis, not
+copied). Test ids of the copied tests become
+`applications/X::I::lgi:spc:inp:out` (the `elan3/` prefix and the legacy
+root dropped); `baseline.tsv`, the snapshots, `bench_g_expected.tsv` and any
+other file keyed by ids are migrated once, mechanically, in the same commit,
+with a check that the migrated run gives the same statuses (0 regressions,
+0 snapshot differences). The private copy of a test is a copy of its
+directory (no case restoration needed). New tests in the copy must PASS
+unless listed in `baseline.tsv` (G: or UNSUPPORTED), as in the overlay
+design.
+
+**Kept from the first S9a work** (commits 2cbb698..fb3f7e7, retargeted):
+`produce()` and its exit status, the `gtest` line, the strict judging of new
+tests, `make_expected.py` (writes into the copy's `SAMPLES/`),
+`check_coverage.py` (walks `applications/` and `contributions/`;
+`unloadable.tsv`, `todo.tsv`), `triage.py` and its report. Dropped: the
+overlay discovery and merge (`OVERLAY`, `tst_all.overlay`, the overlay step
+of `private_copy`), `tests/legacy-overlay/` (its scripts move to
+`tests/apps/`).
+
+**Stages (replacing S9a/S9b of §6).** S9a' — the copy and the bench switch:
+copy, case collisions resolved, `TESTS` migration, bench and id migration,
+scripts retargeted, overlay code removed, `tst_all` entry points, docs;
+`make check` and `check-reference` unchanged in statuses. S9b onwards as in
+§6, working in the copy (category 3 "ported copy" becomes "fixed in place,
+recorded in `HISTORY.md`").
