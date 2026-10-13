@@ -3,3 +3,6 @@ itest matchingAC ctesig ex1 ex1
 itest matchingAC ctesig ex2 ex2
 itest matchingAC ctesig ex3 ex3
 itest matchingAC ctesig ex4 ex4
+# S9b: programs loaded by the 2004 reference without a test (tests/apps/triage.tsv)
+itest CompMatchingAC CompCtesig CompMatchingAC CompMatchingAC-i
+aitest CompMatchingAC CompCtesig CompMatchingAC CompMatchingAC-i

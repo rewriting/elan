@@ -25,3 +25,13 @@ evaluates the start term as the interpreter does.
 | Features/mc | `(la la la (2 ((3 2) 1)) la la 1)` | `result = la la(21)` (the query normalised) | the start term normalised, as the interpreter |
 | Features/nqueens | `4` | no result (`queens(query)` ignored) | the two solutions, as the interpreter |
 | Features/tri, Features/trii | `a` | `result = a` | `result = f(a)` (start term `f(a)`, as the interpreter) |
+| FastCompletion/cp (KNZ86) | `nil` | no result (start term `cp` ignored) | the completed system, as the interpreter |
+| Solving/Equational/MatchingAC/CompMatchingAC (CompCtesig) | `x + y <=AC a1 + a2 + a3` | the 6 matches of the query | the 8400 matches of the start term `x+y+z+v <=AC a1+...+a7`, as the interpreter |
+
+Other reasons:
+
+| program | reason |
+|---|---|
+| FastCompletion/critical_pairs (KNZ86) | the program compiled by REM crashes (rc=-11): no expected output |
+| APT/bubleLOG | the reference REM build crashes (Boehm GC out of memory) |
+| Robot/tictac | elanc-go writes a 4 MB `main.go` (121 615 lines); `go build` takes more than 6 min (TIMEOUT); REM gives the 5 moves |

@@ -74,6 +74,8 @@ Found in S9b (programs loaded by the reference, still untested, kept in
   `APT/bubleLOG`, `Robot/tictac`, `Strategies/ll`.
 - `Simplest/test_rewrite`: the interpreters do not interpret its `rewrite`
   strategy ("Rewrite step is not intepreted", no result): `gtest` only.
+- `Solving/Equational/MatchingAC/CompMatchingAC`: the start term (8400
+  AC matches) is evaluated whatever the query: its expected output is 500 KB.
 - `gtest` lines missing for other reasons are listed in `category4.md`.
 - The reference REM build of `bubleLOG` crashes (Boehm GC out of memory,
   rc=-11).
