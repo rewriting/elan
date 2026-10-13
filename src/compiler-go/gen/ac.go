@@ -192,8 +192,8 @@ type lazyAC struct {
 	ms string
 }
 
-// forceLazy writes the normal forms of the variables of e.lazy that reads
-// tells (nil: all of them), before the condition or the right-hand side
+// forceLazy writes the normal forms of the variables of e.lazy that `reads`
+// selects (nil: all of them), before the condition or the right-hand side
 // that reads them: the candidates that the equality of a CondSame rejects
 // are never normalised (their rewrite steps not counted, as in REM), nor
 // is a variable that the condition does not read (a partner bound by a

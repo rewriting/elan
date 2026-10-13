@@ -224,6 +224,30 @@ func runSteps(t *testing.T, p *prog, limit time.Duration) string {
 	return string(out)
 }
 
+// TestLazyACVariableReadAfterChoose: a lazy variable that the branches of
+// a choose do not read, but the rest of the rule does, is forced by the
+// rest (not in the branch, where it would be declared and not used).
+func TestLazyACVariableReadAfterChoose(t *testing.T) {
+	if testing.Short() {
+		t.Skip("go vet")
+	}
+	p := lazyBase(3, func(p *prog) {
+		x, y, z, w := v(0, sNat), v(1, sNat), v(2, sNat), v(3, sNat)
+		o := f(318)
+		p.rule(sNat, f(343, f(340, x, y)), f(345, x, w),
+			ref.Assign{Lhs: f(342, x, z), Strategy: ref.None, Rhs: f(342, f(340, o, o), o)},
+			ref.Try{Branches: [][]ref.Where{
+				{ref.Assign{Lhs: w, Strategy: ref.None, Rhs: o}},
+				{ref.Assign{Lhs: w, Strategy: ref.None, Rhs: o}},
+			}})
+	})
+	p.p.Query.StartWith = f(343, p.p.Query.StartWith.(ref.Fsym).Args[0])
+	dir, src := module(t, p)
+	if out, err := goCmd(dir, "vet", ".").CombinedOutput(); err != nil {
+		t.Errorf("go vet: %v\n%s\n%s", err, out, numbered(src))
+	}
+}
+
 // runWithin builds p and runs it: no rewrite step (the normalisation of a
 // candidate that nothing reads takes one), within limit.
 func runWithin(t *testing.T, p *prog, limit time.Duration) {

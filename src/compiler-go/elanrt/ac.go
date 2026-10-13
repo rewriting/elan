@@ -629,7 +629,7 @@ func (s *Down) Rest() []Term {
 // differences at once, then the arguments (the elements of an AC term are
 // in canonical order). A variable that occurs twice is compared so (REM
 // and the interpreter compare the instances as they are, not their normal
-// forms).
+// forms). (The recursion runs only when the hashes match: the equal case.)
 func EqRaw(a, b Term) bool {
 	if Eq(a, b) {
 		return true

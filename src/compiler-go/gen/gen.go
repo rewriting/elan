@@ -128,9 +128,8 @@ type emitter struct {
 	// transient term: compared, not normalised); lazy those of them whose
 	// normal form is not written yet (written before the first condition
 	// that reads it, other than a CondSame, or the right-hand side:
-	// forceLazy); acLater
-	// are the variables bound by the conditions after the current AC
-	// matching (ac.go)
+	// forceLazy); acLater are the variables bound by the conditions after
+	// the current AC matching (ac.go)
 	raw     map[ir.VarID]string
 	lazy    []lazyAC
 	acLater map[ir.VarID]bool
@@ -1509,12 +1508,14 @@ func (e *emitter) conds(r *ir.Rule, from int, used map[ir.VarID]bool, depth int)
 			return e.choose(r, j, used, depth) || opens > 0
 		}
 	}
-	e.forceLazy(r, nil)
 	if e.chooseRest != nil {
-		// the end of a branch of a choose: the rest of the rule
+		// the end of a branch of a choose: the rest of the rule (which
+		// forces the variables it reads itself; those that the branch
+		// reads were forced at the choose)
 		e.chooseRest(depth)
 		return true
 	}
+	e.forceLazy(r, nil)
 	rhs := ""
 	if e.late != nil {
 		rhs = e.lateBind(r, used)
