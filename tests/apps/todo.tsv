@@ -25,8 +25,6 @@ applications/CStrategies/nim1.lgi
 applications/CStrategies/robot.lgi
 applications/CStrategies/robot1.lgi
 applications/CStrategies/space.lgi
-applications/FastCompletion/cp.lgi
-applications/FastCompletion/critical_pairs.lgi
 applications/Features/ac1.lgi
 applications/Features/bblock.lgi
 applications/Features/block.lgi
@@ -88,17 +86,14 @@ applications/MetaApply/adjlist.lgi
 applications/MetaApply/compbasic.lgi
 applications/MetaApply/cpbasic.lgi
 applications/MetaApply/cpbasic2.lgi
-applications/MetaApply/edge.lgi
 applications/MetaApply/eqSystem.lgi
 applications/MetaApply/extequation.lgi
 applications/MetaApply/extequation1.lgi
 applications/MetaApply/graph.lgi
-applications/MetaApply/label.lgi
 applications/MetaApply/list.lgi
 applications/MetaApply/lpo.lgi
 applications/MetaApply/lvariables.lgi
 applications/MetaApply/oneadjlist.lgi
-applications/MetaApply/path.lgi
 applications/MetaApply/position.lgi
 applications/MetaApply/renaming.lgi
 applications/MetaApply/termCommons.lgi

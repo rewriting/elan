@@ -1,2 +1,12 @@
 # tests of MetaApply (from legacy/elan3 tst_all; format: tests/apps/README.md)
 itest compbasic2 group kbgroup1c kbgroup1c
+# S9b: programs loaded by the 2004 reference without a test (tests/apps/triage.tsv)
+itest edge no edge edge-i
+aitest edge no edge edge-i
+gtest edge no edge edge-c
+itest label no label label-i
+aitest label no label label-i
+gtest label no label label-c
+itest path no path path-i
+aitest path no path path-i
+gtest path no path path-c
