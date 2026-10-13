@@ -268,6 +268,19 @@ sub-project (S1–S5b). Each item says where it comes from.
     normalisation does not end or stops the program (an array error, a
     write) does so in REM only. The run-time refusals left are worded
     `elanrt: not supported (not planned): ...`.
+- **REM: a compiled program that reads a query ignores the start term**
+  (found by S9b): `start with (s) f(query)` behaves as `(s) query`. Examples:
+  `Features/nqueens`, `longnames`, `tri`, `FastCompletion/cp`,
+  `MatchingAC/CompMatchingAC`. elanc and the interpreter evaluate the start
+  term. Consequence: no `gtest` for these programs, since the G oracle is
+  REM (`tests/apps/category4.md`).
+- **`Robot/tictac` with elanc-go**: it generates a 4 MB `main.go` (121 615
+  lines) and `go build` takes more than 6 min (REM compiles it).
+- **`.ref` export of `APT/bubleLOG`, `Robot/tictac`, `Strategies/ll`**: the
+  file cannot be imported back (`[PARSER] syntax error on symbol 'tone'`,
+  before `dk (N . div)`). The modern `elan -b --export` and the reference's
+  write the same file (same size) and both fail on the import, so the bug is
+  in both exporters; the A test of the bench uses the modern `elan`.
 
 ## Performance
 

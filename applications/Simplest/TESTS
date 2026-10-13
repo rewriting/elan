@@ -26,3 +26,5 @@ long aitest nqueens no nqueens nqueens
 long aitest queens no queens queens
 # S9b: programs loaded by the 2004 reference without a test (tests/apps/triage.tsv)
 gtest test_rewrite no test_rewrite test_rewrite-c
+gtest test_rewrite no test_rewrite_go1 test_rewrite_go1-c
+gtest test_rewrite no test_rewrite_go2 test_rewrite_go2-c

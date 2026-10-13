@@ -20,6 +20,8 @@ applications/Simplest::G::prim_jc:no:-:prim_jc	PASS≈
 applications/Simplest::G::primes_jc:no:-:primes_jc	PASS≈
 applications/Simplest::G::queens_jc:no:-:queens_jc	PASS≈
 applications/Simplest::G::test_rewrite:no:test_rewrite:test_rewrite-c	PASS
+applications/Simplest::G::test_rewrite:no:test_rewrite_go1:test_rewrite_go1-c	PASS
+applications/Simplest::G::test_rewrite:no:test_rewrite_go2:test_rewrite_go2-c	PASS
 applications/Strategies::G::ll:no:ll:ll-c	PASS
 contributions/Proving/Automata::G::all_operations:ex_termination:all_operations:all_operations-c	PASS
 contributions/Proving/Automata::G::automaton:ex_automaton:automaton:automaton-c	PASS

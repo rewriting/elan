@@ -1,0 +1,8 @@
+Enter a query term of sort 'Term'
+
+
+result = f(g(a,a))
+
+result = f(g(b,b))
+
+rewrite_step = 4
