@@ -1,0 +1,6 @@
+Enter a query term of sort 'pair[list[statezone],bool]'
+
+
+result = [cons_statezone(s2/[X>=1^true],nil),REACHED]
+
+rewrite_step = 98

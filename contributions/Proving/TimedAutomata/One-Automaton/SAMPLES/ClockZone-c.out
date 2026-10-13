@@ -1,0 +1,6 @@
+Enter a query term of sort 'clockzone'
+
+
+result = [Y>1^[X>2^[Z<=3^[X<5^true]]]]
+
+rewrite_step = 11

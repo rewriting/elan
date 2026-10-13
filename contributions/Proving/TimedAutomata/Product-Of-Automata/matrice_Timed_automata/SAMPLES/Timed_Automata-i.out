@@ -1,0 +1,10 @@
+[Near.Up.u1.nil/[Z>=0^[Z<=0^[Y<=1^[X<=0^[X>=0^true]]]]].nil,REACHED] end
+
+ end end
+end
+
+[Near.t1.u0.nil/[Y>=0^[Y<=0^[X>=0^[Z<=1^[X<=5^[Z>=1^[Z-X<=0^[X-Z<=0^true]]]]]]]].Near.Up.u1.nil/[Z>=0^[Z<=0^[Y<=1^[X<=0^[X>=0^true]]]]].nil,REACHED] end
+
+ end end
+end
+

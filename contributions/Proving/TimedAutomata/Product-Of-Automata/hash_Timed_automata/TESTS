@@ -1,0 +1,5 @@
+# tests of Proving/TimedAutomata/Product-Of-Automata/hash_Timed_automata (S9b; format: tests/apps/README.md)
+# S9b: programs loaded by the 2004 reference without a test (tests/apps/triage.tsv)
+itest Timed_Automata Eng_train Timed_Automata Timed_Automata-i
+aitest Timed_Automata Eng_train Timed_Automata Timed_Automata-i
+gtest Timed_Automata Eng_train Timed_Automata Timed_Automata-c

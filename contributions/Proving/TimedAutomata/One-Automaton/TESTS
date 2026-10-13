@@ -1,0 +1,8 @@
+# tests of Proving/TimedAutomata/One-Automaton (S9b; format: tests/apps/README.md)
+# S9b: programs loaded by the 2004 reference without a test (tests/apps/triage.tsv)
+itest ClockZone clocks ClockZone ClockZone-i
+aitest ClockZone clocks ClockZone ClockZone-i
+gtest ClockZone clocks ClockZone ClockZone-c
+itest Timed_Automaton simple Timed_Automaton Timed_Automaton-i
+aitest Timed_Automaton simple Timed_Automaton Timed_Automaton-i
+gtest Timed_Automaton simple Timed_Automaton Timed_Automaton-c
