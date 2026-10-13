@@ -1,2 +1,0 @@
-elanc-rs is frozen at the end of S6b (docs/s6-rust-status.md): it refuses
-choose/try conditions (S6d), which elanc-go compiles since S7d.

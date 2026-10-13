@@ -422,13 +422,27 @@ fn unsupported_constructs_are_refused_when_reachable() {
         Err(Error::Unsupported { stage: "S6c", what }) => assert!(what.contains("AC"), "{what}"),
         r => panic!("{r:?}"),
     }
-    // a start term with the query, a strategy
+    // a start term with the query (S6d): the query variable; every
+    // operator of the query grammar is compiled
     let mut p = peano();
     p.start(f(319, vec![v(0, NAT)]), NAT);
-    assert!(matches!(
-        p.lower(),
-        Err(Error::Unsupported { stage: "S6d", .. })
-    ));
+    let ir = p.lower().unwrap();
+    assert!(ir.start.uses_query && ir.start.vars.len() == 1);
+    let id = |n: &str| ir.ops.iter().position(|o| o.name == n).unwrap();
+    assert_eq!(
+        ir.start.term,
+        Expr::Op {
+            op: id("s"),
+            args: vec![Expr::Var(0)]
+        }
+    );
+    // o, s and plus may be in the query: compiled; the rules of bool are
+    // not (a query of sort nat has none)
+    let rules = &ir.start.query.rules;
+    for n in ["o", "s", "plus"] {
+        assert!(rules.contains(&QueryRule::Op(id(n))), "{n}: {rules:?}");
+    }
+    assert!(rules.contains(&QueryRule::None));
     // a traversal (S6d); a strategy of the strategy interpreter strat[X]
     // is compiled as any other (S6b task 2)
     let mut p = peano();
@@ -733,4 +747,46 @@ fn labelled_rules_need_their_operators() {
     let ir = p.lower().unwrap();
     assert_eq!(ir.labels[0].rules.len(), 2);
     assert!(matches!(op_named(&ir, "b").kind, OpKind::Constructor));
+}
+
+/// The term builtins on sorts of terms (codes 16, 17) are total
+/// operations compiled to walkers: one per pair of sorts that can contain
+/// the searched term, the copied path rebuilt by the operators' functions.
+#[test]
+fn replace_and_occurs_walk_the_sorts_that_can_contain_the_term() {
+    let mut p = peano();
+    p.op(SET, 341, "single", &[NAT], 0, 0);
+    p.op(SET, 342, "empty", &[], 0, 0);
+    p.op(SET, 343, "replace", &[NAT, NAT, SET], 16, 0);
+    p.op(BOOL, 344, "occurs", &[NAT, SET], 17, 0);
+    p.op(SET, 345, "pair", &[SET, BOOL], 0, 0);
+    let o = || f(318, vec![]);
+    let so = || f(319, vec![o()]);
+    p.start(
+        f(
+            345,
+            vec![
+                f(343, vec![o(), so(), f(341, vec![so()])]),
+                f(344, vec![o(), f(342, vec![])]),
+            ],
+        ),
+        SET,
+    );
+    let ir = p.lower().unwrap();
+    for name in ["replace", "occurs"] {
+        assert!(op_named(&ir, name).kind.total(), "{name}");
+    }
+    let main = elanc_rs::emit::emit_crate(&ir, "/rt").main_rs;
+    for needle in [
+        "tw_replace__Nat__Set(a2, a0, a1)",
+        "pub fn tw_replace__Nat__Set(t: &H<Set>, a: &H<Nat>, b: &H<Nat>) -> H<Set> {",
+        "let r0 = tw_replace__Nat__Nat(x0, a, b);",
+        "return single_341(&r0);",
+        "pub fn tw_replace__Nat__Nat(t: &H<Nat>, a: &H<Nat>, b: &H<Nat>) -> H<Nat> {\n    if t == a { return b.clone(); }",
+        "Set::Single(x0) => {\n            tw_occurs__Nat__Nat(a, x0)",
+        // a bool cannot contain a nat
+        "Set::Pair(x0, x1) => {\n            tw_occurs__Nat__Set(a, x0)\n",
+    ] {
+        assert!(main.contains(needle), "{needle} not in:\n{main}");
+    }
 }

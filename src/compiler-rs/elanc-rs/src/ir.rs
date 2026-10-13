@@ -107,7 +107,18 @@
 //!
 //! * S6c (AC): [`Repr::Enum`] variants get an AC multiset field, [`Pattern`]
 //!   an AC case, [`Decision`] an AC matching node.
-//! * S6d (query): [`Start`] gets the query variable and the parser tables.
+//!
+//! # Query input (S6d)
+//!
+//! Without `-noInput`, a program reads its query from the standard input
+//! with REM's Earley parser (`elan_runtime::earley`, spec D6): [`Start`]
+//! has the parser's tables ([`QueryIr`]: the grammar rules of the `.ref`
+//! file, and how the term of each one is built) and, when the start term
+//! uses the query, the query variable. As elanc-go (S7d task 5, S7e task
+//! 13): when the start term uses the query, every operator that a query
+//! can contain is compiled (one that cannot be is refused at run time,
+//! when a query contains it); else only those the program reaches are,
+//! and a query containing another one is parsed but not built.
 
 use elan_ref::{SortIndex, SymbolCode};
 
@@ -139,6 +150,9 @@ pub struct Ir {
     /// The evaluators of the `Strategy[X]` terms of `META` (one per X).
     pub metas: Vec<MetaIr>,
     pub start: Start,
+    /// The table of identifiers of the `.ref` file (index, name):
+    /// identifiers and the query parser (`elan_runtime::init_idents`).
+    pub idents: Vec<(i32, String)>,
 }
 
 /// The evaluation of the terms of sort `Strategy[X]` (`Meta_strat[X]`) by
@@ -299,6 +313,9 @@ pub enum BuiltinKind {
     Bool,
     /// `builtinString`: a `Str` (`Rc<[u8]>`: bytes, as C strings).
     Str,
+    /// `ident`: an `Ident`, the index of the identifier in the table of
+    /// identifiers of the program (`elan_runtime::ident`).
+    Ident,
 }
 
 /// A builtin sort and the sorts whose only constructor is an injection of
@@ -431,6 +448,16 @@ pub enum BuiltinOp {
     StrSpn,
     StrCmp,
     StrOfChar,
+    /// `==`, `!=` on ident (14, 15).
+    IdentEq,
+    IdentNe,
+    /// `ident2string` (177): the name of the identifier.
+    IdentToString,
+    /// `replace t1 by t2 in t3` (16) and `occurs t1 in t2` (17) on sorts
+    /// of terms (`replace[X,Y]`, `occur[X,Y]`): REM's term_rec_replace and
+    /// term_occur, the copied path of a replacement renormalised.
+    TermReplace,
+    TermOccurs,
 }
 
 /// A comparison.
@@ -476,12 +503,18 @@ impl BuiltinOp {
             156 => StrSpn,
             157 => StrCmp,
             158 => StrOfChar,
+            14 => IdentEq,
+            15 => IdentNe,
+            177 => IdentToString,
+            16 => TermReplace,
+            17 => TermOccurs,
             _ => return None,
         })
     }
 
     /// Does the operation need values (not stuck terms) as arguments?
-    /// `and`/`or`/`not` and the term equalities accept any normal form.
+    /// `and`/`or`/`not` and the operations on terms accept any normal
+    /// form.
     pub fn needs_values(self) -> bool {
         !matches!(
             self,
@@ -490,6 +523,8 @@ impl BuiltinOp {
                 | BuiltinOp::BoolNot
                 | BuiltinOp::TermEq
                 | BuiltinOp::TermNeq
+                | BuiltinOp::TermReplace
+                | BuiltinOp::TermOccurs
         )
     }
 
@@ -545,6 +580,8 @@ pub enum Pattern {
     Int(i64),
     /// A builtinString literal.
     Str(Vec<u8>),
+    /// An identifier literal (its index).
+    Ident(i32),
 }
 
 /// A condition or local assignment of a rule.
@@ -567,6 +604,34 @@ pub enum Cond {
         strategy: StratId,
         expr: Expr,
     },
+    /// `choose try b1 try b2 ... end`: the branches (lists of conditions)
+    /// are alternatives of the rest of the rule, as both oracles run them
+    /// (the interpreter's TRYCHOICE, `rewrite/stateofexecution.cc`; REM's
+    /// `Choice.java`): branch 1 then the conditions after `end` and the
+    /// right-hand side, each of their solutions in turn; when they are
+    /// exhausted (or fail), branch 2 and the rest, and so on. So a
+    /// condition after `end` that fails tries the next branch, a labelled
+    /// rule gives the results of every branch in order, and a
+    /// normalisation keeps the first. A variable bound by a branch is the
+    /// same variable in every branch; after `end`, only those bound by
+    /// every branch (`bound`) are bound. (As elanc-go's `CondChoose`.)
+    Choose {
+        branches: Vec<Vec<Cond>>,
+        bound: Vec<VarId>,
+    },
+}
+
+impl Cond {
+    /// Call `f` on `c` and on the conditions of its branches
+    /// ([`Cond::Choose`]), depth first.
+    pub fn walk<'c>(&'c self, f: &mut dyn FnMut(&'c Cond)) {
+        f(self);
+        if let Cond::Choose { branches, .. } = self {
+            for c in branches.iter().flatten() {
+                c.walk(f);
+            }
+        }
+    }
 }
 
 /// A term to build (right-hand side, condition, start term). Building an
@@ -578,6 +643,8 @@ pub enum Expr {
     Op { op: OpId, args: Vec<Expr> },
     Int(i64),
     Str(Vec<u8>),
+    /// An identifier literal (its index).
+    Ident(i32),
 }
 
 /// A position under the arguments of the function: the argument number,
@@ -619,6 +686,7 @@ pub enum Head {
     Op(OpId),
     Int(i64),
     Str(Vec<u8>),
+    Ident(i32),
 }
 
 /// The query's start term (`start with () t`, run by `-noInput`).
@@ -627,10 +695,72 @@ pub struct Start {
     /// Sort of the query (printed by the prompt).
     pub query_sort: String,
     pub sort: SortId,
+    /// The start term; when it uses the query (`uses_query`), `vars` has
+    /// one variable, the query (`Expr::Var(0)`).
     pub term: Expr,
+    pub uses_query: bool,
+    pub vars: Vec<VarIr>,
+    /// The query parser: the query is read from the standard input
+    /// (without `-noInput`).
+    pub query: QueryIr,
     /// `start with (S) t`: the strategy applied to the normal form of the
     /// term, each result printed; `None` for `()`.
     pub strategy: Option<StratId>,
+}
+
+/// The tables of the query parser (`elan_runtime::earley`): the grammar
+/// and, per grammar rule, how the term of its operator is built.
+#[derive(Clone, Debug)]
+pub struct QueryIr {
+    /// The sort of the query (the `.ref` sort index: the start symbol of
+    /// the parser), and its sort in the IR when it is compiled.
+    pub sort: SortIndex,
+    pub sort_id: Option<SortId>,
+    /// The grammar rules (REM's `gram[]`), and how each one is built.
+    pub grammar: Vec<GrammarRule>,
+    pub rules: Vec<QueryRule>,
+    /// The names of the sorts (the parser's warnings).
+    pub sort_names: Vec<(SortIndex, String)>,
+    /// The sorts of the standard rules (identifier, number and string
+    /// lexems).
+    pub intern_ident: SortIndex,
+    pub intern_int: SortIndex,
+    pub intern_string: SortIndex,
+}
+
+/// A rule of the query grammar: `sort ::= rhs`, building `symbol`.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct GrammarRule {
+    /// The left-hand side (a sort index of the `.ref` file).
+    pub sort: SortIndex,
+    /// The function symbol code (the rule number of the parser).
+    pub symbol: SymbolCode,
+    /// The priority word: priority + syntax bits * 4096 (bits 12-13 the
+    /// associativity).
+    pub info: i32,
+    /// The right-hand side, blanks left out: (kind, code), the kinds of
+    /// REM's `gram[]` (0 an identifier, 1 a sort, 2 a character, 3 a
+    /// number).
+    pub rhs: Vec<(u8, i32)>,
+}
+
+/// How the term of a grammar rule is built.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum QueryRule {
+    /// The parser never builds it (a rule of a sort that a query cannot
+    /// contain, or a number, identifier or string: built by the parser).
+    None,
+    /// The function of the operator.
+    Op(OpId),
+    /// `- n` of the number read (INTCONSTUMIN, code 79).
+    Umin,
+    /// The operator is not compiled (why); a query that contains it stops
+    /// the program (status 2).
+    Unsupported(String),
+    /// The start term does not use the query and only the query reaches
+    /// the operator: it is not compiled; a query containing it is parsed
+    /// but not built.
+    Uncompiled,
 }
 
 impl Ir {
@@ -685,13 +815,13 @@ impl Ir {
                 for r in rules {
                     ops_of(&r.rhs, &mut succ[o]);
                     for c in &r.conds {
-                        match c {
-                            Cond::Same(..) => {}
+                        c.walk(&mut |c| match c {
+                            Cond::Same(..) | Cond::Choose { .. } => {}
                             Cond::If(e) | Cond::Let(_, e) | Cond::Match(_, e) => {
                                 ops_of(e, &mut succ[o])
                             }
                             Cond::Apply { expr, .. } => ops_of(expr, &mut succ[o]),
-                        }
+                        });
                     }
                 }
                 succ[o].sort_unstable();

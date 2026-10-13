@@ -1,7 +1,8 @@
 #!/bin/sh
 # Compiled programs that read their query from the standard input (S7d
 # task 5: the Earley parser of REM's compiled programs ported to Go,
-# elanrt/earley), compared query by query with REM and the interpreter.
+# elanrt/earley; S6d for elanc-rs, elan-runtime/src/earley), compared
+# query by query with REM and the interpreter.
 #
 # Programs (each with its queries, one per line, each run separately):
 #  - tests/compiler/programs/start_term/*.lgi: queries 5, 7, 2147483647;
@@ -30,13 +31,21 @@
 # <name>.status: the expected exit status of each query, one per line
 # (2: a query refused, the interpreter not run; without it a status 0 or
 # 1 is expected); <name>.steps (saying why): the `rewrite_step` line is
-# compared with REM's too (the whole stdout).
+# compared with REM's too (the whole stdout); <name>.no-<compiler> (e.g.
+# .no-elanc-rs): why the program is not run with that compiler. With
+# elanc-rs, a program that it refuses (status 2, "not supported yet
+# (S6c)" or a later stage: AC operators...) is skipped, with the refusal,
+# and so is a query that it refuses at run time (the query has an
+# operator that it does not compile, status 2 with the same message).
 #
-# Usage: [ELANC=elanc-go] test_query.sh PREFIX [name...]  (an installed
-# ELAN with the compiler and elanc-rem; names select programs: start_term/x,
-# runtime_strategies/x, examples/x, query/x). The go build cache is
-# $ELANC_GO_CACHE, default tests/compiler-rs/work/gocache. The work
-# directory tests/compiler-rs/work/query-go.XXXXXX is removed when all pass.
+# Usage: [ELANC=elanc-go|elanc-rs] test_query.sh PREFIX [name...]  (an
+# installed ELAN with the compiler and elanc-rem; names select programs:
+# start_term/x, runtime_strategies/x, examples/x, query/x). The build cache
+# is $ELANC_GO_CACHE (default tests/compiler-rs/work/gocache) for
+# elanc-go, the cargo target directory $ELANC_RS_TARGET_DIR (default
+# tests/compiler-rs/work/target) for elanc-rs. The work directory
+# tests/compiler-rs/work/query-go.XXXXXX (query-rs for elanc-rs) is
+# removed when all pass.
 PREFIX=${1:?usage: test_query.sh PREFIX [name...]}
 PREFIX=$(cd "$PREFIX" && pwd) || exit 2
 shift
@@ -44,11 +53,16 @@ HERE=$(cd "$(dirname "$0")" && pwd)
 ROOT=$(cd "$HERE/../.." && pwd)
 export ELANLIB=$PREFIX PATH=$PREFIX/bin:$PATH LC_ALL=C
 ELANC=${ELANC:-elanc-go}
-[ "$ELANC" = elanc-go ] || { echo "test_query.sh: only elanc-go reads queries" >&2; exit 2; }
-TARGET=${ELANC_GO_CACHE:-$HERE/work/gocache}
+# per compiler: the build cache and its option, the subdirectory of each
+# program (and the suffix of the work directory)
+case $ELANC in
+  elanc-go) TARGET=${ELANC_GO_CACHE:-$HERE/work/gocache} CACHE_OPT=--gocache W=go ;;
+  elanc-rs) TARGET=${ELANC_RS_TARGET_DIR:-$HERE/work/target} CACHE_OPT=--target-dir W=rs ;;
+  *) echo "unknown compiler ELANC=$ELANC (elanc-go or elanc-rs)" >&2; exit 2 ;;
+esac
 QDIR=$HERE/programs/query
 mkdir -p "$HERE/work" "$TARGET" || exit 2
-RUN=$(mktemp -d "$HERE/work/query-go.XXXXXX") || exit 2
+RUN=$(mktemp -d "$HERE/work/query-$W.XXXXXX") || exit 2
 echo "work directory: $RUN ($ELANC)"
 SELECTION="$*"
 selected() { [ -z "$SELECTION" ] && return 0; for s in $SELECTION; do [ "$s" = "$1" ] && return 0; done; return 1; }
@@ -83,13 +97,16 @@ remstrings() {
 program() {
   label=$1 src=$2 lgi=$3 spc=$4 queries=$5
   selected "$label" || return 0
+  base=$(basename "$label")
+  if [ "${label%%/*}" = query ] && [ -f "$QDIR/$base.no-$ELANC" ]; then
+    echo "skip $label ($base.no-$ELANC)"; return 0
+  fi
   n=$((n+1))
   d=$RUN/$(echo "$label" | tr / _)
-  mkdir -p "$d/go" "$d/rem" "$d/int" || exit 2
-  for w in go rem int; do cp -R "$src"/. "$d/$w/" || exit 2; done
+  mkdir -p "$d/$W" "$d/rem" "$d/int" || exit 2
+  for w in $W rem int; do cp -R "$src"/. "$d/$w/" || exit 2; done
   spcfile=; [ -n "$spc" ] && spcfile=$spc.spc
   noint=; norem=; expected=; statuses=; steps=
-  base=$(basename "$label")
   if [ "${label%%/*}" = query ]; then
     [ -f "$QDIR/$base.no-rem" ] && norem=$QDIR/$base.no-rem
     [ -f "$QDIR/$base.no-interpreter" ] && noint=$QDIR/$base.no-interpreter
@@ -97,10 +114,15 @@ program() {
     [ -f "$QDIR/$base.status" ] && statuses=$QDIR/$base.status
     [ -f "$QDIR/$base.steps" ] && steps=$QDIR/$base.steps
   fi
-  if ! ( cd "$d/go" && $ELANC -v -b -nosplit -quiet --gocache "$TARGET" "$lgi" $spc >elanc-go.log 2>&1 ); then
-    fail "$label: $ELANC failed (see $d/go/elanc-go.log)"; return
+  ( cd "$d/$W" && $ELANC -v -b -nosplit -quiet $CACHE_OPT "$TARGET" "$lgi" $spc >$ELANC.log 2>&1 ); cs=$?
+  if [ "$cs" = 2 ] && [ "$ELANC" = elanc-rs ] && grep -q 'not supported yet (S6[c-e])' "$d/$W/$ELANC.log"; then
+    n=$((n-1))
+    echo "skip $label (refused by elanc-rs: $(grep -o 'not supported yet.*' "$d/$W/$ELANC.log" | head -1))"; return
   fi
-  build=$(sed -n 's/^elanc-go: build time //p' "$d/go/elanc-go.log")
+  if [ "$cs" != 0 ]; then
+    fail "$label: $ELANC failed (see $d/$W/$ELANC.log)"; return
+  fi
+  build=$(sed -n "s/^$ELANC: build time //p" "$d/$W/$ELANC.log")
   if [ -z "$norem" ] && ! ( cd "$d/rem" && elanc-rem -b -nosplit -quiet "$lgi" $spc >elanc.log 2>&1 \
        && make -f "$lgi.make" >make.log 2>&1 ); then
     fail "$label: elanc-rem or make failed (see $d/rem/*.log)"; return
@@ -110,22 +132,27 @@ program() {
     i=$((i+1)) nq=$((nq+1))
     if [ "$q" = "<EOF>" ]; then printf '' > "$d/q$i"; else printf '%s\n' "$q" > "$d/q$i"; fi
     what="$label [$q]"
-    ( cd "$d/go" && ./a.out -quiet < "$d/q$i" > "$d/go/out$i" 2> "$d/go/err$i" ); gs=$?
-    if [ -n "$steps" ]; then cp "$d/go/out$i" "$d/go/cmp$i"
-    else grep -v '^rewrite_step = ' "$d/go/out$i" > "$d/go/cmp$i"; fi
+    ( cd "$d/$W" && ./a.out -quiet < "$d/q$i" > "$d/$W/out$i" 2> "$d/$W/err$i" ); gs=$?
+    if [ -n "$steps" ]; then cp "$d/$W/out$i" "$d/$W/cmp$i"
+    else grep -v '^rewrite_step = ' "$d/$W/out$i" > "$d/$W/cmp$i"; fi
     good=1
+    # elanc-rs: a query with an operator it refuses (S6c: AC), at run time
+    if [ "$ELANC" = elanc-rs ] && [ "$gs" = 2 ] && grep -q 'not supported yet.*(S6[c-e])' "$d/$W/err$i" \
+       && { [ -z "$statuses" ] || [ "$(sed -n "${i}p" "$statuses")" != 2 ]; }; then
+      echo "skip $what (refused by elanc-rs: $(grep -o '(S6[c-e]).*' "$d/$W/err$i" | head -1))"; continue
+    fi
     if [ -n "$statuses" ]; then
       want=$(sed -n "${i}p" "$statuses")
-      [ "$gs" = "$want" ] || { fail "$what: status $gs, expected $want ($(head -c 300 "$d/go/err$i" | tr '\n' ' '))"; continue; }
+      [ "$gs" = "$want" ] || { fail "$what: status $gs, expected $want ($(head -c 300 "$d/$W/err$i" | tr '\n' ' '))"; continue; }
     else
-      case $gs in 0|1) ;; *) fail "$what: status $gs ($(head -c 300 "$d/go/err$i" | tr '\n' ' '))"; continue ;; esac
+      case $gs in 0|1) ;; *) fail "$what: status $gs ($(head -c 300 "$d/$W/err$i" | tr '\n' ' '))"; continue ;; esac
     fi
     # REM
     if [ -n "$norem" ]; then
       if [ -n "$expected" ]; then
         awk -v k="$i" 'BEGIN{b=1} /^==$/{b++; next} b==k' "$expected" > "$d/exp$i"
-        if ! cmp -s "$d/exp$i" "$d/go/cmp$i"; then
-          fail "$what: stdout differs from $base.expected: $(diff "$d/exp$i" "$d/go/cmp$i" | head -4 | tr '\n' ' ')"; good=
+        if ! cmp -s "$d/exp$i" "$d/$W/cmp$i"; then
+          fail "$what: stdout differs from $base.expected: $(diff "$d/exp$i" "$d/$W/cmp$i" | head -4 | tr '\n' ' ')"; good=
         fi
       fi
     else
@@ -136,10 +163,10 @@ program() {
       else grep -v '^rewrite_step = ' "$d/rem/out$i" > "$d/rem/cmp$i"; fi
       if [ "$rs" != "$gs" ]; then
         fail "$what vs REM: status $gs, REM $rs"; good=
-      elif ! cmp -s "$d/go/cmp$i" "$d/rem/cmp$i"; then
-        fail "$what vs REM: stdout $(diff "$d/rem/cmp$i" "$d/go/cmp$i" | head -4 | tr '\n' ' ')"; good=
-      elif ! remstrings < "$d/go/err$i" | cmp -s - "$d/rem/err$i"; then
-        fail "$what vs REM: stderr $(diff "$d/rem/err$i" "$d/go/err$i" | head -6 | tr '\n' ' ')"; good=
+      elif ! cmp -s "$d/$W/cmp$i" "$d/rem/cmp$i"; then
+        fail "$what vs REM: stdout $(diff "$d/rem/cmp$i" "$d/$W/cmp$i" | head -4 | tr '\n' ' ')"; good=
+      elif ! remstrings < "$d/$W/err$i" | cmp -s - "$d/rem/err$i"; then
+        fail "$what vs REM: stderr $(diff "$d/rem/err$i" "$d/$W/err$i" | head -6 | tr '\n' ' ')"; good=
       fi
     fi
     # the interpreter
@@ -151,7 +178,7 @@ program() {
           fail "$what: a syntax error for $ELANC, not for the interpreter"; good=
         fi
       else
-        a=$(grep '^result = ' "$d/go/out$i" | sed 's/^result = *//' | tr -d '"' | canon "$label" | oneline)
+        a=$(grep '^result = ' "$d/$W/out$i" | sed 's/^result = *//' | tr -d '"' | canon "$label" | oneline)
         b=$(printf '%s\n' "$iout" | sed -n 's/^ *\(.*\) end$/\1/p' | grep -v '^end$' | tr -d '"' | canon "$label" | oneline)
         if [ "$a" != "$b" ]; then
           fail "$what vs interpreter: $ELANC [$a], interpreter [$b]"; good=
@@ -159,9 +186,9 @@ program() {
       fi
     fi
     if [ -n "$good" ]; then
-      r=$(grep '^result = ' "$d/go/out$i" | sed 's/^result = *//' | oneline)
-      [ "$gs" = 1 ] && r="syntax error: $(sed -n 's/^\[earley\] //p' "$d/go/err$i" | head -1)"
-      [ "$gs" = 2 ] && r="refused: $(head -1 "$d/go/err$i")"
+      r=$(grep '^result = ' "$d/$W/out$i" | sed 's/^result = *//' | oneline)
+      [ "$gs" = 1 ] && r="syntax error: $(sed -n 's/^\[earley\] //p' "$d/$W/err$i" | head -1)"
+      [ "$gs" = 2 ] && r="refused: $(head -1 "$d/$W/err$i")"
       ok "$what: [$r]${norem:+ (no REM: $(basename "$norem"))}${noint:+ (no interpreter: $(basename "$noint"))}"
     fi
   done < "$queries"

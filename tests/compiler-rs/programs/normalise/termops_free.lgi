@@ -1,0 +1,18 @@
+LPL termops_free description
+  query of sort bool
+  result of sort u
+  import termops_free
+  start with () res(
+    r(replace(a, b, f(a, g(a))),
+      replace(b, h(a), f(b, d)),
+      replace(a, g(b), g(a)),
+      replace(k(1), k(2), f(k(1), s("x"))),
+      replace(f(a,a), a, f(f(a,a), f(a,a))),
+      replace(d, c, f(a, g(b))),
+      rep(f(a, f(b, g(b))))),
+    q(occurs(a, f(g(a), b)), occurs(f(a,b), a), occurs(s("x"), g(s("x"))),
+      occurs(k(3), f(k(3), a)), occurs(a, a), occurs(d, f(a, b)),
+      occurs(a, m(w(f(a, b)), e)), occurs(c, m(e, w(d))), occurs(e, m(w(a), e))),
+    m(replace(a, h(c), m(w(f(a, b)), w(h(a)))), replace(b, a, w(h(b)))),
+    replace(w(a), e, m(w(a), m(w(b), w(a)))))
+end

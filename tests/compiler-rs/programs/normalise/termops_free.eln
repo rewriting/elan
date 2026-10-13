@@ -1,0 +1,33 @@
+module termops_free
+// The term builtins replace (code 16) and occurs (17) on sorts of terms
+// without AC operators (termops has the AC cases), within one sort and
+// across sorts (replace[t,u], occur[t,u]: a t in a u): elanc-rs walks the
+// typed terms with one function per pair of sorts. The copied path of a
+// replacement is renormalised (h(a) => b, g(g(x)) => x; h(b) is stuck,
+// h(a) after the replacement is not); unchanged subterms are kept.
+import global bool int string replace[t,t] occur[t,t] replace[t,u] occur[t,u] replace[u,u] occur[u,u]; end
+sort t u; end
+operators global
+  a : t; b : t; c : t; d : t;
+  f(@,@) : (t t) t;
+  g(@) : (t) t;
+  h(@) : (t) t;
+  k(@) : (int) t;
+  s(@) : (string) t;
+  e : u;
+  w(@) : (t) u;
+  m(@,@) : (u u) u;
+  r(@,@,@,@,@,@,@) : (t t t t t t t) u;
+  q(@,@,@,@,@,@,@,@,@) : (bool bool bool bool bool bool bool bool bool) u;
+  rep(@) : (t) t;
+  res(@,@,@,@) : (u u u u) u;
+end
+rules for t
+  x, y : t;
+global
+  [] h(a) => b end
+  [] g(g(x)) => x end
+  // as the bench's rep: the replacement in a where, renormalised
+  [] rep(f(a,x)) => y where y := () replace b by a in x end
+end
+end

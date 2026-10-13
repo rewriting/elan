@@ -36,6 +36,16 @@
 //!   continuation of `S` (a closure), so that a failing condition asks `S`
 //!   for its next result (`return false`); in a normalisation function the
 //!   first result for which the rule applies is kept (`res`);
+//! * `choose try b1 ... end`: the rest of the rule (the conditions after
+//!   `end` and the right-hand side) as a closure `rest<n>` taking the
+//!   variables bound by every branch, then each branch in a block ending
+//!   with the call of `rest<n>` (a failing condition leaves the block: the
+//!   next branch is tried);
+//! * the term builtins `occurs a in t` and `replace a by b in t` on sorts
+//!   of terms: one walker function per (sort of `a`, sort of a subterm of
+//!   `t`) that can contain it, `tw_occurs__A__C` and `tw_replace__A__C`,
+//!   the copied path rebuilt by the normalisation functions of its
+//!   operators;
 //! * `main`: the start term, normalised and printed by the runtime driver
 //!   (strings printed raw, as the compiled C programs do), or each result
 //!   of the start strategy applied to it.
@@ -228,6 +238,23 @@ struct Emitter<'a> {
     /// While emitting a tail-recursive strategy as a loop: its calls in
     /// tail position ([`Ir::tail_calls`]), which set the next term.
     tail_nodes: Vec<*const Strategy>,
+    /// The term walkers used ([`Emitter::walker`]), to emit after the
+    /// operators, and those already emitted or pending (by name).
+    walkers: Vec<(Walk, SortId, SortId)>,
+    walker_names: std::collections::HashSet<String>,
+    /// The type of the result of the normalisation function being emitted.
+    res_ty: String,
+    /// While emitting the branches of chooses: the closure of the rest of
+    /// the rule of the innermost one and its arguments, called at the end
+    /// of a branch instead of the right-hand side.
+    choose_rest: Vec<(String, String)>,
+}
+
+/// What a term walker computes.
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum Walk {
+    Occurs,
+    Replace,
 }
 
 impl<'a> Emitter<'a> {
@@ -247,6 +274,10 @@ impl<'a> Emitter<'a> {
             recursive: ir.recursive_ops(),
             total: ir.total_strategies(),
             tail_nodes: Vec::new(),
+            walkers: Vec::new(),
+            walker_names: std::collections::HashSet::new(),
+            res_ty: String::new(),
+            choose_rest: Vec::new(),
         }
     }
 
@@ -264,6 +295,7 @@ impl<'a> Emitter<'a> {
             BuiltinKind::Int => "Int",
             BuiltinKind::Bool => "bool",
             BuiltinKind::Str => "Str",
+            BuiltinKind::Ident => "elan_runtime::Ident",
         }
     }
 
@@ -340,6 +372,7 @@ impl<'a> Emitter<'a> {
             Expr::Var(v) => format!("{}.clone()", vars[*v].name),
             Expr::Int(n) => self.lit_int(*n),
             Expr::Str(s) => self.lit_str(s),
+            Expr::Ident(i) => self.lit_ident(*i),
             Expr::Op { op, args } => {
                 let o = &self.ir.ops[*op];
                 match o.kind {
@@ -390,6 +423,21 @@ impl<'a> Emitter<'a> {
         self.wrap(self.int_sort().expect("builtinInt"), &v)
     }
 
+    fn ident_sort(&self) -> Option<SortId> {
+        self.ir
+            .families
+            .iter()
+            .find(|f| f.kind == BuiltinKind::Ident)
+            .map(|f| f.base)
+    }
+
+    fn lit_ident(&self, i: i32) -> String {
+        self.wrap(
+            self.ident_sort().expect("ident"),
+            &format!("elan_runtime::Ident({i})"),
+        )
+    }
+
     fn lit_str(&self, s: &[u8]) -> String {
         self.wrap(
             self.str_sort().expect("builtinString"),
@@ -404,6 +452,7 @@ impl<'a> Emitter<'a> {
                 Head::Int(n) if *n < 0 => format!("*{v} == ({n})"),
                 Head::Int(n) => format!("*{v} == {n}"),
                 Head::Str(st) => format!("&**{v} == {}", byte_lit(st)),
+                Head::Ident(i) => format!("{v}.0 == {i}"),
                 Head::Op(o) => match self.ir.ops[*o].kind {
                     OpKind::BoolConst(true) => format!("*{v}"),
                     OpKind::BoolConst(false) => format!("!*{v}"),
@@ -453,6 +502,7 @@ impl<'a> Emitter<'a> {
         self.sorts();
         self.families();
         o_ops(&mut self);
+        self.walker_fns();
         self.labels();
         self.strategies();
         self.metas();
@@ -677,6 +727,7 @@ impl<'a> Emitter<'a> {
                 if self.recursive[o] {
                     self.out.line("elan_runtime::guard();");
                 }
+                self.res_ty = self.ty(op.result);
                 self.decision(tree, rules);
                 if *total {
                     self.out.line(&format!(
@@ -711,6 +762,18 @@ impl<'a> Emitter<'a> {
                 format!("*a{i}")
             }
         };
+        if let BuiltinOp::TermOccurs = b {
+            let f = self.walker(Walk::Occurs, op.args[0], op.args[1]);
+            let w = self.wrap(res, &format!("{f}(a0, a1)"));
+            self.out.line(&w);
+            return;
+        }
+        if let BuiltinOp::TermReplace = b {
+            // replace a0 by a1 in a2
+            let f = self.walker(Walk::Replace, op.args[0], op.args[2]);
+            self.out.line(&format!("{f}(a2, a0, a1)"));
+            return;
+        }
         if !b.needs_values() {
             let v = match b {
                 BuiltinOp::TermEq => "a0 == a1".to_string(),
@@ -764,7 +827,12 @@ impl<'a> Emitter<'a> {
             StrSpn => "builtin::str_spn(&v0, &v1)".to_string(),
             StrCmp => "builtin::str_cmp(&v0, &v1)".to_string(),
             StrOfChar => "builtin::str_of_char(v0)".to_string(),
-            TermEq | TermNeq | BoolAnd | BoolOr | BoolNot => unreachable!(),
+            IdentEq => "v0 == v1".to_string(),
+            IdentNe => "v0 != v1".to_string(),
+            IdentToString => "Str::from(elan_runtime::ident_name(v0).as_bytes())".to_string(),
+            TermEq | TermNeq | BoolAnd | BoolOr | BoolNot | TermReplace | TermOccurs => {
+                unreachable!()
+            }
         };
         if b.partial() {
             self.out.open(&format!("match {value} {{"));
@@ -776,6 +844,201 @@ impl<'a> Emitter<'a> {
             let w = self.wrap(res, &value);
             self.out.line(&w);
         }
+    }
+
+    // ------------------------------------------------------------------
+    // Term walkers: occurs (17) and replace (16) on sorts of terms
+    // ------------------------------------------------------------------
+
+    /// The representation of the terms of sort `s` for the walkers: its
+    /// Rust type (the members of a builtin family share it: an `int` is
+    /// its `builtinInt`, as for REM, where the injection is no node), a
+    /// name, and the variants a term can have at its top (none for a
+    /// native value).
+    fn walk_node(&self, s: SortId) -> (String, String, Vec<OpId>) {
+        let sort = &self.ir.sorts[s];
+        match &sort.repr {
+            Repr::Enum { variants } => (self.ty(s), sort.type_name.clone(), variants.clone()),
+            Repr::Family(f) => {
+                let fam = &self.ir.families[*f];
+                match &fam.stuck {
+                    Some(e) => (self.ty(s), e.alias.clone(), e.variants.clone()),
+                    None => (
+                        self.ty(s),
+                        self.ir.sorts[fam.base].type_name.clone(),
+                        Vec::new(),
+                    ),
+                }
+            }
+        }
+    }
+
+    /// Can a term of sort `c` contain a subterm of the representation of
+    /// sort `a` (itself included)?
+    fn can_contain(&self, c: SortId, a: SortId) -> bool {
+        let target = self.walk_node(a).0;
+        let mut seen: std::collections::HashSet<String> = std::collections::HashSet::new();
+        let mut todo = vec![c];
+        while let Some(s) = todo.pop() {
+            let (ty, _, variants) = self.walk_node(s);
+            if ty == target {
+                return true;
+            }
+            if !seen.insert(ty) {
+                continue;
+            }
+            for v in variants {
+                todo.extend(self.ir.ops[v].args.iter().copied());
+            }
+        }
+        false
+    }
+
+    /// The name of the walker `w` of the terms of sort `a` in the terms of
+    /// sort `c` (`c` can contain `a`), emitted after the operators.
+    fn walker(&mut self, w: Walk, a: SortId, c: SortId) -> String {
+        let kind = match w {
+            Walk::Occurs => "occurs",
+            Walk::Replace => "replace",
+        };
+        let name = format!(
+            "tw_{kind}__{}__{}",
+            self.walk_node(a).1,
+            self.walk_node(c).1
+        );
+        if self.walker_names.insert(name.clone()) {
+            self.walkers.push((w, a, c));
+        }
+        name
+    }
+
+    /// The walkers used by the operators, and those they use.
+    fn walker_fns(&mut self) {
+        let mut i = 0;
+        while i < self.walkers.len() {
+            let (w, a, c) = self.walkers[i];
+            i += 1;
+            self.walker_fn(w, a, c);
+        }
+    }
+
+    /// `occurs a in t` (REM's term_occur): `t` is `a`, or `a` occurs in an
+    /// argument of `t` (only the arguments whose sort can contain `a` are
+    /// visited). `replace a by b in t` (REM's term_rec_replace): `b` when
+    /// `t` is `a`; else each argument replaced, the term rebuilt by its
+    /// operator's normalisation function when one changed (so the copied
+    /// path is renormalised), kept otherwise; `b` is not searched.
+    fn walker_fn(&mut self, w: Walk, a: SortId, c: SortId) {
+        let ir = self.ir;
+        let name = self.walker(w, a, c);
+        let (ta, tc) = (self.ty(a), self.ty(c));
+        let same = self.walk_node(a).0 == self.walk_node(c).0;
+        let (_, _, variants) = self.walk_node(c);
+        let (en, stuck) = match &ir.sorts[c].repr {
+            Repr::Enum { .. } => (ir.sorts[c].type_name.clone(), false),
+            Repr::Family(f) => match &ir.families[*f].stuck {
+                Some(e) => (e.type_name.clone(), true),
+                None => (String::new(), false),
+            },
+        };
+        let (sa, sc) = (&ir.sorts[a].name, &ir.sorts[c].name);
+        match w {
+            Walk::Occurs => {
+                self.out
+                    .line(&format!("/// occurs a in t, a of sort {sa}, t of sort {sc}."));
+                self.out.open(&format!(
+                    "pub fn {name}(a: &{ta}, t: &{tc}) -> bool {{"
+                ));
+            }
+            Walk::Replace => {
+                self.out.line(&format!(
+                    "/// replace a by b in t, a of sort {sa}, t of sort {sc}."
+                ));
+                self.out.open(&format!(
+                    "pub fn {name}(t: &{tc}, a: &{ta}, b: &{ta}) -> {tc} {{"
+                ));
+            }
+        }
+        if same {
+            match w {
+                Walk::Occurs => self.out.line("if t == a { return true; }"),
+                Walk::Replace => self.out.line("if t == a { return b.clone(); }"),
+            }
+        }
+        let kept = match w {
+            Walk::Occurs => "false",
+            Walk::Replace => "t.clone()",
+        };
+        // the variants with an argument that can contain a
+        let arms: Vec<OpId> = variants
+            .iter()
+            .copied()
+            .filter(|&v| ir.ops[v].args.iter().any(|&s| self.can_contain(s, a)))
+            .collect();
+        if arms.is_empty() {
+            self.out.line(kept);
+            self.out.close("}");
+            self.out.line("");
+            return;
+        }
+        self.out.line("elan_runtime::guard();");
+        let node = if stuck {
+            self.out.line(&format!(
+                "let Builtin::Stuck(s) = t else {{ return {kept}; }};"
+            ));
+            "s"
+        } else {
+            "t"
+        };
+        self.out.open(&format!("match &**{node} {{"));
+        for v in arms {
+            let op = &ir.ops[v];
+            let vn = op.variant.as_ref().unwrap();
+            let fields: Vec<String> = (0..op.args.len()).map(|i| format!("x{i}")).collect();
+            self.out
+                .open(&format!("{en}::{vn}({}) => {{", fields.join(", ")));
+            let visited: Vec<usize> = (0..op.args.len())
+                .filter(|&i| self.can_contain(op.args[i], a))
+                .collect();
+            match w {
+                Walk::Occurs => {
+                    let calls: Vec<String> = visited
+                        .iter()
+                        .map(|&i| {
+                            let f = self.walker(Walk::Occurs, a, op.args[i]);
+                            format!("{f}(a, x{i})")
+                        })
+                        .collect();
+                    self.out.line(&calls.join(" || "));
+                }
+                Walk::Replace => {
+                    for &i in &visited {
+                        let f = self.walker(Walk::Replace, a, op.args[i]);
+                        self.out.line(&format!("let r{i} = {f}(x{i}, a, b);"));
+                    }
+                    let changed: Vec<String> =
+                        visited.iter().map(|&i| format!("r{i} != *x{i}")).collect();
+                    let args: Vec<String> = (0..op.args.len())
+                        .map(|i| {
+                            if visited.contains(&i) {
+                                format!("&r{i}")
+                            } else {
+                                format!("x{i}")
+                            }
+                        })
+                        .collect();
+                    self.out.open(&format!("if {} {{", changed.join(" || ")));
+                    self.out.line(&format!("return {}({});", op.fun, args.join(", ")));
+                    self.out.close("}");
+                    self.out.line("t.clone()");
+                }
+            }
+            self.out.close("}");
+        }
+        self.out.line(&format!("_ => {kept},"));
+        self.out.close("}");
+        self.out.close("}");
+        self.out.line("");
     }
 
     // ------------------------------------------------------------------
@@ -866,7 +1129,7 @@ impl<'a> Emitter<'a> {
         for (h, d) in cases {
             let mut closes = 1;
             match h {
-                Head::Int(_) | Head::Str(_) => {
+                Head::Int(_) | Head::Str(_) | Head::Ident(_) => {
                     let t = self.lit_test(sort, &name, h);
                     self.out.open(&format!("if {t} {{"));
                 }
@@ -937,20 +1200,22 @@ impl<'a> Emitter<'a> {
             self.out
                 .line(&format!("let {} = {};", rule.vars[*v].name, occ_name(occ)));
         }
-        self.conds(rule, 0, &format!("break {label};"), 0);
+        self.conds(rule, &rule.conds, &format!("break {label};"), 0);
         self.out.close("}");
         if self.label_mode {
             self.out.line("if first && found { return false; }");
         }
     }
 
-    /// The conditions of `rule` from the i-th, then its application. `fail`
+    /// The conditions `conds` of `rule` (its conditions from one of them,
+    /// or the rest of a branch of a choose), then its application (at the
+    /// end of a branch of a choose: the rest of the rule after it). `fail`
     /// is the statement that abandons this attempt (`break 'r` in the
     /// rule's block, `return false` in the continuation of a strategy, which
     /// then gives its next result); `depth` is the number of enclosing
     /// continuations.
-    fn conds(&mut self, rule: &RuleIr, i: usize, fail: &str, depth: usize) {
-        for (j, c) in rule.conds.iter().enumerate().skip(i) {
+    fn conds(&mut self, rule: &RuleIr, conds: &[Cond], fail: &str, depth: usize) {
+        for (j, c) in conds.iter().enumerate() {
             match c {
                 Cond::Same(a, b) => {
                     self.out.line(&format!(
@@ -1008,7 +1273,7 @@ impl<'a> Emitter<'a> {
                         self.out.open(&format!("if {call}"));
                     }
                     self.pattern_check(pattern, &y, st.sort, "return false;", &rule.vars);
-                    self.conds(rule, j + 1, "return false;", depth + 1);
+                    self.conds(rule, &conds[j + 1..], "return false;", depth + 1);
                     self.out.line("false");
                     if keep_first {
                         self.out.close("});");
@@ -1018,7 +1283,25 @@ impl<'a> Emitter<'a> {
                     }
                     return;
                 }
+                Cond::Choose { branches, bound } => {
+                    self.choose(rule, &conds[j + 1..], branches, bound, depth);
+                    return;
+                }
             }
+        }
+        if let Some((rest, args)) = self.choose_rest.last().cloned() {
+            // the end of a branch of a choose: the rest of the rule
+            if self.label_mode {
+                self.out.line(&format!("if {rest}({args}) {{ return true; }}"));
+            } else if depth == 0 {
+                self.out
+                    .line(&format!("if let Some(r) = {rest}({args}) {{ return r; }}"));
+            } else {
+                self.out.line(&format!(
+                    "if let Some(r) = {rest}({args}) {{ res = Some(r); return true; }}"
+                ));
+            }
+            return;
         }
         self.out.line("step();");
         let rhs = self.expr(&rule.rhs, &rule.vars);
@@ -1033,12 +1316,74 @@ impl<'a> Emitter<'a> {
         }
     }
 
+    /// A choose ([`Cond::Choose`]) of `rule`, the conditions `rest` after
+    /// it: the rest of the rule as a closure `rest<n>` taking the variables
+    /// bound by every branch (a normalisation function: the result of the
+    /// rule, if it applies; a label: whether `k` asks to stop), then each
+    /// branch in a block (a failing condition leaves it: the next branch),
+    /// ending with the call of `rest<n>`. When every branch is
+    /// exhausted, the code after the blocks is reached: the rule fails.
+    fn choose(
+        &mut self,
+        rule: &RuleIr,
+        rest: &[Cond],
+        branches: &[Vec<Cond>],
+        bound: &[VarId],
+        depth: usize,
+    ) {
+        let n = self.next();
+        let name = format!("rest{n}");
+        let params: Vec<String> = bound
+            .iter()
+            .map(|&v| format!("{}: &{}", rule.vars[v].name, self.ty(rule.vars[v].sort)))
+            .collect();
+        let args: Vec<String> = bound.iter().map(|&v| rule.vars[v].name.clone()).collect();
+        self.out
+            .line("// the rest of the rule after the choose, for each branch");
+        if self.label_mode {
+            self.out.open(&format!(
+                "let mut {name} = |{}| -> bool {{",
+                params.join(", ")
+            ));
+            self.conds(rule, rest, "return false;", depth + 1);
+            self.out.line("false");
+            self.out.close("};");
+        } else {
+            self.out.open(&format!(
+                "let mut {name} = |{}| -> Option<{}> {{",
+                params.join(", "),
+                self.res_ty
+            ));
+            self.out.line("let mut res = None;");
+            self.out.open("(|| -> bool {");
+            self.conds(rule, rest, "return false;", depth + 1);
+            self.out.line("false");
+            self.out.close("})();");
+            self.out.line("res");
+            self.out.close("};");
+        }
+        self.choose_rest.push((name.clone(), args.join(", ")));
+        for (i, br) in branches.iter().enumerate() {
+            let label = format!("'c{n}_{}", i + 1);
+            self.out.line(&format!(
+                "// choose: try branch {} of {}, then {name}",
+                i + 1,
+                branches.len()
+            ));
+            self.out.open(&format!("{label}: {{"));
+            self.conds(rule, br, &format!("break {label};"), depth);
+            self.out.close("}");
+        }
+        self.choose_rest.pop();
+    }
+
     fn expr_sort(&self, e: &Expr, vars: &[VarIr]) -> SortId {
         match e {
             Expr::Var(v) => vars[*v].sort,
             Expr::Op { op, .. } => self.ir.ops[*op].result,
             Expr::Int(_) => self.int_sort().unwrap(),
             Expr::Str(_) => self.str_sort().unwrap(),
+            Expr::Ident(_) => self.ident_sort().unwrap(),
         }
     }
 
@@ -1048,10 +1393,11 @@ impl<'a> Emitter<'a> {
         let ir = self.ir;
         match p {
             Pattern::Var(v) => self.out.line(&format!("let {} = {scrut};", vars[*v].name)),
-            Pattern::Int(_) | Pattern::Str(_) => {
+            Pattern::Int(_) | Pattern::Str(_) | Pattern::Ident(_) => {
                 let h = match p {
                     Pattern::Int(n) => Head::Int(*n),
                     Pattern::Str(x) => Head::Str(x.clone()),
+                    Pattern::Ident(i) => Head::Ident(*i),
                     _ => unreachable!(),
                 };
                 let t = self.lit_test(s, scrut, &h);
@@ -1821,27 +2167,258 @@ impl<'a> Emitter<'a> {
         )
     }
 
+    /// The query parser's tables (S6d): the grammar (REM's `gram[]`), the
+    /// names of the sorts, the table of identifiers, and the builder of the
+    /// terms of the grammar rules (`QueryBuilder`: each by the function of
+    /// its operator, the terms passed as `Box<dyn Any>` of their Rust
+    /// types, a number, an identifier or a string read as its native
+    /// value, converted to the sort of the argument it is by `q_<Type>`).
+    fn query(&mut self) {
+        let ir = self.ir;
+        let q = &ir.start.query;
+        self.out
+            .line("// ==== query ====================================================");
+        self.out.line("");
+        let entries: Vec<String> = ir.idents.iter().map(|(i, n)| format!("({i}, {n:?})")).collect();
+        self.out
+            .line("/// The table of identifiers of the program (its .ref file): an identifier is its index there.");
+        self.out
+            .line(&format!("static IDENTS: &[(i32, &str)] = &[{}];", entries.join(", ")));
+        self.out.line("");
+        self.out
+            .line("/// The grammar of the query parser (REM's gram[]: the grammar rules of the .ref file).");
+        self.out
+            .open("static QUERY_RULES: &[elan_runtime::earley::Rule] = &[");
+        for g in &q.grammar {
+            let rhs: Vec<String> = g
+                .rhs
+                .iter()
+                .map(|(k, c)| format!("elan_runtime::earley::RhsLexem({k}, {c})"))
+                .collect();
+            self.out.line(&format!(
+                "elan_runtime::earley::Rule {{ sort: {}, symbol: {}, info: {}, rhs: &[{}] }},",
+                g.sort,
+                g.symbol,
+                g.info,
+                rhs.join(", ")
+            ));
+        }
+        self.out.close("];");
+        let names: Vec<String> = q
+            .sort_names
+            .iter()
+            .map(|(i, n)| format!("({i}, {n:?})"))
+            .collect();
+        self.out.line(&format!(
+            "static QUERY_SORTS: &[(i32, &str)] = &[{}];",
+            names.join(", ")
+        ));
+        self.out.line(&format!(
+            "static QUERY_TABLES: elan_runtime::earley::Tables = elan_runtime::earley::Tables {{ \
+             rules: QUERY_RULES, sort_names: QUERY_SORTS, intern_ident: {}, intern_int: {}, intern_string: {} }};",
+            q.intern_ident, q.intern_int, q.intern_string
+        ));
+        self.out.line("");
+        let Some(qs) = q.sort_id else { return };
+        // the conversions of the terms of the query to the sorts they are
+        let mut conv: Vec<SortId> = vec![qs];
+        for r in &q.rules {
+            if let QueryRule::Op(o) = r {
+                for &a in &ir.ops[*o].args {
+                    if !conv.contains(&a) {
+                        conv.push(a);
+                    }
+                }
+            }
+        }
+        conv.sort_unstable();
+        for &c in &conv {
+            let ty = self.ty(c);
+            let tn = &ir.sorts[c].type_name;
+            self.out.line(&format!(
+                "/// A term of the query as a term of sort {}.",
+                ir.sorts[c].name
+            ));
+            self.out
+                .open(&format!("fn q_{tn}(a: Box<dyn std::any::Any>) -> {ty} {{"));
+            self.out.line(&format!(
+                "let a = match a.downcast::<{ty}>() {{ Ok(t) => return *t, Err(a) => a }};"
+            ));
+            if let Some(f) = ir.family_of(c) {
+                if self.wrapped(c) {
+                    let v = Self::native(f.kind);
+                    self.out.line(&format!(
+                        "if let Some(v) = a.downcast_ref::<{v}>() {{ return Builtin::Val(v.clone()); }}"
+                    ));
+                }
+            }
+            self.out.line(&format!(
+                "fatal(\"query: a term of another sort than {} (internal error)\")",
+                ir.sorts[c].name
+            ));
+            self.out.close("}");
+            self.out.line("");
+        }
+        self.out.line("/// The terms of the query: each grammar rule built by the function of its operator.");
+        self.out.line("struct QueryBuilder;");
+        self.out.line("");
+        self.out
+            .open("impl elan_runtime::earley::Builder for QueryBuilder {");
+        self.out.line("type T = Box<dyn std::any::Any>;");
+        self.out.open(
+            "fn op(&mut self, r: usize, a: Vec<Box<dyn std::any::Any>>) -> Box<dyn std::any::Any> {",
+        );
+        self.out.line("let mut a = a.into_iter();");
+        self.out.open("match r {");
+        let mut done: Vec<OpId> = Vec::new();
+        let mut umin = Vec::new();
+        let mut unsupported = Vec::new();
+        for (r, x) in q.rules.iter().enumerate() {
+            match x {
+                QueryRule::Umin => umin.push(r.to_string()),
+                QueryRule::Unsupported(_) => unsupported.push(r),
+                _ => {}
+            }
+        }
+        for x in &q.rules {
+            let QueryRule::Op(o) = x else { continue };
+            if done.contains(o) {
+                continue;
+            }
+            done.push(*o);
+            let rs: Vec<String> = q
+                .rules
+                .iter()
+                .enumerate()
+                .filter(|(_, y)| *y == x)
+                .map(|(r, _)| r.to_string())
+                .collect();
+            let op = &ir.ops[*o];
+            self.out
+                .open(&format!("{} => {{ // {}", rs.join(" | "), op.decl));
+            let mut vars = Vec::new();
+            for (i, &s) in op.args.iter().enumerate() {
+                self.out.line(&format!(
+                    "let x{i} = &q_{}(a.next().unwrap());",
+                    ir.sorts[s].type_name
+                ));
+                vars.push(VarIr {
+                    name: format!("x{i}"),
+                    sort: s,
+                });
+            }
+            let e = Expr::Op {
+                op: *o,
+                args: (0..op.args.len()).map(Expr::Var).collect(),
+            };
+            let ex = self.expr(&e, &vars);
+            let ty = self.ty(op.result);
+            self.out.line(&format!("let t: {ty} = {ex};"));
+            self.out.line("Box::new(t)");
+            self.out.close("}");
+        }
+        if !umin.is_empty() {
+            // the number read, negated (a builtinInt)
+            self.out.open(&format!("{} => {{ // - n (INTCONSTUMIN)", umin.join(" | ")));
+            self.out.line("let n = *a.next().unwrap().downcast::<Int>().unwrap_or_else(|_| fatal(\"query: - of a term that is not a number (internal error)\"));");
+            self.out.line("Box::new(builtin::int_neg(n))");
+            self.out.close("}");
+        }
+        self.out.open("_ => {");
+        self.out.line("let why = match r {");
+        for r in unsupported {
+            let QueryRule::Unsupported(why) = &q.rules[r] else { unreachable!() };
+            self.out.line(&format!("    {r} => {:?},", format!(": {why}")));
+        }
+        self.out.line("    _ => \"\",");
+        self.out.line("};");
+        self.out.line("elan_runtime::unsupported(&format!(\"a query with the operator of grammar rule {r}{why}\"))");
+        self.out.close("}");
+        self.out.close("}");
+        self.out.close("}");
+        self.out
+            .line("fn int(&mut self, n: i32) -> Box<dyn std::any::Any> { Box::new(n as Int) }");
+        self.out.line("fn ident(&mut self, i: i32) -> Box<dyn std::any::Any> { Box::new(elan_runtime::Ident(i)) }");
+        self.out
+            .line("fn str(&mut self, s: &[u8]) -> Box<dyn std::any::Any> { Box::new(Str::from(s)) }");
+        self.out.close("}");
+        self.out.line("");
+        let ty = self.ty(qs);
+        self.out.line("/// The query of a derivation, normalised.");
+        self.out.open(&format!(
+            "fn query_build(t: &elan_runtime::earley::Tree) -> Result<{ty}, elan_runtime::earley::Fatal> {{"
+        ));
+        self.out.line(&format!(
+            "Ok(q_{}(elan_runtime::earley::build(t, &mut QueryBuilder)?))",
+            ir.sorts[qs].type_name
+        ));
+        self.out.close("}");
+        self.out.line("");
+        if !ir.start.uses_query {
+            let skipped: Vec<String> = q
+                .rules
+                .iter()
+                .enumerate()
+                .filter(|(_, x)| matches!(x, QueryRule::Uncompiled | QueryRule::Unsupported(_)))
+                .map(|(r, _)| r.to_string())
+                .collect();
+            self.out.line("/// Is the operator of grammar rule r not compiled? (A query containing it is");
+            self.out.line("/// parsed, not built: the start term does not use the query.)");
+            self.out.open("fn query_uncompiled(r: usize) -> bool {");
+            if skipped.is_empty() {
+                self.out.line("false");
+            } else {
+                self.out.line(&format!("matches!(r, {})", skipped.join(" | ")));
+            }
+            self.out.close("}");
+            self.out.line("");
+        }
+    }
+
     fn main_fn(&mut self) {
         let ir = self.ir;
+        self.query();
         self.out
             .line("// ==== main =====================================================");
         self.out.line("");
         match ir.start.strategy {
             None => self
                 .out
-                .line("/// `-noInput`: the start term of the query, normalised and printed."),
+                .line("/// The start term of the query, normalised and printed."),
             Some(st) => self.out.line(&format!(
-                "/// `-noInput`: the start term of the query, normalised, then each result of {}.",
+                "/// The start term of the query, normalised, then each result of {}.",
                 ir.strategies[st].name
             )),
         }
+        if ir.start.uses_query {
+            self.out.line("/// It uses the query (read from the standard input).");
+        }
         self.out.open("fn main() {");
+        let qty = match ir.start.query.sort_id {
+            Some(s) => self.ty(s),
+            None => "()".to_string(),
+        };
+        let query = match ir.start.query.sort_id {
+            None => format!("elan_runtime::Query::<()> {{ tables: &QUERY_TABLES, sort: {}, build: None, uncompiled: None }}", ir.start.query.sort),
+            Some(_) => format!(
+                "elan_runtime::Query {{ tables: &QUERY_TABLES, sort: {}, build: Some(query_build), uncompiled: {} }}",
+                ir.start.query.sort,
+                if ir.start.uses_query { "None" } else { "Some(query_uncompiled)" }
+            ),
+        };
         self.out.open(&format!(
-            "elan_runtime::main_program({:?}, |s| {{",
-            ir.start.query_sort
+            "elan_runtime::main_program({:?}, IDENTS, {}, Some({query}), |s, q: Option<{qty}>| {{",
+            ir.start.query_sort, ir.start.uses_query
         ));
         self.out.line("s.writer.string_style = StringStyle::Raw;");
-        let e = self.expr(&ir.start.term, &[]);
+        if ir.start.uses_query {
+            let v = &ir.start.vars[0];
+            self.out.line(&format!(
+                "let {} = &q.expect(\"the query\");",
+                v.name
+            ));
+        }
+        let e = self.expr(&ir.start.term, &ir.start.vars);
         let ty = self.ty(ir.start.sort);
         self.out.line(&format!("let t: {ty} = {e};"));
         match ir.start.strategy {

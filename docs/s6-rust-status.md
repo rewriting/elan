@@ -36,10 +36,24 @@ tests skipped`. The test scripts of `tests/compiler-rs` default to
   `strat[X]`, `call "name":X` and META (set_of, meta_apply) with the
   sort-aware lookup, a stack guard (exit status 3) and loops for
   deterministic and tail-recursive strategies.
+* **S6d, in part** (2026-10-13, branch `rs-fastcompletion`, to compile
+  `legacy/elan3/applications/FastCompletion`): identifiers (sort ident,
+  REM's indices, `elan-runtime/src/ident.rs`), `replace` and `occurs`
+  (codes 16, 17: walkers over the typed terms), choose/try conditions,
+  and the query read from the standard input: REM's Earley parser ported
+  from elanc-go's (`elan-runtime/src/earley`, spec D6), the query
+  grammar and the builders of its operators generated (`QueryIr`); a
+  query with an operator that elanc-rs does not compile (AC) stops at
+  run time (status 2). `echo 'sat end' | ./a.out -quiet` on
+  `ans_completion p8` prints the result and `rewrite_step = 21607279` of
+  elanc-go and REM.
 * Tests (`tests/compiler-rs/`): `test_ref_roundtrip.sh`, `test_normalise.sh`
   (20 programs), `test_strategies.sh` (35) and `-d strategy_terms` (93),
   `test_depth.sh` (17), `bench_parity.py` (kind R of the bench: 64 cases
-  compiled, same status as `elanc`).
+  compiled, same status as `elanc`; 87 since the partial S6d), and since
+  the partial S6d `test_query.sh` with `ELANC=elanc-rs` (49 programs, the
+  programs and queries that elanc-rs refuses, S6c, skipped) and the unit
+  tests of the parser (`elan-runtime/tests/earley.rs`, REM's messages).
 * Measured: nqueens 11 in 0.067 s (REM: 19.8 s), 1-2 MB.
 
 ## Remaining (if the Rust compiler is resumed)
@@ -47,10 +61,10 @@ tests skipped`. The test scripts of `tests/compiler-rs` default to
 * **S6c, AC matching**: plan `docs/superpowers/plans/2026-10-11-s6c-ac.md`
   (canonical form, common and general matching, performance on efib and
   propc); 70 bench cases are refused as S6c today.
-* **S6d, completeness**: query input (Earley parsing of the `.ref`
-  grammars), traversals (tall/tone/tsome/rewrite), normin/normout, choose/try,
-  builtin identifiers and the remaining builtin codes (16, 191), labels
-  named by strings in Meta_strat; 11 bench cases are refused as S6d.
+* **S6d, completeness**: traversals (tall/tone/tsome/rewrite),
+  normin/normout, the remaining builtin codes (191, 175, btoi/itob, I/O,
+  arrays), labels named by strings in Meta_strat, the options of the
+  programs that choose another query mode (`-REFInput`...).
 * **S6e, performance and switch**: benchmarks, compile time of large
   generated crates (BenchThesis), AC speed (the typed representation was
   1.4x slower than an arena on propc: lookup before build, inline short

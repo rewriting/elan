@@ -5,8 +5,8 @@
 //! position), with the *signature* of a sort being the heads that its
 //! normal forms can have ([`Signatures::heads`]): constructors, operators
 //! that can be stuck, the injection of a builtin family, `true`/`false`;
-//! the literals of `builtinInt` and `builtinString` make an infinite
-//! signature (only a variable covers them).
+//! the literals of `builtinInt`, `builtinString` and `ident` make an
+//! infinite signature (only a variable covers them).
 //!
 //! Decision trees follow Maranget ("Compiling pattern matching to good
 //! decision trees", 2008) with first-match semantics: a `Switch` tests the
@@ -32,6 +32,7 @@ fn head_of(p: &Pattern) -> Option<Head> {
         Pattern::Op { op, .. } => Some(Head::Op(*op)),
         Pattern::Int(n) => Some(Head::Int(*n)),
         Pattern::Str(s) => Some(Head::Str(s.clone())),
+        Pattern::Ident(i) => Some(Head::Ident(*i)),
     }
 }
 

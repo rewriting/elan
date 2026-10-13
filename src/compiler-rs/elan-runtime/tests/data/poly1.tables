@@ -1,0 +1,274 @@
+# examples/poly1 compiled by elanc (REM): its gram[], tabIdent, tabSort
+rule 1,4596,3,58,3,1,58,2,43,1,58
+rule 1,4696,4,58,3,1,58,2,45,1,58
+rule 1,4796,5,58,3,1,58,2,42,1,58
+rule 1,4896,6,58,3,1,58,2,47,1,58
+rule 1,4896,27,58,3,1,58,2,37,1,58
+rule 1,4896,28,58,3,1,58,2,38,1,58
+rule 1,4896,29,58,3,1,58,2,124,1,58
+rule 1,900,20,58,2,2,45,1,58
+rule 1,4596,3,58,5,2,40,1,58,2,43,1,58,2,41
+rule 1,4696,4,58,5,2,40,1,58,2,45,1,58,2,41
+rule 1,4796,5,58,5,2,40,1,58,2,42,1,58,2,41
+rule 1,4896,6,58,5,2,40,1,58,2,47,1,58,2,41
+rule 1,4896,27,58,5,2,40,1,58,2,37,1,58,2,41
+rule 1,4896,28,58,5,2,40,1,58,2,38,1,58,2,41
+rule 1,4896,29,58,5,2,40,1,58,2,124,1,58,2,41
+rule 1,900,20,58,4,2,40,2,45,1,58,2,41
+rule 1,32768,3,58,6,0,663,2,40,1,58,2,44,1,58,2,41
+rule 1,32768,4,58,6,0,556,2,40,1,58,2,44,1,58,2,41
+rule 1,32768,5,58,6,0,642,2,40,1,58,2,44,1,58,2,41
+rule 1,32768,6,58,6,0,323,2,40,1,58,2,44,1,58,2,41
+rule 1,32768,27,58,6,0,320,2,40,1,58,2,44,1,58,2,41
+rule 1,32768,28,58,6,0,518,2,40,1,58,2,44,1,58,2,41
+rule 1,32768,29,58,6,0,225,2,40,1,58,2,44,1,58,2,41
+rule 1,0,20,58,4,0,441,2,40,1,58,2,41
+rule 1,32768,20,58,4,0,1594,2,40,1,58,2,41
+rule 1,900,25,58,4,0,430,2,40,1,428,2,41
+rule 1,33668,25,58,4,0,1583,2,40,1,428,2,41
+rule 1,33668,317,58,4,0,722,2,40,1,331,2,41
+rule 1,1000,300,331,1,1,58
+rule 1,1000,300,331,3,2,91,1,58,2,93
+rule 1,4596,301,331,3,1,331,2,43,1,331
+rule 1,4696,302,331,3,1,331,2,45,1,331
+rule 1,4796,303,331,3,1,331,2,42,1,331
+rule 1,4896,304,331,3,1,331,2,37,1,331
+rule 1,4896,305,331,3,1,331,2,38,1,331
+rule 1,4896,306,331,3,1,331,2,47,1,331
+rule 1,4896,307,331,3,1,331,2,124,1,331
+rule 1,900,308,331,2,2,45,1,331
+rule 1,500,301,331,5,2,40,1,331,2,43,1,331,2,41
+rule 1,600,302,331,5,2,40,1,331,2,45,1,331,2,41
+rule 1,700,303,331,5,2,40,1,331,2,42,1,331,2,41
+rule 1,800,306,331,5,2,40,1,331,2,47,1,331,2,41
+rule 1,800,304,331,5,2,40,1,331,2,37,1,331,2,41
+rule 1,800,305,331,5,2,40,1,331,2,38,1,331,2,41
+rule 1,800,307,331,5,2,40,1,331,2,124,1,331,2,41
+rule 1,900,308,331,4,2,40,2,45,1,331,2,41
+rule 1,33268,301,331,6,0,663,2,40,1,331,2,44,1,331,2,41
+rule 1,33368,302,331,6,0,556,2,40,1,331,2,44,1,331,2,41
+rule 1,33468,303,331,6,0,642,2,40,1,331,2,44,1,331,2,41
+rule 1,33568,306,331,6,0,323,2,40,1,331,2,44,1,331,2,41
+rule 1,33568,304,331,6,0,320,2,40,1,331,2,44,1,331,2,41
+rule 1,33568,305,331,6,0,518,2,40,1,331,2,44,1,331,2,41
+rule 1,33568,307,331,6,0,225,2,40,1,331,2,44,1,331,2,41
+rule 1,33668,308,331,4,0,441,2,40,1,331,2,41
+rule 1,900,315,331,4,0,430,2,40,1,428,2,41
+rule 1,33668,315,331,4,0,856,2,40,1,428,2,41
+rule 1,33768,300,331,1,1,58
+rule 1,32768,318,338,1,0,88
+rule 1,32768,1,428,1,0,448
+rule 1,32768,0,428,1,0,734
+rule 1,4196,21,428,3,1,428,0,518,1,428
+rule 1,4196,22,428,3,1,428,0,225,1,428
+rule 1,36964,21,428,5,2,40,1,428,0,518,1,428,2,41
+rule 1,36964,22,428,5,2,40,1,428,0,225,1,428,2,41
+rule 1,200,24,428,4,0,337,2,40,1,428,2,41
+rule 1,200,24,428,2,0,337,1,428
+rule 1,200,24,428,4,2,40,0,337,1,428,2,41
+rule 1,32968,24,428,6,2,40,0,337,2,40,1,428,2,41,2,41
+rule 1,4296,8,428,4,1,428,2,61,2,61,1,428
+rule 1,4296,9,428,4,1,428,2,33,2,61,1,428
+rule 1,4296,10,428,3,1,428,2,60,1,428
+rule 1,4296,11,428,4,1,428,2,60,2,61,1,428
+rule 1,4296,12,428,3,1,428,2,62,1,428
+rule 1,4296,13,428,4,1,428,2,62,2,61,1,428
+rule 1,32968,8,428,6,0,737,2,40,1,428,2,44,1,428,2,41
+rule 1,32968,9,428,6,0,847,2,40,1,428,2,44,1,428,2,41
+rule 1,32968,10,428,6,0,962,2,40,1,428,2,44,1,428,2,41
+rule 1,32968,11,428,6,0,1176,2,40,1,428,2,44,1,428,2,41
+rule 1,32968,12,428,6,0,1269,2,40,1,428,2,44,1,428,2,41
+rule 1,32968,13,428,6,0,1483,2,40,1,428,2,44,1,428,2,41
+rule 1,300,8,428,4,1,58,2,61,2,61,1,58
+rule 1,300,9,428,4,1,58,2,33,2,61,1,58
+rule 1,300,10,428,3,1,58,2,60,1,58
+rule 1,300,11,428,4,1,58,2,60,2,61,1,58
+rule 1,300,12,428,3,1,58,2,62,1,58
+rule 1,300,13,428,4,1,58,2,62,2,61,1,58
+rule 1,300,8,428,6,0,1367,2,40,1,58,2,44,1,58,2,41
+rule 1,300,9,428,6,0,1477,2,40,1,58,2,44,1,58,2,41
+rule 1,300,10,428,6,0,1592,2,40,1,58,2,44,1,58,2,41
+rule 1,300,11,428,6,0,1806,2,40,1,58,2,44,1,58,2,41
+rule 1,300,12,428,6,0,1899,2,40,1,58,2,44,1,58,2,41
+rule 1,300,13,428,6,0,2113,2,40,1,58,2,44,1,58,2,41
+rule 1,900,26,428,4,0,1063,2,40,1,58,2,41
+rule 1,33668,26,428,4,0,1794,2,40,1,58,2,41
+rule 1,300,309,428,4,1,331,2,61,2,61,1,331
+rule 1,300,310,428,4,1,331,2,33,2,61,1,331
+rule 1,300,311,428,3,1,331,2,62,1,331
+rule 1,300,312,428,4,1,331,2,62,2,61,1,331
+rule 1,300,313,428,4,1,331,2,60,2,61,1,331
+rule 1,300,314,428,3,1,331,2,60,1,331
+rule 1,33068,309,428,6,0,640,2,40,1,331,2,44,1,331,2,41
+rule 1,33068,310,428,6,0,961,2,40,1,331,2,44,1,331,2,41
+rule 1,33068,314,428,6,0,865,2,40,1,331,2,44,1,331,2,41
+rule 1,33068,313,428,6,0,1079,2,40,1,331,2,44,1,331,2,41
+rule 1,33068,311,428,6,0,1172,2,40,1,331,2,44,1,331,2,41
+rule 1,33068,312,428,6,0,1386,2,40,1,331,2,44,1,331,2,41
+rule 1,900,316,428,4,0,1063,2,40,1,331,2,41
+rule 1,33668,316,428,4,0,1067,2,40,1,331,2,41
+rule 1,32768,319,452,1,1,338
+rule 1,32768,320,452,1,1,331
+rule 1,40961,321,452,3,1,452,2,43,1,452
+rule 1,40962,322,452,3,1,452,2,42,1,452
+rule 1,32768,323,452,4,0,538,2,40,1,452,2,41
+rule 1,36768,67,58,1,1,19
+rule 1,36768,79,58,2,2,45,1,19
+ident 542 int
+ident 1483 greatereq_bool
+ident 759 builtin
+ident 439 part
+ident 438 tone
+ident 437 dont
+ident 1377 specification
+ident 1058 builtinInt
+ident 750 iterate
+ident 431 then
+ident 430 btoi
+ident 110 n
+ident 646 module
+ident 1269 greater_bool
+ident 327 for
+ident 962 less_bool
+ident 961 neq_int
+ident 324 neq
+ident 642 time
+ident 960 greatereq
+ident 1583 btoi_builtinInt
+ident 323 div
+ident 641 repeat
+ident 322 one
+ident 640 eq_int
+ident 859 implicit
+ident 320 mod
+ident 539 where
+ident 857 dkconcur
+ident 538 deriv
+ident 856 btoi_int
+ident 1477 neq_builtinInt
+ident 1794 itob_builtinInt
+ident 852 choose
+ident 215 END
+ident 214 eq
+ident 850 inline
+ident 213 of
+ident 211 AND
+ident 429 tall
+ident 428 bool
+ident 746 greater
+ident 1367 eq_builtinInt
+ident 424 bs
+ident 1047 assocRight
+ident 1046 anyInteger
+ident 1899 greater_builtinInt
+ident 639 public
+ident 100 d
+ident 99 c
+ident 98 b
+ident 97 a
+ident 849 dcconcur
+ident 311 end
+ident 847 neq_bool
+ident 207 dk
+ident 842 firstOne
+ident 205 id
+ident 523 local
+ident 522 alias
+ident 737 eq_bool
+ident 418 if
+ident 734 false
+ident 412 fail
+ident 730 Epsilon
+ident 411 code
+ident 625 global
+ident 307 SUCH
+ident 88 X
+ident 623 call
+ident 305 THAT
+ident 622 care
+ident 838 variable
+ident 199 dc
+ident 518 and
+ident 835 handline
+ident 834 case
+ident 510 check
+ident 722 valueOf
+ident 720 declare
+ident 619 dkcall
+ident 295 META
+ident 932 assocLeft
+ident 611 dccall
+ident 2113 greatereq_builtinInt
+ident 501 poly1
+ident 719 defined
+ident 273 EACH
+ident 489 dcOne
+ident 162 p2
+ident 161 p1
+ident 905 hardAlias
+ident 899 definedAs
+ident 788 normout
+ident 781 stratop
+ident 143 IF
+ident 1083 strategies
+ident 674 export
+ident 991 operators
+ident 354 ANDIF
+ident 671 result
+ident 351 try
+ident 566 query
+ident 883 strategy
+ident 1188 description
+ident 456 sort
+ident 1079 lesseq_int
+ident 452 poly
+ident 770 rewrite
+ident 132 AC
+ident 986 otherwise
+ident 667 import
+ident 663 plus
+ident 877 queryend
+ident 558 start
+ident 556 minus
+ident 555 rules
+ident 554 spart
+ident 1176 lesseq_bool
+ident 552 tsome
+ident 232 LPL
+ident 231 FOR
+ident 1172 greater_int
+ident 448 true
+ident 447 know
+ident 763 first
+ident 1386 greatereq_int
+ident 444 with
+ident 1067 itob_int
+ident 441 umin
+ident 977 normalize
+ident 659 normin
+ident 1063 itob
+ident 658 switch
+ident 657 source
+ident 974 private
+ident 337 not
+ident 972 oneconcur
+ident 653 lesseq
+ident 1594 umin_builtinInt
+ident 970 normalise
+ident 1592 less_builtinInt
+ident 650 less
+ident 331 pri
+ident 866 explicit
+ident 865 less_int
+ident 1806 lesseq_builtinInt
+ident 225 or
+sort 32 ident
+sort 390 builtinString
+sort 452 poly
+sort 351 intern string
+sort 428 bool
+sort 58 builtinInt
+sort 19 intern int
+sort 338 variable
+sort 220 intern ident
+sort 331 int

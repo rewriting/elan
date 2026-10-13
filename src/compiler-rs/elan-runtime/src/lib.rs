@@ -8,6 +8,8 @@
 //! * [`ac`]: canonical AC multisets and matching helpers.
 //! * [`strat`]: continuations and strategy combinators.
 //! * [`builtin`]: int (interpreter semantics), bool, string, stuck terms.
+//! * [`ident`]: identifiers (sort ident) and their table.
+//! * [`earley`]: the query parser (REM's Earley parser).
 //! * [`print`]: the printer of the compiled C programs.
 //! * [`driver`]: options, output, big-stack main thread, step counter.
 //! * [`depth`]: the recursion bound (stack guard).
@@ -18,6 +20,8 @@ pub mod ac;
 pub mod builtin;
 pub mod depth;
 pub mod driver;
+pub mod earley;
+pub mod ident;
 pub mod print;
 pub mod release;
 pub mod strat;
@@ -26,7 +30,8 @@ pub mod term;
 pub use ac::{AcSet, Rest};
 pub use builtin::{Builtin, Int, Str};
 pub use depth::guard;
-pub use driver::{fatal, main_program, step, steps, unsupported, Options, Session};
+pub use driver::{fatal, main_program, step, steps, unsupported, Options, Query, Session};
+pub use ident::{ident_index, ident_name, init_idents, Ident};
 pub use print::{Print, Writer};
 pub use strat::{DynStrat, Strat, K};
 pub use term::{

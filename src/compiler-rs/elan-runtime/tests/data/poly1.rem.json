@@ -1,0 +1,87 @@
+[
+ {
+  "input": "deriv(3*X*X + 2*X + 7) end",
+  "status": 0,
+  "stderr": ""
+ },
+ {
+  "input": "X+X*X end",
+  "status": 0,
+  "stderr": ""
+ },
+ {
+  "input": "X*X+X end",
+  "status": 0,
+  "stderr": ""
+ },
+ {
+  "input": "X+X+X end",
+  "status": 0,
+  "stderr": ""
+ },
+ {
+  "input": "(3) end",
+  "status": 1,
+  "stderr": "\n[error] :file=standard input\tline=0\tpos=8\n[earley] syntax error on symbol ')'\n\tone of ('|' '/' '-' '+' '*' '&' '%') expected\n\tin context ( 3  >>>)<<< end \n"
+ },
+ {
+  "input": "- 5 end",
+  "status": 0,
+  "stderr": ""
+ },
+ {
+  "input": "3 - 2 - 1 end",
+  "status": 0,
+  "stderr": ""
+ },
+ {
+  "input": "deriv(3 * X * X + ) end",
+  "status": 1,
+  "stderr": "\n[error] :file=standard input\tline=0\tpos=24\n[earley] syntax error on symbol ')'\n\tone of ('NUMBER' 'umin_builtinInt' 'btoi_builtinInt' 'btoi_int' 'valueOf' 'plus' 'time' 'minus' 'deriv' 'and' 'umin' 'btoi' 'div' 'mod' 'or' 'X' '[' '-' '(') expected\n\tin context deriv ( 3 * X * X +  >>>)<<< end \n"
+ },
+ {
+  "input": "",
+  "status": 1,
+  "stderr": "\n[error] :file=standard input\tline=0\tpos=1\n[earley] syntax error on symbol 'ENDOFLSTREAM'\n\tone of ('NUMBER' 'umin_builtinInt' 'btoi_builtinInt' 'btoi_int' 'valueOf' 'plus' 'time' 'minus' 'deriv' 'and' 'umin' 'btoi' 'div' 'mod' 'or' 'X' '[' '-' '(') expected\n\tin context  >>>ENDOFLSTREAM<<< ENDOFLSTREAM \n"
+ },
+ {
+  "input": "X X end",
+  "status": 1,
+  "stderr": "\n[error] :file=standard input\tline=0\tpos=8\n[earley] syntax error on symbol 'X'\n\tone of ('+' '*') expected\n\tin context X  >>>X<<< end \n"
+ },
+ {
+  "input": "deriv(X",
+  "status": 1,
+  "stderr": "\n[error] :file=standard input\tline=0\tpos=8\n[earley] syntax error on symbol 'ENDOFLSTREAM'\n\tone of (''\\0'') expected\n\tin context deriv ( X ENDOFLSTREAM  >>>ENDOFLSTREAM<<< ENDOFLSTREAM \n"
+ },
+ {
+  "input": "\"a\" end",
+  "status": 1,
+  "stderr": "\n[error] :file=standard input\tline=0\tpos=8\n[earley] syntax error on symbol '(null)'\n\tone of ('NUMBER' 'umin_builtinInt' 'btoi_builtinInt' 'btoi_int' 'valueOf' 'plus' 'time' 'minus' 'deriv' 'and' 'umin' 'btoi' 'div' 'mod' 'or' 'X' '[' '-' '(') expected\n\tin context  >>>(null)<<< end \n"
+ },
+ {
+  "input": "X end junk",
+  "status": 0,
+  "stderr": ""
+ },
+ {
+  "input": "end",
+  "status": 1,
+  "stderr": "\n[error] :file=standard input\tline=0\tpos=4\n[earley] syntax error on symbol 'end'\n\tone of ('NUMBER' 'umin_builtinInt' 'btoi_builtinInt' 'btoi_int' 'valueOf' 'plus' 'time' 'minus' 'deriv' 'and' 'umin' 'btoi' 'div' 'mod' 'or' 'X' '[' '-' '(') expected\n\tin context  >>>end<<< ENDOFLSTREAM \n"
+ },
+ {
+  "input": "3 == 4 end",
+  "status": 1,
+  "stderr": "\n[error] :file=standard input\tline=0\tpos=5\n[earley] syntax error on symbol '='\n\tone of ('|' '/' '-' '+' '*' '&' '%') expected\n\tin context 3  >>>=<<< = 4 end \n"
+ },
+ {
+  "input": "1+2*3 end",
+  "status": 0,
+  "stderr": "\n[warning]earley: ambiguity can't be solved in string:\n 1 + 2 * 3\nbetween operators :\n\t @ \t : (int)poly\t pri 0 code 320;\n\t @ '+'  @ \t : (poly poly)poly\t assocRight \t pri 1 code 321;\n"
+ },
+ {
+  "input": "X+\n  X\n )\nend",
+  "status": 1,
+  "stderr": "\n[error] :file=standard input\tline=3\tpos=4\n[earley] syntax error on symbol ')'\n\tone of ('+' '*') expected\n\tin context X + X  >>>)<<< end \n"
+ }
+]

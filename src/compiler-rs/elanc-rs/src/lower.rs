@@ -83,6 +83,25 @@ const NEVER_BUILT: &str =
 /// The symbol code of a strategy call in a term (`Call`, `term/codes.h`).
 const CALL_SYMBOL: SymbolCode = 144;
 
+/// Codes of the query grammar (`term/codes.h`): semantic actions of the
+/// parser (NUMTOTERM, IDENTTOTERM, STRINGTOTERM; NUMRULE 69, IDENTRULE 70
+/// and STRINGRULE 82 are its standard rules) and INTCONSTUMIN.
+const NUM_TO_TERM: SymbolCode = 67;
+const IDENT_TO_TERM: SymbolCode = 68;
+const STRING_TO_TERM: SymbolCode = 81;
+const INT_CONST_UMINUS: SymbolCode = 79;
+
+/// How a query builds the term of a grammar rule ([`QueryRule`], the
+/// operator as a candidate).
+#[derive(Clone, Debug)]
+enum QRule {
+    None,
+    Op(usize),
+    Umin,
+    Unsupported(String),
+    Uncompiled,
+}
+
 /// Does a semantic code make an operator a builtin operation? The codes
 /// of the strategy constructors of `strsig[X,Y]`/`strat[X]` (`code -180`
 /// .. `-190`, `-205` .. `-208`, `DS_*` in `term/codes.h`) do not: the
@@ -135,6 +154,7 @@ enum TT {
     EVar,
     Int(i64),
     Str(Vec<u8>),
+    Ident(i32),
 }
 
 /// Typing failure: a type mismatch (try another profile) or a hard error.
@@ -155,6 +175,7 @@ fn builtin_kind(name: &str) -> Option<BuiltinKind> {
         "builtinInt" => Some(BuiltinKind::Int),
         "bool" => Some(BuiltinKind::Bool),
         "builtinString" => Some(BuiltinKind::Str),
+        "ident" => Some(BuiltinKind::Ident),
         _ => None,
     }
 }
@@ -186,6 +207,7 @@ struct Lowerer<'p> {
     int_sort: Option<SortIndex>,
     str_sort: Option<SortIndex>,
     bool_sort: Option<SortIndex>,
+    ident_sort: Option<SortIndex>,
 }
 
 impl<'p> Lowerer<'p> {
@@ -244,6 +266,7 @@ impl<'p> Lowerer<'p> {
             int_sort: sort_named("builtinInt"),
             str_sort: sort_named("builtinString"),
             bool_sort: sort_named("bool"),
+            ident_sort: sort_named("ident"),
         }
     }
 
@@ -326,7 +349,13 @@ impl<'p> Lowerer<'p> {
                 check(s, "string")?;
                 Ok(TT::Str(decode_string(cs)))
             }
-            Term::Ident(_) => Err(unsupported("S6d", "builtin identifiers (sort ident)").into()),
+            Term::Ident(i) => {
+                let s = self
+                    .ident_sort
+                    .ok_or_else(|| Error::Invalid("identifier without ident".into()))?;
+                check(s, "identifier")?;
+                Ok(TT::Ident(*i as i32))
+            }
             Term::Fsym { args, symbol } => {
                 if let (CALL_SYMBOL, [Term::Int(s)]) = (*symbol, args.as_slice()) {
                     // `call "name":X` (`call @':'X : (builtinString)
@@ -408,6 +437,7 @@ impl<'p> Lowerer<'p> {
             TT::Var(_, s) => *s,
             TT::Int(_) => self.int_sort.unwrap(),
             TT::Str(_) => self.str_sort.unwrap(),
+            TT::Ident(_) => self.ident_sort.unwrap(),
             TT::EVar => unreachable!("sort of an extension variable"),
         }
     }
@@ -419,12 +449,6 @@ impl<'p> Lowerer<'p> {
     fn run(&self, name: &str) -> Result<Ir, Error> {
         let q = &self.p.query;
         let start = self.type_top(&q.start_with, Some(q.result_sort), "start term")?;
-        if contains_var(&start) {
-            return Err(unsupported(
-                "S6d",
-                "query input: the start term uses the query",
-            ));
-        }
 
         // Reachability
         let mut reach = Reach::default();
@@ -432,23 +456,84 @@ impl<'p> Lowerer<'p> {
         if let Some(s) = q.strategy {
             reach.reach_strategy(s);
         }
-        // every refusal is collected; the first one is reported
+        self.fixpoint(&mut reach)?;
+        self.check_sorts(&reach)?;
+
+        // the operators of the query: those of the grammar rules that a
+        // term of the query's sort can contain
+        let grammar = self.grammar()?;
+        let mut qrules = self.query_rules(&grammar);
+        if !contains_var(&start) {
+            // the query is not used: the query operators that the program
+            // reaches are compiled, a query containing another one is
+            // parsed but not built
+            for r in qrules.iter_mut() {
+                if matches!(r, QRule::Op(c) if !reach.seen.contains(c)) {
+                    *r = QRule::Uncompiled;
+                }
+            }
+            return Builder::new(self, reach).build(name, &start, q, grammar, qrules);
+        }
+        // the query is used: every query operator is compiled; one by one
+        // when one of them is refused (refused at run time, the others
+        // kept)
+        let base = reach.clone();
+        for r in &qrules {
+            if let QRule::Op(c) = r {
+                reach.reach(*c);
+            }
+        }
+        if self.fixpoint(&mut reach).is_err() {
+            reach = base.clone();
+            for r in qrules.iter_mut() {
+                let QRule::Op(c) = *r else { continue };
+                if base.seen.contains(&c) {
+                    continue;
+                }
+                let snap = reach.clone();
+                reach.reach(c);
+                if let Err(e) = self.fixpoint(&mut reach) {
+                    reach = snap;
+                    *r = QRule::Unsupported(e.to_string());
+                }
+            }
+        }
+        let built = self
+            .check_sorts(&reach)
+            .and_then(|_| Builder::new(self, reach).build(name, &start, q, grammar.clone(), qrules.clone()));
+        match built {
+            Ok(ir) => Ok(ir),
+            Err(e) => {
+                // the program alone, its query refused at run time
+                for r in qrules.iter_mut() {
+                    if matches!(r, QRule::Op(_) | QRule::Umin) {
+                        *r = QRule::Unsupported(e.to_string());
+                    }
+                }
+                Builder::new(self, base).build(name, &start, q, grammar, qrules)
+            }
+        }
+    }
+
+    /// Expand what `reach` has reached until nothing new is reached; every
+    /// refusal is collected, the first one is reported.
+    fn fixpoint(&self, reach: &mut Reach<'p>) -> Result<(), Error> {
         let mut errors = Vec::new();
         loop {
             let r = if let Some(c) = reach.todo.pop() {
-                self.expand(c, &mut reach)
+                self.expand(c, reach)
             } else if let Some(l) = reach.labels_todo.pop() {
-                self.expand_label(l, &mut reach)
+                self.expand_label(l, reach)
             } else if let Some(s) = reach.strategies_todo.pop() {
-                self.expand_strategy(s, &mut reach)
+                self.expand_strategy(s, reach)
             } else if let Some(i) = reach
                 .pending
                 .iter()
-                .position(|p| self.lhs_possible(&p.lhs, &reach))
+                .position(|p| self.lhs_possible(&p.lhs, reach))
             {
                 // a rule whose left-hand side has become possible
                 let p = reach.pending.swap_remove(i);
-                self.accept_rule(p.rule, &p.lhs, &p.ctx, &mut reach)
+                self.accept_rule(p.rule, &p.lhs, &p.ctx, reach)
             } else {
                 break;
             };
@@ -460,14 +545,18 @@ impl<'p> Lowerer<'p> {
         if !errors.is_empty() {
             return Err(errors.swap_remove(0));
         }
+        Ok(())
+    }
+
+    /// Refuse the sorts of the parser's grammar.
+    fn check_sorts(&self, reach: &Reach) -> Result<(), Error> {
         for &s in &reach.sorts {
             let n = self.sort_name(s);
-            if n == "ident" || n.starts_with("intern ") {
+            if n.starts_with("intern ") {
                 return Err(unsupported("S6d", format!("builtin sort {n}")));
             }
         }
-
-        Builder::new(self, reach).build(name, &start, q)
+        Ok(())
     }
 
     fn visit(&self, t: &TT, r: &mut Reach) {
@@ -491,6 +580,9 @@ impl<'p> Lowerer<'p> {
             }
             TT::Str(_) => {
                 r.sorts.insert(self.str_sort.unwrap());
+            }
+            TT::Ident(_) => {
+                r.sorts.insert(self.ident_sort.unwrap());
             }
             TT::EVar => {}
         }
@@ -555,6 +647,119 @@ impl<'p> Lowerer<'p> {
             self.accept_rule(rule, &lhs, &ctx, r)?;
         }
         Ok(())
+    }
+
+    // ------------------------------------------------------------------
+    // The query grammar (S6d)
+    // ------------------------------------------------------------------
+
+    /// The grammar rules of the program in REM's `gram[]` order: the
+    /// three dumps (Both, GlobalOnly, TopOnly) in file order. A String
+    /// lexem, which REM does not read ("Wrong lexem in REF file"), is
+    /// refused.
+    fn grammar(&self) -> Result<Vec<GrammarRule>, Error> {
+        let mut rules = Vec::new();
+        for (g, o) in self.p.operators() {
+            let mut rhs = Vec::new();
+            for l in &o.rhs {
+                rhs.push(match l {
+                    Lexem::Blank => continue,
+                    Lexem::Ident(i) => (0, *i as i32),
+                    Lexem::Type(s) => (1, *s as i32),
+                    Lexem::Char(c) => (2, *c),
+                    Lexem::Num(n) => (3, *n),
+                    Lexem::String(_) => {
+                        return Err(unsupported(
+                            "S6d",
+                            format!(
+                                "query grammar: a string lexem in the grammar rule of symbol {} (REM does not read it either)",
+                                o.symbol
+                            ),
+                        ))
+                    }
+                });
+            }
+            rules.push(GrammarRule {
+                sort: g.sort,
+                symbol: o.symbol,
+                info: o.priority + o.syntax.0 * 4096,
+                rhs,
+            });
+        }
+        Ok(rules)
+    }
+
+    /// Per grammar rule, how a query builds its term ([`QueryRule`], the
+    /// operators as candidates): the rules of the sorts that a term of the
+    /// query's sort can contain (that sort, and the sorts of the arguments
+    /// of their rules) are built by their operators, but the `1:` rules
+    /// (s ::= intern int, intern ident, intern string, built by the
+    /// parser), the codes of the parser's semantic actions (another term)
+    /// and the operators of a lexical sort (refused).
+    fn query_rules(&self, grammar: &[GrammarRule]) -> Vec<QRule> {
+        let mut inside: HashSet<SortIndex> = HashSet::from([self.p.query.sort]);
+        loop {
+            let mut changed = false;
+            for g in grammar {
+                if inside.contains(&g.sort) {
+                    for &(k, c) in &g.rhs {
+                        if k == 1 {
+                            changed |= inside.insert(c as SortIndex);
+                        }
+                    }
+                }
+            }
+            if !changed {
+                break;
+            }
+        }
+        let lexical = |s: SortIndex| self.sort_name(s).starts_with("intern ");
+        grammar
+            .iter()
+            .map(|g| {
+                if !inside.contains(&g.sort) {
+                    return QRule::None;
+                }
+                let intern = match g.symbol {
+                    NUM_TO_TERM => Some("intern int"),
+                    IDENT_TO_TERM => Some("intern ident"),
+                    STRING_TO_TERM => Some("intern string"),
+                    _ => None,
+                };
+                if let (Some(n), [(1, s)]) = (intern, g.rhs.as_slice()) {
+                    if self.sort_name(*s as SortIndex) == n {
+                        return QRule::None;
+                    }
+                }
+                if matches!(g.symbol, NUM_TO_TERM | IDENT_TO_TERM | 69 | 70 | STRING_TO_TERM | 82) {
+                    return QRule::Unsupported(format!(
+                        "code {} is a semantic action of REM's parser, which builds another term",
+                        g.symbol
+                    ));
+                }
+                if g.symbol == INT_CONST_UMINUS {
+                    return QRule::Umin;
+                }
+                let args: Vec<SortIndex> = g
+                    .rhs
+                    .iter()
+                    .filter(|(k, _)| *k == 1)
+                    .map(|&(_, c)| c as SortIndex)
+                    .collect();
+                if args.iter().any(|&a| lexical(a)) {
+                    return QRule::Unsupported(format!("code {} on a lexical sort", g.symbol));
+                }
+                let cand = self.by_symbol.get(&g.symbol).and_then(|cs| {
+                    cs.iter()
+                        .copied()
+                        .find(|&c| self.cands[c].args == args && self.cands[c].result == g.sort)
+                });
+                match cand {
+                    Some(c) => QRule::Op(c),
+                    None => QRule::Unsupported(format!("code {}: no operator", g.symbol)),
+                }
+            })
+            .collect()
     }
 
     /// An operator that can be at the top of a term without being built by
@@ -793,11 +998,12 @@ impl<'p> Lowerer<'p> {
                     self.type_top(rhs, Some(*sort), &ctx)?,
                 ]
             }
-            Where::Try(_) => {
-                return Err(unsupported(
-                    "S6d",
-                    format!("choose/try conditions in {ctx}"),
-                ))
+            Where::Try(branches) => {
+                let mut v = Vec::new();
+                for w in branches.iter().flatten() {
+                    v.extend(self.where_terms(w, &ctx, reach)?);
+                }
+                v
             }
         })
     }
@@ -980,6 +1186,7 @@ fn contains_evar(t: &TT) -> bool {
 
 /// A rule whose left-hand side cannot match yet (see
 /// [`Lowerer::lhs_possible`]).
+#[derive(Clone)]
 struct Pending<'p> {
     rule: &'p Rule,
     lhs: TT,
@@ -993,7 +1200,7 @@ struct Pending<'p> {
 type CallMap =
     BTreeMap<(Vec<u8>, SortIndex), (StrategyNameIndex, Option<Result<StrategyNameIndex, String>>)>;
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 struct Reach<'p> {
     pending: Vec<Pending<'p>>,
     /// Refusals found while visiting terms.
@@ -1080,7 +1287,14 @@ impl<'a, 'p> Builder<'a, 'p> {
         }
     }
 
-    fn build(mut self, name: &str, start: &TT, q: &elan_ref::Query) -> Result<Ir, Error> {
+    fn build(
+        mut self,
+        name: &str,
+        start: &TT,
+        q: &elan_ref::Query,
+        grammar: Vec<GrammarRule>,
+        qrules: Vec<QRule>,
+    ) -> Result<Ir, Error> {
         let l = self.l;
         // sorts, in table order
         let mut sort_indices: Vec<SortIndex> = self.reach.sorts.iter().copied().collect();
@@ -1343,7 +1557,59 @@ impl<'a, 'p> Builder<'a, 'p> {
                 Some(id)
             }
         };
-        let start = expr_of(&self, start, &mut |_, _| unreachable!("no variable"));
+        // the query variable
+        let mut vars: Vec<VarIr> = Vec::new();
+        let start_e = expr_of(&self, start, &mut |_, s| {
+            if vars.is_empty() {
+                vars.push(VarIr {
+                    name: "query".to_string(),
+                    sort: self.sort_of[&s],
+                });
+            }
+            0
+        });
+        let query = {
+            let named = |n: &str, def: SortIndex| {
+                l.p.sorts
+                    .iter()
+                    .find(|s| s.name == n)
+                    .map_or(def, |s| s.index)
+            };
+            let sort_id = self.sort_of.get(&q.sort).copied();
+            let rules = qrules
+                .into_iter()
+                .map(|r| match r {
+                    QRule::None => QueryRule::None,
+                    // the query's sort is not compiled: parsed only
+                    QRule::Op(_) if sort_id.is_none() => QueryRule::Uncompiled,
+                    QRule::Op(c) => match self.op_of.get(&c) {
+                        Some(&o) => QueryRule::Op(o),
+                        None => QueryRule::Uncompiled,
+                    },
+                    QRule::Umin => QueryRule::Umin,
+                    QRule::Unsupported(why) => QueryRule::Unsupported(why),
+                    QRule::Uncompiled => QueryRule::Uncompiled,
+                })
+                .collect();
+            QueryIr {
+                sort: q.sort,
+                sort_id,
+                grammar,
+                rules,
+                sort_names: l.p.sorts.iter().map(|s| (s.index, s.name.clone())).collect(),
+                intern_ident: named("intern ident", 220),
+                intern_int: named("intern int", 19),
+                intern_string: named("intern string", 351),
+            }
+        };
+        // the table of identifiers: the parser of the query reads them (and
+        // the identifiers of its grammar rules are their indices)
+        let idents = l
+            .p
+            .identifiers
+            .iter()
+            .map(|e| (e.index as i32, e.name.clone()))
+            .collect();
         Ok(Ir {
             program: name.to_string(),
             sorts,
@@ -1352,11 +1618,15 @@ impl<'a, 'p> Builder<'a, 'p> {
             labels,
             strategies,
             metas,
+            idents,
             start: Start {
                 query_sort: l.sort_name(q.sort),
                 sort: start_sort,
-                term: start,
+                term: start_e,
+                uses_query: !vars.is_empty(),
+                vars,
                 strategy: start_strategy,
+                query,
             },
         })
     }
@@ -1493,10 +1763,15 @@ impl<'a, 'p> Builder<'a, 'p> {
             let mut changed = false;
             for label in labels.iter_mut() {
                 let det = label.rules.iter().all(|r| {
-                    r.conds.iter().all(|c| match c {
-                        Cond::Apply { strategy, .. } => strategies[*strategy].det,
-                        _ => true,
-                    })
+                    let mut det = true;
+                    for c in &r.conds {
+                        c.walk(&mut |c| match c {
+                            Cond::Apply { strategy, .. } => det &= strategies[*strategy].det,
+                            Cond::Choose { branches, .. } => det &= branches.len() <= 1,
+                            _ => {}
+                        });
+                    }
+                    det
                 });
                 if det != label.rules_det {
                     label.rules_det = det;
@@ -1705,6 +1980,10 @@ struct RuleLowerer<'b, 'a, 'p> {
     vars: Vec<VarIr>,
     /// model variable index -> IR variable (first occurrence)
     var_of: HashMap<u32, VarId>,
+    /// The variables bound by the branches of the enclosing chooses
+    /// already lowered: a branch binding the same model variable gets the
+    /// same variable ([`Cond::Choose`]).
+    shared: HashMap<u32, VarId>,
     conds: Vec<Cond>,
 }
 
@@ -1715,7 +1994,18 @@ impl<'b, 'a, 'p> RuleLowerer<'b, 'a, 'p> {
             rule,
             vars: vec![],
             var_of: HashMap::new(),
+            shared: HashMap::new(),
             conds: vec![],
+        }
+    }
+
+    /// The variable of the first binding of model variable `i` (in a
+    /// pattern or a where): the one of another branch of an enclosing
+    /// choose, else a new one.
+    fn bind_var(&mut self, i: u32, sort: SortIndex) -> VarId {
+        match self.shared.get(&i) {
+            Some(&v) => v,
+            None => self.new_var(i, sort),
         }
     }
 
@@ -1742,7 +2032,7 @@ impl<'b, 'a, 'p> RuleLowerer<'b, 'a, 'p> {
         match t {
             TT::Var(i, s) => match self.var_of.get(i) {
                 None => {
-                    let v = self.new_var(*i, *s);
+                    let v = self.bind_var(*i, *s);
                     self.var_of.insert(*i, v);
                     Pattern::Var(v)
                 }
@@ -1758,6 +2048,7 @@ impl<'b, 'a, 'p> RuleLowerer<'b, 'a, 'p> {
             },
             TT::Int(n) => Pattern::Int(*n),
             TT::Str(s) => Pattern::Str(s.clone()),
+            TT::Ident(i) => Pattern::Ident(*i),
             TT::EVar => unreachable!("rules with extension variables are skipped"),
         }
     }
@@ -1801,7 +2092,28 @@ impl<'b, 'a, 'p> RuleLowerer<'b, 'a, 'p> {
             unreachable!("checked")
         };
         let mut text_conds = Vec::new();
-        for w in wheres {
+        self.wheres(wheres, &mut text_conds)?;
+        let rt = l.type_top(rhs, Some(self.rule.sort), "right-hand side")?;
+        let rhs_e = self.expr(&rt)?;
+        let mut text = format!("[] {} => {}", self.render_tt(lhs), self.render_tt(&rt));
+        for c in text_conds {
+            text.push(' ');
+            text.push_str(&c);
+        }
+        Ok(Some(RuleIr {
+            text,
+            vars: std::mem::take(&mut self.vars),
+            lhs: pats,
+            conds: std::mem::take(&mut self.conds),
+            rhs: rhs_e,
+        }))
+    }
+
+    /// The conditions `ws`, added to `self.conds` (their text to
+    /// `text_conds`).
+    fn wheres(&mut self, ws: &[Where], text_conds: &mut Vec<String>) -> Result<(), Error> {
+        let l = self.b.l;
+        for w in ws {
             match w {
                 Where::If(t) => {
                     let t = l.type_top(t, l.bool_sort, "condition")?;
@@ -1831,7 +2143,7 @@ impl<'b, 'a, 'p> RuleLowerer<'b, 'a, 'p> {
                             self.conds.append(&mut same);
                         }
                         TT::Var(i, s) if !self.var_of.contains_key(&i) => {
-                            let v = self.new_var(i, s);
+                            let v = self.bind_var(i, s);
                             self.var_of.insert(i, v);
                             self.conds.push(Cond::Let(v, e));
                         }
@@ -1870,23 +2182,57 @@ impl<'b, 'a, 'p> RuleLowerer<'b, 'a, 'p> {
                     }
                     self.conds.append(&mut same);
                 }
-                Where::Try(_) => unreachable!("refused during reachability"),
+                Where::Try(branches) => self.choose(branches, text_conds)?,
             }
         }
-        let rt = l.type_top(rhs, Some(self.rule.sort), "right-hand side")?;
-        let rhs_e = self.expr(&rt)?;
-        let mut text = format!("[] {} => {}", self.render_tt(lhs), self.render_tt(&rt));
-        for c in text_conds {
-            text.push(' ');
-            text.push_str(&c);
+        Ok(())
+    }
+
+    /// `choose try b1 ... end` ([`Cond::Choose`]): each branch's conditions
+    /// from the variables bound before it, a model variable bound by
+    /// several branches being one variable; after `end`, the variables
+    /// bound by every branch are bound.
+    fn choose(&mut self, branches: &[Vec<Where>], text_conds: &mut Vec<String>) -> Result<(), Error> {
+        let before = self.var_of.clone();
+        let outer = self.shared.clone();
+        let conds = std::mem::take(&mut self.conds);
+        let mut irs = Vec::new();
+        let mut everywhere: Option<HashMap<u32, VarId>> = None;
+        let mut texts = Vec::new();
+        for br in branches {
+            self.var_of = before.clone();
+            let mut t = Vec::new();
+            self.wheres(br, &mut t)?;
+            texts.push(format!("try {}", t.join(" ")));
+            irs.push(std::mem::take(&mut self.conds));
+            let bound: HashMap<u32, VarId> = self
+                .var_of
+                .iter()
+                .filter(|(m, _)| !before.contains_key(m))
+                .map(|(&m, &v)| (m, v))
+                .collect();
+            self.shared.extend(bound.iter().map(|(&m, &v)| (m, v)));
+            everywhere = Some(match everywhere {
+                None => bound,
+                Some(mut e) => {
+                    e.retain(|m, _| bound.contains_key(m));
+                    e
+                }
+            });
         }
-        Ok(Some(RuleIr {
-            text,
-            vars: std::mem::take(&mut self.vars),
-            lhs: pats,
-            conds: std::mem::take(&mut self.conds),
-            rhs: rhs_e,
-        }))
+        let everywhere = everywhere.unwrap_or_default();
+        self.var_of = before;
+        self.var_of.extend(everywhere.iter().map(|(&m, &v)| (m, v)));
+        self.shared = outer;
+        let mut bound: Vec<VarId> = everywhere.into_values().collect();
+        bound.sort_unstable();
+        self.conds = conds;
+        self.conds.push(Cond::Choose {
+            branches: irs,
+            bound,
+        });
+        text_conds.push(format!("choose {} end", texts.join(" ")));
+        Ok(())
     }
 
     /// The name of the strategy of a `where` (empty for `()`).
@@ -1925,6 +2271,12 @@ fn render(b: &Builder, t: &TT, out: &mut String) {
             out.push_str(&n.to_string())
         }
         TT::Str(s) => out.push_str(&string_text(s)),
+        TT::Ident(i) => {
+            if alnum_end(out) {
+                out.push(' ');
+            }
+            out.push_str(&b.l.ident(*i as u32))
+        }
         TT::Op(c, args) => {
             // the declaration's syntax (the printing form may be an alias)
             let mut i = 0;
@@ -1972,6 +2324,7 @@ fn expr_of(b: &Builder, t: &TT, var: &mut dyn FnMut(u32, SortIndex) -> VarId) ->
         },
         TT::Int(n) => Expr::Int(*n),
         TT::Str(s) => Expr::Str(s.clone()),
+        TT::Ident(i) => Expr::Ident(*i),
         TT::EVar => unreachable!("extension variable in an expression"),
     }
 }
