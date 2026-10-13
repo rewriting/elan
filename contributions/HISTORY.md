@@ -15,3 +15,9 @@ Each directory's csh `tst_all` is replaced by a plain `TESTS` file (same tests,
 same files; format in `tests/apps/README.md`). Test ids became
 `contributions/X::KIND::lgi:spc:inp:out`; the bench baseline and snapshots were
 migrated mechanically (same statuses).
+
+## 2026-10-13: S9b
+
+`Proving/TimedAutomata/Product-Of-Automata/Timed_automata/tests` (notes of
+H. Kacem: queries and expected answers) renamed `tests.txt`: it differed only
+by case from the new `TESTS` file of the directory (check_case).
