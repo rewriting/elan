@@ -135,6 +135,7 @@ enum TT {
     EVar,
     Int(i64),
     Str(Vec<u8>),
+    Ident(i32),
 }
 
 /// Typing failure: a type mismatch (try another profile) or a hard error.
@@ -155,6 +156,7 @@ fn builtin_kind(name: &str) -> Option<BuiltinKind> {
         "builtinInt" => Some(BuiltinKind::Int),
         "bool" => Some(BuiltinKind::Bool),
         "builtinString" => Some(BuiltinKind::Str),
+        "ident" => Some(BuiltinKind::Ident),
         _ => None,
     }
 }
@@ -186,6 +188,7 @@ struct Lowerer<'p> {
     int_sort: Option<SortIndex>,
     str_sort: Option<SortIndex>,
     bool_sort: Option<SortIndex>,
+    ident_sort: Option<SortIndex>,
 }
 
 impl<'p> Lowerer<'p> {
@@ -244,6 +247,7 @@ impl<'p> Lowerer<'p> {
             int_sort: sort_named("builtinInt"),
             str_sort: sort_named("builtinString"),
             bool_sort: sort_named("bool"),
+            ident_sort: sort_named("ident"),
         }
     }
 
@@ -326,7 +330,13 @@ impl<'p> Lowerer<'p> {
                 check(s, "string")?;
                 Ok(TT::Str(decode_string(cs)))
             }
-            Term::Ident(_) => Err(unsupported("S6d", "builtin identifiers (sort ident)").into()),
+            Term::Ident(i) => {
+                let s = self
+                    .ident_sort
+                    .ok_or_else(|| Error::Invalid("identifier without ident".into()))?;
+                check(s, "identifier")?;
+                Ok(TT::Ident(*i as i32))
+            }
             Term::Fsym { args, symbol } => {
                 if let (CALL_SYMBOL, [Term::Int(s)]) = (*symbol, args.as_slice()) {
                     // `call "name":X` (`call @':'X : (builtinString)
@@ -408,6 +418,7 @@ impl<'p> Lowerer<'p> {
             TT::Var(_, s) => *s,
             TT::Int(_) => self.int_sort.unwrap(),
             TT::Str(_) => self.str_sort.unwrap(),
+            TT::Ident(_) => self.ident_sort.unwrap(),
             TT::EVar => unreachable!("sort of an extension variable"),
         }
     }
@@ -462,7 +473,7 @@ impl<'p> Lowerer<'p> {
         }
         for &s in &reach.sorts {
             let n = self.sort_name(s);
-            if n == "ident" || n.starts_with("intern ") {
+            if n.starts_with("intern ") {
                 return Err(unsupported("S6d", format!("builtin sort {n}")));
             }
         }
@@ -491,6 +502,9 @@ impl<'p> Lowerer<'p> {
             }
             TT::Str(_) => {
                 r.sorts.insert(self.str_sort.unwrap());
+            }
+            TT::Ident(_) => {
+                r.sorts.insert(self.ident_sort.unwrap());
             }
             TT::EVar => {}
         }
@@ -1344,6 +1358,15 @@ impl<'a, 'p> Builder<'a, 'p> {
             }
         };
         let start = expr_of(&self, start, &mut |_, _| unreachable!("no variable"));
+        let idents = match l.ident_sort {
+            Some(s) if self.sort_of.contains_key(&s) => l
+                .p
+                .identifiers
+                .iter()
+                .map(|e| (e.index as i32, e.name.clone()))
+                .collect(),
+            _ => Vec::new(),
+        };
         Ok(Ir {
             program: name.to_string(),
             sorts,
@@ -1352,6 +1375,7 @@ impl<'a, 'p> Builder<'a, 'p> {
             labels,
             strategies,
             metas,
+            idents,
             start: Start {
                 query_sort: l.sort_name(q.sort),
                 sort: start_sort,
@@ -1758,6 +1782,7 @@ impl<'b, 'a, 'p> RuleLowerer<'b, 'a, 'p> {
             },
             TT::Int(n) => Pattern::Int(*n),
             TT::Str(s) => Pattern::Str(s.clone()),
+            TT::Ident(i) => Pattern::Ident(*i),
             TT::EVar => unreachable!("rules with extension variables are skipped"),
         }
     }
@@ -1925,6 +1950,12 @@ fn render(b: &Builder, t: &TT, out: &mut String) {
             out.push_str(&n.to_string())
         }
         TT::Str(s) => out.push_str(&string_text(s)),
+        TT::Ident(i) => {
+            if alnum_end(out) {
+                out.push(' ');
+            }
+            out.push_str(&b.l.ident(*i as u32))
+        }
         TT::Op(c, args) => {
             // the declaration's syntax (the printing form may be an alias)
             let mut i = 0;
@@ -1972,6 +2003,7 @@ fn expr_of(b: &Builder, t: &TT, var: &mut dyn FnMut(u32, SortIndex) -> VarId) ->
         },
         TT::Int(n) => Expr::Int(*n),
         TT::Str(s) => Expr::Str(s.clone()),
+        TT::Ident(i) => Expr::Ident(*i),
         TT::EVar => unreachable!("extension variable in an expression"),
     }
 }

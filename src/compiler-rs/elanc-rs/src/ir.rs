@@ -139,6 +139,9 @@ pub struct Ir {
     /// The evaluators of the `Strategy[X]` terms of `META` (one per X).
     pub metas: Vec<MetaIr>,
     pub start: Start,
+    /// The table of identifiers of the `.ref` file (index, name) when the
+    /// sort `ident` is reached (`elan_runtime::init_idents`), else empty.
+    pub idents: Vec<(i32, String)>,
 }
 
 /// The evaluation of the terms of sort `Strategy[X]` (`Meta_strat[X]`) by
@@ -299,6 +302,9 @@ pub enum BuiltinKind {
     Bool,
     /// `builtinString`: a `Str` (`Rc<[u8]>`: bytes, as C strings).
     Str,
+    /// `ident`: an `Ident`, the index of the identifier in the table of
+    /// identifiers of the program (`elan_runtime::ident`).
+    Ident,
 }
 
 /// A builtin sort and the sorts whose only constructor is an injection of
@@ -431,6 +437,11 @@ pub enum BuiltinOp {
     StrSpn,
     StrCmp,
     StrOfChar,
+    /// `==`, `!=` on ident (14, 15).
+    IdentEq,
+    IdentNe,
+    /// `ident2string` (177): the name of the identifier.
+    IdentToString,
 }
 
 /// A comparison.
@@ -476,6 +487,9 @@ impl BuiltinOp {
             156 => StrSpn,
             157 => StrCmp,
             158 => StrOfChar,
+            14 => IdentEq,
+            15 => IdentNe,
+            177 => IdentToString,
             _ => return None,
         })
     }
@@ -545,6 +559,8 @@ pub enum Pattern {
     Int(i64),
     /// A builtinString literal.
     Str(Vec<u8>),
+    /// An identifier literal (its index).
+    Ident(i32),
 }
 
 /// A condition or local assignment of a rule.
@@ -578,6 +594,8 @@ pub enum Expr {
     Op { op: OpId, args: Vec<Expr> },
     Int(i64),
     Str(Vec<u8>),
+    /// An identifier literal (its index).
+    Ident(i32),
 }
 
 /// A position under the arguments of the function: the argument number,
@@ -619,6 +637,7 @@ pub enum Head {
     Op(OpId),
     Int(i64),
     Str(Vec<u8>),
+    Ident(i32),
 }
 
 /// The query's start term (`start with () t`, run by `-noInput`).

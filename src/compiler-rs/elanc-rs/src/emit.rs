@@ -264,6 +264,7 @@ impl<'a> Emitter<'a> {
             BuiltinKind::Int => "Int",
             BuiltinKind::Bool => "bool",
             BuiltinKind::Str => "Str",
+            BuiltinKind::Ident => "elan_runtime::Ident",
         }
     }
 
@@ -340,6 +341,7 @@ impl<'a> Emitter<'a> {
             Expr::Var(v) => format!("{}.clone()", vars[*v].name),
             Expr::Int(n) => self.lit_int(*n),
             Expr::Str(s) => self.lit_str(s),
+            Expr::Ident(i) => self.lit_ident(*i),
             Expr::Op { op, args } => {
                 let o = &self.ir.ops[*op];
                 match o.kind {
@@ -390,6 +392,21 @@ impl<'a> Emitter<'a> {
         self.wrap(self.int_sort().expect("builtinInt"), &v)
     }
 
+    fn ident_sort(&self) -> Option<SortId> {
+        self.ir
+            .families
+            .iter()
+            .find(|f| f.kind == BuiltinKind::Ident)
+            .map(|f| f.base)
+    }
+
+    fn lit_ident(&self, i: i32) -> String {
+        self.wrap(
+            self.ident_sort().expect("ident"),
+            &format!("elan_runtime::Ident({i})"),
+        )
+    }
+
     fn lit_str(&self, s: &[u8]) -> String {
         self.wrap(
             self.str_sort().expect("builtinString"),
@@ -404,6 +421,7 @@ impl<'a> Emitter<'a> {
                 Head::Int(n) if *n < 0 => format!("*{v} == ({n})"),
                 Head::Int(n) => format!("*{v} == {n}"),
                 Head::Str(st) => format!("&**{v} == {}", byte_lit(st)),
+                Head::Ident(i) => format!("{v}.0 == {i}"),
                 Head::Op(o) => match self.ir.ops[*o].kind {
                     OpKind::BoolConst(true) => format!("*{v}"),
                     OpKind::BoolConst(false) => format!("!*{v}"),
@@ -764,6 +782,9 @@ impl<'a> Emitter<'a> {
             StrSpn => "builtin::str_spn(&v0, &v1)".to_string(),
             StrCmp => "builtin::str_cmp(&v0, &v1)".to_string(),
             StrOfChar => "builtin::str_of_char(v0)".to_string(),
+            IdentEq => "v0 == v1".to_string(),
+            IdentNe => "v0 != v1".to_string(),
+            IdentToString => "Str::from(elan_runtime::ident_name(v0).as_bytes())".to_string(),
             TermEq | TermNeq | BoolAnd | BoolOr | BoolNot => unreachable!(),
         };
         if b.partial() {
@@ -866,7 +887,7 @@ impl<'a> Emitter<'a> {
         for (h, d) in cases {
             let mut closes = 1;
             match h {
-                Head::Int(_) | Head::Str(_) => {
+                Head::Int(_) | Head::Str(_) | Head::Ident(_) => {
                     let t = self.lit_test(sort, &name, h);
                     self.out.open(&format!("if {t} {{"));
                 }
@@ -1039,6 +1060,7 @@ impl<'a> Emitter<'a> {
             Expr::Op { op, .. } => self.ir.ops[*op].result,
             Expr::Int(_) => self.int_sort().unwrap(),
             Expr::Str(_) => self.str_sort().unwrap(),
+            Expr::Ident(_) => self.ident_sort().unwrap(),
         }
     }
 
@@ -1048,10 +1070,11 @@ impl<'a> Emitter<'a> {
         let ir = self.ir;
         match p {
             Pattern::Var(v) => self.out.line(&format!("let {} = {scrut};", vars[*v].name)),
-            Pattern::Int(_) | Pattern::Str(_) => {
+            Pattern::Int(_) | Pattern::Str(_) | Pattern::Ident(_) => {
                 let h = match p {
                     Pattern::Int(n) => Head::Int(*n),
                     Pattern::Str(x) => Head::Str(x.clone()),
+                    Pattern::Ident(i) => Head::Ident(*i),
                     _ => unreachable!(),
                 };
                 let t = self.lit_test(s, scrut, &h);
@@ -1841,6 +1864,14 @@ impl<'a> Emitter<'a> {
             ir.start.query_sort
         ));
         self.out.line("s.writer.string_style = StringStyle::Raw;");
+        if !ir.idents.is_empty() {
+            let entries: Vec<String> =
+                ir.idents.iter().map(|(i, n)| format!("({i}, {n:?})")).collect();
+            self.out.line(&format!(
+                "elan_runtime::init_idents(&[{}]);",
+                entries.join(", ")
+            ));
+        }
         let e = self.expr(&ir.start.term, &[]);
         let ty = self.ty(ir.start.sort);
         self.out.line(&format!("let t: {ty} = {e};"));
