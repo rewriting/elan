@@ -1,0 +1,1 @@
+REM does not compare x with its other occurrence when that is bound by a later where (its result is m(a, ..., b) whatever the where gives: nl_later with h(e, b) too); the interpreter is the oracle. The rewrite steps (no normalisation of x for the candidates before the where) are checked by TestLazyACVariableForcedWhereRead (src/compiler-go/gen/ac_test.go).

@@ -127,7 +127,8 @@ type emitter struct {
 	// twice (a CondSame) and the Go variable of their value as it is (a
 	// transient term: compared, not normalised); lazy those of them whose
 	// normal form is not written yet (written before the first condition
-	// other than a CondSame, or the right-hand side: forceLazy); acLater
+	// that reads it, other than a CondSame, or the right-hand side:
+	// forceLazy); acLater
 	// are the variables bound by the conditions after the current AC
 	// matching (ac.go)
 	raw     map[ir.VarID]string
@@ -419,6 +420,7 @@ func (e *emitter) exprKey(x *ir.Expr) string {
 		return "d" + goInt(x.Int)
 	}
 	if e.ir.Ops[x.Op].Kind == ir.Injection {
+		// (expr writes an injection as its argument: the same value)
 		return e.exprKey(&x.Args[0])
 	}
 	var keys []string
@@ -1467,7 +1469,7 @@ func (e *emitter) conds(r *ir.Rule, from int, used map[ir.VarID]bool, depth int)
 	for j := from; j < len(r.Conds); j++ {
 		c := r.Conds[j]
 		if c.Kind != ir.CondSame {
-			e.forceLazy(r)
+			e.forceLazy(r, condReader(&c))
 		}
 		switch c.Kind {
 		case ir.CondSame, ir.CondIf, ir.CondLet:
@@ -1507,7 +1509,7 @@ func (e *emitter) conds(r *ir.Rule, from int, used map[ir.VarID]bool, depth int)
 			return e.choose(r, j, used, depth) || opens > 0
 		}
 	}
-	e.forceLazy(r)
+	e.forceLazy(r, nil)
 	if e.chooseRest != nil {
 		// the end of a branch of a choose: the rest of the rule
 		e.chooseRest(depth)
@@ -1595,9 +1597,12 @@ func (e *emitter) choose(r *ir.Rule, j int, used map[ir.VarID]bool, depth int) b
 	e.open("%s := func(%s) bool { // the rest of the rule after the choose", name, strings.Join(decl, ", "))
 	rest := *r
 	rest.Conds = r.Conds[j+1:]
+	// (the variables it forces are its own: the branches force theirs)
+	savedLazy := e.lazy
 	if e.conds(&rest, 0, used, depth+1) {
 		e.line("return false")
 	}
+	e.lazy = savedLazy
 	e.close("}")
 	e.res, e.ok = saveRes, saveOk
 	outer := e.chooseRest
@@ -1705,7 +1710,7 @@ func (e *emitter) simpleCond(c *ir.Cond, r *ir.Rule, used map[ir.VarID]bool) int
 		e.open("if %s {", e.eqExpr(r.Vars[c.A].Sort, r.Vars[c.A].Name, r.Vars[c.B].Name))
 		return 1
 	case ir.CondIf:
-		e.forceLazy(r)
+		e.forceLazy(r, condReader(c))
 		x := e.expr(&c.Expr, r.Vars)
 		if _, ok := e.ir.Native(e.ir.ExprSort(&c.Expr, r.Vars)); !ok {
 			x += " == rt.True"
@@ -1713,7 +1718,7 @@ func (e *emitter) simpleCond(c *ir.Cond, r *ir.Rule, used map[ir.VarID]bool) int
 		e.open("if %s {", x)
 		return 1
 	case ir.CondLet:
-		e.forceLazy(r)
+		e.forceLazy(r, condReader(c))
 		if used[c.A] {
 			e.line("%s := %s", r.Vars[c.A].Name, e.typedExpr(&c.Expr, r.Vars))
 		} else {

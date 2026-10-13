@@ -621,20 +621,24 @@ func (s *Down) Rest() []Term {
 
 // EqRaw tells whether a and b are the same term, either of them possibly
 // a transient AC term ([ACSubject]: the elements an AC-level variable
-// takes, as they are, which can make a reducible term). A transient node
-// is never a shared one (ACTerm gives the shared node when it exists);
-// two transient nodes are equal when their elements are. A variable that
-// occurs twice is compared so (REM and the interpreter compare the
-// instances as they are, not their normal forms).
+// takes, as they are, which can make a reducible term). Structural, so
+// that it does not depend on every shared node being in the unique table
+// (a transient node is not equal to a shared node by identity, and a
+// shared node may be plain, outside the table): the pointers, then the
+// stored hashes (the flags apart) and the symbols reject nearly all the
+// differences at once, then the arguments (the elements of an AC term are
+// in canonical order). A variable that occurs twice is compared so (REM
+// and the interpreter compare the instances as they are, not their normal
+// forms).
 func EqRaw(a, b Term) bool {
 	if Eq(a, b) {
 		return true
 	}
-	if !a.isTmp() || !b.isTmp() || a.Sym != b.Sym || len(a.Args) != len(b.Args) {
+	if a.Sym != b.Sym || a.Int != b.Int || len(a.Args) != len(b.Args) || a.hash() != b.hash() {
 		return false
 	}
 	for i := range a.Args {
-		if !Eq(a.Args[i], b.Args[i]) {
+		if !EqRaw(a.Args[i], b.Args[i]) {
 			return false
 		}
 	}

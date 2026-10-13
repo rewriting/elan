@@ -203,7 +203,9 @@ func rawKey(t *raw, isAC func(r int) bool) string {
 	case stringRule:
 		return "s" + strconv.Quote(t.str)
 	}
-	head := "o" + strconv.Itoa(int(t.rule.rulenumber)) + "/" + strconv.Itoa(t.rule.index)
+	// the operator (its code): not its grammar rule, an operator written
+	// with several syntaxes (g(a), g[a]) has one rule each
+	head := "o" + strconv.Itoa(int(t.rule.rulenumber))
 	var keys []string
 	if t.rule.index >= 0 && isAC(t.rule.index) {
 		for _, a := range flatAC(t) {

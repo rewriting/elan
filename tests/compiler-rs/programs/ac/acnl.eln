@@ -5,7 +5,8 @@ module acnl
 // nl_raw), and normalise the value only when it is used; the candidates
 // that differ cost no rewrite step (nl_steps) and no normalisation (the
 // candidates of G(x, ...) modulo an extension are the 2^n sub-multisets:
-// nl_slow, exponential when each one was normalised).
+// nl_slow, exponential when each one was normalised); nor a variable that
+// the condition being written does not read (nl_later, nl_hoist).
 import global int bool eq[T]; end
 sort T; end
 operators global
@@ -20,9 +21,13 @@ operators global
   F(@,@) : (T T) T (AC);
   G(@,@) : (T T) T (AC);
   P(@,@) : (T T) T (AC);
+  m(@,@,@) : (T T T) T;
+  ca(@) : (T) T;
+  cb(@,@,@) : (T T int) T;
 end
 rules for T
-  x, y, z : T;
+  x, y, z, u, v : T;
+  i : int;
 global
   [] G(x,F(x,y)) => y end
   [] G(b,F(a,e)) => d end
@@ -31,5 +36,12 @@ global
   [] h(P(x,F(x,y)),z) => g(P(x,z)) end
   [] k(P(x,y),F(x,z)) => g(P(x,z)) end
   [] P(e,e) => e end
+  // a partner bound by a later where: x is normalised when the rhs reads
+  // it, not for each candidate before the where (nl_later)
+  [] ca(G(x,y)) => m(x,y,z) where (T) h(x,z) :=() h(a,b) end
+  // a condition that does not read x, hoisted before the outer level is
+  // enumerated: x is not normalised for it (nl_hoist)
+  [] cb(G(x,y), G(x,v), i) => m(x,y,v) if i > 3 end
+  [] cb(x, y, i) => d end
 end
 end

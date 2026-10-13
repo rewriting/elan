@@ -320,6 +320,13 @@ func TestEqRawAndTakeAC(t *testing.T) {
 	if !EqRaw(s, ACSubject(symAnd, Flatten(symAnd, c, b))) || EqRaw(s, ACSubject(symAnd, Flatten(symAnd, a, b))) {
 		t.Fatal("EqRaw of a shared node")
 	}
+	// a shared node outside the unique table (plain nodes of a selective
+	// hash-consing): equal to its transient or other copy by structure
+	plain := func(x Term) Term { return &Node{Sym: x.Sym, Int: x.Int, Hash: x.hash(), Args: slices.Clone(x.Args)} }
+	px, py := plain(x), plain(ACSubject(symAnd, Flatten(symAnd, a, b, c)))
+	if !EqRaw(x, px) || !EqRaw(px, x) || !EqRaw(px, plain(px)) || EqRaw(px, py) || EqRaw(py, x) || EqRaw(x, py) {
+		t.Fatal("EqRaw of a plain node")
+	}
 	e := Flatten(symAnd, a, a, b, c, c, c)
 	for _, tc := range []struct {
 		x    []Term
@@ -349,10 +356,10 @@ func TestEqRawAndTakeAC(t *testing.T) {
 // TestApplyACm: repeated arguments given once with their multiplicity.
 func TestApplyACm(t *testing.T) {
 	a, b, c := atom(71), atom(72), atom(73)
-	if ApplyACm(symAnd, nil, []int{2, 1}, a, b) != ApplyAC(symAnd, nil, a, a, b) {
+	if !Eq(ApplyACm(symAnd, nil, []int{2, 1}, a, b), ApplyAC(symAnd, nil, a, a, b)) {
 		t.Error("ApplyACm")
 	}
-	if ExtendACm(symAnd, nil, []Term{c}, []int{1, 3}, b, a) != ApplyAC(symAnd, nil, a, a, a, b, c) {
+	if !Eq(ExtendACm(symAnd, nil, []Term{c}, []int{1, 3}, b, a), ApplyAC(symAnd, nil, a, a, a, b, c)) {
 		t.Error("ExtendACm")
 	}
 }

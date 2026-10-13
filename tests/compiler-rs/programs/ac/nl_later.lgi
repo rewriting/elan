@@ -1,0 +1,6 @@
+LPL nl_later description
+  query of sort bool
+  result of sort T
+  import acnl
+  start with () ca(G(b,G(c,G(a,G(e,G(b,c))))))
+end

@@ -256,12 +256,15 @@ func TestACRepeatedElements(t *testing.T) {
 		{Sort: 7, Symbol: 500, Rhs: []RhsLexem{{RhsIdent, a}}},
 		{Sort: 7, Symbol: 501, Rhs: []RhsLexem{{RhsIdent, b}}},
 		{Sort: 7, Symbol: 502, Rhs: []RhsLexem{{RhsIdent, g}, {RhsChar, '('}, {RhsSort, 7}, {RhsChar, ')'}}},
+		// the same operator written another way: one grammar rule each
+		{Sort: 7, Symbol: 502, Rhs: []RhsLexem{{RhsIdent, g}, {RhsChar, '['}, {RhsSort, 7}, {RhsChar, ']'}}},
 	}
 	tab := id.tables(rules, map[int32]string{7: "s"})
 	for _, tc := range []struct {
 		src, want string
 		ops       int
 	}{
+		{"g(a) + g[a] + g(a) end", "999{502(500),502(500),502(500)}", 2},
 		{"g(a) + g(a) + g(a) end", "999{502(500),502(500),502(500)}", 2},
 		{"g(a) + g(b) + g(a) + b end", "999{502(500),502(501),502(500),501}", 5},
 		// modulo AC: g(a + b) and g(b + a) are one element

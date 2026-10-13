@@ -148,6 +148,101 @@ func nonLinearAC(n int) *prog {
 	return p
 }
 
+// lazyBase builds the programs below: u (AC) of s(o), ..., s^n(o), with
+// the rule u(s(a), s(b)) => k(a, b), not modulo an extension: the whole
+// term is a normal form, but the normal form of each sub-multiset of two
+// elements takes a rewrite step (n(n-1)/2 of them, counted when a
+// candidate is normalised for nothing).
+func lazyBase(n int, rules func(p *prog)) *prog {
+	p := newProg()
+	p.op(sNat, 318, "o", nil, 0)
+	p.op(sNat, 319, "s", []uint32{sNat}, 0)
+	p.op(sNat, 340, "u", []uint32{sNat, sNat}, 0)
+	p.setAC(340)
+	p.op(sNat, 342, "h", []uint32{sNat, sNat}, 0)
+	p.op(sNat, 343, "ca", []uint32{sNat}, 0)
+	p.op(sNat, 344, "cb", []uint32{sNat, sNat}, 0)
+	p.op(sNat, 345, "k", []uint32{sNat, sNat}, 0)
+	a, b := v(0, sNat), v(1, sNat)
+	p.rule(sNat, f(340, f(319, a), f(319, b)), f(345, a, b))
+	rules(p)
+	e := f(319, f(318))
+	t := e
+	for range n - 1 {
+		e = f(319, e)
+		t = f(340, e, t)
+	}
+	p.p.Query.StartWith = f(344, t, t) // (replaced by the caller for ca)
+	return p
+}
+
+// lazyPartnerLater: ca(u(x, y)) => k(x, z) where h(x, z) := h(u(o, o), o): the
+// partner of x is bound by a later where, which does not read x: the n
+// candidates must not be normalised before it (no step: REM does not run it: its
+// where ignores the equality of x).
+func lazyPartnerLater(n int) *prog {
+	p := lazyBase(n, func(p *prog) {
+		x, y, z := v(0, sNat), v(1, sNat), v(2, sNat)
+		p.rule(sNat, f(343, f(340, x, y)), f(345, x, z),
+			ref.Assign{Lhs: f(342, x, z), Strategy: ref.None, Rhs: f(342, f(340, f(318), f(318)), f(318))})
+	})
+	t := p.p.Query.StartWith.(ref.Fsym).Args[0]
+	p.p.Query.StartWith = f(343, t)
+	return p
+}
+
+// lazyHoisted: cb(u(x, y), u(x, v)) => k(x, o) if false: the condition,
+// hoisted at the innermost level, does not read x; the 2^n candidates
+// that pass the equality must not be normalised for it.
+func lazyHoisted(n int) *prog {
+	return lazyBase(n, func(p *prog) {
+		x, y, w := v(0, sNat), v(1, sNat), v(2, sNat)
+		p.rule(sNat, f(344, f(340, x, y), f(340, x, w)), f(345, x, f(318)), ref.If{Cond: f(0)})
+	})
+}
+
+// runSteps builds p and runs it within limit; it returns the output.
+func runSteps(t *testing.T, p *prog, limit time.Duration) string {
+	t.Helper()
+	if testing.Short() {
+		t.Skip("go build")
+	}
+	dir, src := module(t, p)
+	build := goCmd(dir, "build", "-trimpath", "-buildvcs=false", "-o", "prog", ".")
+	if out, err := build.CombinedOutput(); err != nil {
+		t.Fatalf("go build: %v\n%s\n%s", err, out, src)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), limit)
+	defer cancel()
+	out, err := exec.CommandContext(ctx, filepath.Join(dir, "prog"), "-noInput", "-quiet").Output()
+	if ctx.Err() != nil {
+		t.Fatalf("not finished in %v (exponential enumeration of the candidates)", limit)
+	}
+	if err != nil {
+		t.Fatalf("run: %v\n%s", err, out)
+	}
+	return string(out)
+}
+
+// runWithin builds p and runs it: no rewrite step (the normalisation of a
+// candidate that nothing reads takes one), within limit.
+func runWithin(t *testing.T, p *prog, limit time.Duration) {
+	t.Helper()
+	out := runSteps(t, p, limit)
+	if !strings.HasSuffix(out, "\nrewrite_step = 0\n") {
+		t.Errorf("got %q", out)
+	}
+}
+
+// TestLazyACVariableForcedWhereRead: a lazy AC-level variable (one that
+// occurs twice) is normalised only by a condition that reads it (or the
+// right-hand side), not before the where that binds its partner, nor for
+// a hoisted condition of other variables.
+func TestLazyACVariableForcedWhereRead(t *testing.T) {
+	t.Run("partner bound by a later where", func(t *testing.T) { runWithin(t, lazyPartnerLater(8), 10*time.Second) })
+	t.Run("hoisted condition", func(t *testing.T) { runWithin(t, lazyHoisted(8), 10*time.Second) })
+}
+
 // TestNonLinearACLevelVariable: the candidates of a variable that occurs
 // twice are compared as they are (the multiset), only the chosen one is
 // normalised: normalising each of the 2^n candidates (each one a
@@ -155,24 +250,7 @@ func nonLinearAC(n int) *prog {
 // with n = 16 elements besides the two w (tests/compiler-rs/programs/ac
 // nl_slow; REM 0.1 s).
 func TestNonLinearACLevelVariable(t *testing.T) {
-	if testing.Short() {
-		t.Skip("go build")
-	}
-	dir, src := module(t, nonLinearAC(16))
-	build := goCmd(dir, "build", "-trimpath", "-buildvcs=false", "-o", "prog", ".")
-	if out, err := build.CombinedOutput(); err != nil {
-		t.Fatalf("go build: %v\n%s\n%s", err, out, src)
-	}
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
-	defer cancel()
-	out, err := exec.CommandContext(ctx, filepath.Join(dir, "prog"), "-noInput", "-quiet").Output()
-	if ctx.Err() != nil {
-		t.Fatalf("not finished in 2 s (exponential enumeration of the candidates)")
-	}
-	if err != nil {
-		t.Fatalf("run: %v\n%s", err, out)
-	}
-	if !strings.HasSuffix(string(out), "\nrewrite_step = 0\n") {
-		t.Errorf("got %q", out)
-	}
+	// n = 20: more than 60 s before the fix; the limit leaves room for a
+	// loaded machine
+	runWithin(t, nonLinearAC(20), 10*time.Second)
 }

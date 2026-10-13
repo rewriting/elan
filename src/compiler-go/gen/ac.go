@@ -192,15 +192,27 @@ type lazyAC struct {
 	ms string
 }
 
-// forceLazy writes the normal forms of the variables of e.lazy (before a
-// condition other than a CondSame, or the right-hand side, that can read
-// them): the candidates that the equality of a CondSame rejects are never
-// normalised (their rewrite steps not counted, as in REM).
-func (e *emitter) forceLazy(r *ir.Rule) {
+// forceLazy writes the normal forms of the variables of e.lazy that reads
+// tells (nil: all of them), before the condition or the right-hand side
+// that reads them: the candidates that the equality of a CondSame rejects
+// are never normalised (their rewrite steps not counted, as in REM), nor
+// is a variable that the condition does not read (a partner bound by a
+// later where, a hoisted condition of another variable).
+func (e *emitter) forceLazy(r *ir.Rule, reads func(ir.VarID) bool) {
+	var keep []lazyAC
 	for _, l := range e.lazy {
+		if reads != nil && !reads(l.v) {
+			keep = append(keep, l)
+			continue
+		}
 		e.line("%s := %s", r.Vars[l.v].Name, e.acValue(l.op, l.ms))
 	}
-	e.lazy = nil
+	e.lazy = keep
+}
+
+// condReader is forceLazy's reads for the condition c.
+func condReader(c *ir.Cond) func(ir.VarID) bool {
+	return func(v ir.VarID) bool { return condReads(c, v) }
 }
 
 // sameOf are the variables that a CondSame of r compares with v.
