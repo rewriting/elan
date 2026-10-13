@@ -442,6 +442,11 @@ pub enum BuiltinOp {
     IdentNe,
     /// `ident2string` (177): the name of the identifier.
     IdentToString,
+    /// `replace t1 by t2 in t3` (16) and `occurs t1 in t2` (17) on sorts
+    /// of terms (`replace[X,Y]`, `occur[X,Y]`): REM's term_rec_replace and
+    /// term_occur, the copied path of a replacement renormalised.
+    TermReplace,
+    TermOccurs,
 }
 
 /// A comparison.
@@ -490,12 +495,15 @@ impl BuiltinOp {
             14 => IdentEq,
             15 => IdentNe,
             177 => IdentToString,
+            16 => TermReplace,
+            17 => TermOccurs,
             _ => return None,
         })
     }
 
     /// Does the operation need values (not stuck terms) as arguments?
-    /// `and`/`or`/`not` and the term equalities accept any normal form.
+    /// `and`/`or`/`not` and the operations on terms accept any normal
+    /// form.
     pub fn needs_values(self) -> bool {
         !matches!(
             self,
@@ -504,6 +512,8 @@ impl BuiltinOp {
                 | BuiltinOp::BoolNot
                 | BuiltinOp::TermEq
                 | BuiltinOp::TermNeq
+                | BuiltinOp::TermReplace
+                | BuiltinOp::TermOccurs
         )
     }
 

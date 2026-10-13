@@ -734,3 +734,45 @@ fn labelled_rules_need_their_operators() {
     assert_eq!(ir.labels[0].rules.len(), 2);
     assert!(matches!(op_named(&ir, "b").kind, OpKind::Constructor));
 }
+
+/// The term builtins on sorts of terms (codes 16, 17) are total
+/// operations compiled to walkers: one per pair of sorts that can contain
+/// the searched term, the copied path rebuilt by the operators' functions.
+#[test]
+fn replace_and_occurs_walk_the_sorts_that_can_contain_the_term() {
+    let mut p = peano();
+    p.op(SET, 341, "single", &[NAT], 0, 0);
+    p.op(SET, 342, "empty", &[], 0, 0);
+    p.op(SET, 343, "replace", &[NAT, NAT, SET], 16, 0);
+    p.op(BOOL, 344, "occurs", &[NAT, SET], 17, 0);
+    p.op(SET, 345, "pair", &[SET, BOOL], 0, 0);
+    let o = || f(318, vec![]);
+    let so = || f(319, vec![o()]);
+    p.start(
+        f(
+            345,
+            vec![
+                f(343, vec![o(), so(), f(341, vec![so()])]),
+                f(344, vec![o(), f(342, vec![])]),
+            ],
+        ),
+        SET,
+    );
+    let ir = p.lower().unwrap();
+    for name in ["replace", "occurs"] {
+        assert!(op_named(&ir, name).kind.total(), "{name}");
+    }
+    let main = elanc_rs::emit::emit_crate(&ir, "/rt").main_rs;
+    for needle in [
+        "tw_replace__Nat__Set(a2, a0, a1)",
+        "pub fn tw_replace__Nat__Set(t: &H<Set>, a: &H<Nat>, b: &H<Nat>) -> H<Set> {",
+        "let r0 = tw_replace__Nat__Nat(x0, a, b);",
+        "return single_341(&r0);",
+        "pub fn tw_replace__Nat__Nat(t: &H<Nat>, a: &H<Nat>, b: &H<Nat>) -> H<Nat> {\n    if t == a { return b.clone(); }",
+        "Set::Single(x0) => {\n            tw_occurs__Nat__Nat(a, x0)",
+        // a bool cannot contain a nat
+        "Set::Pair(x0, x1) => {\n            tw_occurs__Nat__Set(a, x0)\n",
+    ] {
+        assert!(main.contains(needle), "{needle} not in:\n{main}");
+    }
+}

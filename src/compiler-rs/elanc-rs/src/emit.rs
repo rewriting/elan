@@ -36,6 +36,11 @@
 //!   continuation of `S` (a closure), so that a failing condition asks `S`
 //!   for its next result (`return false`); in a normalisation function the
 //!   first result for which the rule applies is kept (`res`);
+//! * the term builtins `occurs a in t` and `replace a by b in t` on sorts
+//!   of terms: one walker function per (sort of `a`, sort of a subterm of
+//!   `t`) that can contain it, `tw_occurs__A__C` and `tw_replace__A__C`,
+//!   the copied path rebuilt by the normalisation functions of its
+//!   operators;
 //! * `main`: the start term, normalised and printed by the runtime driver
 //!   (strings printed raw, as the compiled C programs do), or each result
 //!   of the start strategy applied to it.
@@ -228,6 +233,17 @@ struct Emitter<'a> {
     /// While emitting a tail-recursive strategy as a loop: its calls in
     /// tail position ([`Ir::tail_calls`]), which set the next term.
     tail_nodes: Vec<*const Strategy>,
+    /// The term walkers used ([`Emitter::walker`]), to emit after the
+    /// operators, and those already emitted or pending (by name).
+    walkers: Vec<(Walk, SortId, SortId)>,
+    walker_names: std::collections::HashSet<String>,
+}
+
+/// What a term walker computes.
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum Walk {
+    Occurs,
+    Replace,
 }
 
 impl<'a> Emitter<'a> {
@@ -247,6 +263,8 @@ impl<'a> Emitter<'a> {
             recursive: ir.recursive_ops(),
             total: ir.total_strategies(),
             tail_nodes: Vec::new(),
+            walkers: Vec::new(),
+            walker_names: std::collections::HashSet::new(),
         }
     }
 
@@ -471,6 +489,7 @@ impl<'a> Emitter<'a> {
         self.sorts();
         self.families();
         o_ops(&mut self);
+        self.walker_fns();
         self.labels();
         self.strategies();
         self.metas();
@@ -729,6 +748,18 @@ impl<'a> Emitter<'a> {
                 format!("*a{i}")
             }
         };
+        if let BuiltinOp::TermOccurs = b {
+            let f = self.walker(Walk::Occurs, op.args[0], op.args[1]);
+            let w = self.wrap(res, &format!("{f}(a0, a1)"));
+            self.out.line(&w);
+            return;
+        }
+        if let BuiltinOp::TermReplace = b {
+            // replace a0 by a1 in a2
+            let f = self.walker(Walk::Replace, op.args[0], op.args[2]);
+            self.out.line(&format!("{f}(a2, a0, a1)"));
+            return;
+        }
         if !b.needs_values() {
             let v = match b {
                 BuiltinOp::TermEq => "a0 == a1".to_string(),
@@ -785,7 +816,9 @@ impl<'a> Emitter<'a> {
             IdentEq => "v0 == v1".to_string(),
             IdentNe => "v0 != v1".to_string(),
             IdentToString => "Str::from(elan_runtime::ident_name(v0).as_bytes())".to_string(),
-            TermEq | TermNeq | BoolAnd | BoolOr | BoolNot => unreachable!(),
+            TermEq | TermNeq | BoolAnd | BoolOr | BoolNot | TermReplace | TermOccurs => {
+                unreachable!()
+            }
         };
         if b.partial() {
             self.out.open(&format!("match {value} {{"));
@@ -797,6 +830,201 @@ impl<'a> Emitter<'a> {
             let w = self.wrap(res, &value);
             self.out.line(&w);
         }
+    }
+
+    // ------------------------------------------------------------------
+    // Term walkers: occurs (17) and replace (16) on sorts of terms
+    // ------------------------------------------------------------------
+
+    /// The representation of the terms of sort `s` for the walkers: its
+    /// Rust type (the members of a builtin family share it: an `int` is
+    /// its `builtinInt`, as for REM, where the injection is no node), a
+    /// name, and the variants a term can have at its top (none for a
+    /// native value).
+    fn walk_node(&self, s: SortId) -> (String, String, Vec<OpId>) {
+        let sort = &self.ir.sorts[s];
+        match &sort.repr {
+            Repr::Enum { variants } => (self.ty(s), sort.type_name.clone(), variants.clone()),
+            Repr::Family(f) => {
+                let fam = &self.ir.families[*f];
+                match &fam.stuck {
+                    Some(e) => (self.ty(s), e.alias.clone(), e.variants.clone()),
+                    None => (
+                        self.ty(s),
+                        self.ir.sorts[fam.base].type_name.clone(),
+                        Vec::new(),
+                    ),
+                }
+            }
+        }
+    }
+
+    /// Can a term of sort `c` contain a subterm of the representation of
+    /// sort `a` (itself included)?
+    fn can_contain(&self, c: SortId, a: SortId) -> bool {
+        let target = self.walk_node(a).0;
+        let mut seen: std::collections::HashSet<String> = std::collections::HashSet::new();
+        let mut todo = vec![c];
+        while let Some(s) = todo.pop() {
+            let (ty, _, variants) = self.walk_node(s);
+            if ty == target {
+                return true;
+            }
+            if !seen.insert(ty) {
+                continue;
+            }
+            for v in variants {
+                todo.extend(self.ir.ops[v].args.iter().copied());
+            }
+        }
+        false
+    }
+
+    /// The name of the walker `w` of the terms of sort `a` in the terms of
+    /// sort `c` (`c` can contain `a`), emitted after the operators.
+    fn walker(&mut self, w: Walk, a: SortId, c: SortId) -> String {
+        let kind = match w {
+            Walk::Occurs => "occurs",
+            Walk::Replace => "replace",
+        };
+        let name = format!(
+            "tw_{kind}__{}__{}",
+            self.walk_node(a).1,
+            self.walk_node(c).1
+        );
+        if self.walker_names.insert(name.clone()) {
+            self.walkers.push((w, a, c));
+        }
+        name
+    }
+
+    /// The walkers used by the operators, and those they use.
+    fn walker_fns(&mut self) {
+        let mut i = 0;
+        while i < self.walkers.len() {
+            let (w, a, c) = self.walkers[i];
+            i += 1;
+            self.walker_fn(w, a, c);
+        }
+    }
+
+    /// `occurs a in t` (REM's term_occur): `t` is `a`, or `a` occurs in an
+    /// argument of `t` (only the arguments whose sort can contain `a` are
+    /// visited). `replace a by b in t` (REM's term_rec_replace): `b` when
+    /// `t` is `a`; else each argument replaced, the term rebuilt by its
+    /// operator's normalisation function when one changed (so the copied
+    /// path is renormalised), kept otherwise; `b` is not searched.
+    fn walker_fn(&mut self, w: Walk, a: SortId, c: SortId) {
+        let ir = self.ir;
+        let name = self.walker(w, a, c);
+        let (ta, tc) = (self.ty(a), self.ty(c));
+        let same = self.walk_node(a).0 == self.walk_node(c).0;
+        let (_, _, variants) = self.walk_node(c);
+        let (en, stuck) = match &ir.sorts[c].repr {
+            Repr::Enum { .. } => (ir.sorts[c].type_name.clone(), false),
+            Repr::Family(f) => match &ir.families[*f].stuck {
+                Some(e) => (e.type_name.clone(), true),
+                None => (String::new(), false),
+            },
+        };
+        let (sa, sc) = (&ir.sorts[a].name, &ir.sorts[c].name);
+        match w {
+            Walk::Occurs => {
+                self.out
+                    .line(&format!("/// occurs a in t, a of sort {sa}, t of sort {sc}."));
+                self.out.open(&format!(
+                    "pub fn {name}(a: &{ta}, t: &{tc}) -> bool {{"
+                ));
+            }
+            Walk::Replace => {
+                self.out.line(&format!(
+                    "/// replace a by b in t, a of sort {sa}, t of sort {sc}."
+                ));
+                self.out.open(&format!(
+                    "pub fn {name}(t: &{tc}, a: &{ta}, b: &{ta}) -> {tc} {{"
+                ));
+            }
+        }
+        if same {
+            match w {
+                Walk::Occurs => self.out.line("if t == a { return true; }"),
+                Walk::Replace => self.out.line("if t == a { return b.clone(); }"),
+            }
+        }
+        let kept = match w {
+            Walk::Occurs => "false",
+            Walk::Replace => "t.clone()",
+        };
+        // the variants with an argument that can contain a
+        let arms: Vec<OpId> = variants
+            .iter()
+            .copied()
+            .filter(|&v| ir.ops[v].args.iter().any(|&s| self.can_contain(s, a)))
+            .collect();
+        if arms.is_empty() {
+            self.out.line(kept);
+            self.out.close("}");
+            self.out.line("");
+            return;
+        }
+        self.out.line("elan_runtime::guard();");
+        let node = if stuck {
+            self.out.line(&format!(
+                "let Builtin::Stuck(s) = t else {{ return {kept}; }};"
+            ));
+            "s"
+        } else {
+            "t"
+        };
+        self.out.open(&format!("match &**{node} {{"));
+        for v in arms {
+            let op = &ir.ops[v];
+            let vn = op.variant.as_ref().unwrap();
+            let fields: Vec<String> = (0..op.args.len()).map(|i| format!("x{i}")).collect();
+            self.out
+                .open(&format!("{en}::{vn}({}) => {{", fields.join(", ")));
+            let visited: Vec<usize> = (0..op.args.len())
+                .filter(|&i| self.can_contain(op.args[i], a))
+                .collect();
+            match w {
+                Walk::Occurs => {
+                    let calls: Vec<String> = visited
+                        .iter()
+                        .map(|&i| {
+                            let f = self.walker(Walk::Occurs, a, op.args[i]);
+                            format!("{f}(a, x{i})")
+                        })
+                        .collect();
+                    self.out.line(&calls.join(" || "));
+                }
+                Walk::Replace => {
+                    for &i in &visited {
+                        let f = self.walker(Walk::Replace, a, op.args[i]);
+                        self.out.line(&format!("let r{i} = {f}(x{i}, a, b);"));
+                    }
+                    let changed: Vec<String> =
+                        visited.iter().map(|&i| format!("r{i} != *x{i}")).collect();
+                    let args: Vec<String> = (0..op.args.len())
+                        .map(|i| {
+                            if visited.contains(&i) {
+                                format!("&r{i}")
+                            } else {
+                                format!("x{i}")
+                            }
+                        })
+                        .collect();
+                    self.out.open(&format!("if {} {{", changed.join(" || ")));
+                    self.out.line(&format!("return {}({});", op.fun, args.join(", ")));
+                    self.out.close("}");
+                    self.out.line("t.clone()");
+                }
+            }
+            self.out.close("}");
+        }
+        self.out.line(&format!("_ => {kept},"));
+        self.out.close("}");
+        self.out.close("}");
+        self.out.line("");
     }
 
     // ------------------------------------------------------------------
