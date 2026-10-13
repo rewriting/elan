@@ -1,0 +1,14 @@
+# tests of Proving/Automata (S9b; format: tests/apps/README.md)
+# S9b: programs loaded by the 2004 reference without a test (tests/apps/triage.tsv)
+itest automaton ex_automaton automaton automaton-i
+aitest automaton ex_automaton automaton automaton-i
+gtest automaton ex_automaton automaton automaton-c
+itest nf_automaton ex_nf_automaton nf_automaton nf_automaton-i
+aitest nf_automaton ex_nf_automaton nf_automaton nf_automaton-i
+gtest nf_automaton ex_nf_automaton nf_automaton nf_automaton-c
+itest termination ex_termination termination termination-i
+aitest termination ex_termination termination termination-i
+gtest termination ex_termination termination termination-c
+itest all_operations ex_termination all_operations all_operations-i
+aitest all_operations ex_termination all_operations all_operations-i
+gtest all_operations ex_termination all_operations all_operations-c

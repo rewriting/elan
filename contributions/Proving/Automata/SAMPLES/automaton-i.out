@@ -1,0 +1,10 @@
+ Description of A(1)states q|0.q|1.q|2.q|3.q|4.nil final states q|4.nil transitions cons_transition(b->q|2,cons_transition(a->q|2,cons_transition(cons(q|2,q|0)->q|1,cons_transition(cons(q|2,q|1)->q|3,cons_transition(null->q|0,cons_transition(null->q|1,cons_transition(null->q|3,cons_transition(cons(q|2,q|3)->q|4,nil))))))))End of Description end
+
+ end end
+end
+
+ Description of A(2)states q|0.q|1.q|2.q|3.q|4.q|5.q|6.q|7.q|8.q|9.q|10.q|11.q|12.q|13.q|14.nil final states q|8.q|9.q|10.q|11.q|12.q|13.q|14.nil transitions cons_transition(null->q|0,cons_transition(null->q|1,cons_transition(null->q|14,cons_transition(cons(q|11,q|0)->q|2,cons_transition(cons(q|11,q|0)->q|3,cons_transition(cons(q|5,q|1)->q|3,cons_transition(cons(q|11,q|0)->q|13,cons_transition(cons(q|5,q|1)->q|13,cons_transition(cons(q|7,q|14)->q|13,cons_transition(null->q|2,cons_transition(null->q|3,cons_transition(null->q|13,cons_transition(cons(q|11,q|2)->q|4,cons_transition(cons(q|11,q|2)->q|6,cons_transition(cons(q|5,q|3)->q|6,cons_transition(cons(q|11,q|2)->q|12,cons_transition(cons(q|5,q|3)->q|12,cons_transition(cons(q|7,q|13)->q|12,cons_transition(null->q|4,cons_transition(null->q|6,cons_transition(null->q|12,cons_transition(b->q|5,cons_transition(a->q|7,cons_transition(cons(q|11,q|4)->q|11,cons_transition(cons(q|5,q|6)->q|11,cons_transition(cons(q|7,q|12)->q|11,cons_transition(null->q|11,cons_transition(cons(q|11,q|4)->q|10,cons_transition(cons(q|11,q|4)->q|9,cons_transition(cons(q|5,q|6)->q|9,cons_transition(cons(q|11,q|4)->q|8,cons_transition(cons(q|5,q|6)->q|8,cons_transition(cons(q|7,q|12)->q|8,cons_transition(null->q|10,cons_transition(null->q|9,cons_transition(null->q|8,nil))))))))))))))))))))))))))))))))))))End of Description end
+
+ end end
+end
+

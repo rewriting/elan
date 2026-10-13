@@ -1,0 +1,2 @@
+simplify(!A(0) inter !A(1)) end
+simplify(!A(1) union !A(2)) end
