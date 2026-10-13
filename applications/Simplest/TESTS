@@ -24,3 +24,5 @@ aitest fib no ifib ifib
 aitest main no main main
 long aitest nqueens no nqueens nqueens
 long aitest queens no queens queens
+# S9b: programs loaded by the 2004 reference without a test (tests/apps/triage.tsv)
+gtest test_rewrite no test_rewrite test_rewrite-c

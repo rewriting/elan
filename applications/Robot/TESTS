@@ -9,3 +9,5 @@ aitest robot non robot robot
 aitest tictactoe non tictactoe tictactoe
 long aitest robot2 non robot2 robot2
 long aitest nim2 non nim2 nim2
+# S9b: programs loaded by the 2004 reference without a test (tests/apps/triage.tsv)
+itest tictac no tictac tictac-i

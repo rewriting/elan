@@ -40,3 +40,6 @@ aitest lis4 lis4 lis4 lis4
 aitest filter filter filter filter
 aitest filt filt filt filt
 aitest lambda lambda lambda lambda
+# S9b: programs loaded by the 2004 reference without a test (tests/apps/triage.tsv)
+itest ll no ll ll-i
+gtest ll no ll ll-c

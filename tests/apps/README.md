@@ -69,6 +69,12 @@ Found in S9b (programs loaded by the reference, still untested, kept in
 - `Features/re`: segfaults with both systems on every query (the rule calls
   `printnl`); `Features/hello` too (`print`) on `hello`: its test only
   queries a string.
+- `aitest` lines are missing for programs whose exported `.ref` cannot be
+  imported by either system (`[PARSER] syntax error on symbol 'tone'`):
+  `APT/bubleLOG`, `Robot/tictac`, `Strategies/ll`.
+- `Simplest/test_rewrite`: the interpreters do not interpret its `rewrite`
+  strategy ("Rewrite step is not intepreted", no result): `gtest` only.
+- `gtest` lines missing for other reasons are listed in `category4.md`.
 - The reference REM build of `bubleLOG` crashes (Boehm GC out of memory,
   rc=-11).
 - The reference interpreter segfaults on `Features/hello` (rc=139).
