@@ -1,0 +1,3 @@
+itest  toi_meme no toi_meme toi_meme-i
+aitest toi_meme no toi_meme toi_meme-i
+gtest  toi_meme no toi_meme toi_meme-c

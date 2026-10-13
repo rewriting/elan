@@ -151,6 +151,7 @@ elan/sources/Compiler.4.0/Test::G::wpatternAC3:no:-:wpatternAC3	PASS≈
 elan/sources/Compiler.4.0/Test::G::wpatternAC4:no:-:wpatternAC4	PASS≈
 elan/sources/Compiler.4.0/Test::G::wpatternAC5:no:-:wpatternAC5	PASS≈
 elan/sources/Compiler.4.0/Test::G::wpatternAC6:no:-:wpatternAC6	PASS≈
+elan3/applications/Features::G::toi_meme:no:toi_meme:toi_meme-c	PASS
 elan3/applications/Simplest::G::fib_jc:no:-:fib_jc	PASS≈
 elan3/applications/Simplest::G::hanoi_jc:no:-:hanoi_jc	PASS≈
 elan3/applications/Simplest::G::main_jc:no:-:main_jc	PASS~
