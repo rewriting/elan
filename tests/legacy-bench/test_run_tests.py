@@ -372,5 +372,18 @@ class OverlayCopyTest(unittest.TestCase):
             self.assertEqual(e.exception.status, "NOINP")
 
 
+class OverlayJudgeTest(unittest.TestCase):
+    def test_overlay_tests_must_pass_unless_in_the_baseline(self):
+        st = {"A::I::p:no:q:q": "PASS~", "A::G::p:no:q:q-c": "UNSUPPORTED",
+              "A::I::r:no:r:r": "FAIL", "A::I::h:no:h:h": "FAIL"}
+        regress, _ = rt.judge(st, {"A::I::r:no:r:r": "FAIL"}, set(),
+                              overlay_ids=set(st))
+        self.assertEqual(sorted(r[0] for r in regress), ["A::I::h:no:h:h", "A::I::p:no:q:q"])
+
+    def test_historical_tests_keep_the_old_rule(self):
+        regress, _ = rt.judge({"A::I::p:no:p:p": "FAIL"}, {}, set())
+        self.assertEqual(regress, [])
+
+
 if __name__ == "__main__":
     unittest.main()

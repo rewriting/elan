@@ -480,11 +480,12 @@ def load_baseline():
 RANK = {"PASS": 0, "PASS~": 1, "PASS≈": 2}
 
 
-def judge(statuses, base, exceptions):
+def judge(statuses, base, exceptions, overlay_ids=frozenset()):
     """Compare test statuses with the baseline: return (regressions, improvements),
     lists of (id, old, new). Cases of tests/regression must PASS exactly (their
     expected.out is the oracle, whatever the baseline says); tests listed in the
-    platform exceptions are exempt."""
+    platform exceptions are exempt. Overlay tests (spec S9) not in the baseline must
+    PASS (kind G: or UNSUPPORTED): the reference is their oracle."""
     regress, improve = [], []
     for tid, new in sorted(statuses.items()):
         if new == "SANITIZER":          # a sanitizer report is always a failure
@@ -494,6 +495,11 @@ def judge(statuses, base, exceptions):
             continue
         if tid.startswith(("regression/", "examples/")):
             if new not in ("PASS", "MODERN-ONLY"):
+                regress.append((tid, "PASS", new))
+            continue
+        if tid in overlay_ids and tid not in base:
+            ok = ("PASS", "UNSUPPORTED") if "::G::" in tid else ("PASS",)
+            if new not in ok:
                 regress.append((tid, "PASS", new))
             continue
         if tid in base:
@@ -603,8 +609,10 @@ def main():
     print(f"details: {outdir}")
 
     base = load_baseline()
-    regress, improve = judge({tid: results[tid][0] for tid in ids}, base, exceptions)
-    if base or regress:
+    overlay_ids = {t["id"] for t in tests if t.get("overlay")}
+    regress, improve = judge({tid: results[tid][0] for tid in ids}, base, exceptions,
+                             overlay_ids)
+    if base or regress or overlay_ids:
         print(f"vs baseline: {len(regress)} regressions, {len(improve)} improvements")
         for tid, old, new in regress:
             print(f"  REGRESSION {tid}: {old} -> {new}")
