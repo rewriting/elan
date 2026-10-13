@@ -289,26 +289,64 @@ def sanitizer_report(err):
     return None
 
 
-def run_test(t, timeout):
-    if modern_only(t, PREFIX, FIXED_CASES):
-        return "MODERN-ONLY", "fixes a bug of the 2004 reference (fixes-2004)", ""
-    expected = src_path(samples(t["dir"]) / f"{t['out']}.out")
-    if not expected.exists():
-        return "NOREF", f"missing {expected}", ""
-    if not src_path(t["dir"] / f"{t['lgi']}.lgi").exists():
-        return "NOLGI", f"missing {t['lgi']}.lgi", ""
+class Unrunnable(Exception):
+    """A test that produced no output to compare: status, detail, output so far."""
+    def __init__(self, status, detail, out=""):
+        super().__init__(status)
+        self.status, self.detail, self.out = status, detail, out
+
+
+def locate(t, name):
+    """(file, path relative to its application directory) of the SAMPLES
+    file `name` of test t: in the overlay first (spec S9), then in legacy/
+    (stored names: CASE-RENAMES.tsv); (None, None) when neither has it."""
+    ov = t.get("ovdir")
+    for base in ([ov] if ov is not None and ov.is_dir() else []) + [t["dir"]]:
+        p = samples(base) / name
+        if src_path(p).exists():
+            return src_path(p), p.relative_to(base)
+    return None, None
+
+
+def has_lgi(t):
+    ov = t.get("ovdir")
+    return ((ov is not None and (ov / f"{t['lgi']}.lgi").exists())
+            or src_path(t["dir"] / f"{t['lgi']}.lgi").exists())
+
+
+def private_copy(t, wd):
+    """wd: the legacy directory of t, its case names restored, then its
+    overlay directory over it (ported files replace legacy ones)."""
+    shutil.copytree(t["dir"], wd, symlinks=True,
+                    ignore=shutil.ignore_patterns("CVS", "*.o", "a.out", ".elan.*"))
+    restore_case(t["dir"], wd, t["lgi"])
+    ov = t.get("ovdir")
+    if ov is not None and ov.is_dir():
+        shutil.copytree(ov, wd, symlinks=True, dirs_exist_ok=True,
+                        ignore=shutil.ignore_patterns("tst_all.overlay", "PORTING.md"))
+
+
+def produce(t, timeout):
+    """(stdout, stderr) of test t run in a private copy with PREFIX's tools.
+    Raises Unrunnable when there is nothing to compare; lets
+    subprocess.TimeoutExpired through. A compiled program reads the test's
+    input when it has one, else evaluates its start term (-noInput)."""
+    if not has_lgi(t):
+        raise Unrunnable("NOLGI", f"missing {t['lgi']}.lgi")
     spc = [] if t["spc"] == "no" else [f"{t['spc']}.spc"]
     flags = [f for f in t["flags"] if f]
     WORK.mkdir(exist_ok=True)
     work = Path(tempfile.mkdtemp(prefix="elantest-", dir=WORK))
     try:
         wd = work / t["dir"].name
-        shutil.copytree(t["dir"], wd, symlinks=True,
-                        ignore=shutil.ignore_patterns("CVS", "*.o", "a.out", ".elan.*"))
-        restore_case(t["dir"], wd, t["lgi"])
-        inp = samples(wd) / f"{t['inp']}.inp" if t["inp"] else None
-        if inp is not None and not inp.exists():
-            return "NOINP", f"missing {inp.name}", ""
+        private_copy(t, wd)
+        inp = None
+        if t["inp"]:
+            _, rel = locate(t, f"{t['inp']}.inp")
+            if rel is None:
+                raise Unrunnable("NOINP", f"missing {t['inp']}.inp")
+            inp = wd / rel
+        compiled = ["./a.out", "-quiet"] if inp is not None else ["./a.out", "-noInput", "-quiet"]
         k = t["kind"]
         if k == "I":
             rc, out, err = run(["elan", "-b", *flags, f"{t['lgi']}.lgi", *spc], wd, inp, timeout)
@@ -316,47 +354,61 @@ def run_test(t, timeout):
             rc, o1, e1 = run(["elan", "-b", *flags, "--export", f"{t['lgi']}.ref",
                               f"{t['lgi']}.lgi", *spc], wd, None, timeout)
             if sanitizer_report(e1):
-                return "SANITIZER", f"export: {sanitizer_report(e1)}\n{e1[-4000:]}", o1
+                raise Unrunnable("SANITIZER", f"export: {sanitizer_report(e1)}\n{e1[-4000:]}", o1)
             if rc != 0:
-                return "ERROR", f"export rc={rc}\n{e1[-2000:]}", o1
+                raise Unrunnable("ERROR", f"export rc={rc}\n{e1[-2000:]}", o1)
             rc, out, err = run(["elan", "-b", "--import", f"{t['lgi']}.ref"], wd, inp, timeout)
         elif k in COMPILER_KINDS:   # elanc-rs (S6) or elanc-go (S7); only with --kinds R/G
             compiler = COMPILER_KINDS[k]
             rc, o1, e1 = run([compiler, "-b", *flags, t["lgi"], *spc], wd, None, timeout * 3)
             if rc == 2:
-                return "UNSUPPORTED", (o1 + e1)[-1500:], ""
+                raise Unrunnable("UNSUPPORTED", (o1 + e1)[-1500:])
             if rc != 0 or not (wd / "a.out").exists():
-                return "ERROR", f"{compiler} rc={rc}\n{o1[-1500:]}\n{e1[-1500:]}", ""
-            rc, out, err = run(["./a.out", "-noInput", "-quiet"], wd, None, timeout)
+                raise Unrunnable("ERROR", f"{compiler} rc={rc}\n{o1[-1500:]}\n{e1[-1500:]}")
+            rc, out, err = run(compiled, wd, inp, timeout)
         else:  # J, JO
             opts = ["-b", "-nosplit", "-quiet"] + (["-optimiseChoicePoint"] if k == "JO" else [])
             rc, o1, e1 = run(["elanc-rem", *opts, *flags, t["lgi"], *spc], wd, None, timeout)
             mk = wd / f"{t['lgi']}.make"
             if not mk.exists():
-                return "ERROR", f"elanc-rem rc={rc}\n{o1[-1500:]}\n{e1[-1500:]}", ""
+                raise Unrunnable("ERROR", f"elanc-rem rc={rc}\n{o1[-1500:]}\n{e1[-1500:]}")
             rc, o2, e2 = run(["make", "-f", mk.name], wd, None, timeout * 3)
             if rc != 0 or not (wd / "a.out").exists():
-                return "ERROR", f"make rc={rc}\n{(o2 + e2)[-3000:]}", ""
-            rc, out, err = run(["./a.out", "-noInput", "-quiet"], wd, None, timeout)
+                raise Unrunnable("ERROR", f"make rc={rc}\n{(o2 + e2)[-3000:]}")
+            rc, out, err = run(compiled, wd, inp, timeout)
         if sanitizer_report(err):
-            return "SANITIZER", f"{sanitizer_report(err)}\n{err[-4000:]}", out
-        exp = expected.read_text(encoding="latin-1", errors="replace")
-        if k in COMPILER_KINDS:   # rewrite_step counts depend on the compilation scheme
-            out, exp = REWRITE_STEP.sub("", out), REWRITE_STEP.sub("", exp)
-        if out == exp:
-            return "PASS", "", out
-        if norm(out) == norm(exp):
-            return "PASS~", "differs only in white space", out
-        if atoms(out) == atoms(exp):
-            return "PASS≈", "same symbols/values in same order (printing differs)", out
-        diff = "".join(difflib.unified_diff(exp.splitlines(True), out.splitlines(True),
-                                            "expected", "got", n=2))
-        tail = f"\n--- rc={rc} stderr:\n{err[-1500:]}" if (rc or err.strip()) else ""
-        return "FAIL", diff[:20000] + tail, out
-    except subprocess.TimeoutExpired:
-        return "TIMEOUT", f"> {timeout}s", ""
+            raise Unrunnable("SANITIZER", f"{sanitizer_report(err)}\n{err[-4000:]}", out)
+        return out, err
     finally:
         shutil.rmtree(work, ignore_errors=True)
+
+
+def run_test(t, timeout):
+    if modern_only(t, PREFIX, FIXED_CASES):
+        return "MODERN-ONLY", "fixes a bug of the 2004 reference (fixes-2004)", ""
+    expected, _ = locate(t, f"{t['out']}.out")
+    if expected is None:
+        return "NOREF", f"missing {t['out']}.out", ""
+    try:
+        out, err = produce(t, timeout)
+    except Unrunnable as u:
+        return u.status, u.detail, u.out
+    except subprocess.TimeoutExpired:
+        return "TIMEOUT", f"> {timeout}s", ""
+    k = t["kind"]
+    exp = expected.read_text(encoding="latin-1", errors="replace")
+    if k in COMPILER_KINDS:   # rewrite_step counts depend on the compilation scheme
+        out, exp = REWRITE_STEP.sub("", out), REWRITE_STEP.sub("", exp)
+    if out == exp:
+        return "PASS", "", out
+    if norm(out) == norm(exp):
+        return "PASS~", "differs only in white space", out
+    if atoms(out) == atoms(exp):
+        return "PASS≈", "same symbols/values in same order (printing differs)", out
+    diff = "".join(difflib.unified_diff(exp.splitlines(True), out.splitlines(True),
+                                        "expected", "got", n=2))
+    tail = f"\n--- stderr:\n{err[-1500:]}" if err.strip() else ""
+    return "FAIL", diff[:20000] + tail, out
 
 
 def snapshot_id(t):

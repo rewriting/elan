@@ -311,5 +311,66 @@ class OverlayDiscoveryTest(unittest.TestCase):
         self.assertIn("elan3/applications/Robot::I::Nim:non:Nim:Nim", ids)
 
 
+class OverlayCopyTest(unittest.TestCase):
+    def make(self, tmp):
+        d = Path(tmp) / "legacy" / "App"
+        (d / "SAMPLES").mkdir(parents=True)
+        (d / "p.lgi").write_text("legacy lgi\n")
+        (d / "m.eln").write_text("legacy module\n")
+        (d / "SAMPLES" / "old.inp").write_text("old input\n")
+        ov = Path(tmp) / "overlay" / "App"
+        (ov / "SAMPLES").mkdir(parents=True)
+        (ov / "m.eln").write_text("ported module\n")
+        (ov / "SAMPLES" / "new.inp").write_text("new input\n")
+        (ov / "tst_all.overlay").write_text("itest p no new new\n")
+        (ov / "PORTING.md").write_text("notes\n")
+        return dict(dir=d, ovdir=ov, lgi="p", spc="no", inp="new", out="new",
+                    kind="I", flags=[], overlay=True, id="App::I::p:no:new:new")
+
+    def test_locate_prefers_the_overlay_then_legacy(self):
+        with tempfile.TemporaryDirectory(dir=rt.HERE) as tmp:
+            t = self.make(tmp)
+            f, rel = rt.locate(t, "new.inp")
+            self.assertEqual((f, rel), (t["ovdir"] / "SAMPLES" / "new.inp", Path("SAMPLES/new.inp")))
+            f, rel = rt.locate(t, "old.inp")
+            self.assertEqual((f, rel), (t["dir"] / "SAMPLES" / "old.inp", Path("SAMPLES/old.inp")))
+            self.assertEqual(rt.locate(t, "none.out"), (None, None))
+
+    def test_private_copy_puts_the_overlay_over_legacy(self):
+        with tempfile.TemporaryDirectory(dir=rt.HERE) as tmp:
+            t = self.make(tmp)
+            wd = Path(tmp) / "wd"
+            rt.private_copy(t, wd)
+            self.assertEqual((wd / "m.eln").read_text(), "ported module\n")
+            self.assertEqual((wd / "p.lgi").read_text(), "legacy lgi\n")
+            self.assertTrue((wd / "SAMPLES" / "new.inp").exists())
+            self.assertTrue((wd / "SAMPLES" / "old.inp").exists())
+            self.assertFalse((wd / "tst_all.overlay").exists())
+            self.assertFalse((wd / "PORTING.md").exists())
+
+    def test_produce_runs_with_the_overlay_input(self):
+        with tempfile.TemporaryDirectory(dir=rt.HERE) as tmp:
+            t = self.make(tmp)
+            prefix = Path(tmp) / "prefix"
+            (prefix / "bin").mkdir(parents=True)
+            fake = prefix / "bin" / "elan"
+            fake.write_text('#!/bin/sh\necho "elan $*"; cat\n')
+            fake.chmod(0o755)
+            old = rt.PREFIX
+            rt.PREFIX = prefix
+            try:
+                out, err = rt.produce(t, 30)
+            finally:
+                rt.PREFIX = old
+            self.assertEqual(out, "elan -b p.lgi\nnew input\n")
+
+    def test_produce_reports_a_missing_input(self):
+        with tempfile.TemporaryDirectory(dir=rt.HERE) as tmp:
+            t = dict(self.make(tmp), inp="absent")
+            with self.assertRaises(rt.Unrunnable) as e:
+                rt.produce(t, 30)
+            self.assertEqual(e.exception.status, "NOINP")
+
+
 if __name__ == "__main__":
     unittest.main()
