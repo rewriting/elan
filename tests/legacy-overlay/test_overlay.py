@@ -166,6 +166,18 @@ class TriageTest(unittest.TestCase):
             app, prefix = self.fake_prefix(tmp, "exit 7")
             self.assertEqual(tr.load_status_in(app, "x", prefix, 30), "rc=7")
 
+    def test_silent_batch_failure_takes_the_reason_of_the_unbatched_run(self):
+        with tempfile.TemporaryDirectory(dir=HERE) as tmp:
+            app, prefix = self.fake_prefix(
+                tmp, 'if [ "$1" = -b ]; then exit 1; fi; echo "[fatal] some reason" >&2; exit 1')
+            self.assertEqual(tr.load_status_in(app, "x", prefix, 30), "[fatal] some reason")
+
+    def test_usage_text_and_silence_are_reported(self):
+        with tempfile.TemporaryDirectory(dir=HERE) as tmp:
+            app, prefix = self.fake_prefix(
+                tmp, 'if [ "$1" != -b ]; then echo "usage: elan [--elanlib D] f" >&2; fi; exit 1')
+            self.assertEqual(tr.load_status_in(app, "x", prefix, 30), "usage")
+
     def test_a_location_error_is_joined_with_its_message_on_one_line(self):
         with tempfile.TemporaryDirectory(dir=HERE) as tmp:
             app, prefix = self.fake_prefix(

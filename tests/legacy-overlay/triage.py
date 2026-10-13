@@ -12,6 +12,7 @@ import os
 import re
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -20,6 +21,31 @@ import run_tests as rt  # noqa: E402
 import check_coverage as cc  # noqa: E402
 
 REPORT = HERE / "triage.tsv"
+
+
+def reason(text):
+    """First [error]/fatal line of text (a bare location joined with the next
+    line), on one line of at most 160 characters; else None."""
+    lines = [l.strip() for l in text.splitlines() if l.strip()]
+    for i, line in enumerate(lines):
+        if "[error]" in line or "fatal" in line:
+            if re.search(r"\[error\]\s*:file=\S+\s+line=\d+", line) and i + 1 < len(lines):
+                line += " " + lines[i + 1]   # a bare location: add its message
+            return " ".join(line.split())[:160]
+    return None
+
+
+def unbatched_reason(t, timeout):
+    """`elan -b` fails silently on some errors; without -b elan says why."""
+    spc = [] if t["spc"] == "no" else [f"{t['spc']}.spc"]
+    with tempfile.TemporaryDirectory(prefix="elantest-", dir=rt.WORK) as work:
+        wd = Path(work) / t["dir"].name
+        rt.private_copy(t, wd)
+        _, out, err = rt.run(["elan", f"{t['lgi']}.lgi", *spc], wd, None, timeout)
+    text = out + "\n" + err
+    if any(l.lower().startswith("usage") or "--elanlib" in l for l in text.splitlines()):
+        return "usage"
+    return reason(text)
 
 
 def load_status_in(app, name, prefix, timeout):
@@ -31,19 +57,17 @@ def load_status_in(app, name, prefix, timeout):
     rt.PREFIX = prefix
     try:
         out, err, rc = rt.produce(t, timeout)
+        found = reason(err)
+        if found is None and rc != 0:
+            rt.WORK.mkdir(exist_ok=True)
+            found = unbatched_reason(t, timeout) or f"rc={rc}"
     except rt.Unrunnable as u:
         return u.status
     except subprocess.TimeoutExpired:
         return "TIMEOUT"
     finally:
         rt.PREFIX = old
-    lines = [l.strip() for l in err.splitlines() if l.strip()]
-    for i, line in enumerate(lines):
-        if "[error]" in line or "fatal" in line:
-            if re.search(r"\[error\]\s*:file=\S+\s+line=\d+", line) and i + 1 < len(lines):
-                line += " " + lines[i + 1]   # a bare location: add its message
-            return " ".join(line.split())[:160]
-    return "ok" if rc == 0 else f"rc={rc}"
+    return found or "ok"
 
 
 def candidates(path):
