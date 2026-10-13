@@ -1,0 +1,2 @@
+state(X,[X,-,O],[-,O,-],[X,-,-]) end
+state(O,[X,O,X],[X,O,O],[O,X,-]) end

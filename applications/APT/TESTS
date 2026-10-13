@@ -3,3 +3,5 @@ itest queens queens queens queens
 itest queensLIN queensLIN queensLIN queensLIN
 itest queensLOG queensLOG queensLOG queensLOG
 itest buble buble buble buble
+# S9b: historical input and output; no aitest: the import of the exported .ref fails with both systems (syntax error on "tone"); no gtest: the reference REM build crashes
+itest bubleLOG no bubleLOG bubleLOG

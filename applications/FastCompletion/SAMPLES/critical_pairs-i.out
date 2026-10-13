@@ -1,0 +1,5 @@
+ cons_criticalPair(CP(f(s(var(0)),var(1)),s(s(var(2))),identity o var(0)->s(var(2)),cons_int(1,nil),x->var(0)o y->var(1)o identity,x->var(2)o identity,s(f(s(var(2)),var(1))),f(var(2),var(1)),3,1),cons_criticalPair(CP(g(s(var(0)),var(1)),s(s(var(2))),identity o var(0)->s(var(2)),cons_int(1,nil),x->var(0)o y->var(1)o identity,x->var(2)o identity,f(g(s(var(2)),var(1)),o),g(var(2),var(1)),6,1),cons_criticalPair(CP(f(f(g(var(0),var(1)),o),o),g(o,var(2)),identity o var(0)->o o var(1)->var(2),cons_int(1,cons_int(1,nil)),x->var(0)o y->var(1)o identity,y->var(2)o identity,g(o,var(2)),f(f(var(2),o),o),4,5),cons_criticalPair(CP(f(f(g(var(0),var(1)),o),o),g(s(var(2)),var(3)),identity o var(0)->s(var(2))o var(1)->var(3),cons_int(1,cons_int(1,nil)),x->var(0)o y->var(1)o identity,x->var(2)o y->var(3)o identity,g(s(var(2)),var(3)),f(f(f(g(var(2),var(3)),o),o),o),4,6),nil)))) end
+
+ end end
+end
+

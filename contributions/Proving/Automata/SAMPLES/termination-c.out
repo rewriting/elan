@@ -1,0 +1,6 @@
+Enter a query term of sort 'pair[bool,automaton]'
+
+
+result = [true,Description of A(1)states q|0.q|1.q|2.q|3.q|4.q|5.q|6.nil final states q|6.nil transitions cons_transition(f(q|3)->q|4,cons_transition(f(q|3)->q|6,cons_transition(g(q|4)->q|4,cons_transition(g(q|4)->q|6,cons_transition(b->q|6,cons_transition(f(q|3)->q|3,cons_transition(g(q|4)->q|3,cons_transition(b->q|3,cons_transition(g(q|2)->q|3,cons_transition(f(q|1)->q|2,cons_transition(b->q|1,cons_transition(g(q|5)->q|4,cons_transition(g(q|5)->q|6,cons_transition(f(q|0)->q|5,cons_transition(b->q|0,nil)))))))))))))))End of Description]
+
+rewrite_step = 9576

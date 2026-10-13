@@ -1,0 +1,20 @@
+[Y>1^[X>2^[Z<=3^[X<5^true]]]] end
+
+ end end
+end
+
+[[Y>1^true]^[X-Y<4^true]] end
+
+ end end
+end
+
+[X>=0^[X<=0^[Y<7^true]]] end
+
+ end end
+end
+
+[X<1^[X>3^true]] end
+
+ end end
+end
+

@@ -1,0 +1,6 @@
+Gg(x,y) >lpo Ff(x,y) end
+Ff(x,y) >lpo Gg(x,y) end
+Ii(Ff(x,y)) >lpo Ff(Ii(x),Ii(y)) end
+Ff(Ff(x,y),z) >mpo Ff(x,Ff(y,z)) end
+Ff(Ii(x),Ii(y)) >lpo Ii(Ff(x,y)) end
+Gg(Ff(x,y),z) >mpo Ff(z,Gg(x,y)) end

@@ -1,0 +1,10 @@
+ Description of A(1)states q|0.q|1.q|2.nil final states q|2.nil transitions cons_transition(a->q|0,cons_transition(g(q|0)->q|0,cons_transition(g(q|0)->q|2,cons_transition(g(q|0)->q|1,cons_transition(a->q|2,cons_transition(f(q|1)->q|2,cons_transition(f(q|1)->q|1,cons_transition(b->q|2,cons_transition(b->q|1,nil)))))))))End of Description end
+
+ end end
+end
+
+ Description of A(1)states q|0.q|1.nil final states q|1.nil transitions cons_transition(f(q|1)->q|1,cons_transition(f(q|1)->q|0,cons_transition(g(q|0)->q|1,cons_transition(g(q|0)->q|0,cons_transition(b->q|1,nil)))))End of Description end
+
+ end end
+end
+

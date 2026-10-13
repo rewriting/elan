@@ -1,0 +1,5 @@
+# tests of Proving/Termination/LPO-MPO (S9b; format: tests/apps/README.md)
+# S9b: programs loaded by the 2004 reference without a test (tests/apps/triage.tsv)
+itest lpo lpo lpo lpo-i
+aitest lpo lpo lpo lpo-i
+gtest lpo lpo lpo lpo-c

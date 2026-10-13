@@ -1,0 +1,3 @@
+Hvide |- (A |=> (B |=> C)) |=> (A |=> B) |=> A |=> C end
+A or B |- A && B end
+C or (D or A) |- (C or D) or A end

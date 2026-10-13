@@ -1,0 +1,6 @@
+Enter a query term of sort 'pair[trajectory,bool]'
+
+
+result = [Near|Up|u1,REACHED]
+
+rewrite_step = 445

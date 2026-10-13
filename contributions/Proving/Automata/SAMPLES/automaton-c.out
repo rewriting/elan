@@ -1,0 +1,6 @@
+Enter a query term of sort 'automaton'
+
+
+result = Description of A(1)states q|0.q|1.q|2.q|3.q|4.nil final states q|4.nil transitions cons_transition(b->q|2,cons_transition(a->q|2,cons_transition(cons(q|2,q|0)->q|1,cons_transition(cons(q|2,q|1)->q|3,cons_transition(null->q|0,cons_transition(null->q|1,cons_transition(null->q|3,cons_transition(cons(q|2,q|3)->q|4,nil))))))))End of Description
+
+rewrite_step = 1466

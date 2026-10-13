@@ -1,0 +1,4 @@
+# S9b: programs loaded by the 2004 reference without a test (tests/apps/triage.tsv)
+itest firewall no firewall firewall-i
+aitest firewall no firewall firewall-i
+gtest firewall no firewall firewall-c

@@ -1,0 +1,2 @@
+simplify(T_up(R1) on(!A(0)) inter build_nf(R1)) end
+build_nf(R2) end

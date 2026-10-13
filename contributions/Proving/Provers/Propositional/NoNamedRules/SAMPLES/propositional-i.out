@@ -1,0 +1,15 @@
+$ end
+
+ end end
+end
+
+((A or B)&&^(B))|-FALSE::((A or B)&&^(A))|-FALSE end
+
+ end end
+end
+
+((((A or(C or D))&&^(A))&&^(C))&&^(D))|-FALSE end
+
+ end end
+end
+

@@ -1,0 +1,5 @@
+ cons_equation(s(var(1))=s(var(1)),cons_equation(s(s(var(0)))->var(0),cons_equation(f(o,var(0))->var(0),cons_equation(g(o,var(0))->var(0),cons_equation(f(s(var(0)),var(1))->s(f(var(0),var(1))),cons_equation(h(o)->s(o),cons_equation(g(s(var(0)),var(1))->f(g(var(0),var(1)),o),cons_equation(f(f(f(g(var(2),var(3)),o),o),o)=g(s(var(2)),var(3)),cons_equation(f(f(g(var(0),var(1)),o),o)->g(var(0),var(1)),nil))))))))) end
+
+ end end
+end
+

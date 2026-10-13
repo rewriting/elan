@@ -1,0 +1,3 @@
+suiv(I,C) end
+suiv(C,I) end
+suiv(S,S) end

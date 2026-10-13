@@ -34,3 +34,8 @@ long aitest ans_completion gdiv sat igdiv
 long aitest ans_completion group sat igroup
 long aitest ans_completion sample sat isample
 long aitest ans_completion taussky sat itaussky
+# S9b: programs loaded by the 2004 reference without a test (tests/apps/triage.tsv)
+itest cp KNZ86 cp cp-i
+aitest cp KNZ86 cp cp-i
+itest critical_pairs KNZ86 critical_pairs critical_pairs-i
+aitest critical_pairs KNZ86 critical_pairs critical_pairs-i

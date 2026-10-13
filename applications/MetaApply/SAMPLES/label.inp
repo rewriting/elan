@@ -1,0 +1,4 @@
+suiv(I,C) end
+suiv(C,I) end
+eqlabel(I,I) end
+eqlabel(C,S) end

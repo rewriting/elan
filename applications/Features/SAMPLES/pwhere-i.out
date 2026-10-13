@@ -1,0 +1,15 @@
+[a,b,c] end
+
+[b,a,c] end
+
+[a,c,b] end
+
+[c,a,b] end
+
+[b,c,a] end
+
+[c,b,a] end
+
+ end end
+end
+

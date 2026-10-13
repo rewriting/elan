@@ -1,0 +1,10 @@
+[cons_statezone(s2/[X>=1^true],nil),REACHED] end
+
+ end end
+end
+
+[cons_statezone(s0/[X-Y<2^[Y-X<=-1^[X>=1^[Y>2^true]]]],cons_statezone(s2/[X-Y<2^[Y-X<=-1^[X>=1^[Y>2^true]]]],cons_statezone(s0/[X-Y<2^[Y-X<=-1^[X>=1^[Y>2^true]]]],cons_statezone(s2/[Y<1^[X>=1^[Y>=0^[X-Y<2^[Y-X<=-1^[X<5^true]]]]]],cons_statezone(s1/[Y>=0^[Y<=0^[X>=1^[X<2^true]]]],cons_statezone(s0/[X-Y<2^[X>=1^[Y>2^true]]],cons_statezone(s2/[X>=1^[X-Y<2^[Y>2^true]]],cons_statezone(s0/[X-Y<2^[Y>2^true]],cons_statezone(s2/[Y<1^[Y>=0^[X-Y<2^[X<5^true]]]],cons_statezone(s1/[Y>=0^[Y<=0^[X<2^true]]],nil)))))))))),CYCLE] end
+
+ end end
+end
+

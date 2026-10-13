@@ -1,0 +1,4 @@
+inter(X<5 ^ Y>1 ^ true, X>2 ^ Z<=3 ^ true) end
+time(X<5 ^ Y>1 ^ true) end
+proj(X<5 ^ Y - X <= 2 ^ true, X) end
+X<1 ^ X>3 ^ true end

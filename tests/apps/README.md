@@ -59,3 +59,35 @@ Found while testing the programs of the copy against the 2004 reference
 - The historical `Features/SAMPLES/toi_meme.out` is the output of a ctest
   (compiled) run, hence the two tests `toi_meme-i.out` (interpreter) and
   `toi_meme-c.out` (compiled).
+
+Found in S9b (programs loaded by the reference, still untested, kept in
+`todo.tsv`):
+
+- `APT/S28`, `APT/S28LOG`, `APT/S28LIN`: the start term (`new(0)` searched
+  by the strategy of the `.lgi`) does all the work and the query cannot make
+  it smaller (every placement needs all 27 cells); the reference needs more
+  than 60 s (the modern interpreter about 20 s).
+- `APT/bubleLIN`: more than 20 s with the reference (100 elements sorted in
+  a linear array, fixed by the start term).
+- `APT/bubleLOG`: tested by `itest` only (see the `aitest` item below; no
+  `gtest`: the reference REM build crashes).
+- `Features/con`: hangs with both systems, without output (`dkconcur`,
+  `oneconcur` of the start strategy).
+- `Features/re`: segfaults with both systems on every query (the rule calls
+  `printnl`; `Features/hello` segfaults too, see above).
+- `aitest` lines are missing for programs whose exported `.ref` cannot be
+  imported by either system (`[PARSER] syntax error on symbol 'tone'`):
+  `APT/bubleLOG`, `Robot/tictac`, `Strategies/ll`. The exported `.ref` is
+  the same file (same size) from the modern `elan` and from the reference's
+  `elan`: a bug of both exporters (`dk (N . div)` followed by `one`).
+- `Simplest/test_rewrite`: the interpreters do not interpret its `rewrite`
+  strategy ("Rewrite step is not intepreted", no result): `gtest` only.
+- `Solving/Equational/MatchingAC/CompMatchingAC`: the start term (8400
+  AC matches) is evaluated whatever the query: its expected output
+  (`CompMatchingAC-i.out`, 500 KB) is kept knowingly.
+- `gtest` lines missing for other reasons are listed in `category4.md`.
+- `Simplest/test_rewrite` has one `gtest` per query (`f(g(a,b))`, `go1`,
+  `go2`): a `gtest` compiles the program and runs only the first query of
+  its `.inp`. The same holds for the other `gtest` lines whose `.inp` has
+  several queries (`lambda1`, `firewall`, `label`): only the first query is
+  compiled-tested.
