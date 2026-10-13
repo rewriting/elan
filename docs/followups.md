@@ -186,6 +186,42 @@ sub-project (S1–S5b). Each item says where it comes from.
   term of 12 arguments or more reads its last arguments at a wrong address
   (`GgetArgument(k+t, i)`); `new(n, x)` with n < 0 asks the GC for a huge
   block (warnings), the first get then reports `size = -1`.
+- **REM: bugs found by the bug hunt of 2026-10-13** (differential random
+  testing of the interpreter, elanc, elanc-rs and `elanc-rem -O` on about
+  8000 programs and queries, plus reviews of AC matching, strategies and
+  pattern matching; not fixed, REM does not change outside S10e; elanc
+  agrees with the interpreter on each):
+  - a term is lost after a `where` fails in a later rule of a symbol whose
+    earlier rule did not match: `[] f(a) => a`, `[] f(g(x)) => x where
+    (T) g(y) := () x`, start `f(g(a))`: no result line (the others print
+    `f(g(a))`); the same with a `where y := (s) x` whose strategy has no
+    result;
+  - an AC rule with two element patterns and an empty rest: `[] F(g(x),
+    F(g(y), z)) => z` on `F(g(a), g(a))` gives no result (the others
+    `F(g(a),g(a))`);
+  - an AC-bound variable read in a `choose`: `[] f(F(y, x)) => z choose
+    try where z := () x end end` on `f(F(d, a))` gives `F(a,d)` (x bound
+    to the whole AC term; the interpreter gives `d`, elanc `a`, both
+    valid);
+  - repeated variables and repeated element patterns under AC (`x^n`
+    shapes: `F(x,F(x,y))` at the top, `F(b,F(x,x))`, `F(z,F(z,F(b,b)))`,
+    `g(F(x,F(x,F(y,y))))`; `F(g(x),F(g(x),y))`, `F(G(x,y),F(G(x,y),z))`):
+    segmentation faults, wrong values, missing or extra solutions,
+    `iterate*` that never ends (same class as the `dk_xx`/`g_x2y2*`
+    `.no-rem` programs);
+  - builtin operations without rules are not evaluated in a query of a
+    compiled program (`computeTerm`, `runtime/termIn.c`, only builds the
+    term): `and`/`or`/`not`, `==` of `eq[t]`, `occurs`/`replace`, `==` on
+    identifiers, `<` on bool: `res((false and maybe))`, `rewrite_step = 0`;
+  - a non-linear left-hand side needs the module `eq[T]` imported, else
+    the compiled program crashes;
+  - REM builds in `./.elan.<prog>/` and its `make` does not notice a
+    changed start term: rebuilding in the same directory can leave a stale
+    `a.out` (build in a fresh directory).
+  Reproductions: the minimal programs of the hunt (`min/rem_wherepat_lost`,
+  `min/rem_ac_two_elems_lost`, `min/rem_choose_acvar`, AC `x^n` shapes)
+  are to be added as `.no-rem` regression programs of `tests/compiler-rs/
+  programs/` when elanc's AC fixes land.
 - **Interpreter: I/O builtins** (found in S7e task 6, not fixed; the
   interpreter does not change in S7e): `write` (code 119) crashes with a
   segmentation fault after writing its term (`write(stdout, 5)`, status
