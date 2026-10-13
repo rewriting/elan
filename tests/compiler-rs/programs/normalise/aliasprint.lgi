@@ -1,0 +1,6 @@
+LPL aliasprint description
+  query of sort bool
+  result of sort t
+  import aliasprint
+  start with () r(a ++ b, a ** b, a ## b)
+end

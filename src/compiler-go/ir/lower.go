@@ -190,7 +190,8 @@ type lowerer struct {
 	p             *ref.Program
 	cands         []cand
 	bySymbol      map[ref.SymbolCode][]int
-	printForm     map[profile][]ref.Lexem // the last grammar rule of each profile
+	printForm     map[profile][]ref.Lexem // the printing rule of each profile
+	printMarked   map[profile]bool        // profiles whose printForm is a Printable rule
 	rulesBySymbol map[ref.SymbolCode][]*ref.Rule
 	// rulesByLabel are the labelled rules of each localised label, in file
 	// order.
@@ -219,6 +220,7 @@ func newLowerer(p *ref.Program) *lowerer {
 		p:             p,
 		bySymbol:      map[ref.SymbolCode][]int{},
 		printForm:     map[profile][]ref.Lexem{},
+		printMarked:   map[profile]bool{},
 		rulesBySymbol: map[ref.SymbolCode][]*ref.Rule{},
 		rulesByLabel:  map[ref.RuleNameIndex][]*ref.Rule{},
 	}
@@ -230,7 +232,16 @@ func newLowerer(p *ref.Program) *lowerer {
 				args = append(args, ref.SortIndex(x.N))
 			}
 		}
-		l.printForm[profileOf(o.Symbol, args, r.Grammar.Sort)] = o.Rhs
+		// the printing form of a profile: its rule marked Printable (the
+		// interpreter's textform of the symbol, so not a local alias
+		// declared after it); the last rule when none is marked
+		pf := profileOf(o.Symbol, args, r.Grammar.Sort)
+		if o.Syntax.Printable() {
+			l.printMarked[pf] = true
+			l.printForm[pf] = o.Rhs
+		} else if !l.printMarked[pf] {
+			l.printForm[pf] = o.Rhs
+		}
 		ids := l.bySymbol[o.Symbol]
 		if slices.ContainsFunc(ids, func(i int) bool {
 			return slices.Equal(l.cands[i].args, args) && l.cands[i].result == r.Grammar.Sort
@@ -1982,9 +1993,11 @@ func (b *builder) lexemTexts(ls []ref.Lexem) []string {
 	return v
 }
 
-// printItems is the printing form: the last grammar rule of the symbol
-// with the operator's profile, as the interpreter prints (an alias
-// declared after the operator, `eq_bool(@,@)` after `@ == @`); the rules
+// printItems is the printing form: the grammar rule of the symbol with the
+// operator's profile marked Printable, as the interpreter prints (the
+// alias declared in a local section after the operator does not become
+// the form, a global one does: `mul(a,b)` for `**`); the last rule of the
+// profile when none is marked. The rules
 // of the symbol with other profiles are not used (eq_builtinInt, declared
 // last, is not the form of == on bool; the C runtime of REM, keyed by the
 // symbol only, would print it).

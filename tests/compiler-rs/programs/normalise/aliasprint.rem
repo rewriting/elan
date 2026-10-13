@@ -1,0 +1,5 @@
+# Known difference with REM: its runtime prints a local alias (cat, hh) as
+# the form of the symbol (termOut.c findTextForm); the interpreter and the
+# compiler print the form marked Printable: the operator (a++b) or a
+# global alias (mul, hh2).
+result = r(cat(a,b),mul(a,b),hh(a,b))
