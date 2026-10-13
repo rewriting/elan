@@ -807,11 +807,12 @@ impl<'p> Lowerer<'p> {
                     self.type_top(rhs, Some(*sort), &ctx)?,
                 ]
             }
-            Where::Try(_) => {
-                return Err(unsupported(
-                    "S6d",
-                    format!("choose/try conditions in {ctx}"),
-                ))
+            Where::Try(branches) => {
+                let mut v = Vec::new();
+                for w in branches.iter().flatten() {
+                    v.extend(self.where_terms(w, &ctx, reach)?);
+                }
+                v
             }
         })
     }
@@ -1517,10 +1518,15 @@ impl<'a, 'p> Builder<'a, 'p> {
             let mut changed = false;
             for label in labels.iter_mut() {
                 let det = label.rules.iter().all(|r| {
-                    r.conds.iter().all(|c| match c {
-                        Cond::Apply { strategy, .. } => strategies[*strategy].det,
-                        _ => true,
-                    })
+                    let mut det = true;
+                    for c in &r.conds {
+                        c.walk(&mut |c| match c {
+                            Cond::Apply { strategy, .. } => det &= strategies[*strategy].det,
+                            Cond::Choose { branches, .. } => det &= branches.len() <= 1,
+                            _ => {}
+                        });
+                    }
+                    det
                 });
                 if det != label.rules_det {
                     label.rules_det = det;
@@ -1729,6 +1735,10 @@ struct RuleLowerer<'b, 'a, 'p> {
     vars: Vec<VarIr>,
     /// model variable index -> IR variable (first occurrence)
     var_of: HashMap<u32, VarId>,
+    /// The variables bound by the branches of the enclosing chooses
+    /// already lowered: a branch binding the same model variable gets the
+    /// same variable ([`Cond::Choose`]).
+    shared: HashMap<u32, VarId>,
     conds: Vec<Cond>,
 }
 
@@ -1739,7 +1749,18 @@ impl<'b, 'a, 'p> RuleLowerer<'b, 'a, 'p> {
             rule,
             vars: vec![],
             var_of: HashMap::new(),
+            shared: HashMap::new(),
             conds: vec![],
+        }
+    }
+
+    /// The variable of the first binding of model variable `i` (in a
+    /// pattern or a where): the one of another branch of an enclosing
+    /// choose, else a new one.
+    fn bind_var(&mut self, i: u32, sort: SortIndex) -> VarId {
+        match self.shared.get(&i) {
+            Some(&v) => v,
+            None => self.new_var(i, sort),
         }
     }
 
@@ -1766,7 +1787,7 @@ impl<'b, 'a, 'p> RuleLowerer<'b, 'a, 'p> {
         match t {
             TT::Var(i, s) => match self.var_of.get(i) {
                 None => {
-                    let v = self.new_var(*i, *s);
+                    let v = self.bind_var(*i, *s);
                     self.var_of.insert(*i, v);
                     Pattern::Var(v)
                 }
@@ -1826,7 +1847,28 @@ impl<'b, 'a, 'p> RuleLowerer<'b, 'a, 'p> {
             unreachable!("checked")
         };
         let mut text_conds = Vec::new();
-        for w in wheres {
+        self.wheres(wheres, &mut text_conds)?;
+        let rt = l.type_top(rhs, Some(self.rule.sort), "right-hand side")?;
+        let rhs_e = self.expr(&rt)?;
+        let mut text = format!("[] {} => {}", self.render_tt(lhs), self.render_tt(&rt));
+        for c in text_conds {
+            text.push(' ');
+            text.push_str(&c);
+        }
+        Ok(Some(RuleIr {
+            text,
+            vars: std::mem::take(&mut self.vars),
+            lhs: pats,
+            conds: std::mem::take(&mut self.conds),
+            rhs: rhs_e,
+        }))
+    }
+
+    /// The conditions `ws`, added to `self.conds` (their text to
+    /// `text_conds`).
+    fn wheres(&mut self, ws: &[Where], text_conds: &mut Vec<String>) -> Result<(), Error> {
+        let l = self.b.l;
+        for w in ws {
             match w {
                 Where::If(t) => {
                     let t = l.type_top(t, l.bool_sort, "condition")?;
@@ -1856,7 +1898,7 @@ impl<'b, 'a, 'p> RuleLowerer<'b, 'a, 'p> {
                             self.conds.append(&mut same);
                         }
                         TT::Var(i, s) if !self.var_of.contains_key(&i) => {
-                            let v = self.new_var(i, s);
+                            let v = self.bind_var(i, s);
                             self.var_of.insert(i, v);
                             self.conds.push(Cond::Let(v, e));
                         }
@@ -1895,23 +1937,57 @@ impl<'b, 'a, 'p> RuleLowerer<'b, 'a, 'p> {
                     }
                     self.conds.append(&mut same);
                 }
-                Where::Try(_) => unreachable!("refused during reachability"),
+                Where::Try(branches) => self.choose(branches, text_conds)?,
             }
         }
-        let rt = l.type_top(rhs, Some(self.rule.sort), "right-hand side")?;
-        let rhs_e = self.expr(&rt)?;
-        let mut text = format!("[] {} => {}", self.render_tt(lhs), self.render_tt(&rt));
-        for c in text_conds {
-            text.push(' ');
-            text.push_str(&c);
+        Ok(())
+    }
+
+    /// `choose try b1 ... end` ([`Cond::Choose`]): each branch's conditions
+    /// from the variables bound before it, a model variable bound by
+    /// several branches being one variable; after `end`, the variables
+    /// bound by every branch are bound.
+    fn choose(&mut self, branches: &[Vec<Where>], text_conds: &mut Vec<String>) -> Result<(), Error> {
+        let before = self.var_of.clone();
+        let outer = self.shared.clone();
+        let conds = std::mem::take(&mut self.conds);
+        let mut irs = Vec::new();
+        let mut everywhere: Option<HashMap<u32, VarId>> = None;
+        let mut texts = Vec::new();
+        for br in branches {
+            self.var_of = before.clone();
+            let mut t = Vec::new();
+            self.wheres(br, &mut t)?;
+            texts.push(format!("try {}", t.join(" ")));
+            irs.push(std::mem::take(&mut self.conds));
+            let bound: HashMap<u32, VarId> = self
+                .var_of
+                .iter()
+                .filter(|(m, _)| !before.contains_key(m))
+                .map(|(&m, &v)| (m, v))
+                .collect();
+            self.shared.extend(bound.iter().map(|(&m, &v)| (m, v)));
+            everywhere = Some(match everywhere {
+                None => bound,
+                Some(mut e) => {
+                    e.retain(|m, _| bound.contains_key(m));
+                    e
+                }
+            });
         }
-        Ok(Some(RuleIr {
-            text,
-            vars: std::mem::take(&mut self.vars),
-            lhs: pats,
-            conds: std::mem::take(&mut self.conds),
-            rhs: rhs_e,
-        }))
+        let everywhere = everywhere.unwrap_or_default();
+        self.var_of = before;
+        self.var_of.extend(everywhere.iter().map(|(&m, &v)| (m, v)));
+        self.shared = outer;
+        let mut bound: Vec<VarId> = everywhere.into_values().collect();
+        bound.sort_unstable();
+        self.conds = conds;
+        self.conds.push(Cond::Choose {
+            branches: irs,
+            bound,
+        });
+        text_conds.push(format!("choose {} end", texts.join(" ")));
+        Ok(())
     }
 
     /// The name of the strategy of a `where` (empty for `()`).

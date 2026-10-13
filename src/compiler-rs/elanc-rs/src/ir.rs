@@ -593,6 +593,34 @@ pub enum Cond {
         strategy: StratId,
         expr: Expr,
     },
+    /// `choose try b1 try b2 ... end`: the branches (lists of conditions)
+    /// are alternatives of the rest of the rule, as both oracles run them
+    /// (the interpreter's TRYCHOICE, `rewrite/stateofexecution.cc`; REM's
+    /// `Choice.java`): branch 1 then the conditions after `end` and the
+    /// right-hand side, each of their solutions in turn; when they are
+    /// exhausted (or fail), branch 2 and the rest, and so on. So a
+    /// condition after `end` that fails tries the next branch, a labelled
+    /// rule gives the results of every branch in order, and a
+    /// normalisation keeps the first. A variable bound by a branch is the
+    /// same variable in every branch; after `end`, only those bound by
+    /// every branch (`bound`) are bound. (As elanc-go's `CondChoose`.)
+    Choose {
+        branches: Vec<Vec<Cond>>,
+        bound: Vec<VarId>,
+    },
+}
+
+impl Cond {
+    /// Call `f` on `c` and on the conditions of its branches
+    /// ([`Cond::Choose`]), depth first.
+    pub fn walk<'c>(&'c self, f: &mut dyn FnMut(&'c Cond)) {
+        f(self);
+        if let Cond::Choose { branches, .. } = self {
+            for c in branches.iter().flatten() {
+                c.walk(f);
+            }
+        }
+    }
 }
 
 /// A term to build (right-hand side, condition, start term). Building an
@@ -714,13 +742,13 @@ impl Ir {
                 for r in rules {
                     ops_of(&r.rhs, &mut succ[o]);
                     for c in &r.conds {
-                        match c {
-                            Cond::Same(..) => {}
+                        c.walk(&mut |c| match c {
+                            Cond::Same(..) | Cond::Choose { .. } => {}
                             Cond::If(e) | Cond::Let(_, e) | Cond::Match(_, e) => {
                                 ops_of(e, &mut succ[o])
                             }
                             Cond::Apply { expr, .. } => ops_of(expr, &mut succ[o]),
-                        }
+                        });
                     }
                 }
                 succ[o].sort_unstable();

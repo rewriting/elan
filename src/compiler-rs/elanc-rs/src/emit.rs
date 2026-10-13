@@ -36,6 +36,11 @@
 //!   continuation of `S` (a closure), so that a failing condition asks `S`
 //!   for its next result (`return false`); in a normalisation function the
 //!   first result for which the rule applies is kept (`res`);
+//! * `choose try b1 ... end`: the rest of the rule (the conditions after
+//!   `end` and the right-hand side) as a closure `rest<n>` taking the
+//!   variables bound by every branch, then each branch in a block ending
+//!   with the call of `rest<n>` (a failing condition leaves the block: the
+//!   next branch is tried);
 //! * the term builtins `occurs a in t` and `replace a by b in t` on sorts
 //!   of terms: one walker function per (sort of `a`, sort of a subterm of
 //!   `t`) that can contain it, `tw_occurs__A__C` and `tw_replace__A__C`,
@@ -237,6 +242,12 @@ struct Emitter<'a> {
     /// operators, and those already emitted or pending (by name).
     walkers: Vec<(Walk, SortId, SortId)>,
     walker_names: std::collections::HashSet<String>,
+    /// The type of the result of the normalisation function being emitted.
+    res_ty: String,
+    /// While emitting the branches of chooses: the closure of the rest of
+    /// the rule of the innermost one and its arguments, called at the end
+    /// of a branch instead of the right-hand side.
+    choose_rest: Vec<(String, String)>,
 }
 
 /// What a term walker computes.
@@ -265,6 +276,8 @@ impl<'a> Emitter<'a> {
             tail_nodes: Vec::new(),
             walkers: Vec::new(),
             walker_names: std::collections::HashSet::new(),
+            res_ty: String::new(),
+            choose_rest: Vec::new(),
         }
     }
 
@@ -714,6 +727,7 @@ impl<'a> Emitter<'a> {
                 if self.recursive[o] {
                     self.out.line("elan_runtime::guard();");
                 }
+                self.res_ty = self.ty(op.result);
                 self.decision(tree, rules);
                 if *total {
                     self.out.line(&format!(
@@ -1186,20 +1200,22 @@ impl<'a> Emitter<'a> {
             self.out
                 .line(&format!("let {} = {};", rule.vars[*v].name, occ_name(occ)));
         }
-        self.conds(rule, 0, &format!("break {label};"), 0);
+        self.conds(rule, &rule.conds, &format!("break {label};"), 0);
         self.out.close("}");
         if self.label_mode {
             self.out.line("if first && found { return false; }");
         }
     }
 
-    /// The conditions of `rule` from the i-th, then its application. `fail`
+    /// The conditions `conds` of `rule` (its conditions from one of them,
+    /// or the rest of a branch of a choose), then its application (at the
+    /// end of a branch of a choose: the rest of the rule after it). `fail`
     /// is the statement that abandons this attempt (`break 'r` in the
     /// rule's block, `return false` in the continuation of a strategy, which
     /// then gives its next result); `depth` is the number of enclosing
     /// continuations.
-    fn conds(&mut self, rule: &RuleIr, i: usize, fail: &str, depth: usize) {
-        for (j, c) in rule.conds.iter().enumerate().skip(i) {
+    fn conds(&mut self, rule: &RuleIr, conds: &[Cond], fail: &str, depth: usize) {
+        for (j, c) in conds.iter().enumerate() {
             match c {
                 Cond::Same(a, b) => {
                     self.out.line(&format!(
@@ -1257,7 +1273,7 @@ impl<'a> Emitter<'a> {
                         self.out.open(&format!("if {call}"));
                     }
                     self.pattern_check(pattern, &y, st.sort, "return false;", &rule.vars);
-                    self.conds(rule, j + 1, "return false;", depth + 1);
+                    self.conds(rule, &conds[j + 1..], "return false;", depth + 1);
                     self.out.line("false");
                     if keep_first {
                         self.out.close("});");
@@ -1267,7 +1283,25 @@ impl<'a> Emitter<'a> {
                     }
                     return;
                 }
+                Cond::Choose { branches, bound } => {
+                    self.choose(rule, &conds[j + 1..], branches, bound, depth);
+                    return;
+                }
             }
+        }
+        if let Some((rest, args)) = self.choose_rest.last().cloned() {
+            // the end of a branch of a choose: the rest of the rule
+            if self.label_mode {
+                self.out.line(&format!("if {rest}({args}) {{ return true; }}"));
+            } else if depth == 0 {
+                self.out
+                    .line(&format!("if let Some(r) = {rest}({args}) {{ return r; }}"));
+            } else {
+                self.out.line(&format!(
+                    "if let Some(r) = {rest}({args}) {{ res = Some(r); return true; }}"
+                ));
+            }
+            return;
         }
         self.out.line("step();");
         let rhs = self.expr(&rule.rhs, &rule.vars);
@@ -1280,6 +1314,67 @@ impl<'a> Emitter<'a> {
             self.out.line(&format!("res = Some({rhs});"));
             self.out.line("return true;");
         }
+    }
+
+    /// A choose ([`Cond::Choose`]) of `rule`, the conditions `rest` after
+    /// it: the rest of the rule as a closure `rest<n>` taking the variables
+    /// bound by every branch (a normalisation function: the result of the
+    /// rule, if it applies; a label: whether `k` asks to stop), then each
+    /// branch in a block (a failing condition leaves it: the next branch),
+    /// ending with the call of `rest<n>`. When every branch is
+    /// exhausted, the code after the blocks is reached: the rule fails.
+    fn choose(
+        &mut self,
+        rule: &RuleIr,
+        rest: &[Cond],
+        branches: &[Vec<Cond>],
+        bound: &[VarId],
+        depth: usize,
+    ) {
+        let n = self.next();
+        let name = format!("rest{n}");
+        let params: Vec<String> = bound
+            .iter()
+            .map(|&v| format!("{}: &{}", rule.vars[v].name, self.ty(rule.vars[v].sort)))
+            .collect();
+        let args: Vec<String> = bound.iter().map(|&v| rule.vars[v].name.clone()).collect();
+        self.out
+            .line("// the rest of the rule after the choose, for each branch");
+        if self.label_mode {
+            self.out.open(&format!(
+                "let mut {name} = |{}| -> bool {{",
+                params.join(", ")
+            ));
+            self.conds(rule, rest, "return false;", depth + 1);
+            self.out.line("false");
+            self.out.close("};");
+        } else {
+            self.out.open(&format!(
+                "let mut {name} = |{}| -> Option<{}> {{",
+                params.join(", "),
+                self.res_ty
+            ));
+            self.out.line("let mut res = None;");
+            self.out.open("(|| -> bool {");
+            self.conds(rule, rest, "return false;", depth + 1);
+            self.out.line("false");
+            self.out.close("})();");
+            self.out.line("res");
+            self.out.close("};");
+        }
+        self.choose_rest.push((name.clone(), args.join(", ")));
+        for (i, br) in branches.iter().enumerate() {
+            let label = format!("'c{n}_{}", i + 1);
+            self.out.line(&format!(
+                "// choose: try branch {} of {}, then {name}",
+                i + 1,
+                branches.len()
+            ));
+            self.out.open(&format!("{label}: {{"));
+            self.conds(rule, br, &format!("break {label};"), depth);
+            self.out.close("}");
+        }
+        self.choose_rest.pop();
     }
 
     fn expr_sort(&self, e: &Expr, vars: &[VarIr]) -> SortId {
