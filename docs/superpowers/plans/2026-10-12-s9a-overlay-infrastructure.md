@@ -1,5 +1,7 @@
 # S9a — The overlay of legacy/: infrastructure — Implementation Plan
 
+> **Superseded** after Task 7 by spec section 8 and docs/superpowers/plans/2026-10-13-s9a-living-copy.md.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** The legacy bench reads tests from an overlay of `legacy/` (`tests/legacy-overlay/`), with outputs of the 2004 reference as the oracle, a coverage check of the 293 programs of `legacy/elan3/{applications,contributions}`, a triage report of the 179 untested ones, and one program tested end to end through the overlay (I, A, G).

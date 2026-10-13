@@ -31,3 +31,8 @@ migrated mechanically (same statuses).
 First new tests of the copy: `toi_meme` (`itest`, `aitest` with
 `toi_meme-i.out`; `gtest` with `toi_meme-c.out`, a compiled program does not
 print as the interpreter), expected outputs produced by the 2004 reference.
+
+## 2026-10-13: CVS debris removed
+
+`Simplest/.#test_rewrite.eln.1.1` (a CVS merge backup) removed from the copy;
+`import_legacy.py` no longer copies `.#*` files.

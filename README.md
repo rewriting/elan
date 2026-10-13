@@ -12,7 +12,7 @@ backtracking. This repository preserves the original system and revives it.
 | `legacy/` | the archive: verbatim historical sources (never edited; a few files renamed `x-case-*`, see `CASE-RENAMES.tsv`) |
 | `applications/`, `contributions/` | the living copy of `legacy/elan3/applications` and `contributions`: programs fixed and tested in place (`HISTORY.md`), run by `make check` |
 | `reference/` | rebuild of ELAN 3 (2004) from `legacy/` with minimal portability patches; the behavioural reference |
-| `tests/legacy-bench/` | the historical test bench (778 tests), its baseline and reference snapshots |
+| `tests/legacy-bench/` | the test bench: 800 tests with the default kinds (I, A, J, JO; 1212 with R and G), replaying the TESTS of `applications/`, `contributions/` and the historical `tst_all` files, with its baseline and reference snapshots |
 | `src/interpreter/` | the modern interpreter, one directory per module (see below) |
 | `src/compiler-go/` | the compiler `elanc` (also `elanc-go`): ELAN to Go, its runtime module `elanrt` |
 | `src/compiler/` | REM, the compiler of 2004, installed as `elanc-rem`: Java C generator, C runtime, Earley parser, choice points (`cpl`) |
@@ -221,7 +221,7 @@ make check-elanc     # what bin/elanc is (ELAN_ELANC); make check-elanc-rem: the
 make check-sanitize  # same under ASan+UBSan (UBSan only on macOS; compiled programs: UBSan)
 make install PREFIX=$HOME/.local   # any file system
 make reference       # build the 2004 reference system (interpreter + compiler)
-make check-reference # full bench (778 tests) against the reference
+make check-reference # full bench (800 tests) against the reference
 ```
 
 The modern interpreter and the compiler's libraries (C runtime, Earley parser,

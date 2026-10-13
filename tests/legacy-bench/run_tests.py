@@ -15,13 +15,18 @@ Test kinds (same semantics as the original scripts):
               elan -b --import LGI.ref < SAMPLES/INP.inp         == SAMPLES/OUT.out
   J  jtest  : elanc-rem -b -nosplit -quiet LGI [SPC]; make; a.out -noInput -quiet == SAMPLES/OUT.out
               (-noInput = evaluate the compiled `start with` query; it was the default
-              when the reference outputs were produced)
+              when the reference outputs were produced). A compiled program (J, JO, R, G)
+              reads SAMPLES/INP.inp when its line has an INP.
   JO jtest  : same with -optimiseChoicePoint (second half of the original jtest)
   R  jtest  : elanc-rs (Rust compiler, spec S6) LGI [SPC]; a.out -noInput -quiet,
               rewrite_step lines ignored; UNSUPPORTED when elanc-rs refuses (exit 2).
               Not in the default kinds.
   G  jtest  : the same with elanc-go (Go compiler, spec S7; a go build cache in the
-              bench work directory). Not in the default kinds.
+              bench work directory). Not in the default kinds. `gtest` lines of a TESTS
+              file are G tests with an INP.
+
+A test of the living copy not in baseline.tsv must PASS; G and R tests may also be
+UNSUPPORTED (the compiler refuses the program).
 
 ctest/actest/cctest (old C compiler) and pitest/pevaltest (partial evaluator)
 have no script anymore and are not replayed.
@@ -409,7 +414,11 @@ def run_test(t, timeout):
         return "PASS≈", "same symbols/values in same order (printing differs)", out
     diff = "".join(difflib.unified_diff(exp.splitlines(True), out.splitlines(True),
                                         "expected", "got", n=2))
-    tail = f"\n--- stderr:\n{err[-1500:]}" if err.strip() else f"\n--- rc={rc}" if rc != 0 else ""
+    rcs = f"rc={rc}" if rc != 0 else ""
+    if err.strip():
+        tail = f"\n--- {rcs + ', ' if rcs else ''}stderr:\n{err[-1500:]}"
+    else:
+        tail = f"\n--- {rcs}" if rcs else ""
     return "FAIL", diff[:20000] + tail, out
 
 
@@ -487,7 +496,7 @@ def judge(statuses, base, exceptions, new_ids=frozenset()):
     lists of (id, old, new). Cases of tests/regression must PASS exactly (their
     expected.out is the oracle, whatever the baseline says); tests listed in the
     platform exceptions are exempt. Tests of the living copy (spec S9 §8) not in
-    the baseline must PASS (kind G: or UNSUPPORTED): the reference is their oracle."""
+    the baseline must PASS (kinds G and R: or UNSUPPORTED): the reference is their oracle."""
     regress, improve = [], []
     for tid, new in sorted(statuses.items()):
         if new == "SANITIZER":          # a sanitizer report is always a failure
@@ -500,7 +509,7 @@ def judge(statuses, base, exceptions, new_ids=frozenset()):
                 regress.append((tid, "PASS", new))
             continue
         if tid in new_ids and tid not in base:
-            ok = ("PASS", "UNSUPPORTED") if "::G::" in tid else ("PASS",)
+            ok = ("PASS", "UNSUPPORTED") if "::G::" in tid or "::R::" in tid else ("PASS",)
             if new not in ok:
                 regress.append((tid, "PASS", new))
             continue

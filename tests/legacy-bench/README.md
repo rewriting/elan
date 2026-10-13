@@ -25,10 +25,17 @@ the test uses them, so the bench runs on case-insensitive file systems too.
 
 | Kind | Original script | What is run | Count |
 |------|-----------------|-------------|-------|
-| `I`  | `itest`  | `elan -b X.lgi [Y.spc] < SAMPLES/in.inp` | 232 |
-| `A`  | `aitest` | `elan --export X.ref ...` then `elan --import X.ref < in.inp` | 136 |
+| `I`  | `itest`  | `elan -b X.lgi [Y.spc] < SAMPLES/in.inp` | 253 |
+| `A`  | `aitest` | `elan --export X.ref ...` then `elan --import X.ref < in.inp` | 137 |
 | `J`  | `jtest`  | `elanc-rem -nosplit X` (REM's driver by its own name, whatever `elanc` is), `make`, `a.out -noInput -quiet` | 205 |
 | `JO` | `jtest` (2nd half) | same with `-optimiseChoicePoint` | 205 |
+| `R`  | `jtest` | `elanc-rs` (Rust compiler), same run; `UNSUPPORTED` when it refuses the program; not a default kind | 205 |
+| `G`  | `jtest`, `gtest` | `elanc-go` (Go compiler), same run; `gtest` lines (G with an INP) are in `TESTS` files; `UNSUPPORTED` when it refuses the program; not a default kind | 206 |
+
+A compiled program (`J`, `JO`, `R`, `G`) reads `SAMPLES/INP.inp` when the line
+has an INP. The default kinds (`I,A,J,JO`) make 800 tests. Strict rule for the
+new tests of the copy (not in `baseline.tsv`): they must `PASS`; `G` and `R`
+may be `UNSUPPORTED`.
 
 `ctest`/`actest` (C compiler of ELAN 2), `pitest` (partial evaluator) and the
 Java compiler of `Compiler.*/Test` have no driver anymore and are not replayed.
@@ -60,5 +67,5 @@ commit message.
 
 ## State of the reference build (reference/install)
 
-778 tests: PASS 276, PASS~ 2, PASS≈ 174, FAIL 126, ERROR 60, missing files 140;
+778 historical tests (before the living copy; the bench now lists 800 with the default kinds): PASS 276, PASS~ 2, PASS≈ 174, FAIL 126, ERROR 60, missing files 140;
 stable over repeated runs (0 FLAKY with `--repeat 3`).

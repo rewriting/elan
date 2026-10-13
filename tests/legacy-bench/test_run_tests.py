@@ -344,6 +344,20 @@ class CopyRunTest(unittest.TestCase):
             self.assertEqual(status, "FAIL")
             self.assertIn("rc=3", detail)
 
+    def test_a_failing_run_with_stderr_reports_its_rc_too(self):
+        with tempfile.TemporaryDirectory(dir=rt.HERE) as tmp:
+            t = self.make(tmp)
+            (t["dir"] / "SAMPLES" / "new.out").write_text("expected\n")
+            old = rt.PREFIX
+            rt.PREFIX = self.fake_prefix(tmp, '#!/bin/sh\necho got; echo oops >&2; exit 3\n')
+            try:
+                status, detail, _ = rt.run_test(t, 30)
+            finally:
+                rt.PREFIX = old
+            self.assertEqual(status, "FAIL")
+            self.assertIn("--- rc=3, stderr:", detail)
+            self.assertIn("oops", detail)
+
     def test_produce_reports_a_missing_input(self):
         with tempfile.TemporaryDirectory(dir=rt.HERE) as tmp:
             t = dict(self.make(tmp), inp="absent")
@@ -360,6 +374,11 @@ class CopyJudgeTest(unittest.TestCase):
         reg, _ = rt.judge(st, base, {}, new_ids={"applications/A::I::p:no:q:r",
                                                  "applications/A::G::p:no:q:r-c"})
         self.assertEqual(reg, [("applications/A::I::p:no:q:r", "PASS", "FAIL")])
+
+    def test_new_r_cases_may_be_unsupported(self):
+        st = {"applications/A::R::p:no:q:r": "UNSUPPORTED", "applications/A::R::p:no:q:s": "FAIL"}
+        reg, _ = rt.judge(st, {}, {}, new_ids=set(st))
+        self.assertEqual(reg, [("applications/A::R::p:no:q:s", "PASS", "FAIL")])
 
     def test_new_tests_are_those_of_the_copy_absent_from_the_baseline(self):
         def t(tid, kind, copy=True):

@@ -3,7 +3,8 @@
 legacy/elan3/applications -> applications/, legacy/elan3/contributions ->
 contributions/, without CVS/ and build products; each tst_all (csh)
 becomes a TESTS file (format: tests/apps/README.md); the overlay pilot of
-tests/legacy-overlay/elan3/ is folded in; the Robot case collisions are
+tests/legacy-overlay/elan3/ is folded in (done at the 2026-10-13 run; the overlay no
+longer exists and main() refuses to run); the Robot case collisions are
 resolved for good (RENAMES). Refuses to overwrite an existing copy.
 Usage: import_legacy.py"""
 import re
@@ -17,7 +18,7 @@ sys.path.insert(0, str(REPO / "tests" / "legacy-bench"))
 import run_tests as rt  # noqa: E402
 
 IGNORE = shutil.ignore_patterns("CVS", "*.o", "a.out", ".elan.*", ".elan-go.*",
-                                "*.make", "*.ref", "tst_all", "tst_all.overlay",
+                                "*.make", "*.ref", ".#*", "tst_all", "tst_all.overlay",
                                 "tst_one", "PORTING.md")
 # Robot: Nim.eln/nim.eln, Robot.lgi/robot.lgi... are two variants of a
 # program; the capitalised one (stored as x-case-*, CASE-RENAMES.tsv) is
@@ -86,6 +87,9 @@ def import_tree(src, dst, overlay):
 
 def main():
     ov = REPO / "tests" / "legacy-overlay" / "elan3"
+    if not ov.is_dir():
+        raise SystemExit("import_legacy: the overlay was folded in at the 2026-10-13 run "
+                         f"and {ov} no longer exists: re-running is not supported")
     for top in ("applications", "contributions"):
         import_tree(rt.ELAN3 / top, REPO / top, ov / top)
         print(f"import_legacy: {top}/ made")

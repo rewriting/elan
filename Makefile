@@ -21,7 +21,7 @@
 #                        removed afterwards)
 #   make reference       build the 2004 reference system (REFERENCE_PREFIX, default
 #                        reference/install; on a case-sensitive volume, see reference/README.md)
-#   make check-reference full bench (778 tests) against the reference
+#   make check-reference full bench (800 tests) against the reference
 BUILD   ?= build
 PREFIX  ?= $(CURDIR)/$(BUILD)/install
 BENCH    = tests/legacy-bench/run_tests.py

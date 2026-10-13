@@ -32,7 +32,7 @@ def tested(tests, root):
 def load_list(path):
     entries = {}
     if path.exists():
-        for line in path.read_text().splitlines():
+        for line in path.read_text(encoding="utf-8").splitlines():
             if line.strip() and not line.startswith("#"):
                 first, _, rest = line.partition("\t")
                 entries[first.strip()] = rest.strip()
@@ -60,7 +60,7 @@ def main(argv):
     if argv == ["--write-todo"]:
         rest = sorted(progs - done - set(unloadable))
         TODO.write_text("# programs of S9 still to test (spec S9 §5); check_coverage.py\n"
-                        + "".join(f"{p}\n" for p in rest))
+                        + "".join(f"{p}\n" for p in rest), encoding="utf-8")
         print(f"check_coverage: {len(rest)} programs written to {TODO.name}")
         return 0
     problems = check(progs, done & progs, unloadable, todo)

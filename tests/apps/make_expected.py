@@ -23,7 +23,7 @@ import run_tests as rt  # noqa: E402
 
 def plan(tests):
     """One (test to run on the reference, target file) per distinct output
-    of the copy's tests that has no .out yet: kind I for itest/aitest
+    of the copy's tests (write_expected skips the existing ones): kind I for itest/aitest
     lines, J for gtest lines."""
     jobs, kinds = [], {}
     for t in tests:

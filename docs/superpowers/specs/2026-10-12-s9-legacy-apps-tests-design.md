@@ -81,6 +81,8 @@ Bench, TEST, Sophia...); kinds J/JO (REM) for the new tests.
 
 ## 4. Architecture: an overlay of `legacy/`
 
+> Superseded after Task 7 by section 8 and docs/superpowers/plans/2026-10-13-s9a-living-copy.md.
+
 `legacy/` does not change. `tests/legacy-overlay/elan3/<application path>/`
 mirrors `legacy/elan3/<application path>/` and may hold:
 
@@ -213,7 +215,7 @@ archive; `applications/HISTORY.md` records the copy (source commit) and
 every later change of a program, with its reason (what `PORTING.md` was).
 
 **Test files.** Each directory's csh `tst_all` is replaced by a plain file
-`TESTS`: one test per line, `<cmd> LGI SPC INP OUT [long]`, `cmd` among
+`TESTS`: one test per line, `[long] <cmd> LGI SPC INP OUT [flags...]`, `cmd` among
 `itest` (I), `aitest` (A), `jtest` (J, JO, R, G: as today), `gtest` (G, the
 compiled program reading INP); `long` replaces the `if ($1 =~ *L*)` blocks;
 `#` comments. The migration of the existing lines is mechanical (same tests,

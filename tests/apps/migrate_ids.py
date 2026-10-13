@@ -57,10 +57,10 @@ def main():
     old_ids = {line.split("\t")[0] for line in rt.BASELINE.read_text().splitlines()
                if line.strip() and not line.startswith("#")}
     moved = migrate_snapshots(old_ids)
-    for f in FILES:
-        if f.exists():
-            migrate_file(f)
-    print(f"migrate_ids: {len(FILES)} files rewritten, {moved} snapshots renamed")
+    files = [f for f in FILES if f.exists()]
+    for f in files:
+        migrate_file(f)
+    print(f"migrate_ids: {len(files)} files rewritten, {moved} snapshots renamed")
     return 0
 
 

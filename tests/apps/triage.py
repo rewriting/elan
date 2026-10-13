@@ -86,7 +86,7 @@ def load_one(app, name, spc, prefix, timeout):
         return "TIMEOUT"
     finally:
         rt.PREFIX = old
-    return found or "ok"
+    return found.replace(str(prefix), "<prefix>") if found else "ok"
 
 
 def candidates(path):

@@ -4,3 +4,19 @@ build/
 build-*/
 build-manual/
 tests/compiler-rs/work/
+
+# build products in the living copy (spec S9 §8)
+applications/**/a.out
+applications/**/*.o
+applications/**/*.ref
+applications/**/*.make
+applications/**/.elan.*/
+applications/**/.elan-go.*/
+applications/**/.elan-rs.*/
+contributions/**/a.out
+contributions/**/*.o
+contributions/**/*.ref
+contributions/**/*.make
+contributions/**/.elan.*/
+contributions/**/.elan-go.*/
+contributions/**/.elan-rs.*/

@@ -14,7 +14,8 @@ are edited, tested and extended in place. Each directory with tests holds:
 - `SAMPLES/INP.inp`: the queries; `SAMPLES/OUT.out`: the expected output.
 
 The bench (`tests/legacy-bench/run_tests.py`) runs these tests with the
-historical ones; a test of the copy must PASS unless `baseline.tsv` lists it.
+historical ones; a test of the copy must PASS unless `baseline.tsv` lists it
+(`gtest` and R cases may also be UNSUPPORTED: the compiler refuses the program).
 
 ## Adding a test
 
@@ -43,3 +44,18 @@ tested / unloadable / to do, or in two.
 `check_coverage.py`. `import_legacy.py` and `migrate_ids.py` were run once
 (2026-10-13) to create the copy and migrate the ids; they are kept as
 history.
+
+## Known problems found by the triage
+
+Found while testing the programs of the copy against the 2004 reference
+(S9a Task 7):
+
+- `S28` and `S28LOG` take more than 20 s with the reference.
+- The reference REM build of `bubleLOG` crashes (Boehm GC out of memory,
+  rc=-11).
+- The reference interpreter segfaults on `Features/hello` (rc=139).
+- The historical `.inp` files of `Features/mc` and `Features/re` belong to
+  other programs (syntax error / mismatched output).
+- The historical `Features/SAMPLES/toi_meme.out` is the output of a ctest
+  (compiled) run, hence the two tests `toi_meme-i.out` (interpreter) and
+  `toi_meme-c.out` (compiled).
