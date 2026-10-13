@@ -1,0 +1,6 @@
+LPL nl_slow description
+  query of sort bool
+  result of sort T
+  import acnl
+  start with () G(F(a,d),G(F(a,d),G(g(a),G(g(b),G(g(c),G(g(d),G(h(a,b),G(h(b,a),G(h(c,d),G(h(d,c),G(h(a,a),G(h(b,b),G(h(c,c),G(h(d,d),G(g(g(a)),G(g(g(b)),G(g(g(c)),g(g(d)))))))))))))))))))
+end

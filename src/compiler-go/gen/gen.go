@@ -123,6 +123,16 @@ type emitter struct {
 	// rest of the elements without an extension (ac.go, restTaker), that
 	// variable, bound after the conditions
 	late *lateRest
+	// raw are, inside an AC matching, the AC-level variables that occur
+	// twice (a CondSame) and the Go variable of their value as it is (a
+	// transient term: compared, not normalised); lazy those of them whose
+	// normal form is not written yet (written before the first condition
+	// that reads it, other than a CondSame, or the right-hand side:
+	// forceLazy); acLater are the variables bound by the conditions after
+	// the current AC matching (ac.go)
+	raw     map[ir.VarID]string
+	lazy    []lazyAC
+	acLater map[ir.VarID]bool
 	// chooseRest, inside a branch of a choose, writes the call of the
 	// closure of the rest of the rule at the end of the branch's
 	// conditions (at depth: see conds); nil elsewhere
@@ -325,7 +335,10 @@ func (e *emitter) expr(x *ir.Expr, vars []ir.Var) string {
 		return "rt.False"
 	}
 	if op.AC {
-		if args := e.acArgs(x, vars); len(args) > 2 {
+		if args, mults := e.acArgs(x, vars); mults != "" {
+			// repeated elements: each one evaluated once
+			return fmt.Sprintf("rt.ApplyACm(%s, %s, %s, %s)", symName(op), acFun(op), mults, strings.Join(args, ", "))
+		} else if len(args) > 2 {
 			// one AC term: normalised once, as a whole
 			return fmt.Sprintf("rt.ApplyAC(%s, %s, %s)", symName(op), acFun(op), strings.Join(args, ", "))
 		}
@@ -342,17 +355,85 @@ func (e *emitter) expr(x *ir.Expr, vars []ir.Var) string {
 // interpreter flattens an AC term before normalising it (its subterms of
 // the same operator are not redexes of their own: F(a, F(b, c)) is
 // normalised as the multiset a, b, c, as REM does).
-func (e *emitter) acArgs(x *ir.Expr, vars []ir.Var) []string {
-	var args []string
+//
+// The elements equal modulo AC (the same expression: g(x) twice) are
+// given once each, mults being then their multiplicities (a Go []int
+// literal, "" when no element is repeated): REM flattens the term at
+// compile time into its distinct elements with their multiplicities and
+// normalises each one once (its rewrite steps counted once).
+func (e *emitter) acArgs(x *ir.Expr, vars []ir.Var) (args []string, mults string) {
+	return e.acGroup(acElems(x, nil), vars)
+}
+
+// acElems are the arguments of the AC operator at the top of x, the
+// nested applications of the same operator flattened (skip: an argument
+// left out, or nil).
+func acElems(x *ir.Expr, skip func(a *ir.Expr) bool) []*ir.Expr {
+	var elems []*ir.Expr
 	for i := range x.Args {
 		a := &x.Args[i]
-		if a.Kind == ir.ExprOp && a.Op == x.Op {
-			args = append(args, e.acArgs(a, vars)...)
-		} else {
-			args = append(args, e.expr(a, vars))
+		switch {
+		case a.Kind == ir.ExprOp && a.Op == x.Op:
+			elems = append(elems, acElems(a, skip)...)
+		case skip == nil || !skip(a):
+			elems = append(elems, a)
 		}
 	}
-	return args
+	return elems
+}
+
+// acGroup is the expressions of the distinct elements xs (modulo AC, in
+// their order) and their multiplicities (see acArgs).
+func (e *emitter) acGroup(xs []*ir.Expr, vars []ir.Var) (args []string, mults string) {
+	var keys []string
+	var ms []string
+	n := map[string]int{}
+	for _, x := range xs {
+		k := e.exprKey(x)
+		if _, ok := n[k]; !ok {
+			keys = append(keys, k)
+			args = append(args, e.expr(x, vars))
+		}
+		n[k]++
+	}
+	if len(keys) == len(xs) {
+		return args, ""
+	}
+	for _, k := range keys {
+		ms = append(ms, strconv.Itoa(n[k]))
+	}
+	return args, "[]int{" + strings.Join(ms, ", ") + "}"
+}
+
+// exprKey is a key of the expression x, the same for the expressions equal
+// modulo AC (the elements of an AC operator sorted).
+func (e *emitter) exprKey(x *ir.Expr) string {
+	switch x.Kind {
+	case ir.ExprVar:
+		return "v" + strconv.Itoa(int(x.Var))
+	case ir.ExprInt:
+		return "i" + goInt(x.Int)
+	case ir.ExprStr:
+		return "s" + goString(x.Str)
+	case ir.ExprIdent:
+		return "d" + goInt(x.Int)
+	}
+	if e.ir.Ops[x.Op].Kind == ir.Injection {
+		// (expr writes an injection as its argument: the same value)
+		return e.exprKey(&x.Args[0])
+	}
+	var keys []string
+	if e.ir.Ops[x.Op].AC {
+		for _, a := range acElems(x, nil) {
+			keys = append(keys, e.exprKey(a))
+		}
+		slices.Sort(keys)
+		return "o" + strconv.Itoa(int(x.Op)) + "[" + strings.Join(keys, ",") + "]"
+	}
+	for i := range x.Args {
+		keys = append(keys, e.exprKey(&x.Args[i]))
+	}
+	return "o" + strconv.Itoa(int(x.Op)) + "(" + strings.Join(keys, ",") + ")"
 }
 
 // typedExpr is expr, an int literal typed int32 (for `x := ...`).
@@ -1386,6 +1467,9 @@ func (e *emitter) conds(r *ir.Rule, from int, used map[ir.VarID]bool, depth int)
 	}()
 	for j := from; j < len(r.Conds); j++ {
 		c := r.Conds[j]
+		if c.Kind != ir.CondSame {
+			e.forceLazy(r, condReader(&c))
+		}
 		switch c.Kind {
 		case ir.CondSame, ir.CondIf, ir.CondLet:
 			opens += e.simpleCond(&c, r, used)
@@ -1425,10 +1509,13 @@ func (e *emitter) conds(r *ir.Rule, from int, used map[ir.VarID]bool, depth int)
 		}
 	}
 	if e.chooseRest != nil {
-		// the end of a branch of a choose: the rest of the rule
+		// the end of a branch of a choose: the rest of the rule (which
+		// forces the variables it reads itself; those that the branch
+		// reads were forced at the choose)
 		e.chooseRest(depth)
 		return true
 	}
+	e.forceLazy(r, nil)
 	rhs := ""
 	if e.late != nil {
 		rhs = e.lateBind(r, used)
@@ -1443,10 +1530,15 @@ func (e *emitter) conds(r *ir.Rule, from int, used map[ir.VarID]bool, depth int)
 		// with E when op is at its top
 		op := &e.ir.Ops[e.ext.op]
 		args := []string{rhs}
+		mults := ""
 		if r.Rhs.Kind == ir.ExprOp && r.Rhs.Op == e.ext.op {
-			args = e.acArgs(&r.Rhs, r.Vars)
+			args, mults = e.acArgs(&r.Rhs, r.Vars)
 		}
-		rhs = fmt.Sprintf("rt.ExtendAC(%s, %s, %s, %s)", symName(op), acFun(op), e.ext.rest, strings.Join(args, ", "))
+		if mults != "" {
+			rhs = fmt.Sprintf("rt.ExtendACm(%s, %s, %s, %s, %s)", symName(op), acFun(op), e.ext.rest, mults, strings.Join(args, ", "))
+		} else {
+			rhs = fmt.Sprintf("rt.ExtendAC(%s, %s, %s, %s)", symName(op), acFun(op), e.ext.rest, strings.Join(args, ", "))
+		}
 	}
 	switch {
 	case e.labelMode && depth == 0:
@@ -1506,9 +1598,12 @@ func (e *emitter) choose(r *ir.Rule, j int, used map[ir.VarID]bool, depth int) b
 	e.open("%s := func(%s) bool { // the rest of the rule after the choose", name, strings.Join(decl, ", "))
 	rest := *r
 	rest.Conds = r.Conds[j+1:]
+	// (the variables it forces are its own: the branches force theirs)
+	savedLazy := e.lazy
 	if e.conds(&rest, 0, used, depth+1) {
 		e.line("return false")
 	}
+	e.lazy = savedLazy
 	e.close("}")
 	e.res, e.ok = saveRes, saveOk
 	outer := e.chooseRest
@@ -1600,9 +1695,23 @@ func bindsOf(c *ir.Cond, into map[ir.VarID]bool) {
 func (e *emitter) simpleCond(c *ir.Cond, r *ir.Rule, used map[ir.VarID]bool) int {
 	switch c.Kind {
 	case ir.CondSame:
+		ra, rawA := e.raw[c.A]
+		rb, rawB := e.raw[c.B]
+		if rawA || rawB {
+			// an AC-level variable: its value as it is (ac.go)
+			if !rawA {
+				ra = r.Vars[c.A].Name
+			}
+			if !rawB {
+				rb = r.Vars[c.B].Name
+			}
+			e.open("if rt.EqRaw(%s, %s) {", ra, rb)
+			return 1
+		}
 		e.open("if %s {", e.eqExpr(r.Vars[c.A].Sort, r.Vars[c.A].Name, r.Vars[c.B].Name))
 		return 1
 	case ir.CondIf:
+		e.forceLazy(r, condReader(c))
 		x := e.expr(&c.Expr, r.Vars)
 		if _, ok := e.ir.Native(e.ir.ExprSort(&c.Expr, r.Vars)); !ok {
 			x += " == rt.True"
@@ -1610,6 +1719,7 @@ func (e *emitter) simpleCond(c *ir.Cond, r *ir.Rule, used map[ir.VarID]bool) int
 		e.open("if %s {", x)
 		return 1
 	case ir.CondLet:
+		e.forceLazy(r, condReader(c))
 		if used[c.A] {
 			e.line("%s := %s", r.Vars[c.A].Name, e.typedExpr(&c.Expr, r.Vars))
 		} else {

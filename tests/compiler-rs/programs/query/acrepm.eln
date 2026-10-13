@@ -1,0 +1,38 @@
+module acrepm
+// Repeated elements of an AC term built by a start term or a right-hand
+// side: REM flattens the term at compile time into its distinct elements
+// with their multiplicities (modulo AC: F(g(a), g(b)) and F(g(b), g(a))
+// are one element) and normalises each distinct element once (its rewrite
+// steps counted once); the arguments of other operators are normalised
+// each time (rep_free).
+import global int bool eq[T]; end
+sort T; end
+operators global
+  d : T;
+  b : T;
+  e : T;
+  c : T;
+  a : T;
+  g(@) : (T) T;
+  h(@,@) : (T T) T;
+  k(@,@,@) : (T T T) T;
+  k2(@) : (T) T;
+  k3(@,@) : (T T) T;
+  k4(@) : (T) T;
+  F(@,@) : (T T) T (AC);
+  G(@,@) : (T T) T (AC);
+end
+rules for T
+  x, y, z, w : T;
+global
+  [] F(x,x) => x end
+  [] G(e,x) => x end
+  [] g(a) => b end
+  [] g(b) => c end
+  [] h(x,x) => x end
+  [] k(x,y,z) => G(g(x),G(g(y),g(z))) end
+  [] k2(x) => G(g(x),G(g(x),g(x))) end
+  [] k3(x,y) => G(g(x),G(y,g(x))) end
+  [] k4(x) => G(F(g(x),g(b)),F(g(b),g(x))) end
+end
+end

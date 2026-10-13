@@ -1,0 +1,6 @@
+LPL rep_nested description
+  query of sort bool
+  result of sort T
+  import acrep
+  start with () G(h(g(a),g(a)),h(g(a),g(a)))
+end

@@ -619,6 +619,60 @@ func (s *Down) Rest() []Term {
 	return out
 }
 
+// EqRaw tells whether a and b are the same term, either of them possibly
+// a transient AC term ([ACSubject]: the elements an AC-level variable
+// takes, as they are, which can make a reducible term). Structural, so
+// that it does not depend on every shared node being in the unique table
+// (a transient node is not equal to a shared node by identity, and a
+// shared node may be plain, outside the table): the pointers, then the
+// stored hashes (the flags apart) and the symbols reject nearly all the
+// differences at once, then the arguments (the elements of an AC term are
+// in canonical order). A variable that occurs twice is compared so (REM
+// and the interpreter compare the instances as they are, not their normal
+// forms). (The recursion runs only when the hashes match: the equal case.)
+func EqRaw(a, b Term) bool {
+	if Eq(a, b) {
+		return true
+	}
+	if a.Sym != b.Sym || a.Int != b.Int || len(a.Args) != len(b.Args) || a.hash() != b.hash() {
+		return false
+	}
+	for i := range a.Args {
+		if !EqRaw(a.Args[i], b.Args[i]) {
+			return false
+		}
+	}
+	return true
+}
+
+// TakeAC returns the sorted multiset e without m copies of each element
+// of the sorted multiset x (x U ... U x U rest = e), and false when e
+// does not contain them: the only solution of a variable of multiplicity
+// m with an extension whose value x is known (the value of its other
+// occurrence: [Elems]), where [Down] would enumerate every sub-multiset.
+func TakeAC(e, x []Term, m int) ([]Term, bool) {
+	if len(x) == 0 || len(e) < m*len(x) {
+		return nil, false
+	}
+	rest := make([]Term, 0, len(e)-m*len(x))
+	i := 0
+	for j := 0; j < len(x); {
+		k := Mult(x, j) * m
+		for i < len(e) && Compare(e[i], x[j]) < 0 {
+			rest = append(rest, e[i])
+			i++
+		}
+		for ; k > 0; k-- {
+			if i == len(e) || !Eq(e[i], x[j]) {
+				return nil, false
+			}
+			i++
+		}
+		j += Mult(x, j)
+	}
+	return append(rest, e[i:]...), true
+}
+
 // NormAC returns the normal form of the AC term over the multiset e
 // (non-empty, sorted; kept), f being the normalisation function of its
 // symbol over a multiset of two elements or more (it applies the rules
@@ -654,4 +708,29 @@ func ExtendAC(sym int32, f func(e []Term) Term, rest []Term, args ...Term) Term 
 		return MkAC(sym, Merge(Flatten(sym, args...), rest))
 	}
 	return NormAC(Merge(Flatten(sym, args...), rest), f)
+}
+
+// ApplyACm is [ApplyAC] of the arguments args[i] each mults[i] times: the
+// repeated elements of an AC term built by the program, evaluated once
+// each (REM flattens the term at compile time into its distinct elements
+// with their multiplicities, normalising each one once).
+func ApplyACm(sym int32, f func(e []Term) Term, mults []int, args ...Term) Term {
+	return ApplyAC(sym, f, repeat(mults, args)...)
+}
+
+// ExtendACm is [ExtendAC] of the arguments args[i] each mults[i] times
+// (see [ApplyACm]).
+func ExtendACm(sym int32, f func(e []Term) Term, rest []Term, mults []int, args ...Term) Term {
+	return ExtendAC(sym, f, rest, repeat(mults, args)...)
+}
+
+// repeat returns the terms args[i], each mults[i] times.
+func repeat(mults []int, args []Term) []Term {
+	var out []Term
+	for i, x := range args {
+		for range mults[i] {
+			out = append(out, x)
+		}
+	}
+	return out
 }

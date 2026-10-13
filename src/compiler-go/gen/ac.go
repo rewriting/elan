@@ -2,6 +2,7 @@ package gen
 
 import (
 	"fmt"
+	"maps"
 	"slices"
 	"strings"
 
@@ -21,7 +22,11 @@ import (
 // (rt.Down); two variables take REM's counter order (rt.Split). A
 // variable bound to several elements is normalised by the function of the
 // AC operator (the rest of a normal form can be reducible: and(x, t) on
-// and(a, a, t) with and(x, x) => x).
+// and(a, a, t) with and(x, x) => x). A variable that also occurs elsewhere
+// in the pattern (a CondSame) is compared as it is (the elements, as REM
+// and the interpreter compare it), normalised only once a solution passes
+// the comparisons; when its other occurrence is bound first, it takes that
+// value at once (rt.TakeAC) instead of enumerating the sub-multisets.
 //
 // The conditions after the matching that give at most one solution, bind
 // nothing and take no rewrite step (non-linearity checks, ifs and local
@@ -168,7 +173,84 @@ func (e *emitter) acMatch(r *ir.Rule, j int, used map[ir.VarID]bool, depth int) 
 		end++
 	}
 	next := end
+	later := map[ir.VarID]bool{}
+	for k := end; k < len(r.Conds); k++ {
+		r.Conds[k].Walk(func(c *ir.Cond) { bindsOf(c, later) })
+	}
+	saved := e.acLater
+	e.acLater = later
 	e.acLevel(r, j, end, &next, pending, used, func() { e.conds(r, next, used, depth) })
+	e.acLater = saved
+}
+
+// lazyAC is an AC-level variable v that occurs twice, bound to the
+// elements ms (a Go variable of type []rt.Term) of the AC operator op,
+// whose normal form is not written yet.
+type lazyAC struct {
+	v  ir.VarID
+	op ir.OpID
+	ms string
+}
+
+// forceLazy writes the normal forms of the variables of e.lazy that `reads`
+// selects (nil: all of them), before the condition or the right-hand side
+// that reads them: the candidates that the equality of a CondSame rejects
+// are never normalised (their rewrite steps not counted, as in REM), nor
+// is a variable that the condition does not read (a partner bound by a
+// later where, a hoisted condition of another variable).
+func (e *emitter) forceLazy(r *ir.Rule, reads func(ir.VarID) bool) {
+	var keep []lazyAC
+	for _, l := range e.lazy {
+		if reads != nil && !reads(l.v) {
+			keep = append(keep, l)
+			continue
+		}
+		e.line("%s := %s", r.Vars[l.v].Name, e.acValue(l.op, l.ms))
+	}
+	e.lazy = keep
+}
+
+// condReader is forceLazy's reads for the condition c.
+func condReader(c *ir.Cond) func(ir.VarID) bool {
+	return func(v ir.VarID) bool { return condReads(c, v) }
+}
+
+// sameOf are the variables that a CondSame of r compares with v.
+func sameOf(r *ir.Rule, v ir.VarID) []ir.VarID {
+	var ws []ir.VarID
+	for i := range r.Conds {
+		r.Conds[i].Walk(func(c *ir.Cond) {
+			if c.Kind != ir.CondSame {
+				return
+			}
+			switch v {
+			case c.A:
+				ws = append(ws, c.B)
+			case c.B:
+				ws = append(ws, c.A)
+			}
+		})
+	}
+	return ws
+}
+
+// readsBeyondSame tells whether v is read by r other than by its
+// CondSames (by a condition or the right-hand side).
+func readsBeyondSame(r *ir.Rule, v ir.VarID) bool {
+	vars := map[ir.VarID]bool{}
+	for i := range r.Conds {
+		r.Conds[i].Walk(func(c *ir.Cond) {
+			switch c.Kind {
+			case ir.CondSame, ir.CondChoose:
+			case ir.CondAC, ir.CondEker:
+				vars[c.A] = true
+			default:
+				exprVars(&c.Expr, vars)
+			}
+		})
+	}
+	exprVars(&r.Rhs, vars)
+	return vars[v]
 }
 
 // acLevel writes the CondAC i (its element loops), then the next ones up
@@ -266,8 +348,50 @@ func (e *emitter) acVars(r *ir.Rule, c *ir.Cond, el string, pos []string, n int,
 		rest = fmt.Sprintf("r%d", n)
 		e.line("%s := rt.Rest(%s, %s)", rest, el, strings.Join(pos, ", "))
 	}
+	// a variable that occurs twice (a CondSame) at the level of an
+	// operator with rules: compared as it is (REM and the interpreter
+	// compare the elements, not their normal form: G(b, c) is not a with
+	// G(b, c) => a), normalised only when a solution passes the
+	// comparisons (forceLazy): normalising each candidate cost steps,
+	// and exponential time (each one a normalisation of the operator,
+	// enumerating its own candidates; programs/ac nl_*)
+	sym := symName(&e.ir.Ops[p.Op])
+	isRaw := func(v ir.VarID) bool {
+		return e.ir.Ops[p.Op].Kind == ir.Defined && (p.Abs == nil || v != p.Abs.Var) && len(sameOf(r, v)) > 0
+	}
+	// known is the value of another occurrence of v already bound (the
+	// value v must have), or ""
+	known := func(v ir.VarID) string {
+		if !isRaw(v) {
+			return ""
+		}
+		for _, w := range sameOf(r, v) {
+			if w == v || pending[w] || e.acLater[w] {
+				continue
+			}
+			if x, ok := e.raw[w]; ok {
+				return x
+			}
+			return r.Vars[w].Name
+		}
+		return ""
+	}
+	savedRaw, savedLazy := e.raw, e.lazy
 	bind := func(v ir.VarID, m string) {
 		switch {
+		case isRaw(v):
+			name := r.Vars[v].Name
+			e.line("%s_ms := %s", name, m)
+			e.line("%s_raw := rt.ACSubject(%s, %s_ms)", name, sym, name)
+			raw := maps.Clone(e.raw)
+			if raw == nil {
+				raw = map[ir.VarID]string{}
+			}
+			raw[v] = name + "_raw"
+			e.raw = raw
+			if readsBeyondSame(r, v) {
+				e.lazy = append(slices.Clip(e.lazy), lazyAC{v: v, op: p.Op, ms: name + "_ms"})
+			}
 		case p.Abs != nil && v == p.Abs.Var:
 			// the subject of Eker's matcher: the elements as they are (a
 			// part of a term being normalised can be reducible; the
@@ -309,6 +433,13 @@ func (e *emitter) acVars(r *ir.Rule, c *ir.Cond, el string, pos []string, n int,
 		case restTaker(r, p):
 			// the rest, bound after the conditions (lateBind)
 			e.late = &lateRest{v: v.Var, op: p.Op, rest: rest}
+		case ext && known(v.Var) != "":
+			// the value of its other occurrence: one solution at most
+			x := fmt.Sprintf("ext%d", n)
+			w := fmt.Sprintf("rt.Elems(%s, %s)", sym, known(v.Var))
+			open("if %s, ok := rt.TakeAC(%s, %s, %d); ok {", x, rest, w, v.Mult)
+			bind(v.Var, w)
+			e.ext = &extension{p.Op, x}
 		case ext:
 			d := fmt.Sprintf("d%d", n)
 			open("for %s := rt.NewDown(%s, %d); %s.Next(); {", d, rest, v.Mult, d)
@@ -332,6 +463,18 @@ func (e *emitter) acVars(r *ir.Rule, c *ir.Cond, el string, pos []string, n int,
 		}
 	case 2:
 		x, y := vars[0], vars[1]
+		if x.Mult == 1 && y.Mult == 1 && (known(x.Var) != "" || known(y.Var) != "") {
+			// the value of the other occurrence of one of them: one
+			// solution at most
+			if known(x.Var) == "" {
+				x, y = y, x
+			}
+			ys, w := fmt.Sprintf("ys%d", n), fmt.Sprintf("rt.Elems(%s, %s)", sym, known(x.Var))
+			open("if %s, ok := rt.TakeAC(%s, %s, 1); ok && len(%s) > 0 {", ys, rest, w, ys)
+			bind(x.Var, w)
+			bind(y.Var, ys)
+			break
+		}
 		if x.Mult == 1 && y.Mult == 1 {
 			sp := fmt.Sprintf("s%d", n)
 			open("for %s := rt.NewSplit(%s); %s.Next(); {", sp, rest, sp)
@@ -364,6 +507,7 @@ func (e *emitter) acVars(r *ir.Rule, c *ir.Cond, el string, pos []string, n int,
 	opens += e.hoist(r, next, pending, used)
 	k()
 	e.ext, e.late = saved, savedLate
+	e.raw, e.lazy = savedRaw, savedLazy
 	for range opens {
 		e.close("}")
 	}
@@ -408,24 +552,19 @@ func (e *emitter) lateBind(r *ir.Rule, used map[ir.VarID]bool) string {
 	e.open("if len(%s) > 0 { // the variable of the AC level is not empty", l.rest)
 	op := &e.ir.Ops[l.op]
 	if x := &r.Rhs; x.Kind == ir.ExprOp && x.Op == l.op && varCount(x, l.v) == 1 {
-		var args []string
 		direct := false
-		var flat func(x *ir.Expr)
-		flat = func(x *ir.Expr) {
-			for i := range x.Args {
-				a := &x.Args[i]
-				switch {
-				case a.Kind == ir.ExprOp && a.Op == l.op:
-					flat(a)
-				case a.Kind == ir.ExprVar && a.Var == l.v:
-					direct = true
-				default:
-					args = append(args, e.expr(a, r.Vars))
-				}
+		elems := acElems(x, func(a *ir.Expr) bool {
+			if a.Kind == ir.ExprVar && a.Var == l.v {
+				direct = true
+				return true
 			}
-		}
-		flat(x)
+			return false
+		})
 		if direct {
+			args, mults := e.acGroup(elems, r.Vars)
+			if mults != "" {
+				return fmt.Sprintf("rt.ExtendACm(%s, %s, %s, %s, %s)", symName(op), acFun(op), l.rest, mults, strings.Join(args, ", "))
+			}
 			return fmt.Sprintf("rt.ExtendAC(%s, %s, %s, %s)", symName(op), acFun(op), l.rest, strings.Join(args, ", "))
 		}
 	}

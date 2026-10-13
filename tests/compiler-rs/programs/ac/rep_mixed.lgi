@@ -1,0 +1,6 @@
+LPL rep_mixed description
+  query of sort bool
+  result of sort T
+  import acrep
+  start with () G(g(a),F(g(a),g(a)))
+end

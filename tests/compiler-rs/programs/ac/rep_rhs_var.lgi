@@ -1,0 +1,6 @@
+LPL rep_rhs_var description
+  query of sort bool
+  result of sort T
+  import acrep
+  start with () k3(a,g(a))
+end
