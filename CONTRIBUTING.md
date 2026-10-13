@@ -6,7 +6,7 @@ build of 2004.
 
 ## Rules
 
-1. `legacy/` is never modified (contents); the only renames are the files of `CASE-RENAMES.tsv` (case collisions, `x-case-` prefix).
+1. `legacy/` is never modified (contents); the only renames are the files of `CASE-RENAMES.tsv` (case collisions, `x-case-` prefix). A program is fixed in `applications/` or `contributions/` (the living copy), never in `legacy/`, and the fix is recorded in that directory's `HISTORY.md`.
 2. `reference/patches/` is frozen; a portability fix of the reference is a
    new numbered patch documented in `reference/README.md`.
 3. Every commit touching `src/` keeps `make check` green.

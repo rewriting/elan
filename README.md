@@ -9,7 +9,8 @@ backtracking. This repository preserves the original system and revives it.
 
 | Path | Purpose |
 |------|---------|
-| `legacy/` | verbatim archive of the historical sources (never edited; a few files renamed `x-case-*`, see `CASE-RENAMES.tsv`) |
+| `legacy/` | the archive: verbatim historical sources (never edited; a few files renamed `x-case-*`, see `CASE-RENAMES.tsv`) |
+| `applications/`, `contributions/` | the living copy of `legacy/elan3/applications` and `contributions`: programs fixed and tested in place (`HISTORY.md`), run by `make check` |
 | `reference/` | rebuild of ELAN 3 (2004) from `legacy/` with minimal portability patches; the behavioural reference |
 | `tests/legacy-bench/` | the historical test bench (778 tests), its baseline and reference snapshots |
 | `src/interpreter/` | the modern interpreter, one directory per module (see below) |
@@ -49,7 +50,7 @@ is then REM's driver (`elanc-rem`), with a CMake message.
 The repository works on case-insensitive file systems (the macOS and Windows
 defaults). The few files of the imported archives (`legacy/`) and of the
 manual's examples whose names differed only by case from another file are
-stored with an `x-case-` prefix, contents unchanged, and listed in
+stored with an `x-case-` prefix, contents unchanged (the living copy `applications/` has no `x-case-` file: its variants are renamed, `applications/HISTORY.md`), and listed in
 `CASE-RENAMES.tsv`; the legacy bench gives them back their names in its
 private copy of an application, `tests/restore_case.sh DEST` rebuilds the
 original layout, and `tests/check_case.sh` (run by `make check`) refuses new
@@ -82,7 +83,7 @@ $ elan -b poly1.lgi < input.inp
   and expected output (`examples/README.md`);
 * `docs/manual/manual.pdf` — the ELAN 3.6 user manual (99 pages, rebuilt from
   the 2003 LaTeX sources with `make manual`);
-* `legacy/elan3/applications/` — larger historical applications (completion,
+* `applications/` — larger historical applications (completion,
   unification, constraint solving, ...).
 
 ## Compiling ELAN programs

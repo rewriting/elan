@@ -190,6 +190,8 @@ case-sensitive volume (its library installs both `strategy/Any.eln` and
 
 ## 8. Revision (2026-10-13): a living copy instead of the overlay
 
+Status: S9a' done.
+
 Decided by the user on 2026-10-13 (translated): "Simpler: copy the legacy
 applications directory into the project and make the changes there:
 fix the programs, rewrite the test scripts, etc. We still have legacy for

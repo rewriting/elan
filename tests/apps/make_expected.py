@@ -3,7 +3,8 @@
 §8) with the 2004 reference system: for an itest/aitest line, the reference's interpreter
 (`elan -b LGI [SPC] < INP`); for a gtest line, the program compiled by the
 reference's REM (`elanc-rem -b -nosplit -quiet LGI [SPC]; make; ./a.out
--quiet < INP`). The output goes to <test dir>/SAMPLES/<OUT>.out; an
+-quiet < INP`). The output goes to <samples>/<OUT>.out (SAMPLES/ or Sample/ of the test
+dir if it has one, else the dir itself); an
 existing output is kept unless --force.
 Usage: make_expected.py [--reference PREFIX] [--filter REGEX] [--force]
                         [--timeout S]

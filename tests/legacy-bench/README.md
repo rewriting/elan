@@ -1,8 +1,12 @@
 # Legacy test bench
 
-`run_tests.py` replays the historical ELAN test bench — the `tst_all` files that
-drove the csh scripts `itest`, `aitest` and `jtest` of
-`legacy/elan/sources/Scripts` — against an installed ELAN system.
+`run_tests.py` replays the historical ELAN test bench against an installed ELAN
+system. It reads the `TESTS` files of the living copy (`applications/`,
+`contributions/`; ids `applications/X::KIND::lgi:spc:inp:out`; each tree has a
+`tst_all` entry point) and the historical `tst_all` files of
+`legacy/elan/sources` (compiler tests, BenchThesis), which drove the csh
+scripts `itest`, `aitest` and `jtest` of `legacy/elan/sources/Scripts`. The
+tools to add and check tests of the copy are in `tests/apps/`.
 
 ```sh
 ./run_tests.py                         # test reference/install (default)
@@ -12,10 +16,10 @@ drove the csh scripts `itest`, `aitest` and `jtest` of
 ./run_tests.py --list
 ```
 
-Each test runs in a private copy of its application directory (`work/`); the
-files stored renamed (`CASE-RENAMES.tsv`, e.g. `Robot/x-case-Nim.lgi`) get
-their original names back there when the test uses them, so the bench runs
-on case-insensitive file systems too.
+Each test runs in a private copy of its application directory (`work/`). The
+living copy has no `x-case-` file; the few files stored renamed in the
+historical trees (`CASE-RENAMES.tsv`) get their original names back there when
+the test uses them, so the bench runs on case-insensitive file systems too.
 
 ## Test kinds
 

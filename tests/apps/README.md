@@ -21,7 +21,9 @@ historical ones; a test of the copy must PASS unless `baseline.tsv` lists it.
 1. Write `SAMPLES/<name>.inp`.
 2. Add the line to the directory's `TESTS`.
 3. `python3 tests/apps/make_expected.py --filter 'applications/X::'` writes
-   the missing `.out` with the 2004 reference (`make reference`, see
+   the missing `OUT.out` (in `SAMPLES/` or `Sample/` when the directory has
+   one, else in the directory itself: where the bench looks for `.inp` and
+   `.out`) with the 2004 reference (`make reference`, see
    `reference/README.md`); read it before trusting it.
 4. Remove the program from `todo.tsv`.
 

@@ -1,0 +1,12 @@
+#!/bin/sh
+# Run the tests of applications/ (TESTS files) with the legacy bench.
+# Usage: applications/tst_all [KINDS] [run_tests.py options]
+#   KINDS: I,A (default), J,JO, G...; the system tested is $ELAN_PREFIX,
+#   else build/install (make install), else reference/install.
+here=$(cd "$(dirname "$0")" && pwd)
+repo=$(dirname "$here")
+kinds=${1:-I,A}; [ $# -gt 0 ] && shift
+prefix=${ELAN_PREFIX:-$repo/build/install}
+[ -x "$prefix/bin/elan" ] || prefix=$repo/reference/install
+exec python3 "$repo/tests/legacy-bench/run_tests.py" --prefix "$prefix" --kinds "$kinds" \
+    --filter "^$(basename "$here")/" "$@"
