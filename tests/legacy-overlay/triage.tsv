@@ -4,177 +4,177 @@ applications/APT/S28LIN.lgi	ok	ok
 applications/APT/S28LOG.lgi	ok	ok	S28LOG.inp	S28LOG.out
 applications/APT/bubleLIN.lgi	ok	ok	bubleLIN.inp	
 applications/APT/bubleLOG.lgi	ok	ok	bubleLOG.inp	bubleLOG.out
-applications/APT/queen.lgi	[error] :file=queen.lgi	line=9	pos=26	[error] :file=queen.lgi	line=9	pos=26	queens.inp,queensLIN.inp,queensLOG.inp	queens.out,queensLIN.out,queensLOG.out
-applications/CStrategies/apply.lgi	[error] :file=apply.eln	line=26	pos=1	[error] :file=apply.eln	line=26	pos=1	apply.inp	apply.out
-applications/CStrategies/bup.lgi	[error] :file=bup.eln	line=46	pos=1	[error] :file=bup.eln	line=46	pos=1	bup.inp	bup.out
-applications/CStrategies/bup1.lgi	[error] :file=bup1.lgi	line=4	pos=10	[error] :file=bup1.lgi	line=4	pos=10		
-applications/CStrategies/depth.lgi	[error] :file=depth.eln	line=22	pos=1	[error] :file=depth.eln	line=22	pos=1	depth.inp	
-applications/CStrategies/filter.lgi	[error] :file=filter.eln	line=26	pos=1	[error] :file=filter.eln	line=26	pos=1	filter.inp	
+applications/APT/queen.lgi	[error] :file=queen.lgi line=9 pos=26 [earley] syntax error on symbol 'one'	[error] :file=queen.lgi line=9 pos=26 [earley] syntax error on symbol 'one'	queens.inp,queensLIN.inp,queensLOG.inp	queens.out,queensLIN.out,queensLOG.out
+applications/CStrategies/apply.lgi	[error] :file=apply.eln line=26 pos=1 [PARSER] semaction error on symbol 'end'	[error] :file=apply.eln line=26 pos=1 [PARSER] semaction error on symbol 'end'	apply.inp	apply.out
+applications/CStrategies/bup.lgi	[error] :file=bup.eln line=46 pos=1 [PARSER] semaction error on symbol 'end'	[error] :file=bup.eln line=46 pos=1 [PARSER] semaction error on symbol 'end'	bup.inp	bup.out
+applications/CStrategies/bup1.lgi	[error] :file=bup1.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules'	[error] :file=bup1.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules'		
+applications/CStrategies/depth.lgi	[error] :file=depth.eln line=22 pos=1 [PARSER] semaction error on symbol 'end'	[error] :file=depth.eln line=22 pos=1 [PARSER] semaction error on symbol 'end'	depth.inp	
+applications/CStrategies/filter.lgi	[error] :file=filter.eln line=26 pos=1 [PARSER] semaction error on symbol 'end'	[error] :file=filter.eln line=26 pos=1 [PARSER] semaction error on symbol 'end'	filter.inp	
 applications/CStrategies/fopc.lgi	[error] can't open input file 'io.eln'	[error] can't open input file 'io.eln'		
-applications/CStrategies/lis.lgi	[error] :file=lis.eln	line=21	pos=20	[error] :file=lis.eln	line=21	pos=20	lis.inp,lis1.inp,lis2.inp,lis3.inp	
-applications/CStrategies/lis1.lgi	[error] :file=lis1.eln	line=28	pos=20	[error] :file=lis1.eln	line=28	pos=20	lis1.inp	
-applications/CStrategies/lis2.lgi	[error] :file=lis2.eln	line=24	pos=20	[error] :file=lis2.eln	line=24	pos=20	lis2.inp	
-applications/CStrategies/lis3.lgi	[error] :file=lis.eln	line=21	pos=20	[error] :file=lis.eln	line=21	pos=20	lis3.inp	
-applications/CStrategies/loop.lgi	[error] :file=loop.eln	line=29	pos=0	[error] :file=loop.eln	line=29	pos=0	loop.inp	loop.out
-applications/CStrategies/lterm.lgi	[error] :file=lis.eln	line=21	pos=20	[error] :file=lis.eln	line=21	pos=20	lterm.inp	
-applications/CStrategies/map.lgi	[error] :file=map.eln	line=38	pos=1	[error] :file=map.eln	line=38	pos=1	map.inp,map1.inp,map2.inp,map3.inp	map.out,map1.out,map2.out,map3.out
-applications/CStrategies/map1.lgi	[error] :file=map1.eln	line=33	pos=1	[error] :file=map1.eln	line=33	pos=1	map1.inp	map1.out
-applications/CStrategies/map2.lgi	[error] :file=map2.eln	line=35	pos=1	[error] :file=map2.eln	line=35	pos=1	map2.inp	map2.out
-applications/CStrategies/map3.lgi	[error] :file=map3.eln	line=38	pos=1	[error] :file=map3.eln	line=38	pos=1	map3.inp	map3.out
-applications/CStrategies/nim.lgi	[error] :file=/Users/pem/github/elan-cs/reference/install/share/elanlib/strategy/strcapply.eln	line=12	pos=46	[error] :file=/Users/pem/github/elan-cs/build/install/share/elanlib/strategy/strcapply.eln	line=12	pos=46	nim.inp	
-applications/CStrategies/nim1.lgi	[error] :file=nim1.lgi	line=4	pos=10	[error] :file=nim1.lgi	line=4	pos=10		
-applications/CStrategies/robot.lgi	[error] :file=robot.lgi	line=4	pos=10	[error] :file=robot.lgi	line=4	pos=10	robot.inp	
-applications/CStrategies/robot1.lgi	[error] :file=robot1.lgi	line=4	pos=10	[error] :file=robot1.lgi	line=4	pos=10		
-applications/CStrategies/space.lgi	[error] :file=space.lgi	line=4	pos=10	[error] :file=space.lgi	line=4	pos=10		
-applications/FastCompletion/cp.lgi	ok	ok		cp2.out,cp5.out
-applications/FastCompletion/critical_pairs.lgi	ok	ok		
-applications/Features/ac1.lgi	[error] :file=ac1.eln	line=0	pos=1	[error] :file=ac1.eln	line=0	pos=1		
+applications/CStrategies/lis.lgi	[error] :file=lis.eln line=21 pos=20 [PARSER] semaction error on symbol 'strategies'	[error] :file=lis.eln line=21 pos=20 [PARSER] semaction error on symbol 'strategies'	lis.inp,lis1.inp,lis2.inp,lis3.inp	
+applications/CStrategies/lis1.lgi	[error] :file=lis1.eln line=28 pos=20 [PARSER] semaction error on symbol 'strategies'	[error] :file=lis1.eln line=28 pos=20 [PARSER] semaction error on symbol 'strategies'	lis1.inp	
+applications/CStrategies/lis2.lgi	[error] :file=lis2.eln line=24 pos=20 [PARSER] semaction error on symbol 'strategies'	[error] :file=lis2.eln line=24 pos=20 [PARSER] semaction error on symbol 'strategies'	lis2.inp	
+applications/CStrategies/lis3.lgi	[error] :file=lis.eln line=21 pos=20 [PARSER] semaction error on symbol 'strategies'	[error] :file=lis.eln line=21 pos=20 [PARSER] semaction error on symbol 'strategies'	lis3.inp	
+applications/CStrategies/loop.lgi	[error] :file=loop.eln line=29 pos=0 [PARSER] semaction error on symbol 'strategies'	[error] :file=loop.eln line=29 pos=0 [PARSER] semaction error on symbol 'strategies'	loop.inp	loop.out
+applications/CStrategies/lterm.lgi	[error] :file=lis.eln line=21 pos=20 [PARSER] semaction error on symbol 'strategies'	[error] :file=lis.eln line=21 pos=20 [PARSER] semaction error on symbol 'strategies'	lterm.inp	
+applications/CStrategies/map.lgi	[error] :file=map.eln line=38 pos=1 [PARSER] semaction error on symbol 'end'	[error] :file=map.eln line=38 pos=1 [PARSER] semaction error on symbol 'end'	map.inp,map1.inp,map2.inp,map3.inp	map.out,map1.out,map2.out,map3.out
+applications/CStrategies/map1.lgi	[error] :file=map1.eln line=33 pos=1 [PARSER] semaction error on symbol 'end'	[error] :file=map1.eln line=33 pos=1 [PARSER] semaction error on symbol 'end'	map1.inp	map1.out
+applications/CStrategies/map2.lgi	[error] :file=map2.eln line=35 pos=1 [PARSER] semaction error on symbol 'end'	[error] :file=map2.eln line=35 pos=1 [PARSER] semaction error on symbol 'end'	map2.inp	map2.out
+applications/CStrategies/map3.lgi	[error] :file=map3.eln line=38 pos=1 [PARSER] semaction error on symbol 'end'	[error] :file=map3.eln line=38 pos=1 [PARSER] semaction error on symbol 'end'	map3.inp	map3.out
+applications/CStrategies/nim.lgi	[error] :file=/Users/pem/github/elan-cs/reference/install/share/elanlib/strategy/strcapply.eln line=12 pos=46 [earley] syntax error on symbol 'set_of'	[error] :file=/Users/pem/github/elan-cs/build/install/share/elanlib/strategy/strcapply.eln line=12 pos=46 [earley] syntax error on symbol 'set_of'	nim.inp	
+applications/CStrategies/nim1.lgi	[error] :file=nim1.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules'	[error] :file=nim1.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules'		
+applications/CStrategies/robot.lgi	[error] :file=robot.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules'	[error] :file=robot.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules'	robot.inp	
+applications/CStrategies/robot1.lgi	[error] :file=robot1.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules'	[error] :file=robot1.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules'		
+applications/CStrategies/space.lgi	[error] :file=space.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules'	[error] :file=space.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules'		
+applications/FastCompletion/cp.lgi	rc=1	rc=1		cp2.out,cp5.out
+applications/FastCompletion/critical_pairs.lgi	rc=1	rc=1		
+applications/Features/ac1.lgi	[error] :file=ac1.eln line=0 pos=1 [PARSER] syntax error on symbol 'ENDOFLSTREAM'	[error] :file=ac1.eln line=0 pos=1 [PARSER] syntax error on symbol 'ENDOFLSTREAM'		
 applications/Features/bblock.lgi	[error] can't open input file 'io.eln'	[error] can't open input file 'io.eln'		
 applications/Features/block.lgi	[error] can't open input file 'io.eln'	[error] can't open input file 'io.eln'		
-applications/Features/castro.lgi	[error] :file=castro.eln	line=20	pos=1	[error] :file=castro.eln	line=20	pos=1		
+applications/Features/castro.lgi	[error] :file=castro.eln line=20 pos=1 [PARSER] syntax error on symbol 'ENDOFLSTREAM'	[error] :file=castro.eln line=20 pos=1 [PARSER] syntax error on symbol 'ENDOFLSTREAM'		
 applications/Features/con.lgi	ok	ok		
-applications/Features/coop.lgi	[error] :file=coop.lgi	line=4	pos=11	[error] :file=coop.lgi	line=4	pos=11		
-applications/Features/core.lgi	[error] :file=core.lgi	line=4	pos=11	[error] :file=core.lgi	line=4	pos=11		
-applications/Features/core1.lgi	[error] :file=core1.eln	line=36	pos=18	[error] :file=core1.eln	line=36	pos=18		
+applications/Features/coop.lgi	[error] :file=coop.lgi line=4 pos=11 [PARSER] syntax error on symbol 'modules'	[error] :file=coop.lgi line=4 pos=11 [PARSER] syntax error on symbol 'modules'		
+applications/Features/core.lgi	[error] :file=core.lgi line=4 pos=11 [PARSER] syntax error on symbol 'modules'	[error] :file=core.lgi line=4 pos=11 [PARSER] syntax error on symbol 'modules'		
+applications/Features/core1.lgi	[error] :file=core1.eln line=36 pos=18 [earley] syntax error on symbol 't'	[error] :file=core1.eln line=36 pos=18 [earley] syntax error on symbol 't'		
 applications/Features/edge.lgi	ok	ok		
 applications/Features/essai.lgi	[error] can't open input file 'io.eln'	[error] can't open input file 'io.eln'		
 applications/Features/fromto.lgi	[error] can't open input file 'io.eln'	[error] can't open input file 'io.eln'		
-applications/Features/g.lgi	[error] :file=g.eln	line=0	pos=1	[error] :file=g.eln	line=0	pos=1		
-applications/Features/getc.lgi	[error] :file=getc.lgi	line=4	pos=11	[error] :file=getc.lgi	line=4	pos=11		
-applications/Features/graph.lgi	[error] :file=oneadjlist.eln	line=61	pos=55	[error] :file=oneadjlist.eln	line=61	pos=55		
-applications/Features/hell.lgi	[error] :file=hell.lgi	line=4	pos=11	[error] :file=hell.lgi	line=4	pos=11	hello.inp,hello2.inp	chello.out,chello2.out,hello2.out
+applications/Features/g.lgi	[error] :file=g.eln line=0 pos=1 [PARSER] syntax error on symbol 'ENDOFLSTREAM'	[error] :file=g.eln line=0 pos=1 [PARSER] syntax error on symbol 'ENDOFLSTREAM'		
+applications/Features/getc.lgi	[error] :file=getc.lgi line=4 pos=11 [PARSER] syntax error on symbol 'modules'	[error] :file=getc.lgi line=4 pos=11 [PARSER] syntax error on symbol 'modules'		
+applications/Features/graph.lgi	[error] :file=oneadjlist.eln line=61 pos=55 [earley] syntax error on symbol ','	[error] :file=oneadjlist.eln line=61 pos=55 [earley] syntax error on symbol ','		
+applications/Features/hell.lgi	[error] :file=hell.lgi line=4 pos=11 [PARSER] syntax error on symbol 'modules'	[error] :file=hell.lgi line=4 pos=11 [PARSER] syntax error on symbol 'modules'	hello.inp,hello2.inp	chello.out,chello2.out,hello2.out
 applications/Features/hello.lgi	ok	ok	hello.inp,hello2.inp	chello.out,chello2.out,hello2.out
 applications/Features/i2str.lgi	ok	ok		
-applications/Features/j.lgi	[error] :file=j.lgi	line=1	pos=0	[error] :file=j.lgi	line=1	pos=0	adjlist.inp	adjlist.out
+applications/Features/j.lgi	[error] :file=j.lgi line=1 pos=0 name of logic doesn't correspond to name of file	[error] :file=j.lgi line=1 pos=0 name of logic doesn't correspond to name of file	adjlist.inp	adjlist.out
 applications/Features/label.lgi	ok	ok		
 applications/Features/lambda1.lgi	ok	ok		
 applications/Features/longnames.lgi	ok	ok		
-applications/Features/m1.lgi	ok	ok		
-applications/Features/m2.lgi	ok	ok		
+applications/Features/m1.lgi	rc=1	rc=1		
+applications/Features/m2.lgi	rc=1	rc=1		
 applications/Features/m_apply.lgi	[error] can't open input file 'io.eln'	[error] can't open input file 'io.eln'		
-applications/Features/m_apply_all.lgi	[error] :file=m_apply_all.lgi	line=0	pos=29	[error] :file=m_apply_all.lgi	line=0	pos=29		
+applications/Features/m_apply_all.lgi	[error] :file=m_apply_all.lgi line=0 pos=29 name of logic doesn't correspond to name of file	[error] :file=m_apply_all.lgi line=0 pos=29 name of logic doesn't correspond to name of file		
 applications/Features/mc.lgi	ok	ok	termCommontest.inp	termCommontest.out
-applications/Features/mm.lgi	ok	ok	termCommontest.inp	termCommontest.out
-applications/Features/mv.lgi	[error] :file=mv.eln	line=0	pos=1	[error] :file=mv.eln	line=0	pos=1		
-applications/Features/n.lgi	ok	ok	cnorm.inp,new_meta.inp,norm.inp,termCommontest.inp	cnorm.out,new_meta.out,norm.out,termCommontest.out
+applications/Features/mm.lgi	rc=1	rc=1	termCommontest.inp	termCommontest.out
+applications/Features/mv.lgi	[error] :file=mv.eln line=0 pos=1 [PARSER] syntax error on symbol 'ENDOFLSTREAM'	[error] :file=mv.eln line=0 pos=1 [PARSER] syntax error on symbol 'ENDOFLSTREAM'		
+applications/Features/n.lgi	rc=1	rc=1	cnorm.inp,new_meta.inp,norm.inp,termCommontest.inp	cnorm.out,new_meta.out,norm.out,termCommontest.out
 applications/Features/nonbblock.lgi	[error] can't open input file 'io.eln'	[error] can't open input file 'io.eln'		
 applications/Features/nonblock.lgi	[error] can't open input file 'io.eln'	[error] can't open input file 'io.eln'		
-applications/Features/normap.lgi	[error] :file=normap.eln	line=0	pos=1	[error] :file=normap.eln	line=0	pos=1		
+applications/Features/normap.lgi	[error] :file=normap.eln line=0 pos=1 [PARSER] syntax error on symbol 'ENDOFLSTREAM'	[error] :file=normap.eln line=0 pos=1 [PARSER] syntax error on symbol 'ENDOFLSTREAM'		
 applications/Features/nqueens.lgi	ok	ok		
-applications/Features/oneadjlist.lgi	[error] :file=oneadjlist.eln	line=61	pos=55	[error] :file=oneadjlist.eln	line=61	pos=55		
+applications/Features/oneadjlist.lgi	[error] :file=oneadjlist.eln line=61 pos=55 [earley] syntax error on symbol ','	[error] :file=oneadjlist.eln line=61 pos=55 [earley] syntax error on symbol ','		
 applications/Features/path.lgi	ok	ok		
-applications/Features/plus.lgi	[error] :file=plus.lgi	line=4	pos=11	[error] :file=plus.lgi	line=4	pos=11		
-applications/Features/poly3.lgi	ok	ok	poly3.inp	
-applications/Features/print.lgi	[error] :file=print.lgi	line=4	pos=11	[error] :file=print.lgi	line=4	pos=11		
+applications/Features/plus.lgi	[error] :file=plus.lgi line=4 pos=11 [PARSER] syntax error on symbol 'modules'	[error] :file=plus.lgi line=4 pos=11 [PARSER] syntax error on symbol 'modules'		
+applications/Features/poly3.lgi	rc=1	rc=1	poly3.inp	
+applications/Features/print.lgi	[error] :file=print.lgi line=4 pos=11 [PARSER] syntax error on symbol 'modules'	[error] :file=print.lgi line=4 pos=11 [PARSER] syntax error on symbol 'modules'		
 applications/Features/pwhere.lgi	ok	ok		
 applications/Features/pwhere1.lgi	ok	ok		
-applications/Features/qq.lgi	[error] :file=qq.lgi	line=4	pos=11	[error] :file=qq.lgi	line=4	pos=11		
-applications/Features/queens10.lgi	[error] :file=queens10.eln	line=0	pos=1	[error] :file=queens10.eln	line=0	pos=1		
+applications/Features/qq.lgi	[error] :file=qq.lgi line=4 pos=11 [PARSER] syntax error on symbol 'modules'	[error] :file=qq.lgi line=4 pos=11 [PARSER] syntax error on symbol 'modules'		
+applications/Features/queens10.lgi	[error] :file=queens10.eln line=0 pos=1 [PARSER] syntax error on symbol 'ENDOFLSTREAM'	[error] :file=queens10.eln line=0 pos=1 [PARSER] syntax error on symbol 'ENDOFLSTREAM'		
 applications/Features/re.lgi	ok	ok	tre.inp	tre.out
 applications/Features/ref_to_string.lgi	[error] can't open input file 'io.eln'	[error] can't open input file 'io.eln'		
-applications/Features/s.lgi	[error] :file=s.lgi	line=4	pos=11	[error] :file=s.lgi	line=4	pos=11	adjlist.inp,prtest.inp,sel.inp,sieve.inp,termCommontest.inp,trs.inp	adjlist.out,cprtest.out,csel.out,prtest.out,sel.out,sieve.out,termCommontest.out,trs.out
+applications/Features/s.lgi	[error] :file=s.lgi line=4 pos=11 [PARSER] syntax error on symbol 'modules'	[error] :file=s.lgi line=4 pos=11 [PARSER] syntax error on symbol 'modules'	adjlist.inp,prtest.inp,sel.inp,sieve.inp,termCommontest.inp,trs.inp	adjlist.out,cprtest.out,csel.out,prtest.out,sel.out,sieve.out,termCommontest.out,trs.out
 applications/Features/solvers.lgi	[error] can't open input file 'io.eln'	[error] can't open input file 'io.eln'		
-applications/Features/ss.lgi	[error] :file=ss.lgi	line=11	pos=11	[error] :file=ss.lgi	line=11	pos=11		
+applications/Features/ss.lgi	[error] :file=ss.lgi line=11 pos=11 [PARSER] syntax error on symbol 'modules'	[error] :file=ss.lgi line=11 pos=11 [PARSER] syntax error on symbol 'modules'		
 applications/Features/str_to_term.lgi	[error] can't open input file 'io.eln'	[error] can't open input file 'io.eln'		
-applications/Features/termCommonstest.lgi	ok	ok		
+applications/Features/termCommonstest.lgi	rc=1	rc=1		
 applications/Features/toi_meme.lgi	ok	ok	toi_meme.inp	toi_meme.out
 applications/Features/tri.lgi	ok	ok		
 applications/Features/trii.lgi	ok	ok		
-applications/Features/try1.lgi	[error] :file=try1.eln	line=0	pos=1	[error] :file=try1.eln	line=0	pos=1		
-applications/Features/try2.lgi	[error] :file=try2.eln	line=3	pos=10	[error] :file=try2.eln	line=3	pos=10		
-applications/Features/try3.lgi	[error] :file=try3.eln	line=2	pos=19	[error] :file=try3.eln	line=2	pos=19		
-applications/Features/v.lgi	[error] :file=v.lgi	line=4	pos=11	[error] :file=v.lgi	line=4	pos=11	sieve.inp	sieve.out
-applications/HOU_1_17/hou.lgi	ok	ok		
-applications/HOU_1_17/norm.lgi	ok	ok		
-applications/HOU_1_17/phou.lgi	ok	ok		
-applications/HOU_1_17/test.lgi	ok	ok		
-applications/HOU_1_17/tex.lgi	ok	ok		
-applications/HOU_1_17/tst.lgi	[error] :file=tst.lgi	line=4	pos=10	[error] :file=tst.lgi	line=4	pos=10		
-applications/HOU_1_18/norm.lgi	ok	ok		
-applications/HOU_1_18/test.lgi	ok	ok		
-applications/HOU_1_18/tex.lgi	ok	ok		
-applications/HOU_1_18/tst.lgi	[error] :file=tst.lgi	line=4	pos=10	[error] :file=tst.lgi	line=4	pos=10		
-applications/Hou/norm.lgi	ok	ok		
-applications/Hou/test.lgi	ok	ok		
-applications/Hou/tex.lgi	ok	ok		
-applications/Hou/tst.lgi	[error] :file=tst.lgi	line=4	pos=10	[error] :file=tst.lgi	line=4	pos=10		
-applications/IO_Call/Unif.lgi	ok	ok		
-applications/MetaApply/adjlist.lgi	[error] :file=adjlist.eln	line=96	pos=14	[error] :file=adjlist.eln	line=96	pos=14		
-applications/MetaApply/compbasic.lgi	ok	ok		
-applications/MetaApply/cpbasic.lgi	ok	ok		
-applications/MetaApply/cpbasic2.lgi	ok	ok		
+applications/Features/try1.lgi	[error] :file=try1.eln line=0 pos=1 [PARSER] syntax error on symbol 'ENDOFLSTREAM'	[error] :file=try1.eln line=0 pos=1 [PARSER] syntax error on symbol 'ENDOFLSTREAM'		
+applications/Features/try2.lgi	[error] :file=try2.eln line=3 pos=10 [PARSER] semaction error on symbol 'sort'	[error] :file=try2.eln line=3 pos=10 [PARSER] semaction error on symbol 'sort'		
+applications/Features/try3.lgi	[error] :file=try3.eln line=2 pos=19 [PARSER] semaction error on symbol 'import'	[error] :file=try3.eln line=2 pos=19 [PARSER] semaction error on symbol 'import'		
+applications/Features/v.lgi	[error] :file=v.lgi line=4 pos=11 [PARSER] syntax error on symbol 'modules'	[error] :file=v.lgi line=4 pos=11 [PARSER] syntax error on symbol 'modules'	sieve.inp	sieve.out
+applications/HOU_1_17/hou.lgi	rc=1	rc=1		
+applications/HOU_1_17/norm.lgi	rc=1	rc=1		
+applications/HOU_1_17/phou.lgi	rc=1	rc=1		
+applications/HOU_1_17/test.lgi	rc=1	rc=1		
+applications/HOU_1_17/tex.lgi	rc=1	rc=1		
+applications/HOU_1_17/tst.lgi	[error] :file=tst.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules'	[error] :file=tst.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules'		
+applications/HOU_1_18/norm.lgi	rc=1	rc=1		
+applications/HOU_1_18/test.lgi	rc=1	rc=1		
+applications/HOU_1_18/tex.lgi	rc=1	rc=1		
+applications/HOU_1_18/tst.lgi	[error] :file=tst.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules'	[error] :file=tst.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules'		
+applications/Hou/norm.lgi	rc=1	rc=1		
+applications/Hou/test.lgi	rc=1	rc=1		
+applications/Hou/tex.lgi	rc=1	rc=1		
+applications/Hou/tst.lgi	[error] :file=tst.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules'	[error] :file=tst.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules'		
+applications/IO_Call/Unif.lgi	rc=1	rc=1		
+applications/MetaApply/adjlist.lgi	[error] :file=adjlist.eln line=96 pos=14 [earley] syntax error on symbol 'switch'	[error] :file=adjlist.eln line=96 pos=14 [earley] syntax error on symbol 'switch'		
+applications/MetaApply/compbasic.lgi	rc=1	rc=1		
+applications/MetaApply/cpbasic.lgi	rc=1	rc=1		
+applications/MetaApply/cpbasic2.lgi	rc=1	rc=1		
 applications/MetaApply/edge.lgi	ok	ok		
-applications/MetaApply/eqSystem.lgi	ok	ok		
-applications/MetaApply/extequation.lgi	ok	ok		
-applications/MetaApply/extequation1.lgi	ok	ok		
-applications/MetaApply/graph.lgi	[error] :file=adjlist.eln	line=96	pos=14	[error] :file=adjlist.eln	line=96	pos=14		
+applications/MetaApply/eqSystem.lgi	rc=1	rc=1		
+applications/MetaApply/extequation.lgi	rc=1	rc=1		
+applications/MetaApply/extequation1.lgi	rc=1	rc=1		
+applications/MetaApply/graph.lgi	[error] :file=adjlist.eln line=96 pos=14 [earley] syntax error on symbol 'switch'	[error] :file=adjlist.eln line=96 pos=14 [earley] syntax error on symbol 'switch'		
 applications/MetaApply/label.lgi	ok	ok		
-applications/MetaApply/list.lgi	[error] :file=list.eln	line=143	pos=17	[error] :file=list.eln	line=143	pos=17		
-applications/MetaApply/lpo.lgi	ok	ok		
-applications/MetaApply/lvariables.lgi	ok	ok		
-applications/MetaApply/oneadjlist.lgi	[error] :file=adjlist.eln	line=96	pos=14	[error] :file=adjlist.eln	line=96	pos=14		
+applications/MetaApply/list.lgi	[error] :file=list.eln line=143 pos=17 [earley] syntax error on symbol 'switch'	[error] :file=list.eln line=143 pos=17 [earley] syntax error on symbol 'switch'		
+applications/MetaApply/lpo.lgi	rc=1	rc=1		
+applications/MetaApply/lvariables.lgi	rc=1	rc=1		
+applications/MetaApply/oneadjlist.lgi	[error] :file=adjlist.eln line=96 pos=14 [earley] syntax error on symbol 'switch'	[error] :file=adjlist.eln line=96 pos=14 [earley] syntax error on symbol 'switch'		
 applications/MetaApply/path.lgi	ok	ok		
-applications/MetaApply/position.lgi	ok	ok		
-applications/MetaApply/renaming.lgi	ok	ok		
-applications/MetaApply/termCommons.lgi	ok	ok		
-applications/MetaApply/terms.lgi	ok	ok		
-applications/Picalc/picalc.lgi	ok	ok		
+applications/MetaApply/position.lgi	rc=1	rc=1		
+applications/MetaApply/renaming.lgi	rc=1	rc=1		
+applications/MetaApply/termCommons.lgi	rc=1	rc=1		
+applications/MetaApply/terms.lgi	rc=1	rc=1		
+applications/Picalc/picalc.lgi	rc=1	rc=1		
 applications/Prover/fopc.lgi	[error] can't open input file 'io.eln'	[error] can't open input file 'io.eln'	fopc.inp	fopc.out
-applications/Robot/iden.lgi	[error] :file=iden.lgi	line=4	pos=10	[error] :file=iden.lgi	line=4	pos=10		
-applications/Robot/iforelse.lgi	[error] :file=iforelse.lgi	line=4	pos=8	[error] :file=iforelse.lgi	line=4	pos=8		
-applications/Robot/space.lgi	[error] :file=space.lgi	line=4	pos=10	[error] :file=space.lgi	line=4	pos=10		
+applications/Robot/iden.lgi	[error] :file=iden.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules'	[error] :file=iden.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules'		
+applications/Robot/iforelse.lgi	[error] :file=iforelse.lgi line=4 pos=8 [PARSER] syntax error on symbol 'modules'	[error] :file=iforelse.lgi line=4 pos=8 [PARSER] syntax error on symbol 'modules'		
+applications/Robot/space.lgi	[error] :file=space.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules'	[error] :file=space.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules'		
 applications/Robot/tictac.lgi	ok	ok	tictactoe.inp	tictactoe.out
 applications/Server/Firewall/firewall.lgi	ok	ok		
 applications/Server/fac.lgi	[error] can't open input file 'e_list.eln'	[error] can't open input file 'e_list.eln'		
-applications/Simplest/cc.lgi	[error] :file=cc.lgi	line=4	pos=14	[error] :file=cc.lgi	line=4	pos=14		
-applications/Simplest/horse.lgi	[error] :file=horse.eln	line=69	pos=41	[error] :file=horse.eln	line=69	pos=41	nhorse.inp	cnhorse.out,inhorse.out,nhorse_jc.out
-applications/Simplest/perm.lgi	[error] :file=perm.lgi	line=4	pos=14	[error] :file=perm.lgi	line=4	pos=14		
-applications/Simplest/queens4.lgi	ok	ok		
-applications/Simplest/rqueens.lgi	[error] :file=rqueens.lgi	line=4	pos=14	[error] :file=rqueens.lgi	line=4	pos=14		
+applications/Simplest/cc.lgi	[error] :file=cc.lgi line=4 pos=14 [PARSER] syntax error on symbol 'modules'	[error] :file=cc.lgi line=4 pos=14 [PARSER] syntax error on symbol 'modules'		
+applications/Simplest/horse.lgi	[error] :file=horse.eln line=69 pos=41 [PARSER] syntax error on symbol '|'	[error] :file=horse.eln line=69 pos=41 [PARSER] syntax error on symbol '|'	nhorse.inp	cnhorse.out,inhorse.out,nhorse_jc.out
+applications/Simplest/perm.lgi	[error] :file=perm.lgi line=4 pos=14 [PARSER] syntax error on symbol 'modules'	[error] :file=perm.lgi line=4 pos=14 [PARSER] syntax error on symbol 'modules'		
+applications/Simplest/queens4.lgi	rc=1	rc=1		
+applications/Simplest/rqueens.lgi	[error] :file=rqueens.lgi line=4 pos=14 [PARSER] syntax error on symbol 'modules'	[error] :file=rqueens.lgi line=4 pos=14 [PARSER] syntax error on symbol 'modules'		
 applications/Simplest/test_rewrite.lgi	ok	ok		
-applications/Strategies/b.lgi	[error] :file=b.lgi	line=4	pos=10	[error] :file=b.lgi	line=4	pos=10	bup.inp,lambda.inp	bup.out,lambda.out
-applications/Strategies/boo.lgi	[error] :file=boo.lgi	line=4	pos=10	[error] :file=boo.lgi	line=4	pos=10		
-applications/Strategies/bup1.lgi	[error] :file=bup1.lgi	line=4	pos=10	[error] :file=bup1.lgi	line=4	pos=10		
-applications/Strategies/foo.lgi	[error] :file=foo.lgi	line=4	pos=10	[error] :file=foo.lgi	line=4	pos=10		
+applications/Strategies/b.lgi	[error] :file=b.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules'	[error] :file=b.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules'	bup.inp,lambda.inp	bup.out,lambda.out
+applications/Strategies/boo.lgi	[error] :file=boo.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules'	[error] :file=boo.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules'		
+applications/Strategies/bup1.lgi	[error] :file=bup1.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules'	[error] :file=bup1.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules'		
+applications/Strategies/foo.lgi	[error] :file=foo.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules'	[error] :file=foo.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules'		
 applications/Strategies/ll.lgi	ok	ok		
-applications/Strategies/llterm.lgi	[error] :file=llterm.lgi	line=5	pos=23	[error] :file=llterm.lgi	line=5	pos=23		
-applications/Strategies/m.lgi	[error] :file=m.lgi	line=4	pos=9	[error] :file=m.lgi	line=4	pos=9	lambda.inp,lterm.inp,map.inp	lambda.out,lterm.out,map.out
-applications/Strategies/map1.lgi	[error] :file=map1.lgi	line=4	pos=9	[error] :file=map1.lgi	line=4	pos=9		
-applications/Strategies/map2.lgi	[error] :file=map2.lgi	line=4	pos=9	[error] :file=map2.lgi	line=4	pos=9		
-applications/Strategies/map3.lgi	[error] :file=map3.lgi	line=4	pos=9	[error] :file=map3.lgi	line=4	pos=9		
-applications/Strategies/map99.lgi	[error] :file=map99.lgi	line=4	pos=9	[error] :file=map99.lgi	line=4	pos=9		
-applications/Strategies/moo.lgi	[error] :file=moo.lgi	line=4	pos=10	[error] :file=moo.lgi	line=4	pos=10		
-applications/Strategies/polyDer.lgi	ok	ok		
-applications/Strategies/tclist.lgi	[error] :file=tclist.lgi	line=23	pos=10	[error] :file=tclist.lgi	line=23	pos=10		
-applications/UnifElanGen/ElimFA.lgi	ok	ok		
-applications/UnifElanGen/Id.lgi	[error] :file=eqSystem.eln	line=49	pos=30	[error] :file=eqSystem.eln	line=49	pos=30		
-applications/UnifElanGen/Lin.lgi	[error] :file=eqSystem.eln	line=49	pos=30	[error] :file=eqSystem.eln	line=49	pos=30		
-applications/UnifElanGen/Part.lgi	[error] :file=Part.eln	line=47	pos=36	[error] :file=Part.eln	line=47	pos=36		
-applications/UnifElanGen/RestrictUnif0.lgi	ok	ok		
-applications/UnifElanGen/RestrictUnifFA.lgi	ok	ok		
-applications/UnifElanGen/UnifFA.lgi	ok	ok		
-applications/UnifElanGen/combi0plusFA.lgi	ok	ok		
-applications/UnifElanGen/combiBrKnn.lgi	ok	ok		
-applications/UnifElanRCF/alien.lgi	ok	ok		
-applications/UnifElanRCF/combiACplusC.lgi	ok	ok		
-applications/UnifElanRCF/combiRCF.lgi	ok	ok		
-contributions/Proving/Automata/all_operations.lgi	ok	ok		
-contributions/Proving/Automata/automaton.lgi	ok	ok		
-contributions/Proving/Automata/nf_automaton.lgi	ok	ok		
-contributions/Proving/Automata/termination.lgi	ok	ok		
+applications/Strategies/llterm.lgi	[error] :file=llterm.lgi line=5 pos=23 [earley] syntax error on symbol 'reduce'	[error] :file=llterm.lgi line=5 pos=23 [earley] syntax error on symbol 'reduce'		
+applications/Strategies/m.lgi	[error] :file=m.lgi line=4 pos=9 [PARSER] syntax error on symbol 'modules'	[error] :file=m.lgi line=4 pos=9 [PARSER] syntax error on symbol 'modules'	lambda.inp,lterm.inp,map.inp	lambda.out,lterm.out,map.out
+applications/Strategies/map1.lgi	[error] :file=map1.lgi line=4 pos=9 [PARSER] syntax error on symbol 'modules'	[error] :file=map1.lgi line=4 pos=9 [PARSER] syntax error on symbol 'modules'		
+applications/Strategies/map2.lgi	[error] :file=map2.lgi line=4 pos=9 [PARSER] syntax error on symbol 'modules'	[error] :file=map2.lgi line=4 pos=9 [PARSER] syntax error on symbol 'modules'		
+applications/Strategies/map3.lgi	[error] :file=map3.lgi line=4 pos=9 [PARSER] syntax error on symbol 'modules'	[error] :file=map3.lgi line=4 pos=9 [PARSER] syntax error on symbol 'modules'		
+applications/Strategies/map99.lgi	[error] :file=map99.lgi line=4 pos=9 [PARSER] syntax error on symbol 'modules'	[error] :file=map99.lgi line=4 pos=9 [PARSER] syntax error on symbol 'modules'		
+applications/Strategies/moo.lgi	[error] :file=moo.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules'	[error] :file=moo.lgi line=4 pos=10 [PARSER] syntax error on symbol 'modules'		
+applications/Strategies/polyDer.lgi	rc=1	rc=1		
+applications/Strategies/tclist.lgi	[error] :file=tclist.lgi line=23 pos=10 [PARSER] syntax error on symbol 'modules'	[error] :file=tclist.lgi line=23 pos=10 [PARSER] syntax error on symbol 'modules'		
+applications/UnifElanGen/ElimFA.lgi	rc=1	rc=1		
+applications/UnifElanGen/Id.lgi	[error] :file=eqSystem.eln line=49 pos=30 [PARSER] syntax error on symbol '|'	[error] :file=eqSystem.eln line=49 pos=30 [PARSER] syntax error on symbol '|'		
+applications/UnifElanGen/Lin.lgi	[error] :file=eqSystem.eln line=49 pos=30 [PARSER] syntax error on symbol '|'	[error] :file=eqSystem.eln line=49 pos=30 [PARSER] syntax error on symbol '|'		
+applications/UnifElanGen/Part.lgi	[error] :file=Part.eln line=47 pos=36 [PARSER] syntax error on symbol '|'	[error] :file=Part.eln line=47 pos=36 [PARSER] syntax error on symbol '|'		
+applications/UnifElanGen/RestrictUnif0.lgi	rc=1	rc=1		
+applications/UnifElanGen/RestrictUnifFA.lgi	rc=1	rc=1		
+applications/UnifElanGen/UnifFA.lgi	rc=1	rc=1		
+applications/UnifElanGen/combi0plusFA.lgi	rc=1	rc=1		
+applications/UnifElanGen/combiBrKnn.lgi	rc=1	rc=1		
+applications/UnifElanRCF/alien.lgi	rc=1	rc=1		
+applications/UnifElanRCF/combiACplusC.lgi	rc=1	rc=1		
+applications/UnifElanRCF/combiRCF.lgi	rc=1	rc=1		
+contributions/Proving/Automata/all_operations.lgi	rc=1	rc=1		
+contributions/Proving/Automata/automaton.lgi	rc=1	rc=1		
+contributions/Proving/Automata/nf_automaton.lgi	rc=1	rc=1		
+contributions/Proving/Automata/termination.lgi	rc=1	rc=1		
 contributions/Proving/NeedhamSchroeder/nsh.lgi	ok	ok		
-contributions/Proving/Provers/Propositional/NamedRules/propositional.lgi	ok	ok		
-contributions/Proving/Provers/Propositional/NoNamedRules/propositional.lgi	ok	ok		
-contributions/Proving/Provers/Propositional/propositional.lgi	ok	ok		
-contributions/Proving/Termination/LPO-MPO/lpo.lgi	ok	ok		
-contributions/Proving/Termination/RPO/rpo.lgi	ok	ok		
-contributions/Proving/TimedAutomata/One-Automaton/ClockZone.lgi	ok	ok		
-contributions/Proving/TimedAutomata/One-Automaton/Timed_Automaton.lgi	ok	ok		
-contributions/Proving/TimedAutomata/Product-Of-Automata/Timed_automata/Timed_Automata.lgi	ok	ok		
-contributions/Proving/TimedAutomata/Product-Of-Automata/Timed_automata/pdt_automates.lgi	ok	ok		
-contributions/Proving/TimedAutomata/Product-Of-Automata/hash_Timed_automata/Timed_Automata.lgi	ok	ok		
-contributions/Proving/TimedAutomata/Product-Of-Automata/hash_Timed_automata/pdt_automates.lgi	ok	ok		
-contributions/Proving/TimedAutomata/Product-Of-Automata/matrice_Timed_automata/Timed_Automata.lgi	ok	ok		
-contributions/Proving/TimedAutomata/Product-Of-Automata/matrice_Timed_automata/pdt_automates.lgi	ok	ok		
-contributions/Solving/COLETTE/ARITY_N_I/src/colette.lgi	ok	ok		
-contributions/Solving/Equational/MatchingAC/CompMatchingAC.lgi	ok	ok		
+contributions/Proving/Provers/Propositional/NamedRules/propositional.lgi	rc=1	rc=1		
+contributions/Proving/Provers/Propositional/NoNamedRules/propositional.lgi	rc=1	rc=1		
+contributions/Proving/Provers/Propositional/propositional.lgi	rc=1	rc=1		
+contributions/Proving/Termination/LPO-MPO/lpo.lgi	rc=1	rc=1		
+contributions/Proving/Termination/RPO/rpo.lgi	rc=1	rc=1		
+contributions/Proving/TimedAutomata/One-Automaton/ClockZone.lgi	rc=1	rc=1		
+contributions/Proving/TimedAutomata/One-Automaton/Timed_Automaton.lgi	rc=1	rc=1		
+contributions/Proving/TimedAutomata/Product-Of-Automata/Timed_automata/Timed_Automata.lgi	rc=1	rc=1		
+contributions/Proving/TimedAutomata/Product-Of-Automata/Timed_automata/pdt_automates.lgi	rc=1	rc=1		
+contributions/Proving/TimedAutomata/Product-Of-Automata/hash_Timed_automata/Timed_Automata.lgi	rc=1	rc=1		
+contributions/Proving/TimedAutomata/Product-Of-Automata/hash_Timed_automata/pdt_automates.lgi	rc=1	rc=1		
+contributions/Proving/TimedAutomata/Product-Of-Automata/matrice_Timed_automata/Timed_Automata.lgi	rc=1	rc=1		
+contributions/Proving/TimedAutomata/Product-Of-Automata/matrice_Timed_automata/pdt_automates.lgi	rc=1	rc=1		
+contributions/Solving/COLETTE/ARITY_N_I/src/colette.lgi	rc=1	rc=1		
+contributions/Solving/Equational/MatchingAC/CompMatchingAC.lgi	rc=1	rc=1		

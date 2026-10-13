@@ -327,7 +327,7 @@ def private_copy(t, wd):
 
 
 def produce(t, timeout):
-    """(stdout, stderr) of test t run in a private copy with PREFIX's tools.
+    """(stdout, stderr, rc) of test t run in a private copy with PREFIX's tools.
     Raises Unrunnable when there is nothing to compare; lets
     subprocess.TimeoutExpired through. A compiled program reads the test's
     input when it has one, else evaluates its start term (-noInput)."""
@@ -378,7 +378,7 @@ def produce(t, timeout):
             rc, out, err = run(compiled, wd, inp, timeout)
         if sanitizer_report(err):
             raise Unrunnable("SANITIZER", f"{sanitizer_report(err)}\n{err[-4000:]}", out)
-        return out, err
+        return out, err, rc
     finally:
         shutil.rmtree(work, ignore_errors=True)
 
@@ -390,7 +390,7 @@ def run_test(t, timeout):
     if expected is None:
         return "NOREF", f"missing {t['out']}.out", ""
     try:
-        out, err = produce(t, timeout)
+        out, err, rc = produce(t, timeout)
     except Unrunnable as u:
         return u.status, u.detail, u.out
     except subprocess.TimeoutExpired:
@@ -407,7 +407,7 @@ def run_test(t, timeout):
         return "PASS≈", "same symbols/values in same order (printing differs)", out
     diff = "".join(difflib.unified_diff(exp.splitlines(True), out.splitlines(True),
                                         "expected", "got", n=2))
-    tail = f"\n--- stderr:\n{err[-1500:]}" if err.strip() else ""
+    tail = f"\n--- stderr:\n{err[-1500:]}" if err.strip() else f"\n--- rc={rc}" if rc != 0 else ""
     return "FAIL", diff[:20000] + tail, out
 
 

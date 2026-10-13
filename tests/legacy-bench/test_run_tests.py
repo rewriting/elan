@@ -359,10 +359,30 @@ class OverlayCopyTest(unittest.TestCase):
             old = rt.PREFIX
             rt.PREFIX = prefix
             try:
-                out, err = rt.produce(t, 30)
+                out, err, rc = rt.produce(t, 30)
             finally:
                 rt.PREFIX = old
             self.assertEqual(out, "elan -b p.lgi\nnew input\n")
+            self.assertEqual(rc, 0)
+
+    def test_a_failing_run_with_empty_stderr_reports_its_rc(self):
+        with tempfile.TemporaryDirectory(dir=rt.HERE) as tmp:
+            t = self.make(tmp)
+            (t["ovdir"] / "SAMPLES" / "new.out").write_text("expected\n")
+            prefix = Path(tmp) / "prefix"
+            (prefix / "bin").mkdir(parents=True)
+            fake = prefix / "bin" / "elan"
+            fake.write_text('#!/bin/sh\necho got; exit 3\n')
+            fake.chmod(0o755)
+            old = rt.PREFIX
+            rt.PREFIX = prefix
+            try:
+                self.assertEqual(rt.produce(t, 30)[2], 3)
+                status, detail, _ = rt.run_test(t, 30)
+            finally:
+                rt.PREFIX = old
+            self.assertEqual(status, "FAIL")
+            self.assertIn("rc=3", detail)
 
     def test_produce_reports_a_missing_input(self):
         with tempfile.TemporaryDirectory(dir=rt.HERE) as tmp:

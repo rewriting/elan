@@ -49,13 +49,17 @@ def write_expected(jobs, force, timeout):
             kept += 1
             continue
         try:
-            out, _err = rt.produce(t, timeout)
+            out, err, rc = rt.produce(t, timeout)
         except rt.Unrunnable as u:
             print(f"FAILED {t['id']}: {u.status}\n{u.detail[-800:]}")
             failed += 1
             continue
         except subprocess.TimeoutExpired:
             print(f"FAILED {t['id']}: TIMEOUT > {timeout}s")
+            failed += 1
+            continue
+        if rc != 0:   # not an expected output: the reference did not run the program to the end
+            print(f"FAILED {t['id']}: rc={rc}\n{err[-800:]}")
             failed += 1
             continue
         target.parent.mkdir(parents=True, exist_ok=True)

@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 """Unit tests of the overlay scripts (spec S9; run: python3 test_overlay.py)."""
+import contextlib
+import io
 import sys
 import tempfile
 import unittest
@@ -51,6 +53,29 @@ class WriteExpectedTest(unittest.TestCase):
         elan.chmod(0o755)
         return prefix
 
+    def write(self, jobs, force):
+        with contextlib.redirect_stdout(io.StringIO()):
+            return me.write_expected(jobs, force, 30)
+
+    def test_a_reference_run_with_a_nonzero_rc_is_a_failure_not_an_output(self):
+        with tempfile.TemporaryDirectory(dir=HERE) as tmp:
+            t = overlay_test(tmp)
+            prefix = Path(tmp) / "ref"
+            (prefix / "bin").mkdir(parents=True)
+            (prefix / "bin" / "elan").write_text("#!/bin/sh\necho partial; exit 4\n")
+            (prefix / "bin" / "elan").chmod(0o755)
+            old = rt.PREFIX
+            rt.PREFIX = prefix
+            buf = io.StringIO()
+            try:
+                with contextlib.redirect_stdout(buf):
+                    r = me.write_expected(me.plan([t]), False, 30)
+            finally:
+                rt.PREFIX = old
+            self.assertEqual(r, (0, 0, 1))
+            self.assertIn("rc=4", buf.getvalue())
+            self.assertFalse((t["ovdir"] / "SAMPLES" / "q.out").exists())
+
     def test_writes_then_keeps_unless_forced(self):
         with tempfile.TemporaryDirectory(dir=HERE) as tmp:
             t = overlay_test(tmp)
@@ -58,13 +83,13 @@ class WriteExpectedTest(unittest.TestCase):
             rt.PREFIX = self.fake_reference(tmp)
             try:
                 jobs = me.plan([t])
-                self.assertEqual(me.write_expected(jobs, False, 30), (1, 0, 0))
+                self.assertEqual(self.write(jobs, False), (1, 0, 0))
                 target = t["ovdir"] / "SAMPLES" / "q.out"
                 self.assertEqual(target.read_text(), "reference -b p.lgi\nthe query\n")
                 target.write_text("edited\n")
-                self.assertEqual(me.write_expected(jobs, False, 30), (0, 1, 0))
+                self.assertEqual(self.write(jobs, False), (0, 1, 0))
                 self.assertEqual(target.read_text(), "edited\n")
-                self.assertEqual(me.write_expected(jobs, True, 30), (1, 0, 0))
+                self.assertEqual(self.write(jobs, True), (1, 0, 0))
             finally:
                 rt.PREFIX = old
 
@@ -75,7 +100,7 @@ class WriteExpectedTest(unittest.TestCase):
             old = rt.PREFIX
             rt.PREFIX = self.fake_reference(tmp)
             try:
-                self.assertEqual(me.write_expected(me.plan([t]), True, 30), (0, 1, 0))
+                self.assertEqual(self.write(me.plan([t]), True), (0, 1, 0))
             finally:
                 rt.PREFIX = old
 
@@ -125,6 +150,29 @@ class TriageTest(unittest.TestCase):
             self.assertEqual(tr.load_status_in(app, "good", prefix, 30), "ok")
             self.assertEqual(tr.load_status_in(app, "absent", prefix, 30), "NOLGI")
             self.assertEqual(tr.load_status_in(app, "other", prefix, 30), "[error] bad module")
+
+    def fake_prefix(self, tmp, script):
+        prefix = Path(tmp) / "p"
+        (prefix / "bin").mkdir(parents=True)
+        (prefix / "bin" / "elan").write_text("#!/bin/sh\n" + script + "\n")
+        (prefix / "bin" / "elan").chmod(0o755)
+        app = Path(tmp) / "App"
+        app.mkdir()
+        (app / "x.lgi").write_text("")
+        return app, prefix
+
+    def test_nonzero_rc_without_an_error_line_is_rc_n(self):
+        with tempfile.TemporaryDirectory(dir=HERE) as tmp:
+            app, prefix = self.fake_prefix(tmp, "exit 7")
+            self.assertEqual(tr.load_status_in(app, "x", prefix, 30), "rc=7")
+
+    def test_a_location_error_is_joined_with_its_message_on_one_line(self):
+        with tempfile.TemporaryDirectory(dir=HERE) as tmp:
+            app, prefix = self.fake_prefix(
+                tmp, r"printf '[error] :file=x.lgi\tline=3\tpos=4\n\nsyntax error\n' >&2; exit 1")
+            st = tr.load_status_in(app, "x", prefix, 30)
+            self.assertEqual(st, "[error] :file=x.lgi line=3 pos=4 syntax error")
+            self.assertNotIn("\t", st)
 
     def test_candidates_match_the_program_name(self):
         inps, outs = tr.candidates("applications/APT/bubleLOG.lgi")

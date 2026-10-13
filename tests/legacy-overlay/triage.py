@@ -9,6 +9,7 @@ Usage: triage.py [--reference PREFIX] [--modern PREFIX] [--timeout S]
        --modern: else build/install."""
 import argparse
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -29,17 +30,20 @@ def load_status_in(app, name, prefix, timeout):
     old = rt.PREFIX
     rt.PREFIX = prefix
     try:
-        out, err = rt.produce(t, timeout)
+        out, err, rc = rt.produce(t, timeout)
     except rt.Unrunnable as u:
         return u.status
     except subprocess.TimeoutExpired:
         return "TIMEOUT"
     finally:
         rt.PREFIX = old
-    for line in err.splitlines():
+    lines = [l.strip() for l in err.splitlines() if l.strip()]
+    for i, line in enumerate(lines):
         if "[error]" in line or "fatal" in line:
-            return line.strip()[:200]
-    return "ok"
+            if re.search(r"\[error\]\s*:file=\S+\s+line=\d+", line) and i + 1 < len(lines):
+                line += " " + lines[i + 1]   # a bare location: add its message
+            return " ".join(line.split())[:160]
+    return "ok" if rc == 0 else f"rc={rc}"
 
 
 def candidates(path):
@@ -75,9 +79,11 @@ def main(argv=None):
                       + "".join("\t".join(r) + "\n" for r in rows))
     both = sum(1 for r in rows if r[1] == "ok" and r[2] == "ok")
     ref_only = sum(1 for r in rows if r[1] == "ok" and r[2] != "ok")
-    neither = sum(1 for r in rows if r[1] != "ok")
+    modern_only = sum(1 for r in rows if r[1] != "ok" and r[2] == "ok")
+    neither = sum(1 for r in rows if r[1] != "ok" and r[2] != "ok")
     print(f"triage: {len(rows)} programs: {both} load with both, {ref_only} with the reference "
-          f"only, {neither} not with the reference; report in {REPORT.name}")
+          f"only, {modern_only} with the modern only, {neither} with neither; "
+          f"report in {REPORT.name}")
     return 0
 
 
