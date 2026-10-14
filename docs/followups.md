@@ -376,6 +376,22 @@ sub-project (S1–S5b). Each item says where it comes from.
   solutions in the same order, `elanrt` TestEkerPinnedSameOrder): `p(F(x,
   y), G(x, z))` with 12 elements 7.8 s before (0c9d621), 11 s after
   517de33, 0.2 s now (16 elements: > 120 s before, 0.5 s now).
+  Left by the review of be69e62 (minor): (1) `extension32`'s
+  "constrained" test counts the occurrences of a variable in the
+  left-hand side after abstraction, so a variable that occurs again only
+  inside an abstracted subterm (`[] K(x, g(G(x,a)), ...)`) is not seen
+  constrained and REM's case 3 re-sort is not done (another order only
+  when two element patterns swap under the linearisation numbers); count
+  on the left-hand side before abstraction. (2) `TestEkerPinnedSameOrder`
+  covers one-level patterns only: add a pinned variable in a nested AC
+  level (`U(z, g(x))`, `G(x, F(x, y))`) and a pinned AC term of the nested
+  symbol. (3) A pin compares the partner's value with the subject's parts
+  as they are: right when the subject is in normal form (every real
+  program), as the non-linear fix assumes; say so in a comment.
+  `programs/ac/ord_ext` is the first AC case where following REM's order
+  gives another normal form than the interpreter's (a single
+  non-confluent unlabelled AC rule: each takes its first solution;
+  `.no-interpreter`): consistent with "the G oracle is REM".
 
 - **Non-linear variable in an AC part given to Eker's matcher** (bug hunt
   of the AC matching, 2026-10-13): a variable that occurs twice, at the
