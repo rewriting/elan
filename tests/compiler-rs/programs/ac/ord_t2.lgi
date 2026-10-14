@@ -1,0 +1,6 @@
+LPL ord_t2 description
+  query of sort bool
+  result of sort T
+  import acord
+  start with (s_t2) q(F(a,b U g(b) U g(c)))
+end

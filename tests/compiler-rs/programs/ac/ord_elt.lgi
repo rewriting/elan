@@ -1,0 +1,6 @@
+LPL ord_elt description
+  query of sort bool
+  result of sort T
+  import acord
+  start with (s_elt) p(F(h(a,a),F(h(a,b),F(g(a),F(g(b),c)))),a)
+end

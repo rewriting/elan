@@ -1,0 +1,60 @@
+module acord
+// The order of the solutions of AC matching (REM's, elanc-go's): element
+// patterns of a level in REM's ordered normal form; several AC subterms
+// under free symbols, AC patterns nested in an AC level (REM abstracts
+// them into wheres matched by Eker's matcher, RewriteRule.java
+// transformation1 and 2). Every solution is a result (dk).
+import global acsyms; end
+operators global
+  p(@,@) : (T T) T;
+  q(@) : (T) T;
+  k(@,@,@) : (T T T) T;
+end
+stratop global
+  s_elt : <T -> T> bs;
+  s_elt2 : <T -> T> bs;
+  s_t1 : <T -> T> bs;
+  s_t1b : <T -> T> bs;
+  s_t1c : <T -> T> bs;
+  s_t1nl : <T -> T> bs;
+  s_t2 : <T -> T> bs;
+  s_t2b : <T -> T> bs;
+  s_nl3 : <T -> T> bs;
+  s_nl3g : <T -> T> bs;
+end
+rules for T
+  x, y, z, w, v : T;
+global
+  // element patterns: REM's order (symbol code first), not the source one
+  [elt] p(F(h(a, y), F(g(x), z)), w) => h(x, y) if not(x == y) end
+  [elt2] F(h(a, y), F(g(x), z)) => k(x, y, z) end
+  // two AC subterms under a free symbol: the first one in a where
+  [t1] p(F(x, y), z U w) => h(x, z) end
+  // three: the first two in wheres (the second one matched first)
+  [t1b] k(F(x, y), z U w, F(g(x), F(g(w), v))) => h(x, z) end
+  // under a free symbol, one AC subterm deeper
+  [t1c] p(g(F(x, y)), q(z U w)) => k(x, y, z) end
+  // non-linear across the AC subterms
+  [t1nl] p(F(x, y), x U z) => k(x, y, z) end
+  // an AC pattern nested in an AC level: in a where
+  [t2] q(F(a, z U g(x))) => h(x, z) end
+  [t2b] F(g(x), F(y, z U h(x, w))) => k(x, y, z) end
+  // a repeated variable at a level of several variables (REM renames the
+  // repeated occurrence: a larger number, Term.java rlinearise)
+  [nl3] h(y, F(x, F(y, F(z, w)))) => k(x, z, w) end
+  [nl3g] h(y, F(g(v), F(x, F(y, F(z, w))))) => k(x, z, w) end
+end
+strategies for T
+implicit
+  [] s_elt => dk(elt) end
+  [] s_elt2 => dk(elt2) end
+  [] s_t1 => dk(t1) end
+  [] s_t1b => dk(t1b) end
+  [] s_t1c => dk(t1c) end
+  [] s_t1nl => dk(t1nl) end
+  [] s_t2 => dk(t2) end
+  [] s_t2b => dk(t2b) end
+  [] s_nl3 => dk(nl3) end
+  [] s_nl3g => dk(nl3g) end
+end
+end

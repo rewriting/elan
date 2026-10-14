@@ -112,9 +112,18 @@
 // where is replaced, for the decision tree, by a fresh variable; a
 // [CondAC] condition then matches the term bound to it (each solution in
 // turn, the conditions after it backtracking into the matching): the
-// element patterns one element each, in source order, each over the
-// subject's elements in canonical order (each distinct choice once), then
-// the variables of the AC level ([ACVar]). An unlabelled rule with its AC
+// element patterns one element each, in REM's ordered normal form of the
+// pattern (Term.cmp: the symbol code first; the interpreter's order too),
+// each over the subject's elements in canonical order (each distinct
+// choice once), then the variables of the AC level ([ACVar]: list_x first,
+// by REM's variable codes after its linearisation, where a repeated
+// occurrence gets a larger number). As REM (RewriteRule.java
+// transformation1 and 2), the left-hand side keeps one AC pattern
+// matched in place: of several AC subterms under free symbols, all but
+// the last one, and the AC subterms in the level of the remaining one
+// (except one alone of at most two variables, F(x, G(y, z))), are
+// replaced by fresh variables and matched by rt.Eker after it
+// ([CondEker], the last abstracted first). An unlabelled rule with its AC
 // operator at the top is applied modulo an extension ([Pattern.Ext]), as
 // the interpreter does with the extension rules it exports.
 //

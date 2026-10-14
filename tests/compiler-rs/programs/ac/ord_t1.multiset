@@ -1,0 +1,7 @@
+The interpreter enumerates the solutions of AC matching with Eker's
+matcher; REM (and elanc-go, compared with REM in order) matches this
+pattern otherwise: its element patterns in its ordered normal form, AC
+subterms under free symbols or nested in an AC level abstracted into
+wheres matched by Eker's matcher (RewriteRule.java transformation1 and
+2), a repeated variable renamed after the rule's ones (Term.java
+rlinearise). The same solutions, in another order.

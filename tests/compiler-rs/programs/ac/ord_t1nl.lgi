@@ -1,0 +1,6 @@
+LPL ord_t1nl description
+  query of sort bool
+  result of sort T
+  import acord
+  start with (s_t1nl) p(F(F(d,b),F(F(d,b),b)),d U b)
+end
