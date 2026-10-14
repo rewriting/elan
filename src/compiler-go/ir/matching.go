@@ -14,7 +14,8 @@ import "slices"
 // covers them).
 //
 // Decision trees follow Maranget ("Compiling pattern matching to good
-// decision trees", 2008) with first-match semantics: a Switch tests the
+// decision trees", 2008) with first-match semantics (within a size bound,
+// see compileBounded): a Switch tests the
 // head of the first position where the first remaining rule has a
 // non-variable pattern; each case keeps, in order, the rules whose pattern
 // there has that head or is a variable, so when every rule of a case fails
@@ -173,16 +174,17 @@ func decisionTree(rules []Rule, args []SortID, sig *signatures) (*Decision, []Ru
 // the default, so rules that each test a different position of a wide
 // pattern (a board: state(Y,[-,b,c],...), state(Y,[a,-,c],...), ...) give
 // a tree exponential in the number of positions (2^9 paths for the 9
-// moves of tictac: a 121 615-line main.go). A tree is kept when it has at
-// most treeBudget(rows) nodes; otherwise the rows are split by the mixture
-// rule (Maranget's backtracking automata): the maximal prefix of the rows
-// whose pattern at the tested position is not a variable is a Switch
-// whose cases hold only these rows, then (Next, when none of them
-// applies) the other rows, in order; a variable at the tested position
-// drops the column. Every row is then in one place: the code is linear in
-// the size of the patterns, the first-match order is the same.
+// moves of tictac: 7 004 nodes, 4 887 of them Try, a 121 615-line main.go;
+// sharing the identical sub-trees still leaves 2 124 nodes, 1 560 Try).
+// The tree of an operator or a label is kept when it has at most
+// treeBudget nodes; otherwise its rules are matched with bit vectors
+// (compileBits): one traversal of the subject tests each position of the
+// patterns once and keeps the rules compatible with its head (a mask per
+// position and head), then the candidate rules are tried in source order.
+// The code is linear in the size of the patterns.
 
-// treeBudget is the number of nodes allowed to the Maranget tree of rows.
+// treeBudget is the number of nodes allowed to the Maranget tree of rows:
+// 64 + treePerNode per pattern node.
 func treeBudget(rows []row) int {
 	size := 0
 	for _, r := range rows {
@@ -190,8 +192,14 @@ func treeBudget(rows []row) int {
 			size += patSize(p)
 		}
 	}
-	return 64 + 4*size
+	return 64 + treePerNode*size
 }
+
+// treePerNode: the trees of the programs of the bench (kind G, 175
+// programs compiled) use at most 0.6 of their budget (lpo, rpo:
+// identifiers against variables, a quadratic tree, kept); tictac's tree
+// 1.4 times (7 004 nodes for 604 pattern nodes).
+const treePerNode = 8
 
 func patSize(p *Pattern) int {
 	n := 1
@@ -202,18 +210,17 @@ func patSize(p *Pattern) int {
 }
 
 // compileBounded is the Maranget tree of rows when it is within the
-// budget, else the mixture split (see above), whose parts are compiled the
-// same way.
+// budget, else the bit-vector matching of rows (see above).
 func compileBounded(rows []row, occs []Occ, sorts []SortID, sig *signatures) *Decision {
 	budget := treeBudget(rows)
 	if d := compileWithin(rows, occs, sorts, sig, &budget); d != nil {
 		return d
 	}
-	return compileMixture(rows, occs, sorts, sig)
+	return compileBits(rows, occs, sorts, sig)
 }
 
-// compileWithin is compile, or nil when the tree has more nodes than
-// *budget.
+// compileWithin is the Maranget tree of rows (compileB), or nil when it
+// has more nodes than *budget.
 func compileWithin(rows []row, occs []Occ, sorts []SortID, sig *signatures, budget *int) (d *Decision) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -229,10 +236,6 @@ func compileWithin(rows []row, occs []Occ, sorts []SortID, sig *signatures, budg
 type budgetError struct{}
 
 var errBudget any = budgetError{}
-
-func compile(rows []row, occs []Occ, sorts []SortID, sig *signatures) *Decision {
-	return compileB(rows, occs, sorts, sig, nil)
-}
 
 // specialize is the Switch on position j of rows: its cases (each
 // compiled by sub) and its default (nil when the heads of rows are every
@@ -324,31 +327,6 @@ func tryFirst(first row, occs []Occ, next *Decision) *Decision {
 	return &Decision{Kind: Try, Rule: first.rule, Bindings: bindings, Next: next}
 }
 
-// compileMixture splits rows by the mixture rule (see treeBudget).
-func compileMixture(rows []row, occs []Occ, sorts []SortID, sig *signatures) *Decision {
-	if len(rows) == 0 {
-		return &Decision{Kind: Fail}
-	}
-	first := rows[0]
-	j := slices.IndexFunc(first.pats, func(p *Pattern) bool { return p.Kind != PatVar })
-	if j < 0 {
-		return tryFirst(first, occs, compileBounded(rows[1:], occs, sorts, sig))
-	}
-	n := 1
-	for n < len(rows) && rows[n].pats[j].Kind != PatVar {
-		n++
-	}
-	sub := func(rs []row, os []Occ, ss []SortID) *Decision {
-		return compileBounded(rs, os, ss, sig)
-	}
-	d := specialize(rows[:n], occs, sorts, sig, j, sub)
-	if n < len(rows) {
-		// (the default of the group fails) then the other rows
-		d.Next = compileBounded(rows[n:], occs, sorts, sig)
-	}
-	return d
-}
-
 func child(o Occ, i int) Occ { return append(slices.Clone(o), i) }
 
 // compileB is the Maranget tree of rows; budget (when not nil) is the
@@ -371,4 +349,116 @@ func compileB(rows []row, occs []Occ, sorts []SortID, sig *signatures, budget *i
 	return specialize(rows, occs, sorts, sig, j, func(rs []row, os []Occ, ss []SortID) *Decision {
 		return compileB(rs, os, ss, sig, budget)
 	})
+}
+
+// compileBits is the bit-vector matching of rows (a Bits node): bit k of
+// the mask is row k. The traversal (Match) tests each position where a
+// pattern has a head, once per subject: a Switch whose cases and default
+// are Mask nodes (the mask &= the rows compatible with the head: a
+// variable there, under a variable, or that head), each followed by the
+// positions under that head, then (the Switch's Next) the next position.
+// Cands are the Try of the rows, in source order: those whose bit is left
+// are tried in that order, their variables read from the subject by their
+// position (all the heads above them matched).
+func compileBits(rows []row, occs []Occ, sorts []SortID, sig *signatures) *Decision {
+	n := len(rows)
+	words := (n + 63) / 64
+	d := &Decision{Kind: Bits}
+	for _, r := range rows {
+		var bindings []Binding
+		for i, p := range r.pats {
+			varBindings(p, occs[i], &bindings)
+		}
+		d.Cands = append(d.Cands, &Decision{Kind: Try, Rule: r.rule,
+			Bindings: append(slices.Clone(r.bindings), bindings...)})
+	}
+	// pats[k][i]: the pattern of row k at occs[i], nil when the row does
+	// not constrain it
+	pats := make([][]*Pattern, n)
+	for k, r := range rows {
+		pats[k] = slices.Clone(r.pats)
+	}
+	d.Match = bitsMatch(pats, occs, sorts, sig, words)
+	return d
+}
+
+func varBindings(p *Pattern, o Occ, into *[]Binding) {
+	if p.Kind == PatVar {
+		if p.Var != wild {
+			*into = append(*into, Binding{p.Var, o})
+		}
+		return
+	}
+	for i := range p.Args {
+		varBindings(&p.Args[i], child(o, i), into)
+	}
+}
+
+// bitsMatch is the traversal of the positions occs (with the patterns
+// pats of the rows there), nil when no pattern has a head there.
+func bitsMatch(pats [][]*Pattern, occs []Occ, sorts []SortID, sig *signatures, words int) *Decision {
+	for i, o := range occs {
+		var heads []Head
+		for _, ps := range pats {
+			if p := ps[i]; p != nil {
+				if h, ok := headOf(p); ok && !slices.Contains(heads, h) {
+					heads = append(heads, h)
+				}
+			}
+		}
+		if len(heads) == 0 {
+			continue
+		}
+		sigHeads, finite := sig.heads(sorts[i])
+		complete := finite
+		for _, h := range sigHeads {
+			if !slices.Contains(heads, Head{Kind: HeadOp, Op: h}) {
+				complete = false
+			}
+		}
+		mask := func(keep func(p *Pattern) bool) []uint64 {
+			m := make([]uint64, words)
+			for k, ps := range pats {
+				if p := ps[i]; p == nil || p.Kind == PatVar || keep(p) {
+					m[k/64] |= 1 << (k % 64)
+				}
+			}
+			return m
+		}
+		d := &Decision{Kind: Switch, Occ: o, Sort: sorts[i]}
+		for _, h := range heads {
+			var childSorts []SortID
+			if h.Kind == HeadOp {
+				childSorts = sig.ops[h.Op].Args
+			}
+			sub := make([][]*Pattern, len(pats))
+			for k, ps := range pats {
+				sub[k] = make([]*Pattern, len(childSorts))
+				if p := ps[i]; p != nil && p.Kind != PatVar {
+					if ph, _ := headOf(p); ph == h {
+						for c := range p.Args {
+							sub[k][c] = &p.Args[c]
+						}
+					}
+				}
+			}
+			var childOccs []Occ
+			for c := range childSorts {
+				childOccs = append(childOccs, child(o, c))
+			}
+			d.Cases = append(d.Cases, Case{Head: h, Then: &Decision{Kind: Mask,
+				Mask: mask(func(p *Pattern) bool { ph, _ := headOf(p); return ph == h }),
+				Next: bitsMatch(sub, childOccs, slices.Clone(childSorts), sig, words)}})
+		}
+		if !complete {
+			d.Default = &Decision{Kind: Mask, Mask: mask(func(*Pattern) bool { return false })}
+		}
+		rest := make([][]*Pattern, len(pats))
+		for k, ps := range pats {
+			rest[k] = ps[i+1:]
+		}
+		d.Next = bitsMatch(rest, occs[i+1:], sorts[i+1:], sig, words)
+		return d
+	}
+	return nil
 }

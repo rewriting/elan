@@ -321,13 +321,19 @@ sub-project (S1–S5b). Each item says where it comes from.
   Maranget decision trees (`ir/matching.go`) copy the rows with a variable
   at the tested position into every case and the default, so the 9 `moves`
   rules (each tests a different cell) and the 24 non-linear `win` rules
-  gave 2^9 paths (4 887 rule blocks for 49 rules). A tree is now kept only
-  within a budget of 64 + 4 nodes per pattern node (the legacy bench trees
-  have at most 2.5), else it is split by the mixture rule (a Switch on the
-  maximal prefix of rows with a head there, then `Next`: the other rows):
-  7 853 lines (REM's C: 23 035), `go build` 2.4 s with an empty cache; same
-  output as the interpreter and REM, `gtest tictac` added; guards
-  `ir.TestWideRulesHaveALinearTree`, `gen.TestWideRulesGiveCodeOfTheirSize`.
+  gave 2^9 paths (7 004 nodes, 4 887 rule blocks for 49 rules; sharing the
+  identical sub-trees, a DAG, still leaves 2 124 nodes and 1 560 rule
+  blocks, about 38 000 lines). A tree is now kept within a budget of 64 + 8
+  nodes per pattern node (the trees of the 175 bench programs that
+  elanc-go compiles use at most 0.6 of it: their main.go is unchanged);
+  over it, the rules are matched with bit vectors (`compileBits`: one
+  traversal tests each pattern position once, ANDing per position and head
+  the mask of the compatible rules, then the candidates are tried in source
+  order): 3 720 lines (REM's C: 23 035), `go build` 2.2 s with an empty
+  cache, 12 position tests per subject; same output as the interpreter and
+  REM, `gtest tictac` added; guards `ir.TestWideRulesHaveALinearTree`
+  (order of the rules tried for every subject, one test per position),
+  `gen.TestWideRulesGiveCodeOfTheirSize`.
 - **`.ref` export of `APT/bubleLOG`, `Robot/tictac`, `Strategies/ll`**: the
   file cannot be imported back (`[PARSER] syntax error on symbol 'tone'`,
   before `dk (N . div)`). The modern `elan -b --export` and the reference's

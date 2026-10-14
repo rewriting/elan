@@ -52,44 +52,63 @@ func nodes(d *Decision) int {
 	if d == nil {
 		return 0
 	}
-	k := 1 + nodes(d.Next) + nodes(d.Default)
+	k := 1 + nodes(d.Next) + nodes(d.Default) + nodes(d.Match)
 	for _, c := range d.Cases {
 		k += nodes(c.Then)
+	}
+	for _, c := range d.Cands {
+		k += nodes(c)
 	}
 	return k
 }
 
 // tried are the rules that d tries, in order, for the arguments of heads
-// (constants), when no rule applies (each Try goes on with Next).
-func tried(d *Decision, heads []OpID) []RuleID {
+// (constants), when no rule applies (each Try goes on with Next), and the
+// number of positions tested.
+func tried(d *Decision, heads []OpID) ([]RuleID, int) {
 	var rs []RuleID
+	tests := 0
+	var mask []uint64
 	var walk func(d *Decision)
 	walk = func(d *Decision) {
+		if d == nil {
+			return
+		}
 		switch d.Kind {
 		case Try:
 			rs = append(rs, d.Rule)
 			walk(d.Next)
 		case Switch:
+			tests++
 			h := heads[d.Occ[0]]
-			var then *Decision
+			then := d.Default
 			for _, c := range d.Cases {
 				if c.Head.Kind == HeadOp && c.Head.Op == h {
 					then = c.Then
 				}
 			}
-			if then == nil {
-				then = d.Default
+			walk(then)
+			walk(d.Next)
+		case Mask:
+			for w := range mask {
+				mask[w] &= d.Mask[w]
 			}
-			if then != nil {
-				walk(then)
+			walk(d.Next)
+		case Bits:
+			mask = make([]uint64, (len(d.Cands)+63)/64)
+			for k := range d.Cands {
+				mask[k/64] |= 1 << (k % 64)
 			}
-			if d.Next != nil {
-				walk(d.Next)
+			walk(d.Match)
+			for k, c := range d.Cands {
+				if mask[k/64]&(1<<(k%64)) != 0 {
+					rs = append(rs, c.Rule)
+				}
 			}
 		}
 	}
 	walk(d)
-	return rs
+	return rs, tests
 }
 
 func TestWideRulesHaveALinearTree(t *testing.T) {
@@ -99,31 +118,19 @@ func TestWideRulesHaveALinearTree(t *testing.T) {
 	if len(mv.Rules) != n+2 || !mv.Total {
 		t.Fatalf("%d rules, total %v", len(mv.Rules), mv.Total)
 	}
-	// the Maranget tree has more than 2^n nodes: split (a Next after a
-	// Switch), within the budget
-	var rows []row
+	// the Maranget tree has more than 2^n nodes: bit-vector matching, in
+	// size linear in the patterns
+	if mv.Tree.Kind != Bits {
+		t.Fatalf("not a bit-vector matching: %v", mv.Tree.Kind)
+	}
+	size := 0
 	for i := range mv.Rules {
-		r := row{rule: i}
 		for j := range mv.Rules[i].Lhs {
-			r.pats = append(r.pats, &mv.Rules[i].Lhs[j])
+			size += patSize(&mv.Rules[i].Lhs[j])
 		}
-		rows = append(rows, r)
 	}
-	var split func(d *Decision) bool
-	split = func(d *Decision) bool {
-		if d == nil {
-			return false
-		}
-		if d.Kind == Switch && d.Next != nil {
-			return true
-		}
-		return split(d.Next) || split(d.Default) || slices.ContainsFunc(d.Cases, func(c Case) bool { return split(c.Then) })
-	}
-	if !split(mv.Tree) {
-		t.Fatal("the tree is not split")
-	}
-	if k, max := nodes(mv.Tree), treeBudget(rows); k > max {
-		t.Fatalf("the tree has %d nodes, more than %d", k, max)
+	if k := nodes(mv.Tree); k > 4*size {
+		t.Fatalf("the matching has %d nodes for %d pattern nodes", k, size)
 	}
 	// every tuple of heads: the rules that match, in source order
 	opOf := map[string]OpID{}
@@ -148,8 +155,14 @@ func TestWideRulesHaveALinearTree(t *testing.T) {
 			want = append(want, n)
 		}
 		want = append(want, n+1)
-		if got := tried(mv.Tree, heads); !slices.Equal(got, want) {
+		got, tests := tried(mv.Tree, heads)
+		if !slices.Equal(got, want) {
 			t.Fatalf("%v: rules %v, want %v", heads, got, want)
+		}
+		// one test per position of the patterns (n cells), whatever the
+		// number of rules
+		if tests > n {
+			t.Fatalf("%v: %d positions tested", heads, tests)
 		}
 	}
 }

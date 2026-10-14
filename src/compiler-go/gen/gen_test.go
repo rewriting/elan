@@ -470,9 +470,10 @@ func TestQueryOnlyOperatorsKeepIntsNative(t *testing.T) {
 }
 
 // wide is the shape of Robot/tictac's win (docs/followups.md): rule i is
-// mv(..., e at i, z at i+1, z at i+2, ...) => ci (a condition: the rules
-// after it are tried when it fails), then mv(x, y, ...) => c<n>; the tree
-// of these rules is split (ir.compileMixture), not 2^n paths.
+// mv(..., e at i, z at i+1, z at i+2, ...) => ci (a non-linear pattern:
+// an equality check of the cells i+1 and i+2, the rules after it are tried
+// when it fails), then mv(x, y, ...) => c<n>; these rules are matched with
+// bit vectors (ir.compileBits), not a tree of 2^n paths.
 func wide(n int) *prog {
 	p := newProg()
 	p.op(sNat, 318, "e", nil, 0)
@@ -510,19 +511,138 @@ func wide(n int) *prog {
 	// mv(x, y, x, ..., e, x, x): the rule n-3
 	start2 := slices.Clone(start)
 	start2[n-3] = f(318)
-	p.op(sNat, 322, "pair", []uint32{sNat, sNat}, 0)
-	p.p.Query.StartWith = f(322, f(321, start...), f(321, start2...))
+	// mv(x, y, x, e, x, y, x, e, x, x, ...): the pattern of rule 3 matches
+	// but its check fails (cells 4 and 5 differ), rule 7 applies
+	start3 := slices.Clone(start)
+	start3[3], start3[5], start3[7] = f(318), f(320), f(318)
+	p.op(sNat, 322, "triple", []uint32{sNat, sNat, sNat}, 0)
+	p.p.Query.StartWith = f(322, f(321, start...), f(321, start2...), f(321, start3...))
 	return p
 }
 
 func TestWideRulesGiveCodeOfTheirSize(t *testing.T) {
 	const n = 12
 	src := wide(n).gen(t)
-	// 93 470 lines without the split (2^12 paths; tictac: 121 615 lines)
-	if lines := strings.Count(src, "\n"); lines > 2500 {
+	// 518 lines; 93 470 with a Maranget tree (2^12 paths; tictac: 121 615)
+	if lines := strings.Count(src, "\n"); lines > 1000 {
 		t.Fatalf("%d lines", lines)
 	}
-	if got, want := run(t, wide(n)), "\nresult = pair(c12,c9)\n\nrewrite_step = 2\n"; got != want {
+	if got, want := run(t, wide(n)), "\nresult = triple(c12,c9,c7)\n\nrewrite_step = 3\n"; got != want {
 		t.Errorf("wide: %q, want %q", got, want)
+	}
+}
+
+// shadowed: mv(st(e,...)), mv(st(x,...)), mv(st(y,...)) cover every board
+// unconditionally, so the later rules mv(st(..., e at i, ...)) (i >= 1)
+// never apply (bit-vector matching: their bits are cleared by the test of
+// the first cell); go vet accepts the code.
+func shadowed(n int) *prog {
+	p := newProg()
+	const sBoard, sCell = 501, 502
+	p.p.Sorts = append(p.p.Sorts, ref.Sort{Index: sBoard, Name: "board"}, ref.Sort{Index: sCell, Name: "cell"})
+	p.op(sCell, 318, "e", nil, 0)
+	p.op(sCell, 319, "x", nil, 0)
+	p.op(sCell, 320, "y", nil, 0)
+	args := make([]uint32, n)
+	for i := range args {
+		args[i] = sCell
+	}
+	p.op(sBoard, 321, "st", args, 0)
+	p.op(sNat, 322, "mv", []uint32{sBoard}, 0)
+	for i := range n + 2 {
+		p.op(sNat, int32(330+i), fmt.Sprintf("c%d", i), nil, 0)
+	}
+	vars := func() []ref.Term {
+		ts := make([]ref.Term, n)
+		for i := range ts {
+			ts[i] = v(uint32(i), sCell)
+		}
+		return ts
+	}
+	for c := range 3 {
+		ts := vars()
+		ts[0] = f(int32(318 + c))
+		p.rule(sNat, f(322, f(321, ts...)), f(int32(330+c)))
+	}
+	for i := 1; i < n; i++ {
+		ts := vars()
+		ts[i] = f(318)
+		p.rule(sNat, f(322, f(321, ts...)), f(int32(330+n+1)))
+	}
+	start := make([]ref.Term, n)
+	for i := range start {
+		start[i] = f(319)
+	}
+	p.p.Query.StartWith = f(322, f(321, start...))
+	return p
+}
+
+func TestShadowedRulesWithBits(t *testing.T) {
+	if testing.Short() {
+		t.Skip("go vet")
+	}
+	dir, src := module(t, shadowed(10))
+	if out, err := goCmd(dir, "vet", ".").CombinedOutput(); err != nil {
+		t.Fatalf("go vet: %v\n%s\n%s", err, out, src)
+	}
+	if got, want := run(t, shadowed(10)), "\nresult = c1\n\nrewrite_step = 1\n"; got != want {
+		t.Errorf("shadowed: %q, want %q", got, want)
+	}
+}
+
+// shadowedInts: the cells are ints (an injection of builtinInt, a native
+// family): mv(st(x0, ...)) covers every board, the later rules
+// mv(st(..., 0 at i, ...)) never apply (bit-vector matching). The test of
+// the injection always holds (no code reads the first cell): Go refuses a
+// variable declared and not used, so the cell must not be bound.
+func shadowedInts(n int) *prog {
+	const sBoard, sInts = 501, 331
+	p := newProg()
+	p.p.Sorts = append(p.p.Sorts, ref.Sort{Index: sBoard, Name: "board"}, ref.Sort{Index: sInts, Name: "int"})
+	p.op(sInts, 300, "", []uint32{sInt}, 0)
+	args := make([]uint32, n)
+	for i := range args {
+		args[i] = sInts
+	}
+	p.op(sBoard, 321, "st", args, 0)
+	p.op(sNat, 322, "mv", []uint32{sBoard}, 0)
+	p.op(sNat, 330, "c0", nil, 0)
+	p.op(sNat, 331, "c1", nil, 0)
+	vars := func() []ref.Term {
+		ts := make([]ref.Term, n)
+		for i := range ts {
+			ts[i] = v(uint32(i), sInts)
+		}
+		return ts
+	}
+	ts := vars()
+	ts[0] = f(300, v(0, sInt))
+	p.rule(sNat, f(322, f(321, ts...)), f(330))
+	for i := 1; i < n; i++ {
+		ts := vars()
+		ts[i] = f(300, ref.Int{Value: 0})
+		p.rule(sNat, f(322, f(321, ts...)), f(331))
+	}
+	start := make([]ref.Term, n)
+	for i := range start {
+		start[i] = f(300, ref.Int{Value: int64(i)})
+	}
+	p.p.Query.StartWith = f(322, f(321, start...))
+	return p
+}
+
+func TestShadowedIntRulesWithBits(t *testing.T) {
+	if testing.Short() {
+		t.Skip("go vet")
+	}
+	dir, src := module(t, shadowedInts(10))
+	if !strings.Contains(src, "rt.LowBit(m)") {
+		t.Errorf("no bit-vector matching in\n%s", src)
+	}
+	if out, err := goCmd(dir, "vet", ".").CombinedOutput(); err != nil {
+		t.Fatalf("go vet: %v\n%s\n%s", err, out, src)
+	}
+	if got, want := run(t, shadowedInts(10)), "\nresult = c0\n\nrewrite_step = 1\n"; got != want {
+		t.Errorf("shadowed ints: %q, want %q", got, want)
 	}
 }

@@ -21,3 +21,9 @@
 // [Main]): the runtime has no locks on its hot paths. Standard library
 // only, no unsafe.
 package elanrt
+
+import "math/bits"
+
+// LowBit is the index of the lowest bit set of m (the next candidate rule
+// of a bit-vector matching).
+func LowBit(m uint64) int { return bits.TrailingZeros64(m) }
