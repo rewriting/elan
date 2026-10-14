@@ -34,9 +34,16 @@ Other reasons:
 |---|---|
 | FastCompletion/critical_pairs (KNZ86) | the program compiled by REM crashes (rc=-11): no expected output |
 | APT/bubleLOG | the reference REM build crashes (Boehm GC out of memory) |
-| Robot/tictac | elanc-go writes a 4 MB `main.go` (121 615 lines); `go build` takes more than 6 min (TIMEOUT); REM gives the 5 moves |
 
-## elanc-go bug found by S9b (fixed)
+## elanc-go bugs found by S9b (fixed)
+
+Robot/tictac, query `state(X,[X,-,O],[-,O,-],[X,-,-])`: elanc-go wrote a
+4 MB `main.go` (121 615 lines) and `go build` took more than 6 min
+(TIMEOUT); REM gives the 5 moves. The decision trees of the strategy rules
+were exponential in the number of board cells; over a size budget the
+rules are now matched with bit vectors (`docs/followups.md`): 3 720 lines,
+built in 2.2 s, the 5 moves as REM (`gtest tictac no tictac tictac-c`
+added).
 
 Features/i2str, query `a`: elanc-go left `ident2string(a)` unevaluated
 (`string_ident2string(a)`) because the query `a` is the constant `a : ident`

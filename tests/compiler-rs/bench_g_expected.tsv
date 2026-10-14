@@ -10,6 +10,7 @@ applications/Features::G::toi_meme:no:toi_meme:toi_meme-c	PASS
 applications/MetaApply::G::edge:no:edge:edge-c	PASS
 applications/MetaApply::G::label:no:label:label-c	PASS
 applications/MetaApply::G::path:no:path:path-c	PASS
+applications/Robot::G::tictac:no:tictac:tictac-c	PASS
 applications/Server/Firewall::G::firewall:no:firewall:firewall-c	PASS
 applications/Simplest::G::fib_jc:no:-:fib_jc	PASS≈
 applications/Simplest::G::hanoi_jc:no:-:hanoi_jc	PASS≈

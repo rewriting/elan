@@ -895,8 +895,19 @@ const (
 	// Bindings positions): check its conditions; apply it, or continue with
 	// Next.
 	Try
-	// Switch tests the head of the term at Occ (of sort Sort).
+	// Switch tests the head of the term at Occ (of sort Sort); in the
+	// traversal of a Bits node, it goes on with Next (when not nil) after
+	// its case or default.
 	Switch
+	// Bits is a bit-vector matching (a tree over its size budget, see
+	// compileBounded): the mask (one bit per candidate, all set) is
+	// narrowed by the traversal Match (Switch and Mask nodes, nil when no
+	// pattern has a head), then the Try of Cands whose bit is left are
+	// tried in order (their Bindings read from the subject by position).
+	Bits
+	// Mask: mask &= Mask (one word per 64 candidates), then Next (the
+	// positions under the head of the case, when not nil).
+	Mask
 )
 
 // Decision is the matching automaton of a defined operator (a decision
@@ -915,6 +926,10 @@ type Decision struct {
 	// Default is for the heads not listed; nil when the cases cover every
 	// possible head of the sort.
 	Default *Decision
+	// Mask (a Mask node), Match and Cands (a Bits node).
+	Mask  []uint64
+	Match *Decision
+	Cands []*Decision
 }
 
 // Binding is a variable of a rule and its position.

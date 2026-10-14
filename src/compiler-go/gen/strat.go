@@ -66,6 +66,8 @@ func hasTry(d *ir.Decision) bool {
 			}
 		}
 		return d.Default != nil && hasTry(d.Default)
+	case ir.Bits:
+		return len(d.Cands) > 0
 	}
 	return false
 }

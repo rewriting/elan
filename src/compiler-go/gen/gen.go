@@ -105,6 +105,10 @@ type emitter struct {
 	injTests []ir.OpID
 	// labelMode: the rules are those of a label (each result to k)
 	labelMode bool
+	// byPath: the rule tried is a candidate of a bit-vector matching (its
+	// variables read by position); cands: the candidates of that matching
+	byPath bool
+	cands  []*ir.Decision
 	// guarded: a normalisation function that counts its depth (rt.Guard):
 	// its returns end its level (ret)
 	guarded bool
@@ -1276,8 +1280,12 @@ func usedVars(r *ir.Rule) map[ir.VarID]bool {
 }
 
 // usedOccs are the positions read by the code of d; all: every rule is
-// tried, whether it applies or not (a label).
-func usedOccs(d *ir.Decision, rules []ir.Rule, into map[string]bool, all bool) {
+// tried, whether it applies or not (a label). A chain of tests on a
+// builtin family (familySwitch) stops at a test that always holds (an
+// injection, see headTest): the cases after it and the default are not
+// emitted, and the position is read only by the binding of the child of
+// the injection when that test is the first.
+func (e *emitter) usedOccs(d *ir.Decision, rules []ir.Rule, into map[string]bool, all bool) {
 	switch d.Kind {
 	case ir.Try:
 		used := usedVars(&rules[d.Rule])
@@ -1287,17 +1295,59 @@ func usedOccs(d *ir.Decision, rules []ir.Rule, into map[string]bool, all bool) {
 			}
 		}
 		if all || !rules[d.Rule].Unconditional() {
-			usedOccs(d.Next, rules, into, all)
+			e.usedOccs(d.Next, rules, into, all)
 		}
 	case ir.Switch:
-		into[occName(d.Occ)] = true
-		for _, c := range d.Cases {
-			usedOccs(c.Then, rules, into, all)
+		family := e.ir.FamilyOf(d.Sort) != nil
+		closed := false
+		for i, c := range d.Cases {
+			if family && e.emptyTest(d.Sort, c.Head) {
+				closed = true
+				if i == 0 {
+					sub := map[string]bool{}
+					e.usedOccs(c.Then, rules, sub, all)
+					maps.Copy(into, sub)
+					if sub[occName(append(slices.Clone(d.Occ), 0))] {
+						into[occName(d.Occ)] = true
+					}
+					break
+				}
+			}
+			into[occName(d.Occ)] = true
+			e.usedOccs(c.Then, rules, into, all)
+			if closed {
+				break
+			}
 		}
-		if d.Default != nil {
-			usedOccs(d.Default, rules, into, all)
+		if len(d.Cases) == 0 && !family {
+			into[occName(d.Occ)] = true
+		}
+		if d.Default != nil && !closed {
+			e.usedOccs(d.Default, rules, into, all)
+		}
+		if d.Next != nil {
+			e.usedOccs(d.Next, rules, into, all)
+		}
+	case ir.Mask:
+		if d.Next != nil {
+			e.usedOccs(d.Next, rules, into, all)
+		}
+	case ir.Bits:
+		// (the candidates read their variables by position)
+		if d.Match != nil {
+			e.usedOccs(d.Match, rules, into, all)
 		}
 	}
+}
+
+// emptyTest tells whether the test of head h on a term of the builtin
+// family sort s always holds (empty, see headTest).
+func (e *emitter) emptyTest(s ir.SortID, h ir.Head) bool {
+	if h.Kind != ir.HeadOp || e.ir.Ops[h.Op].Kind != ir.Injection {
+		return false
+	}
+	_, native := e.ir.Native(s)
+	return native || len(e.otherStuck(h.Op)) == 0
 }
 
 // decision writes the code of d; it tells whether the end of that code can
@@ -1313,19 +1363,94 @@ func (e *emitter) decision(d *ir.Decision, rules []ir.Rule) bool {
 		}
 		return e.decision(d.Next, rules)
 	case ir.Switch:
+		var falls bool
 		if e.ir.FamilyOf(d.Sort) == nil {
-			return e.symSwitch(d, rules)
+			falls = e.symSwitch(d, rules)
+		} else {
+			falls = e.familySwitch(d, rules)
 		}
-		return e.familySwitch(d, rules)
+		if d.Next != nil && falls {
+			// the next position of a bit-vector matching
+			return e.decision(d.Next, rules)
+		}
+		return falls
+	case ir.Mask:
+		for w, m := range d.Mask {
+			if m != fullWord(len(e.cands), w) {
+				e.line("mk%d &= %#x", w, m)
+			}
+		}
+		if d.Next != nil {
+			return e.decision(d.Next, rules)
+		}
+		return true
+	case ir.Bits:
+		return e.bits(d, rules)
 	}
 	return true
+}
+
+// fullWord is word w of the mask of n candidates with all bits set.
+func fullWord(n, w int) uint64 {
+	if k := n - 64*w; k < 64 {
+		return 1<<k - 1
+	}
+	return ^uint64(0)
+}
+
+// bits writes a bit-vector matching (ir.Bits): the masks mk<w> (all the
+// candidates), narrowed by the traversal, then the candidates whose bit is
+// left, in order (lowest bit first).
+func (e *emitter) bits(d *ir.Decision, rules []ir.Rule) bool {
+	e.cands = d.Cands
+	words := (len(d.Cands) + 63) / 64
+	for w := range words {
+		e.line("mk%d := uint64(%#x)", w, fullWord(len(d.Cands), w))
+	}
+	if d.Match != nil {
+		e.decision(d.Match, rules)
+	}
+	e.byPath = true
+	for w := range words {
+		e.open("for m := mk%d; m != 0; m &= m - 1 {", w)
+		e.line("switch rt.LowBit(m) {")
+		for k := 64 * w; k < len(d.Cands) && k < 64*(w+1); k++ {
+			e.line("case %d:", k-64*w)
+			e.indent++
+			e.tryRule(d.Cands[k], rules)
+			e.indent--
+		}
+		e.line("}")
+		e.close("}")
+	}
+	e.byPath = false
+	e.cands = nil
+	return true
+}
+
+// occPath is the expression of the term at position o of the subject of
+// rule r (a bit-vector candidate: the heads of its pattern above o
+// matched), unboxed as by children.
+func (e *emitter) occPath(o ir.Occ, r *ir.Rule) string {
+	t := occName(o[:1])
+	v := t
+	p := &r.Lhs[o[0]]
+	for _, i := range o[1:] {
+		op := &e.ir.Ops[p.Op]
+		if op.Kind != ir.Injection {
+			t = fmt.Sprintf("%s.Args[%d]", t, i)
+			v = e.unbox(op.Args[i], t)
+		}
+		p = &p.Args[i]
+	}
+	return v
 }
 
 // children binds the children of the head op at position occ (a term)
 // that the code of then reads.
 func (e *emitter) children(occ ir.Occ, o ir.OpID, then *ir.Decision, rules []ir.Rule) {
 	used := map[string]bool{}
-	usedOccs(then, rules, used, e.labelMode)
+	e.usedOccs(then, rules, used, e.labelMode)
 	name := occName(occ)
 	for i, s := range e.ir.Ops[o].Args {
 		c := occName(append(slices.Clone(occ), i))
@@ -1387,7 +1512,7 @@ func (e *emitter) familySwitch(d *ir.Decision, rules []ir.Rule) bool {
 			if op.Kind == ir.Injection {
 				child := occName(append(slices.Clone(d.Occ), 0))
 				used := map[string]bool{}
-				usedOccs(c.Then, rules, used, e.labelMode)
+				e.usedOccs(c.Then, rules, used, e.labelMode)
 				if used[child] {
 					e.line("%s := %s", child, name)
 				}
@@ -1441,7 +1566,11 @@ func (e *emitter) tryRule(d *ir.Decision, rules []ir.Rule) bool {
 	}
 	for _, b := range d.Bindings {
 		if used[b.Var] {
-			e.line("%s := %s", r.Vars[b.Var].Name, occName(b.Occ))
+			occ := occName(b.Occ)
+			if e.byPath {
+				occ = e.occPath(b.Occ, r)
+			}
+			e.line("%s := %s", r.Vars[b.Var].Name, occ)
 		}
 	}
 	falls := e.conds(r, 0, used, 0)
