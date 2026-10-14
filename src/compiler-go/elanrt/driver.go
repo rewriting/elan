@@ -5,12 +5,14 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"os/signal"
 	"runtime"
 	"runtime/debug"
 	"runtime/pprof"
 	"strconv"
 	"strings"
 	"sync"
+	"syscall"
 	"time"
 )
 
@@ -243,6 +245,7 @@ func init() {
 // term is defined", "Do not use -noInput in this case") and exits with
 // status 0 without running; else program gets a nil query.
 func Main(querySort string, usesQuery bool, program func(s *Session, query Term)) {
+	exitOnSIGALRM()
 	o := ParseOptions(os.Args[1:])
 	if o.Help {
 		Out.WriteString(Help)
@@ -351,4 +354,21 @@ func Stats() string {
 		", forced GCs " + strconv.FormatInt(ForcedGCs, 10) +
 		", GC cycles " + strconv.FormatUint(gcCycles(), 10) +
 		", GC tunings " + strconv.FormatInt(GCTunings.Load(), 10)
+}
+
+// Go's runtime catches SIGALRM (and the other signals it does not end the
+// program on) and does nothing, so that a test timeout written with
+// alarm(2) (perl -e 'alarm 5; exec @ARGV') did not stop a looping program,
+// as it does a C program (default action: terminate). exitOnSIGALRM ends
+// the program at once on SIGALRM with the status the shell reports for a
+// process killed by it (128+14), without flushing the output, as the C
+// program. The signals Go handles itself (SIGINT, SIGTERM, ...) are
+// unchanged.
+func exitOnSIGALRM() {
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, syscall.SIGALRM)
+	go func() {
+		<-c
+		os.Exit(128 + int(syscall.SIGALRM))
+	}()
 }
