@@ -5,9 +5,12 @@ import (
 	"compress/gzip"
 	"io"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
+	"syscall"
 	"testing"
+	"time"
 )
 
 // Exact output of the C main program (-noInput -quiet), including the
@@ -195,5 +198,49 @@ func TestProfilesAtEveryExit(t *testing.T) {
 				t.Errorf("%q: %s: %v", c.end, filepath.Base(f), err)
 			}
 		}
+	}
+}
+
+func init() {
+	helpers["loop"] = func() {
+		Main("Nat", false, func(s *Session, _ Term) {
+			for {
+				Step()
+			}
+		})
+	}
+}
+
+// Go's runtime catches SIGALRM and does nothing: a compiled program must
+// end on it, as a C program (status 128+14 as the shell sees it).
+func TestMainEndsOnSIGALRM(t *testing.T) {
+	exe, err := os.Executable()
+	if err != nil {
+		t.Fatal(err)
+	}
+	cmd := exec.Command(exe, "-noInput", "-quiet")
+	cmd.Env = append(os.Environ(), "ELANRT_HELPER=loop")
+	if err := cmd.Start(); err != nil {
+		t.Fatal(err)
+	}
+	done := make(chan error, 1)
+	go func() { done <- cmd.Wait() }()
+	time.Sleep(500 * time.Millisecond)
+	cmd.Process.Signal(syscall.SIGALRM)
+	select {
+	case err := <-done:
+		st := -1
+		if ee, ok := err.(*exec.ExitError); ok {
+			st = ee.ExitCode()
+			if ws, ok := ee.Sys().(syscall.WaitStatus); ok && ws.Signaled() {
+				st = 128 + int(ws.Signal())
+			}
+		}
+		if st != 128+int(syscall.SIGALRM) {
+			t.Fatalf("status %d, want %d", st, 128+int(syscall.SIGALRM))
+		}
+	case <-time.After(5 * time.Second):
+		cmd.Process.Kill()
+		t.Fatal("the program did not end on SIGALRM")
 	}
 }
