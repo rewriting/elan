@@ -77,6 +77,19 @@ func IsIdent(t Term) bool { return t.Sym == SymIdent }
 // IdentOf returns the index of the identifier t, false for a stuck term.
 func IdentOf(t Term) (int32, bool) { return t.Int, t.Sym == SymIdent }
 
+// IdentOrConst is IdentOf, and also the identifier named by a constant of
+// sort ident (`a : ident`, a term without arguments): ident2string writes
+// the term of its argument, as the interpreter does (the name of the constant).
+func IdentOrConst(t Term) (int32, bool) {
+	if t.Sym == SymIdent {
+		return t.Int, true
+	}
+	if len(t.Args) == 0 && t.Sym != SymInt {
+		return IdentIndex(Format(t)), true
+	}
+	return 0, false
+}
+
 // MustIdent is the index of t, which must be an identifier (a stuck term
 // is a bug of the compiler: the operation op receives it).
 func MustIdent(t Term, op string) int32 {

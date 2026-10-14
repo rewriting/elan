@@ -1644,7 +1644,18 @@ func (b *builder) build(name string, start *tt, q *ref.Query, sortIndices []ref.
 	for _, e := range l.p.Identifiers {
 		ir.Idents = append(ir.Idents, Ident{Index: int32(e.Index), Name: e.Name})
 	}
-	if qs, ok := b.sortOf[q.Sort]; ok || !slices.ContainsFunc(b.query, func(r queryRule) bool { return r.Kind == QueryOp }) {
+	// A query sort that is not reached (the start term ignores the query,
+	// else it was refused above): the query is only parsed, its value is
+	// unused, so no operator of the grammar is built.
+	if _, ok := b.sortOf[q.Sort]; !ok {
+		for i := range b.query {
+			if b.query[i].Kind == QueryOp {
+				b.query[i] = queryRule{QueryRule: QueryRule{Kind: QueryUncompiled}}
+			}
+		}
+	}
+	qs, ok := b.sortOf[q.Sort]
+	{
 		named := func(n string, def int32) int32 {
 			for _, s := range l.p.Sorts {
 				if s.Name == n {
