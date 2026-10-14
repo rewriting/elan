@@ -29,6 +29,8 @@ type remNode struct {
 	args []*remNode
 	// mults are the multiplicities of the items (args) of an AC level
 	mults []int
+	// dups are the items equal to this one merged into it (insert)
+	dups []*remNode
 }
 
 // remOf is the ordered normal form of t: the arguments of an AC operator
@@ -41,7 +43,12 @@ func (rl *ruleLowerer) remOf(t *tt) *remNode {
 	case ttStr:
 		return &remNode{t: t, rank: 0, code: 1 << 40}
 	case ttVar:
-		return &remNode{t: t, rank: 1, code: int64(t.index)}
+		if a, ok := rl.absTerm[t.index]; ok && !rl.useLin {
+			// an abstracted AC subterm whose parent is free: REM does not
+			// sort its level again (Term.abstractACSubterm)
+			return rl.remOf(a)
+		}
+		return &remNode{t: t, rank: 1, code: rl.varCode(t)}
 	case ttIdent:
 		if rl.err == nil {
 			rl.err = unsupported(NotPlanned, "an identifier in an AC pattern (REM's order of identifiers among the items of its matchers not established; no program has one)")
@@ -75,6 +82,70 @@ func (rl *ruleLowerer) remOf(t *tt) *remNode {
 	return n
 }
 
+// varCode is REM's code of the variable occurrence t: its number, or
+// after the linearisation (rl.useLin), the larger number REM gives to a
+// repeated occurrence (rl.linCode).
+func (rl *ruleLowerer) varCode(t *tt) int64 {
+	if rl.useLin {
+		if c, ok := rl.linCode[t]; ok {
+			return c
+		}
+	}
+	return int64(t.index)
+}
+
+// linearise numbers the variable occurrences of the left-hand side lhs as
+// REM's linearisation does (Term.java rlinearise, on the ordered normal
+// form, depth first, before the transformations): an occurrence of a
+// variable already met gets a new number, larger than the rule's ones, in
+// the order met (equal items of an AC level are one occurrence).
+func (rl *ruleLowerer) linearise(lhs *tt) {
+	rl.linCode = map[*tt]int64{}
+	seen := map[uint32]bool{}
+	next := int64(rl.rule.Nvars)
+	var group func(ns []*remNode)
+	group = func(ns []*remNode) {
+		for i := 0; i < len(ns); i++ {
+			ns = append(ns, ns[i].dups...)
+		}
+		if ns[0].rank == 1 {
+			idx := ns[0].t.index
+			if !seen[idx] {
+				seen[idx] = true
+				return
+			}
+			for _, n := range ns {
+				rl.linCode[n.t] = next
+			}
+			next++
+			return
+		}
+		for i := range ns[0].args {
+			var as []*remNode
+			for _, n := range ns {
+				if i < len(n.args) {
+					as = append(as, n.args[i])
+				}
+			}
+			group(as)
+		}
+	}
+	var walk func(t *tt)
+	walk = func(t *tt) {
+		switch {
+		case t.kind == ttVar:
+			group([]*remNode{{t: t, rank: 1}})
+		case t.kind == ttOp && rl.b.l.cands[t.cand].infos == 2:
+			group([]*remNode{rl.remOf(t)})
+		default:
+			for i := range t.args {
+				walk(&t.args[i])
+			}
+		}
+	}
+	walk(lhs)
+}
+
 // insert adds an item to an AC level (insertOrderedNormalForm: before the
 // first greater item; an equal item gets one more occurrence).
 func (n *remNode) insert(x *remNode, mult int) {
@@ -82,6 +153,7 @@ func (n *remNode) insert(x *remNode, mult int) {
 		switch c := remCmp(y, x); {
 		case c == 0:
 			n.mults[i] += mult
+			y.dups = append(y.dups, x)
 			return
 		case c > 0:
 			n.args = slices.Insert(n.args, i, x)

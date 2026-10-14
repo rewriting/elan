@@ -131,6 +131,7 @@ type emitter struct {
 	// forceLazy); acLater are the variables bound by the conditions after
 	// the current AC matching (ac.go)
 	raw     map[ir.VarID]string
+	rawNorm map[ir.VarID]string // the expression of the normal form of a raw variable
 	lazy    []lazyAC
 	acLater map[ir.VarID]bool
 	// chooseRest, inside a branch of a choose, writes the call of the

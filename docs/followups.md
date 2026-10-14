@@ -348,6 +348,35 @@ sub-project (S1–S5b). Each item says where it comes from.
   loop (`dc(dk(dec) ; dc one(taildc), id)`: `one3` in `k2`) is still made
   at each call of the closure (taildc 10^7 0.13 s, one object per turn).
 
+- **Order of AC solutions: REM's** (bug hunt of the AC matching,
+  2026-10-13, fixed 2026-10-14): elanc-go matched the element patterns of
+  an AC level in source order and every AC subterm in place; it now
+  follows REM (`ir/ir.go` "AC operators", `ir/lower.go` remTransform,
+  `ir/eker.go` linearise): element patterns in REM's ordered normal form,
+  RewriteRule.java transformation1 (several AC subterms under free
+  symbols: all but the last one in wheres matched by Eker's matcher) and
+  transformation2 (AC subterms in the level of the remaining AC pattern),
+  and the codes of REM's linearisation (a repeated occurrence of a
+  variable gets a larger number: the order of the two variables of a
+  level, the orders after an abstraction). `programs/ac` ord_*; the bug
+  hunt's harness: no order difference with REM left except one shape
+  (below). Where REM's order differs from the interpreter's, the tests
+  compare with the interpreter as multisets. Left: two or more AC
+  subterms in one AC level (`F(G(x,y), F(G(y,z), w))`): REM abstracts
+  them in the iteration order of a HashSet of terms (identity hash codes,
+  `collectACSubterm`), an order elanc-go cannot reproduce; it takes them
+  in the order of the term (bug hunt m3 p13: 7 of 100 queries in another
+  order than REM's). Also: the pattern of a where that REM abstracts
+  from a level (transformation3_1) is sorted by elanc-go with the codes
+  of the linearisation, those of the other where patterns with the codes
+  before it (`ir/lower.go` ekerCond of rl.abs): it would differ from REM
+  only after a re-sort that depends on the HashSet order above.
+  The variables shared by two AC subterms that REM matches apart are
+  given to Eker's matcher with their value (`rt.EkPin`, the same
+  solutions in the same order, `elanrt` TestEkerPinnedSameOrder): `p(F(x,
+  y), G(x, z))` with 12 elements 7.8 s before (0c9d621), 11 s after
+  517de33, 0.2 s now (16 elements: > 120 s before, 0.5 s now).
+
 - **Non-linear variable in an AC part given to Eker's matcher** (bug hunt
   of the AC matching, 2026-10-13): a variable that occurs twice, at the
   level of an AC operator with rules and in another pattern, is now

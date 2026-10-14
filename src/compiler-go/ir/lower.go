@@ -2309,6 +2309,30 @@ type ruleLowerer struct {
 	// chooses already lowered: a branch binding the same model variable
 	// gets the same variable ([CondChoose])
 	shared map[uint32]VarID
+	// abs are the AC subterms of the left-hand side that REM abstracts
+	// into wheres (remTransform), in the order of their conditions
+	abs []absWhere
+	// linCode are the numbers REM gives to the repeated occurrences of
+	// variables of the left-hand side (linearise), used by remOf when
+	// useLin (REM's orders after its linearisation)
+	linCode map[*tt]int64
+	useLin  bool
+	// absTerm are the AC subterms abstracted by remTransform, by their
+	// variables: REM's order before the linearisation sorts them in place
+	// of their variables (remOf)
+	absTerm map[uint32]*tt
+	// resorted: an AC subterm of an AC level was abstracted
+	// (transformation2): REM sorts the left-hand side again, after its
+	// linearisation (Term.java abstractACSubterm)
+	resorted bool
+}
+
+// absWhere is an AC subterm t of a left-hand side replaced by the fresh
+// model variable index (remTransform): `where t :=() x<index>`, matched
+// by Eker's matcher.
+type absWhere struct {
+	index uint32
+	t     tt
 }
 
 // bindVar is the variable of the first binding of model variable i (in a
@@ -2354,7 +2378,9 @@ func (rl *ruleLowerer) addEker(ek *Cond) {
 // element pattern repeated, the variables and repeated items are matched
 // by Eker's matcher, as REM does (acAbstract).
 func (rl *ruleLowerer) acPattern(t *tt, same *[]Cond, ext bool) Pattern {
-	n := rl.remOf(t)
+	// the level as REM's transformation3_1 sees it: sorted before the
+	// linearisation, unless sorted again (resorted)
+	n := rl.remOfLin(t, rl.resorted)
 	p := Pattern{Kind: PatAC, Op: rl.b.opOf[t.cand], Ext: ext}
 	nVars, repeated := 0, false
 	for i, a := range n.args {
@@ -2384,6 +2410,12 @@ func (rl *ruleLowerer) acPattern(t *tt, same *[]Cond, ext bool) Pattern {
 		mult int
 	}
 	var vars []mv
+	// the element patterns in REM's ordered normal form (its matcher
+	// takes them in that order: the symbol code first, Term.cmp), the
+	// interpreter's order too
+	slices.SortStableFunc(items, func(a, b *tt) int {
+		return remCmp(rl.remOfLin(a, rl.resorted), rl.remOfLin(b, rl.resorted))
+	})
 	for _, x := range items {
 		if x.kind != ttVar {
 			p.Args = append(p.Args, rl.pattern(x, same))
@@ -2396,14 +2428,20 @@ func (rl *ruleLowerer) acPattern(t *tt, same *[]Cond, ext bool) Pattern {
 		}
 	}
 	// REM's list_x first (Term.java genDioMatching): the higher
-	// multiplicity, else the smaller variable code; x^n U y^m with n, m > 1:
-	// REM abstracts the smaller variable (transformation3_1), the other
-	// one is list_x
+	// multiplicity, else the smaller variable code (after the
+	// linearisation: a repeated occurrence has a larger code than the
+	// rule's variables); x^n U y^m with n, m > 1: REM abstracts the
+	// first variable of the level (transformation3_1), the other one is
+	// list_x
+	code := func(x *tt, lin bool) int64 {
+		defer rl.setLin(rl.setLin(lin))
+		return rl.varCode(x)
+	}
 	slices.SortStableFunc(vars, func(a, b mv) int {
 		if a.mult > 1 && b.mult > 1 {
-			return cmp.Compare(b.x.index, a.x.index)
+			return cmp.Compare(code(b.x, rl.resorted), code(a.x, rl.resorted))
 		}
-		return cmp.Or(cmp.Compare(b.mult, a.mult), cmp.Compare(a.x.index, b.x.index))
+		return cmp.Or(cmp.Compare(b.mult, a.mult), cmp.Compare(code(a.x, true), code(b.x, true)))
 	})
 	for _, v := range vars {
 		pv := rl.pattern(v.x, same)
@@ -2433,16 +2471,18 @@ func (rl *ruleLowerer) acAbstract(t *tt, n *remNode, p Pattern, same *[]Cond) Pa
 			rl.refuse("an AC pattern whose items are all repeated, the first one an element pattern (%s: REM keeps it at the level for its bipartite matcher, not reproduced)", decl)
 		}
 	}
+	// the where's pattern sorted again, after the linearisation
 	abs := &remNode{t: t, rank: 2, code: n.code, ac: true}
 	for _, i := range list {
 		if rl.containsAC(n.args[i].t) {
-			rl.refuse("an AC pattern nested in a repeated element of an AC pattern with several variables (%s: REM first abstracts the nested one into a where, RewriteRule.java transformation2, not reproduced)", decl)
+			rl.refuse("an AC pattern nested in a repeated element of an AC pattern with several variables (%s: REM abstracts the repeated nested one into one where whose variable gets multiplicity 1, RewriteRule.java transformation2: not reproduced)", decl)
 		}
-		abs.args = append(abs.args, n.args[i])
-		abs.mults = append(abs.mults, n.mults[i])
+		abs.insert(rl.remOfLin(n.args[i].t, true), n.mults[i])
 	}
-	// the element patterns left at the level (multiplicity 1), in source
-	// order
+	// the element patterns left at the level (multiplicity 1), in REM's
+	// ordered normal form (sorted again after the abstraction: after the
+	// linearisation)
+	var items []*tt
 	var flatten func(x *tt)
 	flatten = func(x *tt) {
 		if x.kind == ttOp && x.cand == t.cand {
@@ -2452,13 +2492,17 @@ func (rl *ruleLowerer) acAbstract(t *tt, n *remNode, p Pattern, same *[]Cond) Pa
 			return
 		}
 		if x.kind != ttVar {
-			r := rl.remOf(x)
+			r := rl.remOfLin(x, rl.resorted)
 			if i := slices.IndexFunc(n.args, func(a *remNode) bool { return remCmp(a, r) == 0 }); n.mults[i] == 1 {
-				p.Args = append(p.Args, rl.pattern(x, same))
+				items = append(items, x)
 			}
 		}
 	}
 	flatten(t)
+	slices.SortStableFunc(items, func(a, b *tt) int { return remCmp(rl.remOfLin(a, true), rl.remOfLin(b, true)) })
+	for _, x := range items {
+		p.Args = append(p.Args, rl.pattern(x, same))
+	}
 	if keep >= 0 {
 		pv := rl.pattern(n.args[keep].t, same)
 		p.Vars = append(p.Vars, ACVar{Var: pv.Var, Mult: n.mults[keep]})
@@ -2468,6 +2512,255 @@ func (rl *ruleLowerer) acAbstract(t *tt, n *remNode, p Pattern, same *[]Cond) Pa
 	p.Abs = &ACAbs{Var: x, EkerVars: c.EkerVars}
 	rl.ekerConds = append(rl.ekerConds, c)
 	return p
+}
+
+// remTransform is the left-hand side lhs as REM matches it (its
+// operator free, or AC for the rules of an AC operator), after
+// RewriteRule.java transformation1 and transformation2: the AC subterms it
+// abstracts into wheres matched by Eker's matcher (rl.abs, in the order
+// of their conditions, all after the matching of the left-hand side and
+// its other AC conditions) replaced by fresh variables (numbered after
+// the rule's ones, as REM numbers them: larger codes in its order).
+//   - transformation1: of several AC subterms not under an AC operator,
+//     all but the last one (in the order of the term), each abstracted in
+//     turn and its where put first: the last abstracted one is matched
+//     first;
+//   - transformation2: the AC subterms in the level of the remaining AC
+//     pattern (not under another AC subterm), except one alone of
+//     variables only, of two distinct items at most (F(x, G(y, z)),
+//     F(x, g(G(y, z))): REM matches both levels in place).
+//
+// lhs itself is not modified (a copy when it has an AC operator, its
+// variable occurrences numbered as REM's linearisation does, linearise).
+func (rl *ruleLowerer) remTransform(lhs *tt) *tt {
+	if !rl.containsAC(lhs) {
+		return lhs
+	}
+	lhs = cloneTT(lhs)
+	rl.linearise(lhs)
+	isAC := func(t *tt) bool { return t.kind == ttOp && rl.b.l.cands[t.cand].infos == 2 }
+	var acSubterms func(t *tt, out *[]*tt)
+	acSubterms = func(t *tt, out *[]*tt) {
+		for i := range t.args {
+			if a := &t.args[i]; isAC(a) {
+				*out = append(*out, a)
+			} else {
+				acSubterms(a, out)
+			}
+		}
+	}
+	var acTerm *tt
+	var t1 []*tt
+	if isAC(lhs) {
+		acTerm = lhs
+	} else {
+		var first []*tt
+		acSubterms(lhs, &first)
+		if len(first) == 0 {
+			return lhs
+		}
+		t1, acTerm = first[:len(first)-1], first[len(first)-1]
+	}
+	// transformation2: the items of the AC level (flattened), their AC
+	// subterms
+	var items []*tt
+	var flatten func(x *tt)
+	flatten = func(x *tt) {
+		if x.kind == ttOp && x.cand == acTerm.cand {
+			for i := range x.args {
+				flatten(&x.args[i])
+			}
+			return
+		}
+		items = append(items, x)
+	}
+	flatten(acTerm)
+	var t2 []*tt
+	for _, x := range items {
+		if isAC(x) {
+			t2 = append(t2, x)
+		} else {
+			acSubterms(x, &t2)
+		}
+	}
+	if len(t2) == 1 {
+		n := rl.remOf(t2[0])
+		dio := !slices.ContainsFunc(n.args, func(a *remNode) bool { return a.rank != 1 })
+		if dio && len(n.args) <= 2 {
+			t2 = nil
+		}
+	}
+	// several: REM abstracts them in the order of a HashSet of terms
+	// (identity hash codes: no order to reproduce): the order of the term.
+	// An item of the level holding one, repeated (equal items are one
+	// node of REM's form: its AC subterm abstracted once, then REM gives
+	// the variable multiplicity 1, or leaves the repeated element: REM's
+	// bugs), is left in place (acAbstract refuses it)
+	for _, x := range items {
+		if !rl.containsAC(x) {
+			continue
+		}
+		if slices.ContainsFunc(items, func(y *tt) bool { return y != x && remCmp(rl.remOf(x), rl.remOf(y)) == 0 }) {
+			t2 = nil
+			break
+		}
+	}
+	for _, x := range t2 {
+		if slices.Contains(items, x) {
+			rl.resorted = true
+		}
+	}
+	next := rl.rule.Nvars + 1<<20
+	if len(rl.abs) > 0 {
+		next = rl.abs[len(rl.abs)-1].index + 1
+	}
+	var order []absWhere
+	if rl.absTerm == nil {
+		rl.absTerm = map[uint32]*tt{}
+	}
+	abstract := func(x *tt) {
+		a := absWhere{index: next, t: *x}
+		next++
+		orig := *x
+		rl.absTerm[a.index] = &orig
+		*x = tt{kind: ttVar, index: a.index, sort: rl.b.l.sortOf(x)}
+		order = append(order, a)
+	}
+	for _, x := range t1 {
+		abstract(x)
+	}
+	for _, x := range t2 {
+		abstract(x)
+	}
+	// each where is put first (addFirst): the conditions in reverse order
+	// of the abstractions, transformation2's ones first
+	slices.Reverse(order)
+	rl.abs = append(rl.abs, order...)
+	if acTerm == lhs && !rl.rule.Name.Valid && rl.extension32(lhs) {
+		rl.resorted = true
+	}
+	return lhs
+}
+
+// extension32 tells whether REM's transformation3_2 (an unlabelled rule
+// with its AC operator at the top of the left-hand side t, after
+// transformation2) adds an extension variable, then sorts the left-hand
+// side again with the numbers of its linearisation
+// (RewriteRule.java addExtensionVariable, or the abstraction of its case
+// 2 or 5): every case but F(x, y) of two single variables and F(x, t1,
+// ..., tm) whose x no condition reads. A variable is "constrained"
+// (PatternInfo, BranchEvaluation.dependFrom) when the conditions of the
+// rule after the transformations read it: the rule's conditions and
+// wheres, the equalities of the linearisation (a variable that occurs
+// elsewhere in the left-hand side), the wheres of the abstractions.
+func (rl *ruleLowerer) extension32(t *tt) bool {
+	n := rl.remOfLin(t, true)
+	occ := map[uint32]int{}
+	var count func(x *tt)
+	count = func(x *tt) {
+		if x.kind == ttVar {
+			occ[x.index]++
+		}
+		for i := range x.args {
+			count(&x.args[i])
+		}
+	}
+	count(t)
+	body := map[uint32]bool{}
+	if pl, ok := rl.rule.Body.(ref.Plain); ok {
+		whereVars(pl.Wheres, body)
+	}
+	var sv, mv, ms int
+	constrained := false
+	for i, a := range n.args {
+		if a.rank != 1 {
+			if n.mults[i] == 1 {
+				// (single element patterns: not counted by the cases)
+			} else {
+				ms++
+			}
+			continue
+		}
+		if n.mults[i] == 1 {
+			sv++
+		} else {
+			mv++
+		}
+		idx := a.t.index
+		if _, abs := rl.absTerm[idx]; abs || occ[idx] > n.mults[i] || body[idx] {
+			constrained = true
+		}
+	}
+	arity := len(n.args)
+	switch {
+	case arity == 2 && sv == 2:
+		return false
+	case arity == 1 && mv == 1:
+		return true
+	case arity <= 2 && ms == 1 && !constrained:
+		return true
+	case arity >= 2:
+		return sv == 1 && mv == 0 && ms == 0 && constrained ||
+			sv == 0 && mv == 0 && ms == 0 ||
+			sv+mv > 1 || ms > 0
+	}
+	return false
+}
+
+// whereVars adds the variables of the conditions ws to into.
+func whereVars(ws []ref.Where, into map[uint32]bool) {
+	var term func(t ref.Term)
+	term = func(t ref.Term) {
+		switch t := t.(type) {
+		case ref.Var:
+			into[t.Index] = true
+		case ref.Fsym:
+			for _, a := range t.Args {
+				term(a)
+			}
+		}
+	}
+	for _, w := range ws {
+		switch w := w.(type) {
+		case ref.If:
+			term(w.Cond)
+		case ref.Assign:
+			term(w.Lhs)
+			term(w.Rhs)
+		case ref.Match:
+			term(w.Pattern)
+			term(w.Rhs)
+		case ref.Try:
+			for _, b := range w.Branches {
+				whereVars(b, into)
+			}
+		}
+	}
+}
+
+// remOfLin is remOf with the codes before (lin false) or after REM's
+// linearisation.
+func (rl *ruleLowerer) remOfLin(t *tt, lin bool) *remNode {
+	defer rl.setLin(rl.setLin(lin))
+	return rl.remOf(t)
+}
+
+// setLin sets useLin, returns its previous value.
+func (rl *ruleLowerer) setLin(lin bool) bool {
+	old := rl.useLin
+	rl.useLin = lin
+	return old
+}
+
+func cloneTT(t *tt) *tt {
+	c := *t
+	if t.args != nil {
+		c.args = make([]tt, len(t.args))
+		for i := range t.args {
+			c.args[i] = *cloneTT(&t.args[i])
+		}
+	}
+	return &c
 }
 
 // refuse records a kept refusal of the rule being lowered (not planned:
@@ -2556,14 +2849,19 @@ func (rl *ruleLowerer) lower(lhs *tt, whole bool) (Rule, bool, error) {
 	l := rl.b.l
 	var same []Cond
 	var pats []Pattern
+	m := rl.remTransform(lhs)
 	if whole {
-		pats = append(pats, rl.pattern(lhs, &same))
+		pats = append(pats, rl.pattern(m, &same))
 	} else {
-		for i := range lhs.args {
-			pats = append(pats, rl.pattern(&lhs.args[i], &same))
+		for i := range m.args {
+			pats = append(pats, rl.pattern(&m.args[i], &same))
 		}
 	}
 	rl.takeAC()
+	for _, a := range rl.abs {
+		c := rl.ekerCond(rl.varOf[a.index], rl.remOf(&a.t), &same)
+		rl.conds = append(rl.conds, c)
+	}
 	rl.conds = append(rl.conds, same...)
 	body := rl.rule.Body.(ref.Plain)
 	var texts []string

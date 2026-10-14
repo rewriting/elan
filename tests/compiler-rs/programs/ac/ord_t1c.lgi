@@ -1,0 +1,6 @@
+LPL ord_t1c description
+  query of sort bool
+  result of sort T
+  import acord
+  start with (s_t1c) p(g(F(a,F(b,c))),q(c U d U a))
+end

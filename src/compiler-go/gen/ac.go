@@ -26,7 +26,9 @@ import (
 // in the pattern (a CondSame) is compared as it is (the elements, as REM
 // and the interpreter compare it), normalised only once a solution passes
 // the comparisons; when its other occurrence is bound first, it takes that
-// value at once (rt.TakeAC) instead of enumerating the sub-multisets.
+// value at once (rt.TakeAC) instead of enumerating the sub-multisets; in
+// a CondEker, it is given to Eker's matcher (rt.EkPin), and a variable of
+// Eker's matcher compared with a later one is compared as it is too.
 //
 // The conditions after the matching that give at most one solution, bind
 // nothing and take no rewrite step (non-linearity checks, ifs and local
@@ -183,13 +185,55 @@ func (e *emitter) acMatch(r *ir.Rule, j int, used map[ir.VarID]bool, depth int) 
 	e.acLater = saved
 }
 
-// lazyAC is an AC-level variable v that occurs twice, bound to the
-// elements ms (a Go variable of type []rt.Term) of the AC operator op,
-// whose normal form is not written yet.
+// lazyAC is an AC-level variable v that occurs twice, bound to a value
+// whose normal form (the Go expression norm) is not written yet.
 type lazyAC struct {
-	v  ir.VarID
-	op ir.OpID
-	ms string
+	v    ir.VarID
+	norm string
+}
+
+// setRaw records that v holds the value as it is name (a transient term),
+// its normal form being the expression norm.
+func (e *emitter) setRaw(v ir.VarID, name, norm string) {
+	raw, rn := maps.Clone(e.raw), maps.Clone(e.rawNorm)
+	if raw == nil {
+		raw, rn = map[ir.VarID]string{}, map[ir.VarID]string{}
+	}
+	raw[v], rn[v] = name, norm
+	e.raw, e.rawNorm = raw, rn
+}
+
+// onlyEkerSubject tells whether r reads v only as the subject of Eker's
+// matcher (an AC subterm REM abstracts into a where, transformation1/2):
+// its value as it is, as for an abstracted part (ACAbs).
+func onlyEkerSubject(r *ir.Rule, v ir.VarID) bool {
+	subject, other := false, false
+	for i := range r.Conds {
+		r.Conds[i].Walk(func(c *ir.Cond) {
+			switch {
+			case c.Kind == ir.CondEker && c.A == v:
+				subject = true
+			case c.Kind == ir.CondChoose:
+			case condReads(c, v):
+				other = true
+			}
+		})
+	}
+	vars := map[ir.VarID]bool{}
+	exprVars(&r.Rhs, vars)
+	return subject && !other && !vars[v]
+}
+
+// boundBefore are the variables of r bound before its condition j.
+func boundBefore(r *ir.Rule, j int) map[ir.VarID]bool {
+	b := map[ir.VarID]bool{}
+	for i := range r.Lhs {
+		patternVars(&r.Lhs[i], b)
+	}
+	for i := range j {
+		bindsOf(&r.Conds[i], b)
+	}
+	return b
 }
 
 // forceLazy writes the normal forms of the variables of e.lazy that `reads`
@@ -205,7 +249,7 @@ func (e *emitter) forceLazy(r *ir.Rule, reads func(ir.VarID) bool) {
 			keep = append(keep, l)
 			continue
 		}
-		e.line("%s := %s", r.Vars[l.v].Name, e.acValue(l.op, l.ms))
+		e.line("%s := %s", r.Vars[l.v].Name, l.norm)
 	}
 	e.lazy = keep
 }
@@ -376,23 +420,19 @@ func (e *emitter) acVars(r *ir.Rule, c *ir.Cond, el string, pos []string, n int,
 		}
 		return ""
 	}
-	savedRaw, savedLazy := e.raw, e.lazy
+	savedRaw, savedRawNorm, savedLazy := e.raw, e.rawNorm, e.lazy
 	bind := func(v ir.VarID, m string) {
 		switch {
 		case isRaw(v):
 			name := r.Vars[v].Name
 			e.line("%s_ms := %s", name, m)
 			e.line("%s_raw := rt.ACSubject(%s, %s_ms)", name, sym, name)
-			raw := maps.Clone(e.raw)
-			if raw == nil {
-				raw = map[ir.VarID]string{}
-			}
-			raw[v] = name + "_raw"
-			e.raw = raw
+			norm := e.acValue(p.Op, name+"_ms")
+			e.setRaw(v, name+"_raw", norm)
 			if readsBeyondSame(r, v) {
-				e.lazy = append(slices.Clip(e.lazy), lazyAC{v: v, op: p.Op, ms: name + "_ms"})
+				e.lazy = append(slices.Clip(e.lazy), lazyAC{v: v, norm: norm})
 			}
-		case p.Abs != nil && v == p.Abs.Var:
+		case p.Abs != nil && v == p.Abs.Var || onlyEkerSubject(r, v):
 			// the subject of Eker's matcher: the elements as they are (a
 			// part of a term being normalised can be reducible; the
 			// interpreter matches it as it is, REM normalises it first),
@@ -507,7 +547,7 @@ func (e *emitter) acVars(r *ir.Rule, c *ir.Cond, el string, pos []string, n int,
 	opens += e.hoist(r, next, pending, used)
 	k()
 	e.ext, e.late = saved, savedLate
-	e.raw, e.lazy = savedRaw, savedLazy
+	e.raw, e.rawNorm, e.lazy = savedRaw, savedRawNorm, savedLazy
 	for range opens {
 		e.close("}")
 	}
@@ -606,13 +646,69 @@ func (e *emitter) ekerMatch(r *ir.Rule, j int, used map[ir.VarID]bool, depth int
 	m := fmt.Sprintf("ek%d", n)
 	e.ekerPats = append(e.ekerPats, e.ekerExpr(c.Eker))
 	e.line("// Eker's AC matcher, pattern %s (the oracles' order of solutions)", comment(e.ekerText(c.Eker, r, c.EkerVars)))
-	e.open("for %s := rt.NewEker(ekerPat%d, %d, %s); %s.Next(); {", m, len(e.ekerPats)-1, len(c.EkerVars), r.Vars[c.A].Name, m)
+	// a variable whose other occurrence (a CondSame) is bound already
+	// gets its value (rt.EkPin): the solutions where it has it, in the
+	// same order, without enumerating the others (a variable shared by
+	// two AC subterms REM matches apart, transformation1/2: 2^n
+	// solutions instead of 4^n)
+	before := boundBefore(r, j)
+	pinned := map[ir.VarID]ir.VarID{}
+	var pins []string
 	for i, v := range c.EkerVars {
-		if used[v] {
-			e.line("%s := %s", r.Vars[v].Name, e.unbox(r.Vars[v].Sort, fmt.Sprintf("%s.Value(%d, acNorm)", m, i)))
+		if _, native := e.ir.Native(r.Vars[v].Sort); native {
+			continue
+		}
+		for _, w := range sameOf(r, v) {
+			if w == v || !before[w] {
+				continue
+			}
+			if _, native := e.ir.Native(r.Vars[w].Sort); native {
+				continue
+			}
+			x := r.Vars[w].Name
+			if rx, ok := e.raw[w]; ok {
+				x = rx
+			}
+			pinned[v] = w
+			pins = append(pins, fmt.Sprintf("rt.EkPin{V: %d, T: %s}", i, x))
+			break
+		}
+	}
+	args := ""
+	if len(pins) > 0 {
+		args = ", " + strings.Join(pins, ", ")
+	}
+	savedRaw, savedRawNorm, savedLazy := e.raw, e.rawNorm, e.lazy
+	e.open("for %s := rt.NewEker(ekerPat%d, %d, %s%s); %s.Next(); {", m, len(e.ekerPats)-1, len(c.EkerVars), r.Vars[c.A].Name, args, m)
+	for i, v := range c.EkerVars {
+		name := r.Vars[v].Name
+		_, native := e.ir.Native(r.Vars[v].Sort)
+		switch w, ok := pinned[v]; {
+		case ok:
+			// the value of w
+			if rw, raw := e.raw[w]; raw {
+				e.setRaw(v, rw, e.rawNorm[w])
+				if readsBeyondSame(r, v) {
+					e.lazy = append(slices.Clip(e.lazy), lazyAC{v: v, norm: e.rawNorm[w]})
+				}
+			} else if used[v] {
+				e.line("%s := %s", name, r.Vars[w].Name)
+			}
+		case !native && len(sameOf(r, v)) > 0:
+			// compared as it is (as in the AC levels), normalised only
+			// when a solution passes the comparisons (forceLazy)
+			e.line("%s_raw := %s.Value(%d, rt.ACSubject)", name, m, i)
+			norm := fmt.Sprintf("%s.Value(%d, acNorm)", m, i)
+			e.setRaw(v, name+"_raw", norm)
+			if readsBeyondSame(r, v) {
+				e.lazy = append(slices.Clip(e.lazy), lazyAC{v: v, norm: norm})
+			}
+		case used[v]:
+			e.line("%s := %s", name, e.unbox(r.Vars[v].Sort, fmt.Sprintf("%s.Value(%d, acNorm)", m, i)))
 		}
 	}
 	e.conds(r, j+1, used, depth)
+	e.raw, e.rawNorm, e.lazy = savedRaw, savedRawNorm, savedLazy
 	e.close("}")
 }
 
