@@ -1296,6 +1296,9 @@ func usedOccs(d *ir.Decision, rules []ir.Rule, into map[string]bool, all bool) {
 		if d.Default != nil {
 			usedOccs(d.Default, rules, into, all)
 		}
+		if d.Next != nil {
+			usedOccs(d.Next, rules, into, all)
+		}
 	}
 }
 
@@ -1312,10 +1315,18 @@ func (e *emitter) decision(d *ir.Decision, rules []ir.Rule) bool {
 		}
 		return e.decision(d.Next, rules)
 	case ir.Switch:
+		var falls bool
 		if e.ir.FamilyOf(d.Sort) == nil {
-			return e.symSwitch(d, rules)
+			falls = e.symSwitch(d, rules)
+		} else {
+			falls = e.familySwitch(d, rules)
 		}
-		return e.familySwitch(d, rules)
+		if d.Next != nil && falls {
+			// the other rules, when none of the switch applies (a split
+			// tree, ir.compileMixture)
+			return e.decision(d.Next, rules)
+		}
+		return falls
 	}
 	return true
 }

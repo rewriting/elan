@@ -65,7 +65,7 @@ func hasTry(d *ir.Decision) bool {
 				return true
 			}
 		}
-		return d.Default != nil && hasTry(d.Default)
+		return d.Default != nil && hasTry(d.Default) || d.Next != nil && hasTry(d.Next)
 	}
 	return false
 }

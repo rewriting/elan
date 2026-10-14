@@ -165,28 +165,80 @@ func decisionTree(rules []Rule, args []SortID, sig *signatures) (*Decision, []Ru
 	for i := range args {
 		occs[i] = Occ{i}
 	}
-	return compile(rows, occs, slices.Clone(args), sig), never
+	return compileBounded(rows, occs, slices.Clone(args), sig), never
 }
 
-func child(o Occ, i int) Occ { return append(slices.Clone(o), i) }
+// Size bound (tictac, docs/followups.md): a Maranget tree copies the rows
+// whose pattern is a variable at the tested position into every case and
+// the default, so rules that each test a different position of a wide
+// pattern (a board: state(Y,[-,b,c],...), state(Y,[a,-,c],...), ...) give
+// a tree exponential in the number of positions (2^9 paths for the 9
+// moves of tictac: a 121 615-line main.go). A tree is kept when it has at
+// most treeBudget(rows) nodes; otherwise the rows are split by the mixture
+// rule (Maranget's backtracking automata): the maximal prefix of the rows
+// whose pattern at the tested position is not a variable is a Switch
+// whose cases hold only these rows, then (Next, when none of them
+// applies) the other rows, in order; a variable at the tested position
+// drops the column. Every row is then in one place: the code is linear in
+// the size of the patterns, the first-match order is the same.
+
+// treeBudget is the number of nodes allowed to the Maranget tree of rows.
+func treeBudget(rows []row) int {
+	size := 0
+	for _, r := range rows {
+		for _, p := range r.pats {
+			size += patSize(p)
+		}
+	}
+	return 64 + 4*size
+}
+
+func patSize(p *Pattern) int {
+	n := 1
+	for i := range p.Args {
+		n += patSize(&p.Args[i])
+	}
+	return n
+}
+
+// compileBounded is the Maranget tree of rows when it is within the
+// budget, else the mixture split (see above), whose parts are compiled the
+// same way.
+func compileBounded(rows []row, occs []Occ, sorts []SortID, sig *signatures) *Decision {
+	budget := treeBudget(rows)
+	if d := compileWithin(rows, occs, sorts, sig, &budget); d != nil {
+		return d
+	}
+	return compileMixture(rows, occs, sorts, sig)
+}
+
+// compileWithin is compile, or nil when the tree has more nodes than
+// *budget.
+func compileWithin(rows []row, occs []Occ, sorts []SortID, sig *signatures, budget *int) (d *Decision) {
+	defer func() {
+		if r := recover(); r != nil {
+			if r != errBudget {
+				panic(r)
+			}
+			d = nil
+		}
+	}()
+	return compileB(rows, occs, sorts, sig, budget)
+}
+
+type budgetError struct{}
+
+var errBudget any = budgetError{}
 
 func compile(rows []row, occs []Occ, sorts []SortID, sig *signatures) *Decision {
-	if len(rows) == 0 {
-		return &Decision{Kind: Fail}
-	}
-	first := rows[0]
-	j := slices.IndexFunc(first.pats, func(p *Pattern) bool { return p.Kind != PatVar })
-	if j < 0 {
-		// the first rule matches: try it, then the others
-		bindings := slices.Clone(first.bindings)
-		for i, p := range first.pats {
-			if p.Var != wild {
-				bindings = append(bindings, Binding{p.Var, occs[i]})
-			}
-		}
-		return &Decision{Kind: Try, Rule: first.rule, Bindings: bindings,
-			Next: compile(rows[1:], occs, sorts, sig)}
-	}
+	return compileB(rows, occs, sorts, sig, nil)
+}
+
+// specialize is the Switch on position j of rows: its cases (each
+// compiled by sub) and its default (nil when the heads of rows are every
+// possible head of the sort).
+func specialize(rows []row, occs []Occ, sorts []SortID, sig *signatures, j int,
+	sub func([]row, []Occ, []SortID) *Decision) *Decision {
 	var heads []Head
 	for _, r := range rows {
 		if h, ok := headOf(r.pats[j]); ok && !slices.ContainsFunc(heads, func(x Head) bool { return sameHead(x, h) }) {
@@ -237,7 +289,7 @@ func compile(rows []row, occs []Occ, sorts []SortID, sig *signatures) *Decision 
 		}
 		occs2 := slices.Concat(occs[:j], childOccs, occs[j+1:])
 		sorts2 := slices.Concat(sorts[:j], childSorts, sorts[j+1:])
-		d.Cases = append(d.Cases, Case{Head: h, Then: compile(spec, occs2, sorts2, sig)})
+		d.Cases = append(d.Cases, Case{Head: h, Then: sub(spec, occs2, sorts2)})
 	}
 	if !complete {
 		var def []row
@@ -255,7 +307,68 @@ func compile(rows []row, occs []Occ, sorts []SortID, sig *signatures) *Decision 
 		}
 		occs2 := slices.Delete(slices.Clone(occs), j, j+1)
 		sorts2 := slices.Delete(slices.Clone(sorts), j, j+1)
-		d.Default = compile(def, occs2, sorts2, sig)
+		d.Default = sub(def, occs2, sorts2)
 	}
 	return d
+}
+
+// tryFirst is the Try of the first row, whose patterns are variables, then
+// next (the other rows).
+func tryFirst(first row, occs []Occ, next *Decision) *Decision {
+	bindings := slices.Clone(first.bindings)
+	for i, p := range first.pats {
+		if p.Var != wild {
+			bindings = append(bindings, Binding{p.Var, occs[i]})
+		}
+	}
+	return &Decision{Kind: Try, Rule: first.rule, Bindings: bindings, Next: next}
+}
+
+// compileMixture splits rows by the mixture rule (see treeBudget).
+func compileMixture(rows []row, occs []Occ, sorts []SortID, sig *signatures) *Decision {
+	if len(rows) == 0 {
+		return &Decision{Kind: Fail}
+	}
+	first := rows[0]
+	j := slices.IndexFunc(first.pats, func(p *Pattern) bool { return p.Kind != PatVar })
+	if j < 0 {
+		return tryFirst(first, occs, compileBounded(rows[1:], occs, sorts, sig))
+	}
+	n := 1
+	for n < len(rows) && rows[n].pats[j].Kind != PatVar {
+		n++
+	}
+	sub := func(rs []row, os []Occ, ss []SortID) *Decision {
+		return compileBounded(rs, os, ss, sig)
+	}
+	d := specialize(rows[:n], occs, sorts, sig, j, sub)
+	if n < len(rows) {
+		// (the default of the group fails) then the other rows
+		d.Next = compileBounded(rows[n:], occs, sorts, sig)
+	}
+	return d
+}
+
+func child(o Occ, i int) Occ { return append(slices.Clone(o), i) }
+
+// compileB is the Maranget tree of rows; budget (when not nil) is the
+// number of nodes left (it panics with errBudget beyond).
+func compileB(rows []row, occs []Occ, sorts []SortID, sig *signatures, budget *int) *Decision {
+	if budget != nil {
+		if *budget--; *budget < 0 {
+			panic(errBudget)
+		}
+	}
+	if len(rows) == 0 {
+		return &Decision{Kind: Fail}
+	}
+	first := rows[0]
+	j := slices.IndexFunc(first.pats, func(p *Pattern) bool { return p.Kind != PatVar })
+	if j < 0 {
+		// the first rule matches: try it, then the others
+		return tryFirst(first, occs, compileB(rows[1:], occs, sorts, sig, budget))
+	}
+	return specialize(rows, occs, sorts, sig, j, func(rs []row, os []Occ, ss []SortID) *Decision {
+		return compileB(rs, os, ss, sig, budget)
+	})
 }

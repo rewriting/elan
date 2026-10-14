@@ -886,7 +886,10 @@ const (
 	// Bindings positions): check its conditions; apply it, or continue with
 	// Next.
 	Try
-	// Switch tests the head of the term at Occ (of sort Sort).
+	// Switch tests the head of the term at Occ (of sort Sort); then, when
+	// no rule of the cases applies, Next when not nil (a tree split by the
+	// mixture rule to bound its size, see compileBounded: the cases and the
+	// default hold only a group of the rules).
 	Switch
 )
 

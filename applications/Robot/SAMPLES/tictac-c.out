@@ -1,0 +1,14 @@
+Enter a query term of sort 'state'
+
+
+result = state(O,[X,X,O],[-,O,-],[X,-,-])
+
+result = state(O,[X,-,O],[X,O,-],[X,-,-])
+
+result = state(O,[X,-,O],[-,O,X],[X,-,-])
+
+result = state(O,[X,-,O],[-,O,-],[X,X,-])
+
+result = state(O,[X,-,O],[-,O,-],[X,-,X])
+
+rewrite_step = 15

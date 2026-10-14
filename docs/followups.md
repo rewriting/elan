@@ -315,8 +315,19 @@ sub-project (S1–S5b). Each item says where it comes from.
   `MatchingAC/CompMatchingAC`. elanc and the interpreter evaluate the start
   term. Consequence: no `gtest` for these programs, since the G oracle is
   REM (`tests/apps/category4.md`).
-- **`Robot/tictac` with elanc-go**: it generates a 4 MB `main.go` (121 615
-  lines) and `go build` takes more than 6 min (REM compiles it).
+- **`Robot/tictac` with elanc-go** (found by S9b, closed on branch
+  `fix-codesize`): it generated a 4 MB `main.go` (121 615 lines, 119 121 in
+  the label of `[s]t`) and `go build` took more than 6 min. Cause: the
+  Maranget decision trees (`ir/matching.go`) copy the rows with a variable
+  at the tested position into every case and the default, so the 9 `moves`
+  rules (each tests a different cell) and the 24 non-linear `win` rules
+  gave 2^9 paths (4 887 rule blocks for 49 rules). A tree is now kept only
+  within a budget of 64 + 4 nodes per pattern node (the legacy bench trees
+  have at most 2.5), else it is split by the mixture rule (a Switch on the
+  maximal prefix of rows with a head there, then `Next`: the other rows):
+  7 853 lines (REM's C: 23 035), `go build` 2.4 s with an empty cache; same
+  output as the interpreter and REM, `gtest tictac` added; guards
+  `ir.TestWideRulesHaveALinearTree`, `gen.TestWideRulesGiveCodeOfTheirSize`.
 - **`.ref` export of `APT/bubleLOG`, `Robot/tictac`, `Strategies/ll`**: the
   file cannot be imported back (`[PARSER] syntax error on symbol 'tone'`,
   before `dk (N . div)`). The modern `elan -b --export` and the reference's

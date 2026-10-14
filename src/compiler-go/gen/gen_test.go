@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 
@@ -465,5 +466,63 @@ func TestQueryOnlyOperatorsKeepIntsNative(t *testing.T) {
 	src := p.gen(t)
 	if !strings.Contains(src, "func noattack_402(a0 int32, a1 int32, a2 rt.Term)") {
 		t.Errorf("noattack does not take native ints in\n%s", src)
+	}
+}
+
+// wide is the shape of Robot/tictac's win (docs/followups.md): rule i is
+// mv(..., e at i, z at i+1, z at i+2, ...) => ci (a condition: the rules
+// after it are tried when it fails), then mv(x, y, ...) => c<n>; the tree
+// of these rules is split (ir.compileMixture), not 2^n paths.
+func wide(n int) *prog {
+	p := newProg()
+	p.op(sNat, 318, "e", nil, 0)
+	p.op(sNat, 319, "x", nil, 0)
+	p.op(sNat, 320, "y", nil, 0)
+	args := make([]uint32, n)
+	for i := range args {
+		args[i] = sNat
+	}
+	p.op(sNat, 321, "mv", args, 0)
+	for i := range n + 1 {
+		p.op(sNat, int32(330+i), fmt.Sprintf("c%d", i), nil, 0)
+	}
+	vars := func() []ref.Term {
+		ts := make([]ref.Term, n)
+		for i := range ts {
+			ts[i] = v(uint32(i), sNat)
+		}
+		return ts
+	}
+	for i := range n {
+		ts := vars()
+		ts[i] = f(318)
+		ts[(i+2)%n] = v(uint32((i+1)%n), sNat)
+		p.rule(sNat, f(321, ts...), f(int32(330+i)))
+	}
+	ts := vars()
+	ts[0], ts[1] = f(319), f(320)
+	p.rule(sNat, f(321, ts...), f(int32(330+n)))
+	// mv(x, y, x, x, ..., x): no e, the last rule
+	start := []ref.Term{f(319), f(320)}
+	for len(start) < n {
+		start = append(start, f(319))
+	}
+	// mv(x, y, x, ..., e, x, x): the rule n-3
+	start2 := slices.Clone(start)
+	start2[n-3] = f(318)
+	p.op(sNat, 322, "pair", []uint32{sNat, sNat}, 0)
+	p.p.Query.StartWith = f(322, f(321, start...), f(321, start2...))
+	return p
+}
+
+func TestWideRulesGiveCodeOfTheirSize(t *testing.T) {
+	const n = 12
+	src := wide(n).gen(t)
+	// 93 470 lines without the split (2^12 paths; tictac: 121 615 lines)
+	if lines := strings.Count(src, "\n"); lines > 2500 {
+		t.Fatalf("%d lines", lines)
+	}
+	if got, want := run(t, wide(n)), "\nresult = pair(c12,c9)\n\nrewrite_step = 2\n"; got != want {
+		t.Errorf("wide: %q, want %q", got, want)
 	}
 }
