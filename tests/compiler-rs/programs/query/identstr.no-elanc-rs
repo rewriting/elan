@@ -1,0 +1,1 @@
+elanc-rs leaves ident2string of a constant (the query a : ident) stuck, as elanc did before fix-query-ident; elanc and the interpreter give its name. The Rust target is to be regenerated from elanc's IR (S10c).
