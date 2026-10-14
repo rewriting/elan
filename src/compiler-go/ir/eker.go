@@ -43,6 +43,11 @@ func (rl *ruleLowerer) remOf(t *tt) *remNode {
 	case ttStr:
 		return &remNode{t: t, rank: 0, code: 1 << 40}
 	case ttVar:
+		if a, ok := rl.absTerm[t.index]; ok && !rl.useLin {
+			// an abstracted AC subterm whose parent is free: REM does not
+			// sort its level again (Term.abstractACSubterm)
+			return rl.remOf(a)
+		}
 		return &remNode{t: t, rank: 1, code: rl.varCode(t)}
 	case ttIdent:
 		if rl.err == nil {

@@ -161,3 +161,75 @@ func TestEkerCountsSolutions(t *testing.T) {
 		checkSolutions(t, Format(ekU(xs...)), got, got...)
 	}
 }
+
+// A pinned variable (EkPin): the solutions are those of the matching
+// without it where the variable has the pinned value, in the same order.
+func TestEkerPinnedSameOrder(t *testing.T) {
+	a, b, c, d := Mk0(ekA), Mk0(ekB), Mk0(ekC), Mk0(ekD)
+	ga, gb := Mk1(ekG, a), Mk1(ekG, b)
+	cases := []struct {
+		name    string
+		p       *EkPat
+		n       int
+		subject Term
+	}{
+		{"x U y", EkAC(symU, uItems(EkVar(0), EkVar(1))...), 2, ekU(a, b, c, d)},
+		{"x U y U z", EkAC(symU, uItems(EkVar(0), EkVar(1), EkVar(2))...), 3, ekU(a, b, c, d)},
+		{"x U y U z, repeated", EkAC(symU, uItems(EkVar(0), EkVar(1), EkVar(2))...), 3, ekU(a, a, b, c, c)},
+		{"x^2 U y U z", EkAC(symU, EkItem{EkVar(0), 2}, EkItem{EkVar(1), 1}, EkItem{EkVar(2), 1}), 3, ekU(a, a, b, b, c, d)},
+		{"g(x) U y U z", EkAC(symU, uItems(EkOp(ekG, EkVar(0)), EkVar(1), EkVar(2))...), 3, ekU(ga, gb, ga, c, d)},
+		{"x U y U z U w", EkAC(symU, uItems(EkVar(0), EkVar(1), EkVar(2), EkVar(3))...), 4, ekU(a, b, c, d, ga)},
+	}
+	for _, k := range cases {
+		var full [][]Term
+		for m := NewEker(k.p, k.n, k.subject); m.Next(); {
+			var vs []Term
+			for v := range k.n {
+				vs = append(vs, m.Value(v, ekNorm))
+			}
+			full = append(full, vs)
+		}
+		if len(full) == 0 {
+			t.Fatalf("%s: no solution", k.name)
+		}
+		format := func(vs []Term) string {
+			var s []string
+			for _, x := range vs {
+				s = append(s, Format(x))
+			}
+			return strings.Join(s, "; ")
+		}
+		for pv := range k.n {
+			for pv2 := pv; pv2 < k.n; pv2++ {
+				seen := map[string]bool{}
+				for _, sol := range full {
+					key := Format(sol[pv]) + "|" + Format(sol[pv2])
+					if seen[key] {
+						continue
+					}
+					seen[key] = true
+					var want, got []string
+					for _, s := range full {
+						if Format(s[pv]) == Format(sol[pv]) && Format(s[pv2]) == Format(sol[pv2]) {
+							want = append(want, format(s))
+						}
+					}
+					pins := []EkPin{{pv, sol[pv]}}
+					if pv2 != pv {
+						pins = append(pins, EkPin{pv2, sol[pv2]})
+					}
+					for m := NewEker(k.p, k.n, k.subject, pins...); m.Next(); {
+						var vs []Term
+						for v := range k.n {
+							vs = append(vs, m.Value(v, ekNorm))
+						}
+						got = append(got, format(vs))
+					}
+					if !slices.Equal(got, want) {
+						t.Errorf("%s, pinned %v:\ngot  %q\nwant %q", k.name, pins, got, want)
+					}
+				}
+			}
+		}
+	}
+}

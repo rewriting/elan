@@ -2306,6 +2306,10 @@ type ruleLowerer struct {
 	// useLin (REM's orders after its linearisation)
 	linCode map[*tt]int64
 	useLin  bool
+	// absTerm are the AC subterms abstracted by remTransform, by their
+	// variables: REM's order before the linearisation sorts them in place
+	// of their variables (remOf)
+	absTerm map[uint32]*tt
 	// resorted: an AC subterm of an AC level was abstracted
 	// (transformation2): REM sorts the left-hand side again, after its
 	// linearisation (Term.java abstractACSubterm)
@@ -2575,20 +2579,20 @@ func (rl *ruleLowerer) remTransform(lhs *tt) *tt {
 			t2 = nil
 		}
 	}
-	if len(t2) > 1 {
-		// several: REM abstracts them in the order of a HashSet of terms
-		// (identity hash codes: no order to reproduce); the order of the
-		// term, and an equal one repeated (REM gives the variable
-		// multiplicity 1: wrong) left in place (acAbstract refuses it)
-		for i, x := range t2 {
-			if slices.ContainsFunc(t2[:i], func(y *tt) bool { return remCmp(rl.remOf(x), rl.remOf(y)) == 0 }) {
-				t2 = nil
-				break
-			}
+	// several: REM abstracts them in the order of a HashSet of terms
+	// (identity hash codes: no order to reproduce): the order of the term.
+	// An item of the level holding one, repeated (equal items are one
+	// node of REM's form: its AC subterm abstracted once, then REM gives
+	// the variable multiplicity 1, or leaves the repeated element: REM's
+	// bugs), is left in place (acAbstract refuses it)
+	for _, x := range items {
+		if !rl.containsAC(x) {
+			continue
 		}
-	}
-	if len(t1) == 0 && len(t2) == 0 {
-		return lhs
+		if slices.ContainsFunc(items, func(y *tt) bool { return y != x && remCmp(rl.remOf(x), rl.remOf(y)) == 0 }) {
+			t2 = nil
+			break
+		}
 	}
 	for _, x := range t2 {
 		if slices.Contains(items, x) {
@@ -2600,9 +2604,14 @@ func (rl *ruleLowerer) remTransform(lhs *tt) *tt {
 		next = rl.abs[len(rl.abs)-1].index + 1
 	}
 	var order []absWhere
+	if rl.absTerm == nil {
+		rl.absTerm = map[uint32]*tt{}
+	}
 	abstract := func(x *tt) {
 		a := absWhere{index: next, t: *x}
 		next++
+		orig := *x
+		rl.absTerm[a.index] = &orig
 		*x = tt{kind: ttVar, index: a.index, sort: rl.b.l.sortOf(x)}
 		order = append(order, a)
 	}
@@ -2616,7 +2625,106 @@ func (rl *ruleLowerer) remTransform(lhs *tt) *tt {
 	// of the abstractions, transformation2's ones first
 	slices.Reverse(order)
 	rl.abs = append(rl.abs, order...)
+	if acTerm == lhs && !rl.rule.Name.Valid && rl.extension32(lhs) {
+		rl.resorted = true
+	}
 	return lhs
+}
+
+// extension32 tells whether REM's transformation3_2 (an unlabelled rule
+// with its AC operator at the top of the left-hand side t, after
+// transformation2) adds an extension variable, then sorts the left-hand
+// side again with the numbers of its linearisation
+// (RewriteRule.java addExtensionVariable, or the abstraction of its case
+// 2 or 5): every case but F(x, y) of two single variables and F(x, t1,
+// ..., tm) whose x no condition reads. A variable is "constrained"
+// (PatternInfo, BranchEvaluation.dependFrom) when the conditions of the
+// rule after the transformations read it: the rule's conditions and
+// wheres, the equalities of the linearisation (a variable that occurs
+// elsewhere in the left-hand side), the wheres of the abstractions.
+func (rl *ruleLowerer) extension32(t *tt) bool {
+	n := rl.remOfLin(t, true)
+	occ := map[uint32]int{}
+	var count func(x *tt)
+	count = func(x *tt) {
+		if x.kind == ttVar {
+			occ[x.index]++
+		}
+		for i := range x.args {
+			count(&x.args[i])
+		}
+	}
+	count(t)
+	body := map[uint32]bool{}
+	if pl, ok := rl.rule.Body.(ref.Plain); ok {
+		whereVars(pl.Wheres, body)
+	}
+	var sv, mv, ms int
+	constrained := false
+	for i, a := range n.args {
+		if a.rank != 1 {
+			if n.mults[i] == 1 {
+				// (single element patterns: not counted by the cases)
+			} else {
+				ms++
+			}
+			continue
+		}
+		if n.mults[i] == 1 {
+			sv++
+		} else {
+			mv++
+		}
+		idx := a.t.index
+		if _, abs := rl.absTerm[idx]; abs || occ[idx] > n.mults[i] || body[idx] {
+			constrained = true
+		}
+	}
+	arity := len(n.args)
+	switch {
+	case arity == 2 && sv == 2:
+		return false
+	case arity == 1 && mv == 1:
+		return true
+	case arity <= 2 && ms == 1 && !constrained:
+		return true
+	case arity >= 2:
+		return sv == 1 && mv == 0 && ms == 0 && constrained ||
+			sv == 0 && mv == 0 && ms == 0 ||
+			sv+mv > 1 || ms > 0
+	}
+	return false
+}
+
+// whereVars adds the variables of the conditions ws to into.
+func whereVars(ws []ref.Where, into map[uint32]bool) {
+	var term func(t ref.Term)
+	term = func(t ref.Term) {
+		switch t := t.(type) {
+		case ref.Var:
+			into[t.Index] = true
+		case ref.Fsym:
+			for _, a := range t.Args {
+				term(a)
+			}
+		}
+	}
+	for _, w := range ws {
+		switch w := w.(type) {
+		case ref.If:
+			term(w.Cond)
+		case ref.Assign:
+			term(w.Lhs)
+			term(w.Rhs)
+		case ref.Match:
+			term(w.Pattern)
+			term(w.Rhs)
+		case ref.Try:
+			for _, b := range w.Branches {
+				whereVars(b, into)
+			}
+		}
+	}
 }
 
 // remOfLin is remOf with the codes before (lin false) or after REM's

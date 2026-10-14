@@ -116,3 +116,31 @@ func TestACShapesOfTask2(t *testing.T) {
 		t.Errorf("%s %s", st, msg)
 	}
 }
+
+// REM's transformation2 abstracts every AC subterm of the level of the
+// remaining AC pattern (collectACSubterm: one node each), equal ones
+// included when they are not the same item of the level (a direct item
+// and one under a free symbol): two wheres matched by Eker's matcher,
+// then the level u(box(X1), X2, y) of two variables: a third one
+// (transformation3_1).
+func TestTransformation2EqualSubterms(t *testing.T) {
+	p := acProg()
+	p.op(sSet, 343, "w", []uint32{sSet, sSet}, 0, 2)
+	p.op(sSet, 344, "box", []uint32{sSet}, 0, 0)
+	x, y := v(1, sSet), v(2, sSet)
+	wx := func() ref.Term { return f(343, x, f(341, f(318))) }
+	// mem(n, u(w(x, single(o)), u(box(w(x, single(o))), y))) => o
+	p.rule(sNat, 3, f(342, v(0, sNat), f(340, wx(), f(340, f(344, wx()), y))), f(318))
+	p.start(f(342, f(318), f(340, f(341, f(318)), f(341, f(318)))), sNat)
+	ir := p.lower(t)
+	r := &opNamed(t, ir, "mem").Rules[0]
+	n := 0
+	for _, c := range r.Conds {
+		if c.Kind == CondEker {
+			n++
+		}
+	}
+	if n != 3 {
+		t.Fatalf("three wheres expected: %+v", r.Conds)
+	}
+}

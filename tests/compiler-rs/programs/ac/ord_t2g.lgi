@@ -1,0 +1,6 @@
+LPL ord_t2g description
+  query of sort bool
+  result of sort T
+  import acord
+  start with (s_t2g) F(g(a U b),F(g(a U c),F(g(h(a,b)),F(g(h(c,b)),d))))
+end

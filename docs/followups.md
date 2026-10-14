@@ -366,7 +366,16 @@ sub-project (S1–S5b). Each item says where it comes from.
   them in the iteration order of a HashSet of terms (identity hash codes,
   `collectACSubterm`), an order elanc-go cannot reproduce; it takes them
   in the order of the term (bug hunt m3 p13: 7 of 100 queries in another
-  order than REM's).
+  order than REM's). Also: the pattern of a where that REM abstracts
+  from a level (transformation3_1) is sorted by elanc-go with the codes
+  of the linearisation, those of the other where patterns with the codes
+  before it (`ir/lower.go` ekerCond of rl.abs): it would differ from REM
+  only after a re-sort that depends on the HashSet order above.
+  The variables shared by two AC subterms that REM matches apart are
+  given to Eker's matcher with their value (`rt.EkPin`, the same
+  solutions in the same order, `elanrt` TestEkerPinnedSameOrder): `p(F(x,
+  y), G(x, z))` with 12 elements 7.8 s before (0c9d621), 11 s after
+  517de33, 0.2 s now (16 elements: > 120 s before, 0.5 s now).
 
 - **Non-linear variable in an AC part given to Eker's matcher** (bug hunt
   of the AC matching, 2026-10-13): a variable that occurs twice, at the

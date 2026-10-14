@@ -193,11 +193,10 @@ func lazyPartnerLater(n int) *prog {
 
 // lazyHoisted: cb(u(x, y), u(x, v)) => k(x, o) if false: the condition,
 // hoisted at the innermost level, does not read x; the 2^n candidates
-// that pass the equality must not be normalised for it. Since elanc-go
-// follows REM's transformation1, u(x, y) is matched by Eker's matcher in
-// a where after u(x, v), whose values are normal forms (acNorm): on this
-// start term, not normalised (a program's is), they count steps; the
-// test checks the time (no exponential enumeration of normalisations).
+// that pass the equality must not be normalised for it. As REM
+// (transformation1), u(x, v) is matched in place, then u(x', y) by Eker's
+// matcher in a where, x' given the value of x (rt.EkPin): one solution
+// per candidate of x, not 2^n (4^n in all).
 func lazyHoisted(n int) *prog {
 	return lazyBase(n, func(p *prog) {
 		x, y, w := v(0, sNat), v(1, sNat), v(2, sNat)
@@ -268,11 +267,9 @@ func runWithin(t *testing.T, p *prog, limit time.Duration) {
 // a hoisted condition of other variables.
 func TestLazyACVariableForcedWhereRead(t *testing.T) {
 	t.Run("partner bound by a later where", func(t *testing.T) { runWithin(t, lazyPartnerLater(8), 10*time.Second) })
-	t.Run("hoisted condition", func(t *testing.T) {
-		if out := runSteps(t, lazyHoisted(8), 10*time.Second); !strings.HasPrefix(out, "\nresult = cb(") {
-			t.Errorf("got %q", out)
-		}
-	})
+	t.Run("hoisted condition", func(t *testing.T) { runWithin(t, lazyHoisted(8), 10*time.Second) })
+	// 2^16 candidates of x, each with one solution of Eker's matcher
+	t.Run("hoisted condition, 16 elements", func(t *testing.T) { runWithin(t, lazyHoisted(16), 10*time.Second) })
 }
 
 // TestNonLinearACLevelVariable: the candidates of a variable that occurs

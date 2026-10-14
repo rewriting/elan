@@ -1,0 +1,6 @@
+The interpreter matches the unlabelled rule of K with Eker's matcher and
+applies the first solution it finds (k(d,c,b)); REM sorts the element
+patterns again after adding its extension variable (RewriteRule.java
+transformation3_2, addExtensionVariable, with the numbers of its
+linearisation: f(h(z, b)) before f(h(x', y))) and applies another
+solution (k(d,c,d)), which elanc-go follows (compared with REM).

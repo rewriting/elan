@@ -300,10 +300,28 @@ type Eker struct {
 	first  bool
 }
 
+// EkPin gives variable V the value T before the matching: T is the value
+// of another occurrence of V, already bound (the rule compares them
+// after the matching).
+type EkPin struct {
+	V int
+	T Term
+}
+
 // NewEker starts the matching of subject against p, whose variables are
-// numbered 0 to nvars-1 (build_match).
-func NewEker(p *EkPat, nvars int, subject Term) *Eker {
+// numbered 0 to nvars-1 (build_match). The pinned variables are bound to
+// their values: the solutions are those of the matching where each one
+// has that value, in the same order (a bound variable is matched by the
+// free part as a constant, and removed from the pure part with its value:
+// it took exactly one value at its place in the enumeration of the
+// variables, the others' values being enumerated as without it), without
+// enumerating the others.
+func NewEker(p *EkPat, nvars int, subject Term, pins ...EkPin) *Eker {
 	m := &Eker{bind: make([]ekBinding, nvars), first: true}
+	for _, pin := range pins {
+		// (never retracted)
+		m.bind[pin.V] = ekBinding{toEker(pin.T), 1 << 30}
+	}
 	fp, ok := m.buildFree(p.eker(), toEker(subject))
 	if !ok {
 		m.failed = true
