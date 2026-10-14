@@ -530,6 +530,58 @@ func TestWideRulesGiveCodeOfTheirSize(t *testing.T) {
 	if got, want := run(t, wide(n)), "\nresult = triple(c12,c9,c7)\n\nrewrite_step = 3\n"; got != want {
 		t.Errorf("wide: %q, want %q", got, want)
 	}
+	// 71 rules: two words of mask; the rules 67 and 70 apply (bits 3 and
+	// 6 of the second word)
+	src = wide(70).gen(t)
+	if !strings.Contains(src, "mk1 := uint64(0x7f)") || !strings.Contains(src, "for m := mk1;") {
+		t.Errorf("no second word of mask in\n%s", src)
+	}
+	if got, want := run(t, wide(70)), "\nresult = triple(c70,c67,c7)\n\nrewrite_step = 3\n"; got != want {
+		t.Errorf("wide(70): %q, want %q", got, want)
+	}
+}
+
+// nested: positions under different heads, variables read 2 and 3 levels
+// down by the candidates of a bit-vector matching (forced):
+//
+//	[] f(g(a,x)) => r(x)   [] f(h(g(y,a))) => q(y)
+//	[] f(g(x,b)) => s(x)   [] f(z) => t(z)
+func nested() *prog {
+	p := newProg()
+	p.op(sNat, 318, "a", nil, 0)
+	p.op(sNat, 319, "b", nil, 0)
+	p.op(sNat, 320, "g", []uint32{sNat, sNat}, 0)
+	p.op(sNat, 321, "h", []uint32{sNat}, 0)
+	p.op(sNat, 322, "f", []uint32{sNat}, 0)
+	for i, name := range []string{"r", "q", "s", "t"} {
+		p.op(sNat, int32(330+i), name, []uint32{sNat}, 0)
+	}
+	p.op(sOut, 340, "tup", []uint32{sNat, sNat, sNat, sNat, sNat}, 0)
+	a, b := f(318), f(319)
+	g := func(x, y ref.Term) ref.Term { return f(320, x, y) }
+	h := func(x ref.Term) ref.Term { return f(321, x) }
+	fn := func(x ref.Term) ref.Term { return f(322, x) }
+	x := v(0, sNat)
+	p.rule(sNat, fn(g(a, x)), f(330, x))
+	p.rule(sNat, fn(h(g(x, a))), f(331, x))
+	p.rule(sNat, fn(g(x, b)), f(332, x))
+	p.rule(sNat, fn(x), f(333, x))
+	p.p.Query.ResultSort = sOut
+	p.p.Query.StartWith = f(340, fn(g(a, b)), fn(h(g(b, a))), fn(h(b)), fn(g(b, b)), fn(g(b, a)))
+	return p
+}
+
+func TestNestedPositionsWithBits(t *testing.T) {
+	old := ir.TreePerNode
+	ir.TreePerNode = -1 << 20 // every tree over its budget
+	defer func() { ir.TreePerNode = old }()
+	if src := nested().gen(t); !strings.Contains(src, "rt.LowBit(m)") {
+		t.Fatalf("no bit-vector matching in\n%s", src)
+	}
+	want := "\nresult = tup(r(b),q(b),t(h(b)),s(b),t(g(b,a)))\n\nrewrite_step = 5\n"
+	if got := run(t, nested()); got != want {
+		t.Errorf("nested: %q, want %q", got, want)
+	}
 }
 
 // shadowed: mv(st(e,...)), mv(st(x,...)), mv(st(y,...)) cover every board

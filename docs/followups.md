@@ -329,7 +329,9 @@ sub-project (S1–S5b). Each item says where it comes from.
   over it, the rules are matched with bit vectors (`compileBits`: one
   traversal tests each pattern position once, ANDing per position and head
   the mask of the compatible rules, then the candidates are tried in source
-  order): 3 720 lines (REM's C: 23 035), `go build` 2.2 s with an empty
+  order; per subject O(positions visited * ceil(rules/64) + candidates
+  tried), code O(pattern nodes * ceil(rules/64) + the rule bodies); elanc-rs
+  still builds the whole tree): 3 720 lines (REM's C: 23 035), `go build` 2.2 s with an empty
   cache, 12 position tests per subject; same output as the interpreter and
   REM, `gtest tictac` added; guards `ir.TestWideRulesHaveALinearTree`
   (order of the rules tried for every subject, one test per position),

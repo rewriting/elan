@@ -1,6 +1,8 @@
 package ir
 
 import (
+	"fmt"
+	"math/rand/v2"
 	"slices"
 	"testing"
 
@@ -22,7 +24,7 @@ func wide(n int) *prog {
 	}
 	p.op(sNat, 321, "mv", args, 0, 0)
 	for i := range n + 2 {
-		p.op(sNat, int32(330+i), "c"+string(rune('a'+i)), nil, 0, 0)
+		p.op(sNat, int32(330+i), fmt.Sprintf("c%d", i), nil, 0, 0)
 	}
 	vars := func() []ref.Term {
 		ts := make([]ref.Term, n)
@@ -112,14 +114,41 @@ func tried(d *Decision, heads []OpID) ([]RuleID, int) {
 }
 
 func TestWideRulesHaveALinearTree(t *testing.T) {
-	const n = 10
+	// every tuple of heads of 10 cells
+	checkWide(t, 10, 59049, func(code int, heads []OpID, vals []OpID) {
+		for i := range heads {
+			heads[i] = vals[code%3]
+			code /= 3
+		}
+	})
+}
+
+// TestWideRulesOverAWord: 72 rules, two words of mask; random tuples.
+func TestWideRulesOverAWord(t *testing.T) {
+	r := rand.New(rand.NewPCG(1, 2))
+	checkWide(t, 70, 3000, func(_ int, heads []OpID, vals []OpID) {
+		for i := range heads {
+			// e rarely: several candidates, some beyond bit 64
+			heads[i] = vals[1+r.IntN(2)]
+			if r.IntN(10) == 0 {
+				heads[i] = vals[0]
+			}
+		}
+	})
+}
+
+// checkWide checks the bit-vector matching of wide(n) on count tuples of
+// heads (fill writes the code-th): the rules tried are the ones that
+// match, in source order, and one test per cell at most.
+func checkWide(t *testing.T, n, count int, fill func(code int, heads []OpID, vals []OpID)) {
+	t.Helper()
 	ir := wide(n).lower(t)
 	mv := opNamed(t, ir, "mv")
 	if len(mv.Rules) != n+2 || !mv.Total {
 		t.Fatalf("%d rules, total %v", len(mv.Rules), mv.Total)
 	}
 	// the Maranget tree has more than 2^n nodes: bit-vector matching, in
-	// size linear in the patterns
+	// size linear in the patterns (times the words of the masks)
 	if mv.Tree.Kind != Bits {
 		t.Fatalf("not a bit-vector matching: %v", mv.Tree.Kind)
 	}
@@ -132,19 +161,14 @@ func TestWideRulesHaveALinearTree(t *testing.T) {
 	if k := nodes(mv.Tree); k > 4*size {
 		t.Fatalf("the matching has %d nodes for %d pattern nodes", k, size)
 	}
-	// every tuple of heads: the rules that match, in source order
 	opOf := map[string]OpID{}
 	for i := range ir.Ops {
 		opOf[ir.Ops[i].Name] = i
 	}
 	vals := []OpID{opOf["e"], opOf["x"], opOf["y"]}
 	heads := make([]OpID, n)
-	for code := 0; code < 59049; code++ { // 3^10
-		c := code
-		for i := range heads {
-			heads[i] = vals[c%3]
-			c /= 3
-		}
+	for code := range count {
+		fill(code, heads, vals)
 		var want []RuleID
 		for i := range n {
 			if heads[i] == vals[0] {

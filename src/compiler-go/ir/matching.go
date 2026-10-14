@@ -4,7 +4,9 @@ import "slices"
 
 // Pattern matching of the left-hand sides (syntactic, S7a; elanc-rs
 // matching.rs): the exhaustiveness check of the totality analysis and the
-// decision trees.
+// decision trees. Unlike matching.rs, a tree over its size budget is
+// replaced by a bit-vector matching (compileBits; tictac,
+// docs/followups.md): elanc-rs still builds the whole tree.
 //
 // Both work on pattern matrices (one row per rule, one column per
 // position), with the signature of a sort being the heads that its normal
@@ -15,8 +17,7 @@ import "slices"
 //
 // Decision trees follow Maranget ("Compiling pattern matching to good
 // decision trees", 2008) with first-match semantics (within a size bound,
-// see compileBounded): a Switch tests the
-// head of the first position where the first remaining rule has a
+// see compileBounded): a Switch tests the head of the first position where the first remaining rule has a
 // non-variable pattern; each case keeps, in order, the rules whose pattern
 // there has that head or is a variable, so when every rule of a case fails
 // (patterns or conditions), no other rule can apply and the term is stuck.
@@ -179,12 +180,15 @@ func decisionTree(rules []Rule, args []SortID, sig *signatures) (*Decision, []Ru
 // The tree of an operator or a label is kept when it has at most
 // treeBudget nodes; otherwise its rules are matched with bit vectors
 // (compileBits): one traversal of the subject tests each position of the
-// patterns once and keeps the rules compatible with its head (a mask per
-// position and head), then the candidate rules are tried in source order.
-// The code is linear in the size of the patterns.
+// patterns where some rule has a head (a switch on symbols, an if-chain on
+// literals, as in the trees), ANDing at each one the mask of the rules
+// compatible with the head found, then the candidate rules left are tried
+// in source order. Per subject: O(positions visited * ceil(rules/64) +
+// candidates tried); code: O(pattern nodes * ceil(rules/64) + the bodies
+// of the rules, once each).
 
 // treeBudget is the number of nodes allowed to the Maranget tree of rows:
-// 64 + treePerNode per pattern node.
+// 64 + TreePerNode per pattern node.
 func treeBudget(rows []row) int {
 	size := 0
 	for _, r := range rows {
@@ -192,14 +196,15 @@ func treeBudget(rows []row) int {
 			size += patSize(p)
 		}
 	}
-	return 64 + treePerNode*size
+	return 64 + TreePerNode*size
 }
 
-// treePerNode: the trees of the programs of the bench (kind G, 175
+// TreePerNode: the trees of the programs of the bench (kind G, 175
 // programs compiled) use at most 0.6 of their budget (lpo, rpo:
 // identifiers against variables, a quadratic tree, kept); tictac's tree
-// 1.4 times (7 004 nodes for 604 pattern nodes).
-const treePerNode = 8
+// 1.4 times (7 004 nodes for 604 pattern nodes). A variable for the tests
+// (a very negative value forces the bit-vector matching).
+var TreePerNode = 8
 
 func patSize(p *Pattern) int {
 	n := 1
@@ -329,13 +334,11 @@ func tryFirst(first row, occs []Occ, next *Decision) *Decision {
 
 func child(o Occ, i int) Occ { return append(slices.Clone(o), i) }
 
-// compileB is the Maranget tree of rows; budget (when not nil) is the
-// number of nodes left (it panics with errBudget beyond).
+// compileB is the Maranget tree of rows; budget is the number of nodes
+// left (it panics with errBudget beyond).
 func compileB(rows []row, occs []Occ, sorts []SortID, sig *signatures, budget *int) *Decision {
-	if budget != nil {
-		if *budget--; *budget < 0 {
-			panic(errBudget)
-		}
+	if *budget--; *budget < 0 {
+		panic(errBudget)
 	}
 	if len(rows) == 0 {
 		return &Decision{Kind: Fail}
@@ -409,13 +412,6 @@ func bitsMatch(pats [][]*Pattern, occs []Occ, sorts []SortID, sig *signatures, w
 		if len(heads) == 0 {
 			continue
 		}
-		sigHeads, finite := sig.heads(sorts[i])
-		complete := finite
-		for _, h := range sigHeads {
-			if !slices.Contains(heads, Head{Kind: HeadOp, Op: h}) {
-				complete = false
-			}
-		}
 		mask := func(keep func(p *Pattern) bool) []uint64 {
 			m := make([]uint64, words)
 			for k, ps := range pats {
@@ -450,9 +446,9 @@ func bitsMatch(pats [][]*Pattern, occs []Occ, sorts []SortID, sig *signatures, w
 				Mask: mask(func(p *Pattern) bool { ph, _ := headOf(p); return ph == h }),
 				Next: bitsMatch(sub, childOccs, slices.Clone(childSorts), sig, words)}})
 		}
-		if !complete {
-			d.Default = &Decision{Kind: Mask, Mask: mask(func(*Pattern) bool { return false })}
-		}
+		// the default even when the cases are every head of the signature:
+		// a head outside it (if any) clears the rows of the other heads
+		d.Default = &Decision{Kind: Mask, Mask: mask(func(*Pattern) bool { return false })}
 		rest := make([][]*Pattern, len(pats))
 		for k, ps := range pats {
 			rest[k] = ps[i+1:]
